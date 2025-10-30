@@ -1,0 +1,173 @@
+﻿@{
+    ViewData["Title"] = "TongHopNhanVienPhucVuView";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var XuongId = @Context.Session.GetString("XuongId");
+}
+
+
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h2 class="mb-0">Tổng Hợp Lô</h2>
+                </div>
+                <div class="card-body">
+                    <div id="Grid"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+    var grid;
+    var datalength = 0;
+    function loadGridData(data) {
+        var dataManager = new ej.data.DataManager({
+            json: data,
+            adaptor: new ej.data.JsonAdaptor()
+        });
+            if(data != null && data.length !=null){
+        datalength = data.length;
+    }
+    else{
+        datalength = 0;
+    }
+        if (grid != null) {
+            grid.dataSource = dataManager;
+            grid.refresh();
+        } else {
+            grid = new ej.grids.Grid({
+                dataSource: dataManager,
+                allowPaging: true,
+                pageSettings: { pageSize: 50, pageSizes: [50, 100, 200, 500] },
+                allowFiltering: true,
+                allowSorting: true,
+                filterSettings: { type: 'Excel' },
+                selectionSettings: { persistSelection: true },
+                    actionBegin: function (args) {
+        if (args.requestType == 'filterchoicerequest' || args.requestType == 'filtersearchbegin') {
+
+            args.filterChoiceCount = datalength;
+        }
+    },
+
+                //frozenColumns: 3,
+                allowResizing: true,
+                //rowSelected: onRowSelected,
+                // rowSelected: selectionChanged,
+                // rowDeselected: unSelectionChanged,
+                //allowGrouping: true,
+                //groupSettings: { showDropArea: false, columns: ['MaThanhPham'] },
+                //toolbar: ['ExcelExport'],
+                allowExcelExport: true,
+                toolbar: ['ExcelExport'],
+                height: 400,
+                columns: [
+                    { field: 'Ngay', headerText: 'Ngày', width: 150, type: 'date', format: 'dd-MM-yyyy'},
+                    { field: 'MaLo', headerText: 'Mã Lô', width: 150 },
+                    { field: 'ThanhPhamName', headerText: 'Thành Phẩm', width: 150 },
+                    { field: 'DinhMuc', headerText: 'Định Mức', type: 'number',format:'N2', width: 150 },
+                    { field: 'TrongLuongNhan', headerText: 'Trọng Lượng Nhận', type: 'number',format:'N2', width: 180 },
+                    { field: 'TrongLuongTra', headerText: 'Trọng Lượng Trả', type: 'number',format:'N2', width: 180 },
+                    { field: 'SizeName', headerText: 'Size', width: 150 },
+                    { field: 'DinhMucChuan', headerText: 'Định Mức Chuẩn', type: 'number',format:'N2', width: 180 },
+                    { field: 'SoRo', headerText: 'Số Rổ', type: 'number',format:'N2', width: 150 },
+                    
+                    
+                ],
+                aggregates: [{
+                    columns: [
+                        {
+                            type: 'Sum',
+                            field: 'TrongLuong',
+                            format: '#,###.##',
+                            footerTemplate: 'Tổng Trọng Lượng: ${Sum} Kg'
+                        },
+                        {
+                            type: 'Sum',
+                            field: 'SoRo',
+                            format: '#,###.##',
+                            footerTemplate: 'Tổng Rổ: ${Sum} Kg'
+                        }
+                    ]
+                }]
+            });
+            grid.appendTo('#Grid');
+            grid.toolbarClick = function (args) {
+             if (args.item.id === 'Grid_excelexport') {
+                grid.excelExport();
+             }};
+        }
+    }
+    loadGridData();
+
+</script>
+<script>
+    function ClearData(GridId) {
+        try {
+            var gridObj = document.getElementById(GridId).ej2_instances[0];
+            if(gridObj)
+                gridObj.dataSource = [];
+        } catch (e) {
+            Console.log(e);
+        }
+
+    }
+</script>
+<script>
+    document.getElementById('RefreshButton').addEventListener("click", function () {
+        var btnEle = document.getElementById('RefreshButton');
+        var btn = btnEle.ej2_instances[0];
+
+        if (btnEle.classList.contains("loading")) return;
+        btnEle.classList.add("loading");
+
+        ClearData("Grid");
+
+        var originalContent = btn.content;
+        // btn.disabled = true;
+
+        var dots = 0;
+        btn.content = "Đang tải";
+        var loadingInterval = setInterval(function () {
+            dots = (dots + 1) % 4;
+            btn.content = "Đang tải" + ".".repeat(dots);
+        }, 500);
+
+        var grid = document.getElementById("Grid").ej2_instances[0];
+        var fromDate = document.getElementById("datepicker1").ej2_instances[0];
+        var toDate = document.getElementById("datepicker2").ej2_instances[0];
+        var xuongId = '@XuongId';
+
+        $.ajax({
+            url: "@Url.Action("Reload", "TP")",
+            type: "POST",
+            data: {
+                fromDate: fromDate.value ? fromDate.value.toDateString() : null,
+                toDate: toDate.value ? toDate.value.toDateString() : null,
+                xuongId: xuongId
+            },
+            success: function (response) {
+                if (response.Success) {
+                    loadGridData(response.Data);
+                } else {
+                    loadGridData();
+                    console.error(response.Messages);
+                    if (typeof toastOptionNotyfi === "function") toastOptionNotyfi();
+                    toastr["error"](response.Messages, "Không có dữ liệu!");
+                }
+            },
+            error: function (error) {
+                if (typeof toastOptionNotyfi === "function") toastOptionNotyfi();
+                toastr["error"](error.statusText || "Lỗi không xác định", "Thông báo");
+            }
+        }).always(function () {
+            clearInterval(loadingInterval);
+            btn.content = originalContent;
+            // btn.disabled = false;
+            btnEle.classList.remove("loading");
+        });
+    });
+</script>
+

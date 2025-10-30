@@ -1,0 +1,231 @@
+﻿@{
+    var tptl = ViewBag.listTPTLModel;
+    var NumberDate = Context.Session.GetString("NumberDate");
+    var XuongId = @Context.Session.GetString("XuongId");
+}
+<link href="~/css/DBTongHopTPStyle.css" rel="stylesheet" />
+<style>
+    @@media (max-width: 768px) {
+        div#elementRaCoiXepKhuon.e-lib.e-accumulationchart.e-control.e-touch.e-accumulationchart-focused {
+            height: 0 !important;
+            margin-top: -8.5rem !important;
+        }
+
+        svg#elementRaCoiXepKhuon_svg {
+            height: 350px
+        }
+    }
+</style>
+<div class="card mb-4 minHeigh">
+    <div class="card-header" style="text-align: center">
+        <h6>Tổng Hợp Thành Phẩm Ra Cối</h6>
+    </div>
+    <div style="margin-top: -1.5rem !important" class="card-body ">
+        <div class="fixed-chartPie d-flex flex-column justify-content-between align-items-center mb-3" style="height: 200px; width: 100%;">
+            <div id="elementRaCoiXepKhuon"></div>
+
+        </div>
+        <div style="text-align: center">
+            <div id="tongTLTPRaCoiXepKhuon"></div>
+        </div>
+        <div id="loadingIndicatorRaCoiXepKhuon" class=" spinner-border text-primary position-absolute" role="status" style="bottom: 0; display: none; left: 0; margin: auto; right: 0; top: 0;">
+            <span class="visually-hidden">Đang tải...</span>
+        </div>
+
+        <a id="detailLinkRaCoiXepKhuon" class="me-1"
+           data-bs-toggle="collapse"
+           data-bs-target="#collapseExampleRaCoiXepKhuon"
+           aria-expanded="false"
+           aria-controls="collapseExample" style="position:relative; z-index:1;">
+            Xem chi tiết
+        </a>
+        <div class="collapse" id="collapseExampleRaCoiXepKhuon">
+            <div class="table-responsive text-nowrap">
+                <table class="table table-hover">
+                    <thead class="d-none">
+                        <tr>
+                            <th scope="col">1</th>
+                            <th scope="col">2</th>
+                            <th scope="col">3</th>
+                        </tr>
+                    <tbody class="table-border-bottom-0 RaCoiXepKhuon">
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+<script src="~/js/adduserwaitview.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var detailLink = document.getElementById('detailLinkRaCoiXepKhuon');
+        var collapseElement = document.getElementById('collapseExampleRaCoiXepKhuon');
+
+        function setColor(defaultColor, hoverColor) {
+            detailLink.style.color = defaultColor;
+
+            detailLink.onmouseenter = function () {
+                detailLink.style.color = hoverColor;
+            };
+            detailLink.onmouseleave = function () {
+                detailLink.style.color = defaultColor;
+            };
+        }
+
+        detailLink.textContent = 'Xem chi tiết';
+        setColor('#75aaff', '#0056b3');
+
+        collapseElement.addEventListener('show.bs.collapse', function () {
+            detailLink.textContent = 'Thu gọn';
+            setColor('#6c757d', '#dc3545');
+        });
+
+        collapseElement.addEventListener('hide.bs.collapse', function () {
+            detailLink.textContent = 'Xem chi tiết';
+            setColor('#75aaff', '#0056b3');
+        });
+    });
+</script>
+<script>
+    if (typeof detailLinkRaCoiXepKhuon === 'undefined') {
+        var detailLinkRaCoiXepKhuon = document.getElementById('detailLinkRaCoiXepKhuon');
+    }
+
+    if (typeof tongHopTPRaCoiXepKhuonChart === 'undefined') {
+
+        var tongHopTPRaCoiXepKhuonChart;
+    }
+    detailLinkRaCoiXepKhuon.addEventListener('click',
+        function() {
+            if (this.classList.contains('active-link')) {
+                this.classList.remove('active-link');
+            } else {
+                this.classList.add('active-link');
+            }
+        });
+
+    $(document).ready(function() {
+        document.getElementById("loadingIndicatorRaCoiXepKhuon").style.display = "block";
+        loadDataRaCoiXepKhuon();
+    });
+
+    function loadDataRaCoiXepKhuon() {
+        //AddUserWaitView(xuongId);
+        const parentElement = document.querySelector('.RaCoiXepKhuon');
+        const fromDate = localStorage.getItem("fromDate_dashboard_user");
+        const toDate = localStorage.getItem("toDate_dashboard_user");
+        $.ajax({
+            url: '/Dashboard/TongHopTyLeThanhPhamTPRaCoiWithDate',
+            data: { fromDate: fromDate, toDate: toDate },
+            type: 'GET',
+            dataType: 'json',
+            success: function(data) {
+                if (tongHopTPRaCoiXepKhuonChart) {
+                    tongHopTPRaCoiXepKhuonChart.series[0].dataSource = data.datas;
+                } else {
+                    rendertChartTHTPRaCoiXepKhuon(data);
+                }
+                
+                updateUIRaCoiXepKhuon(data);
+
+            },
+            error: function(error) {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi khi lấy dữ liệu từ server: ', error, "Thông báo");
+            },
+            complete: function() {
+                document.getElementById("loadingIndicatorRaCoiXepKhuon").style.display = "none";
+            }
+        });
+    }
+
+    function rendertChartTHTPRaCoiXepKhuon(data) {
+        const _data = data.datas;
+        chartData = {
+            series: [
+                {
+                    dataSource: _data,
+                    innerRadius: '80%',
+                    xName: 'labels',
+                    yName: 'TrongLuongTP',
+                    text: 'TrongLuongTP',
+                    dataLabel: {
+                        visible: true,
+                        name: 'TrongLuongAndPersente',
+                        position: 'Outside',
+                        template: '<div style="position:relative; z-index:1;">${point.text}</div>'
+                    }
+
+                }
+            ],
+            centerLabel: {
+                text: ' ',
+                hoverTextFormat: '${point.x}<br>${point.percentage}%'
+            },
+            legendSettings: {
+                visible: false
+            },
+            //title: 'Tổng Hợp Loại Thành Phẩm Định Hình',
+            width: '100%',
+            height: '100%'
+        };
+        tongHopTPRaCoiXepKhuonChart = new ej.charts.AccumulationChart(chartData, '#elementRaCoiXepKhuon');
+
+    }
+
+    function updateUIRaCoiXepKhuon(data) {
+        const rawTongTL = data.TongTL;
+
+        // Nếu không có giá trị hoặc là "underfile" thì không làm gì
+        if (
+            rawTongTL === undefined ||
+            rawTongTL === null ||
+            rawTongTL === 'underfile'
+        ) {
+            return;
+        }
+
+        // Chuẩn hóa giá trị: loại bỏ dấu phẩy và ép sang số
+        const tongTLNumber = Number(String(rawTongTL).replace(/,/g, ''));
+
+        // Nếu sau khi chuẩn hóa mà vẫn không hợp lệ hoặc = 0, thì cũng không cập nhật
+        if (isNaN(tongTLNumber) || tongTLNumber === 0) {
+            return;
+        }
+        const parentElement = document.querySelector('.RaCoiXepKhuon');
+        parentElement.innerHTML = '';
+        //tongHopTPDHChart.centerLabel.text = 'Tổng<br>' + data.TongTL + 'Kg';
+        document.getElementById("tongTLTPRaCoiXepKhuon").textContent = `Tổng: ${rawTongTL} Kg`;
+        const series = tongHopTPRaCoiXepKhuonChart.series[0];
+        for (let i = 0; i < series.points.length; i++) {
+            const item = series.points[i];
+            const trongLuongTP = item.y;
+            const trongLuongTPFormat = trongLuongTP.toLocaleString('vi-VN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            const newItem = document.createElement('tr');
+            newItem.innerHTML = `
+                            <td>
+                                <div>
+                                    <h6 style="color: ${item.color}" class="mb-0">${item.x}</h6>
+                                </div>
+                            </td>
+                            <td style="text-align: right;">
+                                <small class="fw-semibold">${trongLuongTPFormat} Kg</small>
+                            </td>
+                         `;
+
+            parentElement.appendChild(newItem);
+        }
+    }
+    
+    var timeInterval = localStorage.getItem("timeInterval_dashboard_user");
+
+    // Nếu null thì ép thành 30p
+    if (isNaN(timeInterval) || timeInterval <= 0) {
+        timeInterval = 1800000;
+    }
+
+    setInterval(loadDataRaCoiXepKhuon, timeInterval);
+</script>
+

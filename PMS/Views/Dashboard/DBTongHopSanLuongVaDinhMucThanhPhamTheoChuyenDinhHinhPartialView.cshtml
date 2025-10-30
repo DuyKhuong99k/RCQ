@@ -1,0 +1,332 @@
+﻿@{
+    var XuongId = @Context.Session.GetString("XuongId");
+}
+<div class="card mb-4 marginGridjs position-relative">
+    <div class="card-header d-flex justify-content-between align-items-center gap-2 position-relative">
+        <div class="text-start">
+            <small class="fw-semibold text-muted d-block"> Sản lượng trung bình:</small>
+            <p class="weight-displayTBSanLuongCongNhan fw-bold fs-6 mb-0">0,000.00 Kg</p>
+        </div>
+        <h6 class="mb-0 mx-auto text-center flex-grow-1">
+            Tổng Hợp Sản Lượng & Định Mức Thành Phẩm Theo Chuyền Sửa Cá
+        </h6>
+        <button class="btn btn-outline-primary btn-sm position-absolute top-0 end-0 mt-2 me-3 shadow-sm"
+                onclick="location.href='@Url.Action("DBTongHopSanLuongVaDinhMucThanhPhamTheoChuyenDinhHinhAdvanceView", "Dashboard")'">
+            <i class='bx bxs-bar-chart-alt-2 fs-5'></i>
+        </button>
+    </div>
+
+    <div class="card-body px-3 py-2">
+        <div id="column-container-SanLuongDinhMucTPTheoChuyenDinhHinh" style="width: 100%;height:275px"></div>
+    </div>
+</div>
+<script>
+    var chart_SanLuongDinhMucTPTheoChuyenDinhHinhh;
+
+    $(document).ready(function () {
+        taiDasboardTongHopSanLuongDinhMucTPTheoChuyenDinhHinhh();
+
+        var timeInterval = localStorage.getItem("timeInterval_dashboard_user");
+
+        if (isNaN(timeInterval) || timeInterval <= 0) {
+            timeInterval = 1800000; // 30 phút mặc định
+        }
+
+        setInterval(taiDasboardTongHopSanLuongDinhMucTPTheoChuyenDinhHinhh, timeInterval);
+    });
+
+    function taiDasboardTongHopSanLuongDinhMucTPTheoChuyenDinhHinhh() {
+        const xuongId = '@XuongId';
+        const chartDataSLDMTP = getDataForChartSLDMTP(xuongId);
+        if (chartDataSLDMTP && chartDataSLDMTP.length > 0) {
+            createComboChart(chartDataSLDMTP);
+        }
+    }
+
+    function getDataForChartSLDMTP(xuongId) {
+        let chartDataSLDMTP = null;
+        const fromDate = localStorage.getItem("fromDate_dashboard_user");
+        const toDate = localStorage.getItem("toDate_dashboard_user");
+        $.ajax({
+            url: '/Dashboard/DataChartTongHopSanLuongVaDinhMucThanhPhamTheoChuyenDinhHinh',
+            type: 'GET',
+            data: { fromDate: fromDate, toDate: toDate, xuongId: xuongId },
+            async: false,
+            success: function (response) {
+                if (response.Success) {
+                    chartDataSLDMTP = response.DataChart;
+                    if (Array.isArray(chartDataSLDMTP)) {
+
+                        const weightDisplays = document.querySelectorAll('.weight-displayTBSanLuongCongNhan');
+                        weightDisplays.forEach(display => {
+                            display.textContent = `${response.TotalTrongLuong} kg`;
+                        });
+                    }
+                } else {
+                    console.warn("Không có dữ liệu");
+                }
+            },
+            error: function (e) {
+                console.error("Lỗi khi lấy dữ liệu:", e);
+            }
+        });
+        return chartDataSLDMTP;
+    }
+
+    // function createComboChart(data) {
+    //     const isMobile = window.innerWidth <= 768;
+    //     const xKey = "Nhom";
+    //     const yKey = "TongTLTra";
+
+    //     const lineKeysSet = new Set();
+    //     data.forEach(row => {
+    //         Object.keys(row).forEach(k => {
+    //             if (k.startsWith("DinhMuc_")) {
+    //                 lineKeysSet.add(k);
+    //             }
+    //         });
+    //     });
+    //     const lineKeys = Array.from(lineKeysSet);
+    //     // data.forEach(row => {
+    //     //     lineKeys.forEach(k => {
+    //     //         if (!(k in row)) {
+    //     //             row[k] = 0;
+    //     //         }
+    //     //     });
+    //     // });
+    //     const series = [];
+
+    //     // Cột: Tổng trọng lượng
+    //     series.push({
+    //         type: 'Column',
+    //         xName: xKey,
+    //         yName: yKey,
+    //         name: 'Sản Lượng',
+    //         marker: {
+    //             dataLabel: {
+    //                 visible: true,
+    //                 font: { fontWeight: '600', color: '#000' }
+    //             }
+    //         }
+    //     });
+
+    //     // Đường line cho từng loại Định Mức
+    //     lineKeys.forEach((key) => {
+    //         series.push({
+    //             type: 'Line',
+    //             xName: xKey,
+    //             yName: key,
+    //             name: key.replace("DinhMuc_", ""),
+    //             width: 2,
+    //             marker: { visible: true },
+    //             yAxisName: 'yDinhMuc'
+    //         });
+    //     });
+
+    //     if (chart_SanLuongDinhMucTPTheoChuyenDinhHinhh) {
+    //         chart_SanLuongDinhMucTPTheoChuyenDinhHinhh.series = series;
+    //         chart_SanLuongDinhMucTPTheoChuyenDinhHinhh.dataSource = data;
+    //         chart_SanLuongDinhMucTPTheoChuyenDinhHinhh.refresh();
+    //         return;
+    //     }
+
+    //     chart_SanLuongDinhMucTPTheoChuyenDinhHinhh = new ej.charts.Chart({
+    //         primaryXAxis: {
+    //             valueType: 'Category',
+    //             labelIntersectAction: 'Rotate45',
+    //             labelRotation: isMobile ? 270 : 0,
+    //             labelStyle: {
+    //                 fontWeight: 'bold',
+    //                 size: '9px',
+    //                 color: '#333'
+    //             },
+    //             majorGridLines: { width: 0 },
+    //             majorTickLines: { width: 0 },
+    //             minorTickLines: { width: 0 }
+    //         },
+    //         primaryYAxis: {
+    //             title: 'Sản Lượng',
+    //             majorTickLines: { width: 0 },
+    //             lineStyle: { width: 0 },
+    //             labelFormat: '{value}'
+    //         },
+    //         axes: [
+    //             {
+    //                 name: 'yDinhMuc',
+    //                 title: 'Định Mức',
+    //                 opposedPosition: true,
+    //                 lineStyle: { width: 0 },
+    //                 majorTickLines: { width: 0 },
+    //                 labelStyle: { color: '#565656', fontWeight: 'bold' },
+    //                 labelFormat: '{value}'
+    //             }
+    //         ],
+    //         chartArea: { border: { width: 0 } },
+    //         tooltip: {
+    //             enable: true,
+    //             shared: true
+    //         },
+    //         legendSettings: { visible: true },
+    //         width: '100%',
+    //         height: '400px',
+    //         series: series,
+    //         dataSource: data,
+
+    //         //Format label hiển thị trên cột và line
+    //         textRender: function (args) {
+    //             const num = parseFloat(args.text);
+    //             if (!isNaN(num)) {
+    //                 args.text = num.toLocaleString('vi-VN', {
+    //                     minimumFractionDigits: 2,
+    //                     maximumFractionDigits: 2
+    //                 });
+    //             }
+    //         },
+
+    //             tooltipRender: function (args) {
+    //     // Chỉ định dạng tooltip cho series "Sản Lượng"
+    //     if (args.series && args.series.name === 'Sản Lượng' && args.point && !isNaN(args.point.y)) {
+    //         args.text = `${args.series.name}: ${args.point.y.toLocaleString('vi-VN', {
+    //             minimumFractionDigits: 2,
+    //             maximumFractionDigits: 2
+    //         })} kg`;
+    //     }
+    // }
+    //     });
+
+    //     chart_SanLuongDinhMucTPTheoChuyenDinhHinhh.appendTo('#column-container-SanLuongDinhMucTPTheoChuyenDinhHinh');
+    // }
+    function createComboChart(data) {
+        const isMobile = window.innerWidth <= 768;
+        const xKey = "Nhom";
+        const yKey = "TongTLTra";
+
+        const lineKeysSet = new Set();
+        data.forEach(row => {
+            Object.keys(row).forEach(k => {
+                if (k.startsWith("DinhMuc_")) {
+                    lineKeysSet.add(k);
+                }
+            });
+        });
+        let lineKeys = Array.from(lineKeysSet);
+
+        // data.forEach(row => {
+        //     lineKeys.forEach(k => {
+        //         if (!(k in row)) {
+        //             row[k] = 0;
+        //         }
+        //     });
+        // });
+
+        const series = [];
+
+        // Cột: Tổng trọng lượng
+        series.push({
+            type: 'Column',
+            xName: xKey,
+            yName: yKey,
+            name: 'Sản Lượng',
+            marker: {
+                dataLabel: {
+                    visible: true,
+                    font: { fontWeight: '600', color: '#000' }
+                }
+            }
+        });
+
+        // Các đường định mức
+        lineKeys.forEach((key) => {
+            series.push({
+                type: 'Line',
+                xName: xKey,
+                yName: key,
+                name: key.replace("DinhMuc_", ""),
+                width: 2,
+                marker: { visible: true },
+                yAxisName: 'yDinhMuc'
+            });
+        });
+
+        if (chart_SanLuongDinhMucTPTheoChuyenDinhHinhh) {
+            chart_SanLuongDinhMucTPTheoChuyenDinhHinhh.series = series;
+            chart_SanLuongDinhMucTPTheoChuyenDinhHinhh.dataSource = data;
+            chart_SanLuongDinhMucTPTheoChuyenDinhHinhh.refresh();
+            return;
+        }
+
+        chart_SanLuongDinhMucTPTheoChuyenDinhHinhh = new ej.charts.Chart({
+            primaryXAxis: {
+                valueType: 'Category',
+                labelIntersectAction: 'Rotate45',
+                labelRotation: isMobile ? 270 : 0,
+                labelStyle: {
+                    fontWeight: 'bold',
+                    size: '9px',
+                    color: '#333'
+                },
+                majorGridLines: { width: 0 },
+                majorTickLines: { width: 0 },
+                minorTickLines: { width: 0 }
+            },
+            primaryYAxis: {
+                title: 'Sản Lượng',
+                majorTickLines: { width: 0 },
+                lineStyle: { width: 0 },
+                labelFormat: '{value}'
+            },
+            axes: [
+                {
+                    name: 'yDinhMuc',
+                    title: 'Định Mức (%)',
+                    opposedPosition: true,
+                    lineStyle: { width: 0 },
+                    majorTickLines: { width: 0 },
+                    labelStyle: { color: '#565656', fontWeight: 'bold' },
+                    labelFormat: '{value}'
+                }
+            ],
+            chartArea: { border: { width: 0 } },
+            tooltip: {
+                enable: true,
+                shared: true,showNearestPoint: false,
+            },
+            legendSettings: { visible: true },
+            width: '100%',
+            height: '400px',
+            series: series,
+            dataSource: data,
+
+            textRender: function (args) {
+                const num = parseFloat(args.text);
+                if (!isNaN(num)) {
+                    args.text = num.toLocaleString('vi-VN', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    });
+                }
+            },
+
+            tooltipRender: function (args) {
+                const value = args.point?.y;
+                const name = args.series?.name;
+
+                if (typeof value === 'number' && !isNaN(value)) {
+                    const formatted = value.toLocaleString('vi-VN', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    });
+
+                    if (name === 'Sản Lượng') {
+                        args.text = `${name}: ${formatted} kg`;
+                    } else {
+                        args.text = `${name}: ${formatted} %`;
+                    }
+                }
+            }
+        });
+
+        chart_SanLuongDinhMucTPTheoChuyenDinhHinhh.appendTo('#column-container-SanLuongDinhMucTPTheoChuyenDinhHinh');
+    }
+</script>
+

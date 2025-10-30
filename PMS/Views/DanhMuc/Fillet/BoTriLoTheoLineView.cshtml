@@ -1,0 +1,571 @@
+﻿@{
+    ViewData["Title"] = "BoTriLoTheoLineView";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var listLines = ViewBag.listLines;
+    var ListLos = ViewBag.ListLos;
+    var XuongId = @Context.Session.GetString("XuongId");
+    var roleIds = PMS.Middlewares.AuthenticationHelpers.GetRoleIdsFromCookie(Context);
+    var rolePermistions = await PMS.Middlewares.AuthenticationHelpers.GetRolePermistionsAsync(Context, roleIds);
+}
+
+<style>
+    body {
+        background-color: #f8f9fa;
+    }
+
+    .sidebar {
+        background-color: #f1f1f1;
+        padding: 10px;
+        height: calc(86vh - 200px); /* Chiều cao sidebar */
+        border-right: 1px solid #ddd;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .sidebar-section {
+        display: flex;
+        flex-direction: column;
+        flex: 1; /* Chia đều */
+        min-height: 0; /* Cho phép overflow */
+    }
+
+    .sidebar-header {
+        flex-shrink: 0;
+        font-weight: 600;
+        margin-bottom: 5px;
+    }
+
+    .sidebar-list {
+        flex: 1;
+        overflow: auto;
+    }
+
+    .sidebar .btn {
+        width: 100%;
+        margin-bottom: 5px;
+    }
+
+
+    .footer-bar {
+        background: #fff;
+        padding: 10px;
+        border-top: 1px solid #ddd;
+    }
+
+    .form-check-label {
+        display: inline-block;
+        white-space: nowrap;
+    }
+
+    #modalNhanVien .modal-dialog {
+        max-width: 1000px;
+    }
+
+    /* --- Responsive cho mobile --- */
+    @@media (max-width: 768px) {
+        .sidebar {
+            flex-direction: row; /* Nằm ngang */
+            height: auto;
+            border-right: none;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .sidebar-section {
+            flex: 1; /* Mỗi phần 50% */
+            min-height: auto;
+        }
+
+        .sidebar-header {
+            font-size: 14px;
+            margin-bottom: 3px;
+            text-align: center;
+        }
+
+        .sidebar-list {
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        .sidebar .btn {
+            font-size: 12px;
+            padding: 3px 5px;
+            margin-bottom: 3px;
+        }
+        /* Để bảng xuống dưới sidebar */
+        .col-2.sidebar {
+            max-width: 100%;
+            flex: 0 0 100%;
+        }
+
+        .col-10 {
+            max-width: 100%;
+            flex: 0 0 100%;
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .footer-bar {
+            flex-direction: column;
+            align-items: stretch; /* Cho các phần tử full chiều ngang */
+            gap: 10px;
+        }
+
+            .footer-bar .d-flex {
+                flex-wrap: wrap; /* Cho phép xuống dòng */
+                gap: 5px;
+            }
+
+            .footer-bar label {
+                font-size: 14px;
+            }
+
+            .footer-bar input[type="date"],
+            .footer-bar input[type="time"] {
+                flex: 1 1 auto; /* Để input co giãn vừa khung */
+                min-width: 120px;
+            }
+
+            .footer-bar .btn {
+                width: 100%; /* Nút full width */
+            }
+    }
+
+    @@media (max-width: 768px) {
+        .table-container {
+            display: flex;
+            flex-direction: column-reverse; /* Đảo thứ tự khi mobile */
+        }
+
+            .table-container > #GridLineStaff {
+                margin-top: 10px;
+            }
+    }
+    @@media (max-width: 768px) {
+    .row .col-6 {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+}
+</style>
+
+<div class="row">
+    <div class="col-12">
+        <div class="row">
+            <div class="col-2 sidebar mb-2">
+                <div class="sidebar-section">
+                    <div class="sidebar-header">Lô</div>
+                    <div class="sidebar-list" id="sidebar-list-lo">
+                        @foreach (var lo in ListLos)
+                        {
+                                <button class="btn btn-secondary" data-id="@lo">@lo</button>
+                        }
+                    </div>
+                </div>
+            </div>
+            <div class="col-10">
+                <div class="row g-2 mb-2">
+                    <div class="col-12 col-md-6">
+                        <h5>Chọn Chuyền</h5>
+                        <div id="GridLine"></div>
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <h5>Danh Sách Lô Theo Chuyền</h5>
+                        <div id="GridLoLine"></div>
+                    </div>
+                </div>
+                <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+                    <div class="d-flex gap-1">
+                        <button class="btn btn-outline-primary" onclick="insert()" title="Thêm">
+                            <i class='bx bx-layer-plus'></i>
+                        </button>
+                        <button class="btn btn-outline-danger" onclick="deleteLoLine()" title="Xóa">
+                            <i class='bx bx-layer-minus'></i>
+                        </button>
+                    </div>
+                    <div class="d-flex align-items-center gap-1">
+                        <label for="date" class="mb-0">Ngày:</label>
+                        <input type="date" class="form-control" id="date">
+                        <label for="time" class="mb-0">Giờ:</label>
+                        <input type="time" class="form-control" id="time">
+                    </div>
+                    <div class="form-check form-check-inline d-flex align-items-center ms-2">
+                        <input class="form-check-input" type="checkbox" id="checkNow">
+                        <label class="form-check-label mb-0 ms-1" for="checkNow" style="white-space: nowrap;">Vị Trí Mới Nhất</label>
+                    </div>
+                    <button class="btn btn-primary" onclick="reloadLoLine()">Tải Lại</button>
+                </div>
+
+
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        showLine();
+        var today = new Date().toISOString().split('T')[0];
+        document.getElementById('date').value = today;
+
+        function updateTime() {
+            var now = new Date();
+            var hh = String(now.getHours()).padStart(2, '0');
+            var mm = String(now.getMinutes()).padStart(2, '0');
+            var ss = String(now.getSeconds()).padStart(2, '0');
+            document.getElementById('time').value = hh + ':' + mm + ':' + ss;
+        }
+        updateTime();
+        setInterval(updateTime, 1000);
+    });
+
+
+    $("#date").on("change", function () {
+        var selectedDate = $(this).val();
+
+        $.ajax({
+            url: "/BoTriViTriLoSizeThanhPhamFillet/GetLosWithDate",
+            type: "GET",
+            data: { ngay: selectedDate },
+            success: function (data) {
+                var container = $("#sidebar-list-lo");
+                container.empty();
+
+                if (data && data.length > 0) {
+                    data.forEach(function (lo) {
+                        container.append(
+                            `<button class="btn btn-secondary" data-id="${lo}">${lo}</button>`
+                        );
+                    });
+                } else {
+                    container.append("<p class='text-muted'>Không có dữ liệu</p>");
+                }
+            },
+            error: function () {
+                alert("Có lỗi khi tải dữ liệu Lô!");
+            }
+        });
+    });
+
+        var gridLoLine;
+        var selectedLo = null;
+
+    $(document).on('click', '.sidebar button[data-id]', function () {
+        var $section = $(this).closest('.sidebar-section');
+        var parentTitle = $section.find('.sidebar-header').text().trim();
+
+        if (parentTitle === "Lô") {
+            selectedLo = $(this).data('id');
+        }
+        $section.find('button[data-id]')
+            .removeClass('btn-primary')
+            .addClass('btn-secondary');
+        $(this)
+            .removeClass('btn-secondary')
+            .addClass('btn-primary');
+
+        checkAndLoad();
+    });
+
+      function checkAndLoad() {
+            var ngay = document.getElementById('date').value;
+            if (ngay && selectedLo) {
+                reloadGridLoLine(ngay, selectedLo);
+            }
+      }
+
+      function reloadGridLoLine(ngay,maLo){
+          var isCheckNow = $('#checkNow').prop('checked');
+          $.ajax({
+            url: '/BoTriLoTheoLineFillet/GetAllsFullField',
+            type: 'GET',
+            data: {
+                    ngay: ngay,
+                    maLo: maLo,
+                    isCheckNow:isCheckNow
+            },
+            dataType: 'json',
+            success: function (rs) {
+                if (rs != null) {
+                    loadGridDataLoLine(rs);
+                } else {
+                    toastOptionNotyfi();
+                    toastr["warning"](rs.Mesages, "Thông báo");
+                }
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error, "Thông báo");
+            }
+        });
+      }
+
+      function loadGridDataLoLine(data) {
+        if (gridLoLine) {
+            gridLoLine.dataSource = [];
+            gridLoLine.dataBind();
+            if (data && data.length > 0) {
+                gridLoLine.dataSource = new ej.data.DataManager({
+                    json: data,
+                    adaptor: new ej.data.JsonAdaptor()
+                });
+                gridLoLine.dataBind();
+            }
+        } else {
+            initializeGrid(data);
+        }
+    }
+     loadGridDataLoLine();
+      function initializeGrid(data){
+        var dataManager = new ej.data.DataManager({
+            json: data,
+            adaptor: new ej.data.JsonAdaptor()
+        });
+        gridLoLine = new ej.grids.Grid({
+                            dataSource: dataManager,
+                            allowPaging: true,
+                            pageSettings: { pageSize: 50, pageSizes: [50, 100, 200, 500] },
+                            allowFiltering: true,
+                            filterSettings: { type: 'Excel' },
+                            allowSorting: true,
+                            allowResizing: true,
+                            allowExcelExport: true,
+                            selectionSettings: { persistSelection: true },
+                            toolbar: ['ExcelExport'],
+                            rowSelected: selectionChangedLoLine,
+                            rowDeselected: unSelectionChangedLoLine,
+                            height: 400,
+                            columns: [
+                                { type: "checkbox", field: "", allowFiltering: false, allowSorting: false, width: '50' },
+                                { field: 'MaLo', headerText: 'Mã Lô', width: 150 },
+                                { field: 'LineName', headerText: 'Chuyền', width: 150 },
+                                { field: 'Gio', headerText: 'Giờ Bắt Đầu', width: 150 }
+                            ]
+                        });
+        gridLoLine.appendTo('#GridLoLine');
+        gridLoLine.toolbarClick = function (args) {
+        if (args.item.id === 'Grid_excelexport') {
+            gridLoLine.excelExport();
+        }};
+
+      }
+
+    let selectedIdsStringLoLine = "";
+    let selectedCount = 0;
+    function unSelectionChangedLoLine(args) {
+        let deselectedRecords = args.data ? args.data : [];
+        if (deselectedRecords.length == 0) {
+            selectedIdsStringLoLine = "";
+            selectedCount = 0;
+            //alert(selectedIdsStringLoLine);
+            return;
+        }
+        let deselectedId = deselectedRecords.Id;
+        if (selectedIdsStringLoLine.includes(deselectedId)) {
+            selectedIdsStringLoLine = selectedIdsStringLoLine.replace(deselectedId + ",", "");
+            selectedCount--;
+        }
+        //alert(selectedIdsStringLoLine);
+    }
+
+    function selectionChangedLoLine(args) {
+        let selectedRecords = args.data ? args.data : [];
+        if (selectedRecords.length == 0) {
+            let filteredRecords = gridLoLine.getCurrentViewRecords();
+            selectedIdsStringLoLine = "";
+            selectedCount = filteredRecords.length;
+            filteredRecords.forEach(record => {
+                selectedIdsStringLoLine += record.Id + ",";
+            });
+            //alert(selectedIdsStringLoLine);
+            return;
+        }
+        let selectedId = selectedRecords.Id;
+        if (!selectedIdsStringLoLine.includes(selectedId)) {
+            selectedIdsStringLoLine += selectedId + ",";
+            selectedCount++;
+        }
+        //alert(selectedIdsStringLoLine);
+
+    }
+
+    function deleteLoLine() {
+        var ngay = $('#date').val();
+        var gio = $('#time').val();
+        var maLo = selectedLo;
+        var xuongId = @XuongId;
+        bootbox.confirm({
+            title: "Thông báo!",
+            message: "Bạn có chắc muốn xoá " + selectedCount + " items!  ",
+            buttons: {
+                confirm: {
+                    label: 'OK',
+                    className: 'btn btn-primary'
+                }
+            },
+            callback: function (result) {
+                if (result) {
+                    $.ajax({
+                        url: '/BoTriLoTheoLineFillet/DoDelete',
+                        data: {
+                            selectedIdsStringLoLine: selectedIdsStringLoLine,
+                        },
+                        type: 'POST',
+                        dataType: 'json',
+                        success: function (rs) {
+                            if (rs.isSuccess === true) {
+                                reloadGridLoLine(ngay,maLo);
+                                showLine();
+                                selectedIdsStringLoLine = "";
+                                selectedCount = 0;
+                                toastOptionNotyfi();
+                                toastr["success"](rs.Messages, "Thông báo");
+
+                            } else {
+                                toastOptionNotyfi();
+                                toastr["warning"](rs.Messages, "Thông báo");
+                            }
+                        },
+                        error: function (error) {
+                            toastOptionNotyfi();
+                            toastr["error"]('Đã xảy ra lỗi: ' + error.toString(), "Thông báo");
+                        }
+                    });
+                }
+            }
+        });
+    }
+
+
+
+    function reloadLoLine(){
+        var ngay = $('#date').val();;
+        var maLo = selectedLo;
+        reloadGridLoLine(ngay,maLo);
+    }
+
+
+</script>
+
+<script>
+    var gridLine;
+    function showLine() {
+        $.ajax({
+            url: '/lineFillet/GetAlls',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                var dataManager = new ej.data.DataManager({
+                    json: data,
+                    adaptor: new ej.data.JsonAdaptor()
+                });
+
+                if (gridLine) {
+                    gridLine.dataSource = dataManager;
+                    gridLine.refresh();
+                } else {
+                    gridLine = new ej.grids.Grid({
+                        dataSource: dataManager,
+                        allowPaging: true,
+                        pageSettings: { pageSize: 500, pageSizes: [50, 100, 200, 500] },
+                        allowFiltering: true,
+                        allowSorting: true,
+                        filterSettings: { type: 'Excel' },
+                        allowResizing: true,
+                        allowExcelExport: true,
+                        toolbar: ['ExcelExport'],
+                        //rowSelected: onRowSelected,
+                        selectionSettings: { persistSelection: true },
+                        rowSelected: selectionChanged,
+                        rowDeselected: unSelectionChanged,
+                        height: 400,
+                        columns: [
+                            { type: "checkbox", field: "", allowFiltering: false, allowSorting: false, width: '50' },
+                            { field: 'Ma', headerText: 'Mã', width: 150 },
+                            { field: 'Ten', headerText: 'Tên', width: 150 },
+                            { field: 'SuDung', headerText: 'Sử Dụng', width: 100, displayAsCheckBox: 'true', textAlign: 'Center' },
+                        ]
+                    });
+                    gridLine.appendTo('#GridLine');
+                }
+            },
+            error: function (error) {
+                console.error(error);
+                $('#GridStaff').html('<div class="text-danger text-center py-5">Lỗi tải dữ liệu</div>').show();
+            }
+        });
+    }
+
+    let selectedIdsString = "";
+
+    function unSelectionChanged(args) {
+        let deselectedRecords = args.data ? args.data : [];
+        if (deselectedRecords.length == 0) {
+            selectedIdsString = "";
+            //alert(selectedIdsString);
+            return;
+        }
+
+        let deselectedId = deselectedRecords.Ma;
+        if (selectedIdsString.includes(deselectedId)) {
+            selectedIdsString = selectedIdsString.replace(deselectedId + ",", "");
+        }
+        //alert(selectedIdsString);
+
+    }
+    function selectionChanged(args) {
+        let selectedRecords = args.data ? args.data : [];
+        if (selectedRecords.length == 0) {
+
+            let filteredRecords = gridLine.getCurrentViewRecords();
+            selectedIdsString = "";
+            filteredRecords.forEach(record => {
+                selectedIdsString += record.Ma + ",";
+            });
+            //alert(selectedIdsString);
+            return;
+        }
+        let selectedId = selectedRecords.Ma;
+        if (!selectedIdsString.includes(selectedId)) {
+            selectedIdsString += selectedId + ",";
+        }
+        //alert(selectedIdsString);
+    }
+
+    var selectedLine = null;
+    var selectedViTri = null;
+    function insert() {
+        var ngay = $('#date').val();
+        var gio = $('#time').val();
+        var maLo = selectedLo;
+        var xuongId = @XuongId;
+        $.ajax({
+            type: 'POST',
+            url: '/BoTriLoTheoLineFillet/DoInsert',
+            data: {
+                selectedIdsString: selectedIdsString,
+                ngay: ngay,
+                gio: gio,
+                maLo: maLo,
+                xuongId: xuongId
+            },
+            success: function (rs) {
+                if (rs.isSuccess === true) {
+                    toastOptionNotyfi();
+                    toastr["success"](rs.Messages, "Thông báo");
+                    reloadGridLoLine(ngay, maLo);
+                    showLine();
+                    selectedIdsString = "";
+                } else {
+                    toastOptionNotyfi(); 
+                    toastr["warning"](rs.Messages, "Thông báo");
+                }
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error, "Thông báo");
+            }
+        });
+    }
+</script>
+
+

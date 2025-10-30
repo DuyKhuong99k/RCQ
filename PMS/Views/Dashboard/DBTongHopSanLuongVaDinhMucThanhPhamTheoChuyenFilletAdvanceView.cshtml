@@ -1,0 +1,502 @@
+﻿@{
+    ViewData["Title"] = "DBTongHopSanLuongVaDinhMucThanhPhamTheoChuyenFilletAdvanceView";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var XuongId = @Context.Session.GetString("XuongId");
+}
+<style>
+    .collapse-horizontal {
+        position: absolute;
+        top: 80px;
+        left: 0;
+        height: 400px;
+        background-color: rgba(255, 255, 255, 0.8);
+        z-index: 2;
+        width: 0;
+        max-width: 0;
+        transition: all 0.3s ease-in-out;
+        /* Xóa overflow: hidden */
+        overflow-y: auto; /* CHO PHÉP SCROLL DỌC */
+        overflow-x: hidden;
+    }
+
+        .collapse-horizontal.collapse.show {
+            width: 100%;
+            max-width: 100%;
+        }
+
+    .collapse-inner {
+        padding: 15px;
+        white-space: nowrap;
+        max-height: 100%;
+        overflow-y: auto;
+    }
+
+    .card {
+        position: relative;
+        overflow: visible;
+    }
+</style>
+<div class="row g-3 align-items-end mb-2" style="margin-top: -20px;">
+    <!-- Nút Quay lại bên trái -->
+    <div class="col-md-auto">
+        <button class="btn btn-outline-secondary" type="button" onclick="window.history.back();">
+            <i class='bx bx-arrow-back'></i> Quay lại
+        </button>
+
+    </div>
+
+    <!-- Các thành phần bên phải, đẩy về cuối hàng -->
+    <div class="col-md-auto ms-auto">
+        <div class="input-group">
+            <span class="input-group-text">Chọn ngày</span>
+            <input type="date" class="form-control" id="fromDateDB" name="fromDate">
+            <input type="date" class="form-control" id="toDateDB" name="toDate">
+        </div>
+    </div>
+    <div class="col-md-auto" style="z-index:1">
+        <div class="input-group">
+            <span class="input-group-text">Số phút</span>
+            <input type="number" class="form-control" id="minuteInput" name="minuteInput" min="5" value="5">
+            <button id="applyBtn" class="btn btn-primary" type="button">
+                <i class='bx bx-refresh'></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="card mb-4 marginGridjs position-relative">
+    <div class="card-header d-flex justify-content-between align-items-center gap-2 position-relative">
+        <div class="text-start">
+            <small class="fw-semibold text-muted d-block">Sản lượng trung bình:</small>
+            <p class="weight-displayTBSanLuongCongNhanFL fw-bold fs-6 mb-0">0,000.00 Kg</p>
+        </div>
+        <h6 class="mb-0 mx-auto text-center flex-grow-1">
+            Tổng Hợp Sản Lượng & Định Mức Thành Phẩm Theo Chuyền Fillet
+        </h6>
+        <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
+            Chi Tiết Định Mức Từng Chuyền
+        </button>
+    </div>
+    <div class="card-body px-3 py-2">
+        <div class="collapse collapse-horizontal" id="collapseExample">
+            <div class="collapse-inner">
+                <div id="cardContainer" style="width: 100%; white-space: nowrap;"></div>
+            </div>
+        </div>
+    </div>
+    <div id="column-container-SanLuongDinhMucTPTheoChuyenFillet">
+    </div>
+    <div id="Grid"></div>
+</div>
+
+@* <div class="card mb-4 marginGridjs position-relative">
+    <div class="card-header d-flex justify-content-between align-items-center gap-2 position-relative">
+        <div class="text-start">
+            <small class="fw-semibold text-muted d-block">Sản lượng trung bình:</small>
+            <p class="weight-displayTBSanLuongCongNhanFL fw-bold fs-6 mb-0">0,000.00 Kg</p>
+        </div>
+        <h6 class="mb-0 mx-auto text-center flex-grow-1">
+            Tổng Hợp Sản Lượng & Định Mức Thành Phẩm Theo Chuyền Fillet
+        </h6>
+
+    </div>
+
+    <div class="card-body px-3 py-2">
+        <div id="column-container-SanLuongDinhMucTPTheoChuyenFillet" style="width: 100%;height:350px"></div>
+        <div id="Grid"></div>
+    </div>
+</div> *@
+
+
+<script>
+
+    function generateCards(chartDataSLDMTPFL) {
+        const cardContainer = document.getElementById('cardContainer');
+        cardContainer.innerHTML = '';
+
+        cardContainer.style.display = 'flex';
+        cardContainer.style.flexWrap = 'wrap';
+        cardContainer.style.gap = '10px';
+        cardContainer.style.padding = '10px';
+        cardContainer.style.maxHeight = '550px';  // Giới hạn chiều cao
+        //cardContainer.style.overflowY = 'auto';   // Thêm thanh cuộn dọc
+
+        chartDataSLDMTPFL.forEach(item => {
+            const cardDiv = document.createElement('div');
+            cardDiv.style.flex = '0 0 auto';
+            cardDiv.style.width = '200px';
+            cardDiv.className = 'card h-100';
+            cardDiv.style.fontSize = '10px';
+            cardDiv.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+            cardDiv.style.color = 'white';
+            cardDiv.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.5)';
+            cardDiv.style.borderRadius = '6px';
+
+            const cardBody = document.createElement('div');
+            cardBody.className = 'card-body';
+            cardBody.style.padding = '8px';
+
+            const cardTitle = document.createElement('h5');
+            cardTitle.className = 'card-title';
+            cardTitle.style.fontSize = '11px';
+            cardTitle.textContent = item.Nhom;
+            cardTitle.style.color = 'white';
+            cardBody.appendChild(cardTitle);
+
+            const hr = document.createElement('hr');
+            hr.style.border = '0';
+            hr.style.borderTop = '1px solid #ccc';
+            hr.style.margin = '5px 0';
+            cardBody.appendChild(hr);
+
+            const weightPara = document.createElement('p');
+            weightPara.className = 'card-text';
+            weightPara.innerHTML = `<strong>Sản Lượng:</strong> ${Number(item.TongTLTra).toLocaleString('vi-VN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} kg`;
+            cardBody.appendChild(weightPara);
+
+            for (const [key, value] of Object.entries(item)) {
+                if (key.includes('DinhMuc')) {
+                    const dinhMucPara = document.createElement('p');
+                    dinhMucPara.className = 'card-text';
+                    dinhMucPara.innerHTML = `<strong>${key.replace('DinhMuc_', '')}:</strong> ${Number(value).toLocaleString('vi-VN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                    cardBody.appendChild(dinhMucPara);
+                }
+            }
+
+            cardDiv.appendChild(cardBody);
+            cardContainer.appendChild(cardDiv);
+        });
+    }
+
+
+    var chart_SanLuongDinhMucTPTheoChuyenFillet;
+
+    $(document).ready(function () {
+        taiDasboardTongHopSanLuongDinhMucTPTheoChuyenFillet();
+
+        var timeInterval = localStorage.getItem("timeInterval_dashboard_user_Advance");
+
+        if (isNaN(timeInterval) || timeInterval <= 0) {
+            timeInterval = 1800000; // 30 phút mặc định
+        }
+
+        setInterval(taiDasboardTongHopSanLuongDinhMucTPTheoChuyenFillet, timeInterval);
+    });
+
+    function taiDasboardTongHopSanLuongDinhMucTPTheoChuyenFillet() {
+        const xuongId = '@XuongId';
+        const chartDataSLDMTPFL = getDataForChartSLDMTPFL(xuongId);
+        if (chartDataSLDMTPFL && chartDataSLDMTPFL.length > 0) {
+            createComboChartFL(chartDataSLDMTPFL);
+        }
+    }
+
+    function getDataForChartSLDMTPFL(xuongId) {
+        let chartDataSLDMTPFL = null;
+        const fromDate = localStorage.getItem("fromDate_dashboard_user_Advance");
+        const toDate = localStorage.getItem("toDate_dashboard_user_Advance");
+        $.ajax({
+            url: '/Dashboard/DataChartTongHopSanLuongVaDinhMucThanhPhamTheoChuyenFillet',
+            type: 'GET',
+            data: { fromDate: fromDate, toDate: toDate, xuongId: xuongId },
+            async: false,
+            success: function (response) {
+                if (response.Success) {
+                    chartDataSLDMTPFL = response.DataChart;
+                    if (Array.isArray(chartDataSLDMTPFL)) {
+                        generateCards(chartDataSLDMTPFL);
+                        const weightDisplays = document.querySelectorAll('.weight-displayTBSanLuongCongNhanFL');
+                        weightDisplays.forEach(display => {
+                            display.textContent = `${response.TotalTrongLuong} kg`;
+                        });
+                    }
+                } else {
+                    console.warn("Không có dữ liệu");
+                }
+            },
+            error: function (e) {
+                console.error("Lỗi khi lấy dữ liệu:", e);
+            }
+        });
+        return chartDataSLDMTPFL;
+    }
+
+    function createComboChartFL(data) {
+        const isMobile = window.innerWidth <= 768;
+        const xKey = "Nhom";
+        const yKey = "TongTLTra";
+
+        const lineKeysSet = new Set();
+        data.forEach(row => {
+            Object.keys(row).forEach(k => {
+                if (k.startsWith("DinhMuc_")) {
+                    lineKeysSet.add(k);
+                }
+            });
+        });
+        let lineKeys = Array.from(lineKeysSet);
+
+        // data.forEach(row => {
+        //     lineKeys.forEach(k => {
+        //         if (!(k in row) || row[k] === 0 || row[k] === null) {
+        //             row[k] = null; // dùng null để Syncfusion không vẽ line qua điểm này
+        //         }
+        //     });
+        // });
+        const series = [];
+
+        // Cột: Tổng trọng lượng
+        series.push({
+            type: 'Column',
+            xName: xKey,
+            yName: yKey,
+            name: 'Sản Lượng',
+            marker: {
+                dataLabel: {
+                    visible: true,
+                    font: { fontWeight: '600', color: '#000' }
+                }
+            }
+        });
+
+        // Đường line cho từng loại Định Mức
+        lineKeys.forEach((key) => {
+            series.push({
+                type: 'Line',
+                xName: xKey,
+                yName: key,
+                name: key.replace("DinhMuc_", ""),
+                width: 2,
+                marker: { visible: true },
+                yAxisName: 'yDinhMuc'
+            });
+        });
+
+        if (chart_SanLuongDinhMucTPTheoChuyenFillet) {
+            chart_SanLuongDinhMucTPTheoChuyenFillet.series = series;
+            chart_SanLuongDinhMucTPTheoChuyenFillet.dataSource = data;
+            chart_SanLuongDinhMucTPTheoChuyenFillet.refresh();
+            return;
+        }
+
+        chart_SanLuongDinhMucTPTheoChuyenFillet = new ej.charts.Chart({
+            primaryXAxis: {
+                valueType: 'Category',
+                labelIntersectAction: 'Rotate45',
+                labelRotation: isMobile ? 270 : 0,
+                labelStyle: {
+                    fontWeight: 'bold',
+                    size: '9px',
+                    color: '#333'
+                },
+                majorGridLines: { width: 0 },
+                majorTickLines: { width: 0 },
+                minorTickLines: { width: 0 }
+            },
+            primaryYAxis: {
+                title: 'Sản Lượng',
+                majorTickLines: { width: 0 },
+                lineStyle: { width: 0 },
+                labelFormat: '{value}'
+            },
+            axes: [
+                {
+                    name: 'yDinhMuc',
+                    title: 'Định Mức',
+                    opposedPosition: true,
+                    lineStyle: { width: 0 },
+                    majorTickLines: { width: 0 },
+                    labelStyle: { color: '#565656', fontWeight: 'bold' },
+                    labelFormat: '{value}'
+                }
+            ],
+            chartArea: { border: { width: 0 } },
+            tooltip: {
+                enable: true,
+                shared: true,showNearestPoint: false,
+
+            },
+            legendSettings: { visible: true },
+            width: '100%',
+            height: '400px',
+            series: series,
+            dataSource: data,
+
+            //Format label hiển thị trên cột và line
+            textRender: function (args) {
+                const num = parseFloat(args.text);
+                if (!isNaN(num)) {
+                    args.text = num.toLocaleString('vi-VN', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    });
+                }
+            },
+
+            tooltipRender: function (args) {
+                // Chỉ định dạng tooltip cho series "Sản Lượng"
+                if (args.series && args.series.name === 'Sản Lượng' && args.point && !isNaN(args.point.y)) {
+                    args.text = `${args.series.name}: ${args.point.y.toLocaleString('vi-VN', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    })} kg`;
+                }
+            }
+        });
+
+        chart_SanLuongDinhMucTPTheoChuyenFillet.appendTo('#column-container-SanLuongDinhMucTPTheoChuyenFillet');
+    }
+</script>
+<script>
+    $(document).ready(function () {
+        loadGridData();
+    });
+    var grid;
+    function loadGridData() {
+        var fromDate = localStorage.getItem("fromDate_dashboard_user_Advance");
+        var toDate = localStorage.getItem("toDate_dashboard_user_Advance");
+        var xuongId = @XuongId;
+        $.ajax({
+            url: '/Dashboard/TongHopSanLuongVaDinhMucThanhPhamTheoChuyenFillet',
+            type: 'GET',
+            dataType: 'json',
+            data: {
+                fromDate: fromDate,toDate:toDate,xuongId:xuongId
+            },
+            success: function (data) {
+                var dataManager = new ej.data.DataManager({
+                    json: data,
+                    adaptor: new ej.data.JsonAdaptor()
+                });
+                if (grid) {
+                    grid.dataSource = dataManager;
+                    grid.refresh();
+                } else {
+                    grid = new ej.grids.Grid({
+                        dataSource: dataManager,
+                        allowPaging: true,
+                        pageSettings: { pageSize: 50, pageSizes: [50, 100, 200, 500] },
+                        allowFiltering: true,
+                        filterSettings: { type: 'Excel' },
+                        allowSorting: true,
+                        //frozenColumns: 3,
+                        allowResizing: true,
+                        allowExcelExport: true,
+                        toolbar: ['ExcelExport'],
+                        //rowSelected: onRowSelected,
+                        //height: auto,
+                        columns: [
+                            { field: 'Nhom', headerText: 'Nhóm', width: 150 },
+                            { field: 'ThanhPhamName', headerText: 'Thành Phẩm', width: 150 },
+                            { field: 'DinhMuc', headerText: 'Định Mức', type: 'number',format:'N2', width: 200 },
+                            { field: 'TLNhan', headerText: 'Trọng Lượng Nhận', type: 'number',format:'N2', width: 200 },
+                            { field: 'TLTra', headerText: 'Trọng Lượng Trả', type: 'number',format:'N2', width: 200 },
+                        ]
+                    });
+                    // Hiển thị Grid trên trang web
+                    grid.appendTo('#Grid');
+                    grid.toolbarClick = function (args) {
+                         if (args.item.id === 'Grid_excelexport') {
+                            grid.excelExport();
+                         }};
+                    }
+            },
+            error: function (error) {
+                console.error(error);
+            }
+        });
+    }
+</script>
+<script>
+
+    window.addEventListener("DOMContentLoaded", function () {
+        const today = new Date().toLocaleDateString('en-CA');
+        //const today = new Date('2023/10/05');
+        const fromInput = document.getElementById("fromDateDB");
+        const toInput = document.getElementById("toDateDB");
+        const minuteInput = document.getElementById("minuteInput");
+
+        const savedFrom = localStorage.getItem("fromDate_dashboard_user_Advance");
+        const savedTo = localStorage.getItem("toDate_dashboard_user_Advance");
+        const savedInterval = localStorage.getItem("timeInterval_dashboard_user_Advance");
+        const isApplied = localStorage.getItem("dashboard_is_applied_Advance");
+
+        // nếu apply thì áp dung localstoge sau khi hoanf thành thì xóa cờ
+        if (isApplied === "true" && savedFrom && savedTo) {
+            fromInput.value = savedFrom;
+            toInput.value = savedTo;
+            localStorage.removeItem("dashboard_is_applied_Advance"); // Xoá cờ khi đã dùng
+        } else {
+            fromInput.value = today;
+            toInput.value = today;
+            localStorage.setItem("fromDate_dashboard_user_Advance", today);
+            localStorage.setItem("toDate_dashboard_user_Advance", today);
+        }
+
+        if (savedInterval) {
+            const minutes = parseInt(savedInterval, 10) / 60000;
+            minuteInput.value = Math.max(minutes, 5);
+        } else {
+            minuteInput.value = 30;
+            localStorage.setItem("timeInterval_dashboard_user_Advance", 1800000); // 30 phút mặc định
+        }
+    });
+
+    // window.addEventListener("DOMContentLoaded", function () {
+    //     const today = new Date().toLocaleDateString('en-CA');
+
+    //     const fromInput = document.getElementById("fromDateDB");
+    //     const toInput = document.getElementById("toDateDB");
+    //     const minuteInput = document.getElementById("minuteInput");
+
+    //     // Lấy từ localStorage
+    //     const savedFrom = localStorage.getItem("fromDate_dashboard_user");
+    //     const savedTo = localStorage.getItem("toDate_dashboard_user");
+    //     const savedInterval = localStorage.getItem("timeInterval_dashboard_user");
+    //     const isApplied = localStorage.getItem("dashboard_is_applied");
+    //     const kyVong = localStorage.getItem("kyVong_dashboard_NangSuatDinhHinh");
+    //     if (kyVong !== null) {
+    //         document.getElementById("kyVongInput").value = parseFloat(kyVong);
+    //     }
+    //     if (isApplied === "true" && savedFrom && savedTo) {
+    //         fromInput.value = savedFrom;
+    //         toInput.value = savedTo;
+    //     } else {
+    //         fromInput.value = today;
+    //         toInput.value = today;
+    //     }
+
+    //     if (savedInterval) {
+    //         const minutes = parseInt(savedInterval, 10) / 60000;
+    //         minuteInput.value = Math.max(minutes, 5);
+    //     } else {
+    //         minuteInput.value = 30;
+    //         localStorage.setItem("timeInterval_dashboard_user", 1800000); // 30 phút mặc định
+    //     }
+    // });
+
+
+    document.getElementById("applyBtn").addEventListener("click", function () {
+        const minuteValue = parseInt(document.getElementById("minuteInput").value);
+        const fromDate = document.getElementById("fromDateDB").value;
+        const toDate = document.getElementById("toDateDB").value;
+        if (isNaN(minuteValue) || minuteValue < 5) {
+            alert("Nhỏ nhất là 5 phút");
+            document.getElementById("minuteInput").value = 5;
+            return;
+        }
+
+        const intervalMilliseconds = minuteValue * 60000;
+
+        localStorage.setItem("timeInterval_dashboard_user_Advance", intervalMilliseconds);
+        localStorage.setItem("fromDate_dashboard_user_Advance", fromDate);
+        localStorage.setItem("toDate_dashboard_user_Advance", toDate);
+        localStorage.setItem("dashboard_is_applied_Advance", "true");
+        location.reload();
+    });
+
+</script>
+
+
+
+

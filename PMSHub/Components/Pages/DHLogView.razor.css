@@ -1,0 +1,45 @@
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+.grid-container {
+    display: flex;
+    gap: 5px;
+    height: 95vh; /* chiếm full chiều cao trình duyệt */
+    padding: 0px !important;
+    box-sizing: border-box;
+
+}
+
+.grid-column {
+    flex: 1 1 5%;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+}
+.grid-column-first {
+    flex: 0 0 30%; /* không co giãn, độ rộng cố định 30% */
+}
+.grid-title {
+    margin: 0;
+    padding: 8px 12px;
+    font-weight: bold;
+    background: #f0f0f0;
+    height: 30px;
+    line-height: 20px;
+    flex-shrink: 0;
+}
+
+.grid-content {
+    flex-grow: 1;
+    min-height: 0;
+    overflow: hidden;
+}
+@media (max-width: 1200px) {
+    .grid-container {
+        width: 1600px;
+    }
+}

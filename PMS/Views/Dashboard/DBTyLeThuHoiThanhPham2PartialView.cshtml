@@ -1,0 +1,228 @@
+﻿@{
+    var XuongId = @Context.Session.GetString("XuongId");
+}
+<div class="card mb-4 marginGridjs position-relative">
+    <div class="card-header d-flex justify-content-between align-items-center gap-2 position-relative">
+        <div class="text-start">
+            <small class="fw-semibold text-muted d-block">Tổng sản lượng:</small>
+            <p class="weight-displayTyLeThuHoiThanhPham2 fw-bold fs-6 mb-0">0,000.00 Kg</p>
+        </div>
+        <h6 class="mb-0 mx-auto text-center flex-grow-1">
+            Tỷ Lệ Thu Hồi Thành Phẩm 2
+        </h6>
+        <button onclick="location.href='@Url.Action("DBTyLeThuHoiThanhPham2AdvanceView", "Dashboard")'"
+                class="btn btn-outline-primary btn-sm position-absolute top-0 end-0 mt-2 me-3 z-1 shadow-sm"
+                title="Chi tiết nâng cao">
+            <i class='bx bxs-bar-chart-alt-2 fs-5'></i>
+        </button>
+    </div>
+
+    <div class="card-body px-3 py-2">
+        <div id="column-container-TyLeThuHoiThanhPham2" style="width: 100%;height:275px"></div>
+    </div>
+</div>
+<script>
+    var chart_TyLeThuHoiThanhPham2;
+
+    $(document).ready(function () {
+        taiDasboardTongHopTyLeThuHoiThanhPham2();
+
+        var timeInterval = localStorage.getItem("timeInterval_dashboard_user");
+
+        if (isNaN(timeInterval) || timeInterval <= 0) {
+            timeInterval = 1800000; // 30 phút mặc định
+        }
+
+        setInterval(taiDasboardTongHopTyLeThuHoiThanhPham2, timeInterval);
+    });
+
+    function taiDasboardTongHopTyLeThuHoiThanhPham2() {
+        const xuongId = '@XuongId';
+        const chartDataTLTHTP2 = getDataForChartTLTHTP2(xuongId);
+        if (chartDataTLTHTP2 && chartDataTLTHTP2.length > 0) {
+            createComboChartTLTHTP2(chartDataTLTHTP2);
+        }
+    }
+
+    function getDataForChartTLTHTP2(xuongId) {
+        let chartDataTLTHTP2 = null;
+        const fromDate = localStorage.getItem("fromDate_dashboard_user");
+        const toDate = localStorage.getItem("toDate_dashboard_user");
+        $.ajax({
+            url: '/Dashboard/DataChartTyLeThuHoiThanhPham2',
+            type: 'GET',
+            data: { fromDate: fromDate, toDate: toDate, xuongId: xuongId },
+            async: false,
+            success: function (response) {
+                if (response.Success) {
+                    chartDataTLTHTP2 = response.DataChart;
+                    if (Array.isArray(chartDataTLTHTP2)) {
+
+                        const weightDisplays = document.querySelectorAll('.weight-displayTyLeThuHoiThanhPham2');
+                        weightDisplays.forEach(display => {
+                            display.textContent = `${response.TotalTrongLuong} kg`;
+                        });
+                    }
+                } else {
+                    console.warn("Không có dữ liệu");
+                }
+            },
+            error: function (e) {
+                console.error("Lỗi khi lấy dữ liệu:", e);
+            }
+        });
+        return chartDataTLTHTP2;
+    }
+    // function getMaxTyLeThuHoi(data) {
+    //     let max = 0;
+    //     data.forEach(item => {
+    //         Object.keys(item).forEach(key => {
+    //             if (key.startsWith('TyLeThuHoi_')) {
+    //                 const value = item[key] * 100;
+    //                 if (value > max) max = value;
+    //             }
+    //         });
+    //     });
+    //     return Math.ceil((max + 3) / 1) * 1;
+    // }
+    function createComboChartTLTHTP2(data) {
+        const isMobile = window.innerWidth <= 768;
+
+
+        let maxTyLeToanBo = 0;
+
+        data.forEach(row => {
+            if (!row.ThanhPhamName || row.ThanhPhamName.trim() === "") {
+                row.ThanhPhamName = row.MaThanhPham || "Không tên";
+            } else {
+                row.ThanhPhamName = `${row.ThanhPhamName}`;
+            }
+
+            const tyLeKeys = Object.keys(row).filter(k => k.startsWith("TyLeThuHoi_"));
+            let maxTyLe = 0;
+            tyLeKeys.forEach(k => {
+                const val = parseFloat(row[k]);
+                if (!isNaN(val)) {
+                    if (val > maxTyLe) maxTyLe = val;
+                    if (val > maxTyLeToanBo) maxTyLeToanBo = val;
+                }
+            });
+
+            row.TyLeThuHoi = maxTyLe > 0 ? maxTyLe : null;
+        });
+
+        const yAxisMax = Math.ceil((maxTyLeToanBo + 2) / 2) * 2; // alfm tròn thằng chnawx
+
+        const series = [
+            {
+                type: 'Column',
+                xName: 'ThanhPhamName',
+                yName: 'SanLuong',
+                name: 'Sản Lượng',
+                marker: {
+                    dataLabel: {
+                        visible: true,
+                        font: { fontWeight: '600', color: '#000' }
+                    }
+                }
+            },
+            {
+                type: 'Line',
+                xName: 'ThanhPhamName',
+                yName: 'TyLeThuHoi',
+                name: 'Tỷ Lệ Thu Hồi',
+                width: 2,
+                marker: { visible: true },
+                yAxisName: 'yTyLeThuHoi'
+            }
+        ];
+
+        const chartHeight = data.length > 10 ? '600px' : '400px';
+
+        if (chart_TyLeThuHoiThanhPham2) {
+            chart_TyLeThuHoiThanhPham2.series = series;
+            chart_TyLeThuHoiThanhPham2.dataSource = data;
+            chart_TyLeThuHoiThanhPham2.height = chartHeight;
+            chart_TyLeThuHoiThanhPham2.axes[0].maximum = yAxisMax;
+            chart_TyLeThuHoiThanhPham2.refresh();
+            return;
+        }
+
+        chart_TyLeThuHoiThanhPham2 = new ej.charts.Chart({
+            primaryXAxis: {
+                valueType: 'Category',
+                interval: 1,
+                labelIntersectAction: 'Rotate45',
+                labelRotation: isMobile ? 270 : 0,
+                labelStyle: {
+                    fontWeight: 'bold',
+                    size: '9px',
+                    color: '#333'
+                },
+                majorGridLines: { width: 0 },
+                majorTickLines: { width: 0 },
+                minorTickLines: { width: 0 }
+            },
+            primaryYAxis: {
+                title: 'Sản Lượng',
+                majorTickLines: { width: 0 },
+                lineStyle: { width: 0 },
+                labelFormat: '{value}'
+            },
+            axes: [
+                {
+                    name: 'yTyLeThuHoi',
+                    title: 'Tỷ Lệ Thu Hồi',
+                    opposedPosition: true,
+                    lineStyle: { width: 0 },
+                    majorTickLines: { width: 0 },
+                    labelStyle: { color: '#565656', fontWeight: 'bold' },
+                    labelFormat: '{value} %',
+                    minimum: 0,
+                    maximum: yAxisMax,
+                    interval: 1
+                }
+            ],
+            chartArea: { border: { width: 0 } },
+            tooltip: {
+                enable: true,
+                shared: true,
+                showNearestPoint: false
+            },
+            legendSettings: { visible: true },
+            width: '100%',
+            height: chartHeight,
+            series: series,
+            dataSource: data,
+
+            textRender: function (args) {
+                const num = parseFloat(args.text);
+                if (!isNaN(num)) {
+                    args.text = num.toLocaleString('vi-VN', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    });
+                }
+            },
+
+            tooltipRender: function (args) {
+                if (args.series && args.point && !isNaN(args.point.y)) {
+                    const formatted = args.point.y.toLocaleString('vi-VN', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    });
+
+                    if (args.series.name === 'Sản Lượng') {
+                        args.text = `${args.series.name}: ${formatted} kg`;
+                    } else {
+                        args.text = `${args.series.name}: ${formatted} %`;
+                    }
+                }
+            }
+        });
+
+        chart_TyLeThuHoiThanhPham2.appendTo('#column-container-TyLeThuHoiThanhPham2');
+    }
+</script>
+
+

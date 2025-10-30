@@ -1,0 +1,562 @@
+[
+  {
+    "Fu": "JSONFILE",
+    "Func": "rauquatiengiang"
+  },
+  {
+    "Fu": "DashboardHQ",
+    "Func": "Xem Dashboard HQ"
+  },
+  {
+    "Fu": "Danh Mục / Color Code HQ",
+    "Func": "Xem Color Code HQ"
+  },
+  {
+    "Fu": "Danh Mục / Color Code HQ",
+    "Func": "Thêm Color Code HQ"
+  },
+  {
+    "Fu": "Danh Mục / Color Code HQ",
+    "Func": "Sửa Color Code HQ"
+  },
+  {
+    "Fu": "Danh Mục / Color Code HQ",
+    "Func": "Xóa Color Code HQ"
+  },
+  {
+    "Fu": "Danh Mục / Color Code HQ",
+    "Func": "Import Color Code HQ"
+  },
+  {
+    "Fu": "Danh Mục / Color Code HQ",
+    "Func": "Export Color Code HQ"
+  },
+  {
+    "Fu": "Danh Mục / Lô HQ",
+    "Func": "Xem Lô HQ"
+  },
+  {
+    "Fu": "Danh Mục / Lô HQ",
+    "Func": "Thêm Lô HQ"
+  },
+  {
+    "Fu": "Danh Mục / Lô HQ",
+    "Func": "Sửa Lô HQ"
+  },
+  {
+    "Fu": "Danh Mục / Lô HQ",
+    "Func": "Xóa Lô HQ"
+  },
+  {
+    "Fu": "Danh Mục / Lô HQ",
+    "Func": "Import Lô HQ"
+  },
+  {
+    "Fu": "Danh Mục / Lô HQ",
+    "Func": "Export Lô HQ"
+  },
+  {
+    "Fu": "Danh Mục / Loại Nguyên Liệu HQ",
+    "Func": "Xem HQ / Loại Nguyên Liệu"
+  },
+  {
+    "Fu": "Danh Mục / Loại Nguyên Liệu HQ",
+    "Func": "Thêm HQ / Loại Nguyên Liệu"
+  },
+  {
+    "Fu": "Danh Mục / Loại Nguyên Liệu HQ",
+    "Func": "Sửa HQ / Loại Nguyên Liệu"
+  },
+  {
+    "Fu": "Danh Mục / Loại Nguyên Liệu HQ",
+    "Func": "Xóa HQ / Loại Nguyên Liệu"
+  },
+  {
+    "Fu": "Danh Mục / Loại Nguyên Liệu HQ",
+    "Func": "Import HQ / Loại Nguyên Liệu"
+  },
+  {
+    "Fu": "Danh Mục / Loại Nguyên Liệu HQ",
+    "Func": "Export HQ / Loại Nguyên Liệu"
+  },
+  {
+    "Fu": "Danh Mục / Lô Chi Tiết HQ",
+    "Func": "Xem Lô Chi Tiết HQ"
+  },
+  {
+    "Fu": "Danh Mục / Lô Chi Tiết HQ",
+    "Func": "Thêm Lô Chi Tiết HQ"
+  },
+  {
+    "Fu": "Danh Mục / Lô Chi Tiết HQ",
+    "Func": "Sửa Lô Chi Tiết HQ"
+  },
+  {
+    "Fu": "Danh Mục / Lô Chi Tiết HQ",
+    "Func": "Xóa Lô Chi Tiết HQ"
+  },
+  {
+    "Fu": "Danh Mục / Lô Chi Tiết HQ",
+    "Func": "Import Lô Chi Tiết HQ"
+  },
+  {
+    "Fu": "Danh Mục / Lô Chi Tiết HQ",
+    "Func": "Export Lô Chi Tiết HQ"
+  },
+  {
+    "Fu": "Danh Mục / Nhân Viên HQ",
+    "Func": "Xem Nhân Viên HQ"
+  },
+  {
+    "Fu": "Danh Mục / Nhân Viên HQ",
+    "Func": "Thêm Nhân Viên HQ"
+  },
+  {
+    "Fu": "Danh Mục / Nhân Viên HQ",
+    "Func": "Sửa Nhân Viên HQ"
+  },
+  {
+    "Fu": "Danh Mục / Nhân Viên HQ",
+    "Func": "Xóa Nhân Viên HQ"
+  },
+  {
+    "Fu": "Danh Mục / Nhân Viên HQ",
+    "Func": "Import Nhân Viên HQ"
+  },
+  {
+    "Fu": "Danh Mục / Nhân Viên HQ",
+    "Func": "Export Nhân Viên HQ"
+  },
+  {
+    "Fu": "Danh Mục / Phiếu Cân HQ",
+    "Func": "Xem Phiếu Cân HQ"
+  },
+  {
+    "Fu": "Danh Mục / Phiếu Cân HQ",
+    "Func": "Thêm Phiếu Cân HQ"
+  },
+  {
+    "Fu": "Danh Mục / Phiếu Cân HQ",
+    "Func": "Sửa Phiếu Cân HQ"
+  },
+  {
+    "Fu": "Danh Mục / Phiếu Cân HQ",
+    "Func": "Xóa Phiếu Cân HQ"
+  },
+  {
+    "Fu": "Danh Mục / Phiếu Cân HQ",
+    "Func": "Import Phiếu Cân HQ"
+  },
+  {
+    "Fu": "Danh Mục / Phiếu Cân HQ",
+    "Func": "Export Phiếu Cân HQ"
+  },
+  {
+    "Fu": "Danh Mục / Size HQ",
+    "Func": "Xem Size HQ"
+  },
+  {
+    "Fu": "Danh Mục / Size HQ",
+    "Func": "Thêm Size HQ"
+  },
+  {
+    "Fu": "Danh Mục / Size HQ",
+    "Func": "Sửa Size HQ"
+  },
+  {
+    "Fu": "Danh Mục / Size HQ",
+    "Func": "Xóa Size HQ"
+  },
+  {
+    "Fu": "Danh Mục / Size HQ",
+    "Func": "Import Size HQ"
+  },
+  {
+    "Fu": "Danh Mục / Size HQ",
+    "Func": "Export Size HQ"
+  },
+  {
+    "Fu": "Danh Mục / Thành Phẩm HQ",
+    "Func": "Xem Thành Phẩm HQ"
+  },
+  {
+    "Fu": "Danh Mục / Thành Phẩm HQ",
+    "Func": "Thêm Thành Phẩm HQ"
+  },
+  {
+    "Fu": "Danh Mục / Thành Phẩm HQ",
+    "Func": "Sửa Thành Phẩm HQ"
+  },
+  {
+    "Fu": "Danh Mục / Thành Phẩm HQ",
+    "Func": "Xóa Thành Phẩm HQ"
+  },
+  {
+    "Fu": "Danh Mục / Thành Phẩm HQ",
+    "Func": "Import Thành Phẩm HQ"
+  },
+  {
+    "Fu": "Danh Mục / Thành Phẩm HQ",
+    "Func": "Export Thành Phẩm HQ"
+  },
+  {
+    "Fu": "Danh Mục / Thẻ Rổ HQ",
+    "Func": "Xem Thẻ Rổ HQ"
+  },
+  {
+    "Fu": "Danh Mục / Thẻ Rổ HQ",
+    "Func": "Thêm Thẻ Rổ HQ"
+  },
+  {
+    "Fu": "Danh Mục / Thẻ Rổ HQ",
+    "Func": "Sửa Thẻ Rổ HQ"
+  },
+  {
+    "Fu": "Danh Mục / Thẻ Rổ HQ",
+    "Func": "Xóa Thẻ Rổ HQ"
+  },
+  {
+    "Fu": "Danh Mục / Thẻ Rổ HQ",
+    "Func": "Import Thẻ Rổ HQ"
+  },
+  {
+    "Fu": "Danh Mục / Thẻ Rổ HQ",
+    "Func": "Export Thẻ Rổ HQ"
+  },
+  {
+    "Fu": "Danh Mục / Thẻ Thành Phẩm HQ",
+    "Func": "Xem Thẻ Thành Phẩm HQ"
+  },
+  {
+    "Fu": "Danh Mục / Thẻ Thành Phẩm HQ",
+    "Func": "Thêm Thẻ Thành Phẩm HQ"
+  },
+  {
+    "Fu": "Danh Mục / Thẻ Thành Phẩm HQ",
+    "Func": "Sửa Thẻ Thành Phẩm HQ"
+  },
+  {
+    "Fu": "Danh Mục / Thẻ Thành Phẩm HQ",
+    "Func": "Xóa Thẻ Thành Phẩm HQ"
+  },
+  {
+    "Fu": "Danh Mục / Thẻ Thành Phẩm HQ",
+    "Func": "Import Thẻ Thành Phẩm HQ"
+  },
+  {
+    "Fu": "Danh Mục / Thẻ Thành Phẩm HQ",
+    "Func": "Export Thẻ Thành Phẩm HQ"
+  },
+  {
+    "Fu": "Danh Mục / Thẻ Từ HQ",
+    "Func": "Xem Thẻ Từ HQ"
+  },
+  {
+    "Fu": "Danh Mục / Thẻ Từ HQ",
+    "Func": "Thêm Thẻ Từ HQ"
+  },
+  {
+    "Fu": "Danh Mục / Thẻ Từ HQ",
+    "Func": "Sửa Thẻ Từ HQ"
+  },
+  {
+    "Fu": "Danh Mục / Thẻ Từ HQ",
+    "Func": "Xóa Thẻ Từ HQ"
+  },
+  {
+    "Fu": "Danh Mục / Thẻ Từ HQ",
+    "Func": "Import Thẻ Từ HQ"
+  },
+  {
+    "Fu": "Danh Mục / Thẻ Từ HQ",
+    "Func": "Export Thẻ Từ HQ"
+  },
+  {
+    "Fu": "Danh Mục / Nhóm HQ",
+    "Func": "Xem Nhóm HQ"
+  },
+  {
+    "Fu": "Danh Mục / Nhóm HQ",
+    "Func": "Thêm Nhóm HQ"
+  },
+  {
+    "Fu": "Danh Mục / Nhóm HQ",
+    "Func": "Sửa Nhóm HQ"
+  },
+  {
+    "Fu": "Danh Mục / Nhóm HQ",
+    "Func": "Xóa Nhóm HQ"
+  },
+  {
+    "Fu": "Danh Mục / Nhóm HQ",
+    "Func": "Import Nhóm HQ"
+  },
+  {
+    "Fu": "Danh Mục / Nhóm HQ",
+    "Func": "Export Nhóm HQ"
+  },
+  {
+    "Fu": "Danh Mục / Nhân Viên Theo Nhóm HQ",
+    "Func": "Xem Nhân Viên Theo Nhóm HQ"
+  },
+  {
+    "Fu": "Danh Mục / Nhân Viên Theo Nhóm HQ",
+    "Func": "Thêm Nhân Viên Theo Nhóm HQ"
+  },
+  {
+    "Fu": "Danh Mục / Nhân Viên Theo Nhóm HQ",
+    "Func": "Sửa Nhân Viên Theo Nhóm HQ"
+  },
+  {
+    "Fu": "Danh Mục / Nhân Viên Theo Nhóm HQ",
+    "Func": "Xóa Nhân Viên Theo Nhóm HQ"
+  },
+  {
+    "Fu": "Danh Mục / Nhân Viên Theo Nhóm HQ",
+    "Func": "Import Nhân Viên Theo Nhóm HQ"
+  },
+  {
+    "Fu": "Danh Mục / Nhân Viên Theo Nhóm HQ",
+    "Func": "Export Nhân Viên Theo Nhóm HQ"
+  },
+  {
+    "Fu": "Danh Mục / Ca HQ",
+    "Func": "Xem Ca HQ"
+  },
+  {
+    "Fu": "Danh Mục / Ca HQ",
+    "Func": "Thêm Ca HQ"
+  },
+  {
+    "Fu": "Danh Mục / Ca HQ",
+    "Func": "Sửa Ca HQ"
+  },
+  {
+    "Fu": "Danh Mục / Ca HQ",
+    "Func": "Xóa Ca HQ"
+  },
+  {
+    "Fu": "Danh Mục / Ca HQ",
+    "Func": "Import Ca HQ"
+  },
+  {
+    "Fu": "Danh Mục / Ca HQ",
+    "Func": "Export Ca HQ"
+  },
+  {
+    "Fu": "Danh Mục / Nhân Viên Theo Ca HQ",
+    "Func": "Xem Nhân Viên Theo Ca HQ"
+  },
+  {
+    "Fu": "Danh Mục / Nhân Viên Theo Ca HQ",
+    "Func": "Thêm Nhân Viên Theo Ca HQ"
+  },
+  {
+    "Fu": "Danh Mục / Nhân Viên Theo Ca HQ",
+    "Func": "Sửa Nhân Viên Theo Ca HQ"
+  },
+  {
+    "Fu": "Danh Mục / Nhân Viên Theo Ca HQ",
+    "Func": "Xóa Nhân Viên Theo Ca HQ"
+  },
+  {
+    "Fu": "Danh Mục / Nhân Viên Theo Ca HQ",
+    "Func": "Import Nhân Viên Theo Ca HQ"
+  },
+  {
+    "Fu": "Danh Mục / Nhân Viên Theo Ca HQ",
+    "Func": "Export Nhân Viên Theo Ca HQ"
+  },
+  {
+    "Fu": "Danh Mục / Nhân Viên Theo Ca HQ",
+    "Func": "Chuyển Ca Nhân Viên Theo Ca HQ"
+  },
+  {
+    "Fu": "Danh Mục / Map Sản Phẩm Tính Lương HQ",
+    "Func": "Xem Map Sản Phẩm Tính Lương HQ"
+  },
+  {
+    "Fu": "Danh Mục / Map Sản Phẩm Tính Lương HQ",
+    "Func": "Thêm Map Sản Phẩm Tính Lương HQ"
+  },
+  {
+    "Fu": "Danh Mục / Map Sản Phẩm Tính Lương HQ",
+    "Func": "Sửa Map Sản Phẩm Tính Lương HQ"
+  },
+  {
+    "Fu": "Danh Mục / Map Sản Phẩm Tính Lương HQ",
+    "Func": "Xóa Map Sản Phẩm Tính Lương HQ"
+  },
+  {
+    "Fu": "Danh Mục / Map Sản Phẩm Tính Lương HQ",
+    "Func": "Import Map Sản Phẩm Tính Lương HQ"
+  },
+  {
+    "Fu": "Danh Mục / Map Sản Phẩm Tính Lương HQ",
+    "Func": "Export Map Sản Phẩm Tính Lương HQ"
+  },
+  {
+    "Fu": "Báo Cáo / Chi Tiết HQ",
+    "Func": "Xem Báo Cáo / Chi Tiết HQ"
+  },
+  {
+    "Fu": "Báo Cáo / Chi Tiết HQ",
+    "Func": "Xuất Báo Cáo / Chi Tiết HQ"
+  },
+  {
+    "Fu": "Báo Cáo / Tổng Hợp Nhân Viên HQ",
+    "Func": "Xem Báo Cáo / Tổng Hợp Nhân Viên HQ"
+  },
+  {
+    "Fu": "Báo Cáo / Tổng Hợp Nhân Viên HQ",
+    "Func": "Xuất Báo Cáo / Tổng Hợp Nhân Viên HQ"
+  },
+  {
+    "Fu": "Báo Cáo / Tổng Hợp Thành Phẩm HQ",
+    "Func": "Xem Báo Cáo / Tổng Hợp Thành Phẩm HQ"
+  },
+  {
+    "Fu": "Báo Cáo / Tổng Hợp Thành Phẩm HQ",
+    "Func": "Xuất Báo Cáo / Tổng Hợp Thành Phẩm HQ"
+  },
+  {
+    "Fu": "Báo Cáo / Tổng Hợp Nhân Viên Theo Ca HQ",
+    "Func": "Xem Báo Cáo / Tổng Hợp Nhân Viên Theo Ca HQ"
+  },
+  {
+    "Fu": "Báo Cáo / Tổng Hợp Nhân Viên Theo Ca HQ",
+    "Func": "Xuất Báo Cáo / Tổng Hợp Nhân Viên Theo Ca HQ"
+  },
+  {
+    "Fu": "Báo Cáo / Tổng Hợp Tính Lương HQ",
+    "Func": "Xem Báo Cáo / Tổng Hợp Tính Lương HQ"
+  },
+  {
+    "Fu": "Báo Cáo / Tổng Hợp Tính Lương HQ",
+    "Func": "Xuất Báo Cáo / Tổng Hợp Tính Lương HQ"
+  },
+  {
+    "Fu": "Báo Cáo / Thống Kê Sản Xuất HQ",
+    "Func": "Xem Báo Cáo / Thống Kê Sản Xuất HQ"
+  },
+  {
+    "Fu": "Báo Cáo / Thống Kê Sản Xuất HQ",
+    "Func": "Xuất Báo Cáo / Thống Kê Sản Xuất HQ"
+  },
+  {
+    "Fu": "Xử Lý Phiếu Cân / Phiếu Cân HQ",
+    "Func": "Xem Xử Lý Phiếu Cân / Phiếu Cân HQ"
+  },
+  {
+    "Fu": "Xử Lý Phiếu Cân / Phiếu Cân HQ",
+    "Func": "Thêm Xử Lý Phiếu Cân / Phiếu Cân HQ"
+  },
+  {
+    "Fu": "Xử Lý Phiếu Cân / Phiếu Cân HQ",
+    "Func": "Xoá Xử Lý Phiếu Cân / Phiếu Cân HQ"
+  },
+  {
+    "Fu": "Xử Lý Phiếu Cân / Phiếu Cân HQ",
+    "Func": "Sửa Xử Lý Phiếu Cân / Phiếu Cân HQ"
+  },
+  {
+    "Fu": "Xử Lý Phiếu Cân / Phiếu Cân HQ",
+    "Func": "Import Xử Lý Phiếu Cân / Phiếu Cân HQ"
+  },
+  {
+    "Fu": "Xử Lý Phiếu Cân / Phiếu Cân HQ",
+    "Func": "Export Xử Lý Phiếu Cân / Phiếu Cân HQ"
+  },
+  {
+    "Fu": "Xử Lý Phiếu Cân / Phiếu Cân HQ",
+    "Func": "Chuyển Xưởng Xử Lý Phiếu Cân / Phiếu Cân HQ"
+  },
+  {
+    "Fu": "Xử Lý Phiếu Cân / Phiếu Cân HQ",
+    "Func": "Chuyển Size Xử Lý Phiếu Cân / Phiếu Cân HQ"
+  },
+  {
+    "Fu": "Xử Lý Phiếu Cân / Phiếu Cân HQ",
+    "Func": "Chuyển Thành Phẩm Xử Lý Phiếu Cân / Phiếu Cân HQ"
+  },
+  {
+    "Fu": "Xử Lý Phiếu Cân / Phiếu Cân HQ",
+    "Func": "Chuyển Loại Nguyên Liệu Xử Lý Phiếu Cân / Phiếu Cân HQ"
+  },
+  {
+    "Fu": "Xử Lý Phiếu Cân / Phiếu Cân HQ",
+    "Func": "Chuyển Nhân Viên Xử Lý Phiếu Cân / Phiếu Cân HQ"
+  },
+  {
+    "Fu": "Xử Lý Phiếu Cân / Phiếu Cân HQ",
+    "Func": "Chuyển Nhân Viên Phục Vụ Xử Lý Phiếu Cân / Phiếu Cân HQ"
+  },
+  {
+    "Fu": "Xử Lý Phiếu Cân / Phiếu Cân HQ",
+    "Func": "Chuyển Nhân Viên Bàn Kiểm Xử Lý Phiếu Cân / Phiếu Cân HQ"
+  },
+  {
+    "Fu": "Xử Lý Phiếu Cân / Phiếu Cân HQ",
+    "Func": "Xem Xoá Xử Lý Phiếu Cân / Phiếu Cân HQ"
+  },
+  {
+    "Fu": "Xử Lý Phiếu Cân / Phiếu Cân HQ",
+    "Func": "Xem Sửa Xử Lý Phiếu Cân / Phiếu Cân HQ"
+  },
+  {
+    "Fu": "Cài Đặt",
+    "Func": "Tài Khoản"
+  },
+  {
+    "Fu": "Cài Đặt",
+    "Func": "Thông Báo"
+  },
+  {
+    "Fu": "Cài Đặt",
+    "Func": "Kết Nối"
+  },
+  {
+    "Fu": "Cài Đặt",
+    "Func": "Dashboard"
+  },
+  {
+    "Fu": "Cài Đặt",
+    "Func": "Quản Lý Dữ Liệu"
+  },
+  {
+    "Fu": "Cài Đặt",
+    "Func": "Quản Lý Máy Cân"
+  },
+  {
+    "Fu": "Cài Đặt",
+    "Func": "Thêm Quản Lý Máy Cân"
+  },
+  {
+    "Fu": "Cài Đặt",
+    "Func": "Sửa Quản Lý Máy Cân"
+  },
+  {
+    "Fu": "Cài Đặt",
+    "Func": "Xoá Quản Lý Máy Cân"
+  },
+  {
+    "Fu": "Xác Thực",
+    "Func": "Đăng Ký Tài Khoản"
+  },
+  {
+    "Fu": "Xác Thực",
+    "Func": "Phân Quyền"
+  },
+  {
+    "Fu": "Xác Thực",
+    "Func": "Khôi Phục Tài Khoản"
+  },
+  {
+    "Fu": "Hubs",
+    "Func": "Máy Cân"
+  },
+  {
+    "Fu": "Báo Cáo / Thống Kê Sản Xuất HQ",
+    "Func": "Kết Chuyển Báo Cáo / Thống Kê Sản Xuất HQ"
+  }
+]

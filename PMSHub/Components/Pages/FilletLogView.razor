@@ -1,0 +1,586 @@
+@page "/FL-log-view"
+
+@using System.Collections.Concurrent
+@using System.Collections.ObjectModel
+@using System.Collections.Specialized
+@using System.Timers
+@using Models.Repos.Models
+@using PMSHub.Components.Layout
+@using Syncfusion.Blazor.Navigations
+@using Syncfusion.Blazor.Buttons
+@using Syncfusion.Blazor.Calendars
+@using Syncfusion.Blazor.Cards
+@using Syncfusion.Blazor.DropDowns
+@using Syncfusion.Blazor.Grids
+@using Syncfusion.Blazor.Inputs
+@using Syncfusion.Blazor.Popups
+@using ToolsEx
+@using Vars
+@using Vars.Hubs
+@using ViewModels.Repos.Hubs.IServices
+@using EventArgs = System.EventArgs
+@using FilterType = Syncfusion.Blazor.Grids.FilterType
+@layout ErrorLayout
+@rendermode InteractiveServer
+@attribute [StreamRendering]
+@inject IToastService ToastService
+@inject IMainService MainService
+@inject IMayCansService MayCanService
+@inject IConverterService ConverterService
+@implements IDisposable
+<link rel="stylesheet" href="styles/cardcoinotlogin.css"/>
+<link rel="stylesheet" href="styles/coiview.css"/>
+<link rel="stylesheet" href="styles/grid.css"/>
+<link rel="stylesheet" href="styles/switchs.css"/>
+<link rel="stylesheet" href="styles/buttons.css"/>
+<link rel="stylesheet" href="styles/kioskboard-2.3.0.min.css"/>
+<h3>Fillet</h3>
+<PageTitle>FL-Log-View</PageTitle>
+
+<div class="grid-container">
+    <div class="grid-column grid-column-first">
+        <h3 class="grid-title">Đầu Vào</h3>
+        <div class="grid-content">
+            <SfGrid DataSource="@BTPItems"  Width="100%" @ref="btpGrid" @key="BTPItems" Height="100%" EnableVirtualization="true"
+                    AllowTextWrap="true" EnableAdaptiveUI="true" AllowResizing="true" AllowFiltering="true"
+                    AllowSorting="true" AllowMultiSorting="true" AllowScrolling="true">
+                <GridFilterSettings Type="FilterType.Excel"></GridFilterSettings>
+                <GridSortSettings>
+                    <GridSortColumns>
+                        <GridSortColumn Field="Gio" Direction="SortDirection.Descending"></GridSortColumn>
+                    </GridSortColumns>
+                </GridSortSettings>
+                <GridColumns>
+                    <GridColumn HeaderText="Thời Gian" Width="auto" Field="Gio" TextAlign="TextAlign.Left">
+                        <Template Context="context">
+                            @{
+                                var a = context.GetPropValueOrDefault<TimeSpan>("Gio", new TimeSpan(0, 0, 0)).ToString(@"hh\:mm\:ss");
+                                @a
+                            }
+                        </Template>
+                    </GridColumn>
+                    <GridColumn HeaderText="Lô" Width="auto" Field="MaLo">
+
+                    </GridColumn>
+                    <GridColumn HeaderText="Thành Phẩm" Width="auto" Field="MaThanhPham" TextAlign="TextAlign.Left">
+                        <Template Context="context">
+                            @{
+                                var a = context.GetPropValueOrDefault<string>("MaThanhPham", "");
+                                @ConverterService.ThanhPhamToName(a, AppKV.BTPFilletv2);
+                            }
+                        </Template>
+                    </GridColumn>
+                    @* <GridColumn HeaderText="Size" Width="100" Field="MaSize" TextAlign="TextAlign.Left"> *@
+                    @*     <Template Context="context"> *@
+                    @*         @{ *@
+                    @*             var a = context.GetPropValueOrDefault<string>("MaSize", ""); *@
+                    @*             @ConverterService.SizeToName(a, AppKV.BTPDinhHinh); *@
+                    @*         } *@
+                    @*     </Template> *@
+                    @* </GridColumn> *@
+                    <GridColumn HeaderText="TL" Width="auto" Field="TrongLuong" TextAlign="TextAlign.Right">
+                    </GridColumn>
+                </GridColumns>
+            </SfGrid>
+        </div>
+    </div>
+
+    <div class="grid-column">
+        <h3 class="grid-title">Đầu Ra</h3>
+        <div class="grid-content">
+            <SfGrid DataSource="@TPItems" @ref="tpGrid" Width="100%" @key="TPItems"  Height="100%" EnableVirtualization="true" AllowTextWrap="true" EnableAdaptiveUI="true" AllowResizing="true" AllowFiltering="true"
+                    AllowSorting="true"
+                    AllowMultiSorting="true">
+                <GridEvents TValue="PhieuCanTPFilletv2" RowDataBound="OnRowDataBound"></GridEvents>
+                <GridFilterSettings Type="FilterType.Excel"></GridFilterSettings>
+                <GridSortSettings>
+                    <GridSortColumns>
+                        <GridSortColumn Field="Gio" Direction="SortDirection.Descending"></GridSortColumn>
+                    </GridSortColumns>
+                </GridSortSettings>
+                <GridColumns>
+                    <GridColumn Field="Id" IsPrimaryKey="true" Visible="false"></GridColumn>
+                    <GridColumn HeaderText="Thời Gian" Width="auto" Field="Gio" TextAlign="TextAlign.Left">
+                        <Template Context="context">
+
+                            @{
+                                var a = context.GetPropValueOrDefault<TimeSpan>("Gio", new TimeSpan(0, 0, 0)).ToString(@"hh\:mm\:ss");
+                                @a
+                            }
+
+                        </Template>
+                    </GridColumn>
+                    <GridColumn HeaderText="Lô" Width="auto" Field="MaLo">
+
+                    </GridColumn>
+                    <GridColumn HeaderText="Thành Phẩm" Width="auto" Field="MaThanhPham" TextAlign="TextAlign.Left">
+                        <Template Context="context">
+                            @{
+                                var a = context.GetPropValueOrDefault<string>("MaThanhPham", "");
+                                @ConverterService.ThanhPhamToName(a, AppKV.TPFilletv2)
+                                ;
+                            }
+                        </Template>
+                    </GridColumn>
+                    @* <GridColumn HeaderText="Size" Width="100" Field="MaSize" TextAlign="TextAlign.Left"> *@
+                    @*     <Template Context="context"> *@
+                    @*         @{ *@
+                    @*             var a = context.GetPropValueOrDefault<string>("MaSize", ""); *@
+                    @*             @ConverterService.SizeToName(a, AppKV.TPDinhHinh) *@
+                    @*             ; *@
+                    @*         } *@
+                    @*     </Template> *@
+                    @* </GridColumn> *@
+                    <GridColumn HeaderText="Mã Số" Width="100" Field="MaNhanVien" TextAlign="TextAlign.Left">
+                        <Template Context="context">
+                            @{
+                                var a = context.GetPropValueOrDefault<string>("MaNhanVien", "");
+                                @ConverterService.NhanVienToMaHoSo(a)
+                                ;
+                            }
+                        </Template>
+                    </GridColumn>
+                    <GridColumn HeaderText="Tên" Width="auto" Field="MaNhanVien" TextAlign="TextAlign.Left">
+                        <Template Context="context">
+                            @{
+                                var a = context.GetPropValueOrDefault<string>("MaNhanVien", "");
+                                @ConverterService.NhanVienToName(a)
+                                ;
+                            }
+                        </Template>
+                    </GridColumn>
+                    <GridColumn HeaderText="TL Nhận" Width="auto" Field="TrongLuongNhan"
+                                TextAlign="TextAlign.Right">
+                    </GridColumn>
+                    <GridColumn HeaderText="TL Trả" Width="auto" Field="TrongLuongTra"
+                                TextAlign="TextAlign.Right">
+                    </GridColumn>
+                    <GridColumn HeaderText="ĐM" Width="auto" Field="DinhMucThucTe" TextAlign="TextAlign.Right">
+                    </GridColumn>
+                    <GridColumn HeaderText="TGHT (Phút)" Width="auto" Field="ThoiGianHT"
+                                TextAlign="TextAlign.Right">
+                    </GridColumn>
+                    <GridColumn HeaderText="ĐM Chuẩn" Width="auto" Field="DinhMucChuan" TextAlign="TextAlign.Right">
+                    </GridColumn>
+                </GridColumns>
+            </SfGrid>
+        </div>
+    </div>
+</div>
+<style>
+    .e-grid tr.e-row:nth-child(even) {
+        background-color: #f9f9f9;
+    }
+
+    .e-grid tr.e-row:nth-child(odd) {
+        background-color: #ffffff;
+    }
+    .e-grid tr.e-row.low-amount-row {
+        /*background: Red !important;*/
+        border-radius: 4px;
+        /*font-weight: bold;*/
+    }
+
+    .e-grid tr.e-row.low-amount-row td.e-rowcell[data-colindex="9"],.e-grid tr.e-row.low-amount-row td.e-rowcell[data-colindex="8"], .e-grid tr.e-row.low-amount-row td.e-rowcell[data-colindex="5"], .e-grid tr.e-row.low-amount-row td.e-rowcell[data-colindex="4"], .e-grid tr.e-row.low-amount-row td.e-rowcell[data-colindex="3"] {
+        color: Red !important;
+        font-weight: bold;
+    }
+
+    .e-grid tr.e-row.low-amount-row2 {
+        /*background: Red !important;*/
+        border-radius: 4px;
+        /*font-weight: bold;*/
+    }
+
+    .e-grid tr.e-row.low-amount-row2 td.e-rowcell {
+        /*color: Red !important;*/
+    }
+
+    .e-grid tr.e-row.low-amount-row2 td.e-rowcell[data-colindex="8"], .e-grid tr.e-row.low-amount-row2 td.e-rowcell[data-colindex="5"], .e-grid tr.e-row.low-amount-row2 td.e-rowcell[data-colindex="4"], .e-grid tr.e-row.low-amount-row2 td.e-rowcell[data-colindex="3"] {
+        /*background: lightgreen !important;*/
+        color: Red !important;
+        font-weight: bold;
+    }
+
+    .e-grid tr.e-row.low-amount-row3 td.e-rowcell[data-colindex="9"], .e-grid tr.e-row.low-amount-row3 td.e-rowcell[data-colindex="5"], .e-grid tr.e-row.low-amount-row3 td.e-rowcell[data-colindex="4"], .e-grid tr.e-row.low-amount-row3 td.e-rowcell[data-colindex="3"] {
+        /*background: Red !important;*/
+        color: Red !important;
+        font-weight: bold;
+    }
+
+    .e-grid tr.e-row.low-amount-row4 td.e-rowcell[data-colindex="9"] {
+        /*background: lightgreen !important;*/
+        color: black !important;
+        /*font-weight: bold;*/
+    }
+    .e-grid .e-headercelldiv {
+
+        font-size: 11px;
+        height : 13px;
+
+    }
+    .e-grid .e-rowcell{
+        font-size:13px;
+    }
+    
+</style>
+@code {
+    private SmartObservableCollection<PhieuCanBTPFilletv2> BTPItems = new();
+    private SmartObservableCollection<PhieuCanTPFilletv2> TPItems = new();
+    private ConcurrentQueue<PhieuCanBTPFilletv2> incBTPItems = new();
+    private ConcurrentQueue<PhieuCanTPFilletv2> incTPItems = new();
+    private bool isRunning = false;
+    private System.Timers.Timer batchTimer;
+    // private ConcurrentQueue<System.EventArgs> mayCanChangeEvents = new();
+    private HashSet<string> enqueuedIds = new();
+    private DateTime currentDate = DateTime.Today;
+    private readonly object syncLock = new();
+    private SfGrid<PhieuCanBTPFilletv2> btpGrid;
+    private SfGrid<PhieuCanTPFilletv2> tpGrid;
+    private decimal timeout = 15;
+
+    protected override void OnInitialized()
+    {
+        batchTimer = new Timer(1000);
+        batchTimer.Elapsed -= BatchTimerOnElapsed;
+        batchTimer.Elapsed += BatchTimerOnElapsed;
+        // MayCanService.ItemChanged -= MayCanChangedHandler;
+        // MayCanService.ItemChanged += MayCanChangedHandler;
+        // MayCanService.ItemUpdated -= MayCanServiceOnItemUpdated;
+        // MayCanService.ItemAdded -= MayCanServiceOnItemAdded;
+        // MayCanService.ItemRemoved -= MayCanServiceOnItemRemoved;
+        // MayCanService.ItemUpdated += MayCanServiceOnItemUpdated;
+        // MayCanService.ItemAdded += MayCanServiceOnItemAdded;
+        // MayCanService.ItemRemoved += MayCanServiceOnItemRemoved;
+        batchTimer.Start();
+        if (isRunning == false)
+        {
+            StartMayCanWorker();
+        }
+
+        base.OnInitialized();
+    }
+
+    // private void MayCanServiceOnItemRemoved(string obj)
+    // {
+    //     if (enqueuedIds.Add(obj))
+    //     {
+    //         mayCanChangeEvents.Enqueue(EventArgs.Empty);
+    //     }
+    // }
+    //
+    // private void MayCanServiceOnItemAdded(MayCan obj)
+    // {
+    //     if (enqueuedIds.Add(obj.Id))
+    //     {
+    //         mayCanChangeEvents.Enqueue(EventArgs.Empty);
+    //     }
+    // }
+    //
+    // private void MayCanServiceOnItemUpdated(MayCan obj)
+    // {
+    //     if (enqueuedIds.Add(obj.Id))
+    //     {
+    //         mayCanChangeEvents.Enqueue(EventArgs.Empty);
+    //     }
+    // }
+
+    private void StartMayCanWorker()
+    {
+        if (isRunning) return;
+        isRunning = true;
+
+        Task.Run(async () =>
+        {
+            try
+            {
+                const int maxBatchSize = 1000;
+                while (true)
+                {
+                    int processed = 0;
+                    var listBtp = MainService.VmPhieuCanBtpFilletv2.GetsLastMinutes<PhieuCanBTPFilletv2>(5); //MayCanService.GetBTPDinhHinh();
+                    var listTp = MainService.VmPhieuCanTpFilletv2.GetsLastMinutes<PhieuCanTPFilletv2>(5);
+                    var idBTPSet = new HashSet<string>(BTPItems.Select(x => x.Id));
+                    var idTPSet = new HashSet<string>(TPItems.Select(x => x.Id));
+                   
+                        foreach (var item in listBtp)
+                            if (!idBTPSet.Contains(item.Id))
+                            {
+                                incBTPItems.Enqueue(item);
+                                if (incBTPItems.Count > 100) incBTPItems.TryDequeue(out _);
+                            }
+
+                        foreach (var item in listTp)
+                            if (!idTPSet.Contains(item.Id))
+                            {
+                                incTPItems.Enqueue(item);
+                                if (incTPItems.Count > 100) incTPItems.TryDequeue(out _);
+                            }
+
+                      
+                    
+
+                    enqueuedIds.Clear();
+                    if (DateTime.Today != currentDate)
+                    {
+                        currentDate = DateTime.Today;
+                        lock (syncLock)
+                        {
+                            BTPItems.Clear();
+                            TPItems.Clear();
+                            incBTPItems.Clear();
+                            incTPItems.Clear();
+                            enqueuedIds.Clear();
+                        }
+
+                        //InvokeAsync(StateHasChanged);
+                    }
+
+                    await Task.Delay(10000);
+                }
+            }
+            catch (Exception e)
+            {
+                var o = new ToastOption
+                {
+                    Title = "Thông Báo",
+                    Content = $"Worker {e.ToString()}"
+                };
+                o.SetType(ToastType.Error);
+
+                ToastService.ShowToast(o);
+            }
+        });
+    }
+
+    private async void BatchTimerOnElapsed(object? sender, ElapsedEventArgs e)
+    {
+        // InvokeAsync(FlushBatch);
+        // await InvokeAsync(async () => await btpGrid.Refresh());
+        // await InvokeAsync(async () => await tpGrid.Refresh());
+        try
+        {
+            batchTimer.Stop();
+            await InvokeAsync(async () =>
+            {
+                await FlushBatch();
+                //StateHasChanged();
+                // return Task.CompletedTask;
+            });
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+            // throw;
+        }
+        finally
+        {
+            batchTimer.Start();
+        }
+       
+    }
+
+    private async Task FlushBatch()
+    {
+        await Task.WhenAll(
+            FlushBatch(incBTPItems, async list =>
+            {
+                var _list = list.GroupBy(x => x.Id).Select(g => g.First()).OrderByDescending(x => x.Gio).ToList();//list.Distinct().OrderByDescending(x => x.Gio).ToList();
+                foreach (var _l in _list)
+                {
+                    await Task.Delay(10);
+                    // if (BTPItems.All(x => x.Id != _l.Id) )
+                    // {
+                        var firstItem = BTPItems.FirstOrDefault();
+                        if (firstItem != null)
+                        {
+                            var timeOut = (_l.Gio - firstItem.Gio).TotalSeconds;
+                            if (timeOut > 0)
+                            {
+                                BTPItems.Insert(0, _l);
+                            }
+                        }
+                        else
+                        {
+                            BTPItems.Insert(0, _l);
+                        }
+                    // }
+
+                    while (BTPItems.Count > 100)
+                    {
+                        var last = BTPItems.Last();
+                        BTPItems.Remove(last);
+                    }
+                }
+            }, () => BTPItems),
+
+            FlushBatch(incTPItems, async list =>
+            {
+                var _list = list.Distinct().OrderByDescending(x => x.Gio).ToList();
+                foreach (var _l in _list)
+                {
+                    
+                    await Task.Delay(10);
+                    var firstItem = TPItems.FirstOrDefault();
+                    if (firstItem != null)
+                    {
+                        var timeOut = (_l.Gio - firstItem.Gio).TotalSeconds;
+                        if (timeOut > 0)
+                        {
+                            TPItems.Insert(0, _l);
+                        }
+                    }
+                    else
+                    {
+                        TPItems.Insert(0, _l);
+                    }
+                    while (TPItems.Count > 100)
+                    {
+                        var last = TPItems.Last();
+                        TPItems.Remove(last);
+                    }
+                }
+            }, () => TPItems)
+        );
+        // FlushBatch(incBTPItems, BTPItems);
+        // FlushBatch(incTPItems, TPItems);
+        // FlushBatch(incBTPItems, async list =>
+        // {
+        //     var _list = list.Distinct().OrderByDescending(x=>x.Gio).ToList();
+        //     foreach (var _l in _list)
+        //     {
+        //         await Task.Delay(100);
+        //         if (BTPItems.All(x => x.Id != _l.Id))
+        //         {
+        //             BTPItems.Insert(0,_l);
+        //             //await btpGrid?.AddRecordAsync(_l,0);
+        //         }
+        //         if(BTPItems.Count > 5)
+        //         {
+        //             var last = BTPItems.Last();
+        //            // await btpGrid.DeleteRecordAsync("Id", last);
+        //             BTPItems.Remove(last);
+        //         }
+        //     }
+        //     
+        // }, () => BTPItems);
+        // FlushBatch(incTPItems, async list =>
+        // {
+        //     var _list = list.Distinct().OrderByDescending(x=>x.Gio).ToList();
+        //     foreach (var _l in _list)
+        //     {
+        //         await Task.Delay(100);
+        //         if (TPItems.All(x => x.Id != _l.Id))
+        //         {
+        //             TPItems.Insert(0,_l);
+        //             //await tpGrid?.AddRecordAsync(_l,0);
+        //         }
+        //
+        //         if (TPItems.Count > 5)
+        //         {
+        //             var last = TPItems.Last();
+        //             //await tpGrid.DeleteRecordAsync("Id", last);
+        //             TPItems.Remove(last);
+        //         }
+        //     }
+        // }, () => TPItems);
+    }
+
+    private async Task FlushBatch<T>(ConcurrentQueue<T> sourceQueue, Action<List<T>> setTargetList, Func<ObservableCollection<T>> getTargetList, int maxBatchSize = 1000, int maxTotalItems = 1000)
+    {
+        int processed = 0;
+        var batch = new List<T>();
+
+        while (processed < maxTotalItems)
+        {
+            var subBatch = new List<T>();
+
+            while (subBatch.Count < maxBatchSize && sourceQueue.TryDequeue(out var item))
+            {
+                subBatch.Add(item);
+            }
+
+            if (subBatch.Any())
+            {
+                var currentList = subBatch.Distinct().ToList();
+                batch.AddRange(currentList);
+                processed += currentList.Count;
+            }
+            else break;
+        }
+
+        if (processed > 0)
+        {
+            var currentList = getTargetList();
+            var merged = batch.Concat(currentList).Take(maxTotalItems).ToList();
+            setTargetList(merged);
+            //InvokeAsync(StateHasChanged);
+        }
+    }
+
+    // private void MayCanChangedHandler(object? sender, System.EventArgs args)
+    // {
+    //     mayCanChangeEvents.Enqueue(args);
+    // }
+
+    public void Dispose()
+    {
+        batchTimer?.Stop();
+        batchTimer?.Dispose();
+        // MayCanService.ItemUpdated -= MayCanServiceOnItemUpdated;
+        // MayCanService.ItemAdded -= MayCanServiceOnItemAdded;
+        // MayCanService.ItemRemoved -= MayCanServiceOnItemRemoved;
+        isRunning = false;
+        // MayCanService.ItemChanged -= MayCanChangedHandler;
+    }
+
+    private void OnRowDataBound(RowDataBoundEventArgs<PhieuCanTPFilletv2> args)
+    {
+        var item = args.Data;
+        var thanhPham = item?.MaThanhPham;
+        if (thanhPham != null)
+        {
+            var tp = MainService.VmThanhPhamFillet.Items.FirstOrDefault(x => x.Ma == thanhPham);
+            if (tp != null)
+            {
+                timeout = tp.ThoiGianHT;
+            }
+        }
+        if (item?.DanhGia == false && item?.ThoiGianHT > timeout)
+        {
+            args.Row.AddClass(["low-amount-row"]);
+            
+        }
+        else if (item?.DanhGia == false && item?.ThoiGianHT <= timeout)
+        {
+            args.Row.AddClass(["low-amount-row2"]);
+        }
+        else if (item?.DanhGia == true && item?.ThoiGianHT > timeout)
+        {
+            args.Row.AddClass(["low-amount-row3"]);
+            
+        }
+        else if (item?.DanhGia == true && item?.ThoiGianHT <= timeout)
+        {
+            args.Row.AddClass(["low-amount-row4"]);
+        }
+    }
+
+    public class SmartObservableCollection<T> : ObservableCollection<T>
+    {
+        private bool _preventNotification = false;
+        protected override void OnCollectionChanged(NotifyCollectionChangedEventArgs e)
+        {
+            if (!_preventNotification)
+                base.OnCollectionChanged(e);
+        }
+        public void AddRange(IEnumerable<T> list)
+        {
+            _preventNotification = true;
+            foreach (T item in list)
+                Add(item);
+            _preventNotification = false;
+            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
+        }
+    }
+}

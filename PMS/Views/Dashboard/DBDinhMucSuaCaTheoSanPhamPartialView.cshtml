@@ -1,0 +1,185 @@
+﻿@{
+    var XuongId = @Context.Session.GetString("XuongId");
+}
+<div class="card mb-4 marginGridjs position-relative">
+    <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2 position-relative">
+        @* <div class="text-start">
+            <small class="fw-semibold text-muted d-block">Tổng trọng lượng:</small>
+            <p class="weight-displayDinhMucSuaCaTheoSanPham fw-bold fs-6 mb-0">0,000.00 Kg</p>
+        </div> *@
+
+        <h6 class="mb-0 mx-auto text-center flex-grow-1">
+            Định Mức Sửa Cá Theo Sản Phẩm
+        </h6>
+
+        @* <button onclick="location.href='@Url.Action("DBDinhMucSuaCaTheoSanPhamAdvanceView", "Dashboard", new { from = "2025-01-01", to = "2025-01-31" })'"
+                class="btn btn-outline-primary btn-sm position-absolute top-0 end-0 mt-2 me-3 z-1 shadow-sm"
+                title="Chi tiết nâng cao">
+            <i class='bx bxs-bar-chart-alt-2 fs-5'></i>
+        </button> *@
+        <button onclick="location.href='@Url.Action("DBDinhMucSuaCaTheoSanPhamAdvanceView", "Dashboard")'"
+                class="btn btn-outline-primary btn-sm position-absolute top-0 end-0 mt-2 me-3 z-1 shadow-sm"
+                title="Chi tiết nâng cao">
+            <i class='bx bxs-bar-chart-alt-2 fs-5'></i>
+        </button>
+    </div>
+
+    <div class="card-body px-3 py-2">
+        <div id="column-container-DinhMucSuaCaTheoSanPham" style="width: 100%; height: 275px;"></div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        taiDasboardDinhMucSuaCaTheoSanPham();
+    });
+
+    var chart_DinhMucSuaCaTheoSanPham;
+    function createChartDinhMucSuaCaTheoSanPham() {
+        const isMobile = window.innerWidth <= 768;
+
+        chart_DinhMucSuaCaTheoSanPham = new ej.charts.Chart({
+            primaryXAxis: {
+                valueType: 'Category',
+                interval: 1,
+                labelIntersectAction: 'Rotate45', // hoặc 'Rotate45' hay 'Wrap' nếu phù hợp
+                // enableTrim: true,
+                // edgeLabelPlacement: 'Shift',
+                labelRotation: isMobile ? 270 : 0, // hoặc bỏ rotation nếu dùng Wrap
+                labelStyle: {
+                    fontWeight: 'bold',
+                    size: isMobile ? '9px' : '9px',
+                    color: '#333333'
+                },
+                majorGridLines: { width: 0 },
+                majorTickLines: { width: 0 },
+                minorTickLines: { width: 0 },
+            },
+            chartArea: { border: { width: 0 } },
+            primaryYAxis: {
+                title: 'Định Mức',
+                majorTickLines: { width: 0 },
+                lineStyle: { width: 0 },
+                maximum: 100,
+                interval: 20
+            },
+            series: [
+                {
+                    type: 'Column',
+                    xName: 'x',
+                    yName: 'y',
+                    name: "Định Mức",
+                    columnSpacing: 0.1,
+                    width: 2,
+                    dataSource: [],
+                    fill: '#42A5F5',
+                    marker: {
+                        dataLabel: {
+                            visible: true,
+                            font: { fontWeight: '600', color: '#000000' }
+                        }
+                    }
+                },
+                {
+                    type: 'Column',
+                    xName: 'x',
+                    yName: 'dm',
+                    name: "Định Mức Chuẩn",
+                    columnSpacing: 0.1,
+                    width: 2,
+                    dataSource: [],
+                    fill: '#EF5350',
+                    marker: {
+                        dataLabel: {
+                            visible: true,
+                            font: { fontWeight: '600', color: '#000000' }
+                        }
+                    }
+                }
+            ],
+            width: '100%',
+            tooltip: { enable: true },
+            textRender: function (args) {
+                const num = parseFloat(args.text);
+                if (!isNaN(num)) {
+                    args.text = num.toLocaleString('vi-VN', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    });
+                }
+            }
+        });
+
+        chart_DinhMucSuaCaTheoSanPham.appendTo('#column-container-DinhMucSuaCaTheoSanPham');
+    }
+
+    function loadChart_DinhMucSuaCaTheoSanPham(data) {
+        if (!chart_DinhMucSuaCaTheoSanPham || !Array.isArray(data)) return;
+
+        const updated = data.map((item) => ({
+            x: item.x,
+            y: item.y,
+            dm: item.dm
+        }));
+
+        chart_DinhMucSuaCaTheoSanPham.series[0].dataSource = updated;
+        chart_DinhMucSuaCaTheoSanPham.series[1].dataSource = updated;
+
+        const maxY = Math.max(...updated.flatMap(i => [i.y || 0, i.dm || 0]));
+        const newMax = Math.ceil(maxY * 1.2);
+        const interval = Math.ceil(newMax / 3);
+
+        chart_DinhMucSuaCaTheoSanPham.setProperties({
+            primaryYAxis: {
+                maximum: newMax,
+                interval: interval
+            }
+        });
+
+        chart_DinhMucSuaCaTheoSanPham.series[0].dataBind();
+        chart_DinhMucSuaCaTheoSanPham.series[1].dataBind();
+    }
+
+    function getDataForChartDinhMucSuaCaTheoSanPham(xuongId) {
+        let chartData = null;
+        const fromDate = localStorage.getItem("fromDate_dashboard_user");
+        const toDate = localStorage.getItem("toDate_dashboard_user");
+
+        $.ajax({
+            url: '/Dashboard/DataChartDinhMucSuaCaTheoSanPham',
+            type: 'GET',
+            data: { fromDate: fromDate, toDate: toDate, xuongId: xuongId },
+            async: false,
+            success: function (response) {
+                if (response.Success) {
+                    chartData = response.DataChart;
+                } else {
+                    console.warn(response.Messages || 'Không có dữ liệu biểu đồ');
+                }
+            },
+            error: function (error) {
+                console.error('Lỗi khi tải dữ liệu:', error);
+            }
+        });
+
+        return chartData;
+    }
+
+    function taiDasboardDinhMucSuaCaTheoSanPham() {
+        var xuongId = @XuongId; // Razor hoặc gán JS trước đó
+        const chartData = getDataForChartDinhMucSuaCaTheoSanPham(xuongId);
+        if (!chart_DinhMucSuaCaTheoSanPham) {
+            createChartDinhMucSuaCaTheoSanPham();
+        }
+        if (chartData) {
+            loadChart_DinhMucSuaCaTheoSanPham(chartData);
+        }
+    }
+
+    var timeInterval = localStorage.getItem("timeInterval_dashboard_user");
+    // Nếu null thì ép thành 30p
+    if (isNaN(timeInterval) || timeInterval <= 0) {
+        timeInterval = 1800000;
+    }
+    setInterval(taiDasboardDinhMucSuaCaTheoSanPham, timeInterval);
+</script>

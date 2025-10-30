@@ -1,0 +1,477 @@
+﻿
+@{
+    ViewData["Title"] = "TrongLuongCoiTheoThanhPhamView";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    //lấy danh sách roleid từ cookie
+    var roleIds = PMS.Middlewares.AuthenticationHelpers.GetRoleIdsFromCookie(Context);
+    // lấy danh sách fu func từ list roleId
+    var rolePermistions = await PMS.Middlewares.AuthenticationHelpers.GetRolePermistionsAsync(Context, roleIds);
+
+    var listCois = ViewBag.listCois;
+    var listThanhPhams = ViewBag.listThanhPhams;
+    var listXuongs = ViewBag.listXuongs;
+}
+
+<style>
+    .custom-table {
+        border-collapse: collapse;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+        .custom-table th, .custom-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .custom-table th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+        }
+
+        .custom-table tr:hover {
+            background-color: #f1f1f1;
+        }
+</style>
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h2 class="mb-0">Trọng Lượng Cối Theo Thành Phẩm</h2>
+                </div>
+                <div class="card-body">
+                    <div id="Grid"></div>
+                    <div style="margin-top:20px;">
+                        @{
+                            
+
+                            var themTrongLuongCoiTheoThanhPham = rolePermistions.Where(x => x.Fu == "Danh Mục / Xếp Khuôn / Trọng Lượng Cối Theo Thành Phẩm" && x.Func == "Thêm Xếp Khuôn / Trọng Lượng Cối Theo Thành Phẩm" && x.Status == 1).FirstOrDefault();
+                            if (themTrongLuongCoiTheoThanhPham != null)
+                            {
+                                <button onclick="showInsert()" type="button" class="btn btn-primary">Thêm</button>
+                            }
+                            var suaTrongLuongCoiTheoThanhPham = rolePermistions.Where(x => x.Fu == "Danh Mục / Xếp Khuôn / Trọng Lượng Cối Theo Thành Phẩm" && x.Func == "Sửa Xếp Khuôn / Trọng Lượng Cối Theo Thành Phẩm" && x.Status == 1).FirstOrDefault();
+                            if (suaTrongLuongCoiTheoThanhPham != null)
+                            {
+                                <button onclick="showUpdate()" style="margin-right:5px" class="btn btn-outline-warning"><i class='bx bx-edit-alt'></i>Sửa</button>
+                            }
+                            var xoaTrongLuongCoiTheoThanhPham = rolePermistions.Where(x => x.Fu == "Danh Mục / Xếp Khuôn / Trọng Lượng Cối Theo Thành Phẩm" && x.Func == "Xóa Xếp Khuôn / Trọng Lượng Cối Theo Thành Phẩm" && x.Status == 1).FirstOrDefault();
+                            if (xoaTrongLuongCoiTheoThanhPham != null)
+                            {
+                                <button onclick="showDelete()" style="margin-right:5px" class="btn btn-outline-danger"><i class='bx bx-trash'></i>Xoá</button>
+                            }
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalThem" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Thêm Trọng Lượng Cối Thành Phẩm</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-12 mb-12 ">
+                                <div class="form-outline">
+                                    <label class="form-label">Cối</label>
+                                    <select id="maCoiTLCTTPXK" class="form-control form-control-lg">
+                                        <option disabled selected>Chọn Cối</option>
+                                        @foreach (var item in listCois)
+                                        {
+                                            <option value="@item.Ma">@item.Ten</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 mb-12 ">
+                                <div class="form-outline">
+                                    <label class="form-label">Thành Phẩm</label>
+                                    <select id="maThanhPhamTLCTTPXK" class="form-control form-control-lg">
+                                        <option disabled selected>Chọn Thành Phẩm</option>
+                                        @foreach (var item in listThanhPhams)
+                                        {
+                                            <option value="@item.Ma">@item.Ten</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-12 mb-12">
+                            <div class="form-outline">
+                                <label class="form-label">Trọng Lượng Max</label>
+                                <input type="number" min="0" step=".001" class="form-control form-control-lg" id="trongLuongMaxTLCTTPXK" placeholder="0.000" />
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12 mb-12 ">
+                                <div class="form-outline">
+                                    <label class="form-label">Xưởng</label>
+                                    <select id="maXuongTLCTTPXK" class="form-control form-control-lg">
+                                        <option disabled selected>Chọn Xưởng</option>
+                                        @foreach (var item in listXuongs)
+                                        {
+                                            <option value="@item.Ma">@item.Ten</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-4 pt-2">
+                            <div class="col-12">
+                                <button onclick="insert()" class="btn btn-primary w-100 position-relative" type="submit" id="">
+                                    <div class=" align-items-center">
+                                        <span id="txtThem">Thêm</span>
+                                        <div id="loadingIndicator" class=" spinner-border text-secondary position-absolute" role="status" style="left: 0;right: 0;top: 0;bottom: 0;margin: auto; display:none">
+                                            <span class="visually-hidden">Đang tải...</span>
+                                        </div>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="modalSua" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Sửa Trọng Lượng Cối Thành Phẩm</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-12 mb-12 ">
+                                <div class="form-outline">
+                                    <label class="form-label">Cối</label>
+                                    <select id="maCoiTLCTTPXKSua" class="form-control form-control-lg" disabled>
+                                        <option disabled selected>Chọn Cối</option>
+                                        @foreach (var item in listCois)
+                                        {
+                                            <option value="@item.Ma">@item.Ten</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 mb-12 ">
+                                <div class="form-outline">
+                                    <label class="form-label">Thành Phẩm</label>
+                                    <select id="maThanhPhamTLCTTPXKSua" class="form-control form-control-lg" disabled>
+                                        <option disabled selected>Chọn Thành Phẩm</option>
+                                        @foreach (var item in listThanhPhams)
+                                        {
+                                            <option value="@item.Ma">@item.Ten</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-12 mb-12">
+                            <div class="form-outline">
+                                <label class="form-label">Trọng Lượng Max</label>
+                                <input type="number" min="0" step=".001" class="form-control form-control-lg" id="trongLuongMaxTLCTTPXKSua" placeholder="0.000" />
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12 mb-12 ">
+                                <div class="form-outline">
+                                    <label class="form-label">Xưởng</label>
+                                    <select id="maXuongTLCTTPXKSua" class="form-control form-control-lg" disabled>
+                                        <option disabled selected>Chọn Xưởng</option>
+                                        @foreach (var item in listXuongs)
+                                        {
+                                            <option value="@item.Ma">@item.Ten</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-4 pt-2">
+                            <div class="col-12">
+                                <button onclick="update()" class="btn btn-primary w-100 position-relative" type="submit" id="">
+                                    <div class=" align-items-center">
+                                        <span id="txtSua">Thêm</span>
+                                        <div id="loadingIndicatorSua" class=" spinner-border text-secondary position-absolute" role="status" style="left: 0;right: 0;top: 0;bottom: 0;margin: auto; display:none">
+                                            <span class="visually-hidden">Đang tải...</span>
+                                        </div>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<input type="hidden" id="maCoiTLCTTPXKRowSelected" />
+<input type="hidden" id="maThanhPhamTLCTTPXKRowSelected" />
+<input type="hidden" id="maXuongTLCTTPXKRowSelected" />
+<script>
+
+    $(document).ready(function () {
+        loadGridData();
+
+    });
+    var grid;
+    function loadGridData() {
+        $.ajax({
+            url: '/TrongLuongCoiTheoThanhPham/GetAllsFullField',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                var dataManager = new ej.data.DataManager({
+                    json: data,
+                    adaptor: new ej.data.JsonAdaptor()
+                });
+                if (grid) {
+                    grid.dataSource = dataManager;
+                    grid.refresh();
+                } else {
+                    grid = new ej.grids.Grid({
+                        dataSource: dataManager,
+                        allowPaging: true,
+                        pageSettings: { pageSize: 50, pageSizes: [50, 100, 200, 500] },
+                        allowFiltering: true,
+                        filterSettings: { type: 'Excel' },
+                        allowSorting: true,
+                        //frozenColumns: 3,
+                        allowResizing: true,
+                        rowSelected: onRowSelected,
+                        allowExcelExport: true,
+                        toolbar: ['ExcelExport'],
+                        height: 400,
+                        columns: [
+                            { field: 'CoiName', headerText: 'Cối',width: 150 },
+                            { field: 'ThanhPhamName', headerText: 'Thành Phẩm',width: 150 },
+                            { field: 'TrongLuongMax', headerText: 'Trọng Lượng Max',width: 150 },
+                            { field: 'XuongName', headerText: 'Xưởng',width: 150 },
+                        ]
+                    });
+                    // Hiển thị Grid trên trang web
+                    grid.appendTo('#Grid');
+                    grid.toolbarClick = function (args) {
+                        if (args.item.id === 'Grid_excelexport') {
+                            grid.excelExport();
+                        }
+                    };
+                }
+             }
+        });
+    }
+    loadGridData();
+    function reloadData() {
+        loadGridData();
+    }
+    function onRowSelected(args) {
+        // Lấy dữ liệu của hàng được chọn
+        var selectedRecord = args.data;
+
+        var MaCoi = selectedRecord.MaCoi;
+        var MaThanhPham = selectedRecord.MaThanhPham;
+        var MaXuong = selectedRecord.MaXuong;
+        
+
+        $('#maCoiTLCTTPXKRowSelected').val(MaCoi);
+        $('#maThanhPhamTLCTTPXKRowSelected').val(MaThanhPham);
+        $('#maXuongTLCTTPXKRowSelected').val(MaXuong);
+    }
+</script>
+<script>
+    function showInsert() {
+        $('#modalThem').modal('show');
+    }
+    function insert() {
+       
+        var maCoi = $('#maCoiTLCTTPXK').val();
+        var maThanhPham = $('#maThanhPhamTLCTTPXK').val();
+        var maXuong = $('#maXuongTLCTTPXK').val();
+        var trongLuongMax = $('#trongLuongMaxTLCTTPXK').val();
+        document.getElementById("txtThem").style.visibility = "hidden";
+        document.getElementById("loadingIndicator").style.display = "block";
+        $.ajax({
+            type: 'POST',
+            url: '/TrongLuongCoiTheoThanhPham/DoInsert',
+            data: {
+                maCoi: maCoi,
+                maThanhPham: maThanhPham,
+                maXuong : maXuong,
+                trongLuongMax : trongLuongMax
+            },
+            success: function (rs) {
+                if (rs.isSuccess === true) {
+                    toastOptionNotyfi();
+                    toastr["success"](rs.Messages, "Thông báo");
+                    $('#modalThem').modal('hide');
+                    reloadData();
+                } else {
+                    toastOptionNotyfi();
+                    toastr["warning"](rs.Messages, "Thông báo");
+                }
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error, "Thông báo");
+            },
+            complete: function () {
+                document.getElementById("loadingIndicator").style.display = "none";
+                document.getElementById("txtThem").style.visibility = "visible";
+            }
+        });
+    }
+</script>
+<script>
+    function showUpdate() {
+        var maCoi = $('#maCoiTLCTTPXKRowSelected').val();
+        var maThanhPham = $('#maThanhPhamTLCTTPXKRowSelected').val();
+        var maXuong = $('#maXuongTLCTTPXKRowSelected').val();
+        $.ajax({
+            url: "/TrongLuongCoiTheoThanhPham/GetsByMa",
+            data: { maCoi: maCoi, maThanhPham:maThanhPham,maXuong:maXuong},
+            type: 'GET',
+            dataType: 'json',
+            success: function (rs) {
+                if (rs.isSuccess === true) {
+                    $('#maCoiTLCTTPXKSua').val(rs.MaCoi);
+                    $('#maThanhPhamTLCTTPXKSua').val(rs.MaThanhPham);
+                    $('#maXuongTLCTTPXKSua').val(rs.MaXuong);
+                    $('#trongLuongMaxTLCTTPXKSua').val(rs.TrongLuongMax);
+                    $('#modalSua').modal('show');
+                }
+                else {
+                    toastOptionNotyfi();
+                    toastr["warning"](rs.Mesages, "Thông báo");
+                }
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error, "Thông báo");
+            }
+        });
+    }
+    function update() {
+        var maCoi = $('#maCoiTLCTTPXKSua').val();
+        var maThanhPham = $('#maThanhPhamTLCTTPXKSua').val();
+        var maXuong = $('#maXuongTLCTTPXKSua').val();
+        var trongLuongMax = $('#trongLuongMaxTLCTTPXKSua').val();
+        document.getElementById("txtSua").style.visibility = "hidden";
+        document.getElementById("loadingIndicatorSua").style.display = "block";
+        $.ajax({
+            url: '/TrongLuongCoiTheoThanhPham/DoUpdate',
+            data: {
+                maCoi: maCoi,
+                maThanhPham: maThanhPham,
+                maXuong: maXuong,
+                trongLuongMax: trongLuongMax
+            },
+            type: 'POST',
+            dataType: 'json',
+            success: function (rs) {
+                if (rs.isSuccess === true) {
+                    $('#modalSua').modal('hide');
+                    reloadData();
+                    toastOptionNotyfi();
+                    toastr["success"](rs.Messages, "Thông báo");
+                } else {
+                    toastOptionNotyfi();
+                    toastr["warning"](rs.Messages, "Thông báo");
+                }
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error.toString(), "Thông báo");
+            },
+            complete: function () {
+                document.getElementById("loadingIndicatorSua").style.display = "none";
+                document.getElementById("txtSua").style.visibility = "visible";
+            }
+        });
+    }
+</script>
+<script>
+    function showDelete() {
+        var maCoi = $('#maCoiTLCTTPXKRowSelected').val();
+        var maThanhPham = $('#maThanhPhamTLCTTPXKRowSelected').val();
+        var maXuong = $('#maXuongTLCTTPXKRowSelected').val();
+        $.ajax({
+            url: "/TrongLuongCoiTheoThanhPham/GetsByMa",
+            data: { maCoi: maCoi,maThanhPham:maThanhPham,maXuong:maXuong },
+            type: 'GET',
+            dataType: 'json',
+            success: function (rs) {
+                if (rs.isSuccess === true) {
+                    bootbox.confirm({
+                        title: "Thông báo!",
+                        message: "Bạn có chắc muốn xoá Map loại sản phẩm này",
+                        buttons: {
+                            confirm: {
+                                label: 'OK',
+                                className: 'btn btn-primary'
+                            }
+                        },
+                        callback: function (result) {
+                            if (result) {
+                                //Người dùng đã bấm OK, Gọi API xóa ở đây
+                                $.ajax({
+                                    url: '/TrongLuongCoiTheoThanhPham/DoDelete',
+                                    data: {  maCoi: maCoi,maThanhPham: maThanhPham,maXuong: maXuong,},
+                                    type: 'POST',
+                                    dataType: 'json',
+                                    success: function (rs) {
+                                        if (rs.isSuccess === true) {
+                                            reloadData();
+                                            toastOptionNotyfi();
+                                            toastr["success"](rs.Messages, "Thông báo");
+                                        } else {
+                                            toastOptionNotyfi();
+                                            toastr["warning"](rs.Messages, "Thông báo");
+                                        }
+                                    },
+                                    error: function (error) {
+                                        toastOptionNotyfi();
+                                        toastr["error"]('Đã xảy ra lỗi: ' + error.toString(), "Thông báo");
+                                    }
+                                });
+                            }
+                        }
+                    });
+                } else {
+                    toastOptionNotyfi();
+                    toastr["warning"]('Không tìm thấy thông tin!', "Thông báo");
+                }
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error.toString(), "Thông báo");
+            }
+        });
+
+    }
+</script>
+

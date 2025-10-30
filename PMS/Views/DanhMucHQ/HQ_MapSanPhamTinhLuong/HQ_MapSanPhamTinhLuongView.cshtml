@@ -1,0 +1,505 @@
+﻿@{
+    ViewData["Title"] = "HQ_MapSanPhamTinhLuongView";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    //lấy danh sách roleid từ cookie
+    var roleIds = PMS.Middlewares.AuthenticationHelpers.GetRoleIdsFromCookie(Context);
+    // lấy danh sách fu func từ list roleId
+    var rolePermistions = await PMS.Middlewares.AuthenticationHelpers.GetRolePermistionsAsync(Context, roleIds);
+
+    var listSPTLs = ViewBag.listSPTLs;
+    var listTPHQ = ViewBag.listTPHQ;
+    var listSizes = ViewBag.listSizes;
+    var listLoaiNguyenLieus = ViewBag.listLoaiNguyenLieus;
+}
+<style>
+    .custom-table {
+        border-collapse: collapse;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+        .custom-table th, .custom-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .custom-table th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+        }
+
+        .custom-table tr:hover {
+            background-color: #f1f1f1;
+        }
+</style>
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h2 class="mb-0">Map Sản Phẩm Tính Lương</h2>
+                    <div class="d-flex flex-column flex-md-row align-items-center w-100">
+                        <label class="form-label text-center mb-2 mb-md-0 me-md-2">Ngày:</label>
+                        <input type="datetime-local" id="dateTimeHQNhanVien" class="form-control w-100 w-md-auto" />
+                        @{
+                            var taiHQ_MapSanPhamTinhLuong = rolePermistions.Where(x => x.Fu == "Danh Mục / Map Sản Phẩm Tính Lương HQ" && x.Func == "Xem Map Sản Phẩm Tính Lương HQ" && x.Status == 1).FirstOrDefault();
+                            if (taiHQ_MapSanPhamTinhLuong != null)
+                            {
+                                <button onclick="reloadData()" class="btn btn-primary mt-2 mt-md-0 ms-md-2 w-100 w-md-auto">Tải</button>
+                            }
+                        }
+                    </div>
+
+
+                </div>
+                <div class="card-body">
+                    <div id="Grid"></div>
+                    <div style="margin-top:20px;">
+                        @{
+                            // var suaHQ_MapSanPhamTinhLuong = rolePermistions.Where(x => x.Fu == "Danh Mục / Map Sản Phẩm Tính Lương HQ" && x.Func == "Sửa Map Sản Phẩm Tính Lương HQ" && x.Status == 1).FirstOrDefault();
+                            // if (suaHQ_MapSanPhamTinhLuong != null)
+                            // {
+                            //     <button onclick="showUpdate()" style="margin-right:5px" class="btn btn-outline-warning"><i class='bx bx-edit-alt'></i>Sửa</button>
+                            // }
+
+                            var themHQ_MapSanPhamTinhLuong = rolePermistions.Where(x => x.Fu == "Danh Mục / Map Sản Phẩm Tính Lương HQ" && x.Func == "Thêm Map Sản Phẩm Tính Lương HQ" && x.Status == 1).FirstOrDefault();
+                            if (themHQ_MapSanPhamTinhLuong != null)
+                            {
+                                <button onclick="showInsert()" type="button" class="btn btn-primary">Thêm</button>
+                            }
+
+                            var xoaHQ_MapSanPhamTinhLuong = rolePermistions.Where(x => x.Fu == "Danh Mục / Map Sản Phẩm Tính Lương HQ" && x.Func == "Xóa Map Sản Phẩm Tính Lương HQ" && x.Status == 1).FirstOrDefault();
+                            if (xoaHQ_MapSanPhamTinhLuong != null)
+                            {
+                                <button onclick="showDelete()" style="margin-right:5px" class="btn btn-outline-danger"><i class='bx bx-trash'></i>Xoá</button>
+                            }
+                            var importHQ_MapSanPhamTinhLuong = rolePermistions.Where(x => x.Fu == "Danh Mục / Map Sản Phẩm Tính Lương HQ" && x.Func == "Import Map Sản Phẩm Tính Lương HQ" && x.Status == 1).FirstOrDefault();
+                            if (importHQ_MapSanPhamTinhLuong != null)
+                            {
+                                <button onclick="importPopup()" style="margin-right:5px" class="btn btn-outline-info"><i class='bx bx-import'></i>Import</button>
+                            }
+                            // var exportHQ_MapSanPhamTinhLuong = rolePermistions.Where(x => x.Fu == "Danh Mục / Map Sản Phẩm Tính Lương HQ" && x.Func == "Export Map Sản Phẩm Tính Lương HQ" && x.Status == 1).FirstOrDefault();
+                            // if (exportHQ_MapSanPhamTinhLuong != null)
+                            // {
+                            //     <button onclick="export()" style="margin-right:5px" class="btn btn-outline-secondary"><i class='bx bx-export'></i>Export Excel</button>
+                            // }
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="importPopup" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Import Map Sản Phẩm Tính Lương</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <form method="post" enctype="multipart/form-data" id="importForm2">
+                            <div class="mb-3">
+                                <p>Tạo file Excel đúng với cấu trúc sau:</p>
+                                <div class="container mt-4">
+                                    <div class="table-responsive">
+                                        <table class="table custom-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Sản Phẩm</th>
+                                                    <th>Thành Phẩm</th>
+                                                    <th>Size</th>
+                                                    <th>Loại Nguyên Liệu</th>
+                                                    <th>Ngày Giờ</th>
+                                                </tr>
+                                            </thead>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="fileInput" class="form-label fw-bold">Chọn file Excel:</label>
+                                <input type="file" id="fileInput" name="file" class="form-control" accept=".xlsx, .xls" required />
+                            </div>
+                            <div class="d-grid">
+                                <button onclick="startImport()" class="btn btn-primary w-100 position-relative" type="submit" id="importButton">
+                                    <div class=" align-items-center">
+                                        <span id="txtImport">Xác nhận</span>
+                                        <div id="loadingIndicatorIm" class=" spinner-border text-secondary position-absolute" role="status" style="left: 0;right: 0;top: 0;bottom: 0;margin: auto; display:none">
+                                            <span class="visually-hidden">Đang tải...</span>
+                                        </div>
+                                    </div>
+                                </button>
+                            </div>
+                        </form>
+                        <div id="result" class="mt-3"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="modalThem" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Thêm Map Sản Phâm Tính Lương</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-12 mb-12 ">
+                                <div class="form-outline">
+                                    <label class="form-label">Thành Phẩm</label>
+                                    <select id="maThanhPhamMSPTLHQ" class="form-control form-control-lg">
+                                        <option disabled selected>Chọn Thành Phẩm</option>
+                                        @foreach (var item in listTPHQ)
+                                        {
+                                            <option value="@item.Id">@item.Ten</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 mb-12 ">
+                                <div class="form-outline">
+                                    <label class="form-label">Size</label>
+                                    <select id="maSizeMSPTLHQ" class="form-control form-control-lg">
+                                        <option disabled selected>Chọn Size</option>
+                                        @foreach (var item in listSizes)
+                                        {
+                                            <option value="@item.Id">@item.Ten</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 mb-12 ">
+                                <div class="form-outline">
+                                    <label class="form-label">Loại Nguyên Liệu</label>
+                                    <select id="maLoaiNguyenLieuMSPTLHQ" class="form-control form-control-lg">
+                                        <option disabled selected>Chọn Loại Nguyên Liệu</option>
+                                        @foreach (var item in listLoaiNguyenLieus)
+                                        {
+                                            <option value="@item.Id">@item.Ten</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 mb-12 ">
+                                <div class="form-outline">
+                                    <label class="form-label">Sản Phẩm Tính Lương</label>
+                                    <select id="maSanPhamTLMSPTLHQ" class="form-control form-control-lg">
+                                        <option disabled selected>Chọn Sản Phẩm</option>
+                                        @foreach (var item in listSPTLs)
+                                        {
+                                            <option value="@item.Ma">@item.Ten</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 mb-12 ">
+                                <div class="form-outline">
+                                    <label class="form-label">
+                                        Ngày giờ bất đầu
+                                    </label>
+                                    <input type="datetime-local" id="ngayGioBatDauMSPTLHQ" class="form-control form-control-lg" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-4 pt-2">
+                            <div class="col-12">
+                                <button onclick="insert()" class="btn btn-primary w-100 position-relative" type="submit" id="">
+                                    <div class=" align-items-center">
+                                        <span id="txtThem">Thêm</span>
+                                        <div id="loadingIndicator" class=" spinner-border text-secondary position-absolute" role="status" style="left: 0;right: 0;top: 0;bottom: 0;margin: auto; display:none">
+                                            <span class="visually-hidden">Đang tải...</span>
+                                        </div>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<input type="hidden" id="idMSPTLHQRowSelected" />
+<script>
+    function setCurrentDateTime() {
+        const now = new Date();
+
+        // Lấy từng phần ngày và giờ của giờ địa phương
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0'); // Tháng bắt đầu từ 0 nên cần +1
+        const day = String(now.getDate()).padStart(2, '0');
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const seconds = String(now.getSeconds()).padStart(2, '0');
+        const milliseconds = String(now.getMilliseconds()).padStart(3, '0'); // Thêm phần mili giây
+
+        // Định dạng theo 'YYYY-MM-DDTHH:MM:SS.fff'
+        const formattedDateTime = `${year}-${month}-${day}T${hours}:${minutes}:${seconds}.${milliseconds}`;
+        const dateTimeInput = document.getElementById("dateTimeHQNhanVien");
+        dateTimeInput.value = formattedDateTime;
+        return formattedDateTime;
+        //.value = formattedDateTime;
+    }
+    $(document).ready(function () {
+        loadGridData();
+        setCurrentDateTime();
+    });
+    var grid;
+    function loadGridData() {
+        var dateTime = setCurrentDateTime();
+        $.ajax({
+            url: '/HQ_MapSanPhamTinhLuong/GetAllsFullField',
+            data: {
+                dateTime: dateTime
+            },
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                var dataManager = new ej.data.DataManager({
+                    json: data,
+                    adaptor: new ej.data.JsonAdaptor()
+                });
+                if (grid) {
+                    grid.dataSource = dataManager;
+                    grid.refresh();
+                } else {
+                    grid = new ej.grids.Grid({
+                        dataSource: dataManager,
+                        allowPaging: true,
+                        pageSettings: { pageSize: 50, pageSizes: [50, 100, 200, 500] },
+                        allowFiltering: true,
+                        filterSettings: { type: 'Excel' },
+                        allowSorting: true,
+                        //frozenColumns: 3,
+                        allowResizing: true,
+                        rowSelected: onRowSelected,
+                        allowExcelExport: true,
+                        toolbar: ['ExcelExport'],
+                        height: 400,
+                        columns: [
+                            //{ field: 'MaSanPham', headerText: 'Mã Sản Phẩm', width: 150 },
+                            { field: 'SanPhamName', headerText: 'Sản Phẩm', width: 150 },
+                            //{ field: 'MaThanhPham', headerText: 'Mã Thành Phẩm', width: 150 },
+                            { field: 'ThanhPhamName', headerText: 'Thành Phẩm',width: 150 },
+                            { field: 'SizeName', headerText: 'Size',width: 150 },
+                            { field: 'LoaiNguyenLieuName', headerText: 'Loại Nguyên Liệu',width: 150 },
+                            { field: 'NgayGio', headerText: 'Ngày Giờ', width: 150, type: 'date', format: 'dd-MM-yyyy HH:mm:ss' },
+
+                        ]
+                    });
+                    // Hiển thị Grid trên trang web
+                    grid.appendTo('#Grid');
+                    grid.toolbarClick = function (args) {
+                        if (args.item.id === 'Grid_excelexport') {
+                            grid.excelExport();
+                        }
+                    };
+                }
+             }
+        });
+    }
+    loadGridData();
+    function reloadData() {
+        setCurrentDateTime();
+        loadGridData();
+    }
+    function onRowSelected(args) {
+        // Lấy dữ liệu của hàng được chọn
+        var selectedRecord = args.data;
+        // Lấy giá trị Id từ dữ liệu của hàng được chọn
+        var Id = selectedRecord.Id;
+
+        $('#idMSPTLHQRowSelected').val(Id);
+    }
+</script>
+<script>
+    function showInsert() {
+        $('#modalThem').modal('show');
+        $('#ngayGioBatDauMSPTLHQ').val(setCurrentDateTime());
+        // $.ajax({
+        //     type: "GET",
+        //     url: "/HQ_MapSanPhamTinhLuong/CreatDefautNew",
+        //     success: function (rs) {
+        //         if (rs.isSuccess === true) {
+        //             $('#maMSPTLHQ').val(rs.Ma);
+        //             //$('#isQuaDemMSPTLHQ').prop('checked', rs.isQuaDem);
+        //             $('#modalThem').modal('show');
+        //         }
+        //         else {
+        //             toastOptionNotyfi();
+        //             toastr["warning"](rs.Mesages, "Thông báo");
+        //         }
+        //     },
+        //     error: function () {
+        //         toastOptionNotyfi();
+        //         toastr["error"]('Đã xảy ra lỗi: ' + error, "Thông báo");
+        //     }
+        // });
+    }
+    function insert() {
+        var maSanPham = $('#maSanPhamTLMSPTLHQ').val();
+        var maSize = $('#maSizeMSPTLHQ').val();
+        var maThanhPham = $('#maThanhPhamMSPTLHQ').val();
+        var maLoaiNguyenLieu = $('#maLoaiNguyenLieuMSPTLHQ').val();
+        var ngayGio = $('#ngayGioBatDauMSPTLHQ').val();
+        document.getElementById("txtThem").style.visibility = "hidden";
+        document.getElementById("loadingIndicator").style.display = "block";
+        $.ajax({
+            type: 'POST',
+            url: '/HQ_MapSanPhamTinhLuong/DoInsert',
+            data: {
+                maSanPham: maSanPham,
+                maThanhPham: maThanhPham,
+                maSize : maSize,
+                maLoaiNguyenLieu : maLoaiNguyenLieu,
+                ngayGio:ngayGio
+            },
+            success: function (rs) {
+                if (rs.isSuccess === true) {
+                    toastOptionNotyfi();
+                    toastr["success"](rs.Messages, "Thông báo");
+                    $('#modalThem').modal('hide');
+                    reloadData();
+                } else {
+                    toastOptionNotyfi();
+                    toastr["warning"](rs.Messages, "Thông báo");
+                }
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error, "Thông báo");
+            },
+            complete: function () {
+                document.getElementById("loadingIndicator").style.display = "none";
+                document.getElementById("txtThem").style.visibility = "visible";
+            }
+        });
+    }
+</script>
+<script>
+    function showDelete() {
+        var id = $('#idMSPTLHQRowSelected').val();
+        $.ajax({
+            url: "/HQ_MapSanPhamTinhLuong/GetsByMa",
+            data: { id: id },
+            type: 'GET',
+            dataType: 'json',
+            success: function (rs) {
+                if (rs.isSuccess === true) {
+                    bootbox.confirm({
+                        title: "Thông báo!",
+                        message: "Bạn có chắc muốn xoá Map loại sản phẩm này",
+                        buttons: {
+                            confirm: {
+                                label: 'OK',
+                                className: 'btn btn-primary'
+                            }
+                        },
+                        callback: function (result) {
+                            if (result) {
+                                //Người dùng đã bấm OK, Gọi API xóa ở đây
+                                $.ajax({
+                                    url: '/HQ_MapSanPhamTinhLuong/DoDelete',
+                                    data: { id: id },
+                                    type: 'POST',
+                                    dataType: 'json',
+                                    success: function (rs) {
+                                        if (rs.isSuccess === true) {
+                                            reloadData();
+                                            toastOptionNotyfi();
+                                            toastr["success"](rs.Messages, "Thông báo");
+                                        } else {
+                                            toastOptionNotyfi();
+                                            toastr["warning"](rs.Messages, "Thông báo");
+                                        }
+                                    },
+                                    error: function (error) {
+                                        toastOptionNotyfi();
+                                        toastr["error"]('Đã xảy ra lỗi: ' + error.toString(), "Thông báo");
+                                    }
+                                });
+                            }
+                        }
+                    });
+                } else {
+                    toastOptionNotyfi();
+                    toastr["warning"]('Không tìm thấy thông tin!', "Thông báo");
+                }
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error.toString(), "Thông báo");
+            }
+        });
+
+    }
+</script>
+<script>
+    function importPopup(){
+        $('#importPopup').modal('show');
+    }
+
+    function startImport() {
+        document.getElementById("txtImport").style.display = "none";
+        document.getElementById("loadingIndicatorIm").style.display = "block";
+    }
+
+    function endImport() {
+        document.getElementById("txtImport").style.display = "block";
+        document.getElementById("loadingIndicatorIm").style.display = "none";
+    }
+
+    document.getElementById("importForm2").onsubmit = async function (e) {
+        e.preventDefault();
+        startImport();
+        let formData = new FormData(this);
+        let response = await fetch("/HQ_MapSanPhamTinhLuong/ImportExcel", {
+            method: "POST",
+            body: formData
+        });
+
+        let result = await response.json();
+        let output = `<p>${result.Messages}: <span style="color:green">${result.successCount} Thành Công</span>, <span style="color:red">${result.failCount} Thất Bại.</span></p>`;
+
+        if (result.Errors && result.Errors.length > 0) {
+            output += "<ul>";
+            result.Errors.forEach(err => output += `<li>${err}</li>`);
+            output += "</ul>";
+        }
+
+        document.getElementById("result").innerHTML = output;
+        endImport();
+    };
+
+    document.addEventListener("DOMContentLoaded", function () {
+        var importPopup = document.getElementById("importPopup");
+
+        importPopup.addEventListener("hidden.bs.modal", function () {
+            reloadData();
+            document.getElementById("importForm2").reset();
+            document.getElementById("result").innerHTML = "";
+        });
+    });
+</script>
+
+

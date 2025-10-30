@@ -1,0 +1,297 @@
+﻿@{
+    var XuongId = @Context.Session.GetString("XuongId");
+}
+@* <div class="card mb-4 marginGridjs">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h6 class="mb-0 text-center w-100">Tổng Hợp Tỷ Lệ Thời Gian Và Định Mức Theo Chuyền Sửa Cá</h6>
+
+    </div>
+
+    <div class="card-body px-3 py-2">
+        <div id="column-container-TyLeThoiGianVaDinhMucDinhHinhTheoChuyen" style="width: 100%; height: 275px;"></div>
+    </div>
+</div> *@
+
+<div class="card mb-4 marginGridjs">
+    <div class="card-header d-flex flex-wrap justify-content-between align-items-start gap-2">
+        <h6 class="mb-0 flex-grow-1 text-center text-md-center text-start">
+            Tổng Hợp Tỷ Lệ Định Mức Và Thời Gian Theo Chuyền Sửa Cá
+        </h6>
+
+        <div class="d-flex flex-wrap align-items-center gap-3 ms-md-auto small text-nowrap">
+            <!-- Định mức -->
+            <div class="d-flex align-items-center gap-1">
+                <strong class="text-muted me-1">Định mức:</strong>
+                <span class="rounded-circle" style="width:10px; height:10px; background-color:#198754;"></span>
+                <span>Đạt</span>
+                <span class="rounded-circle" style="width:10px; height:10px; background-color:#000;"></span>
+                <span>Rớt</span>
+                
+            </div>
+            <!-- Thời gian -->
+            <div class="d-flex align-items-center gap-1">
+                <strong class="text-muted me-1">Thời gian:</strong>
+                <span class="rounded-circle" style="width:10px; height:10px; background-color:#198754;"></span>
+                <span>Đạt &lt; 30p</span>
+                <span class="rounded-circle" style="width:10px; height:10px; background-color:#ffc107;"></span>
+                <span>Vượt &gt; 30p</span>
+                <span class="rounded-circle" style="width:10px; height:10px; background-color:#dc3545;"></span>
+                <span>Vượt &gt; 40p</span>
+                
+                
+            </div>
+
+            
+        </div>
+    </div>
+
+    <div class="card-body px-3 py-2">
+        <div id="column-container-TyLeThoiGianVaDinhMucDinhHinhTheoChuyen" style="width: 100%;  height: 100%; height: 275px;"></div>
+    </div>
+</div>
+
+
+
+
+<script>
+    $(document).ready(function () {
+        taiDasboardTongHopTyLeThoiGianVaDinhMucDinhHinhTheoChuyen();
+    });
+    var chart_TyLeThoiGianVaDinhMucDinhHinhTheoChuyen;
+    var chartDataGlobalTheoChuyen = [];
+
+    function createChartTyLeThoiGianVaDinhMucTheoChuyen_UngNhom() {
+        const isMobile = window.innerWidth <= 768;
+        chart_TyLeThoiGianVaDinhMucDinhHinhTheoChuyen = new ej.charts.Chart({
+            primaryXAxis: {
+                valueType: 'Category',
+                interval: 1,
+                labelIntersectAction: 'Rotate45', // hoặc 'Rotate45' hay 'Wrap' nếu phù hợp
+                // enableTrim: true,
+                // edgeLabelPlacement: 'Shift',
+                labelRotation: isMobile ? 270 : 0, // hoặc bỏ rotation nếu dùng Wrap
+                labelStyle: {
+                    fontWeight: 'bold',
+                    size: isMobile ? '9px' : '9px',
+                    color: '#333333'
+                },
+                majorGridLines: { width: 0 },
+                majorTickLines: { width: 0 },
+                minorTickLines: { width: 0 },
+            },
+            primaryYAxis: {
+                minimum: 0,
+                maximum: 100,
+                interval: 20,
+                labelFormat: '{value}%',
+                title: 'Tỷ lệ (%)'
+            },
+            chartArea: { border: { width: 0 } },
+            series: [],
+            tooltip: {
+                enable: true,
+                shared: false,
+                //format: '${series.name}<br/>${point.x}: <b>${point.y}%</b><br/>Số rổ: <b>${point.tooltipSoRo}</b>'
+            },
+            tooltipRender: function (args) {
+                const series = args.series;
+                const pointIndex = args.point.index;
+                const pointData = series.dataSource[pointIndex];
+
+                const tyLe = pointData.y?.toFixed(1) || "0";
+                const soRo = pointData.tooltipSoRo !== undefined
+                    ? Number(pointData.tooltipSoRo).toLocaleString('vi-VN', {
+                          minimumFractionDigits: 0,
+                          maximumFractionDigits: 2
+                      })
+                    : "0";
+
+                const loaiChiTieu = pointData.loaiChiTieu || '';
+                const fillColor = pointData.fill;
+
+                let tenLoai = '';
+
+                if (loaiChiTieu === 'Định Mức') {
+                    tenLoai = fillColor === '#00bdae' ? 'Số rổ đạt' : 'Số rổ không đạt';
+                } else if (loaiChiTieu === 'Thời Gian') {
+                    if (fillColor === '#00bdae') tenLoai = 'Số rổ đạt';
+                    else if (fillColor === '#b58900') tenLoai = 'Số rổ không đạt';
+                    else if (fillColor === '#c1442b') tenLoai = 'Số rổ không đạt 2';
+                }
+
+                args.text = `<b>${series.name}</b><br>${pointData.x} - ${loaiChiTieu}: <b>${tyLe}%</b><br>${tenLoai}: <b>${soRo}</b>`;
+            },
+            legendSettings: {
+                visible: true,
+                enableHighlight: true
+            }
+        });
+
+        chart_TyLeThoiGianVaDinhMucDinhHinhTheoChuyen.appendTo('#column-container-TyLeThoiGianVaDinhMucDinhHinhTheoChuyen');
+    }
+
+
+        function loadChart_TongHopTyLeThoiGianVaDinhMucTheoChuyen_UngNhom(data) {
+        if (!chart_TyLeThoiGianVaDinhMucDinhHinhTheoChuyen || !Array.isArray(data)) {
+            console.warn('Dữ liệu không hợp lệ hoặc biểu đồ chưa được khởi tạo');
+            return;
+        }
+
+        chartDataGlobalTheoChuyen = [];
+
+        const groupNames = [...new Set(data.map(r => r.GroupName))];
+
+        const dinhMucSeriesArray = [];
+        const thoiGianSeriesArray = [];
+
+        groupNames.forEach(group => {
+            const dm = data.find(r => r.GroupName === group && r.category === 'DinhMuc');
+            const tg = data.find(r => r.GroupName === group && r.category === 'ThoiGian');
+
+            if (dm) {
+                dinhMucSeriesArray.push(
+                    {
+                        x: group,
+                        y: dm.TyLeDat || 0,
+                        fill: '#00bdae',
+                        tooltipSoRo: dm.SoRoDat ?? 0,
+                        loaiChiTieu: 'Định Mức'
+                    },
+                    {
+                        x: group,
+                        y: dm.TyLeKhongDat || 0,
+                        fill: '#404041',
+                        tooltipSoRo: dm.SoRoKhongDat ?? 0,
+                        loaiChiTieu: 'Định Mức'
+                    }
+                );
+            }
+
+            if (tg) {
+                thoiGianSeriesArray.push(
+                    {
+                        x: group,
+                        y: tg.TyLeDat || 0,
+                        fill: '#00bdae',
+                        tooltipSoRo: tg.SoRoDat ?? 0,
+                        loaiChiTieu: 'Thời Gian'
+                    },
+                    {
+                        x: group,
+                        y: tg.TyLeKhongDat || 0,
+                        fill: '#b58900',
+                        tooltipSoRo: tg.SoRoKhongDat ?? 0,
+                        loaiChiTieu: 'Thời Gian'
+                    },
+                    {
+                        x: group,
+                        y: tg.TyLeKhongDat2 || 0,
+                        fill: '#c1442b',
+                        tooltipSoRo: tg.SoRoKhongDat2 ?? 0,
+                        loaiChiTieu: 'Thời Gian'
+                    }
+                );
+            }
+        });
+
+        //Cập nhật lại dữ liệu mà KHÔNG render lại biểu đồ
+        if (chart_TyLeThoiGianVaDinhMucDinhHinhTheoChuyen.series.length >= 2) {
+            chart_TyLeThoiGianVaDinhMucDinhHinhTheoChuyen.series[0].dataSource = dinhMucSeriesArray;
+            chart_TyLeThoiGianVaDinhMucDinhHinhTheoChuyen.series[1].dataSource = thoiGianSeriesArray;
+            chart_TyLeThoiGianVaDinhMucDinhHinhTheoChuyen.dataBind(); //Áp dụng lại dữ liệu mới
+        } else {
+            console.warn("Số lượng series không đúng, biểu đồ sẽ được tạo lại từ đầu.");
+            chart_TyLeThoiGianVaDinhMucDinhHinhTheoChuyen.series = [
+                {
+                    type: 'StackingColumn100',
+                    name: 'Định Mức',
+                    dataSource: dinhMucSeriesArray,
+                    stackingGroup: 'DinhMuc',
+                    xName: 'x',
+                    yName: 'y',
+                    columnWidth: 0.6,
+                    columnSpacing: 0.1,
+                    pointColorMapping: 'fill',
+                    tooltipMappingName: 'tooltipSoRo',
+                    marker: {
+                        dataLabel: {
+                            visible: true,
+                            position: 'Center',
+                            font: { color: 'white', fontWeight: 'bold' }
+                        }
+                    }
+                },
+                {
+                    type: 'StackingColumn100',
+                    name: 'Thời Gian',
+                    dataSource: thoiGianSeriesArray,
+                    stackingGroup: 'ThoiGian',
+                    xName: 'x',
+                    yName: 'y',
+                    columnWidth: 0.6,
+                    columnSpacing: 0.1,
+                    pointColorMapping: 'fill',
+                    tooltipMappingName: 'tooltipSoRo',
+                    marker: {
+                        dataLabel: {
+                            visible: true,
+                            position: 'Center',
+                            font: { color: 'white', fontWeight: 'bold' }
+                        }
+                    }
+                }
+            ];
+            chart_TyLeThoiGianVaDinhMucDinhHinhTheoChuyen.refresh(); // fallback nếu series chưa có
+        }
+    }
+
+    async function getDataForChartTyLeThoiGianVaDinhMucTheoChuyen(xuongId) {
+        try {
+            const fromDate = localStorage.getItem("fromDate_dashboard_user");
+            const toDate = localStorage.getItem("toDate_dashboard_user");
+            const response = await $.ajax({
+                url: '/Dashboard/DataChartTongHopTongHopTyLeThoiGianVaDinhMucTheoChuyenDinhHinh',
+                type: 'GET',
+                data: {fromDate:fromDate,toDate:toDate, xuongId: xuongId },
+            });
+
+            if (response.Success) {
+                console.log('Dữ liệu từ server:', response.DataChart);
+                return response.DataChart;
+            } else {
+                console.warn('Thông báo từ server:', response.Messages || 'Không có dữ liệu biểu đồ');
+                return null;
+            }
+        } catch (error) {
+            console.error('Lỗi khi tải dữ liệu:', error);
+            return null;
+        }
+    }
+
+    async function taiDasboardTongHopTyLeThoiGianVaDinhMucDinhHinhTheoChuyen() {
+        const xuongId = @XuongId;
+        //AddUserWaitView(xuongId);
+
+        const chartData = await getDataForChartTyLeThoiGianVaDinhMucTheoChuyen(xuongId);
+        if (!chartData || !Array.isArray(chartData) || chartData.length === 0) {
+            console.warn('Không có dữ liệu để hiển thị biểu đồ');
+            return;
+        }
+
+        if (!chart_TyLeThoiGianVaDinhMucDinhHinhTheoChuyen) {
+            createChartTyLeThoiGianVaDinhMucTheoChuyen_UngNhom();
+        }
+
+        loadChart_TongHopTyLeThoiGianVaDinhMucTheoChuyen_UngNhom(chartData);
+    }
+    
+    
+    var timeInterval = localStorage.getItem("timeInterval_dashboard_user");
+
+      // Nếu null thì ép thành 30p
+      if (isNaN(timeInterval) || timeInterval <= 0) {
+          timeInterval = 1800000;
+      }
+
+        setInterval(taiDasboardTongHopTyLeThoiGianVaDinhMucDinhHinhTheoChuyen, timeInterval);
+</script>

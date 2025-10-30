@@ -1,0 +1,228 @@
+﻿@{
+    var XuongId = @Context.Session.GetString("XuongId");
+}
+
+<div class="card mb-4 marginGridjs position-relative">
+    <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2 position-relative">
+        <div class="text-start">
+            <small class="fw-semibold text-muted d-block">Năng suất trung bình</small>
+            <p class="weight-display fw-bold fs-6 mb-0">0,000.00 Kg</p>
+        </div>
+
+        <h6 class="mb-0 mx-auto text-center flex-grow-1">
+            Tổng Hợp Năng Suất Theo Chuyền Sửa Cá
+        </h6>
+
+        <button onclick="location.href='@Url.Action("DBTongHopDinhMucSanLuongTheoChuyenDinhHinhAdvanceView", "Dashboard")'"
+                class="btn btn-outline-primary btn-sm position-absolute top-0 end-0 mt-2 me-3 z-1 shadow-sm"
+                title="Chi tiết nâng cao">
+            <i class='bx bxs-bar-chart-alt-2 fs-5'></i>
+        </button>
+    </div>
+
+    <div class="card-body px-3 py-2">
+        <div id="column-container-DinhMucSanLuongDinhHinh" style="width: 100%; height: 275px;"></div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        taiDasboardTongHopDinhMucSanLuongDinhHinh();
+    });
+
+    var chart_DinhMucSanLuongDinhHinh;
+    function createChart() {
+        // kiểm tra điện thoại
+        const isMobile = window.innerWidth <= 768;
+        chart_DinhMucSanLuongDinhHinh = new ej.charts.Chart({
+             primaryXAxis: {
+                valueType: 'Category',
+                interval: 1,
+                labelIntersectAction: 'Rotate45', // hoặc 'Rotate45' hay 'Wrap' nếu phù hợp
+                // enableTrim: true,
+                // edgeLabelPlacement: 'Shift',
+                labelRotation: isMobile ? 270 : 0, // hoặc bỏ rotation nếu dùng Wrap
+                labelStyle: {
+                    fontWeight: 'bold',
+                    size: isMobile ? '9px' : '9px',
+                    color: '#333333'
+                },
+                majorGridLines: { width: 0 },
+                majorTickLines: { width: 0 },
+                minorTickLines: { width: 0 },
+            },
+            chartArea: { border: { width: 0 } },
+            primaryYAxis: {
+                title: 'Trọng Lượng (kg)',
+                majorTickLines: { width: 0 },
+                lineStyle: { width: 0 },
+                maximum: 100,
+                interval: 50
+            },
+            series: [
+                {
+                    type: 'Column',
+                    xName: 'x',
+                    yName: 'y',
+                    //name: "Trọng Lượng",
+                    columnSpacing: 0.1,
+                    width: 2,
+                    dataSource: [],
+                    pointColorMapping: 'color',
+                    marker: {
+                        dataLabel: {
+                            visible: true,
+                            font: { fontWeight: '600', color: '#000000' }
+                        }
+                    }
+                }
+            ],
+            width: '100%',
+            tooltip: { enable: true,shared: false },
+            textRender: function (args) {
+                const num = parseFloat(args.text);
+                if (!isNaN(num)) {
+                    args.text = num.toLocaleString('vi-VN', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    });
+                }
+            },
+
+        });
+
+        chart_DinhMucSanLuongDinhHinh.appendTo('#column-container-DinhMucSanLuongDinhHinh');
+    }
+
+
+    function loadChart_TongHopDinhMucSanLuongDinhHinh(data) {
+       if (!chart_DinhMucSanLuongDinhHinh || !Array.isArray(data)) return;
+
+        const oldData = chart_DinhMucSanLuongDinhHinh.series[0].dataSource || [];
+        const weightMap = new Map(oldData.map(item => [item.x, { ...item }]));
+
+        let hasNewCategory = false;
+
+        // Cập nhật dữ liệu theo từng cột
+        data.forEach(item => {
+            const isValidY = item.y !== null && item.y !== undefined && !isNaN(item.y) && item.y >= 0;
+
+            if (isValidY) {
+                if (weightMap.has(item.x)) {
+                    const old = weightMap.get(item.x);
+                    old.y = item.y;
+                    old.dm = item.dm ?? 0;
+                } else {
+                    hasNewCategory = true;
+                    weightMap.set(item.x, {
+                        x: item.x,
+                        y: item.y,
+                        dm: item.dm ?? 0,
+                        color: undefined
+                    });
+                }
+            } else if (!weightMap.has(item.x)) {
+                hasNewCategory = true;
+                weightMap.set(item.x, {
+                    x: item.x,
+                    y: null,
+                    dm: item.dm ?? 0,
+                    color: undefined
+                });
+            }
+        });
+
+        const updated = Array.from(weightMap.values());
+
+        // Nếu có cột mới → gán màu
+        if (hasNewCategory) {
+            const palette = [
+                '#00bdae', '#c1442b', '#2a81b9', '#4c8c2b', '#b58900',
+                '#7e57c2', '#2aa198', '#c2185b', '#6a1b9a', '#388e3c', '#ef6c00'
+            ];
+            let idx = 0;
+
+            for (const item of updated) {
+                if (!item.color) {
+                    item.color = palette[idx % palette.length];
+                    idx++;
+                }
+            }
+        }
+
+        // Cập nhật lại dataSource với y và dm mới
+        chart_DinhMucSanLuongDinhHinh.series[0].dataSource = updated;
+
+        // Cập nhật trục Y động
+        const maxY = Math.max(...updated.map(i => i.y || 0));
+        const newMax = Math.ceil(maxY);
+        const interval = newMax > 0 ? Math.round(newMax / 3) + 50 : 1;
+
+        chart_DinhMucSanLuongDinhHinh.setProperties({
+            primaryYAxis: {
+                maximum: newMax,
+                interval: interval
+            }
+        });
+
+        // Cập nhật hiển thị biểu đồ
+        chart_DinhMucSanLuongDinhHinh.series[0].dataBind();
+    }
+    
+
+    function getDataForChart(xuongId) {
+        let chartData = null;
+        const fromDate = localStorage.getItem("fromDate_dashboard_user");
+        const toDate = localStorage.getItem("toDate_dashboard_user");
+        var kyVong = localStorage.getItem("kyVong_dashboard_NangSuatDinhHinh");
+        if (kyVong == null) {
+            kyVong = 0;
+        }
+        $.ajax({
+            url: '/Dashboard/DataChartTongHopDinhMucSanLuongTheoChuyenDinhHinh',
+            type: 'GET',
+            data: {fromDate:fromDate,toDate:toDate, xuongId: xuongId,kyVong:kyVong },
+            async: false,
+            success: function (response) {
+                if (response.Success) {
+                    chartData = response.DataChart;
+                    if (Array.isArray(chartData) && chartData.length > 0) {
+                        const weightDisplays = document.querySelectorAll('.weight-display');
+                        weightDisplays.forEach(display => {
+                            display.textContent = `${response.TotalTrongLuong} kg`;
+                        });
+                    }
+                } else {
+                    console.warn(response.Messages || 'Không có dữ liệu biểu đồ');
+                }
+            },
+            error: function (error) {
+                console.error('Lỗi khi tải dữ liệu:', error);
+            }
+        });
+
+        return chartData;
+    }
+
+    function taiDasboardTongHopDinhMucSanLuongDinhHinh() {
+        var xuongId = @XuongId;
+        //AddUserWaitView(xuongId);
+
+        const chartData = getDataForChart(xuongId);
+        if (!chart_DinhMucSanLuongDinhHinh) {
+            createChart();
+        }
+        if (chartData) {
+            loadChart_TongHopDinhMucSanLuongDinhHinh(chartData);
+        }
+    }
+
+    var timeInterval = localStorage.getItem("timeInterval_dashboard_user");
+
+    // Nếu null thì ép thành 30p
+    if (isNaN(timeInterval) || timeInterval <= 0) {
+        timeInterval = 1800000;
+    }
+
+    setInterval(taiDasboardTongHopDinhMucSanLuongDinhHinh, timeInterval);
+</script>

@@ -1,0 +1,413 @@
+﻿
+@{
+    ViewData["Title"] = "DBTongHopTyLeTangTrongTheoThanhPhamRaCoiXepKhuonAdvanceView";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var XuongId = @Context.Session.GetString("XuongId");
+}
+
+<div class="row g-3 align-items-end mb-2" style="margin-top: -20px;">
+    <!-- Nút Quay lại bên trái -->
+    <div class="col-md-auto">
+        <button class="btn btn-outline-secondary" type="button" onclick="window.history.back();">
+            <i class='bx bx-arrow-back'></i> Quay lại
+        </button>
+    </div>
+
+    <!-- Các thành phần bên phải, đẩy về cuối hàng -->
+    <div class="col-md-auto ms-auto">
+        <div class="input-group">
+            <span class="input-group-text">Chọn ngày</span>
+            <input type="date" class="form-control" id="fromDateDB" name="fromDate">
+            @* <input type="date" class="form-control" id="toDateDB" name="toDate"> *@
+        </div>
+    </div>
+    <div class="col-md-auto" style="z-index:1">
+        <div class="input-group">
+            <span class="input-group-text">Số phút</span>
+            <input type="number" class="form-control" id="minuteInput" name="minuteInput" min="5" value="5">
+            <button id="applyBtn" class="btn btn-primary" type="button">
+                <i class='bx bx-refresh'></i>
+            </button>
+        </div>
+    </div>
+</div>
+<div class="card mb-4 marginGridjs position-relative">
+    <div class="card-header d-flex justify-content-between align-items-center gap-2 position-relative">
+        @* <div class="text-start">
+            <small class="fw-semibold text-muted d-block"> Sản lượng trung bình:</small>
+            <p class="weight-displayTBSanLuongCongNhan fw-bold fs-6 mb-0">0,000.00 Kg</p>
+        </div> *@
+        <h6 class="mb-0 mx-auto text-center flex-grow-1">
+            Tổng Hợp Sản Lượng & Tỷ Lệ Tăng Trong Theo Thành Phẩm Ra Coi Xếp Khuôn
+        </h6>
+        @*  <button class="btn btn-outline-primary btn-sm position-absolute top-0 end-0 mt-2 me-3 shadow-sm"
+                onclick="location.href='@Url.Action("DBTongHopSanLuongVaDinhMucThanhPhamTheoChuyenDinhHinhAdvanceView", "Dashboard")'">
+            <i class='bx bxs-bar-chart-alt-2 fs-5'></i>
+        </button> *@
+    </div>
+
+    <div class="card-body px-3 py-2">
+        <div id="column-container-TangTrongRaCoiTheoThanhPham" style="width: 100%;height:350px"></div>
+        <div id="Grid"></div>
+    </div>
+</div>
+
+
+<script>
+
+    const fakeData_TangTrongRaCoi = [
+        {
+            MaThanhPham: "TP001",
+            ThanhPhamName: "Cá Hồi Phi Lê",
+            TongTrongLuongVao: 1000,
+            TongTrongLuongRa: 950,
+            TyLeTangTrong: -5.0
+        },
+        {
+            MaThanhPham: "TP002",
+            ThanhPhamName: "Cá Tra Cắt Khúc",
+            TongTrongLuongVao: 1200,
+            TongTrongLuongRa: 1260,
+            TyLeTangTrong: 5.0
+        },
+        {
+            MaThanhPham: "TP003",
+            ThanhPhamName: "Mực Ống Làm Sạch",
+            TongTrongLuongVao: 800,
+            TongTrongLuongRa: 780,
+            TyLeTangTrong: -2.5
+        },
+        {
+            MaThanhPham: "TP004",
+            ThanhPhamName: "Tôm Sú Nguyên Con",
+            TongTrongLuongVao: 1500,
+            TongTrongLuongRa: 1575,
+            TyLeTangTrong: 5.0
+        },
+        {
+            MaThanhPham: "TP005",
+            ThanhPhamName: "Cá Thu Cắt Lát",
+            TongTrongLuongVao: 950,
+            TongTrongLuongRa: 930,
+            TyLeTangTrong: -2.1
+        }
+    ];
+    $(document).ready(function () {
+         //createComboChart_TangTrongRaCoiTheoThanhPham(fakeData_TangTrongRaCoi);
+         taiDashboardTyLeTangTrongRaCoiTheoThanhPham();
+        var timeInterval = localStorage.getItem("timeInterval_dashboard_user_Advance");
+
+        if (isNaN(timeInterval) || timeInterval <= 0) {
+            timeInterval = 1800000; // 30 phút mặc định
+        }
+
+        setInterval(createComboChart_TangTrongRaCoiTheoThanhPham, timeInterval);
+    });
+    function taiDashboardTyLeTangTrongRaCoiTheoThanhPham() {
+        const chartDataTLTTRCXK = getDataForChartTLTTRCXK();
+        if (chartDataTLTTRCXK && chartDataTLTTRCXK.length > 0) {
+            createComboChart_TangTrongRaCoiTheoThanhPham(chartDataTLTTRCXK);
+        }
+    }
+
+    function getDataForChartTLTTRCXK() {
+        let chartDataTLTTRCXK = null;
+        const ngayNguyenLieu = localStorage.getItem("fromDate_dashboard_user_Advance");
+        //const ngayNguyenLieu = localStorage.getItem("toDate_dashboard_user");
+        $.ajax({
+            url: '/Dashboard/DataChartTongHopTyLeTangTrongRaCoiXepKhuon',
+            type: 'GET',
+            data: { ngayNguyenLieu : ngayNguyenLieu},
+            async: false,
+            success: function (response) {
+                if (response.Success) {
+                    chartDataTLTTRCXK = response.DataChart;
+                    if (Array.isArray(chartDataTLTTRCXK)) {
+
+                        // const weightDisplays = document.querySelectorAll('.weight-displayTyLeThuHoiThanhPham2');
+                        // weightDisplays.forEach(display => {
+                        //     display.textContent = `${response.TotalTrongLuong} kg`;
+                        // });
+                    }
+                } else {
+                    console.warn("Không có dữ liệu");
+                }
+            },
+            error: function (e) {
+                console.error("Lỗi khi lấy dữ liệu:", e);
+            }
+        });
+        return chartDataTLTTRCXK;
+    }
+
+    let chart_TangTrongRaCoiTheoThanhPham = null;
+
+    function createComboChart_TangTrongRaCoiTheoThanhPham(data) {
+        const isMobile = window.innerWidth <= 768;
+
+        const series = [
+            {
+                type: 'Column',
+                xName: 'ThanhPhamName',
+                yName: 'TongTrongLuongVao',
+                name: 'Vào',
+                marker: {
+                    dataLabel: {
+                        visible: true,
+                        font: { fontWeight: '600', color: '#000' }
+                    }
+                }
+            },
+            {
+                type: 'Column',
+                xName: 'ThanhPhamName',
+                yName: 'TongTrongLuongRa',
+                name: 'Ra',
+                marker: {
+                    dataLabel: {
+                        visible: true,
+                        font: { fontWeight: '600', color: '#000' }
+                    }
+                }
+            },
+            {
+                type: 'Line',
+                xName: 'ThanhPhamName',
+                yName: 'TyLeTangTrong',
+                name: 'Tăng Trọng (%)',
+                width: 2,
+                marker: { visible: true },
+                yAxisName: 'yTyLe'
+            },
+            {
+                type: 'Line',
+                xName: 'ThanhPhamName',
+                yName: 'DinhMucTangTrong',
+                name: 'Định Mức (%)',
+                width: 2,
+                dashArray: '5,5',
+                marker: { visible: true },
+                yAxisName: 'yTyLe'
+            }
+        ];
+
+        if (chart_TangTrongRaCoiTheoThanhPham) {
+            chart_TangTrongRaCoiTheoThanhPham.series = series;
+            chart_TangTrongRaCoiTheoThanhPham.dataSource = data;
+            chart_TangTrongRaCoiTheoThanhPham.refresh();
+            return;
+        }
+
+        chart_TangTrongRaCoiTheoThanhPham = new ej.charts.Chart({
+            primaryXAxis: {
+                valueType: 'Category',
+                labelIntersectAction: 'Rotate45',
+                labelRotation: isMobile ? 270 : 0,
+                labelStyle: {
+                    fontWeight: 'bold',
+                    size: '9px',
+                    color: '#333'
+                },
+                majorGridLines: { width: 0 }
+            },
+            primaryYAxis: {
+                title: 'Trọng lượng (kg)',
+                labelFormat: '{value}',
+                majorTickLines: { width: 0 },
+                lineStyle: { width: 0 }
+            },
+            axes: [
+                {
+                    name: 'yTyLe',
+                    title: 'Tỷ lệ tăng trọng (%)',
+                    opposedPosition: true,
+                    labelFormat: '{value}%',
+                    lineStyle: { width: 0 },
+                    majorTickLines: { width: 0 },
+                    labelStyle: { color: '#565656', fontWeight: 'bold' }
+                }
+            ],
+            chartArea: { border: { width: 0 } },
+            tooltip: {
+                enable: true,
+                shared: true,
+                showNearestPoint: false
+            },
+            legendSettings: { visible: true },
+            width: '100%',
+            height: '400px',
+            series: series,
+            dataSource: data,
+
+            textRender: function (args) {
+                const num = parseFloat(args.text);
+                if (!isNaN(num)) {
+                    args.text = num.toLocaleString('vi-VN', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    });
+                }
+            },
+
+            tooltipRender: function (args) {
+                const value = args.point?.y;
+                const name = args.series?.name;
+
+                if (typeof value === 'number' && !isNaN(value)) {
+                    const formatted = value.toLocaleString('vi-VN', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    });
+
+                    if (name === 'Tăng Trọng (%)') {
+                        args.text = `${name}: ${formatted} %`;
+                    } else {
+                        args.text = `${name}: ${formatted} kg`;
+                    }
+                }
+            }
+        });
+
+        chart_TangTrongRaCoiTheoThanhPham.appendTo('#column-container-TangTrongRaCoiTheoThanhPham');
+    }
+</script>
+<script>
+    $(document).ready(function () {
+        loadGridData();
+    });
+    var grid;
+    function loadGridData() {
+        var toDate = localStorage.getItem("fromDate_dashboard_user_Advance");
+        //var toDate = localStorage.getItem("toDate_dashboard_user_Advance");
+        var xuongId = @XuongId;
+        $.ajax({
+            url: '/BaoCaoRaCoiXepKhuon/GetTongHopTyLeTangTrongCois',
+            type: 'GET',
+            dataType: 'json',
+            data: {
+                toDate: toDate
+            },
+            success: function (data) {
+                var dataManager = new ej.data.DataManager({
+                    json: data,
+                    adaptor: new ej.data.JsonAdaptor()
+                });
+                if (grid) {
+                    grid.dataSource = dataManager;
+                    grid.refresh();
+                } else {
+                    grid = new ej.grids.Grid({
+                        dataSource: dataManager,
+                        allowPaging: true,
+                        pageSettings: { pageSize: 50, pageSizes: [50, 100, 200, 500] },
+                        allowFiltering: true,
+                        filterSettings: { type: 'Excel' },
+                        allowSorting: true,
+                        //frozenColumns: 3,
+                        allowResizing: true,
+                        allowExcelExport: true,
+                        toolbar: ['ExcelExport'],
+                        //rowSelected: onRowSelected,
+                        //height: auto,
+                        columns: [
+                            { field: 'NgayNguyenLieu', headerText: 'Ngày Nguyên Liệu', width: 150 , type: 'date', format: 'dd-MM-yyyy'},
+                            { field: 'MaCoi', headerText: 'Mã Cối', width: 150 },
+                            { field: 'ThanhPhamName', headerText: 'Thành Phẩm', width: 150 },
+                            { field: 'SizeName', headerText: 'Size', width: 150 },
+                            { field: 'TyLeTangTrong', headerText: 'Tỷ Lệ Tăng Trọng', type: 'number',format:'N2', width: 170 },
+                            { field: 'trong_luong_vao_coi', headerText: 'Trọng Lượng Vào', type: 'number',format:'N2', width: 170 },
+                            { field: 'tong_trong_luong_ra_coi', headerText: 'Trọng Lượng Ra', type: 'number',format:'N2', width: 170 },
+                            { field: 'ThamSoTangTrong', headerText: 'Phụ Trội', type: 'number',format:'N2', width: 150 },
+                            { field: 'so_phieu', headerText: 'Số Rổ', type: 'number',format:'N2', width: 150 },
+                            { field: 'luot', headerText: 'Lượt Quay', type: 'number',format:'N2', width: 150 },
+                            { field: 'gio_bat_dau', headerText: 'Giờ Bất Đầu', width: 150 },
+                            { field: 'gio_ket_thuc', headerText: 'Giờ Kết Thúc', width: 150 },
+
+                        ],
+                        aggregates: [{
+                            columns: [
+                                {
+                                    type: 'Sum',
+                                    field: 'trong_luong_vao_coi',
+                                    format: '#,###.##',
+                                    footerTemplate: 'Tổng TL Vào: ${Sum} Kg'
+                                },
+                                {
+                                    type: 'Sum',
+                                    field: 'tong_trong_luong_ra_coi',
+                                    format: '#,###.##',
+                                    footerTemplate: 'Tổng TL Ra: ${Sum} Kg'
+                                },
+                            ]
+                        }]
+                    });
+                    // Hiển thị Grid trên trang web
+                    grid.appendTo('#Grid');
+                    grid.toolbarClick = function (args) {
+                         if (args.item.id === 'Grid_excelexport') {
+                            grid.excelExport();
+                         }};
+                    }
+            },
+            error: function (error) {
+                console.error(error);
+            }
+        });
+    }
+</script>
+<script>
+
+    window.addEventListener("DOMContentLoaded", function () {
+        const today = new Date().toLocaleDateString('en-CA');
+        //const today = new Date('2023/10/05');
+        const fromInput = document.getElementById("fromDateDB");
+        //const toInput = document.getElementById("toDateDB");
+        const minuteInput = document.getElementById("minuteInput");
+
+        const savedFrom = localStorage.getItem("fromDate_dashboard_user_Advance");
+        //const savedTo = localStorage.getItem("toDate_dashboard_user_Advance");
+        const savedInterval = localStorage.getItem("timeInterval_dashboard_user_Advance");
+        const isApplied = localStorage.getItem("dashboard_is_applied_Advance");
+
+        // nếu apply thì áp dung localstoge sau khi hoanf thành thì xóa cờ
+        if (isApplied === "true" && savedFrom) {
+            fromInput.value = savedFrom;
+            //toInput.value = savedTo;
+            localStorage.removeItem("dashboard_is_applied_Advance"); // Xoá cờ khi đã dùng
+        } else {
+            fromInput.value = today;
+            //toInput.value = today;
+            localStorage.setItem("fromDate_dashboard_user_Advance", today);
+            //localStorage.setItem("toDate_dashboard_user_Advance", today);
+        }
+
+        if (savedInterval) {
+            const minutes = parseInt(savedInterval, 10) / 60000;
+            minuteInput.value = Math.max(minutes, 5);
+        } else {
+            minuteInput.value = 30;
+            localStorage.setItem("timeInterval_dashboard_user_Advance", 1800000); // 30 phút mặc định
+        }
+    });
+
+    document.getElementById("applyBtn").addEventListener("click", function () {
+        const minuteValue = parseInt(document.getElementById("minuteInput").value);
+        const fromDate = document.getElementById("fromDateDB").value;
+        //const toDate = document.getElementById("toDateDB").value;
+        if (isNaN(minuteValue) || minuteValue < 5) {
+            alert("Nhỏ nhất là 5 phút");
+            document.getElementById("minuteInput").value = 5;
+            return;
+        }
+
+        const intervalMilliseconds = minuteValue * 60000;
+
+        localStorage.setItem("timeInterval_dashboard_user_Advance", intervalMilliseconds);
+        localStorage.setItem("fromDate_dashboard_user_Advance", fromDate);
+        //localStorage.setItem("toDate_dashboard_user_Advance", toDate);
+        localStorage.setItem("dashboard_is_applied_Advance", "true");
+        location.reload();
+    });
+
+</script>
+

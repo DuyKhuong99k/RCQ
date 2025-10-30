@@ -1,0 +1,719 @@
+﻿@{
+    ViewData["Title"] = "FuFuncManagementByComp";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="text-center">
+    <h1 class="display-4">FuFunc Theo công ty</h1>
+</div>
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-sm-10">
+            <select class="form-select form-select-lg mb-3" aria-label=".form-select-lg example" id="company"></select>
+        </div>
+        <div class="col-sm-2">
+            <button type="button" class="btn btn-primary" onclick="showCreateCompany()">Thêm công ty</button>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-sm-12">
+            <div id="GridFuFunc"></div>
+            <div style="margin-top:5px">
+                <button onclick="showlThemTuFuFuncGoc()" style="margin-right:5px" class="btn btn-outline-primary"><i class='bx bx-plus'></i>Thêm Từ File FuFunc Gốc</button>
+                <button onclick="showInsert()" style="margin-right:5px" class="btn btn-outline-primary"><i class='bx bx-plus'></i>Thêm Trực Tiếp</button>
+                <button onclick="showUpdate()" style="margin-right:5px" class="btn btn-outline-warning"><i class='bx bx-edit-alt'></i>Sửa</button>
+                <button onclick="showDelete()" style="margin-right:5px" class="btn btn-outline-danger"><i class='bx bx-trash'></i>Xóa</button>
+                <button onclick="exportFileJsonComp()" style="margin-right:5px" class="btn btn-outline-success"><i class='bx bx-trash'></i>Xuất File Json</button>
+            </div>
+        </div>
+
+    </div>
+</div>
+<input id="companyTemp" hidden />
+<div class="modal fade" id="modalCreateCompany" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Thêm Công Ty</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-12 mb-12 ">
+                                <div class="form-outline">
+                                    <label class="form-label">Tên Công Ty</label>
+                                    <input class="form-control form-control-lg" id="companyName" placeholder="Nhập Tên Công Ty" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-4 pt-2">
+                            <div class="col-12">
+                                <button onclick="createCompany()" class="btn btn-primary w-100 position-relative" type="submit" id="">
+                                    <div class=" align-items-center">
+                                        <span id="txtCreateCompany">Xác Nhận</span>
+                                        <div id="loadingIndicatorCreateCompany" class=" spinner-border text-secondary position-absolute" role="status" style="left: 0;right: 0;top: 0;bottom: 0;margin: auto; display:none">
+                                            <span class="visually-hidden">Đang tải...</span>
+                                        </div>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="modalThemFuFunc" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Thêm FuFunc</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-12 mb-12 ">
+                                <div class="form-outline">
+                                    <label class="form-label">Chức Năng</label>
+                                    <input class="form-control form-control-lg" id="fuAdd" placeholder="Nhập chức năng" />
+                                </div>
+                            </div>
+                            <div class="col-md-12 mb-12 ">
+                                <div class="form-outline">
+                                    <label class="form-label">Hành động</label>
+                                    <input class="form-control form-control-lg" id="funcAdd" placeholder="Nhập hành động" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-4 pt-2">
+                            <div class="col-12">
+                                <button onclick="insert()" class="btn btn-primary w-100 position-relative" type="submit" id="">
+                                    <div class=" align-items-center">
+                                        <span id="txtThemFuFunc">Xác Nhận</span>
+                                        <div id="loadingIndicatorThemFuFunc" class=" spinner-border text-secondary position-absolute" role="status" style="left: 0;right: 0;top: 0;bottom: 0;margin: auto; display:none">
+                                            <span class="visually-hidden">Đang tải...</span>
+                                        </div>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="modalSuaFuFunc" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Sửa FuFunc</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-12 mb-12 ">
+                                <div class="form-outline">
+                                    <label class="form-label">Chức Năng</label>
+                                    <input class="form-control form-control-lg" id="fuUpdate" placeholder="Nhập chức năng" />
+                                </div>
+                            </div>
+                            <div class="col-md-12 mb-12 ">
+                                <div class="form-outline">
+                                    <label class="form-label">Hành động</label>
+                                    <input class="form-control form-control-lg" id="funcUpdate" placeholder="Nhập hành động" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-4 pt-2">
+                            <div class="col-12">
+                                <button onclick="update()" class="btn btn-primary w-100 position-relative" type="submit" id="">
+                                    <div class=" align-items-center">
+                                        <span id="txtSuaFuFunc">Xác Nhận</span>
+                                        <div id="loadingIndicatorSuaFuFunc" class=" spinner-border text-secondary position-absolute" role="status" style="left: 0;right: 0;top: 0;bottom: 0;margin: auto; display:none">
+                                            <span class="visually-hidden">Đang tải...</span>
+                                        </div>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="modalThemTuFuFuncGoc" tabindex="-1" aria-hidden="true" data-bs-focus="false" no-enforce-focus>
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Thêm Fu Func từ file gốc</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-12 mb-12 ">
+                        <label class="form-label">Chức Năng</label>
+                        <input class="form-control" type="text" id="multiselectFu" />
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12 mb-12 ">
+                        <label class="form-label">Hành Động</label>
+                        <input class="form-control" type="text" id="multiselectFunc" />
+                    </div>
+                </div>
+                <div class="row mt-4 pt-2">
+                    <div class="col-12">
+                        <button onclick="CreatRolePermistion()" class="btn btn-primary w-100 position-relative" type="submit" id="">
+                            <div class=" align-items-center">
+                                <span id="txtTaoQuyen">Xác Nhận</span>
+                                <div id="loadingIndicatorTaoQuyen" class=" spinner-border text-secondary position-absolute" role="status" style="left: 0;right: 0;top: 0;bottom: 0;margin: auto; display:none">
+                                    <span class="visually-hidden">Đang tải...</span>
+                                </div>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        //loadGridData();
+        getCompanyList();
+    });
+
+    function showCreateCompany(){
+        $('#modalCreateCompany').modal('show');
+    }
+    function createCompany(){
+        var companyName = $('#companyName').val();
+        document.getElementById("txtCreateCompany").style.visibility = "hidden";
+        document.getElementById("loadingIndicatorCreateCompany").style.display = "block";
+        $.ajax({
+            type: "GET",
+            url: "/Home/CreateJsonFile",
+            data: { companyName:companyName },
+            success: function (rs) {
+                if (rs.isSuccess === true) {
+                    toastOptionNotyfi();
+                    toastr["success"](rs.messages, "Thông báo");
+                    $('#modalCreateCompany').modal('hide');
+                    getCompanyList();
+                }
+                else {
+                    toastOptionNotyfi();
+                    toastr["warning"](rs.mesages, "Thông báo");
+                }
+            },
+            error: function () {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error, "Thông báo");
+            },
+            complete: function () {
+                document.getElementById("loadingIndicatorCreateCompany").style.display = "none";
+                document.getElementById("txtCreateCompany").style.visibility = "visible";
+            }
+        });
+    }
+
+
+    function getCompanyList(){
+        $.ajax({
+                url: '/Home/GetNameFileJsonFuFunc',
+                type: 'GET',
+                success: function (response) {
+                    if (response.isSuccess) {
+                        const companySelect = $('#company');
+                        companySelect.empty(); // Xóa các option cũ nếu có
+
+                        // Thêm option mặc định
+                        companySelect.append('<option selected>Mở để chọn công ty</option>');
+                        if(response.data.length == 0){
+                            companySelect.append(`<option>Không có công ty nào để chọn</option>`);
+                        }else{
+                            // Duyệt qua danh sách Data và thêm vào <select>
+                            response.data.forEach(function (fileName) {
+                                const companyName = fileName.replace('.json', ''); // Bỏ phần đuôi .json
+                                companySelect.append(`<option value="${fileName}">${companyName}</option>`);
+                            });
+                        }
+
+                    } else {
+                        toastOptionNotyfi();
+                        toastr["warning"](response.messages, "Thông báo");
+                    }
+                },
+                error: function (error) {
+                    toastOptionNotyfi();
+                    toastr["warning"]("Đã xảy ra lỗi khi gọi API.", "Thông báo");
+                }
+            });
+    }
+
+    $('#company').on('change', function () {
+        companyTemp
+        var company = $(this).val();
+        $('#companyTemp').val(company);
+        loadGridData(company);
+    });
+
+    var grid;
+    function loadGridData(company) {
+        $.ajax({
+            url: '/Home/GetFuFuncWithCompany',
+            type: 'GET',
+            data: {company :company},
+            dataType: 'json',
+            success: function (data) {
+                var dataManager = new ej.data.DataManager({
+                    json: data.data,
+                    adaptor: new ej.data.JsonAdaptor()
+                });
+                if (grid) {
+                    grid.dataSource = dataManager;
+                    grid.refresh();
+                } else {
+                    grid = new ej.grids.Grid({
+                        dataSource: dataManager,
+                        allowPaging: true,
+                        pageSettings: { pageSize: 5000 },
+                        allowFiltering: true,
+                        filterSettings: { type: 'Excel' },
+                        selectionSettings: { persistSelection: true },
+                        rowSelected: selectionChanged,
+                        rowDeselected: unSelectionChanged,
+                        allowSorting: true,
+                        //frozenColumns: 3,
+                        allowResizing: true,
+                        //rowSelected: onRowSelected,
+                        height: 400,
+                        columns: [
+                            { type: "checkbox", field: "", allowFiltering: false, allowSorting: false, width: '50' },
+                            { field: 'fu', headerText: 'Fu', width: 150 },
+                            { field: 'func', headerText: 'Chức Năng', width: 150 },
+                        ]
+                    });
+                    // Hiển thị Grid trên trang web
+                    grid.appendTo('#GridFuFunc');
+                }
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["warning"](data.messages, "Thông báo");
+            }
+        });
+    }
+
+    let selectedIdsString = ""; // Khai báo một chuỗi để lưu trữ MaNhanVien đã chọn
+    let numRowSelect = 0;
+    function unSelectionChanged(args) {
+        let deselectedRecords = args.data ? args.data : []; // Lấy các bản ghi được bỏ chọn
+
+        // Kiểm tra xem deselectedRecords có phải là một mảng không
+        if (Array.isArray(deselectedRecords)) {
+            // Nếu là một mảng rỗng hoặc không tồn tại
+            if (deselectedRecords.length === 0) {
+                selectedIdsString = "";
+                numRowSelect = 0; // Reset số dòng đã chọn
+                //alert(selectedIdsString);
+                return;
+            }
+            // Lặp qua từng bản ghi được bỏ chọn
+            for (let i = 0; i < deselectedRecords.length; i++) {
+                let deselectedIds = deselectedRecords[i].fu;
+                let deselectedSTT = deselectedRecords[i].func;
+                let deselectedId = deselectedIds + "," + deselectedSTT;
+
+                // Kiểm tra xem MaNhanVien đã có trong chuỗi chưa trước khi loại bỏ
+                if (selectedIdsString.includes(deselectedId)) {
+                    selectedIdsString = selectedIdsString.replace(deselectedId + "|", ""); // Loại bỏ MaNhanVien khỏi chuỗi
+                    numRowSelect--; // Giảm số dòng đã chọn
+                }
+            }
+        } else {
+            // Nếu deselectedRecords không phải là một mảng
+            let deselectedIds = deselectedRecords.fu;
+            let deselectedSTT = deselectedRecords.func;
+            let deselectedId = deselectedIds + "," + deselectedSTT;
+
+            // Kiểm tra xem MaNhanVien đã có trong chuỗi chưa trước khi loại bỏ
+            if (selectedIdsString.includes(deselectedId)) {
+                selectedIdsString = selectedIdsString.replace(deselectedId + "|", ""); // Loại bỏ MaNhanVien khỏi chuỗi
+                numRowSelect--; // Giảm số dòng đã chọn
+            }
+           //alert(selectedIdsString);
+        }
+        // Hiển thị số dòng đã chọn nếu cần
+        //alert(numRowSelect);
+    }
+
+    function selectionChanged(args) {
+        let selectedRecords = args.data ? args.data : []; // Lấy các bản ghi được chọn
+        // Giả định có một thuộc tính isHeader để xác định xem dữ liệu có phải từ header hay không
+        if (selectedRecords.length == 0) {
+            // Lấy toàn bộ Mã Nhân viên từ grid vào selectedIdsString
+            let filteredRecords = grid.getCurrentViewRecords(); // Lấy các bản ghi đã được lọc
+            selectedIdsString = ""; // Reset selectedIdsString trước khi thêm dữ liệu mới
+            numRowSelect = filteredRecords.length; // Cập nhật số dòng đã chọn
+            filteredRecords.forEach(record => {
+                selectedIdsString += record.fu + ","; // Thêm STT vào chuỗi, phân tách bằng dấu phẩy
+                selectedIdsString += record.func + "|"; // Thêm STT vào chuỗi, phân tách bằng dấu phẩy
+            });
+
+            // Loại bỏ dấu | cuối cùng
+            selectedIdsString = selectedIdsString.slice(0, -1);
+            //alert(selectedIdsString);
+            //alert(numRowSelect);
+            return;
+        }
+        let selectedId = selectedRecords.fu;
+        let selectedSTT = selectedRecords.func;
+        // Kiểm tra xem MaNhanVien đã được thêm vào chuỗi chưa trước khi thêm vào
+        if (!selectedIdsString.includes(selectedSTT)) {
+            selectedIdsString += selectedId + ",";
+            selectedIdsString += selectedSTT + "|";
+            numRowSelect++; // Tăng số dòng đã chọn
+        }
+        // Loại bỏ dấu | cuối cùng
+        //selectedIdsString = selectedIdsString.slice(0, -1);
+        //alert(selectedIdsString);
+        // Hiển thị số dòng đã chọn nếu cần
+        //alert(numRowSelect);
+    }
+
+
+
+
+
+    function showInsert(){
+        $('#modalThemFuFunc').modal('show');
+    }
+    function insert(){
+        var company = $('#companyTemp').val();
+        if(company == ""){
+            toastOptionNotyfi();
+            toastr["warning"]("Bạn chưa chọn công ty", "Thông báo");
+            return false;
+        }
+        var fu = $('#fuAdd').val();
+        var func = $('#funcAdd').val();
+        document.getElementById("txtThemFuFunc").style.visibility = "hidden";
+        document.getElementById("loadingIndicatorThemFuFunc").style.display = "block";
+        $.ajax({
+            type: "GET",
+            url: "/Home/AddDataFuFuncWitCompany",
+            data: { company:company,fu: fu, func:func },
+            success: function (rs) {
+                if (rs.isSuccess === true) {
+                    toastOptionNotyfi();
+                    toastr["success"](rs.messages, "Thông báo");
+                    $('#modalThemFuFunc').modal('hide');
+                    loadGridData(company);
+                }
+                else {
+                    toastOptionNotyfi();
+                    toastr["warning"](rs.messages, "Thông báo");
+                }
+            },
+            error: function () {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error, "Thông báo");
+            },
+            complete: function () {
+                document.getElementById("loadingIndicatorThemFuFunc").style.display = "none";
+                document.getElementById("txtThemFuFunc").style.visibility = "visible";
+            }
+        });
+    }
+
+
+    var multiselectObjFu;
+    var multiselectObjFunc;
+    function renderMultiselect(company) {
+        // Function to load JSON data
+        function loadJSON(callback) {
+            $.ajax({
+                url: '/Home/GetDataMultiSelectRolePermistion',
+                data: { company: company },
+                type: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    callback(data);
+                },
+                error: function (xhr, status, error) {
+                    toastOptionNotyfi();
+                    toastr["error"]('Lỗi khi tải file JSON: ' + error.toString(), "Thông báo");
+                }
+            });
+        }
+
+        // Call the loadJSON function
+        loadJSON(function (data) {
+            // Remove duplicates from the 'Fu' field
+            var uniqueFuValues = [...new Set(data.map(item => item.fu))];
+            var uniqueFuData = uniqueFuValues.map(fuValue => {
+                return { fu: fuValue };
+            });
+
+            initializeMultiSelect(uniqueFuData, data);
+        });
+
+
+        function initializeMultiSelect(uniqueFuData, sampleData) {
+            if (!multiselectObjFu) {
+                // Create multiselectObjFu if it doesn't exist
+                multiselectObjFu = new ej.dropdowns.MultiSelect({
+                    dataSource: uniqueFuData,
+                    fields: { text: 'fu', value: 'fu' },
+                    placeholder: 'Chọn Chức Năng',
+                    mode: 'CheckBox',
+                    showSelectAll: true,
+                    showDropDownIcon: true,
+                    filterBarPlaceholder: 'Tìm Chức Năng',
+                    zIndex: 9999,
+                    change: function (args) {
+                        var selectedFuValues = args.value;
+                        var filteredData = sampleData.filter(function (item) {
+                            return selectedFuValues.includes(item.fu) || selectedFuValues.length === 0;
+                        });
+
+                        multiselectObjFunc.dataSource = filteredData;
+                        multiselectObjFunc.dataBind();
+                    }
+                });
+
+                // Render MultiSelect Dropdown for Fu
+                multiselectObjFu.appendTo('#multiselectFu');
+            } else {
+                // Update data source if multiselectObjFu already exists
+                multiselectObjFu.dataSource = uniqueFuData;
+                multiselectObjFu.dataBind();
+            }
+
+            if (!multiselectObjFunc) {
+                // Create multiselectObjFunc if it doesn't exist
+                multiselectObjFunc = new ej.dropdowns.MultiSelect({
+                    dataSource: sampleData,
+                    fields: { text: 'func', value: 'func' },
+                    placeholder: 'Chọn Hành Động',
+                    mode: 'CheckBox',
+                    showSelectAll: true,
+                    showDropDownIcon: true,
+                    filterBarPlaceholder: 'Tìm Hành Động',
+                    zIndex: 9999,
+                });
+
+                // Render MultiSelect Dropdown for Func
+                multiselectObjFunc.appendTo('#multiselectFunc');
+            } else {
+                // Update data source if multiselectObjFunc already exists
+                multiselectObjFunc.dataSource = sampleData;
+                multiselectObjFunc.dataBind();
+            }
+        }
+
+    }
+
+    function showlThemTuFuFuncGoc() {
+        var company = $('#companyTemp').val();
+        if(company == ""){
+            toastOptionNotyfi();
+            toastr["warning"]("Bạn chưa chọn công ty", "Thông báo");
+            return false;
+        }
+        renderMultiselect(company);
+        $('#modalThemTuFuFuncGoc').modal('show');
+    }
+    function CreatRolePermistion() {
+        var company = $('#companyTemp').val();
+
+        var selectedFuValues = multiselectObjFu.value;
+        var selectedFuncValues = multiselectObjFunc.value;
+
+        var fu = selectedFuValues.join(', ');
+        var func = selectedFuncValues.join(', ')
+        $.ajax({
+            url: '/Home/DoInsertDecentralization',
+            data: {
+                company: company,
+                fu: fu,
+                func: func
+            },
+            type: 'POST',
+            dataType: 'json',
+            success: function (rs) {
+                if (rs.isSuccess === true) {
+                    $('#modalThemTuFuFuncGoc').modal('hide');
+                    loadGridData(company);
+                    toastOptionNotyfi();
+                    toastr["success"](rs.messages, "Thông báo");
+                } else {
+                    toastOptionNotyfi();
+                    toastr["warning"](rs.messages, "Thông báo");
+                }
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error.toString(), "Thông báo");
+            },
+            complete: function () {
+                document.getElementById("loadingIndicatorTaoQuyen").style.display = "none";
+                document.getElementById("txtTaoQuyen").style.visibility = "visible";
+            }
+        });
+
+    }
+    function showUpdate() {
+
+        var currentFuFunc = selectedIdsString;
+
+        if(numRowSelect > 1){
+            toastOptionNotyfi();
+            toastr["warning"]("Thao tác sửa chỉ được chọn 1, vui lòng kiểm tra lại", "Thông báo");
+            return false;
+        }
+        else{
+
+            $.ajax({
+            url: "/Home/InfoUpdateWitCompany",
+            data: { currentFuFunc },
+            type: 'GET',
+            dataType: 'json',
+            success: function (rs) {
+                if (rs.isSuccess === true) {
+                    $('#fuUpdate').val(rs.fu);
+                    $('#funcUpdate').val(rs.func);
+                    $('#modalSuaFuFunc').modal('show');
+                }
+                else {
+                    toastOptionNotyfi();
+                    toastr["warning"](rs.messages, "Thông báo");
+                }
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error, "Thông báo");
+            }
+        });
+        }
+    }
+
+    function update() {
+        var company = $('#companyTemp').val();
+        if(company == ""){
+            toastOptionNotyfi();
+            toastr["warning"]("Bạn chưa chọn công ty", "Thông báo");
+            return false;
+        }
+        var currentFuFunc = selectedIdsString;
+        var newFu = $('#fuUpdate').val();
+        var newFunc = $('#funcUpdate').val();
+
+        document.getElementById("txtSuaFuFunc").style.visibility = "hidden";
+        document.getElementById("loadingIndicatorSuaFuFunc").style.display = "block";
+        $.ajax({
+            url: '/Home/UpdateDataFuFuncWitCompany',
+            data: {
+                company: company,
+                currentFuFunc: currentFuFunc,
+                newFu: newFu,
+                newFunc: newFunc
+            },
+            type: 'POST',
+            dataType: 'json',
+            success: function (rs) {
+                if (rs.isSuccess === true) {
+                    $('#modalSuaFuFunc').modal('hide');
+                    loadGridData(company);
+                    toastOptionNotyfi();
+                    toastr["success"](rs.messages, "Thông báo");
+                } else {
+                    toastOptionNotyfi();
+                    toastr["warning"](rs.messages, "Thông báo");
+                }
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error.toString(), "Thông báo");
+            },
+            complete: function () {
+                document.getElementById("loadingIndicatorSuaFuFunc").style.display = "none";
+                document.getElementById("txtSuaFuFunc").style.visibility = "visible";
+            }
+        });
+    }
+
+
+    function showDelete() {
+        var company = $('#companyTemp').val();
+        if(company == ""){
+            toastOptionNotyfi();
+            toastr["warning"]("Bạn chưa chọn công ty", "Thông báo");
+            return false;
+        }
+        var currentFuFunc = selectedIdsString;
+
+                    bootbox.confirm({
+                        title: "Thông báo!",
+                        message: "Bạn có chắc muốn xoá : " + currentFuFunc,
+                        buttons: {
+                            confirm: {
+                                label: 'OK',
+                                className: 'btn btn-primary'
+                            }
+                        },
+                        callback: function (result) {
+                            if (result) {
+                                //Người dùng đã bấm OK, Gọi API xóa ở đây
+                                $.ajax({
+                                    url: '/Home/DeleteDataFuFuncWitCompany',
+                                    data: { company:company,currentFuFunc: currentFuFunc },
+                                    type: 'POST',
+                                    dataType: 'json',
+                                    success: function (rs) {
+                                        if (rs.isSuccess === true) {
+                                            loadGridData(company);
+                                            toastOptionNotyfi();
+                                            toastr["success"](rs.messages, "Thông báo");
+                                        } else {
+                                            toastOptionNotyfi();
+                                            toastr["warning"](rs.messages, "Thông báo");
+                                        }
+                                    },
+                                    error: function (error) {
+                                        toastOptionNotyfi();
+                                        toastr["error"]('Đã xảy ra lỗi: ' + error.toString(), "Thông báo");
+                                    }
+                                });
+                            }
+                        }
+                    });
+
+
+    }
+    function exportFileJsonComp() {
+        var company = $('#companyTemp').val();
+        if (company == "") {
+            toastOptionNotyfi();
+            toastr["warning"]("Bạn chưa chọn công ty", "Thông báo");
+            return false;
+        }
+
+        // Gửi request bằng cách điều hướng đến URL để trình duyệt tự tải file
+        window.location.href = '/Home/ExportJsonFuFuncWitCompany?company=' + encodeURIComponent(company);
+    }
+
+
+</script>
+

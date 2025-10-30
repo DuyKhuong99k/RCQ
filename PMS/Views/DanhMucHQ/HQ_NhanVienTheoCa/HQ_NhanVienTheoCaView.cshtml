@@ -1,0 +1,743 @@
+﻿@using Newtonsoft.Json
+@{
+    ViewData["Title"] = "HQ_NhanVienTheoCaView";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    //lấy danh sách roleid từ cookie
+    var roleIds = PMS.Middlewares.AuthenticationHelpers.GetRoleIdsFromCookie(Context);
+    // lấy danh sách fu func từ list roleId
+    var rolePermistions = await PMS.Middlewares.AuthenticationHelpers.GetRolePermistionsAsync(Context, roleIds);
+
+    var DataNhanVien = ViewBag.DataNhanVien;
+    var Cas = ViewBag.Cas;
+}
+
+<style>
+
+    span.e-input-group.e-control-wrapper.e-multi-column.e-ddl {
+        height: 50px !important;
+        border: 1px solid #d9dee3 !important;
+        color: #697a8d !important;
+        /*   font-weight: 400 !important;
+                                                                                                                                line-height: 1.53 !important; */
+        background-clip: padding-box !important;
+        min-height: calc(1.53em + 1.5rem + 2px) !important;
+        padding: 0.75rem 1.25rem !important;
+        font-size: 1rem !important;
+        border-radius: 0.5rem !important;
+    }
+
+    @@media (max-width: 576px) {
+        .card-header {
+            flex-direction: column !important;
+        }
+    }
+</style>
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center" style="flex-direction:column">
+                    <h2 class="mb-0">Nhân Viên Theo Ca</h2>
+                    <div class="d-flex flex-column flex-md-row align-items-center w-100">
+                        <label class="form-label text-center mb-2 mb-md-0 me-md-2">Ngày:</label>
+                        <input type="datetime-local" id="dateTimeHQNhanVien" class="form-control w-100 w-md-auto" />
+                        @{
+                            var taiHQ_NhanVienTheoCa = rolePermistions.Where(x => x.Fu == "Danh Mục / Nhân Viên Theo Ca HQ" && x.Func == "Xem Nhân Viên Theo Ca HQ" && x.Status == 1).FirstOrDefault();
+                            if (taiHQ_NhanVienTheoCa != null)
+                            {
+                                <button onclick="reloadData()" class="btn btn-primary mt-2 mt-md-0 ms-md-2 w-100 w-md-auto">Tải</button>
+                            }
+                        }
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="selection-info" style="margin-top: 10px; font-weight: bold;">
+                        Đang chọn: 0
+                    </div>
+                    <div id="Grid"></div>
+                   
+                    <div style="margin-top:20px;">
+                        @{
+                            var themHQ_NhanVienTheoCa = rolePermistions.Where(x => x.Fu == "Danh Mục / Nhân Viên Theo Ca HQ" && x.Func == "Thêm Nhân Viên Theo Ca HQ" && x.Status == 1).FirstOrDefault();
+                            if (themHQ_NhanVienTheoCa != null)
+                            {
+                                <button onclick="showInsert()" type="button" class="btn btn-outline-primary">Thêm</button>
+                            }
+                            // var suaHQ_NhanVienTheoCa = rolePermistions.Where(x => x.Fu == "Danh Mục / Nhân Viên Theo Ca HQ" && x.Func == "Sửa Nhân Viên Theo Ca HQ" && x.Status == 1).FirstOrDefault();
+                            // if (suaHQ_NhanVienTheoCa != null)
+                            // {
+                            //     <button onclick="showUpdate()" style="margin-right:5px" class="btn btn-outline-warning"><i class='bx bx-edit-alt'></i>Sửa</button>
+                            // }
+                            var xoaHQ_NhanVienTheoCa = rolePermistions.Where(x => x.Fu == "Danh Mục / Nhân Viên Theo Ca HQ" && x.Func == "Xóa Nhân Viên Theo Ca HQ" && x.Status == 1).FirstOrDefault();
+                            if (xoaHQ_NhanVienTheoCa != null)
+                            {
+                                <button onclick="showDelete()" style="margin-right:5px" class="btn btn-outline-danger"><i class='bx bx-trash'></i>Xoá</button>
+                            }
+                            var chuyencaHQ_NhanVienTheoCa = rolePermistions.Where(x => x.Fu == "Danh Mục / Nhân Viên Theo Ca HQ" && x.Func == "Chuyển Ca Nhân Viên Theo Ca HQ" && x.Status == 1).FirstOrDefault();
+                            if (chuyencaHQ_NhanVienTheoCa != null)
+                            {
+                                <button id="btnChuyenCa" onclick="showChuyenCa()" style="margin-right:5px;display:none" class="btn btn-outline-secondary">Chuyển Ca</button>
+                            }
+                                // var importHQ_NhanVienTheoCa = rolePermistions.Where(x => x.Fu == "Danh Mục / Nhân Viên Theo Ca HQ" && x.Func == "Import Nhân Viên Theo Ca HQ" && x.Status == 1).FirstOrDefault();
+                            // if (importHQ_NhanVienTheoCa != null)
+                            // {
+                            //     <button onclick="import()" style="margin-right:5px" class="btn btn-outline-info"><i class='bx bx-import'></i>Import</button>
+                            // }
+                            // var exportHQ_NhanVienTheoCa = rolePermistions.Where(x => x.Fu == "Danh Mục / Nhân Viên Theo Ca HQ" && x.Func == "Export Nhân Viên Theo Ca HQ" && x.Status == 1).FirstOrDefault();
+                            // if (exportHQ_NhanVienTheoCa != null)
+                            // {
+                            //     <button onclick="export()" style="margin-right:5px" class="btn btn-outline-secondary"><i class='bx bx-export'></i>Export Excel</button>
+                            // }
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="modalThem" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Thêm Nhân Viên Theo Ca</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-12 mb-12 ">
+                                <div class="form-outline">
+                                    <label class="form-label">
+                                        Ca
+                                    </label>
+                                    <ejs-combobox id="caIdNVTCHQ"
+                                                  open="onComboBoxOpenNhom"
+                                                  dataBound="isCheckScrollNhom"
+                                                  dataSource="@Cas"
+                                                  cssClass="e-multi-column"
+                                                  filtering="onfilteringNhom"
+                                                  allowFiltering="true"
+                                                  placeholder="Chọn Ca"
+                                                  popupHeight="400px"
+                                                  enableVirtualization="true"
+                                                  headerTemplate="@Html.Raw("<table><tr><th class='e-text-center' style='width: 75px;'>Id</th><th>Tên</th></tr></table>")"
+                                                  itemTemplate="@Html.Raw("<table><tbody><tr><td class='e-text-center' style='width: 75px;'>${Id}</td><td>${Ten}</td></tr> </tbody></table>")">
+                                        <e-combobox-fields text="Ten" value="Id"></e-combobox-fields>
+                                    </ejs-combobox>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 mb-12 ">
+                                <div class="form-outline">
+                                    <label class="form-label">Nhân Viên</label>
+                                    <ejs-combobox id="maNhanVienNVTCHQ"
+                                                  open="onComboBoxOpen"
+                                                  dataBound="isCheckScroll"
+                                                  dataSource="@DataNhanVien"
+                                                  cssClass="e-multi-column"
+                                                  filtering="onfiltering"
+                                                  allowFiltering="true"
+                                                  placeholder="Chọn nhân viên"
+                                                  popupHeight="400px"
+                                                  enableVirtualization="true"
+                                                  headerTemplate="@Html.Raw("<table><tr><th class='e-text-center' style='width: 75px;'>Mã</th><th>Tên</th><th>Ca</th></tr></table>")"
+                                                  itemTemplate="@Html.Raw("<table><tbody><tr><td class='e-text-center' style='width: 75px;'>${MaNhanVien}</td><td>${Name}</td><td>${DeptName0}</td></tr> </tbody></table>")">
+                                        <e-combobox-fields text="Name" value="MaNhanVien"></e-combobox-fields>
+                                    </ejs-combobox>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-4 pt-2">
+                            <div class="col-12">
+                                <button onclick="insert()" class="btn btn-primary w-100 position-relative" type="submit" id="">
+                                    <div class=" align-items-center">
+                                        <span id="txtThem">Thêm</span>
+                                        <div id="loadingIndicator" class=" spinner-border text-secondary position-absolute" role="status" style="left: 0;right: 0;top: 0;bottom: 0;margin: auto; display:none">
+                                            <span class="visually-hidden">Đang tải...</span>
+                                        </div>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="modalChuyenCa" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Chuyển Ca Nhân Viên</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-12 mb-12 ">
+                                <div class="form-outline">
+                                    <ejs-combobox id="caIdNVTCHQChuyenCa"
+                                                  open="onComboBoxOpenNhom"
+                                                  dataBound="isCheckScrollNhom"
+                                                  dataSource="@Cas"
+                                                  cssClass="e-multi-column"
+                                                  filtering="onfilteringNhom"
+                                                  allowFiltering="true"
+                                                  placeholder="Chọn Ca"
+                                                  popupHeight="400px"
+                                                  enableVirtualization="true"
+                                                  headerTemplate="@Html.Raw("<table><tr><th class='e-text-center' style='width: 75px;'>Id</th><th>Tên</th</tr></table>")"
+                                                  itemTemplate="@Html.Raw("<table><tbody><tr><td class='e-text-center' style='width: 75px;'>${Id}</td><td>${Ten}</td></tr> </tbody></table>")">
+                                        <e-combobox-fields text="Ten" value="Id"></e-combobox-fields>
+                                    </ejs-combobox>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-4 pt-2">
+                            <div class="col-12">
+                                <button onclick="chuyenCa()" class="btn btn-primary w-100 position-relative" type="submit" id="">
+                                    <div class=" align-items-center">
+                                        <span id="txtThemChuyenCa">Chuyển</span>
+                                        <div id="loadingIndicatorChuyenCa" class=" spinner-border text-secondary position-absolute" role="status" style="left: 0;right: 0;top: 0;bottom: 0;margin: auto; display:none">
+                                            <span class="visually-hidden">Đang tải...</span>
+                                        </div>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<input type="hidden" id="idNVTCHQRowSelected" />
+<script>
+
+    function onfiltering(e) {
+        var query = new ej.data.Query().select(['Name', 'MaNhanVien', 'DeptName0']); // Chỉ lấy 100 phần tử đầu tiên
+        var predicateQuery = query.where(new ej.data.Predicate('MaNhanVien', 'contains', e.text, true).or('Name', 'contains', e.text, true));
+        query = (e.text !== '') ? predicateQuery : query;
+        e.updateData(@Html.Raw(JsonConvert.SerializeObject(@ViewBag.DataNhanVien)), query);
+        isCheckScroll.call(this);
+    }
+
+    function onComboBoxOpen(args) {
+        var comboBox = args.popup; // Lấy popup của combobox
+        if (comboBox) {
+            // Kiểm tra nếu dataSource tồn tại
+            if (comboBox.dataSource) {
+                // Chỉ hiển thị 10 phần tử đầu tiên
+                comboBox.dataSource = comboBox.dataSource.slice(0, 10);
+            }
+        }
+    }
+
+    function isCheckScroll() {
+        if (this.popupObj && this.popupObj.element && this.liCollections.length > 0) {
+            var offsetHeight = this.popupObj.element.querySelector('.e-content').offsetHeight;
+            var contentHeight = offsetHeight < this.liCollections[0].offsetHeight * this.liCollections.length;
+            if (contentHeight || offsetHeight === 0) {
+                this.popupObj.element.classList.add('e-scroller');
+            } else {
+                this.popupObj.element.classList.remove('e-scroller');
+            }
+        }
+    }
+
+
+
+    function onfilteringNhom(e) {
+        var query = new ej.data.Query().select(['Id', 'Ten', 'SuDung']); // Chỉ lấy 100 phần tử đầu tiên
+        var predicateQuery = query.where(new ej.data.Predicate('Id', 'contains', e.text, true).or('Ten', 'contains', e.text, true));
+        query = (e.text !== '') ? predicateQuery : query;
+        e.updateData(@Html.Raw(JsonConvert.SerializeObject(@ViewBag.DataNhanVien)), query);
+        isCheckScroll.call(this);
+    }
+
+    function onComboBoxOpenNhom(args) {
+        var comboBox = args.popup; // Lấy popup của combobox
+        if (comboBox) {
+            // Kiểm tra nếu dataSource tồn tại
+            if (comboBox.dataSource) {
+                // Chỉ hiển thị 10 phần tử đầu tiên
+                comboBox.dataSource = comboBox.dataSource.slice(0, 10);
+            }
+        }
+    }
+
+    function isCheckScrollNhom() {
+        if (this.popupObj && this.popupObj.element && this.liCollections.length > 0) {
+            var offsetHeight = this.popupObj.element.querySelector('.e-content').offsetHeight;
+            var contentHeight = offsetHeight < this.liCollections[0].offsetHeight * this.liCollections.length;
+            if (contentHeight || offsetHeight === 0) {
+                this.popupObj.element.classList.add('e-scroller');
+            } else {
+                this.popupObj.element.classList.remove('e-scroller');
+            }
+        }
+    }
+
+</script>
+<script>
+    function setCurrentDateTime() {
+        const now = new Date();
+
+        // Lấy từng phần ngày và giờ của giờ địa phương
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0'); // Tháng bắt đầu từ 0 nên cần +1
+        const day = String(now.getDate()).padStart(2, '0');
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const seconds = String(now.getSeconds()).padStart(2, '0');
+        const milliseconds = String(now.getMilliseconds()).padStart(3, '0'); // Thêm phần mili giây
+
+        // Định dạng theo 'YYYY-MM-DDTHH:MM:SS.fff'
+        const formattedDateTime = `${year}-${month}-${day}T${hours}:${minutes}:${seconds}.${milliseconds}`;
+        const dateTimeInput = document.getElementById("dateTimeHQNhanVien");
+        dateTimeInput.value = formattedDateTime;
+        return formattedDateTime;
+        //.value = formattedDateTime;
+    }
+
+
+    $(document).ready(function () {
+        setCurrentDateTime();
+        //loadGridData();
+        //reloadData();
+    });
+    let selectedIdsString = ""; // Khai báo một chuỗi để lưu trữ MaNhanVien đã chọn
+    let numRowSelect = 0;
+    var grid;
+    function loadGridData() {
+        var dateTime = setCurrentDateTime();
+        $.ajax({
+            url: '/HQ_NhanVienTheoCa/GetAllsNewFullField',
+            data: {
+                dateTime: dateTime
+            },
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                var dataManager = new ej.data.DataManager({
+                    json: data,
+                    adaptor: new ej.data.JsonAdaptor()
+                });
+                if (grid) {
+                    grid.dataSource = dataManager;
+                    grid.refresh();
+                } else {
+                    // var contextMenuItems = [
+                    //     { text: 'Chuyển Ca', id: 'chuyenCa' }
+                    // ];
+
+                    grid = new ej.grids.Grid({
+                        dataSource: dataManager,
+                        allowPaging: true,
+                        pageSettings: { pageSize: 50, pageSizes: [50, 100, 200, 500] },
+                        allowFiltering: true,
+                        filterSettings: { type: 'Excel' },
+                        allowSorting: true,
+                        //frozenColumns: 3,
+                        allowResizing: true,
+                        //rowSelected: onRowSelected,
+                        selectionSettings: { persistSelection: true },
+                        rowSelected: selectionChanged,
+                        rowDeselected: unSelectionChanged,
+                        allowGrouping: true,
+                        groupSettings: { showDropArea: false, columns: ['CaName'] },
+                        height: 400,
+                        // contextMenuItems: contextMenuItems,
+                        // contextMenuClick: contextMenuClickHandler,
+                        allowExcelExport: true,
+                        toolbar: ['ExcelExport'],
+                        columns: [
+                            { type: 'checkbox', width: '50' },
+                            //{ field: 'Id', headerText: 'Id', width: 150 },
+                            { field: 'NhanVienId', headerText: 'Mã Nhân Viên', width: 150 },
+                            { field: 'MaHoSo', headerText: 'Mã Hồ Sơ', width: 150 },
+                            { field: 'NhanVienName', headerText: 'Tên Nhân Viên', width: 150 },
+                            { field: 'NhomName', headerText: 'Nhóm', width: 150 },
+                            //{ field: 'CaId', headerText: 'Mã Ca', width: 150 },
+                            { field: 'CaName', headerText: 'Ca', width: 150 },
+                            //{ field: 'NgayGio', headerText: 'Ngày Giờ Cài Đặt', width: 150 },
+                        ]
+                    });
+                    // Hiển thị Grid trên trang web
+                    grid.appendTo('#Grid');
+                    grid.toolbarClick = function (args) {
+                        if (args.item.id === 'Grid_excelexport') {
+                              grid.excelExport();
+                        }
+                    };
+                }
+            },
+            error: function (error) {
+                console.error(error);
+            }
+        });
+    }
+    //loadGridData();
+    function reloadData() {
+        loadGridData();
+    }
+
+    function contextMenuClickHandler(args) {
+        var rowData = args.rowInfo.rowData;
+        if (rowData) {
+            switch (args.item.id) {
+                case 'chuyenCa':
+                $.ajax({
+                        url: "/HQ_NhanVienTheoCa/CheckQuyenHQ",
+                        data: { typeOption: "CHUYENNHANVIEN" },
+                        type: 'GET',
+                        dataType: 'json',
+                        success: function (rs) {
+                            if (rs.isSuccess === true) {
+                                bootbox.confirm({
+                                    title: "Thông báo!",
+                                    message: "Bạn có chắc muốn chuyển nhân viên của " + numRowSelect + " phiếu cân đang chọn!",
+                                    buttons: {
+                                        confirm: {
+                                            label: 'OK',
+                                            className: 'btn btn-primary'
+                                        }
+                                    },
+                                    callback: function (result) {
+                                        if (result) {
+                                             $('#modalChuyenCa').modal('show');
+                                        }
+                                    }
+                                });
+                            }
+                            else {
+                                toastOptionNotyfi();
+                                toastr["warning"](rs.Messages, "Thông báo");
+                            }
+                        },
+                        error: function (error) {
+                            toastOptionNotyfi();
+                            toastr["error"]('Đã xảy ra lỗi: ' + error, "Thông báo");
+                        }
+                    });
+
+
+
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+
+
+    function unSelectionChanged(args) {
+        let deselectedRecords = args.data ? args.data : []; // Lấy các bản ghi được bỏ chọn
+
+        // Kiểm tra xem deselectedRecords có phải là một mảng không
+        if (Array.isArray(deselectedRecords)) {
+            // Nếu là một mảng rỗng hoặc không tồn tại
+            if (deselectedRecords.length === 0) {
+                selectedIdsString = "";
+                numRowSelect = 0; // Reset số dòng đã chọn
+                //alert(selectedIdsString);
+                document.getElementById("selection-info").innerText = `Đang chọn: ${numRowSelect}`;
+                 checkButtonVisibility();
+                return;
+            }
+            // Lặp qua từng bản ghi được bỏ chọn
+            for (let i = 0; i < deselectedRecords.length; i++) {
+                //let deselectedIds = deselectedRecords[i].Id;
+                let deselectedNhanVienId = deselectedRecords[i].NhanVienId;
+                let deselectedId = deselectedNhanVienId;
+
+                // Kiểm tra xem MaNhanVien đã có trong chuỗi chưa trước khi loại bỏ
+                if (selectedIdsString.includes(deselectedId)) {
+                    selectedIdsString = selectedIdsString.replace(deselectedId + "|", ""); // Loại bỏ MaNhanVien khỏi chuỗi
+                    numRowSelect--; // Giảm số dòng đã chọn
+                     checkButtonVisibility();
+                }
+            }
+        } else {
+            // Nếu deselectedRecords không phải là một mảng
+            let deselectedNhanVienId = deselectedRecords.NhanVienId
+            let deselectedId = deselectedNhanVienId;
+
+            // Kiểm tra xem MaNhanVien đã có trong chuỗi chưa trước khi loại bỏ
+            if (selectedIdsString.includes(deselectedId)) {
+                selectedIdsString = selectedIdsString.replace(deselectedId + "|", ""); // Loại bỏ MaNhanVien khỏi chuỗi
+                numRowSelect--; // Giảm số dòng đã chọn
+                 checkButtonVisibility();
+            }
+            //alert(selectedIdsString);
+        }
+        // Hiển thị số dòng đã chọn nếu cần
+        //alert(numRowSelect);
+        // Cập nhật nội dung hiển thị
+        document.getElementById("selection-info").innerText = `Đang chọn: ${numRowSelect}`;
+         checkButtonVisibility();
+    }
+
+    function selectionChanged(args) {
+        let selectedRecords = args.data ? args.data : []; // Lấy các bản ghi được chọn
+        // Giả định có một thuộc tính isHeader để xác định xem dữ liệu có phải từ header hay không
+        if (selectedRecords.length == 0) {
+            // Lấy toàn bộ Mã Nhân viên từ grid vào selectedIdsString
+            let filteredRecords = grid.getCurrentViewRecords(); // Lấy các bản ghi đã được lọc
+            selectedIdsString = ""; // Reset selectedIdsString trước khi thêm dữ liệu mới
+            numRowSelect = filteredRecords.length; // Cập nhật số dòng đã chọn
+            filteredRecords.forEach(record => {
+                selectedIdsString += record.NhanVienId + "|"; // Thêm STT vào chuỗi, phân tách bằng dấu phẩy
+            });
+
+            // Loại bỏ dấu | cuối cùng
+            //selectedIdsString = selectedIdsString.slice(0, -1);
+            //alert(selectedIdsString);
+            //alert(numRowSelect);
+            document.getElementById("selection-info").innerText = `Đang chọn: ${numRowSelect}`;
+             checkButtonVisibility();
+            return;
+        }
+        let selectedNhanVienId = selectedRecords.NhanVienId;
+        // Kiểm tra xem MaNhanVien đã được thêm vào chuỗi chưa trước khi thêm vào
+        if (!selectedIdsString.includes(selectedNhanVienId)) {
+            selectedIdsString += selectedNhanVienId + "|";
+            numRowSelect++; // Tăng số dòng đã chọn
+            //alert(selectedIdsString);
+        }
+
+        // Cập nhật nội dung hiển thị
+        document.getElementById("selection-info").innerText = `Đang chọn: ${numRowSelect}`;
+         checkButtonVisibility();
+        // Loại bỏ dấu | cuối cùng
+        //selectedIdsString = selectedIdsString.slice(0, -1);
+        //alert(selectedIdsString);
+        // Hiển thị số dòng đã chọn nếu cần
+        ////alert(numRowSelect);
+    }
+
+
+
+
+    function onRowSelected(args) {
+        // Lấy dữ liệu của hàng được chọn
+        var selectedRecord = args.data;
+        // Lấy giá trị Id từ dữ liệu của hàng được chọn
+        var Id = selectedRecord.Id;
+
+        $('#idNVTCHQRowSelected').val(Id);
+    }
+</script>
+<script>
+    function showInsert() {
+        $('#modalThem').modal('show');
+        // $.ajax({
+        //     type: "GET",
+        //     url: "/HQ_NhanVienTheoCa/CreatDefautNew",
+        //     success: function (rs) {
+        //         if (rs.isSuccess === true) {
+        //             $('#idNVTCHQ').val(rs.Id);
+        //             // $('#maNhanVienNVTCHQ').val(rs.MaNhanVien);
+        //             // $('#caIdNVTCHQ').val(rs.caId);
+        //             // $('#ngayNguyenLieuNVTCHQ').val();
+        //             $('#modalThem').modal('show');
+        //         }
+        //         else {
+        //             toastOptionNotyfi();
+        //             toastr["warning"](rs.Mesages, "Thông báo");
+        //         }
+        //     },
+        //     error: function () {
+        //         toastOptionNotyfi();
+        //         toastr["error"]('Đã xảy ra lỗi: ' + error, "Thông báo");
+        //     }
+        // });
+    }
+    function insert() {
+        var comboboxNhanVien = document.getElementById('maNhanVienNVTCHQ').ej2_instances[0];
+        var nhanVienId = comboboxNhanVien.value;
+        //var caId = $('#caIdNVTCHQ').val();
+        var comboboxNhom = document.getElementById('caIdNVTCHQ').ej2_instances[0];
+        var caId = comboboxNhom.value;
+
+        document.getElementById("txtThem").style.visibility = "hidden";
+        document.getElementById("loadingIndicator").style.display = "block";
+        $.ajax({
+            type: 'POST',
+            url: '/HQ_NhanVienTheoCa/DoInsert',
+            data: {
+                nhanVienId: nhanVienId,
+                caId: caId,
+            },
+            success: function (rs) {
+                if (rs.isSuccess === true) {
+                    toastOptionNotyfi();
+                    toastr["success"](rs.Messages, "Thông báo");
+                    $('#modalThem').modal('hide');
+                    reloadData();
+                } else {
+                    toastOptionNotyfi();
+                    toastr["warning"](rs.Messages, "Thông báo");
+                }
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error, "Thông báo");
+            },
+            complete: function () {
+                document.getElementById("loadingIndicator").style.display = "none";
+                document.getElementById("txtThem").style.visibility = "visible";
+            }
+        });
+    }
+    function showChuyenCa(){
+        $.ajax({
+                        url: "/HQ_NhanVienTheoCa/CheckQuyenHQ",
+                        data: { typeOption: "CHUYENNHANVIEN" },
+                        type: 'GET',
+                        dataType: 'json',
+                        success: function (rs) {
+                            if (rs.isSuccess === true) {
+                                bootbox.confirm({
+                                    title: "Thông báo!",
+                                    message: "Bạn có chắc muốn chuyển nhân viên của " + numRowSelect + " phiếu cân đang chọn!",
+                                    buttons: {
+                                        confirm: {
+                                            label: 'OK',
+                                            className: 'btn btn-primary'
+                                        }
+                                    },
+                                    callback: function (result) {
+                                        if (result) {
+                                             $('#modalChuyenCa').modal('show');
+                                        }
+                                    }
+                                });
+                            }
+                            else {
+                                toastOptionNotyfi();
+                                toastr["warning"](rs.Messages, "Thông báo");
+                            }
+                        },
+                        error: function (error) {
+                            toastOptionNotyfi();
+                            toastr["error"]('Đã xảy ra lỗi: ' + error, "Thông báo");
+                        }
+                    });
+    }
+
+    function chuyenCa() {
+        var comboboxNhom = document.getElementById('caIdNVTCHQChuyenCa').ej2_instances[0];
+        var caId = comboboxNhom.value;
+
+        document.getElementById("txtThem").style.visibility = "hidden";
+        document.getElementById("loadingIndicator").style.display = "block";
+        $.ajax({
+            type: 'POST',
+            url: '/HQ_NhanVienTheoCa/DoChuyenCa',
+            data: {
+                caId: caId,
+                listNhanVien: selectedIdsString
+            },
+            success: function (rs) {
+                if (rs.isSuccess === true) {
+                    toastOptionNotyfi();
+                    toastr["success"](rs.Messages, "Thông báo");
+                    $('#modalChuyenCa').modal('hide');
+                    reloadData();
+                } else {
+                    toastOptionNotyfi();
+                    toastr["warning"](rs.Messages, "Thông báo");
+                }
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error, "Thông báo");
+            },
+            complete: function () {
+                document.getElementById("loadingIndicatorChuyenCa").style.display = "none";
+                document.getElementById("txtThemChuyenCa").style.visibility = "visible";
+            }
+        });
+    }
+</script>
+<script>
+    function showDelete() {
+        var id = $('#idNVTCHQRowSelected').val();
+        $.ajax({
+            url: "/HQ_NhanVienTheoCa/GetsByMa",
+            data: { id: id },
+            type: 'GET',
+            dataType: 'json',
+            success: function (rs) {
+                if (rs.isSuccess === true) {
+                    bootbox.confirm({
+                        title: "Thông báo!",
+                        message: "Bạn có chắc muốn xoá : " + rs.CaId + "|" + rs.NhanVienId,
+                        buttons: {
+                            confirm: {
+                                label: 'OK',
+                                className: 'btn btn-primary'
+                            }
+                        },
+                        callback: function (result) {
+                            if (result) {
+                                //Người dùng đã bấm OK, Gọi API xóa ở đây
+                                $.ajax({
+                                    url: '/HQ_NhanVienTheoCa/DoDelete',
+                                    data: { id: id },
+                                    type: 'POST',
+                                    dataType: 'json',
+                                    success: function (rs) {
+                                        if (rs.isSuccess === true) {
+                                            reloadData();
+                                            toastOptionNotyfi();
+                                            toastr["success"](rs.Messages, "Thông báo");
+                                        } else {
+                                            toastOptionNotyfi();
+                                            toastr["warning"](rs.Messages, "Thông báo");
+                                        }
+                                    },
+                                    error: function (error) {
+                                        toastOptionNotyfi();
+                                        toastr["error"]('Đã xảy ra lỗi: ' + error.toString(), "Thông báo");
+                                    }
+                                });
+                            }
+                        }
+                    });
+                } else {
+                    toastOptionNotyfi();
+                    toastr["warning"]('Không tìm thấy thông tin!', "Thông báo");
+                }
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error.toString(), "Thông báo");
+            }
+        });
+
+    }
+</script>
+<script>
+    function checkButtonVisibility() {
+        const button = document.getElementById("btnChuyenCa");
+        if (numRowSelect > 0) {
+            button.style.display = "inline-block";
+        } else {
+            button.style.display = "none";
+        }
+    }
+
+    document.addEventListener('change', function(event) {
+        checkButtonVisibility();
+    });
+
+</script>
+

@@ -1,0 +1,239 @@
+﻿<div class="card mb-4 marginGridjs position-relative">
+    <div class="card-header d-flex justify-content-between align-items-center gap-2 position-relative">
+        @* <div class="text-start">
+            <small class="fw-semibold text-muted d-block"> Sản lượng trung bình:</small>
+            <p class="weight-displayTBSanLuongCongNhan fw-bold fs-6 mb-0">0,000.00 Kg</p>
+        </div> *@
+        <h6 class="mb-0 mx-auto text-center flex-grow-1">
+            Tổng Hợp Sản Lượng & Tỷ Lệ Tăng Trong Theo Thành Phẩm Ra Coi Xếp Khuôn
+        </h6>
+         <button class="btn btn-outline-primary btn-sm position-absolute top-0 end-0 mt-2 me-3 shadow-sm"
+                onclick="location.href='@Url.Action("DBTongHopTyLeTangTrongTheoThanhPhamRaCoiXepKhuonAdvanceView", "Dashboard")'">
+            <i class='bx bxs-bar-chart-alt-2 fs-5'></i>
+        </button>
+    </div>
+
+    <div class="card-body px-3 py-2">
+        <div id="column-container-TangTrongRaCoiTheoThanhPham" style="width: 100%;height:275px"></div>
+    </div>
+</div>
+
+
+<script>
+
+    const fakeData_TangTrongRaCoi = [
+        {
+            MaThanhPham: "TP001",
+            ThanhPhamName: "Cá Hồi Phi Lê",
+            TongTrongLuongVao: 1000,
+            TongTrongLuongRa: 950,
+            TyLeTangTrong: -5.0
+        },
+        {
+            MaThanhPham: "TP002",
+            ThanhPhamName: "Cá Tra Cắt Khúc",
+            TongTrongLuongVao: 1200,
+            TongTrongLuongRa: 1260,
+            TyLeTangTrong: 5.0
+        },
+        {
+            MaThanhPham: "TP003",
+            ThanhPhamName: "Mực Ống Làm Sạch",
+            TongTrongLuongVao: 800,
+            TongTrongLuongRa: 780,
+            TyLeTangTrong: -2.5
+        },
+        {
+            MaThanhPham: "TP004",
+            ThanhPhamName: "Tôm Sú Nguyên Con",
+            TongTrongLuongVao: 1500,
+            TongTrongLuongRa: 1575,
+            TyLeTangTrong: 5.0
+        },
+        {
+            MaThanhPham: "TP005",
+            ThanhPhamName: "Cá Thu Cắt Lát",
+            TongTrongLuongVao: 950,
+            TongTrongLuongRa: 930,
+            TyLeTangTrong: -2.1
+        }
+    ];
+    $(document).ready(function () {
+         //createComboChart_TangTrongRaCoiTheoThanhPham(fakeData_TangTrongRaCoi);
+         taiDashboardTyLeTangTrongRaCoiTheoThanhPham();
+        var timeInterval = localStorage.getItem("timeInterval_dashboard_user");
+
+        if (isNaN(timeInterval) || timeInterval <= 0) {
+            timeInterval = 1800000; // 30 phút mặc định
+        }
+
+        setInterval(createComboChart_TangTrongRaCoiTheoThanhPham, timeInterval);
+    });
+    function taiDashboardTyLeTangTrongRaCoiTheoThanhPham() {
+        const chartDataTLTTRCXK = getDataForChartTLTTRCXK();
+        if (chartDataTLTTRCXK && chartDataTLTTRCXK.length > 0) {
+            createComboChart_TangTrongRaCoiTheoThanhPham(chartDataTLTTRCXK);
+        }
+    }
+
+    function getDataForChartTLTTRCXK() {
+        let chartDataTLTTRCXK = null;
+        const ngayNguyenLieu = localStorage.getItem("fromDate_dashboard_user");
+        //const ngayNguyenLieu = localStorage.getItem("toDate_dashboard_user");
+        $.ajax({
+            url: '/Dashboard/DataChartTongHopTyLeTangTrongRaCoiXepKhuon',
+            type: 'GET',
+            data: { ngayNguyenLieu : ngayNguyenLieu},
+            async: false,
+            success: function (response) {
+                if (response.Success) {
+                    chartDataTLTTRCXK = response.DataChart;
+                    if (Array.isArray(chartDataTLTTRCXK)) {
+
+                        // const weightDisplays = document.querySelectorAll('.weight-displayTyLeThuHoiThanhPham2');
+                        // weightDisplays.forEach(display => {
+                        //     display.textContent = `${response.TotalTrongLuong} kg`;
+                        // });
+                    }
+                } else {
+                    console.warn("Không có dữ liệu");
+                }
+            },
+            error: function (e) {
+                console.error("Lỗi khi lấy dữ liệu:", e);
+            }
+        });
+        return chartDataTLTTRCXK;
+    }
+
+    let chart_TangTrongRaCoiTheoThanhPham = null;
+
+    function createComboChart_TangTrongRaCoiTheoThanhPham(data) {
+        const isMobile = window.innerWidth <= 768;
+
+        const series = [
+            {
+                type: 'Column',
+                xName: 'ThanhPhamName',
+                yName: 'TongTrongLuongVao',
+                name: 'Vào',
+                marker: {
+                    dataLabel: {
+                        visible: true,
+                        font: { fontWeight: '600', color: '#000' }
+                    }
+                }
+            },
+            {
+                type: 'Column',
+                xName: 'ThanhPhamName',
+                yName: 'TongTrongLuongRa',
+                name: 'Ra',
+                marker: {
+                    dataLabel: {
+                        visible: true,
+                        font: { fontWeight: '600', color: '#000' }
+                    }
+                }
+            },
+            {
+                type: 'Line',
+                xName: 'ThanhPhamName',
+                yName: 'TyLeTangTrong',
+                name: 'Tăng Trọng (%)',
+                width: 2,
+                marker: { visible: true },
+                yAxisName: 'yTyLe'
+            },
+            {
+                type: 'Line',
+                xName: 'ThanhPhamName',
+                yName: 'DinhMucTangTrong',
+                name: 'Định Mức (%)',
+                width: 2,
+                dashArray: '5,5',
+                marker: { visible: true },
+                yAxisName: 'yTyLe'
+            }
+        ];
+
+        if (chart_TangTrongRaCoiTheoThanhPham) {
+            chart_TangTrongRaCoiTheoThanhPham.series = series;
+            chart_TangTrongRaCoiTheoThanhPham.dataSource = data;
+            chart_TangTrongRaCoiTheoThanhPham.refresh();
+            return;
+        }
+
+        chart_TangTrongRaCoiTheoThanhPham = new ej.charts.Chart({
+            primaryXAxis: {
+                valueType: 'Category',
+                labelIntersectAction: 'Rotate45',
+                labelRotation: isMobile ? 270 : 0,
+                labelStyle: {
+                    fontWeight: 'bold',
+                    size: '9px',
+                    color: '#333'
+                },
+                majorGridLines: { width: 0 }
+            },
+            primaryYAxis: {
+                title: 'Trọng lượng (kg)',
+                labelFormat: '{value}',
+                majorTickLines: { width: 0 },
+                lineStyle: { width: 0 }
+            },
+            axes: [
+                {
+                    name: 'yTyLe',
+                    title: 'Tỷ lệ tăng trọng (%)',
+                    opposedPosition: true,
+                    labelFormat: '{value}%',
+                    lineStyle: { width: 0 },
+                    majorTickLines: { width: 0 },
+                    labelStyle: { color: '#565656', fontWeight: 'bold' }
+                }
+            ],
+            chartArea: { border: { width: 0 } },
+            tooltip: {
+                enable: true,
+                shared: true,
+                showNearestPoint: false
+            },
+            legendSettings: { visible: true },
+            width: '100%',
+            height: '400px',
+            series: series,
+            dataSource: data,
+
+            textRender: function (args) {
+                const num = parseFloat(args.text);
+                if (!isNaN(num)) {
+                    args.text = num.toLocaleString('vi-VN', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    });
+                }
+            },
+
+            tooltipRender: function (args) {
+                const value = args.point?.y;
+                const name = args.series?.name;
+
+                if (typeof value === 'number' && !isNaN(value)) {
+                    const formatted = value.toLocaleString('vi-VN', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    });
+
+                    if (name === 'Tăng Trọng (%)') {
+                        args.text = `${name}: ${formatted} %`;
+                    } else {
+                        args.text = `${name}: ${formatted} kg`;
+                    }
+                }
+            }
+        });
+
+        chart_TangTrongRaCoiTheoThanhPham.appendTo('#column-container-TangTrongRaCoiTheoThanhPham');
+    }
+</script>

@@ -1,0 +1,621 @@
+﻿@{
+    ViewData["Title"] = "BoTriNhanVienTheoChuyenViTriView";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var listLines = ViewBag.listLines;
+    var listViTris = ViewBag.listViTris;
+    var XuongId = @Context.Session.GetString("XuongId");
+    var roleIds = PMS.Middlewares.AuthenticationHelpers.GetRoleIdsFromCookie(Context);
+    var rolePermistions = await PMS.Middlewares.AuthenticationHelpers.GetRolePermistionsAsync(Context, roleIds);
+}
+
+<style>
+    body {
+        background-color: #f8f9fa;
+    }
+
+    .sidebar {
+        background-color: #f1f1f1;
+        padding: 10px;
+        height: calc(100vh - 200px); /* Chiều cao sidebar */
+        border-right: 1px solid #ddd;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .sidebar-section {
+        display: flex;
+        flex-direction: column;
+        flex: 1; /* Chia đều */
+        min-height: 0; /* Cho phép overflow */
+    }
+
+    .sidebar-header {
+        flex-shrink: 0;
+        font-weight: 600;
+        margin-bottom: 5px;
+    }
+
+    .sidebar-list {
+        flex: 1;
+        overflow: auto;
+    }
+
+    .sidebar .btn {
+        width: 100%;
+        margin-bottom: 5px;
+    }
+
+    .table-container {
+        background-color: white;
+        padding: 15px;
+        border-radius: 5px;
+        box-shadow: 0 0 5px rgba(0,0,0,0.1);
+    }
+
+    .footer-bar {
+        background: #fff;
+        padding: 10px;
+        border-top: 1px solid #ddd;
+    }
+
+    .form-check-label {
+        display: inline-block;
+        white-space: nowrap;
+    }
+    #modalNhanVien .modal-dialog {
+        max-width: 1000px;
+    }
+
+    /* --- Responsive cho mobile --- */
+    @@media (max-width: 768px) {
+        .sidebar
+
+    {
+        flex-direction: row; /* Nằm ngang */
+        height: auto;
+        border-right: none;
+        border-bottom: 1px solid #ddd;
+    }
+
+    .sidebar-section {
+        flex: 1; /* Mỗi phần 50% */
+        min-height: auto;
+    }
+
+    .sidebar-header {
+        font-size: 14px;
+        margin-bottom: 3px;
+        text-align: center;
+    }
+
+    .sidebar-list {
+        max-height: 150px;
+        overflow-y: auto;
+    }
+
+    .sidebar .btn {
+        font-size: 12px;
+        padding: 3px 5px;
+        margin-bottom: 3px;
+    }
+
+    /* Để bảng xuống dưới sidebar */
+    .col-2.sidebar {
+        max-width: 100%;
+        flex: 0 0 100%;
+    }
+
+    .col-10 {
+        max-width: 100%;
+        flex: 0 0 100%;
+    }
+
+ }
+ @@media (max-width: 768px) {
+        .footer-bar
+
+    {
+        flex-direction: column;
+        align-items: stretch; /* Cho các phần tử full chiều ngang */
+        gap: 10px;
+    }
+
+    .footer-bar .d-flex {
+        flex-wrap: wrap; /* Cho phép xuống dòng */
+        gap: 5px;
+    }
+
+    .footer-bar label {
+        font-size: 14px;
+    }
+
+    .footer-bar input[type="date"],
+    .footer-bar input[type="time"] {
+        flex: 1 1 auto; /* Để input co giãn vừa khung */
+        min-width: 120px;
+    }
+
+    .footer-bar .btn {
+        width: 100%; /* Nút full width */
+    }
+
+ }
+    @@media (max-width: 768px) {
+        .table-container
+
+    {
+        display: flex;
+        flex-direction: column-reverse; /* Đảo thứ tự khi mobile */
+    }
+
+    .table-container > #GridLineStaff {
+        margin-top: 10px;
+    }
+
+    }
+</style>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-2 sidebar">
+                        <div class="sidebar-section">
+                            <div class="sidebar-header">Nhóm CN</div>
+                            <div class="sidebar-list">
+                                @foreach (var line in listLines)
+                                {
+                                    <button class="btn btn-secondary" data-id="@line.Ma">@line.Ten</button>
+                                }
+                            </div>
+                        </div>
+                        <div class="sidebar-section">
+                            <div class="sidebar-header">Vị Trí</div>
+                            <div class="sidebar-list">
+                                @foreach (var vt in listViTris)
+                                {
+                                    <button class="btn btn-secondary" data-id="@vt.Ma">@vt.Ten</button>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-10">
+                        <div class="table-container">
+                            <div id="GridLineStaff"></div>
+                            <div class="d-flex justify-content-start gap-2 mt-2">
+                                <button class="btn btn-outline-primary" onclick="showStaff()">
+                                    <i class='bx bx-layer-plus'></i>
+                                </button>
+                                <button class="btn btn-outline-danger" onclick="deleteNhanVienLine()">
+                                    <i class='bx bx-layer-minus'></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="footer-bar mt-3 d-flex align-items-center justify-content-between">
+                            <div class="d-flex align-items-center gap-2">
+                                <label>Ngày:</label>
+                                <input type="date" class="form-control form-control-sm" id="date">
+                                <label>Giờ:</label>
+                                <input type="time" class="form-control form-control-sm" id="time">
+
+                                <div class="form-check form-check-inline ms-2 align-items-center d-flex">
+                                    <input class="form-check-input" type="checkbox" id="checkNow">
+                                    <label class="form-check-label mb-0 ms-1" for="checkNow" style="white-space: nowrap;">Vị Trí Mới Nhất</label>
+                                </div>
+                            </div>
+                            <button class="btn btn-primary" onclick="reloadLineStaff()">Tải Lại</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="modalNhanVien" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Chọn Nhân Viên</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="card">
+                    <div class="card-body">
+                        <div id="loadingIndicatorGrid" class="text-center py-5" style="display:none">
+                            <div class="spinner-border text-primary" role="status"></div>
+                            <div>Đang tải dữ liệu...</div>
+                        </div>
+                        <div id="GridStaff"></div>
+                        <div class="row mt-4 pt-2">
+                            <div class="col-12">
+                                <button onclick="insert()" class="btn btn-primary w-100 position-relative" type="submit">
+                                    <div class="align-items-center">
+                                        <span id="txtThem">Xác Nhận</span>
+                                        <div id="loadingIndicator" class="spinner-border text-secondary position-absolute" role="status" style="left: 0;right: 0;top: 0;bottom: 0;margin: auto; display:none">
+                                            <span class="visually-hidden">Đang tải...</span>
+                                        </div>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+        document.addEventListener("DOMContentLoaded", function () {
+        var today = new Date().toISOString().split('T')[0];
+        document.getElementById('date').value = today;
+
+        function updateTime() {
+            var now = new Date();
+            var hh = String(now.getHours()).padStart(2, '0');
+            var mm = String(now.getMinutes()).padStart(2, '0');
+            var ss = String(now.getSeconds()).padStart(2, '0');
+            document.getElementById('time').value = hh + ':' + mm + ':' + ss;
+        }
+        updateTime();
+        setInterval(updateTime, 1000);
+    });
+
+        var gridLineStaff;
+        var selectedLine = null;
+        var selectedViTri = null;
+
+    $(document).on('click', '.sidebar button[data-id]', function () {
+        var $section = $(this).closest('.sidebar-section');
+        var parentTitle = $section.find('.sidebar-header').text().trim();
+
+        if (parentTitle === "Nhóm CN") {
+            selectedLine = $(this).data('id');
+        }
+        else if (parentTitle === "Vị Trí") {
+            selectedViTri = $(this).data('id');
+        }
+
+        $section.find('button[data-id]')
+            .removeClass('btn-primary')
+            .addClass('btn-secondary');
+        $(this)
+            .removeClass('btn-secondary')
+            .addClass('btn-primary');
+
+        checkAndLoad();
+    });
+
+      function checkAndLoad() {
+            var ngay = document.getElementById('date').value;
+            if (ngay && selectedLine && selectedViTri) {
+                reloadGridLineStaff(ngay, selectedLine, selectedViTri);
+            }
+      }
+
+      function reloadGridLineStaff(ngay,maLine,maViTri){
+          var isCheckNow = $('#checkNow').prop('checked');
+          $.ajax({
+            url: '/BoTriNVTheoChuyenViTriFillet/GetAllsFullField',
+            type: 'GET',
+            data: {
+                    ngay: ngay,
+                    maLine: maLine,
+                    maViTri: maViTri,
+                    isCheckNow:isCheckNow
+            },
+            dataType: 'json',
+            success: function (rs) {
+                if (rs != null) {
+                    loadGridDataLineStaff(rs);
+                } else {
+                    toastOptionNotyfi();
+                    toastr["warning"](rs.Mesages, "Thông báo");
+                }
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error, "Thông báo");
+            }
+        });
+      }
+
+      function loadGridDataLineStaff(data) {
+        if (gridLineStaff) {
+            gridLineStaff.dataSource = [];
+            gridLineStaff.dataBind();
+            if (data && data.length > 0) {
+                gridLineStaff.dataSource = new ej.data.DataManager({
+                    json: data,
+                    adaptor: new ej.data.JsonAdaptor()
+                });
+                gridLineStaff.dataBind();
+            }
+        } else {
+            initializeGrid(data);
+        }
+    }
+     loadGridDataLineStaff();
+      function initializeGrid(data){
+        var dataManager = new ej.data.DataManager({
+            json: data,
+            adaptor: new ej.data.JsonAdaptor()
+        });
+        gridLineStaff = new ej.grids.Grid({
+                            dataSource: dataManager,
+                            allowPaging: true,
+                            pageSettings: { pageSize: 50, pageSizes: [50, 100, 200, 500] },
+                            allowFiltering: true,
+                            filterSettings: { type: 'Excel' },
+                            allowSorting: true,
+                            allowResizing: true,
+                            allowExcelExport: true,
+                            selectionSettings: { persistSelection: true },
+                            toolbar: ['ExcelExport'],
+                            rowSelected: selectionChangedLineStaff,
+                            rowDeselected: unSelectionChangedLineStaff,
+                            height: 400,
+                            columns: [
+                                { type: "checkbox", field: "", allowFiltering: false, allowSorting: false, width: '50' },
+                                { field: 'MaNhanVien', headerText: 'Mã Nhân Viên', width: 150 },
+                                { field: 'MaHoSo', headerText: 'Mã Số', width: 150 },
+                                { field: 'NhanVienName', headerText: 'Tên Nhân Viên', width: 150 },
+                                { field: 'NhomName', headerText: 'Tên Nhóm', width: 150 },
+                                { field: 'Gio', headerText: 'Giờ Bắt Đầu', width: 150 }
+                            ]
+                        });
+        gridLineStaff.appendTo('#GridLineStaff');
+        gridLineStaff.toolbarClick = function (args) {
+        if (args.item.id === 'Grid_excelexport') {
+            gridLineStaff.excelExport();
+        }};
+
+      }
+
+    let selectedIdsStringLineStaff = "";
+    let selectedCount = 0;
+    function unSelectionChangedLineStaff(args) {
+        let deselectedRecords = args.data ? args.data : [];
+        if (deselectedRecords.length == 0) {
+            selectedIdsStringLineStaff = "";
+            selectedCount = 0;
+            //alert(selectedIdsStringLineStaff);
+            return;
+        }
+        let deselectedId = deselectedRecords.Id;
+        if (selectedIdsStringLineStaff.includes(deselectedId)) {
+            selectedIdsStringLineStaff = selectedIdsStringLineStaff.replace(deselectedId + ",", "");
+            selectedCount--;
+        }
+        //alert(selectedIdsStringLineStaff);
+    }
+    
+    function selectionChangedLineStaff(args) {
+        let selectedRecords = args.data ? args.data : []; 
+        if (selectedRecords.length == 0) {
+            let filteredRecords = gridLineStaff.getCurrentViewRecords();
+            selectedIdsStringLineStaff = "";
+            selectedCount = filteredRecords.length;
+            filteredRecords.forEach(record => {
+                selectedIdsStringLineStaff += record.Id + ",";
+            });
+            //alert(selectedIdsStringLineStaff);
+            return;
+        }
+        let selectedId = selectedRecords.Id;
+        if (!selectedIdsStringLineStaff.includes(selectedId)) {
+            selectedIdsStringLineStaff += selectedId + ",";
+            selectedCount++;
+        }
+        //alert(selectedIdsStringLineStaff);
+
+    }
+
+    function deleteNhanVienLine() {
+        var ngay = $('#date').val();
+        var gio = $('#time').val();
+        var maLine = selectedLine;
+        var maViTri = selectedViTri;
+        var xuongId = @XuongId;
+        bootbox.confirm({
+            title: "Thông báo!",
+            message: "Bạn có chắc muốn xoá " + selectedCount + " items!  ",
+            buttons: {
+                confirm: {
+                    label: 'OK',
+                    className: 'btn btn-primary'
+                }
+            },
+            callback: function (result) {
+                if (result) {
+                    //Người dùng đã bấm OK, Gọi API xóa ở đây
+                    $.ajax({
+                        url: '/BoTriNVTheoChuyenViTriFillet/DoDelete',
+                        data: {
+                            selectedIdsStringLineStaff: selectedIdsStringLineStaff,
+                        },
+                        type: 'POST',
+                        dataType: 'json',
+                        success: function (rs) {
+                            if (rs.isSuccess === true) {
+                                reloadGridLineStaff(ngay,maLine,maViTri);
+                                selectedIdsStringLineStaff = "";
+                                selectedCount = 0;
+                                toastOptionNotyfi();
+                                toastr["success"](rs.Messages, "Thông báo");
+
+                            } else {
+                                toastOptionNotyfi();
+                                toastr["warning"](rs.Messages, "Thông báo");
+                            }
+                        },
+                        error: function (error) {
+                            toastOptionNotyfi();
+                            toastr["error"]('Đã xảy ra lỗi: ' + error.toString(), "Thông báo");
+                        }
+                    });
+                }
+            }
+        });
+    }
+    function reloadLineStaff(){
+        var ngay = $('#date').val();;
+        var maLine = selectedLine;
+        var maViTri = selectedViTri;
+        reloadGridLineStaff(ngay,maLine,maViTri);
+    }
+
+
+</script>
+
+<script>
+    var gridStaff;
+    function showStaff() {
+        $('#modalNhanVien').modal('show');
+        $('#GridStaff').hide();
+        $('#loadingIndicatorGrid').show();
+        var xuongId = @XuongId;
+        $.ajax({
+            url: '/Staff/GetListNhanVienDaiThanhFilltered',
+            type: 'GET',
+            data: {
+                xuongId : xuongId
+            },
+            dataType: 'json',
+            success: function (data) {
+                var dataManager = new ej.data.DataManager({
+                    json: data,
+                    adaptor: new ej.data.JsonAdaptor()
+                });
+
+                if (gridStaff) {
+                    gridStaff.dataSource = dataManager;
+                    gridStaff.refresh();
+                } else {
+                    gridStaff = new ej.grids.Grid({
+                        dataSource: dataManager,
+                        allowPaging: true,
+                        pageSettings: { pageSize: 500, pageSizes: [50, 100, 200, 500] },
+                        allowFiltering: true,
+                        allowSorting: true,
+                        filterSettings: { type: 'Excel' },
+                        allowResizing: true,
+                        allowExcelExport: true,
+                        toolbar: ['ExcelExport'],
+                        //rowSelected: onRowSelected,
+                        selectionSettings: { persistSelection: true },
+                        rowSelected: selectionChanged,
+                        rowDeselected: unSelectionChanged,
+                        height: 400,
+                        columns: [
+                            { type: "checkbox", field: "", allowFiltering: false, allowSorting: false, width: '50' },
+                            { field: 'MaNhanVien', headerText: 'Mã Nhân Viên', width: 150 },
+                            { field: 'MaHoSo', headerText: 'Mã Số', width: 150 },
+                            { field: 'Name', headerText: 'Tên Nhân Viên', width: 150 },
+                            { field: 'DeptName0', headerText: 'Tên Nhóm', width: 150 },
+                        ]
+                    });
+                    gridStaff.appendTo('#GridStaff');
+                }
+
+                // Tắt loading, hiển thị grid
+                $('#loadingIndicatorGrid').hide();
+                $('#GridStaff').show();
+            },
+            error: function (error) {
+                console.error(error);
+                $('#loadingIndicatorGrid').hide();
+                $('#GridStaff').html('<div class="text-danger text-center py-5">Lỗi tải dữ liệu</div>').show();
+            }
+        });
+    }
+
+    let selectedIdsString = "";
+
+    function unSelectionChanged(args) {
+        let deselectedRecords = args.data ? args.data : [];
+        if (deselectedRecords.length == 0) {
+            selectedIdsString = "";
+            //alert(selectedIdsString);
+            return;
+        }
+
+        let deselectedId = deselectedRecords.MaNhanVien;
+
+        // Kiểm tra xem MaNhanVien đã có trong chuỗi chưa trước khi loại bỏ
+        if (selectedIdsString.includes(deselectedId)) {
+            selectedIdsString = selectedIdsString.replace(deselectedId + ",", ""); // Loại bỏ MaNhanVien khỏi chuỗi
+        }
+        //alert(selectedIdsString);
+
+    }
+    function selectionChanged(args) {
+        let selectedRecords = args.data ? args.data : [];
+        if (selectedRecords.length == 0) {
+
+            let filteredRecords = gridStaff.getCurrentViewRecords();
+            selectedIdsString = "";
+            filteredRecords.forEach(record => {
+                selectedIdsString += record.MaNhanVien + ",";
+            });
+            //alert(selectedIdsString);
+            return;
+        }
+        let selectedId = selectedRecords.MaNhanVien;
+        if (!selectedIdsString.includes(selectedId)) {
+            selectedIdsString += selectedId + ",";
+        }
+        //alert(selectedIdsString);
+    }
+
+  
+</script>
+<script>
+    var selectedLine = null;
+    var selectedViTri = null;
+    function insert() {
+        var ngay = $('#date').val();
+        var gio = $('#time').val();
+        var maLine = selectedLine;
+        var maViTri = selectedViTri;
+        var xuongId = @XuongId;
+        document.getElementById("txtThem").style.visibility = "hidden";
+        document.getElementById("loadingIndicator").style.display = "block";
+        $.ajax({
+            type: 'POST',
+            url: '/BoTriNVTheoChuyenViTriFillet/DoInsert',
+            data: {
+                selectedIdsString: selectedIdsString,
+                ngay: ngay,
+                gio: gio,
+                maLine: maLine,
+                maViTri: maViTri,
+                xuongId: xuongId
+            },
+            success: function (rs) {
+                if (rs.isSuccess === true) {
+                    toastOptionNotyfi();
+                    toastr["success"](rs.Messages, "Thông báo");
+                    $('#modalNhanVien').modal('hide');
+                    reloadGridLineStaff(ngay, maLine, maViTri);
+                    selectedIdsString = "";
+                } else {
+                    toastOptionNotyfi();
+                    toastr["warning"](rs.Messages, "Thông báo");
+                }
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error, "Thông báo");
+            },
+            complete: function () {
+                document.getElementById("loadingIndicator").style.display = "none";
+                document.getElementById("txtThem").style.visibility = "visible";
+            }
+        });
+    }
+</script>

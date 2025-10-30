@@ -1,0 +1,58 @@
+[
+  {
+    "TableName": "PhieuCanPhuPhamv2",
+    "NameView": "Phụ Phẩm v2"
+  },
+  {
+    "TableName": "PhieuCanBTPFilletv2",
+    "NameView": "BTP Fillet v2"
+  },
+  {
+    "TableName": "PhieuCanLangDa",
+    "NameView": "BTP Lạng Da"
+  },
+  {
+    "TableName": "PhieuCanTPFillet",
+    "NameView": "TP Fillet"
+  },
+  {
+    "TableName": "PhieuCanTPFilletv2",
+    "NameView": "TP Fillet v2"
+  },
+  {
+    "TableName": "PhieuCanSoCheDinhHinh",
+    "NameView": "Sơ Chế Định Hình"
+  },
+  {
+    "TableName": "PhieuCanBTPDinhHinh",
+    "NameView": "BTP Định Hình"
+  },
+  {
+    "TableName": "PhieuCanTPDinhHinh",
+    "NameView": "TP Định Hình"
+  },
+  {
+    "TableName": "PhieuCanChinhXepKhuon",
+    "NameView": "Chính Xếp Khuôn"
+  },
+  {
+    "TableName": "PhieuCanPhuXepKhuon",
+    "NameView": "Phụ Xếp Khuôn"
+  },
+  {
+    "TableName": "PhieuCanXepKhuonBlock",
+    "NameView": "Block Xếp Khuôn"
+  },
+  {
+    "TableName": "PhieuCanXepKhuonKHC",
+    "NameView": "KXL Xếp Khuôn"
+  },
+  {
+    "TableName": "PhieuCanTaiChe",
+    "NameView": "Tái Chế Xếp Khuôn"
+  },
+  {
+    "TableName": "BT_PhieuCan",
+    "NameView": "Bao Tử"
+  }
+]

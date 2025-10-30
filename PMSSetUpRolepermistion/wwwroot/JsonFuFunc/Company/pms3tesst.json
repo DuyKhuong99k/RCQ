@@ -1,0 +1,58 @@
+[
+  {
+    "Fu": "JSONFILE",
+    "Func": "pms3tesst"
+  },
+  {
+    "Fu": "Dashboard",
+    "Func": "Tổng Hợp Ghe Vùng Nuôi"
+  },
+  {
+    "Fu": "Dashboard",
+    "Func": "Tổng Hợp Thành Phẩm Nguyên Liệu"
+  },
+  {
+    "Fu": "Dashboard",
+    "Func": "Tổng Hợp Thành Phẩm Bán TP Fillet"
+  },
+  {
+    "Fu": "Dashboard",
+    "Func": "Tổng Hợp Thành Phẩm Fillet"
+  },
+  {
+    "Fu": "Dashboard",
+    "Func": "Tổng Hợp Thành Phẩm Bán TP Định Hình"
+  },
+  {
+    "Fu": "Dashboard",
+    "Func": "Tổng Hợp Thành Phẩm Định Hình"
+  },
+  {
+    "Fu": "Dashboard",
+    "Func": "Tổng Hợp Thành Phẩm Xếp Khuôn"
+  },
+  {
+    "Fu": "Dashboard",
+    "Func": "Tổng Hợp Thành Phẩm Sơ Chế Định Hình"
+  },
+  {
+    "Fu": "Dashboard",
+    "Func": "Tổng Hợp Thành Phẩm Phụ Xếp Khuôn"
+  },
+  {
+    "Fu": "Dashboard",
+    "Func": "Tổng Hợp Thành Phẩm Xếp Khuôn Block"
+  },
+  {
+    "Fu": "Dashboard",
+    "Func": "Tổng Hợp Thành Phẩm Phụ Phẩm"
+  },
+  {
+    "Fu": "Dashboard",
+    "Func": "Tổng Hợp Thành Phẩm Tái Chế"
+  },
+  {
+    "Fu": "Dashboard",
+    "Func": "Tổng Hợp Thành Phẩm Xếp Khuôn KHC"
+  }
+]

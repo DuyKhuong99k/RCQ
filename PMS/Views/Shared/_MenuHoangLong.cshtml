@@ -1,0 +1,2443 @@
+﻿@using System.Web
+@{
+    //lấy danh sách roleid từ cookie
+    var roleIds = PMS.Middlewares.AuthenticationHelpers.GetRoleIdsFromCookie(Context);
+    // lấy danh sách fu func từ list roleId
+    var rolePermistions = await PMS.Middlewares.AuthenticationHelpers.GetRolePermistionsAsync(Context, roleIds);
+
+    var listHubmayCan = AppViewModels.AppViewModel.Instance.GetAllHubsUrlJsonData();
+    if (listHubmayCan == null)
+    {
+        listHubmayCan = null;
+    }
+
+    var listKhuVucTL = await PMS.Middlewares.AuthenticationHelpers.GetKhuVucs(Context);
+    if (listKhuVucTL == null)
+    {
+        listKhuVucTL = new List<Models.Repos.A_Model.KhuVuc>
+        {
+            new Models.Repos.A_Model.KhuVuc
+            {
+                Id = "Null",
+                Name = "Không có dữ liệu"
+            }
+        };
+    }
+        var scheme = Context.Request.Scheme; // http
+        var host = Context.Request.Host.Host; // 192.168.1.1
+        var baseUrl = $"{scheme}://{host}";
+   
+}
+<ul class="menu-inner py-1">
+    @{
+        var dashboard = rolePermistions.Where(x => x.Fu == "Dashboard" && x.Status == 1).FirstOrDefault();
+        if (dashboard != null)
+        {
+            <!-- Dashboard -->
+            <li class="menu-item @(Context.Request.Path.StartsWithSegments("/Home") || Context.Request.Path.StartsWithSegments("/") ? "open active" : "")">
+                <a href="/Home/Index" class="menu-link">
+                    @*<i class="menu-icon tf-icons bx bx-home-circle"></i><i class="fal fa-fighter-jet"></i><i class='bx bx-cloud-lightning'></i>*@
+                    <i class="menu-icon tf-icons bx bxs-dashboard"></i>
+                    <div data-i18n="Analytics">Dashboard</div>
+                </a>
+            </li>
+        }
+    }
+    @{
+        @* danh mục *@
+        var danhMuc = rolePermistions.Where(x => x.Fu.Contains("Danh Mục /")).FirstOrDefault();
+        if (danhMuc != null)
+        {
+            <li class="menu-item @((Context.Request.Path.StartsWithSegments("/DanhMuc") || Context.Request.Path.StartsWithSegments("/DanhMucHQ")) ? "open active" : "")">
+
+                <a href="javascript:void(0);" class="menu-link menu-toggle ">
+                    <i class="menu-icon tf-icons bx bx-menu"></i>
+                    <div data-i18n="Layouts">Danh Mục</div>
+                </a>
+                <ul class="menu-sub">
+                    @{
+                        var nhanvien = rolePermistions.Where(x => x.Fu.Contains("Danh Mục / Nhân Viên")).FirstOrDefault();
+                        if (nhanvien != null)
+                        {
+                            <li class="menu-item @(Context.Request.Path.StartsWithSegments("/DanhMuc/Staff") ? "open active" : "")">
+                                <a href="javascript:void(0);" class="menu-link menu-toggle ">
+                                    <div data-i18n="Basic">Nhân Viên</div>
+                                </a>
+                                <ul class="menu-sub">
+                                    @{
+                                        var nhanviencodinh = rolePermistions.Where(x => x.Fu == "Danh Mục / Nhân Viên" && x.Func == "Xem Nhân Viên" && x.Status == 1).FirstOrDefault();
+                                        if (nhanviencodinh != null)
+                                        {
+                                            <li class="menu-item @(Context.Request.Path.StartsWithSegments("/DanhMuc/Staff/NhanVien") ? "active" : "")">
+                                                <a href="/DanhMuc/Staff/NhanVien" class="menu-link">
+                                                    <div data-i18n="Basic">Cố Định</div>
+                                                </a>
+                                            </li>
+                                        }
+
+                                        var nhanvientamthoi = rolePermistions.Where(x => x.Fu == "Danh Mục / Nhân Viên / Trạng Thái Nhân Viên Tạm Thời" && x.Func == "Xem / Nhân Viên / Trạng Thái Nhân Viên Tạm Thời" && x.Status == 1).FirstOrDefault();
+                                        if (nhanvientamthoi != null)
+                                        {
+                                            <li class="menu-item @(Context.Request.Path.StartsWithSegments("/DanhMuc/Staff/NhanVienTrangThaiTamThoi") ? "active" : "")">
+                                                <a href="/DanhMuc/Staff/NhanVienTrangThaiTamThoi" class="menu-link">
+                                                    <div data-i18n="Basic">Trạng Thái Tạm Thời</div>
+                                                </a>
+                                            </li>
+                                        }
+                                    }
+                                </ul>
+                            </li>
+                        }
+                    }
+                    @{
+                        var nguyenlieu = rolePermistions.Where(x => x.Fu.Contains("Danh Mục / Nguyên Liệu")).FirstOrDefault();
+                        if (nguyenlieu != null)
+                        {
+                            <li class="menu-item @(Context.Request.Path.StartsWithSegments("/DanhMuc/NguyenLieu") || Context.Request.Path.StartsWithSegments("/DanhMucHQ/HQ_Lo") ? "open active" : "")">
+                                <a href="javascript:void(0);" class="menu-link menu-toggle">
+                                    <div data-i18n="Basic">Nguyên Liệu</div>
+                                </a>
+                                <ul class="menu-sub">
+                                    @{
+                                        var lohq = rolePermistions.Where(x => x.Fu == "Danh Mục / Lô HQ" && x.Func == "Xem Lô HQ" && x.Status == 1).FirstOrDefault();
+                                        if (lohq != null)
+                                        {
+                                            <li class="menu-item @(Context.Request.Path.StartsWithSegments("/DanhMucHQ/HQ_Lo") ? "active" : "")">
+                                                <a href="/DanhMucHQ/HQ_Lo/Index" class="menu-link">
+                                                    <div data-i18n="Account">Lô</div>
+                                                </a>
+                                            </li>
+                                        }
+                                    }
+
+                                    @{
+                                        var aonguyenlieu = rolePermistions.Where(x => x.Fu == "Danh Mục / Ao" && x.Func == "Xem Ao" && x.Status == 1).FirstOrDefault();
+                                        if (aonguyenlieu != null)
+                                        {
+                                            <li class="menu-item @(Context.Request.Path.StartsWithSegments("/DanhMuc/NguyenLieu/Ao") ? "active" : "")">
+                                                <a href="/DanhMuc/NguyenLieu/Ao/Index" class="menu-link">
+                                                    <div>Ao</div>
+                                                </a>
+                                            </li>
+                                        }
+                                    }
+
+                                    @{
+                                        var nhacungcap = rolePermistions.Where(x => x.Fu == "Danh Mục / Nguyên Liệu / Nhà Cung Cấp" && x.Func == "Xem Nguyên Liệu / Nhà Cung Cấp" && x.Status == 1).FirstOrDefault();
+                                        if (nhacungcap != null)
+                                        {
+                                            <li class="menu-item @(Context.Request.Path.StartsWithSegments("/DanhMuc/NguyenLieu/NhaCungCap") ? "active" : "")">
+                                                <a href="/DanhMuc/NguyenLieu/NhaCungCap/Index" class="menu-link">
+                                                    <div>Nhà Cung Cấp</div>
+                                                </a>
+                                            </li>
+                                        }
+                                    }
+
+                                    @{
+                                        var phuongtiennguyenlieu = rolePermistions.Where(x => x.Fu == "Danh Mục / Nguyên Liệu / Phương Tiện Nguyên Liệu" && x.Func == "Xem Nguyên Liệu / Phương Tiện Nguyên Liệu" && x.Status == 1).FirstOrDefault();
+                                        if (phuongtiennguyenlieu != null)
+                                        {
+                                            <li class="menu-item @(Context.Request.Path.StartsWithSegments("/DanhMuc/NguyenLieu/PhuongTienNguyenLieu") ? "active" : "")">
+                                                <a href="/DanhMuc/NguyenLieu/PhuongTienNguyenLieu/Index"
+                                                   class="menu-link">
+                                                    <div>Phương Tiện</div>
+                                                </a>
+                                            </li>
+                                        }
+                                    }
+                                    @{
+                                        var phuongtientaitrongnguyenlieu = rolePermistions.Where(x => x.Fu == "Danh Mục / Nguyên Liệu / Phương Tiện Tải Trọng" && x.Func == "Xem Nguyên Liệu / Phương Tiện Tải Trọng" && x.Status == 1).FirstOrDefault();
+                                        if (phuongtientaitrongnguyenlieu != null)
+                                        {
+                                            <li class="menu-item @(Context.Request.Path.StartsWithSegments("/DanhMuc/NguyenLieu/PhuongTienTaiTrong") ? "active" : "")">
+                                                <a href="/DanhMuc/NguyenLieu/PhuongTienTaiTrong/Index"
+                                                   class="menu-link">
+                                                    <div>Phương Tiện - Tải Trọng</div>
+                                                </a>
+                                            </li>
+                                        }
+                                    }
+                                    @{
+                                        var loaicanguyenlieu = rolePermistions.Where(x => x.Fu == "Danh Mục / Nguyên Liệu / Loại Cá" && x.Func == "Xem Nguyên Liệu / Loại Cá" && x.Status == 1).FirstOrDefault();
+                                        if (loaicanguyenlieu != null)
+                                        {
+                                            <li class="menu-item @(Context.Request.Path.StartsWithSegments("/DanhMuc/NguyenLieu/LoaiCaNguyenLieu") ? "active" : "")">
+                                                <a href="/DanhMuc/NguyenLieu/LoaiCaNguyenLieu/Index" class="menu-link">
+                                                    <div>Loại Cá</div>
+                                                </a>
+                                            </li>
+                                        }
+                                    }
+                                    @{
+                                        var thanhphamnguyenlieu = rolePermistions.Where(x => x.Fu == "Danh Mục / Nguyên Liệu / Thành Phẩm" && x.Func == "Xem Nguyên Liệu / Thành Phẩm" && x.Status == 1).FirstOrDefault();
+                                        if (thanhphamnguyenlieu != null)
+                                        {
+                                            <li class="menu-item @(Context.Request.Path.StartsWithSegments("/DanhMuc/NguyenLieu/ThanhPhamNguyenLieu") ? "active" : "")">
+                                                <a href="/DanhMuc/NguyenLieu/ThanhPhamNguyenLieu/Index"
+                                                   class="menu-link">
+                                                    <div>Thành Phẩm</div>
+                                                </a>
+                                            </li>
+                                        }
+                                    }
+                                    @{
+                                        var sizenguyenlieu = rolePermistions.Where(x => x.Fu == "Danh Mục / Nguyên Liệu / Size" && x.Func == "Xem Nguyên Liệu / Size" && x.Status == 1).FirstOrDefault();
+                                        if (sizenguyenlieu != null)
+                                        {
+                                            <li class="menu-item @(Context.Request.Path.StartsWithSegments("/DanhMuc/NguyenLieu/SizeNguyenLieu") ? "active" : "")">
+                                                <a href="/DanhMuc/NguyenLieu/SizeNguyenLieu/Index" class="menu-link">
+                                                    <div>Size</div>
+                                                </a>
+                                            </li>
+                                        }
+                                    }
+                                    @{
+                                        var maunguyenlieu = rolePermistions.Where(x => x.Fu == "Danh Mục / Nguyên Liệu / Màu" && x.Func == "Xem Nguyên Liệu / Màu" && x.Status == 1).FirstOrDefault();
+                                        if (maunguyenlieu != null)
+                                        {
+                                            <li class="menu-item @(Context.Request.Path.StartsWithSegments("/DanhMuc/NguyenLieu/MauNguyenLieu") ? "active" : "")">
+                                                <a href="/DanhMuc/NguyenLieu/MauNguyenLieu/Index" class="menu-link">
+                                                    <div>Màu</div>
+                                                </a>
+                                            </li>
+                                        }
+                                    }
+                                    @{
+                                        var mauCaGiongnguyenlieu = rolePermistions.Where(x => x.Fu == "Danh Mục / Vùng Nuôi / Mẫu Cá Giống" && x.Func == "Xem Vùng Nuôi / Mẫu Cá Giống" && x.Status == 1).FirstOrDefault();
+                                        if (mauCaGiongnguyenlieu != null)
+                                        {
+                                            <li class="menu-item @(Context.Request.Path.StartsWithSegments("/DanhMuc/NguyenLieu/MauCaGiongVungNuoi") ? "active" : "")">
+                                                <a href="/DanhMuc/NguyenLieu/MauCaGiongVungNuoi/Index"
+                                                   class="menu-link">
+                                                    <div>Mẫu Cá Giống Vùng Nuôi</div>
+                                                </a>
+                                            </li>
+                                        }
+                                    }
+
+                                </ul>
+                            </li>
+                        }
+                    }
+                    @{
+                        var fillet = rolePermistions.Where(x => x.Fu.Contains("Danh Mục / Fillet")).FirstOrDefault();
+                        if (fillet != null)
+                        {
+                            <li class="menu-item @(Context.Request.Path.StartsWithSegments("/DanhMuc/Fillet") ? "open active" : "")">
+                                <a href="javascript:void(0);" class="menu-link menu-toggle">
+                                    <div data-i18n="Basic">Fillet</div>
+                                </a>
+                                <ul class="menu-sub">
+                                    @{
+                                        var banfillet = rolePermistions.Where(x => x.Fu == "Danh Mục / Fillet / Bàn" && x.Func == "Xem Fillet / Bàn" && x.Status == 1).FirstOrDefault();
+                                        if (banfillet != null)
+                                        {
+                                            <li class="menu-item @(Context.Request.Path.StartsWithSegments("/DanhMuc/Fillet/BanFillet") ? "active" : "")">
+                                                <a href="/DanhMuc/Fillet/BanFillet/Index" class="menu-link">
+                                                    <div>Bàn</div>
+                                                </a>
+                                            </li>
+                                        }
+                                    }
+                                    @{
+                                        var loaicafillet = rolePermistions.Where(x => x.Fu == "Danh Mục / Fillet / Loại Cá" && x.Func == "Xem Fillet / Loại Cá" && x.Status == 1).FirstOrDefault();
+                                        if (loaicafillet != null)
+                                        {
+                                            <li class="menu-item @(Context.Request.Path.StartsWithSegments("/DanhMuc/Fillet/LoaiCaFillet") ? "active" : "")">
+                                                <a href="/DanhMuc/Fillet/LoaiCaFillet/Index" class="menu-link">
+                                                    <div>Loại Cá</div>
+                                                </a>
+                                            </li>
+                                        }
+                                    }
+                                    @{
+                                        var thanhphamfillet = rolePermistions.Where(x => x.Fu == "Danh Mục / Fillet / Thành Phẩm" && x.Func == "Xem Fillet / Thành Phẩm" && x.Status == 1).FirstOrDefault();
+                                        if (thanhphamfillet != null)
+                                        {
+                                            <li class="menu-item @(Context.Request.Path.StartsWithSegments("/DanhMuc/Fillet/ThanhPhamFillet") ? "active" : "")">
+                                                <a href="/DanhMuc/Fillet/ThanhPhamFillet/Index" class="menu-link">
+                                                    <div>Thành Phẩm</div>
+                                                </a>
+                                            </li>
+                                        }
+                                    }
+                                    @{
+                                        var sizefillet = rolePermistions.Where(x => x.Fu == "Danh Mục / Fillet / Size" && x.Func == "Xem Fillet / Size" && x.Status == 1).FirstOrDefault();
+                                        if (sizefillet != null)
+                                        {
+                                            <li class="menu-item @(Context.Request.Path.StartsWithSegments("/DanhMuc/Fillet/SizeFillet") ? "active" : "")">
+                                                <a href="/DanhMuc/Fillet/SizeFillet/Index" class="menu-link">
+                                                    <div>Size</div>
+                                                </a>
+                                            </li>
+                                        }
+                                    }
+                                    @{
+                                        var maufillet = rolePermistions.Where(x => x.Fu == "Danh Mục / Fillet / Màu" && x.Func == "Xem Fillet / Màu" && x.Status == 1).FirstOrDefault();
+                                        if (maufillet != null)
+                                        {
+                                            <li class="menu-item @(Context.Request.Path.StartsWithSegments("/DanhMuc/Fillet/MauFillet") ? "active" : "")">
+                                                <a href="/DanhMuc/Fillet/MauFillet/Index" class="menu-link">
+                                                    <div>Màu</div>
+                                                </a>
+                                            </li>
+                                        }
+                                    }
+                                    @{
+                                        var dinhmucfillet = rolePermistions.Where(x => x.Fu == "Danh Mục / Fillet / Định Mức" && x.Func == "Xem Fillet / Định Mức" && x.Status == 1).FirstOrDefault();
+                                        if (dinhmucfillet != null)
+                                        {
+                                            <li class="menu-item @(Context.Request.Path.StartsWithSegments("/DanhMuc/Fillet/DinhMucFillet") ? "active" : "")">
+                                                <a href="/DanhMuc/Fillet/DinhMucFillet/Index" class="menu-link">
+                                                    <div>Định Mức</div>
+                                                </a>
+                                            </li>
+                                        }
+                                    }
+                                    @{
+                                        var maptptlfillet = rolePermistions.Where(x => x.Fu == "Danh Mục / Fillet / Map TPFillet Tính Lương" && x.Func == "Xem Fillet / Map TPFillet Tính Lương" && x.Status == 1).FirstOrDefault();
+                                        if (maptptlfillet != null)
+                                        {
+                                            <li class="menu-item @(Context.Request.Path.StartsWithSegments("/DanhMuc/Fillet/MapTPTinhLuongFillet") ? "active" : "")">
+                                                <a href="/DanhMuc/Fillet/MapTPTinhLuongFillet/Index" class="menu-link">
+                                                    <div>Map TPFillet Tính Lương</div>
+                                                </a>
+                                            </li>
+                                        }
+                                    }
+                                    @{
+                                        var tpmacdinhfillet = rolePermistions.Where(x => x.Fu == "Danh Mục / Fillet / Thành Phẩm Mặc Định" && x.Func == "Xem Fillet / Thành Phẩm Mặc Định" && x.Status == 1).FirstOrDefault();
+                                        if (tpmacdinhfillet != null)
+                                        {
+                                            <li class="menu-item @(Context.Request.Path.StartsWithSegments("/DanhMuc/Fillet/ThanhPhamMacDinhFillet") ? "active" : "")">
+                                                <a href="/DanhMuc/Fillet/ThanhPhamMacDinhFillet/Index"
+                                                   class="menu-link">
+                                                    <div>Thành Phẩm Mặc Định</div>
+                                                </a>
+                                            </li>
+                                        }
+                                    }
+                                    @{
+                                        var hanmuctlfillet = rolePermistions.Where(x => x.Fu == "Danh Mục / Fillet / Hạn Mức Trọng Lượng" && x.Func == "Xem Fillet / Hạn Mức Trọng Lượng" && x.Status == 1).FirstOrDefault();
+                                        if (hanmuctlfillet != null)
+                                        {
+                                            <li class="menu-item @(Context.Request.Path.StartsWithSegments("/DanhMuc/Fillet/HanMucTrongLuongFillet") ? "active" : "")">
+                                                <a href="/DanhMuc/Fillet/HanMucTrongLuongFillet/Index"
+                                                   class="menu-link">
+                                                    <div>Hạn Mức Trọng Lượng</div>
+                                                </a>
+                                            </li>
+                                        }
+                                    }
+                                    @{
+                                        var nhanvienbanfillet = rolePermistions.Where(x => x.Fu == "Danh Mục / Fillet / Nhân Viên Theo Bàn" && x.Func == "Xem Fillet / Nhân Viên Theo Bàn" && x.Status == 1).FirstOrDefault();
+                                        if (nhanvienbanfillet != null)
+                                        {
+                                            <li class="menu-item @(Context.Request.Path.StartsWithSegments("/DanhMuc/Fillet/NhanVienTheoBanFillet") ? "active" : "")">
+                                                <a href="/DanhMuc/Fillet/NhanVienTheoBanFillet/Index" class="menu-link">
+                                                    <div>Nhân Viên Theo Bàn</div>
+                                                </a>
+                                            </li>
+                                        }
+                                    }
+
+                                </ul>
+                            </li>
+                        }
+                    }
+
+                    @{
+                        var dinhhinh = rolePermistions.Where(x => x.Fu.Contains("Danh Mục / Định Hình")).FirstOrDefault();
+                        if (dinhhinh != null)
+                        {
+                            <li class="menu-item @(Context.Request.Path.StartsWithSegments("/DanhMuc/DinhHinh") ? "open active" : "")">
+                                <a href="javascript:void(0);" class="menu-link menu-toggle">
+                                    <div data-i18n="Basic">Định Hình</div>
+                                </a>
+                                <ul class="menu-sub">
+                                    @{
+                                        var loaicaDinhHinh = rolePermistions.Where(x => x.Fu == "Danh Mục / Định Hình / Loại Cá" && x.Func == "Xem Định Hình / Loại Cá" && x.Status == 1).FirstOrDefault();
+                                        if (loaicaDinhHinh != null)
+                                        {
+                                            <li class="menu-item @(Context.Request.Path.StartsWithSegments("/DanhMuc/DinhHinh/LoaiCaDinhHinh") ? "active" : "")">
+                                                <a href="/DanhMuc/DinhHinh/LoaiCaDinhHinh/Index" class="menu-link">
+                                                    <div>Loại Cá</div>
+                                                </a>
+                                            </li>
+                                        }
+                                    }
+                                    @{
+                                        var thanhphamDinhHinh = rolePermistions.Where(x => x.Fu == "Danh Mục / Định Hình / Thành Phẩm" && x.Func == "Xem Định Hình / Thành Phẩm" && x.Status == 1).FirstOrDefault();
+                                        if (thanhphamDinhHinh != null)
+                                        {
+                                            <li class="menu-item @(Context.Request.Path.StartsWithSegments("/DanhMuc/DinhHinh/ThanhPhamDinhHinh") ? "active" : "")">
+                                                <a href="/DanhMuc/DinhHinh/ThanhPhamDinhHinh/Index" class="menu-link">
+                                                    <div>Thành Phẩm</div>
+                                                </a>
+                                            </li>
+                                        }
+                                    }
+                                    @{
+                                        var thanhphamtyleDinhHinh = rolePermistions.Where(x => x.Fu == "Danh Mục / Định Hình / Thành Phẩm Tỷ Lệ" && x.Func == "Xem Định Hình / Thành Phẩm Tỷ Lệ" && x.Status == 1).FirstOrDefault();
+                                        if (thanhphamtyleDinhHinh != null)
+                                        {
+                                            <li class="menu-item @(Context.Request.Path.StartsWithSegments("/DanhMuc/DinhHinh/ThanhPhamTyLeDinhHinh") ? "active" : "")">
+                                                <a href="/DanhMuc/DinhHinh/ThanhPhamTyLeDinhHinh/Index"
+                                                   class="menu-link">
+                                                    <div>Thành Phẩm Tỷ Lệ</div>
+                                                </a>
+                                            </li>
+                                        }
+                                    }
+                                    @{
+                                        var sizeDinhHinh = rolePermistions.Where(x => x.Fu == "Danh Mục / Định Hình / Size" && x.Func == "Xem Định Hình / Size" && x.Status == 1).FirstOrDefault();
+                                        if (sizeDinhHinh != null)
+                                        {
+                                            <li class="menu-item @(Context.Request.Path.StartsWithSegments("/DanhMuc/DinhHinh/SizeDinhHinh") ? "active" : "")">
+                                                <a href="/DanhMuc/DinhHinh/SizeDinhHinh/Index" class="menu-link">
+                                                    <div>Size</div>
+                                                </a>
+                                            </li>
+                                        }
+                                    }
+                                    @{
+                                        var mauDinhHinh = rolePermistions.Where(x => x.Fu == "Danh Mục / Định Hình / Màu" && x.Func == "Xem Định Hình / Màu" && x.Status == 1).FirstOrDefault();
+                                        if (mauDinhHinh != null)
+                                        {
+                                            <li class="menu-item @(Context.Request.Path.StartsWithSegments("/DanhMuc/DinhHinh/MauDinhHinh") ? "active" : "")">
+                                                <a href="/DanhMuc/DinhHinh/MauDinhHinh/Index" class="menu-link">
+                                                    <div>Màu</div>
+                                                </a>
+                                            </li>
+                                        }
+                                    }
+                                    @{
+                                        var dinhmucDinhHinh = rolePermistions.Where(x => x.Fu == "Danh Mục / Định Hình / Định Mức" && x.Func == "Xem Định Hình / Định Mức" && x.Status == 1).FirstOrDefault();
+                                        if (dinhmucDinhHinh != null)
+                                        {
+                                            <li class="menu-item @(Context.Request.Path.StartsWithSegments("/DanhMuc/DinhHinh/DinhMucDinhHinh") ? "active" : "")">
+                                                <a href="/DanhMuc/DinhHinh/DinhMucDinhHinh/Index" class="menu-link">
+                                                    <div>Định Mức</div>
+                                                </a>
+                                            </li>
+                                        }
+                                    }
+                                </ul>
+                            </li>
+                        }
+                    }
+                    @{
+                        var xepkhuon = rolePermistions.Where(x => x.Fu.Contains("Danh Mục / Xếp Khuôn")).FirstOrDefault();
+                        if (xepkhuon != null)
+                        {
+                            <li class="menu-item @(Context.Request.Path.StartsWithSegments("/DanhMuc/XepKhuon") ? "open active" : "")">
+                                <a href="javascript:void(0);" class="menu-link menu-toggle">
+                                    <div data-i18n="Basic">Xếp Khuôn</div>
+                                </a>
+                                <ul class="menu-sub">
+                                    <li class="menu-item @(Context.Request.Path.StartsWithSegments("/DanhMuc/XepKhuon/Chinh") ? "open active" : "")">
+                                        <a href="javascript:void(0);" class="menu-link menu-toggle">
+                                            <div>Chính</div>
+                                        </a>
+                                        <ul class="menu-sub">
+                                            @{
+                                                var coichinhxepkhuon = rolePermistions.Where(x => x.Fu == "Danh Mục / Xếp Khuôn / Cối Chính" && x.Func == "Xem Xếp Khuôn / Cối Chính" && x.Status == 1).FirstOrDefault();
+                                                if (coichinhxepkhuon != null)
+                                                {
+                                                    <li class="menu-item @(Context.Request.Path.StartsWithSegments("/DanhMuc/XepKhuon/Chinh/CoiChinhXepKhuon") ? "active" : "")">
+                                                        <a href="/DanhMuc/XepKhuon/Chinh/CoiChinhXepKhuon/Index"
+                                                           class="menu-link">
+                                                            <div>Cối</div>
+                                                        </a>
+                                                    </li>
+                                                }
+
+                                                var coilexepkhuon = rolePermistions.Where(x => x.Fu == "Danh Mục / Xếp Khuôn / Cối Lẻ" && x.Func == "Xem Xếp Khuôn / Cối Lẻ" && x.Status == 1).FirstOrDefault();
+                                                if (coilexepkhuon != null)
+                                                {
+                                                    <li class="menu-item @(Context.Request.Path.StartsWithSegments("/DanhMuc/XepKhuon/Chinh/CoiLeXepKhuon") ? "active" : "")">
+                                                        <a href="/DanhMuc/XepKhuon/Chinh/CoiLeXepKhuon/Index"
+                                                           class="menu-link">
+                                                            <div>Cối Lẻ</div>
+                                                        </a>
+                                                    </li>
+                                                }
+
+                                                var sizechinhxepkhuon = rolePermistions.Where(x => x.Fu == "Danh Mục / Xếp Khuôn / Size Chính" && x.Func == "Xem Xếp Khuôn / Size Chính" && x.Status == 1).FirstOrDefault();
+                                                if (sizechinhxepkhuon != null)
+                                                {
+                                                    <li class="menu-item @(Context.Request.Path.StartsWithSegments("/DanhMuc/XepKhuon/Chinh/SizeChinhXepKhuon") ? "active" : "")">
+                                                        <a href="/DanhMuc/XepKhuon/Chinh/SizeChinhXepKhuon/Index"
+                                                           class="menu-link">
+                                                            <div>Size</div>
+                                                        </a>
+                                                    </li>
+                                                }
+
+                                                var thanhphamchinhxepkhuon = rolePermistions.Where(x => x.Fu == "Danh Mục / Xếp Khuôn / Thành Phẩm Chính" && x.Func == "Xem Xếp Khuôn / Thành Phẩm Chính" && x.Status == 1).FirstOrDefault();
+                                                if (thanhphamchinhxepkhuon != null)
+                                                {
+                                                    <li class="menu-item @(Context.Request.Path.StartsWithSegments("/DanhMuc/XepKhuon/Chinh/ThanhPhamChinhXepKhuon") ? "active" : "")">
+                                                        <a href="/DanhMuc/XepKhuon/Chinh/ThanhPhamChinhXepKhuon/Index"
+                                                           class="menu-link">
+                                                            <div>Thành Phẩm</div>
+                                                        </a>
+                                                    </li>
+                                                }
+
+                                                var chieuxachinhxepkhuon = rolePermistions.Where(x => x.Fu == "Danh Mục / Xếp Khuôn / Chiếu Xạ Chính" && x.Func == "Xem Xếp Khuôn / Chiếu Xạ Chính" && x.Status == 1).FirstOrDefault();
+                                                if (chieuxachinhxepkhuon != null)
+                                                {
+                                                    <li class="menu-item @(Context.Request.Path.StartsWithSegments("/DanhMuc/XepKhuon/Chinh/ChieuXaChinhXepKhuon") ? "active" : "")">
+                                                        <a href="/DanhMuc/XepKhuon/Chinh/ChieuXaChinhXepKhuon/Index"
+                                                           class="menu-link">
+                                                            <div>Chiếu Xạ</div>
+                                                        </a>
+                                                    </li>
+                                                }
+
+                                                var chatluongchinhxepkhuon = rolePermistions.Where(x => x.Fu == "Danh Mục / Xếp Khuôn / Chất Lượng Chính" && x.Func == "Xem Xếp Khuôn / Chất Lượng Chính" && x.Status == 1).FirstOrDefault();
+                                                if (chatluongchinhxepkhuon != null)
+                                                {
+                                                    <li class="menu-item @(Context.Request.Path.StartsWithSegments("/DanhMuc/XepKhuon/Chinh/ChatLuongChinhXepKhuon") ? "active" : "")">
+                                                        <a href="/DanhMuc/XepKhuon/Chinh/ChatLuongChinhXepKhuon/Index"
+                                                           class="menu-link">
+                                                            <div>Chất Lượng</div>
+                                                        </a>
+                                                    </li>
+                                                }
+
+                                                var chitietracoixepkhuon = rolePermistions.Where(x => x.Fu == "Danh Mục / Xếp Khuôn / Chi Tiết Ra Cối" && x.Func == "Xem Xếp Khuôn / Chi Tiết Ra Cối" && x.Status == 1).FirstOrDefault();
+                                                if (chitietracoixepkhuon != null)
+                                                {
+                                                    <li class="menu-item @(Context.Request.Path.StartsWithSegments("/DanhMuc/XepKhuon/Chinh/ChiTietRaCoiXepKhuon") ? "active" : "")">
+                                                        <a href="/DanhMuc/XepKhuon/Chinh/ChiTietRaCoiXepKhuon/Index"
+                                                           class="menu-link">
+                                                            <div>Chi Tiết Ra Cối</div>
+                                                        </a>
+                                                    </li>
+                                                }
+
+                                                var trongluongcoitheosanphamxepkhuon = rolePermistions.Where(x => x.Fu == "Danh Mục / Xếp Khuôn / Trọng Lượng Cối Theo Sản Phẩm" && x.Func == "Xem Xếp Khuôn / Trọng Lượng Cối Theo Sản Phẩm" && x.Status == 1).FirstOrDefault();
+                                                if (trongluongcoitheosanphamxepkhuon != null)
+                                                {
+                                                    <li class="menu-item @(Context.Request.Path.StartsWithSegments("/DanhMuc/XepKhuon/Chinh/TrongLuongCoiTheoSanPham") ? "active" : "")">
+                                                        <a href="/DanhMuc/XepKhuon/Chinh/TrongLuongCoiTheoSanPham/Index"
+                                                           class="menu-link">
+                                                            <div>TL Cối Sản Phẩm</div>
+                                                        </a>
+                                                    </li>
+                                                }
+
+                                                var trongluongcoitheothanhphamxepkhuon = rolePermistions.Where(x => x.Fu == "Danh Mục / Xếp Khuôn / Trọng Lượng Cối Theo Thành Phẩm" && x.Func == "Xem Xếp Khuôn / Trọng Lượng Cối Theo Thành Phẩm" && x.Status == 1).FirstOrDefault();
+                                                if (trongluongcoitheothanhphamxepkhuon != null)
+                                                {
+                                                    <li class="menu-item @(Context.Request.Path.StartsWithSegments("/DanhMuc/XepKhuon/Chinh/TrongLuongCoiTheoThanhPham") ? "active" : "")">
+                                                        <a href="/DanhMuc/XepKhuon/Chinh/TrongLuongCoiTheoThanhPham/Index"
+                                                           class="menu-link">
+                                                            <div>TL Cối Thành Phẩm</div>
+                                                        </a>
+                                                    </li>
+                                                }
+                                            }
+                                        </ul>
+                                    </li>
+                                    <li class="menu-item @(Context.Request.Path.StartsWithSegments("/DanhMuc/XepKhuon/Phu") ? "open active" : "")">
+                                        <a href="javascript:void(0);" class="menu-link menu-toggle">
+                                            <div>Phụ</div>
+                                        </a>
+                                        <ul class="menu-sub">
+                                            @{
+                                                var sizephuxepkhuon = rolePermistions.Where(x => x.Fu == "Danh Mục / Xếp Khuôn / Size Phụ" && x.Func == "Xem Xếp Khuôn / Size Phụ" && x.Status == 1).FirstOrDefault();
+                                                if (sizephuxepkhuon != null)
+                                                {
+                                                    <li class="menu-item @(Context.Request.Path.StartsWithSegments("/DanhMuc/XepKhuon/Phu/SizePhuXepKhuon") ? "active" : "")">
+                                                        <a href="/DanhMuc/XepKhuon/Phu/SizePhuXepKhuon/Index"
+                                                           class="menu-link">
+                                                            <div>Size</div>
+                                                        </a>
+                                                    </li>
+                                                }
+
+                                                var thanhphamphuxepkhuon = rolePermistions.Where(x => x.Fu == "Danh Mục / Xếp Khuôn / Thành Phẩm Phụ" && x.Func == "Xem Xếp Khuôn / Thành Phẩm Phụ" && x.Status == 1).FirstOrDefault();
+                                                if (thanhphamphuxepkhuon != null)
+                                                {
+                                                    <li class="menu-item @(Context.Request.Path.StartsWithSegments("/DanhMuc/XepKhuon/Phu/ThanhPhamPhuXepKhuon") ? "active" : "")">
+                                                        <a href="/DanhMuc/XepKhuon/Phu/ThanhPhamPhuXepKhuon/Index"
+                                                           class="menu-link">
+                                                            <div>Thành Phẩm</div>
+                                                        </a>
+                                                    </li>
+                                                }
+                                            }
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </li>
+                        }
+                    }
+
+
+
+                    @{
+                        var sanphamtinhluong = rolePermistions.Where(x => x.Fu.Contains("Danh Mục / Sản Phẩm Tính Lương / ")).FirstOrDefault();
+                        if (sanphamtinhluong != null)
+                        {
+                            <li class="menu-item @(Context.Request.Path.StartsWithSegments("/DanhMuc/SanPhamTinhLuong") ? "open active" : "")">
+                                <a href="javascript:void(0);" class="menu-link menu-toggle">
+                                    <div data-i18n="Basic">Sản Phẩm TL</div>
+                                </a>
+                                <ul class="menu-sub">
+                                    @{
+                                        var sanphamSPTL = rolePermistions.Where(x => x.Fu == "Danh Mục / Sản Phẩm Tính Lương / Sản Phẩm" && x.Func == "Xem Sản Phẩm Tính Lương / Sản Phẩm" && x.Status == 1).FirstOrDefault();
+                                        if (sanphamSPTL != null)
+                                        {
+                                            <li class="menu-item @(Context.Request.Path.StartsWithSegments("/DanhMuc/SanPhamTinhLuong/SanPhamSPTL") ? "active" : "")">
+                                                <a href="/DanhMuc/SanPhamTinhLuong/SanPhamSPTL/Index" class="menu-link">
+                                                    <div>Sản Phẩm</div>
+                                                </a>
+                                            </li>
+                                        }
+                                    }
+                                    @{
+                                        var loaidongiaSPTL = rolePermistions.Where(x => x.Fu == "Danh Mục / Sản Phẩm Tính Lương / Loại Đơn Giá" && x.Func == "Xem Sản Phẩm Tính Lương / Loại Đơn Giá" && x.Status == 1).FirstOrDefault();
+                                        if (loaidongiaSPTL != null)
+                                        {
+                                            <li class="menu-item @(Context.Request.Path.StartsWithSegments("/DanhMuc/SanPhamTinhLuong/LoaiDonGiaSPTL") ? "active" : "")">
+                                                <a href="/DanhMuc/SanPhamTinhLuong/LoaiDonGiaSPTL/Index"
+                                                   class="menu-link">
+                                                    <div>Loại Đơn Giá</div>
+                                                </a>
+                                            </li>
+                                        }
+                                    }
+                                    @{
+                                        var maxephangSPTL = rolePermistions.Where(x => x.Fu == "Danh Mục / Sản Phẩm Tính Lương / Mã Xếp Hạng" && x.Func == "Xem Sản Phẩm Tính Lương / Mã Xếp Hạng" && x.Status == 1).FirstOrDefault();
+                                        if (maxephangSPTL != null)
+                                        {
+                                            <li class="menu-item @(Context.Request.Path.StartsWithSegments("/DanhMuc/SanPhamTinhLuong/MaXepHangSPTL") ? "active" : "")">
+                                                <a href="/DanhMuc/SanPhamTinhLuong/MaXepHangSPTL/Index"
+                                                   class="menu-link">
+                                                    <div>Mã Xếp Hạng</div>
+                                                </a>
+                                            </li>
+                                        }
+                                    }
+                                    @{
+                                        var dinhmucxephangSPTL = rolePermistions.Where(x => x.Fu == "Danh Mục / Sản Phẩm Tính Lương / Định Mức Xếp Hạng" && x.Func == "Xem Sản Phẩm Tính Lương / Định Mức Xếp Hạng" && x.Status == 1).FirstOrDefault();
+                                        if (dinhmucxephangSPTL != null)
+                                        {
+                                            <li class="menu-item @(Context.Request.Path.StartsWithSegments("/DanhMuc/SanPhamTinhLuong/DinhMucXepHangSPTL") ? "active" : "")">
+                                                <a href="/DanhMuc/SanPhamTinhLuong/DinhMucXepHangSPTL/Index"
+                                                   class="menu-link">
+                                                    <div>ĐM Xếp Hạng</div>
+                                                </a>
+                                            </li>
+                                        }
+                                    }
+                                    @{
+                                        var dongiaSPTL = rolePermistions.Where(x => x.Fu == "Danh Mục / Sản Phẩm Tính Lương / Đơn Giá" && x.Func == "Xem Sản Phẩm Tính Lương / Đơn Giá" && x.Status == 1).FirstOrDefault();
+                                        if (dongiaSPTL != null)
+                                        {
+                                            <li class="menu-item @(Context.Request.Path.StartsWithSegments("/DanhMuc/SanPhamTinhLuong/DonGiaSPTL") ? "active" : "")">
+                                                <a href="/DanhMuc/SanPhamTinhLuong/DonGiaSPTL/Index" class="menu-link">
+                                                    <div>Đơn Giá</div>
+                                                </a>
+                                            </li>
+                                        }
+                                    }
+                                </ul>
+                            </li>
+                        }
+                    }
+                </ul>
+            </li>
+        }
+    }
+
+    @{
+        var baocaonhanh = rolePermistions.Where(x => x.Fu == "Báo Cáo Nhanh" && x.Func == "Xem Báo Cáo Nhanh / Tổng Hợp Nhân Viên Thành Phẩm" && x.Status == 1).FirstOrDefault();
+        if (baocaonhanh != null)
+        {
+            <!-- Dashboard -->
+            <li class="menu-item @(Context.Request.Path.StartsWithSegments("/BaoCaoNhanh") ? "open active" : "")">
+                <a href="/BaoCaoNhanh/Index" class="menu-link">
+                    <i class="menu-icon tf-icons bx bx-timer"></i>
+                    <div data-i18n="Analytics">Báo Cáo Nhanh</div>
+                </a>
+            </li>
+        }
+    }
+    @{
+        //     var baocao = rolePermistions.Where(x => x.Fu.Contains("Báo Cáo / ")).FirstOrDefault();
+        //     if (baocao != null)
+        //     {
+        //         <!-- Báo Cáo -->
+        //         <li class="menu-item @(Context.Request.Path.StartsWithSegments("/BaoCao") || Context.Request.Path.StartsWithSegments("/HQ/BaoCaoHQ") ? "open active" : "" )" id="menuActiveBaoCao">
+        //             <a href="javascript:void(0);" class="menu-link menu-toggle">
+        //                 @* <i class="menu-icon tf-icons bx bx-pie-chart-alt-2"></i> *@
+        //                 <i class='menu-icon tf-icons bx bx-chart'></i>
+        //                 <div data-i18n="Layouts">Báo Cáo</div>
+        //             </a>
+        //             <ul class="menu-sub">
+
+
+        //                 @{
+        //                     var baocaoNguyenLieu = rolePermistions.Where(x => x.Fu.Contains("Báo Cáo / Nguyên Liệu")).FirstOrDefault();
+        //                     if (baocaoNguyenLieu != null)
+        //                     {
+        //                         <li class="menu-item @(Context.Request.Path.StartsWithSegments("/BaoCao/NguyenLieu/BaoCaoNguyenLieu") ? "open active" : "")">
+        //                             <a href="javascript:void(0);" class="menu-link menu-toggle">
+        //                                 <div data-i18n="Account Settings">Nguyên Liệu</div>
+        //                             </a>
+        //                             <ul class="menu-sub">
+        //                                 @{
+        //                                     var baocaonguyenlieuchitiet = rolePermistions.Where(x => x.Fu == "Báo Cáo / Nguyên Liệu / Chi Tiết" && x.Func == "Xem Báo Cáo / Nguyên Liệu / Chi Tiết" && x.Status == 1).FirstOrDefault();
+        //                                     if (baocaonguyenlieuchitiet != null)
+        //                                     {
+        //                                         <li class="menu-item @(Context.Request.Path == "/BaoCao/NguyenLieu/BaoCaoNguyenLieu/ChiTietNguyenLieuView"? "active":"" )">
+        //                                             <a href="/BaoCao/NguyenLieu/BaoCaoNguyenLieu/ChiTietNguyenLieuView" class="menu-link">
+        //                                                 <div>Chi Tiết</div>
+        //                                             </a>
+        //                                         </li>
+        //                                     }
+
+        //                                     var baocaonguyenlieutonghopncc = rolePermistions.Where(x => x.Fu == "Báo Cáo / Nguyên Liệu / Tổng Hợp NCC" && x.Func == "Xem Báo Cáo / Nguyên Liệu / Tổng Hợp NCC" && x.Status == 1).FirstOrDefault();
+        //                                     if (baocaonguyenlieutonghopncc != null)
+        //                                     {
+        //                                         <li class="menu-item @(Context.Request.Path == "/BaoCao/NguyenLieu/BaoCaoNguyenLieu/TongHopNhaCCNguyenLieuView"? "active":"" )">
+        //                                             <a href="/BaoCao/NguyenLieu/BaoCaoNguyenLieu/TongHopNhaCCNguyenLieuView" class="menu-link">
+        //                                                 <div>Tổng Hợp Nhà Cung Cấp</div>
+        //                                             </a>
+        //                                         </li>
+        //                                     }
+
+        //                                     // var baocaonguyenlieutonghopbct = rolePermistions.Where(x => x.Fu == "Báo Cáo / Nguyên Liệu / Tổng Hợp BCT" && x.Func == "Xem Báo Cáo / Nguyên Liệu / Tổng Hợp BCT" && x.Status == 1).FirstOrDefault();
+        //                                     // if (baocaonguyenlieutonghopbct != null)
+        //                                     // {
+        //                                     //     <li class="menu-item @(Context.Request.Path == "/BaoCao/NguyenLieu/BaoCaoNguyenLieu/TongHopBanCatTietNguyenLieuView"? "active":"" )">
+        //                                     //         <a href="/BaoCao/NguyenLieu/BaoCaoNguyenLieu/TongHopBanCatTietNguyenLieuView" class="menu-link">
+        //                                     //             <div>Tổng Hợp Bàn Cắt Tiết</div>
+        //                                     //         </a>
+        //                                     //     </li>
+        //                                     // }
+
+        //                                     var baocaonguyenlieutonghoppt = rolePermistions.Where(x => x.Fu == "Báo Cáo / Nguyên Liệu / Tổng Hợp Ghe" && x.Func == "Xem Báo Cáo / Nguyên Liệu / Tổng Hợp Ghe" && x.Status == 1).FirstOrDefault();
+        //                                     if (baocaonguyenlieutonghoppt != null)
+        //                                     {
+        //                                         <li class="menu-item @(Context.Request.Path == "/BaoCao/NguyenLieu/BaoCaoNguyenLieu/TongHopPhuongTienNguyenLieuView"? "active":"" )">
+        //                                             <a href="/BaoCao/NguyenLieu/BaoCaoNguyenLieu/TongHopPhuongTienNguyenLieuView" class="menu-link">
+        //                                                 <div>Tổng Hợp Ghe</div>
+        //                                             </a>
+        //                                         </li>
+        //                                     }
+
+        //                                     var baocaonguyenlieulo = rolePermistions.Where(x => x.Fu == "Báo Cáo / Nguyên Liệu / Tổng Hợp Lô" && x.Func == "Xem Báo Cáo / Nguyên Liệu / Tổng Hợp Lô" && x.Status == 1).FirstOrDefault();
+        //                                     if (baocaonguyenlieulo != null)
+        //                                     {
+        //                                         <li class="menu-item @(Context.Request.Path == "/BaoCao/NguyenLieu/BaoCaoNguyenLieu/TongHopLoView"? "active":"" )">
+        //                                             <a href="/BaoCao/NguyenLieu/BaoCaoNguyenLieu/TongHopLoView" class="menu-link">
+        //                                                 <div>Tổng Hợp Lô</div>
+        //                                             </a>
+        //                                         </li>
+        //                                     }
+        //                                     // var baocaonguyenlieutonghopkt = rolePermistions.Where(x => x.Fu == "Báo Cáo / Nguyên Liệu / Tổng Hợp Kế Toán" && x.Func == "Xem Báo Cáo / Nguyên Liệu / Tổng Hợp Kế Toán" && x.Status == 1).FirstOrDefault();
+        //                                     // if (baocaonguyenlieutonghopkt != null)
+        //                                     // {
+        //                                     //     <li class="menu-item @(Context.Request.Path == "/BaoCao/NguyenLieu/BaoCaoNguyenLieu/TongHopKeToanNguyenLieuView"? "active":"" )">
+        //                                     //         <a href="/BaoCao/NguyenLieu/BaoCaoNguyenLieu/TongHopKeToanNguyenLieuView" class="menu-link">
+        //                                     //             <div>Tổng Hợp Kế Toán</div>
+        //                                     //         </a>
+        //                                     //     </li>
+        //                                     // }
+        //                                 }
+        //                             </ul>
+        //                         </li>
+        //                     }
+        //                 }
+
+        //                 @{
+        //                     var baocaoTPFillet = rolePermistions.Where(x => x.Fu.Contains("TPFillet")).FirstOrDefault();
+        //                     if (baocaoTPFillet != null)
+        //                     {
+        //                         <li class="menu-item @(Context.Request.Path.StartsWithSegments("/BaoCao/Fillet/TPFillet") ? "open active" : "")">
+        //                             <a href="javascript:void(0);" class="menu-link menu-toggle">
+        //                                 <div data-i18n="Account Settings">Xẻ Bướm</div>
+        //                             </a>
+        //                             <ul class="menu-sub">
+        //                                 @{
+        //                                     // var baocaotpfilletchitiet = rolePermistions.Where(x => x.Fu == "Báo Cáo / TPFillet / Chi Tiết" && x.Func == "Xem Báo Cáo / TPFillet / Chi Tiết" && x.Status == 1).FirstOrDefault();
+        //                                     // if (baocaotpfilletchitiet != null)
+        //                                     // {
+        //                                     //     <li class="menu-item @(Context.Request.Path == "/BaoCao/Fillet/TPFillet/ChiTiet"? "active":"" )">
+        //                                     //         <a href="/BaoCao/Fillet/TPFillet/ChiTiet" class="menu-link">
+        //                                     //             <div>Chi Tiết</div>
+        //                                     //         </a>
+        //                                     //     </li>
+        //                                     // }
+
+        //                                     // var baocaotpfillettonghopnhanvien = rolePermistions.Where(x => x.Fu == "Báo Cáo / TPFillet / Tổng Hợp Nhân Viên" && x.Func == "Xem Báo Cáo / TPFillet / Tổng Hợp Nhân Viên" && x.Status == 1).FirstOrDefault();
+        //                                     // if (baocaotpfillettonghopnhanvien != null)
+        //                                     // {
+        //                                     //     <li class="menu-item @(Context.Request.Path == "/BaoCao/Fillet/TPFillet/TongHopNhanVien"? "active":"" )">
+        //                                     //         <a href="/BaoCao/Fillet/TPFillet/TongHopNhanVien" class="menu-link">
+        //                                     //             <div>Tổng Hợp Nhân Viên</div>
+        //                                     //         </a>
+        //                                     //     </li>
+        //                                     // }
+
+        //                                     // var baocaotpfillettonghopthanhpham = rolePermistions.Where(x => x.Fu == "Báo Cáo / TPFillet / Tổng Hợp Thành Phẩm" && x.Func == "Xem Báo Cáo / TPFillet / Tổng Hợp Thành Phẩm" && x.Status == 1).FirstOrDefault();
+        //                                     // if (baocaotpfillettonghopthanhpham != null)
+        //                                     // {
+        //                                     //     <li class="menu-item @(Context.Request.Path == "/BaoCao/Fillet/TPFillet/TongHopThanhPham"? "active":"" )">
+        //                                     //         <a href="/BaoCao/Fillet/TPFillet/TongHopThanhPham" class="menu-link">
+        //                                     //             <div>Tổng Hợp Thành Phẩm</div>
+        //                                     //         </a>
+        //                                     //     </li>
+        //                                     // }
+        //                                     var baocaoxebuomchitietbtp = rolePermistions.Where(x => x.Fu == "Báo Cáo / TPFillet / Chi Tiết BTP Xẻ Bướm" && x.Func == "Xem Báo Cáo / TPFillet / Chi Tiết BTP Xẻ Bướm" && x.Status == 1).FirstOrDefault();
+        //                                     if (baocaoxebuomchitietbtp != null)
+        //                                     {
+        //                                         <li class="menu-item @(Context.Request.Path == "/BaoCao/Fillet/TPFillet/ChiTietBTPXeBuom"? "active":"" )">
+        //                                             <a href="/BaoCao/Fillet/TPFillet/ChiTietBTPXeBuom" class="menu-link">
+        //                                                 <div>Chi Tiết BTP</div>
+        //                                             </a>
+        //                                         </li>
+        //                                     }
+        //                                     var baocaoxebuomtonghopthanhphambtp = rolePermistions.Where(x => x.Fu == "Báo Cáo / TPFillet / Thành Phẩm BTP Xẻ Bướm" && x.Func == "Xem Báo Cáo / TPFillet / Thành Phẩm BTP Xẻ Bướm" && x.Status == 1).FirstOrDefault();
+        //                                     if (baocaoxebuomtonghopthanhphambtp != null)
+        //                                     {
+        //                                         <li class="menu-item @(Context.Request.Path == "/BaoCao/Fillet/TPFillet/TongHopThanhPhamBTPXeBuom"? "active":"" )">
+        //                                             <a href="/BaoCao/Fillet/TPFillet/TongHopThanhPhamBTPXeBuom" class="menu-link">
+        //                                                 <div>Tổng Hợp Thành Phẩm BTP</div>
+        //                                             </a>
+        //                                         </li>
+        //                                     }
+        //                                     var baocaoxebuomtonghoplothanhphamsizebtp = rolePermistions.Where(x => x.Fu == "Báo Cáo / TPFillet / Lô Thành Phẩm Size BTP Xẻ Bướm" && x.Func == "Xem Báo Cáo / TPFillet / Lô Thành Phẩm Size BTP Xẻ Bướm" && x.Status == 1).FirstOrDefault();
+        //                                     if (baocaoxebuomtonghoplothanhphamsizebtp != null)
+        //                                     {
+        //                                         <li class="menu-item @(Context.Request.Path == "/BaoCao/Fillet/TPFillet/TongHopLoThanhPhamSizeBTPXeBuom"? "active":"" )">
+        //                                             <a href="/BaoCao/Fillet/TPFillet/TongHopLoThanhPhamSizeBTPXeBuom" class="menu-link">
+        //                                                 <div>Tổng Hợp Lô BTP</div>
+        //                                             </a>
+        //                                         </li>
+        //                                     }
+        //                                     var baocaoxebuomchitiettp = rolePermistions.Where(x => x.Fu == "Báo Cáo / TPFillet / Chi Tiết TP Xẻ Bướm" && x.Func == "Xem Báo Cáo / TPFillet / Chi Tiết TP Xẻ Bướm" && x.Status == 1).FirstOrDefault();
+        //                                     if (baocaoxebuomchitiettp != null)
+        //                                     {
+        //                                         <li class="menu-item @(Context.Request.Path == "/BaoCao/Fillet/TPFillet/ChiTietTPXeBuom"? "active":"" )">
+        //                                             <a href="/BaoCao/Fillet/TPFillet/ChiTietTPXeBuom" class="menu-link">
+        //                                                 <div>Chi Tiết TP</div>
+        //                                             </a>
+        //                                         </li>
+        //                                     }
+        //                                     var baocaoxebuomtonghopthanhphamtp = rolePermistions.Where(x => x.Fu == "Báo Cáo / TPFillet / Thành Phẩm TP Xẻ Bướm" && x.Func == "Xem Báo Cáo / TPFillet / Thành Phẩm TP Xẻ Bướm" && x.Status == 1).FirstOrDefault();
+        //                                     if (baocaoxebuomtonghopthanhphamtp != null)
+        //                                     {
+        //                                         <li class="menu-item @(Context.Request.Path == "/BaoCao/Fillet/TPFillet/TongHopThanhPhamTPXeBuom"? "active":"" )">
+        //                                             <a href="/BaoCao/Fillet/TPFillet/TongHopThanhPhamTPXeBuom" class="menu-link">
+        //                                                 <div>Tổng Hợp Thành Phẩm TP</div>
+        //                                             </a>
+        //                                         </li>
+        //                                     }
+        //                                     var baocaoxebuomtonghoplotp = rolePermistions.Where(x => x.Fu == "Báo Cáo / TPFillet / Lô Thành Phẩm Size TP Xẻ Bướm" && x.Func == "Xem Báo Cáo / TPFillet / Lô Thành Phẩm Size TP Xẻ Bướm" && x.Status == 1).FirstOrDefault();
+        //                                     if (baocaoxebuomtonghoplotp != null)
+        //                                     {
+        //                                         <li class="menu-item @(Context.Request.Path == "/BaoCao/Fillet/TPFillet/TongHopLoThanhPhamSizeTPXeBuom"? "active":"" )">
+        //                                             <a href="/BaoCao/Fillet/TPFillet/TongHopLoThanhPhamSizeTPXeBuom" class="menu-link">
+        //                                                 <div>Tổng Hợp Lô TP</div>
+        //                                             </a>
+        //                                         </li>
+        //                                     }
+        //                                     var baocaoxebuomtonghopnhanvientp = rolePermistions.Where(x => x.Fu == "Báo Cáo / TPFillet / Tổng Hợp Nhân Viên TP Xẻ Bướm" && x.Func == "Xem Báo Cáo / TPFillet / Tổng Hợp Nhân Viên TP Xẻ Bướm" && x.Status == 1).FirstOrDefault();
+        //                                     if (baocaoxebuomtonghopnhanvientp != null)
+        //                                     {
+        //                                         <li class="menu-item @(Context.Request.Path == "/BaoCao/Fillet/TPFillet/TongHopNhanVienTPXeBuom"? "active":"" )">
+        //                                             <a href="/BaoCao/Fillet/TPFillet/TongHopNhanVienTPXeBuom" class="menu-link">
+        //                                                 <div>Tổng Hợp Nhân Viên TP</div>
+        //                                             </a>
+        //                                         </li>
+        //                                     }
+        //                                 }
+        //                             </ul>
+        //                         </li>
+        //                     }
+        //                 }
+
+        //                 @{
+        //                     var baocaoBTPFilletv2 = rolePermistions.Where(x => x.Fu.Contains("BTPFilletv2")).FirstOrDefault();
+        //                     if (baocaoBTPFilletv2 != null)
+        //                     {
+        //                         <li class="menu-item @(Context.Request.Path.StartsWithSegments("/BaoCao/Fillet/BTPFilletv2") ? "open active" : "")">
+        //                             <a href="javascript:void(0);" class="menu-link menu-toggle">
+        //                                 <div data-i18n="Account Settings">BTPFillet-v2</div>
+        //                             </a>
+        //                             <ul class="menu-sub">
+        //                                 @{
+        //                                     var baocaobtpfilletv2chitiet = rolePermistions.Where(x => x.Fu == "Báo Cáo / BTPFilletv2 / Chi Tiết" && x.Func == "Xem Báo Cáo / BTPFilletv2 / Chi Tiết" && x.Status == 1).FirstOrDefault();
+        //                                     if (baocaobtpfilletv2chitiet != null)
+        //                                     {
+        //                                         <li class="menu-item @(Context.Request.Path == "/BaoCao/Fillet/BTPFilletv2/ChiTiet"? "active":"" )">
+        //                                             <a href="/BaoCao/Fillet/BTPFilletv2/ChiTiet" class="menu-link">
+        //                                                 <div>Chi Tiết</div>
+        //                                             </a>
+        //                                         </li>
+        //                                     }
+        //                                     var baocaobtpfilletv2tonghopnhanvien = rolePermistions.Where(x => x.Fu == "Báo Cáo / BTPFilletv2 / Tổng Hợp Nhân Viên" && x.Func == "Xem Báo Cáo / BTPFilletv2 / Tổng Hợp Nhân Viên" && x.Status == 1).FirstOrDefault();
+        //                                     if (baocaobtpfilletv2tonghopnhanvien != null)
+        //                                     {
+        //                                         <li class="menu-item @(Context.Request.Path == "/BaoCao/Fillet/BTPFilletv2/TongHopNhanVien"? "active":"" )">
+        //                                             <a href="/BaoCao/Fillet/BTPFilletv2/TongHopNhanVien" class="menu-link">
+        //                                                 <div>Tổng Hợp Nhân Viên</div>
+        //                                             </a>
+        //                                         </li>
+        //                                     }
+
+        //                                     var baocaobtpfilletv2tonghopthanhpham = rolePermistions.Where(x => x.Fu == "Báo Cáo / BTPFilletv2 / Tổng Hợp Thành Phẩm" && x.Func == "Xem Báo Cáo / BTPFilletv2 / Tổng Hợp Thành Phẩm" && x.Status == 1).FirstOrDefault();
+        //                                     if (baocaobtpfilletv2tonghopthanhpham != null)
+        //                                     {
+        //                                         <li class="menu-item @(Context.Request.Path == "/BaoCao/Fillet/BTPFilletv2/TongHopThanhPham"? "active":"" )">
+        //                                             <a href="/BaoCao/Fillet/BTPFilletv2/TongHopThanhPham" class="menu-link">
+        //                                                 <div>Tổng Hợp Thành Phẩm</div>
+        //                                             </a>
+        //                                         </li>
+        //                                     }
+        //                                     var baocaobtpfilletv2tonghoplo = rolePermistions.Where(x => x.Fu == "Báo Cáo / BTPFilletv2 / Tổng Hợp Lô" && x.Func == "Xem Báo Cáo / BTPFilletv2 / Tổng Hợp Lô" && x.Status == 1).FirstOrDefault();
+        //                                     if (baocaobtpfilletv2tonghoplo != null)
+        //                                     {
+        //                                         <li class="menu-item @(Context.Request.Path == "/BaoCao/Fillet/BTPFilletv2/TongHopLo"? "active":"" )">
+        //                                             <a href="/BaoCao/Fillet/BTPFilletv2/TongHopLo" class="menu-link">
+        //                                                 <div>Tổng Hợp Lô</div>
+        //                                             </a>
+        //                                         </li>
+        //                                     }
+        //                                 }
+        //                             </ul>
+        //                         </li>
+        //                     }
+        //                 }
+
+
+        //                 @{
+        //                     var baocaoTPFilletv2 = rolePermistions.Where(x => x.Fu.Contains("TPFilletv2")).FirstOrDefault();
+        //                     if (baocaoTPFilletv2 != null)
+        //                     {
+        //                         <li class="menu-item @(Context.Request.Path.StartsWithSegments("/BaoCao/Fillet/TPFilletv2") ? "open active" : "")">
+        //                             <a href="javascript:void(0);" class="menu-link menu-toggle">
+        //                                 <div data-i18n="Account Settings">TPFillet-v2</div>
+        //                             </a>
+        //                             <ul class="menu-sub">
+        //                                 @{
+        //                                     var baocaotpfilletv2chitiet = rolePermistions.Where(x => x.Fu == "Báo Cáo / TPFilletv2 / Chi Tiết" && x.Func == "Xem Báo Cáo / TPFilletv2 / Chi Tiết" && x.Status == 1).FirstOrDefault();
+        //                                     if (baocaotpfilletv2chitiet != null)
+        //                                     {
+        //                                         <li class="menu-item @(Context.Request.Path == "/BaoCao/Fillet/TPFilletv2/ChiTiet"? "active":"" )">
+        //                                             <a href="/BaoCao/Fillet/TPFilletv2/ChiTiet" class="menu-link">
+        //                                                 <div>Chi Tiết</div>
+        //                                             </a>
+        //                                         </li>
+        //                                     }
+        //                                     var baocaotpfilletv2tonghopnhanvien = rolePermistions.Where(x => x.Fu == "Báo Cáo / TPFilletv2 / Tổng Hợp Nhân Viên" && x.Func == "Xem Báo Cáo / TPFilletv2 / Tổng Hợp Nhân Viên" && x.Status == 1).FirstOrDefault();
+        //                                     if (baocaotpfilletv2tonghopnhanvien != null)
+        //                                     {
+        //                                         <li class="menu-item @(Context.Request.Path == "/BaoCao/Fillet/TPFilletv2/TongHopNhanVien"? "active":"" )">
+        //                                             <a href="/BaoCao/Fillet/TPFilletv2/TongHopNhanVien" class="menu-link">
+        //                                                 <div>Tổng Hợp Nhân Viên</div>
+        //                                             </a>
+        //                                         </li>
+        //                                     }
+
+        //                                     var baocaotpfilletv2tonghopthanhpham = rolePermistions.Where(x => x.Fu == "Báo Cáo / TPFilletv2 / Tổng Hợp Thành Phẩm" && x.Func == "Xem Báo Cáo / TPFilletv2 / Tổng Hợp Thành Phẩm" && x.Status == 1).FirstOrDefault();
+        //                                     if (baocaotpfilletv2tonghopthanhpham != null)
+        //                                     {
+        //                                         <li class="menu-item @(Context.Request.Path == "/BaoCao/Fillet/TPFilletv2/TongHopThanhPham"? "active":"" )">
+        //                                             <a href="/BaoCao/Fillet/TPFilletv2/TongHopThanhPham" class="menu-link">
+        //                                                 <div>Tổng Hợp Thành Phẩm</div>
+        //                                             </a>
+        //                                         </li>
+        //                                     }
+
+        //                                     var baocaotpfilletv2tonghoplo = rolePermistions.Where(x => x.Fu == "Báo Cáo / TPFilletv2 / Tổng Hợp Lô" && x.Func == "Xem Báo Cáo / TPFilletv2 / Tổng Hợp Lô" && x.Status == 1).FirstOrDefault();
+        //                                     if (baocaotpfilletv2tonghoplo != null)
+        //                                     {
+        //                                         <li class="menu-item @(Context.Request.Path == "/BaoCao/Fillet/TPFilletv2/TongHopLo"? "active":"" )">
+        //                                             <a href="/BaoCao/Fillet/TPFilletv2/TongHopLo" class="menu-link">
+        //                                                 <div>Tổng Hợp Lô</div>
+        //                                             </a>
+        //                                         </li>
+        //                                     }
+        //                                 }
+        //                             </ul>
+        //                         </li>
+        //                     }
+        //                 }
+
+        //                 @{
+        //                     var baocaoBTDinhHinh = rolePermistions.Where(x => x.Fu.Contains("BTP Định Hình")).FirstOrDefault();
+        //                     if (baocaoBTDinhHinh != null)
+        //                     {
+        //                         <li class="menu-item @(Context.Request.Path.StartsWithSegments("/BaoCao/DinhHinh/BTPDinhHinh") ? "open active" : "")">
+
+        //                             <a href="javascript:void(0);" class="menu-link menu-toggle">
+        //                                 <div>BTP Định Hình</div>
+        //                             </a>
+        //                             <ul class="menu-sub">
+        //                                 @{
+        //                                     var baocaobtpdinhhinhchitiet = rolePermistions.Where(x => x.Fu == "Báo Cáo / BTP Định Hình / Chi Tiết" && x.Func == "Xem Báo Cáo / BTP Định Hình / Chi Tiết" && x.Status == 1).FirstOrDefault();
+        //                                     if (baocaobtpdinhhinhchitiet != null)
+        //                                     {
+        //                                         <li class="menu-item @(Context.Request.Path == "/BaoCao/DinhHinh/BTPDinhHinh/ChiTiet" ? "active":"" )">
+        //                                             <a href="/BaoCao/DinhHinh/BTPDinhHinh/ChiTiet" class="menu-link">
+        //                                                 <div>Chi Tiết</div>
+        //                                             </a>
+        //                                         </li>
+        //                                     }
+        //                                     var baocaobtpdinhhinhtonghopnhanvien = rolePermistions.Where(x => x.Fu == "Báo Cáo / BTP Định Hình / Tổng Hợp Nhân Viên" && x.Func == "Xem Báo Cáo / BTP Định Hình / Tổng Hợp Nhân Viên" && x.Status == 1).FirstOrDefault();
+        //                                     if (baocaobtpdinhhinhtonghopnhanvien != null)
+        //                                     {
+        //                                         <li class="menu-item @(Context.Request.Path == "/BaoCao/DinhHinh/BTPDinhHinh/TongHopNhanVien" ? "active":"" )">
+        //                                             <a href="/BaoCao/DinhHinh/BTPDinhHinh/TongHopNhanVien" class="menu-link">
+        //                                                 <div>Tổng Hợp Nhân Viên</div>
+        //                                             </a>
+        //                                         </li>
+        //                                     }
+
+        //                                     var baocaobtpdinhhinhtonghopthanhpham = rolePermistions.Where(x => x.Fu == "Báo Cáo / BTP Định Hình / Tổng Hợp Thành Phẩm" && x.Func == "Xem Báo Cáo / BTP Định Hình / Tổng Hợp Thành Phẩm" && x.Status == 1).FirstOrDefault();
+        //                                     if (baocaobtpdinhhinhtonghopthanhpham != null)
+        //                                     {
+        //                                         <li class="menu-item @(Context.Request.Path == "/BaoCao/DinhHinh/BTPDinhHinh/TongHopThanhPham" ? "active":"" )">
+        //                                             <a href="/BaoCao/DinhHinh/BTPDinhHinh/TongHopThanhPham" class="menu-link">
+        //                                                 <div>Tổng Hợp Thành Phẩm</div>
+        //                                             </a>
+        //                                         </li>
+        //                                     }
+
+        //                                     var baocaobtpdinhhinhtonghoplo = rolePermistions.Where(x => x.Fu == "Báo Cáo / BTP Định Hình / Tổng Hợp Lô" && x.Func == "Xem Báo Cáo / BTP Định Hình / Tổng Hợp Lô" && x.Status == 1).FirstOrDefault();
+        //                                     if (baocaobtpdinhhinhtonghoplo != null)
+        //                                     {
+        //                                         <li class="menu-item @(Context.Request.Path == "/BaoCao/DinhHinh/BTPDinhHinh/TongHopLos" ? "active":"" )">
+        //                                             <a href="/BaoCao/DinhHinh/BTPDinhHinh/TongHopLos" class="menu-link">
+        //                                                 <div>Tổng Hợp Lô</div>
+        //                                             </a>
+        //                                         </li>
+        //                                     }
+        //                                 }
+        //                             </ul>
+        //                         </li>
+        //                     }
+        //                 }
+        //                 @{
+        //                     var baocaoTDinhHinh = rolePermistions.Where(x => x.Fu.Contains("TP Định Hình")).FirstOrDefault();
+        //                     if (baocaoTDinhHinh != null)
+        //                     {
+        //                         <li class="menu-item @(Context.Request.Path.StartsWithSegments("/BaoCao/DinhHinh/TP") ? "open active" : "")">
+        //                             <a href="javascript:void(0);" class="menu-link menu-toggle">
+        //                                 <div data-i18n="Account Settings">TP Định Hình</div>
+        //                             </a>
+        //                             <ul class="menu-sub">
+        //                                 @{
+        //                                     var baocaotpdinhhinhchitiet = rolePermistions.Where(x => x.Fu == "Báo Cáo / TP Định Hình / Chi Tiết" && x.Func == "Xem Báo Cáo / TP Định Hình / Chi Tiết" && x.Status == 1).FirstOrDefault();
+        //                                     if (baocaotpdinhhinhchitiet != null)
+        //                                     {
+        //                                         <li class="menu-item @(Context.Request.Path == "/BaoCao/DinhHinh/TP/ChiTiet"? "active":"" )">
+        //                                             <a href="/BaoCao/DinhHinh/TP/ChiTiet" class="menu-link">
+        //                                                 <div>Chi Tiết</div>
+        //                                             </a>
+        //                                         </li>
+        //                                     }
+        //                                     var baocaotpdinhhinhtonghopnhanvien = rolePermistions.Where(x => x.Fu == "Báo Cáo / TP Định Hình / Tổng Hợp Nhân Viên" && x.Func == "Xem Báo Cáo / TP Định Hình / Tổng Hợp Nhân Viên" && x.Status == 1).FirstOrDefault();
+        //                                     if (baocaotpdinhhinhtonghopnhanvien != null)
+        //                                     {
+        //                                         <li class="menu-item @(Context.Request.Path == "/BaoCao/DinhHinh/TP/TongHopNhanVien"? "active":"" )">
+        //                                             <a href="/BaoCao/DinhHinh/TP/TongHopNhanVien" class="menu-link">
+        //                                                 <div>Tổng Hợp Nhân Viên</div>
+        //                                             </a>
+        //                                         </li>
+        //                                     }
+        //                                     var baocaotpdinhhinhtonghopthanhpham = rolePermistions.Where(x => x.Fu == "Báo Cáo / TP Định Hình / Tổng Hợp Thành Phẩm" && x.Func == "Xem Báo Cáo / TP Định Hình / Tổng Hợp Thành Phẩm" && x.Status == 1).FirstOrDefault();
+        //                                     if (baocaotpdinhhinhtonghopthanhpham != null)
+        //                                     {
+        //                                         <li class="menu-item @(Context.Request.Path == "/BaoCao/DinhHinh/TP/TongHopLoaiThanhPham"? "active":"" )">
+        //                                             <a href="/BaoCao/DinhHinh/TP/TongHopLoaiThanhPham" class="menu-link">
+        //                                                 <div>Tổng Hợp Thành Phẩm</div>
+        //                                             </a>
+        //                                         </li>
+        //                                     }
+
+        //                                     var baocaotpdinhhinhtonghoplo = rolePermistions.Where(x => x.Fu == "Báo Cáo / TP Định Hình / Tổng Hợp Lô" && x.Func == "Xem Báo Cáo / TP Định Hình / Tổng Hợp Lô" && x.Status == 1).FirstOrDefault();
+        //                                     if (baocaotpdinhhinhtonghoplo != null)
+        //                                     {
+        //                                         <li class="menu-item @(Context.Request.Path == "/BaoCao/DinhHinh/TP/TongHopLo" ? "active":"" )">
+        //                                             <a href="/BaoCao/DinhHinh/TP/TongHopLo" class="menu-link">
+        //                                                 <div>Tổng Hợp Lô</div>
+        //                                             </a>
+        //                                         </li>
+        //                                     }
+
+        //                                 }
+        //                             </ul>
+        //                         </li>
+        //                     }
+        //                 }
+        //                 @{
+        //                     var baocaoxepkhuon = rolePermistions.Where(x => x.Fu.Contains("Báo Cáo / Xếp Khuôn")).FirstOrDefault();
+        //                     if (baocaoxepkhuon != null)
+        //                     {
+        //                         <li class="menu-item @(Context.Request.Path.StartsWithSegments("/BaoCao/XepKhuon") ? "open active" : "")">
+        //                             <a href="javascript:void(0);" class="menu-link menu-toggle">
+        //                                 <div>Xếp Khuôn</div>
+        //                             </a>
+        //                             <ul class="menu-sub">
+        //                                 @{
+        //                                     var baocaosanphamchinhxk = rolePermistions.Where(x => x.Fu.Contains("Báo Cáo / Xếp Khuôn / Sản Phẩm Chính")).FirstOrDefault();
+        //                                     if (baocaosanphamchinhxk != null)
+        //                                     {
+        //                                         <li class="menu-item @(Context.Request.Path.StartsWithSegments("/BaoCao/XepKhuon/BaoCaoSanPhamChinhXepKhuon") ? "open active" : "")">
+        //                                             <a href="" class="menu-link  menu-toggle">
+        //                                                 <div>Sản Phẩm Chính</div>
+        //                                             </a>
+        //                                             <ul class="menu-sub">
+        //                                                 @{
+        //                                                     var baocaochinhxkchitiet = rolePermistions.Where(x => x.Fu == "Báo Cáo / Xếp Khuôn / Sản Phẩm Chính / Chi Tiết" && x.Func == "Xem Báo Cáo / Xếp Khuôn / Sản Phẩm Chính / Chi Tiết" && x.Status == 1).FirstOrDefault();
+        //                                                     if (baocaochinhxkchitiet != null)
+        //                                                     {
+        //                                                         <li class="menu-item @(Context.Request.Path == "/BaoCao/XepKhuon/BaoCaoSanPhamChinhXepKhuon/ChiTietChinhXepKhuonView"? "active":"" )">
+        //                                                             <a href="/BaoCao/XepKhuon/BaoCaoSanPhamChinhXepKhuon/ChiTietChinhXepKhuonView" class="menu-link">
+        //                                                                 <div>Chi Tiết</div>
+        //                                                             </a>
+        //                                                         </li>
+        //                                                     }
+        //                                                     var baocaochinhxkchitietnhanvien = rolePermistions.Where(x => x.Fu == "Báo Cáo / Xếp Khuôn / Sản Phẩm Chính / Chi Tiết Nhân Viên" && x.Func == "Xem Báo Cáo / Xếp Khuôn / Sản Phẩm Chính / Chi Tiết Nhân Viên" && x.Status == 1).FirstOrDefault();
+        //                                                     if (baocaochinhxkchitietnhanvien != null)
+        //                                                     {
+        //                                                         <li class="menu-item @(Context.Request.Path == "/BaoCao/XepKhuon/BaoCaoSanPhamChinhXepKhuon/ChiTietNhanVienChinhXepKhuonView"? "active":"" )">
+        //                                                             <a href="/BaoCao/XepKhuon/BaoCaoSanPhamChinhXepKhuon/ChiTietNhanVienChinhXepKhuonView" class="menu-link">
+        //                                                                 <div>Chi Tiết Nhân Viên</div>
+        //                                                             </a>
+        //                                                         </li>
+        //                                                     }
+        //                                                     var baocaochinhxktonghopnhanvien = rolePermistions.Where(x => x.Fu == "Báo Cáo / Xếp Khuôn / Sản Phẩm Chính / Tổng Hợp Nhân Viên" && x.Func == "Xem Báo Cáo / Xếp Khuôn / Sản Phẩm Chính / Tổng Hợp Nhân Viên" && x.Status == 1).FirstOrDefault();
+        //                                                     if (baocaochinhxktonghopnhanvien != null)
+        //                                                     {
+        //                                                         <li class="menu-item @(Context.Request.Path == "/BaoCao/XepKhuon/BaoCaoSanPhamChinhXepKhuon/TongHopNhanVienChinhXepKhuonView"? "active":"" )">
+        //                                                             <a href="/BaoCao/XepKhuon/BaoCaoSanPhamChinhXepKhuon/TongHopNhanVienChinhXepKhuonView" class="menu-link">
+        //                                                                 <div>Tổng Hợp Nhân Viên</div>
+        //                                                             </a>
+        //                                                         </li>
+        //                                                     }
+        //                                                     var baocaochinhxktonghop2 = rolePermistions.Where(x => x.Fu == "Báo Cáo / Xếp Khuôn / Sản Phẩm Chính / Tổng Hợp 2" && x.Func == "Xem Báo Cáo / Xếp Khuôn / Sản Phẩm Chính / Tổng Hợp 2" && x.Status == 1).FirstOrDefault();
+        //                                                     if (baocaochinhxktonghop2 != null)
+        //                                                     {
+        //                                                         <li class="menu-item @(Context.Request.Path == "/BaoCao/XepKhuon/BaoCaoSanPhamChinhXepKhuon/TongHop2ChinhXepKhuonView"? "active":"" )">
+        //                                                             <a href="/BaoCao/XepKhuon/BaoCaoSanPhamChinhXepKhuon/TongHop2ChinhXepKhuonView" class="menu-link">
+        //                                                                 <div>Tổng Hợp TP Size</div>
+        //                                                             </a>
+        //                                                         </li>
+        //                                                     }
+        //                                                     var baocaochinhxkchitietcoi = rolePermistions.Where(x => x.Fu == "Báo Cáo / Xếp Khuôn / Sản Phẩm Chính / Chi Tiết Cối" && x.Func == "Xem Báo Cáo / Xếp Khuôn / Sản Phẩm Chính / Chi Tiết Cối" && x.Status == 1).FirstOrDefault();
+        //                                                     if (baocaochinhxkchitietcoi != null)
+        //                                                     {
+        //                                                         <li class="menu-item @(Context.Request.Path == "/BaoCao/XepKhuon/BaoCaoSanPhamChinhXepKhuon/ChiTietCoiChinhXepKhuonView"? "active":"" )">
+        //                                                             <a href="/BaoCao/XepKhuon/BaoCaoSanPhamChinhXepKhuon/ChiTietCoiChinhXepKhuonView" class="menu-link">
+        //                                                                 <div>Chi Tiết Cối</div>
+        //                                                             </a>
+        //                                                         </li>
+        //                                                     }
+
+        //                                                     var baocaochinhxktonghopcoi = rolePermistions.Where(x => x.Fu == "Báo Cáo / Xếp Khuôn / Sản Phẩm Chính / Tổng Hợp Cối" && x.Func == "Xem Báo Cáo / Xếp Khuôn / Sản Phẩm Chính / Tổng Hợp Cối" && x.Status == 1).FirstOrDefault();
+        //                                                     if (baocaochinhxktonghopcoi != null)
+        //                                                     {
+        //                                                         <li class="menu-item @(Context.Request.Path == "/BaoCao/XepKhuon/BaoCaoSanPhamChinhXepKhuon/TongHopCoiChinhXepKhuonView"? "active":"" )">
+        //                                                             <a href="/BaoCao/XepKhuon/BaoCaoSanPhamChinhXepKhuon/TongHopCoiChinhXepKhuonView" class="menu-link">
+        //                                                                 <div>Tổng Hợp Cối</div>
+        //                                                             </a>
+        //                                                         </li>
+        //                                                     }
+
+        //                                                     // var baocaochinhxktonghopcoixuong = rolePermistions.Where(x => x.Fu == "Báo Cáo / Xếp Khuôn / Sản Phẩm Chính / Tổng Hợp Cối Xưởng" && x.Func == "Xem Báo Cáo / Xếp Khuôn / Sản Phẩm Chính / Tổng Hợp Cối Xưởng" && x.Status == 1).FirstOrDefault();
+        //                                                     // if (baocaochinhxktonghopcoixuong != null)
+        //                                                     // {
+        //                                                     //     <li class="menu-item @(Context.Request.Path == "/BaoCao/XepKhuon/BaoCaoSanPhamChinhXepKhuon/TongHopCoiXuongChinhXepKhuonView"? "active":"" )">
+        //                                                     //         <a href="/BaoCao/XepKhuon/BaoCaoSanPhamChinhXepKhuon/TongHopCoiXuongChinhXepKhuonView" class="menu-link">
+        //                                                     //             <div>Tổng Hợp Cối Xưởng</div>
+        //                                                     //         </a>
+        //                                                     //     </li>
+        //                                                     // }
+        //                                                     // var baocaochinhxktonghoptgsapracoi = rolePermistions.Where(x => x.Fu == "Báo Cáo / Xếp Khuôn / Sản Phẩm Chính / Tổng Hợp Thời Gian Sắp Ra Cối Xưởng" && x.Func == "Xem Báo Cáo / Xếp Khuôn / Sản Phẩm Chính / Tổng Hợp Thời Gian Sắp Ra Cối Xưởng" && x.Status == 1).FirstOrDefault();
+        //                                                     // if (baocaochinhxktonghoptgsapracoi != null)
+        //                                                     // {
+        //                                                     //     <li class="menu-item @(Context.Request.Path == "/BaoCao/XepKhuon/BaoCaoSanPhamChinhXepKhuon/TongHopThoiGianSapRaCoiXuongChinhXepKhuonView"? "active":"" )">
+        //                                                     //         <a href="/BaoCao/XepKhuon/BaoCaoSanPhamChinhXepKhuon/TongHopThoiGianSapRaCoiXuongChinhXepKhuonView" class="menu-link">
+        //                                                     //             <div>Tổng Hợp Thời Gian Sắp Ra Cối</div>
+        //                                                     //         </a>
+        //                                                     //     </li>
+        //                                                     // }
+        //                                                     // var baocaochinhxktonghoptgluotracoi = rolePermistions.Where(x => x.Fu == "Báo Cáo / Xếp Khuôn / Sản Phẩm Chính / Tổng Hợp Thời Gian Lượt Ra Cối Xưởng" && x.Func == "Xem Báo Cáo / Xếp Khuôn / Sản Phẩm Chính / Tổng Hợp Thời Gian Lượt Ra Cối Xưởng" && x.Status == 1).FirstOrDefault();
+        //                                                     // if (baocaochinhxktonghoptgluotracoi != null)
+        //                                                     // {
+        //                                                     //     <li class="menu-item @(Context.Request.Path == "/BaoCao/XepKhuon/BaoCaoSanPhamChinhXepKhuon/TongHopThoiGianLuotRaCoiXuongChinhXepKhuonView"? "active":"" )">
+        //                                                     //         <a href="/BaoCao/XepKhuon/BaoCaoSanPhamChinhXepKhuon/TongHopThoiGianLuotRaCoiXuongChinhXepKhuonView" class="menu-link">
+        //                                                     //             <div>Tổng Hợp Thời Gian Lượt Ra Cối</div>
+        //                                                     //         </a>
+        //                                                     //     </li>
+        //                                                     // }
+        //                                                 }
+        //                                             </ul>
+        //                                         </li>
+        //                                     }
+
+        //                                     var baocaosanphamphuxk = rolePermistions.Where(x => x.Fu.Contains("Báo Cáo / Xếp Khuôn / Sản Phẩm Phụ")).FirstOrDefault();
+        //                                     if (baocaosanphamphuxk != null)
+        //                                     {
+        //                                         <li class="menu-item @(Context.Request.Path.StartsWithSegments("/BaoCao/XepKhuon/BaoCaoSanPhamPhuXepKhuon") ? "open active" : "")">
+        //                                             <a href="" class="menu-link  menu-toggle">
+        //                                                 <div>Sản Phẩm Phụ</div>
+        //                                             </a>
+        //                                             <ul class="menu-sub">
+        //                                                 @{
+        //                                                     var baocaophuxkchitiet = rolePermistions.Where(x => x.Fu == "Báo Cáo / Xếp Khuôn / Sản Phẩm Phụ / Chi Tiết" && x.Func == "Xem Báo Cáo / Xếp Khuôn / Sản Phẩm Phụ / Chi Tiết" && x.Status == 1).FirstOrDefault();
+        //                                                     if (baocaophuxkchitiet != null)
+        //                                                     {
+        //                                                         <li class="menu-item @(Context.Request.Path == "/BaoCao/XepKhuon/BaoCaoSanPhamPhuXepKhuon/ChiTietPhuXepKhuonView"? "active":"" )">
+        //                                                             <a href="/BaoCao/XepKhuon/BaoCaoSanPhamPhuXepKhuon/ChiTietPhuXepKhuonView" class="menu-link">
+        //                                                                 <div>Chi Tiết</div>
+        //                                                             </a>
+        //                                                         </li>
+        //                                                     }
+        //                                                     var baocaophuxktonghop = rolePermistions.Where(x => x.Fu == "Báo Cáo / Xếp Khuôn / Sản Phẩm Phụ / Tổng Hợp" && x.Func == "Xem Báo Cáo / Xếp Khuôn / Sản Phẩm Phụ / Tổng Hợp" && x.Status == 1).FirstOrDefault();
+        //                                                     if (baocaophuxktonghop != null)
+        //                                                     {
+        //                                                         <li class="menu-item @(Context.Request.Path == "/BaoCao/XepKhuon/BaoCaoSanPhamPhuXepKhuon/TongHopPhuXepKhuonView"? "active":"" )">
+        //                                                             <a href="/BaoCao/XepKhuon/BaoCaoSanPhamPhuXepKhuon/TongHopPhuXepKhuonView" class="menu-link">
+        //                                                                 <div>Tổng Hợp Nhân Viên</div>
+        //                                                             </a>
+        //                                                         </li>
+        //                                                     }
+        //                                                     var baocaophuxktonghop2 = rolePermistions.Where(x => x.Fu == "Báo Cáo / Xếp Khuôn / Sản Phẩm Phụ / Tổng Hợp 2" && x.Func == "Xem Báo Cáo / Xếp Khuôn / Sản Phẩm Phụ / Tổng Hợp 2" && x.Status == 1).FirstOrDefault();
+        //                                                     if (baocaophuxktonghop2 != null)
+        //                                                     {
+        //                                                         <li class="menu-item @(Context.Request.Path == "/BaoCao/XepKhuon/BaoCaoSanPhamPhuXepKhuon/TongHop2PhuXepKhuonView"? "active":"" )">
+        //                                                             <a href="/BaoCao/XepKhuon/BaoCaoSanPhamPhuXepKhuon/TongHop2PhuXepKhuonView" class="menu-link">
+        //                                                                 <div>Tổng Hợp Thành Phẩm</div>
+        //                                                             </a>
+        //                                                         </li>
+        //                                                     }
+        //                                                 }
+        //                                             </ul>
+        //                                         </li>
+        //                                     }
+
+        //                                     var baocaoracoixk = rolePermistions.Where(x => x.Fu.Contains("Báo Cáo / Xếp Khuôn / Ra Cối")).FirstOrDefault();
+        //                                     if (baocaoracoixk != null)
+        //                                     {
+        //                                         <li class="menu-item @(Context.Request.Path.StartsWithSegments("/BaoCao/XepKhuon/BaoCaoRaCoiXepKhuon") ? "open active" : "")">
+        //                                             <a href="" class="menu-link  menu-toggle">
+        //                                                 <div>Ra Cối</div>
+        //                                             </a>
+        //                                             <ul class="menu-sub">
+        //                                                 @{
+        //                                                     var baocaoracoixkchitiet = rolePermistions.Where(x => x.Fu == "Báo Cáo / Xếp Khuôn / Ra Cối / Chi Tiết" && x.Func == "Xem Báo Cáo / Xếp Khuôn / Ra Cối / Chi Tiết" && x.Status == 1).FirstOrDefault();
+        //                                                     if (baocaoracoixkchitiet != null)
+        //                                                     {
+        //                                                         <li class="menu-item @(Context.Request.Path == "/BaoCao/XepKhuon/BaoCaoRaCoiXepKhuon/ChiTietRaCoiXepKhuonView"? "active":"" )">
+        //                                                             <a href="/BaoCao/XepKhuon/BaoCaoRaCoiXepKhuon/ChiTietRaCoiXepKhuonView" class="menu-link">
+        //                                                                 <div>Chi Tiết</div>
+        //                                                             </a>
+        //                                                         </li>
+        //                                                     }
+        //                                                     var baocaotonghopcoixktonghop = rolePermistions.Where(x => x.Fu == "Báo Cáo / Xếp Khuôn / Ra Cối / Tổng Hợp Cối" && x.Func == "Xem Báo Cáo / Xếp Khuôn / Ra Cối / Tổng Hợp Cối" && x.Status == 1).FirstOrDefault();
+        //                                                     if (baocaotonghopcoixktonghop != null)
+        //                                                     {
+        //                                                         <li class="menu-item @(Context.Request.Path == "/BaoCao/XepKhuon/BaoCaoRaCoiXepKhuon/TongHopCoiRaCoiXepKhuonView"? "active":"" )">
+        //                                                             <a href="/BaoCao/XepKhuon/BaoCaoRaCoiXepKhuon/TongHopCoiRaCoiXepKhuonView" class="menu-link">
+        //                                                                 <div>Tổng Hợp Cối</div>
+        //                                                             </a>
+        //                                                         </li>
+        //                                                     }
+        //                                                     var baocaotonghopnhanvienxktonghop = rolePermistions.Where(x => x.Fu == "Báo Cáo / Xếp Khuôn / Ra Cối / Tổng Hợp Nhân Viên" && x.Func == "Xem Báo Cáo / Xếp Khuôn / Ra Cối / Tổng Hợp Nhân Viên" && x.Status == 1).FirstOrDefault();
+        //                                                     if (baocaotonghopnhanvienxktonghop != null)
+        //                                                     {
+        //                                                         <li class="menu-item @(Context.Request.Path == "/BaoCao/XepKhuon/BaoCaoRaCoiXepKhuon/TongHopNhanVienCoiXepKhuonView"? "active":"" )">
+        //                                                             <a href="/BaoCao/XepKhuon/BaoCaoRaCoiXepKhuon/TongHopNhanVienCoiXepKhuonView" class="menu-link">
+        //                                                                 <div>Tổng Hợp Nhân Viên</div>
+        //                                                             </a>
+        //                                                         </li>
+        //                                                     }
+        //                                                 }
+        //                                             </ul>
+
+        //                                         </li>
+        //                                     }
+        //                                 }
+        //                             </ul>
+        //                         </li>
+        //                     }
+        //                 }
+
+        //             </ul>
+        //         </li>
+
+
+        //     }
+    }
+    @{
+        var baocao2 = rolePermistions.Where(x => x.Fu.Contains("Báo Cáo / ")).FirstOrDefault();
+        if (baocao2 != null)
+        {
+            <li class="menu-header small text-uppercase">
+                <span class="menu-header-text">Báo Cáo</span>
+            </li>
+
+            var baocaoNguyenLieu = rolePermistions.Where(x => x.Fu.Contains("Báo Cáo / Nguyên Liệu")).FirstOrDefault();
+            if (baocaoNguyenLieu != null)
+            {
+                
+                 var path = Context.Request.Path;
+                 bool isMainPath = path.StartsWithSegments("/BaoCao/NguyenLieu/BaoCaoNguyenLieu");
+                 bool isExcludedPath =
+                        path.StartsWithSegments("/BaoCao/NguyenLieu/BaoCaoNguyenLieu/ChiTietThanhPham2View") ||
+                        path.StartsWithSegments("/BaoCao/NguyenLieu/BaoCaoNguyenLieu/TongHopSanPhamThanhPham2View") ||
+                        path.StartsWithSegments("/BaoCao/NguyenLieu/BaoCaoNguyenLieu/TyLeThuHoiThanhPham2View");
+
+                 var activeClass = (isMainPath && !isExcludedPath) ? "open active" : "";
+
+                <li class="menu-item @activeClass">
+                    <a href="javascript:void(0);" class="menu-link menu-toggle">
+                        <i class='menu-icon tf-icons bx bx-doughnut-chart'></i>
+                        <div data-i18n="Account Settings">Nguyên Liệu</div>
+                    </a>
+                    <ul class="menu-sub">
+                        @{
+                            var baocaonguyenlieuchitiet = rolePermistions.Where(x => x.Fu == "Báo Cáo / Nguyên Liệu / Chi Tiết" && x.Func == "Xem Báo Cáo / Nguyên Liệu / Chi Tiết" && x.Status == 1).FirstOrDefault();
+                            if (baocaonguyenlieuchitiet != null)
+                            {
+                                <li class="menu-item @(Context.Request.Path == "/BaoCao/NguyenLieu/BaoCaoNguyenLieu/ChiTietNguyenLieuView" ? "active" : "")">
+                                    <a href="/BaoCao/NguyenLieu/BaoCaoNguyenLieu/ChiTietNguyenLieuView"
+                                       class="menu-link">
+                                        <div>Chi Tiết</div>
+                                    </a>
+                                </li>
+                            }
+
+                            var baocaonguyenlieutonghopncc = rolePermistions.Where(x => x.Fu == "Báo Cáo / Nguyên Liệu / Tổng Hợp NCC" && x.Func == "Xem Báo Cáo / Nguyên Liệu / Tổng Hợp NCC" && x.Status == 1).FirstOrDefault();
+                            if (baocaonguyenlieutonghopncc != null)
+                            {
+                                <li class="menu-item @(Context.Request.Path == "/BaoCao/NguyenLieu/BaoCaoNguyenLieu/TongHopNhaCCNguyenLieuView" ? "active" : "")">
+                                    <a href="/BaoCao/NguyenLieu/BaoCaoNguyenLieu/TongHopNhaCCNguyenLieuView"
+                                       class="menu-link">
+                                        <div>Tổng Hợp Nhà Cung Cấp</div>
+                                    </a>
+                                </li>
+                            }
+
+                            // var baocaonguyenlieutonghopbct = rolePermistions.Where(x => x.Fu == "Báo Cáo / Nguyên Liệu / Tổng Hợp BCT" && x.Func == "Xem Báo Cáo / Nguyên Liệu / Tổng Hợp BCT" && x.Status == 1).FirstOrDefault();
+                            // if (baocaonguyenlieutonghopbct != null)
+                            // {
+                            //     <li class="menu-item @(Context.Request.Path == "/BaoCao/NguyenLieu/BaoCaoNguyenLieu/TongHopBanCatTietNguyenLieuView"? "active":"" )">
+                            //         <a href="/BaoCao/NguyenLieu/BaoCaoNguyenLieu/TongHopBanCatTietNguyenLieuView" class="menu-link">
+                            //             <div>Tổng Hợp Bàn Cắt Tiết</div>
+                            //         </a>
+                            //     </li>
+                            // }
+
+                            var baocaonguyenlieutonghoppt = rolePermistions.Where(x => x.Fu == "Báo Cáo / Nguyên Liệu / Tổng Hợp Ghe" && x.Func == "Xem Báo Cáo / Nguyên Liệu / Tổng Hợp Ghe" && x.Status == 1).FirstOrDefault();
+                            if (baocaonguyenlieutonghoppt != null)
+                            {
+                                <li class="menu-item @(Context.Request.Path == "/BaoCao/NguyenLieu/BaoCaoNguyenLieu/TongHopPhuongTienNguyenLieuView" ? "active" : "")">
+                                    <a href="/BaoCao/NguyenLieu/BaoCaoNguyenLieu/TongHopPhuongTienNguyenLieuView"
+                                       class="menu-link">
+                                        <div>Tổng Hợp Ghe</div>
+                                    </a>
+                                </li>
+                            }
+
+                            var baocaonguyenlieulo = rolePermistions.Where(x => x.Fu == "Báo Cáo / Nguyên Liệu / Tổng Hợp Lô" && x.Func == "Xem Báo Cáo / Nguyên Liệu / Tổng Hợp Lô" && x.Status == 1).FirstOrDefault();
+                            if (baocaonguyenlieulo != null)
+                            {
+                                <li class="menu-item @(Context.Request.Path == "/BaoCao/NguyenLieu/BaoCaoNguyenLieu/TongHopLoView" ? "active" : "")">
+                                    <a href="/BaoCao/NguyenLieu/BaoCaoNguyenLieu/TongHopLoView" class="menu-link">
+                                        <div>Tổng Hợp Lô</div>
+                                    </a>
+                                </li>
+                            }
+
+                            var baocaonguyenlieuctkhongghinhandulieu = rolePermistions.Where(x => x.Fu == "Báo Cáo / Nguyên Liệu / Phiếu Cân Không Thể Ghi Nhận" && x.Func == "Xem Báo Cáo / Nguyên Liệu / Phiếu Cân Không Thể Ghi Nhận" && x.Status == 1).FirstOrDefault();
+                            if (baocaonguyenlieuctkhongghinhandulieu != null)
+                            {
+                                <li class="menu-item @(Context.Request.Path == "/BaoCao/NguyenLieu/BaoCaoNguyenLieu/ChiTietPhieuCanKhongGhiNhanDuLieuView" ? "active" : "")">
+                                    <a href="/BaoCao/NguyenLieu/BaoCaoNguyenLieu/ChiTietPhieuCanKhongGhiNhanDuLieuView" class="menu-link">
+                                        <div>Phiếu Cân Không Thể Ghi Nhận</div>
+                                    </a>
+                                </li>
+                            }
+
+                            // var baocaonguyenlieutonghopkt = rolePermistions.Where(x => x.Fu == "Báo Cáo / Nguyên Liệu / Tổng Hợp Kế Toán" && x.Func == "Xem Báo Cáo / Nguyên Liệu / Tổng Hợp Kế Toán" && x.Status == 1).FirstOrDefault();
+                            // if (baocaonguyenlieutonghopkt != null)
+                            // {
+                            //     <li class="menu-item @(Context.Request.Path == "/BaoCao/NguyenLieu/BaoCaoNguyenLieu/TongHopKeToanNguyenLieuView"? "active":"" )">
+                            //         <a href="/BaoCao/NguyenLieu/BaoCaoNguyenLieu/TongHopKeToanNguyenLieuView" class="menu-link">
+                            //             <div>Tổng Hợp Kế Toán</div>
+                            //         </a>
+                            //     </li>
+                            // }
+                        }
+                    </ul>
+                </li>
+            }
+
+            var baocaoTPFillet = rolePermistions.Where(x => x.Fu.Contains("TPFillet")).FirstOrDefault();
+            if (baocaoTPFillet != null)
+            {
+                <li class="menu-item @(Context.Request.Path.StartsWithSegments("/BaoCao/Fillet/TPFillet") ? "open active" : "")">
+                    <a href="javascript:void(0);" class="menu-link menu-toggle">
+                        <i class='menu-icon tf-icons bx bx-doughnut-chart'></i>
+                        <div data-i18n="Account Settings">Xẻ Bướm</div>
+                    </a>
+                    <ul class="menu-sub">
+                        @{
+                            // var baocaotpfilletchitiet = rolePermistions.Where(x => x.Fu == "Báo Cáo / TPFillet / Chi Tiết" && x.Func == "Xem Báo Cáo / TPFillet / Chi Tiết" && x.Status == 1).FirstOrDefault();
+                            // if (baocaotpfilletchitiet != null)
+                            // {
+                            //     <li class="menu-item @(Context.Request.Path == "/BaoCao/Fillet/TPFillet/ChiTiet"? "active":"" )">
+                            //         <a href="/BaoCao/Fillet/TPFillet/ChiTiet" class="menu-link">
+                            //             <div>Chi Tiết</div>
+                            //         </a>
+                            //     </li>
+                            // }
+
+                            // var baocaotpfillettonghopnhanvien = rolePermistions.Where(x => x.Fu == "Báo Cáo / TPFillet / Tổng Hợp Nhân Viên" && x.Func == "Xem Báo Cáo / TPFillet / Tổng Hợp Nhân Viên" && x.Status == 1).FirstOrDefault();
+                            // if (baocaotpfillettonghopnhanvien != null)
+                            // {
+                            //     <li class="menu-item @(Context.Request.Path == "/BaoCao/Fillet/TPFillet/TongHopNhanVien"? "active":"" )">
+                            //         <a href="/BaoCao/Fillet/TPFillet/TongHopNhanVien" class="menu-link">
+                            //             <div>Tổng Hợp Nhân Viên</div>
+                            //         </a>
+                            //     </li>
+                            // }
+
+                            // var baocaotpfillettonghopthanhpham = rolePermistions.Where(x => x.Fu == "Báo Cáo / TPFillet / Tổng Hợp Thành Phẩm" && x.Func == "Xem Báo Cáo / TPFillet / Tổng Hợp Thành Phẩm" && x.Status == 1).FirstOrDefault();
+                            // if (baocaotpfillettonghopthanhpham != null)
+                            // {
+                            //     <li class="menu-item @(Context.Request.Path == "/BaoCao/Fillet/TPFillet/TongHopThanhPham"? "active":"" )">
+                            //         <a href="/BaoCao/Fillet/TPFillet/TongHopThanhPham" class="menu-link">
+                            //             <div>Tổng Hợp Thành Phẩm</div>
+                            //         </a>
+                            //     </li>
+                            // }
+
+                            var baocaobtpxebuom = rolePermistions.Where(x => x.Fu.Contains("BTP Xẻ Bướm")).FirstOrDefault();
+                            if (baocaobtpxebuom != null)
+                            {
+                                <li class="menu-item @((
+                                                         Context.Request.Path.StartsWithSegments("/BaoCao/Fillet/TPFillet/ChiTietBTPXeBuom") ||
+                                                         Context.Request.Path.StartsWithSegments("/BaoCao/Fillet/TPFillet/TongHopThanhPhamBTPXeBuom") ||
+                                                         Context.Request.Path.StartsWithSegments("/BaoCao/Fillet/TPFillet/TongHopLoThanhPhamSizeBTPXeBuom") ||
+                                                         Context.Request.Path.StartsWithSegments("/BaoCao/Fillet/TPFillet/TongHopNhanVienBTPXeBuom")
+                                                     )
+                                                         ? "open active"
+                                                         : "")">
+
+                                    <a href="" class="menu-link  menu-toggle">
+                                        <div>Đầu Vào</div>
+                                    </a>
+                                    <ul class="menu-sub">
+                                        @{
+                                            var baocaoxebuomchitietbtp = rolePermistions.Where(x => x.Fu == "Báo Cáo / TPFillet / Chi Tiết BTP Xẻ Bướm" && x.Func == "Xem Báo Cáo / TPFillet / Chi Tiết BTP Xẻ Bướm" && x.Status == 1).FirstOrDefault();
+                                            if (baocaoxebuomchitietbtp != null)
+                                            {
+                                                <li class="menu-item @(Context.Request.Path == "/BaoCao/Fillet/TPFillet/ChiTietBTPXeBuom" ? "active" : "")">
+                                                    <a href="/BaoCao/Fillet/TPFillet/ChiTietBTPXeBuom"
+                                                       class="menu-link">
+                                                        <div>Chi Tiết</div>
+                                                    </a>
+                                                </li>
+                                            }
+
+                                            var baocaoxebuomtonghopthanhphambtp = rolePermistions.Where(x => x.Fu == "Báo Cáo / TPFillet / Thành Phẩm BTP Xẻ Bướm" && x.Func == "Xem Báo Cáo / TPFillet / Thành Phẩm BTP Xẻ Bướm" && x.Status == 1).FirstOrDefault();
+                                            if (baocaoxebuomtonghopthanhphambtp != null)
+                                            {
+                                                <li class="menu-item @(Context.Request.Path == "/BaoCao/Fillet/TPFillet/TongHopThanhPhamBTPXeBuom" ? "active" : "")">
+                                                    <a href="/BaoCao/Fillet/TPFillet/TongHopThanhPhamBTPXeBuom"
+                                                       class="menu-link">
+                                                        <div>Tổng Hợp Thành Phẩm</div>
+                                                    </a>
+                                                </li>
+                                            }
+
+                                            var baocaoxebuomtonghoplothanhphamsizebtp = rolePermistions.Where(x => x.Fu == "Báo Cáo / TPFillet / Lô Thành Phẩm Size BTP Xẻ Bướm" && x.Func == "Xem Báo Cáo / TPFillet / Lô Thành Phẩm Size BTP Xẻ Bướm" && x.Status == 1).FirstOrDefault();
+                                            if (baocaoxebuomtonghoplothanhphamsizebtp != null)
+                                            {
+                                                <li class="menu-item @(Context.Request.Path == "/BaoCao/Fillet/TPFillet/TongHopLoThanhPhamSizeBTPXeBuom" ? "active" : "")">
+                                                    <a href="/BaoCao/Fillet/TPFillet/TongHopLoThanhPhamSizeBTPXeBuom"
+                                                       class="menu-link">
+                                                        <div>Tổng Hợp Lô</div>
+                                                    </a>
+                                                </li>
+                                            }
+
+                                            var baocaoxebuomtonghopnhanvienbtp = rolePermistions.Where(x => x.Fu == "Báo Cáo / TPFillet / Tổng Hợp Nhân Viên BTP Xẻ Bướm" && x.Func == "Xem Báo Cáo / TPFillet / Tổng Hợp Nhân Viên BTP Xẻ Bướm" && x.Status == 1).FirstOrDefault();
+                                            if (baocaoxebuomtonghopnhanvienbtp != null)
+                                            {
+                                                <li class="menu-item @(Context.Request.Path == "/BaoCao/Fillet/TPFillet/TongHopNhanVienBTPXeBuom" ? "active" : "")">
+                                                    <a href="/BaoCao/Fillet/TPFillet/TongHopNhanVienBTPXeBuom"
+                                                       class="menu-link">
+                                                        <div>Tổng Hợp Nhân Viên</div>
+                                                    </a>
+                                                </li>
+                                            }
+                                        }
+                                    </ul>
+                                </li>
+                            }
+
+                            var baocaotpxebuom = rolePermistions.Where(x => x.Fu.Contains("TP Xẻ Bướm")).FirstOrDefault();
+                            if (baocaotpxebuom != null)
+                            {
+                                <li class="menu-item @((
+                                                         Context.Request.Path.StartsWithSegments("/BaoCao/Fillet/TPFillet/ChiTietTPXeBuom") ||
+                                                         Context.Request.Path.StartsWithSegments("/BaoCao/Fillet/TPFillet/TongHopThanhPhamTPXeBuom") ||
+                                                         Context.Request.Path.StartsWithSegments("/BaoCao/Fillet/TPFillet/TongHopLoThanhPhamSizeTPXeBuom") ||
+                                                         Context.Request.Path.StartsWithSegments("/BaoCao/Fillet/TPFillet/TongHopLoThanhPhamSizeTPXeBuom") ||
+                                                         Context.Request.Path.StartsWithSegments("/BaoCao/Fillet/TPFillet/TongHopNhanVienTPXeBuom") ||
+                                                         Context.Request.Path.StartsWithSegments("/BaoCao/Fillet/TPFillet/TongHopDinhMucTPXeBuom")
+                                        
+                                                     )
+                                                         ? "open active"
+                                                         : "")">
+
+                                    <a href="" class="menu-link  menu-toggle">
+                                        <div>Đầu Ra</div>
+                                    </a>
+                                    <ul class="menu-sub">
+                                        @{
+                                            var baocaoxebuomchitiettp = rolePermistions.Where(x => x.Fu == "Báo Cáo / TPFillet / Chi Tiết TP Xẻ Bướm" && x.Func == "Xem Báo Cáo / TPFillet / Chi Tiết TP Xẻ Bướm" && x.Status == 1).FirstOrDefault();
+                                            if (baocaoxebuomchitiettp != null)
+                                            {
+                                                <li class="menu-item @(Context.Request.Path == "/BaoCao/Fillet/TPFillet/ChiTietTPXeBuom" ? "active" : "")">
+                                                    <a href="/BaoCao/Fillet/TPFillet/ChiTietTPXeBuom" class="menu-link">
+                                                        <div>Chi Tiết</div>
+                                                    </a>
+                                                </li>
+                                            }
+
+                                            var baocaoxebuomtonghopthanhphamtp = rolePermistions.Where(x => x.Fu == "Báo Cáo / TPFillet / Thành Phẩm TP Xẻ Bướm" && x.Func == "Xem Báo Cáo / TPFillet / Thành Phẩm TP Xẻ Bướm" && x.Status == 1).FirstOrDefault();
+                                            if (baocaoxebuomtonghopthanhphamtp != null)
+                                            {
+                                                <li class="menu-item @(Context.Request.Path == "/BaoCao/Fillet/TPFillet/TongHopThanhPhamTPXeBuom" ? "active" : "")">
+                                                    <a href="/BaoCao/Fillet/TPFillet/TongHopThanhPhamTPXeBuom"
+                                                       class="menu-link">
+                                                        <div>Tổng Hợp Thành Phẩm</div>
+                                                    </a>
+                                                </li>
+                                            }
+
+                                            var baocaoxebuomtonghoplotp = rolePermistions.Where(x => x.Fu == "Báo Cáo / TPFillet / Lô Thành Phẩm Size TP Xẻ Bướm" && x.Func == "Xem Báo Cáo / TPFillet / Lô Thành Phẩm Size TP Xẻ Bướm" && x.Status == 1).FirstOrDefault();
+                                            if (baocaoxebuomtonghoplotp != null)
+                                            {
+                                                <li class="menu-item @(Context.Request.Path == "/BaoCao/Fillet/TPFillet/TongHopLoThanhPhamSizeTPXeBuom" ? "active" : "")">
+                                                    <a href="/BaoCao/Fillet/TPFillet/TongHopLoThanhPhamSizeTPXeBuom"
+                                                       class="menu-link">
+                                                        <div>Tổng Hợp Lô</div>
+                                                    </a>
+                                                </li>
+                                            }
+
+                                            var baocaoxebuomtonghopnhanvientp = rolePermistions.Where(x => x.Fu == "Báo Cáo / TPFillet / Tổng Hợp Nhân Viên TP Xẻ Bướm" && x.Func == "Xem Báo Cáo / TPFillet / Tổng Hợp Nhân Viên TP Xẻ Bướm" && x.Status == 1).FirstOrDefault();
+                                            if (baocaoxebuomtonghopnhanvientp != null)
+                                            {
+                                                <li class="menu-item @(Context.Request.Path == "/BaoCao/Fillet/TPFillet/TongHopNhanVienTPXeBuom" ? "active" : "")">
+                                                    <a href="/BaoCao/Fillet/TPFillet/TongHopNhanVienTPXeBuom"
+                                                       class="menu-link">
+                                                        <div>Tổng Hợp Nhân Viên</div>
+                                                    </a>
+                                                </li>
+                                            }
+
+                                            var baocaoxebuomtonghopdinhmuctp = rolePermistions.Where(x => x.Fu == "Báo Cáo / TPFillet / Tổng Hợp Định Mức TP Xẻ Bướm" && x.Func == "Xem Báo Cáo / TPFillet / Tổng Hợp Định Mức TP Xẻ Bướm" && x.Status == 1).FirstOrDefault();
+                                            if (baocaoxebuomtonghopdinhmuctp != null)
+                                            {
+                                                <li class="menu-item @(Context.Request.Path == "/BaoCao/Fillet/TPFillet/TongHopDinhMucTPXeBuom" ? "active" : "")">
+                                                    <a href="/BaoCao/Fillet/TPFillet/TongHopDinhMucTPXeBuom"
+                                                       class="menu-link">
+                                                        <div>Định Mức</div>
+                                                    </a>
+                                                </li>
+                                            }
+                                        }
+                                    </ul>
+                                </li>
+                            }
+                        }
+                    </ul>
+                </li>
+            }
+
+            var baocaoBTPFilletv2 = rolePermistions.Where(x => x.Fu.Contains("BTPFilletv2")).FirstOrDefault();
+            var baocaoTPFilletv2 = rolePermistions.Where(x => x.Fu.Contains("TPFilletv2")).FirstOrDefault();
+            if (baocaoBTPFilletv2 != null || baocaoTPFilletv2 != null)
+            {
+                <li class="menu-item @(Context.Request.Path.StartsWithSegments("/BaoCao/Fillet/BTPFilletv2") || Context.Request.Path.StartsWithSegments("/BaoCao/Fillet/TPFilletv2")? "open active" : "")">
+                    <a href="javascript:void(0);" class="menu-link menu-toggle">
+                        <i class='menu-icon tf-icons bx bx-doughnut-chart'></i>
+                        <div data-i18n="Account Settings">Fillet</div>
+                    </a>
+                    <ul class="menu-sub">
+                        @if (baocaoBTPFilletv2 != null)
+                        {
+                            <li class="menu-item @(Context.Request.Path.StartsWithSegments("/BaoCao/Fillet/BTPFilletv2") ? "open active" : "")">
+                                <a href="javascript:void(0);" class="menu-link menu-toggle">
+                                    <i class='menu-icon tf-icons bx bx-doughnut-chart'></i>
+                                    <div data-i18n="Account Settings">Đầu Vào</div>
+                                </a>
+                                <ul class="menu-sub">
+                                    @{
+                                        var baocaobtpfilletv2chitiet = rolePermistions.Where(x => x.Fu == "Báo Cáo / BTPFilletv2 / Chi Tiết" && x.Func == "Xem Báo Cáo / BTPFilletv2 / Chi Tiết" && x.Status == 1).FirstOrDefault();
+                                        if (baocaobtpfilletv2chitiet != null)
+                                        {
+                                            <li class="menu-item @(Context.Request.Path == "/BaoCao/Fillet/BTPFilletv2/ChiTiet" ? "active" : "")">
+                                                <a href="/BaoCao/Fillet/BTPFilletv2/ChiTiet" class="menu-link">
+                                                    <div>Chi Tiết</div>
+                                                </a>
+                                            </li>
+                                            <li class="menu-item @(Context.Request.Path == "/BaoCao/Fillet/BTPFilletv2/ChiTietPhieuCanChuaSua" ? "active" : "")">
+                                                <a href="/BaoCao/Fillet/BTPFilletv2/ChiTietPhieuCanChuaSua" class="menu-link">
+                                                    <div>Chi Tiết Phiếu Chưa Fillet</div>
+                                                </a>
+                                            </li>
+                                        }
+
+                                        var baocaobtpfilletv2tonghopnhanvien = rolePermistions.Where(x => x.Fu == "Báo Cáo / BTPFilletv2 / Tổng Hợp Nhân Viên" && x.Func == "Xem Báo Cáo / BTPFilletv2 / Tổng Hợp Nhân Viên" && x.Status == 1).FirstOrDefault();
+                                        if (baocaobtpfilletv2tonghopnhanvien != null)
+                                        {
+                                            <li class="menu-item @(Context.Request.Path == "/BaoCao/Fillet/BTPFilletv2/TongHopNhanVien" ? "active" : "")">
+                                                <a href="/BaoCao/Fillet/BTPFilletv2/TongHopNhanVien" class="menu-link">
+                                                    <div>Tổng Hợp Lô</div>
+                                                </a>
+                                            </li>
+                                        }
+
+                                        var baocaobtpfilletv2tonghopthanhpham = rolePermistions.Where(x => x.Fu == "Báo Cáo / BTPFilletv2 / Tổng Hợp Thành Phẩm" && x.Func == "Xem Báo Cáo / BTPFilletv2 / Tổng Hợp Thành Phẩm" && x.Status == 1).FirstOrDefault();
+                                        if (baocaobtpfilletv2tonghopthanhpham != null)
+                                        {
+                                            <li class="menu-item @(Context.Request.Path == "/BaoCao/Fillet/BTPFilletv2/TongHopThanhPham" ? "active" : "")">
+                                                <a href="/BaoCao/Fillet/BTPFilletv2/TongHopThanhPham" class="menu-link">
+                                                    <div>Tổng Hợp Thành Phẩm</div>
+                                                </a>
+                                            </li>
+                                        }
+
+                                        var baocaobtpfilletv2tonghoplo = rolePermistions.Where(x => x.Fu == "Báo Cáo / BTPFilletv2 / Tổng Hợp Lô" && x.Func == "Xem Báo Cáo / BTPFilletv2 / Tổng Hợp Lô" && x.Status == 1).FirstOrDefault();
+                                        if (baocaobtpfilletv2tonghoplo != null)
+                                        {
+                                            <li class="menu-item @(Context.Request.Path == "/BaoCao/Fillet/BTPFilletv2/TongHopLo" ? "active" : "")">
+                                                <a href="/BaoCao/Fillet/BTPFilletv2/TongHopLo" class="menu-link">
+                                                    <div>Tổng Hợp Lô</div>
+                                                </a>
+                                            </li>
+                                        }
+                                    }
+                                </ul>
+                            </li>
+                        }
+
+                        @if (baocaoTPFilletv2 != null)
+                        {
+                            <li class="menu-item @(Context.Request.Path.StartsWithSegments("/BaoCao/Fillet/TPFilletv2") ? "open active" : "")">
+                                <a href="javascript:void(0);" class="menu-link menu-toggle">
+                                    <i class='menu-icon tf-icons bx bx-doughnut-chart'></i>
+                                    <div data-i18n="Account Settings">Đầu Ra</div>
+                                </a>
+                                <ul class="menu-sub">
+                                    @{
+                                        var baocaotpfilletv2dulieucanreal_time = rolePermistions
+                                            .Where(x => x.Fu == "Báo Cáo / TPFilletv2/ Dữ Liệu Cân Read-Time"
+                                                        && x.Func == "Xem Báo Cáo / TPFilletv2 / Dữ Liệu Cân Read-Time"
+                                                        && x.Status == 1)
+                                            .FirstOrDefault();
+
+
+                                        @if (baocaotpfilletv2dulieucanreal_time != null)
+                                        {
+                                            <li class="menu-item @(Context.Request.Path == "/FL-log-view" ? "active" : "")">
+                                                <a href="@($"{baseUrl}:5153/FL-log-view")"  class="menu-link">
+                                                    <div>Dữ Liệu Cân Trực tiếp</div>
+                                                </a>
+                                            </li>
+                                        }
+
+
+                                        var baocaotpfilletv2chitiet = rolePermistions.Where(x => x.Fu == "Báo Cáo / TPFilletv2 / Chi Tiết" && x.Func == "Xem Báo Cáo / TPFilletv2 / Chi Tiết" && x.Status == 1).FirstOrDefault();
+                                        if (baocaotpfilletv2chitiet != null)
+                                        {
+                                            <li class="menu-item @(Context.Request.Path == "/BaoCao/Fillet/TPFilletv2/ChiTiet" ? "active" : "")">
+                                                <a href="/BaoCao/Fillet/TPFilletv2/ChiTiet" class="menu-link">
+                                                    <div>Chi Tiết</div>
+                                                </a>
+                                            </li>
+                                        }
+
+                                        var baocaotpfilletv2tonghopnhanvien = rolePermistions.Where(x => x.Fu == "Báo Cáo / TPFilletv2 / Tổng Hợp Nhân Viên" && x.Func == "Xem Báo Cáo / TPFilletv2 / Tổng Hợp Nhân Viên" && x.Status == 1).FirstOrDefault();
+                                        if (baocaotpfilletv2tonghopnhanvien != null)
+                                        {
+                                            <li class="menu-item @(Context.Request.Path == "/BaoCao/Fillet/TPFilletv2/TongHopNhanVien" ? "active" : "")">
+                                                <a href="/BaoCao/Fillet/TPFilletv2/TongHopNhanVien" class="menu-link">
+                                                    <div>Tổng Hợp Nhân Viên</div>
+                                                </a>
+                                            </li>
+                                        }
+
+                                        var baocaotpfilletv2tonghopnhanvien2 = rolePermistions.Where(x => x.Fu == "Báo Cáo / TPFilletv2 / Tổng Hợp Nhân Viên 2" && x.Func == "Xem Báo Cáo / TPFilletv2 / Tổng Hợp Nhân Viên 2" && x.Status == 1).FirstOrDefault();
+                                        if (baocaotpfilletv2tonghopnhanvien2 != null)
+                                        {
+                                            <li class="menu-item @(Context.Request.Path == "/BaoCao/Fillet/TPFilletv2/TongHopNhanVien2" ? "active" : "")">
+                                                <a href="/BaoCao/Fillet/TPFilletv2/TongHopNhanVien2" class="menu-link">
+                                                    <div>Tổng Hợp Nhân Viên 2</div>
+                                                </a>
+                                            </li>
+                                        }
+
+                                        var baocaotpfilletv2tonghopthanhpham = rolePermistions.Where(x => x.Fu == "Báo Cáo / TPFilletv2 / Tổng Hợp Thành Phẩm" && x.Func == "Xem Báo Cáo / TPFilletv2 / Tổng Hợp Thành Phẩm" && x.Status == 1).FirstOrDefault();
+                                        if (baocaotpfilletv2tonghopthanhpham != null)
+                                        {
+                                            <li class="menu-item @(Context.Request.Path == "/BaoCao/Fillet/TPFilletv2/TongHopThanhPham" ? "active" : "")">
+                                                <a href="/BaoCao/Fillet/TPFilletv2/TongHopThanhPham" class="menu-link">
+                                                    <div>Tổng Hợp Thành Phẩm</div>
+                                                </a>
+                                            </li>
+                                        }
+
+                                        var baocaotpfilletv2tonghoplo = rolePermistions.Where(x => x.Fu == "Báo Cáo / TPFilletv2 / Tổng Hợp Lô" && x.Func == "Xem Báo Cáo / TPFilletv2 / Tổng Hợp Lô" && x.Status == 1).FirstOrDefault();
+                                        if (baocaotpfilletv2tonghoplo != null)
+                                        {
+                                            <li class="menu-item @(Context.Request.Path == "/BaoCao/Fillet/TPFilletv2/TongHopLo" ? "active" : "")">
+                                                <a href="/BaoCao/Fillet/TPFilletv2/TongHopLo" class="menu-link">
+                                                    <div>Tổng Hợp Lô</div>
+                                                </a>
+                                            </li>
+                                        }
+                                    }
+                                </ul>
+                            </li>
+                        }
+
+
+                    </ul>
+                </li>
+            }
+
+
+            var baocaoBTDinhHinh = rolePermistions.Where(x => x.Fu.Contains("BTP Định Hình")).FirstOrDefault();
+            var baocaoTDinhHinh = rolePermistions.Where(x => x.Fu.Contains("TP Định Hình")).FirstOrDefault();
+            if (baocaoBTDinhHinh != null || baocaoTDinhHinh != null)
+            {
+                <li class="menu-item @(Context.Request.Path.StartsWithSegments("/BaoCao/DinhHinh") ? "open active" : "")">
+                    <a href="javascript:void(0);" class="menu-link menu-toggle">
+                        <i class='menu-icon tf-icons bx bx-doughnut-chart'></i>
+                        <div data-i18n="Account Settings">Sửa Cá</div>
+                    </a>
+                    <ul class="menu-sub">
+                        @if (baocaoBTDinhHinh != null)
+                        {
+                            <li class="menu-item @(Context.Request.Path.StartsWithSegments("/BaoCao/DinhHinh/BTPDinhHinh") ? "open active" : "")">
+
+                                <a href="javascript:void(0);" class="menu-link menu-toggle">
+                                    <i class='menu-icon tf-icons bx bx-doughnut-chart'></i>
+                                    <div>Đầu Vào</div>
+                                </a>
+                                <ul class="menu-sub">
+                                    @{
+                                        var baocaobtpdinhhinhchitiet = rolePermistions.Where(x => x.Fu == "Báo Cáo / BTP Định Hình / Chi Tiết" && x.Func == "Xem Báo Cáo / BTP Định Hình / Chi Tiết" && x.Status == 1).FirstOrDefault();
+                                        if (baocaobtpdinhhinhchitiet != null)
+                                        {
+                                            <li class="menu-item @(Context.Request.Path == "/BaoCao/DinhHinh/BTPDinhHinh/ChiTiet" ? "active" : "")">
+                                                <a href="/BaoCao/DinhHinh/BTPDinhHinh/ChiTiet" class="menu-link">
+                                                    <div>Chi Tiết</div>
+                                                </a>
+                                            </li>
+                                        }
+                                        // var baocaobtpdinhhinhtonghopnhanvien = rolePermistions.Where(x => x.Fu == "Báo Cáo / BTP Định Hình / Tổng Hợp Nhân Viên" && x.Func == "Xem Báo Cáo / BTP Định Hình / Tổng Hợp Nhân Viên" && x.Status == 1).FirstOrDefault();
+                                        // if (baocaobtpdinhhinhtonghopnhanvien != null)
+                                        // {
+                                        //     <li class="menu-item @(Context.Request.Path == "/BaoCao/DinhHinh/BTPDinhHinh/TongHopNhanVien" ? "active":"" )">
+                                        //         <a href="/BaoCao/DinhHinh/BTPDinhHinh/TongHopNhanVien" class="menu-link">
+                                        //             <div>Tổng Hợp Nhân Viên</div>
+                                        //         </a>
+                                        //     </li>
+                                        // }
+
+                                        var baocaobtpdinhhinhtonghopthanhpham = rolePermistions.Where(x => x.Fu == "Báo Cáo / BTP Định Hình / Tổng Hợp Thành Phẩm" && x.Func == "Xem Báo Cáo / BTP Định Hình / Tổng Hợp Thành Phẩm" && x.Status == 1).FirstOrDefault();
+                                        if (baocaobtpdinhhinhtonghopthanhpham != null)
+                                        {
+                                            <li class="menu-item @(Context.Request.Path == "/BaoCao/DinhHinh/BTPDinhHinh/TongHopThanhPham" ? "active" : "")">
+                                                <a href="/BaoCao/DinhHinh/BTPDinhHinh/TongHopThanhPham"
+                                                   class="menu-link">
+                                                    <div>Tổng Hợp Thành Phẩm</div>
+                                                </a>
+                                            </li>
+                                        }
+
+                                        var baocaobtpdinhhinhtonghoplo = rolePermistions.Where(x => x.Fu == "Báo Cáo / BTP Định Hình / Tổng Hợp Lô" && x.Func == "Xem Báo Cáo / BTP Định Hình / Tổng Hợp Lô" && x.Status == 1).FirstOrDefault();
+                                        if (baocaobtpdinhhinhtonghoplo != null)
+                                        {
+                                            <li class="menu-item @(Context.Request.Path == "/BaoCao/DinhHinh/BTPDinhHinh/TongHopLos" ? "active" : "")">
+                                                <a href="/BaoCao/DinhHinh/BTPDinhHinh/TongHopLos" class="menu-link">
+                                                    <div>Tổng Hợp Lô</div>
+                                                </a>
+                                            </li>
+                                        }
+
+                                        var baocaobtpdinhhinhphieucanchuasua = rolePermistions.Where(x => x.Fu == "Báo Cáo / BTP Định Hình / Chi Tiết Phiếu Cân Chưa Sửa" && x.Func == "Xem Báo Cáo / BTP Định Hình / Chi Tiết Phiếu Cân Chưa Sửa" && x.Status == 1).FirstOrDefault();
+                                        if (baocaobtpdinhhinhphieucanchuasua != null)
+                                        {
+                                            <li class="menu-item @(Context.Request.Path == "/BaoCao/DinhHinh/BTPDinhHinh/ChiTietPhieuCanChuaSua" ? "active" : "")">
+                                                <a href="/BaoCao/DinhHinh/BTPDinhHinh/ChiTietPhieuCanChuaSua"
+                                                   class="menu-link">
+                                                    <div>Chi Tiết Phiếu Cân Chưa Sửa</div>
+                                                </a>
+                                            </li>
+                                        }
+                                    }
+                                </ul>
+                            </li>
+                        }
+
+
+                        @if (baocaoTDinhHinh != null)
+                        {
+                            <li class="menu-item @(Context.Request.Path.StartsWithSegments("/BaoCao/DinhHinh/TP") ? "open active" : "")">
+                                <a href="javascript:void(0);" class="menu-link menu-toggle">
+                                    <i class='menu-icon tf-icons bx bx-doughnut-chart'></i>
+                                    <div data-i18n="Account Settings">Đầu Ra</div>
+                                </a>
+                                <ul class="menu-sub">
+                                    @{
+                                        var baocaotpdinhhinhdulieucanreal_time = rolePermistions
+                                            .Where(x => x.Fu == "Báo Cáo / TP Định Hình / Dữ Liệu Cân Read-Time"
+                                                        && x.Func == "Xem Báo Cáo / TP Định Hình / Dữ Liệu Cân Read-Time"
+                                                        && x.Status == 1)
+                                            .FirstOrDefault();
+
+
+                                        @if (baocaotpdinhhinhdulieucanreal_time != null)
+                                        {
+                                            @* <li class="menu-item @(Context.Request.Path == "/DH-log-view" ? "active" : "")"> *@
+                                            @*     <a href="http://10.10.26.50:5153/DH-log-view" class="menu-link"> *@
+                                            @*         <div>Dữ Liệu Cân Real-time</div> *@
+                                            @*     </a> *@
+                                            @* </li> *@
+                                            <li class="menu-item @(Context.Request.Path == "/DH-log-view" ? "active" : "")">
+                                                <a href="@($"{baseUrl}:5154/DH-log-view")"  class="menu-link">
+                                                    <div>Dữ Liệu Cân Trực tiếp</div>
+                                                </a>
+                                            </li>
+                                        }
+
+                                        var baocaotpdinhhinhchitiet = rolePermistions.Where(x => x.Fu == "Báo Cáo / TP Định Hình / Chi Tiết" && x.Func == "Xem Báo Cáo / TP Định Hình / Chi Tiết" && x.Status == 1).FirstOrDefault();
+                                        if (baocaotpdinhhinhchitiet != null)
+                                        {
+                                            <li class="menu-item @(Context.Request.Path == "/BaoCao/DinhHinh/TP/ChiTiet" ? "active" : "")">
+                                                <a href="/BaoCao/DinhHinh/TP/ChiTiet" class="menu-link">
+                                                    <div>Chi Tiết</div>
+                                                </a>
+                                            </li>
+                                        }
+
+                                        var baocaotpdinhhinhtonghopnhanvien = rolePermistions.Where(x => x.Fu == "Báo Cáo / TP Định Hình / Tổng Hợp Nhân Viên" && x.Func == "Xem Báo Cáo / TP Định Hình / Tổng Hợp Nhân Viên" && x.Status == 1).FirstOrDefault();
+                                        if (baocaotpdinhhinhtonghopnhanvien != null)
+                                        {
+                                            <li class="menu-item @(Context.Request.Path == "/BaoCao/DinhHinh/TP/TongHopNhanVien" ? "active" : "")">
+                                                <a href="/BaoCao/DinhHinh/TP/TongHopNhanVien" class="menu-link">
+                                                    <div>Tổng Hợp Nhân Viên</div>
+                                                </a>
+                                            </li>
+                                        }
+
+                                        var baocaotpdinhhinhtonghopthanhpham = rolePermistions.Where(x => x.Fu == "Báo Cáo / TP Định Hình / Tổng Hợp Thành Phẩm" && x.Func == "Xem Báo Cáo / TP Định Hình / Tổng Hợp Thành Phẩm" && x.Status == 1).FirstOrDefault();
+                                        if (baocaotpdinhhinhtonghopthanhpham != null)
+                                        {
+                                            <li class="menu-item @(Context.Request.Path == "/BaoCao/DinhHinh/TP/TongHopLoaiThanhPham" ? "active" : "")">
+                                                <a href="/BaoCao/DinhHinh/TP/TongHopLoaiThanhPham" class="menu-link">
+                                                    <div>Tổng Hợp Thành Phẩm</div>
+                                                </a>
+                                            </li>
+                                        }
+
+                                        var baocaotpdinhhinhtonghoplo = rolePermistions.Where(x => x.Fu == "Báo Cáo / TP Định Hình / Tổng Hợp Lô" && x.Func == "Xem Báo Cáo / TP Định Hình / Tổng Hợp Lô" && x.Status == 1).FirstOrDefault();
+                                        if (baocaotpdinhhinhtonghoplo != null)
+                                        {
+                                            <li class="menu-item @(Context.Request.Path == "/BaoCao/DinhHinh/TP/TongHopLo" ? "active" : "")">
+                                                <a href="/BaoCao/DinhHinh/TP/TongHopLo" class="menu-link">
+                                                    <div>Tổng Hợp Lô</div>
+                                                </a>
+                                            </li>
+                                        }
+
+                                        var baocaotpdinhhinhtonghopnhanvienkhonglamviec = rolePermistions.Where(x => x.Fu == "Báo Cáo / TP Định Hình / Tổng Hợp Nhân Viên Không Làm Việc" && x.Func == "Xem Báo Cáo / TP Định Hình / Tổng Hợp Nhân Viên Không Làm Việc" && x.Status == 1).FirstOrDefault();
+                                        if (baocaotpdinhhinhtonghopnhanvienkhonglamviec != null)
+                                        {
+                                            <li class="menu-item @(Context.Request.Path == "/BaoCao/DinhHinh/TP/TongHopNhanVienKhongLamViec" ? "active" : "")">
+                                                <a href="/BaoCao/DinhHinh/TP/TongHopNhanVienKhongLamViec"
+                                                   class="menu-link">
+                                                    <div>NV Không Làm Việc</div>
+                                                </a>
+                                            </li>
+                                        }
+                                    }
+                                </ul>
+                            </li>
+                        }
+
+                    </ul>
+                </li>
+            }
+
+            var baocaoxepkhuon = rolePermistions.Where(x => x.Fu.Contains("Báo Cáo / Xếp Khuôn")).FirstOrDefault();
+            if (baocaoxepkhuon != null)
+            {
+                <li class="menu-item @(Context.Request.Path.StartsWithSegments("/BaoCao/XepKhuon") ? "open active" : "")">
+                    <a href="javascript:void(0);" class="menu-link menu-toggle">
+                        <i class='menu-icon tf-icons bx bx-doughnut-chart'></i>
+                        <div>Xếp Khuôn</div>
+                    </a>
+                    <ul class="menu-sub">
+                        @{
+                            var baocaosanphamchinhxk = rolePermistions.Where(x => x.Fu.Contains("Báo Cáo / Xếp Khuôn / Sản Phẩm Chính")).FirstOrDefault();
+                            if (baocaosanphamchinhxk != null)
+                            {
+                                <li class="menu-item @(Context.Request.Path.StartsWithSegments("/BaoCao/XepKhuon/BaoCaoSanPhamChinhXepKhuon") ? "open active" : "")">
+                                    <a href="" class="menu-link  menu-toggle">
+                                        <div>Vào Cối</div>
+                                    </a>
+                                    <ul class="menu-sub">
+                                        @{
+                                            var baocaochinhxkchitiet = rolePermistions.Where(x => x.Fu == "Báo Cáo / Xếp Khuôn / Sản Phẩm Chính / Chi Tiết" && x.Func == "Xem Báo Cáo / Xếp Khuôn / Sản Phẩm Chính / Chi Tiết" && x.Status == 1).FirstOrDefault();
+                                            if (baocaochinhxkchitiet != null)
+                                            {
+                                                <li class="menu-item @(Context.Request.Path == "/BaoCao/XepKhuon/BaoCaoSanPhamChinhXepKhuon/ChiTietChinhXepKhuonView" ? "active" : "")">
+                                                    <a href="/BaoCao/XepKhuon/BaoCaoSanPhamChinhXepKhuon/ChiTietChinhXepKhuonView"
+                                                       class="menu-link">
+                                                        <div>Chi Tiết</div>
+                                                    </a>
+                                                </li>
+                                            }
+
+                                            // var baocaochinhxkchitietnhanvien = rolePermistions.Where(x => x.Fu == "Báo Cáo / Xếp Khuôn / Sản Phẩm Chính / Chi Tiết Nhân Viên" && x.Func == "Xem Báo Cáo / Xếp Khuôn / Sản Phẩm Chính / Chi Tiết Nhân Viên" && x.Status == 1).FirstOrDefault();
+                                            // if (baocaochinhxkchitietnhanvien != null)
+                                            // {
+                                            //     <li class="menu-item @(Context.Request.Path == "/BaoCao/XepKhuon/BaoCaoSanPhamChinhXepKhuon/ChiTietNhanVienChinhXepKhuonView"? "active":"" )">
+                                            //         <a href="/BaoCao/XepKhuon/BaoCaoSanPhamChinhXepKhuon/ChiTietNhanVienChinhXepKhuonView" class="menu-link">
+                                            //             <div>Chi Tiết Nhân Viên</div>
+                                            //         </a>
+                                            //     </li>
+                                            // }
+                                            var baocaochinhxktonghopnhanvien = rolePermistions.Where(x => x.Fu == "Báo Cáo / Xếp Khuôn / Sản Phẩm Chính / Tổng Hợp Nhân Viên" && x.Func == "Xem Báo Cáo / Xếp Khuôn / Sản Phẩm Chính / Tổng Hợp Nhân Viên" && x.Status == 1).FirstOrDefault();
+                                            if (baocaochinhxktonghopnhanvien != null)
+                                            {
+                                                <li class="menu-item @(Context.Request.Path == "/BaoCao/XepKhuon/BaoCaoSanPhamChinhXepKhuon/TongHopNhanVienChinhXepKhuonView" ? "active" : "")">
+                                                    <a href="/BaoCao/XepKhuon/BaoCaoSanPhamChinhXepKhuon/TongHopNhanVienChinhXepKhuonView"
+                                                       class="menu-link">
+                                                        <div>Tổng Hợp Nhân Viên</div>
+                                                    </a>
+                                                </li>
+                                            }
+
+                                            var baocaochinhxktonghop2 = rolePermistions.Where(x => x.Fu == "Báo Cáo / Xếp Khuôn / Sản Phẩm Chính / Tổng Hợp 2" && x.Func == "Xem Báo Cáo / Xếp Khuôn / Sản Phẩm Chính / Tổng Hợp 2" && x.Status == 1).FirstOrDefault();
+                                            if (baocaochinhxktonghop2 != null)
+                                            {
+                                                <li class="menu-item @(Context.Request.Path == "/BaoCao/XepKhuon/BaoCaoSanPhamChinhXepKhuon/TongHop2ChinhXepKhuonView" ? "active" : "")">
+                                                    <a href="/BaoCao/XepKhuon/BaoCaoSanPhamChinhXepKhuon/TongHop2ChinhXepKhuonView"
+                                                       class="menu-link">
+                                                        <div>Tổng Hợp TP Size</div>
+                                                    </a>
+                                                </li>
+                                            }
+
+                                            var baocaochinhxkchitietcoi = rolePermistions.Where(x => x.Fu == "Báo Cáo / Xếp Khuôn / Sản Phẩm Chính / Chi Tiết Cối" && x.Func == "Xem Báo Cáo / Xếp Khuôn / Sản Phẩm Chính / Chi Tiết Cối" && x.Status == 1).FirstOrDefault();
+                                            if (baocaochinhxkchitietcoi != null)
+                                            {
+                                                <li class="menu-item @(Context.Request.Path == "/BaoCao/XepKhuon/BaoCaoSanPhamChinhXepKhuon/ChiTietCoiChinhXepKhuonView" ? "active" : "")">
+                                                    <a href="/BaoCao/XepKhuon/BaoCaoSanPhamChinhXepKhuon/ChiTietCoiChinhXepKhuonView"
+                                                       class="menu-link">
+                                                        <div>Chi Tiết Cối</div>
+                                                    </a>
+                                                </li>
+                                            }
+
+                                            var baocaochinhxktonghopcoi = rolePermistions.Where(x => x.Fu == "Báo Cáo / Xếp Khuôn / Sản Phẩm Chính / Tổng Hợp Cối" && x.Func == "Xem Báo Cáo / Xếp Khuôn / Sản Phẩm Chính / Tổng Hợp Cối" && x.Status == 1).FirstOrDefault();
+                                            if (baocaochinhxktonghopcoi != null)
+                                            {
+                                                <li class="menu-item @(Context.Request.Path == "/BaoCao/XepKhuon/BaoCaoSanPhamChinhXepKhuon/TongHopCoiChinhXepKhuonView" ? "active" : "")">
+                                                    <a href="/BaoCao/XepKhuon/BaoCaoSanPhamChinhXepKhuon/TongHopCoiChinhXepKhuonView"
+                                                       class="menu-link">
+                                                        <div>Tổng Hợp Cối</div>
+                                                    </a>
+                                                </li>
+                                            }
+
+                                            // var baocaochinhxktonghopcoixuong = rolePermistions.Where(x => x.Fu == "Báo Cáo / Xếp Khuôn / Sản Phẩm Chính / Tổng Hợp Cối Xưởng" && x.Func == "Xem Báo Cáo / Xếp Khuôn / Sản Phẩm Chính / Tổng Hợp Cối Xưởng" && x.Status == 1).FirstOrDefault();
+                                            // if (baocaochinhxktonghopcoixuong != null)
+                                            // {
+                                            //     <li class="menu-item @(Context.Request.Path == "/BaoCao/XepKhuon/BaoCaoSanPhamChinhXepKhuon/TongHopCoiXuongChinhXepKhuonView"? "active":"" )">
+                                            //         <a href="/BaoCao/XepKhuon/BaoCaoSanPhamChinhXepKhuon/TongHopCoiXuongChinhXepKhuonView" class="menu-link">
+                                            //             <div>Tổng Hợp Cối Xưởng</div>
+                                            //         </a>
+                                            //     </li>
+                                            // }
+                                            // var baocaochinhxktonghoptgsapracoi = rolePermistions.Where(x => x.Fu == "Báo Cáo / Xếp Khuôn / Sản Phẩm Chính / Tổng Hợp Thời Gian Sắp Ra Cối Xưởng" && x.Func == "Xem Báo Cáo / Xếp Khuôn / Sản Phẩm Chính / Tổng Hợp Thời Gian Sắp Ra Cối Xưởng" && x.Status == 1).FirstOrDefault();
+                                            // if (baocaochinhxktonghoptgsapracoi != null)
+                                            // {
+                                            //     <li class="menu-item @(Context.Request.Path == "/BaoCao/XepKhuon/BaoCaoSanPhamChinhXepKhuon/TongHopThoiGianSapRaCoiXuongChinhXepKhuonView"? "active":"" )">
+                                            //         <a href="/BaoCao/XepKhuon/BaoCaoSanPhamChinhXepKhuon/TongHopThoiGianSapRaCoiXuongChinhXepKhuonView" class="menu-link">
+                                            //             <div>Tổng Hợp Thời Gian Sắp Ra Cối</div>
+                                            //         </a>
+                                            //     </li>
+                                            // }
+                                            // var baocaochinhxktonghoptgluotracoi = rolePermistions.Where(x => x.Fu == "Báo Cáo / Xếp Khuôn / Sản Phẩm Chính / Tổng Hợp Thời Gian Lượt Ra Cối Xưởng" && x.Func == "Xem Báo Cáo / Xếp Khuôn / Sản Phẩm Chính / Tổng Hợp Thời Gian Lượt Ra Cối Xưởng" && x.Status == 1).FirstOrDefault();
+                                            // if (baocaochinhxktonghoptgluotracoi != null)
+                                            // {
+                                            //     <li class="menu-item @(Context.Request.Path == "/BaoCao/XepKhuon/BaoCaoSanPhamChinhXepKhuon/TongHopThoiGianLuotRaCoiXuongChinhXepKhuonView"? "active":"" )">
+                                            //         <a href="/BaoCao/XepKhuon/BaoCaoSanPhamChinhXepKhuon/TongHopThoiGianLuotRaCoiXuongChinhXepKhuonView" class="menu-link">
+                                            //             <div>Tổng Hợp Thời Gian Lượt Ra Cối</div>
+                                            //         </a>
+                                            //     </li>
+                                            // }
+                                        }
+                                    </ul>
+                                </li>
+                            }   
+                            var baocaoracoixk = rolePermistions.Where(x => x.Fu.Contains("Báo Cáo / Xếp Khuôn / Ra Cối")).FirstOrDefault();
+                            if (baocaoracoixk != null)
+                            {
+                                <li class="menu-item @(Context.Request.Path.StartsWithSegments("/BaoCao/XepKhuon/BaoCaoRaCoiXepKhuon") ? "open active" : "")">
+                                    <a href="" class="menu-link  menu-toggle">
+                                        <div>Ra Cối</div>
+                                    </a>
+                                    <ul class="menu-sub">
+                                        @{
+                                            var baocaoracoixkchitiet = rolePermistions.Where(x => x.Fu == "Báo Cáo / Xếp Khuôn / Ra Cối / Chi Tiết" && x.Func == "Xem Báo Cáo / Xếp Khuôn / Ra Cối / Chi Tiết" && x.Status == 1).FirstOrDefault();
+                                            if (baocaoracoixkchitiet != null)
+                                            {
+                                                <li class="menu-item @(Context.Request.Path == "/BaoCao/XepKhuon/BaoCaoRaCoiXepKhuon/ChiTietRaCoiXepKhuonView" ? "active" : "")">
+                                                    <a href="/BaoCao/XepKhuon/BaoCaoRaCoiXepKhuon/ChiTietRaCoiXepKhuonView"
+                                                       class="menu-link">
+                                                        <div>Chi Tiết</div>
+                                                    </a>
+                                                </li>
+                                            }
+
+                                            var baocaotonghopcoixktonghop = rolePermistions.Where(x => x.Fu == "Báo Cáo / Xếp Khuôn / Ra Cối / Tổng Hợp Cối" && x.Func == "Xem Báo Cáo / Xếp Khuôn / Ra Cối / Tổng Hợp Cối" && x.Status == 1).FirstOrDefault();
+                                            if (baocaotonghopcoixktonghop != null)
+                                            {
+                                                <li class="menu-item @(Context.Request.Path == "/BaoCao/XepKhuon/BaoCaoRaCoiXepKhuon/TongHopCoiRaCoiXepKhuonView" ? "active" : "")">
+                                                    <a href="/BaoCao/XepKhuon/BaoCaoRaCoiXepKhuon/TongHopCoiRaCoiXepKhuonView"
+                                                       class="menu-link">
+                                                        <div>Tổng Hợp Cối</div>
+                                                    </a>
+                                                </li>
+                                            }
+
+                                            var baocaotonghopnhanvienxktonghop = rolePermistions.Where(x => x.Fu == "Báo Cáo / Xếp Khuôn / Ra Cối / Tổng Hợp Nhân Viên" && x.Func == "Xem Báo Cáo / Xếp Khuôn / Ra Cối / Tổng Hợp Nhân Viên" && x.Status == 1).FirstOrDefault();
+                                            if (baocaotonghopnhanvienxktonghop != null)
+                                            {
+                                                <li class="menu-item @(Context.Request.Path == "/BaoCao/XepKhuon/BaoCaoRaCoiXepKhuon/TongHopNhanVienCoiXepKhuonView" ? "active" : "")">
+                                                    <a href="/BaoCao/XepKhuon/BaoCaoRaCoiXepKhuon/TongHopNhanVienCoiXepKhuonView"
+                                                       class="menu-link">
+                                                        <div>Tổng Hợp Nhân Viên</div>
+                                                    </a>
+                                                </li>
+                                            }
+
+                                            var baocaotonghoptyletangtrongcoixktonghop = rolePermistions.Where(x => x.Fu == "Báo Cáo / Xếp Khuôn / Ra Cối / Tổng Hợp Tỷ Lệ Tăng Trọng Cối" && x.Func == "Xem Báo Cáo / Xếp Khuôn / Ra Cối / Tổng Hợp Tỷ Lệ Tăng Trọng Cối" && x.Status == 1).FirstOrDefault();
+                                            if (baocaotonghoptyletangtrongcoixktonghop != null)
+                                            {
+                                                <li class="menu-item @(Context.Request.Path == "/BaoCao/XepKhuon/BaoCaoRaCoiXepKhuon/TongHopTyLeTangTrongCoiXepKhuonView" ? "active" : "")">
+                                                    <a href="/BaoCao/XepKhuon/BaoCaoRaCoiXepKhuon/TongHopTyLeTangTrongCoiXepKhuonView"
+                                                       class="menu-link">
+                                                        <div>Tỷ Lệ Tăng Trọng Cối</div>
+                                                    </a>
+                                                </li>
+                                            }
+                                        }
+                                    </ul>
+
+                                </li>
+                            }
+                            var baocaosanphamphuxk = rolePermistions.Where(x => x.Fu.Contains("Báo Cáo / Xếp Khuôn / Sản Phẩm Phụ")).FirstOrDefault();
+                            if (baocaosanphamphuxk != null)
+                            {
+                                <li class="menu-item @(Context.Request.Path.StartsWithSegments("/BaoCao/XepKhuon/BaoCaoSanPhamPhuXepKhuon") ? "open active" : "")">
+                                    <a href="" class="menu-link  menu-toggle">
+                                        <div>Sản Phẩm Phụ</div>
+                                    </a>
+                                    <ul class="menu-sub">
+                                        @{
+                                            var baocaophuxkchitiet = rolePermistions.Where(x => x.Fu == "Báo Cáo / Xếp Khuôn / Sản Phẩm Phụ / Chi Tiết" && x.Func == "Xem Báo Cáo / Xếp Khuôn / Sản Phẩm Phụ / Chi Tiết" && x.Status == 1).FirstOrDefault();
+                                            if (baocaophuxkchitiet != null)
+                                            {
+                                                <li class="menu-item @(Context.Request.Path == "/BaoCao/XepKhuon/BaoCaoSanPhamPhuXepKhuon/ChiTietPhuXepKhuonView" ? "active" : "")">
+                                                    <a href="/BaoCao/XepKhuon/BaoCaoSanPhamPhuXepKhuon/ChiTietPhuXepKhuonView"
+                                                       class="menu-link">
+                                                        <div>Chi Tiết</div>
+                                                    </a>
+                                                </li>
+                                            }
+
+                                            var baocaophuxktonghop = rolePermistions.Where(x => x.Fu == "Báo Cáo / Xếp Khuôn / Sản Phẩm Phụ / Tổng Hợp" && x.Func == "Xem Báo Cáo / Xếp Khuôn / Sản Phẩm Phụ / Tổng Hợp" && x.Status == 1).FirstOrDefault();
+                                            if (baocaophuxktonghop != null)
+                                            {
+                                                <li class="menu-item @(Context.Request.Path == "/BaoCao/XepKhuon/BaoCaoSanPhamPhuXepKhuon/TongHopPhuXepKhuonView" ? "active" : "")">
+                                                    <a href="/BaoCao/XepKhuon/BaoCaoSanPhamPhuXepKhuon/TongHopPhuXepKhuonView"
+                                                       class="menu-link">
+                                                        <div>Tổng Hợp Nhân Viên</div>
+                                                    </a>
+                                                </li>
+                                            }
+
+                                            var baocaophuxktonghop2 = rolePermistions.Where(x => x.Fu == "Báo Cáo / Xếp Khuôn / Sản Phẩm Phụ / Tổng Hợp 2" && x.Func == "Xem Báo Cáo / Xếp Khuôn / Sản Phẩm Phụ / Tổng Hợp 2" && x.Status == 1).FirstOrDefault();
+                                            if (baocaophuxktonghop2 != null)
+                                            {
+                                                <li class="menu-item @(Context.Request.Path == "/BaoCao/XepKhuon/BaoCaoSanPhamPhuXepKhuon/TongHop2PhuXepKhuonView" ? "active" : "")">
+                                                    <a href="/BaoCao/XepKhuon/BaoCaoSanPhamPhuXepKhuon/TongHop2PhuXepKhuonView"
+                                                       class="menu-link">
+                                                        <div>Tổng Hợp Thành Phẩm</div>
+                                                    </a>
+                                                </li>
+                                            }
+                                        }
+                                    </ul>
+                                </li>
+                            }
+
+                            
+                        }
+                    </ul>
+                </li>
+            }
+            var baocaothanhpham2 = rolePermistions.Where(x => x.Fu.Contains("Báo Cáo / Thành Phẩm 2")).FirstOrDefault();
+            if (baocaothanhpham2 != null)
+            {
+                <li class="menu-item @(Context.Request.Path.StartsWithSegments("/BaoCao/NguyenLieu/BaoCaoNguyenLieu/ChiTietThanhPham2View") || Context.Request.Path.StartsWithSegments("/BaoCao/NguyenLieu/BaoCaoNguyenLieu/TongHopSanPhamThanhPham2View") ||Context.Request.Path.StartsWithSegments("/BaoCao/NguyenLieu/BaoCaoNguyenLieu/TyLeThuHoiThanhPham2View") ? "open active" : "")">
+                    <a href="javascript:void(0);" class="menu-link menu-toggle">
+                        <i class='menu-icon tf-icons bx bx-doughnut-chart'></i>
+                        <div data-i18n="Account Settings">Thành Phẩm 2</div>
+                    </a>
+                    <ul class="menu-sub">
+                        @{
+                            var baocaochitiettp2 = rolePermistions
+                            .Where(x => x.Fu == "Báo Cáo / Thành Phẩm 2 / Chi Tiết" && x.Func == "Xem Báo Cáo / Thành Phẩm 2 / Chi Tiết" && x.Status == 1)
+                            .FirstOrDefault();
+                            if (baocaochitiettp2 != null)
+                            {
+                                <li class="menu-item @(Context.Request.Path == "/BaoCao/NguyenLieu/BaoCaoNguyenLieu/ChiTietThanhPham2View" ? "active" : "")">
+                                    <a href="/BaoCao/NguyenLieu/BaoCaoNguyenLieu/ChiTietThanhPham2View" class="menu-link">
+                                        <div>Chi Tiết</div>
+                                    </a>
+                                </li>
+                            }
+
+                            var baocaotonghopsanphamtp2 = rolePermistions
+                            .Where(x => x.Fu == "Báo Cáo / Thành Phẩm 2 / Tổng Hợp Sản Phẩm" && x.Func == "Xem Báo Cáo / Thành Phẩm 2 / Tổng Hợp Sản Phẩm" && x.Status == 1)
+                            .FirstOrDefault();
+                            if (baocaotonghopsanphamtp2 != null)
+                            {
+                                <li class="menu-item @(Context.Request.Path == "/BaoCao/NguyenLieu/BaoCaoNguyenLieu/TongHopSanPhamThanhPham2View" ? "active" : "")">
+                                    <a href="/BaoCao/NguyenLieu/BaoCaoNguyenLieu/TongHopSanPhamThanhPham2View" class="menu-link">
+                                        <div>Tổng Hợp Sản Phẩm</div>
+                                    </a>
+                                </li>
+                            }
+
+                            var baocaotylethuhoitp2 = rolePermistions
+                            .Where(x => x.Fu == "Báo Cáo / Thành Phẩm 2 / Tỷ Lệ Thu Hồi" && x.Func == "Xem Báo Cáo / Thành Phẩm 2 / Tỷ Lệ Thu Hồi" && x.Status == 1)
+                            .FirstOrDefault();
+                            if (baocaotylethuhoitp2 != null)
+                            {
+                                <li class="menu-item @(Context.Request.Path == "/BaoCao/NguyenLieu/BaoCaoNguyenLieu/TyLeThuHoiThanhPham2View" ? "active" : "")">
+                                    <a href="/BaoCao/NguyenLieu/BaoCaoNguyenLieu/TyLeThuHoiThanhPham2View" class="menu-link">
+                                        <div>Tổng Hợp Tỷ Lệ Thu Hồi</div>
+                                    </a>
+                                </li>
+                            }
+                        }
+                    </ul>
+                </li>
+            }
+        }
+    }
+    @{
+        var xulyphieucan = rolePermistions.Where(x => x.Fu.Contains("Xử Lý Phiếu Cân / ")).FirstOrDefault();
+        if (xulyphieucan != null)
+        {
+            <li class="menu-header small text-uppercase">
+                <span class="menu-header-text">Xử Lý Dữ Liệu</span>
+            </li>
+            <!-- Xử Lý Phiếu Cân-->
+            <li class="menu-item @(Context.Request.Path.StartsWithSegments("/XuLyPhieuCan") ? "open active" : "")"
+                id="menuActiveXuLyPhieuCan">
+                <a href="javascript:void(0);" class="menu-link menu-toggle">
+                    <i class='menu-icon tf-icons bx bx-edit'></i>
+                    <div>Xử Lý Phiếu Cân</div>
+                </a>
+                <ul class="menu-sub">
+                    @{
+                        var xulyphieunguyenlieu = rolePermistions.Where(x => x.Fu == "Xử Lý Phiếu Cân / Phiếu Cân Nguyên Liệu" && x.Func == "Xem Xử Lý Phiếu Cân / Phiếu Cân Nguyên Liệu" && x.Status == 1).FirstOrDefault();
+                        if (xulyphieunguyenlieu != null)
+                        {
+                            <li class="menu-item @(Context.Request.Path.StartsWithSegments("/XuLyPhieuCan/XuLyPhieuCanNguyenLieuView") ? "active" : "")">
+                                <a asp-action="XuLyPhieuCanNguyenLieuView" asp-controller="XuLyPhieuCan"
+                                   class="menu-link">
+                                    <div>Nguyên Liệu</div>
+                                </a>
+                            </li>
+                        }
+
+                        var xulyphieubtpxebuom = rolePermistions.Where(x => x.Fu == "Xử Lý Phiếu Cân / Phiếu Cân BTP Xẻ Bướm" && x.Func == "Xem Xử Lý Phiếu Cân / Phiếu Cân BTP Xẻ Bướm" && x.Status == 1).FirstOrDefault();
+                        if (xulyphieubtpxebuom != null)
+                        {
+                            <li class="menu-item @(Context.Request.Path.StartsWithSegments("/XuLyPhieuCan/XuLyPhieuCanBTPXeBuomView") ? "active" : "")">
+                                <a asp-action="XuLyPhieuCanBTPXeBuomView" asp-controller="XuLyPhieuCan"
+                                   class="menu-link">
+                                    <div>BTP Xẻ Bướm</div>
+                                </a>
+                            </li>
+                        }
+
+                        var xulyphieutpxebuom = rolePermistions.Where(x => x.Fu == "Xử Lý Phiếu Cân / Phiếu Cân TP Xẻ Bướm" && x.Func == "Xem Xử Lý Phiếu Cân / Phiếu Cân TP Xẻ Bướm" && x.Status == 1).FirstOrDefault();
+                        if (xulyphieutpxebuom != null)
+                        {
+                            <li class="menu-item @(Context.Request.Path.StartsWithSegments("/XuLyPhieuCan/XuLyPhieuCanTPXeBuomView") ? "active" : "")">
+                                <a asp-action="XuLyPhieuCanTPXeBuomView" asp-controller="XuLyPhieuCan"
+                                   class="menu-link">
+                                    <div>TP Xẻ Bướm</div>
+                                </a>
+                            </li>
+                        }
+
+                        var xulyphieufillet = rolePermistions.Where(x => x.Fu == "Xử Lý Phiếu Cân / Phiếu Cân Filletv2" && x.Func == "Xem Xử Lý Phiếu Cân / Phiếu Cân Filletv2" && x.Status == 1).FirstOrDefault();
+                        if (xulyphieufillet != null)
+                        {
+                            <li class="menu-item @(Context.Request.Path.StartsWithSegments("/XuLyPhieuCan/XuLyPhieuCanTPFilletv2View") ? "active" : "")">
+                                <a asp-action="XuLyPhieuCanTPFilletv2View" asp-controller="XuLyPhieuCan"
+                                   class="menu-link">
+                                    <div>Fillet</div>
+                                </a>
+                            </li>
+                        }
+
+                        var xulyphieudinhhinh = rolePermistions.Where(x => x.Fu == "Xử Lý Phiếu Cân / Phiếu Cân Định Hình" && x.Func == "Xem Xử Lý Phiếu Cân / Phiếu Cân Định Hình" && x.Status == 1).FirstOrDefault();
+                        if (xulyphieudinhhinh != null)
+                        {
+                            <li class="menu-item @(Context.Request.Path.StartsWithSegments("/XuLyPhieuCan/XuLyPhieuCanDinhHinhView") ? "active" : "")">
+                                <a asp-action="XuLyPhieuCanDinhHinhView" asp-controller="XuLyPhieuCan"
+                                   class="menu-link">
+                                    <div>Định Hình</div>
+                                </a>
+                            </li>
+                        }
+
+                        var xulyphieuphuxepkhuon = rolePermistions.Where(x => x.Fu == "Xử Lý Phiếu Cân / Phiếu Cân Phụ Xếp Khuôn" && x.Func == "Xem Xử Lý Phiếu Cân / Phiếu Cân Phụ Xếp Khuôn" && x.Status == 1).FirstOrDefault();
+                        if (xulyphieuphuxepkhuon != null)
+                        {
+                            <li class="menu-item @(Context.Request.Path.StartsWithSegments("/XuLyPhieuCan/XuLyPhieuCanPhuXepKhuonView") ? "active" : "")">
+                                <a asp-action="XuLyPhieuCanPhuXepKhuonView" asp-controller="XuLyPhieuCan"
+                                   class="menu-link">
+                                    <div>Phụ Xếp Khuôn</div>
+                                </a>
+                            </li>
+                        }
+
+                        var xulyphieuchinhxepkhuon = rolePermistions.Where(x => x.Fu == "Xử Lý Phiếu Cân / Phiếu Cân Chính Xếp Khuôn" && x.Func == "Xem Xử Lý Phiếu Cân / Phiếu Cân Chính Xếp Khuôn" && x.Status == 1).FirstOrDefault();
+                        if (xulyphieuchinhxepkhuon != null)
+                        {
+                            <li class="menu-item @(Context.Request.Path.StartsWithSegments("/XuLyPhieuCan/XuLyPhieuCanChinhXepKhuonView") ? "active" : "")">
+                                <a asp-action="XuLyPhieuCanChinhXepKhuonView" asp-controller="XuLyPhieuCan"
+                                   class="menu-link">
+                                    <div>Chính Xếp Khuôn</div>
+                                </a>
+                            </li>
+                        }
+
+                        var xulyphieuracoixepkhuon = rolePermistions.Where(x => x.Fu == "Xử Lý Phiếu Cân / Phiếu Cân Ra Cối Xếp Khuôn" && x.Func == "Xem Xử Lý Phiếu Cân / Phiếu Cân Ra Cối Xếp Khuôn" && x.Status == 1).FirstOrDefault();
+                        if (xulyphieuracoixepkhuon != null)
+                        {
+                            <li class="menu-item @(Context.Request.Path.StartsWithSegments("/XuLyPhieuCan/XuLyPhieuCanRaCoiXepKhuonView") ? "active" : "")">
+                                <a asp-action="XuLyPhieuCanRaCoiXepKhuonView" asp-controller="XuLyPhieuCan"
+                                   class="menu-link">
+                                    <div>Ra Cối Xếp Khuôn</div>
+                                </a>
+                            </li>
+                        }
+                    }
+                </ul>
+            </li>
+        }
+    }
+
+    @{
+        if (listHubmayCan != null)
+        {
+            var hubs = rolePermistions.Where(x => x.Fu.Contains("Hubs")).FirstOrDefault();
+            if (hubs != null)
+            {
+                <li class="menu-header small text-uppercase">
+                    <span class="menu-header-text">Hubs</span>
+                </li>
+            }
+
+            foreach (var item in listHubmayCan)
+            {
+                var hubsmaycan = rolePermistions.Where(x => x.Fu == "Hubs" && x.Func == "Máy Cân" && x.Status == 1).FirstOrDefault();
+                if (hubsmaycan != null)
+                {
+                    <li class="menu-item">
+
+                        <a onclick="navigateHubsMayCan('@Html.Raw(HttpUtility.JavaScriptStringEncode(item.NameMayCanHubs))')"
+                           href="javascript:void(0);" class="menu-link">
+                            <i class='menu-icon tf-icons bx bx-laptop'></i>
+                            <div data-i18n="Support">@item.NameMayCanHubs</div>
+                        </a>
+                        <input id="hubsMayCanHidden" type="text" value="@item.NameMayCanHubs" hidden/>
+
+                    </li>
+                }
+            }
+        }
+        else
+        {
+        }
+    }
+
+    @{
+        var caidat = rolePermistions.Where(x => x.Fu.Contains("Cài Đặt")).FirstOrDefault();
+        var xacthuc = rolePermistions.Where(x => x.Fu.Contains("Xác Thực")).FirstOrDefault();
+        if (caidat != null || xacthuc != null)
+        {
+            <li class="menu-header small text-uppercase">
+                <span class="menu-header-text">Quản Lý Người Dùng</span>
+            </li>
+        }
+
+        if (caidat != null)
+        {
+            <li class="menu-item @(Context.Request.Path.StartsWithSegments("/SettingWebApp") || Context.Request.Path.StartsWithSegments("/DatabaseManagement") ? "open active" : "")">
+                <a href="javascript:void(0);" class="menu-link menu-toggle">
+                    <i class="menu-icon tf-icons bx bx-user"></i>
+                    <div data-i18n="Account Settings">Cài Đặt Người Dùng</div>
+                </a>
+                <ul class="menu-sub">
+                    @{
+                        var caidattaikhoan = rolePermistions.Where(x => x.Fu == "Cài Đặt" && x.Func == "Tài Khoản" && x.Status == 1).FirstOrDefault();
+                        if (caidattaikhoan != null)
+                        {
+                            <li class="menu-item @(Context.Request.Path.StartsWithSegments("/SettingWebApp/Account") ? "active" : "")">
+                                <a href="/SettingWebApp/Account" class="menu-link">
+                                    <div data-i18n="Account">Tài Khoản</div>
+                                </a>
+                            </li>
+                        }
+                    }
+
+
+                    @{
+                        var caidatdashboard = rolePermistions.Where(x => x.Fu == "Cài Đặt" && x.Func == "Dashboard" && x.Status == 1).FirstOrDefault();
+                        if (caidatdashboard != null)
+                        {
+                            <li class="menu-item @(Context.Request.Path.StartsWithSegments("/SettingWebApp/Dashboard") ? "active" : "")">
+                                <a href="/SettingWebApp/Dashboard" class="menu-link">
+                                    <div data-i18n="Dashboard">Dashboard</div>
+                                </a>
+                            </li>
+                        }
+                    }
+                    @{
+                        var caidatdatabase = rolePermistions.Where(x => x.Fu == "Cài Đặt" && x.Func == "Quản Lý Dữ Liệu" && x.Status == 1).FirstOrDefault();
+                        if (caidatdatabase != null)
+                        {
+                            <li class="menu-item @(Context.Request.Path.StartsWithSegments("/DatabaseManagement") ? "active" : "")">
+                                <a href="/DatabaseManagement" class="menu-link">
+                                    <div>Quản Lý Dữ Liệu</div>
+                                </a>
+                            </li>
+                        }
+                    }
+                    @{
+                        var caiMayCanManager = rolePermistions.Where(x => x.Fu == "Cài Đặt" && x.Func == "Quản Lý Máy Cân" && x.Status == 1).FirstOrDefault();
+                        if (caiMayCanManager != null)
+                        {
+                            <li class="menu-item @(Context.Request.Path.StartsWithSegments("/SettingWebApp/MayCanManager") ? "active" : "")">
+                                <a href="/SettingWebApp/MayCanManager" class="menu-link">
+                                    <div>Quản Lý Máy Cân</div>
+                                </a>
+                            </li>
+                        }
+                    }
+                </ul>
+            </li>
+        }
+
+        if (xacthuc != null)
+        {
+            <li class="menu-item @(Context.Request.Path.StartsWithSegments("/Authentication") ? "open active" : "")">
+                <a href="javascript:void(0);" class="menu-link menu-toggle ">
+                    <i class="menu-icon tf-icons bx bx-lock-open-alt"></i>
+                    <div data-i18n="Authentications">Xác thực</div>
+                </a>
+                <ul class="menu-sub">
+                    @{
+                        var xacthucdangky = rolePermistions.Where(x => x.Fu == "Xác Thực" && x.Func == "Đăng Ký Tài Khoản" && x.Status == 1).FirstOrDefault();
+                        if (xacthucdangky != null)
+                        {
+                            <li class="menu-item @(Context.Request.Path == "/Authentication/Register" ? "active" : "")">
+                                <a href="/Authentication/Register" class="menu-link">
+                                    <div data-i18n="Basic">Đăng ký tài khoản</div>
+                                </a>
+                            </li>
+                        }
+                    }
+                    @{
+                        var xacthucphanquyen = rolePermistions.Where(x => x.Fu == "Xác Thực" && x.Func == "Phân Quyền" && x.Status == 1).FirstOrDefault();
+                        if (xacthucphanquyen != null)
+                        {
+                            <li class="menu-item  @(Context.Request.Path.StartsWithSegments("/Authentication/Decentralization") || Context.Request.Path.StartsWithSegments("/Authentication/GrantAccess") ? "active" : "")">
+                                <a href="/Authentication/GrantAccess" class="menu-link">
+                                    <div data-i18n="Basic">Phân quyền</div>
+                                </a>
+                            </li>
+                        }
+                    }
+                    @{
+                        var xacthuckhoiphuc = rolePermistions.Where(x => x.Fu == "Xác Thực" && x.Func == "Khôi Phục Tài Khoản" && x.Status == 1).FirstOrDefault();
+                        if (xacthuckhoiphuc != null)
+                        {
+                            <li class="menu-item @(Context.Request.Path == "/Authentication/RecoverAccoutView" ? "active" : "")">
+                                <a href="/Authentication/RecoverAccoutView" class="menu-link">
+                                    <div data-i18n="Basic">Khôi phục tài khoản</div>
+                                </a>
+                            </li>
+                        }
+                    }
+                </ul>
+            </li>
+        }
+    }
+
+    <!-- Misc -->
+    <li class="menu-header small text-uppercase">
+        <span class="menu-header-text">HotLine</span>
+    </li>
+    <li class="menu-item">
+        <a href="https://pms-vn.com/"
+           target="_blank"
+           class="menu-link">
+            <i class="menu-icon tf-icons bx bx-support"></i>
+            <div data-i18n="Support">Hỗ trợ</div>
+        </a>
+    </li>
+    <li class="menu-item">
+        <a href="javascript:void(0);" class="menu-link" onclick="openPDFViewer('/HuongDanFile/HSDPHAMMEMPMS.pdf')">
+            <i class="menu-icon tf-icons bx bx-file"></i>
+            <div data-i18n="Documentation">Hướng dẫn</div>
+        </a>
+    </li>
+</ul>

@@ -1,0 +1,152 @@
+﻿
+@{
+    ViewData["Title"] = "TongHopNhanVienKhongLamViecTPDinhHinhView";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var XuongId = @Context.Session.GetString("XuongId");
+}
+
+@section ControlsSection {
+
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h2 class="mb-0">Tổng Hợp Nhân Viên Không Làm Việc</h2>
+                    </div>
+                    <div class="card-body">
+                        <ejs-grid height="400" id="Grid" dataSource="@ViewBag.datasource" allowResizing="true" actionComplete="actionComplete" actionBegin="actionBegin"
+                                  allowReordering="true" allowExcelExport="true" allowPaging="true" allowSorting="true" toolbarClick="toolbarClick" toolbar="@(new List<string> { "ExcelExport"})" allowExcelExport="true" allowFiltering="true">
+                            <e-grid-pagesettings pageSizes="@(new string[] {"20" ,"50", "100" , "200", "500", "All" })" pageSize="20">
+                            </e-grid-pagesettings>
+                            @*<e-data-manager url="@Url.Action("GetChiTiet", "TP")" adaptor="UrlAdaptor"></e-data-manager>*@
+                            <e-grid-filterSettings type="Excel"></e-grid-filterSettings>
+                            <e-grid-columns>
+                                
+                                <e-grid-column field="MaNhanVien" headerText="Mã Nhân Viên" type="string" textAlign="Right" width="150"></e-grid-column>
+                                <e-grid-column field="MaHoSo" headerText="Mã Số" type="string" textAlign="Right" width="140"></e-grid-column>
+                                <e-grid-column field="Name" headerText="Tên Nhân Viên" type="string" textAlign="Right" width="170"></e-grid-column>
+                                <e-grid-column field="DeptName0" headerText="Nhóm" type="string" textAlign="Right" width="140"></e-grid-column>
+                                
+                            </e-grid-columns>
+                        </ejs-grid>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+    <script id="template" type="text/x-template">
+        <div class="e-pagertemplate">
+            <div class="col-lg-12 control-section">
+                <div class="content-wrapper">
+                    <input id="currentPage" type="text" value=${currentPage}>
+                </div>
+            </div>
+
+            <div id="totalPages" class="e-pagertemplatemessage" style="margin-top:5px;margin-left:30px;border: none; display: inline-block ">
+                <span class="e-pagenomsg">${currentPage} of ${totalPages} pages (${totalRecordsCount} items)</span>
+            </div>
+        </div>
+    </script>
+    <script>
+
+        function updateTemplate() {
+            var numeric;
+            var grid = document.getElementById("Grid").ej2_instances[0];
+            numeric = new ej.inputs.NumericTextBox({
+                min: 1,
+                max: 3,
+                step: 1,
+
+                format: '###.##',
+                change: function (args) {
+                    let value = args.value;
+                    grid.goToPage(value);
+                }
+            });
+            numeric.appendTo('#currentPage');
+        };
+        var flag = true;
+        function dataBound() {
+            if (flag) {
+                flag = false;
+                updateTemplate();
+            }
+        }
+        function actionComplete(args) {
+            if (args.requestType === 'paging') {
+                updateTemplate();
+            }
+        }
+        function toolbarClick(args) {
+            var gridObj = document.getElementById("Grid").ej2_instances[0];
+            if (args.item.id === 'Grid_excelexport') {
+                gridObj.excelExport();
+            }
+        }
+                function actionBegin(args) {
+            if (args.requestType == 'filterchoicerequest' || args.requestType == 'filtersearchbegin') {
+                 args.filterChoiceCount = datalength;
+            }
+        }
+
+    </script>
+    <script>
+         var datalength = 0;
+            var refreshHandler = function () {
+            var btnEle = document.getElementById('RefreshButton');
+            var btn = btnEle.ej2_instances[0];
+
+            if (btnEle.classList.contains("loading")) return;
+            btnEle.classList.add("loading");
+
+            var originalContent = btn.content;
+
+            var dots = 0;
+            btn.content = "Đang tải";
+            var loadingInterval = setInterval(function () {
+                dots = (dots + 1) % 4;
+                btn.content = "Đang tải" + ".".repeat(dots);
+            }, 500);
+
+            var grid = document.getElementById("Grid").ej2_instances[0];
+            var fromDate = document.getElementById("datepicker2").ej2_instances[0];
+            var toDate = document.getElementById("datepicker2").ej2_instances[0];
+            var xuongId = @XuongId;
+
+            $.ajax({
+                url: "@Url.Action("Reload", "TP")",
+                type: "POST",
+                data: {
+                    "fromDate": fromDate.value.toDateString(),
+                    "toDate": toDate.value.toDateString(),
+                    xuongId: xuongId
+                },
+                success: function (response) {
+                    if (response.Success) {
+                        datalength = (response.Data && response.Data.length) ? response.Data.length : 0;
+                        grid.dataSource = response.Data;
+                        grid.refresh();
+                    } else {
+                        grid.dataSource = [];
+                        console.error(response.Messages);
+                        toastOptionNotyfi();
+                        toastr["error"](response.Messages, "Không có dữ liệu!");
+                    }
+                },
+                error: function (error) {
+                    toastOptionNotyfi();
+                    toastr["error"](error, "Thông báo");
+                }
+            }).always(function () {
+                clearInterval(loadingInterval);
+                btn.content = originalContent;
+                btnEle.classList.remove("loading");
+            });
+        };
+
+        document.getElementById('RefreshButton').addEventListener("click", refreshHandler);
+    </script>
+
+}
+

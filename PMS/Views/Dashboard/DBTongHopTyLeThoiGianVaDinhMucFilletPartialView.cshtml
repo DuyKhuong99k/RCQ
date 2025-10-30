@@ -1,0 +1,236 @@
+﻿@{
+    var XuongId = @Context.Session.GetString("XuongId");
+}
+
+<div class="card mb-4 marginGridjs position-relative">
+    <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2 position-relative">
+        <div class="text-start">
+            <small class="fw-semibold text-muted d-block">Tổng số rổ:</small>
+            <p class="weight-displayTyLeThoiGianVaDinhMucFillet fw-bold fs-6 mb-0">0,000.00 Rổ</p>
+        </div>
+
+        <h6 class="mb-0 mx-auto text-center flex-grow-1">
+            Tổng Hợp Tỷ Lệ Định Mức Và Thời Gian Fillet
+        </h6>
+
+        <button onclick="location.href='@Url.Action("DBTongHopTyLeThoiGianVaDinhMucFilletAdvanceView", "Dashboard")'"
+                class="btn btn-outline-primary btn-sm position-absolute top-0 end-0 mt-2 me-3 z-1 shadow-sm"
+                title="Chi tiết nâng cao">
+            <i class='bx bxs-bar-chart-alt-2 fs-5'></i>
+        </button>
+    </div>
+
+    <div class="card-body px-3 py-2">
+        <div id="column-container-TyLeThoiGianVaDinhMucFillet" style="width: 100%; height: 275px;"></div>
+    </div>
+</div>
+
+
+
+
+<script>
+    $(document).ready(function () {
+        taiDasboardTongHopTyLeThoiGianVaDinhMucFillet();
+    });
+    // hàm chuyển name x category trong biểu đồ
+    function formatCategoryNameFL(category) {
+        switch (category) {
+            case 'DinhMuc': return 'Định Mức';
+            case 'ThoiGian': return 'Thời Gian';
+            default: return category;
+        }
+    }
+
+    var chart_TyLeThoiGianVaDinhMucFillet;
+    var chartDataGlobalFL = []; // dữ liệu toàn cục dùng cho tooltip
+
+    function createChartTyLeThoiGianVaDinhMucFillet() {
+        chart_TyLeThoiGianVaDinhMucFillet = new ej.charts.Chart({
+            primaryXAxis: {
+                valueType: 'Category',
+                labelIntersectAction: 'Rotate45',
+                majorGridLines: { width: 0 },
+                majorTickLines: { width: 0 },
+                lineStyle: { width: 0 }
+            },
+            primaryYAxis: {
+                minimum: 0,
+                maximum: 100,
+                interval: 20,
+                labelFormat: '{value}%',
+                lineStyle: { width: 0 },
+                majorTickLines: { width: 0 },
+                majorGridLines: { width: 1 },
+                minorGridLines: { width: 1 }
+            },
+            chartArea: { border: { width: 0 } },
+            series: [
+                {
+                    type: 'StackingColumn100',
+                    dataSource: [],
+                    xName: 'category',
+                    yName: 'Dat',
+                    name: 'Đạt',
+                    columnWidth: 0.6,
+                    border: { width: 1, color: 'white' },
+                    marker: {
+                        dataLabel: {
+                            visible: true,
+                            position: 'Center',
+                            font: { color: 'white', fontWeight: 'bold' }
+                        }
+                    }
+                },
+                {
+                    type: 'StackingColumn100',
+                    dataSource: [],
+                    xName: 'category',
+                    yName: 'KhongDat',
+                    name: 'Không đạt',
+                    columnWidth: 0.6,
+                    border: { width: 1, color: 'white' },
+                    marker: {
+                        dataLabel: {
+                            visible: true,
+                            position: 'Center',
+                            font: { color: 'white', fontWeight: 'bold' }
+                        }
+                    }
+                }
+            ],
+            tooltip: {
+                enable: true,
+                header: '<b>${point.x}</b>',
+                shared: false
+            },
+            tooltipRender: function (args) {
+                let category = args.point.x;
+                let isDat = args.series.name === 'Đạt';
+                let row = chartDataGlobalFL.find(d => d.category === category);
+                if (!row) return;
+
+                let soRo = isDat ? row.soRoDat : row.soRoKhongDat;
+                let soRoFm = soRo.toLocaleString('vi-VN', {minimumFractionDigits: 2,maximumFractionDigits: 2});
+                args.header = `<b>${formatCategoryNameFL(category)}</b>`;
+                args.text = `${args.series.name}: <b>${args.point.y.toFixed(1)}%</b><br>Số rổ: <b>${soRoFm}</b>`;
+            },
+            textRender: function (args) {
+                let category = args.point.x;
+                let isDat = args.series.name === 'Đạt';
+                let row = chartDataGlobalFL.find(d => d.category === category);
+                if (!row) return;
+
+                let soRo = isDat ? row.soRoDat : row.soRoKhongDat;
+                let soRoFm = soRo.toLocaleString('vi-VN', {minimumFractionDigits: 2,maximumFractionDigits: 2});
+                args.text = `${args.point.y.toFixed(1)}% (${soRoFm})`;
+            },
+            axisLabelRender: function (args) {
+                if (args.axis.name === 'primaryXAxis') {
+                    args.text = formatCategoryNameFL(args.text);
+                }
+            },
+            legendSettings: {
+                visible: true,
+                shape: 'Rectangle',
+                enableHighlight: true
+            },
+            load: function (args) {
+                // loadChartTheme(args); // nếu có dùng chủ đề
+            }
+        });
+
+        chart_TyLeThoiGianVaDinhMucFillet.appendTo('#column-container-TyLeThoiGianVaDinhMucFillet');
+    }
+
+    function loadChart_TongHopTyLeThoiGianVaDinhMucFillet(data) {
+        if (!chart_TyLeThoiGianVaDinhMucFillet || !Array.isArray(data)) return;
+
+        chartDataGlobalFL = data;
+
+        // Gán text thủ công cho từng điểm
+        const series0Data = data.map(row => ({
+            ...row,
+            text: `${row.Dat.toFixed(1)}% (${row.soRoDat.toLocaleString('vi-VN', {minimumFractionDigits: 2,maximumFractionDigits: 2})})`
+        }));
+        const series1Data = data.map(row => ({
+            ...row,
+            text: `${row.KhongDat.toFixed(1)}% (${row.soRoKhongDat.toLocaleString('vi-VN', {minimumFractionDigits: 2,maximumFractionDigits: 2})})`
+        }));
+
+        chart_TyLeThoiGianVaDinhMucFillet.series[0].dataSource = series0Data;
+        chart_TyLeThoiGianVaDinhMucFillet.series[1].dataSource = series1Data;
+
+        chart_TyLeThoiGianVaDinhMucFillet.series[0].marker.dataLabel.name = 'text';
+        chart_TyLeThoiGianVaDinhMucFillet.series[1].marker.dataLabel.name = 'text';
+
+        chart_TyLeThoiGianVaDinhMucFillet.series[0].dataBind();
+        chart_TyLeThoiGianVaDinhMucFillet.series[1].dataBind();
+    }
+    // function loadChart_TongHopTyLeThoiGianVaDinhMucFillet(data) {
+    //     if (!chart_TyLeThoiGianVaDinhMucFillet || !Array.isArray(data)) return;
+
+    //     chartDataGlobalFL = data;
+
+    //     // Cập nhật dữ liệu mới vào series
+    //     chart_TyLeThoiGianVaDinhMucFillet.series[0].dataSource = data;
+    //     chart_TyLeThoiGianVaDinhMucFillet.series[1].dataSource = data;
+
+    //     // Cập nhật dữ liệu cho từng series
+    //     chart_TyLeThoiGianVaDinhMucFillet.series[0].dataBind();
+    //     chart_TyLeThoiGianVaDinhMucFillet.series[1].dataBind();
+    // }
+    function getDataForChartTyLeThoiGianVaDinhMucFillet(xuongId) {
+        let chartData = null;
+        const fromDate = localStorage.getItem("fromDate_dashboard_user");
+        const toDate = localStorage.getItem("toDate_dashboard_user");
+        $.ajax({
+            url: '/Dashboard/DataChartTongHopTongHopTyLeThoiGianVaDinhMucFillet',
+            type: 'GET',
+            data: {fromDate:fromDate,toDate:toDate, xuongId: xuongId },
+            async: false,
+            success: function (response) {
+                if (response.Success) {
+                    chartData = response.DataChart;
+                    if (Array.isArray(chartData) && chartData.length > 0) {
+                        const weightDisplays = document.querySelectorAll('.weight-displayTyLeThoiGianVaDinhMucFillet');
+                        weightDisplays.forEach(display => {
+                            display.textContent = `${response.TotalRo} rổ`;
+                        });
+                    }
+                } 
+                else {
+                    console.warn(response.Messages || 'Không có dữ liệu biểu đồ');
+                }
+            },
+            error: function (error) {
+                console.error('Lỗi khi tải dữ liệu:', error);
+            }
+        });
+
+        return chartData;
+    }
+
+    function taiDasboardTongHopTyLeThoiGianVaDinhMucFillet() {
+        var xuongId = @XuongId;
+        //AddUserWaitView(xuongId);
+
+        const chartData = getDataForChartTyLeThoiGianVaDinhMucFillet(xuongId);
+        if (!chartData || !Array.isArray(chartData) || chartData.length === 0) return;
+
+        if (!chart_TyLeThoiGianVaDinhMucFillet) {
+            createChartTyLeThoiGianVaDinhMucFillet();
+        }
+
+        loadChart_TongHopTyLeThoiGianVaDinhMucFillet(chartData);
+    }
+
+    
+    var timeInterval = localStorage.getItem("timeInterval_dashboard_user");
+
+      // Nếu null thì ép thành 30p
+      if (isNaN(timeInterval) || timeInterval <= 0) {
+          timeInterval = 1800000;
+      }
+
+        setInterval(taiDasboardTongHopTyLeThoiGianVaDinhMucFillet, timeInterval);
+</script>
