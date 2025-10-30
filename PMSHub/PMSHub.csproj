@@ -38,10 +38,15 @@
 
   <ItemGroup>
     <Folder Include="wwwroot\Imgs\" />
-    <Folder Include="wwwroot\assets\" />
   </ItemGroup>
 
   <ItemGroup>
+    <Content Update="wwwroot\assets\img\logo\PMSLogo.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\assets\img\PMSLogo.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Update="wwwroot\Imgs\logoPMSW.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

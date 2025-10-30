@@ -32,6 +32,10 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9MYXlvdXQvRm9vdGVyTGF5b3V0LnJhem9y
 build_metadata.AdditionalFiles.CssScope = 
 
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMSHub/Components/Layout/ToastComponent.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9MYXlvdXQvVG9hc3RDb21wb25lbnQucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
 [/Volumes/LocalData/PhanBachProject/PMSSoft/PMSHub/Components/Layout/TopLayout.razor]
 build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9MYXlvdXQvVG9wTGF5b3V0LnJhem9y
 build_metadata.AdditionalFiles.CssScope = 
@@ -135,3 +139,11 @@ build_metadata.AdditionalFiles.CssScope = b-u6c1k6rapa
 [/Volumes/LocalData/PhanBachProject/PMSSoft/PMSHub/Components/Layout/NavMenu.razor]
 build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9MYXlvdXQvTmF2TWVudS5yYXpvcg==
 build_metadata.AdditionalFiles.CssScope = b-vtfjmolcge
+
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMSHub/Components/Pages/DHLogView.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9QYWdlcy9ESExvZ1ZpZXcucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = b-q07xlyv8kb
+
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMSHub/Components/Pages/FilletLogView.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9QYWdlcy9GaWxsZXRMb2dWaWV3LnJhem9y
+build_metadata.AdditionalFiles.CssScope = b-ebxyx5r3te

@@ -1001,6 +1001,14 @@
     "Func": "Xuất Báo Cáo / TPFilletv2 / Tổng Hợp Thành Phẩm"
   },
   {
+    "Fu": "Báo Cáo / TPFilletv2 / Tổng Hợp Lô",
+    "Func": "Xem Báo Cáo / TPFilletv2 / Tổng Hợp Lô"
+  },
+  {
+    "Fu": "Báo Cáo / TPFilletv2 / Tổng Hợp Lô",
+    "Func": "Xuất Báo Cáo / TPFilletv2 / Tổng Hợp Lô"
+  },
+  {
     "Fu": "Báo Cáo / BTP Định Hình / Chi Tiết",
     "Func": "Xem Báo Cáo / BTP Định Hình / Chi Tiết"
   },
@@ -1031,6 +1039,22 @@
   {
     "Fu": "Báo Cáo / BTP Định Hình / Tổng Hợp Thành Phẩm",
     "Func": "Xuất Báo Cáo / BTP Định Hình / Tổng Hợp Thành Phẩm"
+  },
+  {
+    "Fu": "Báo Cáo / BTP Định Hình / Tổng Hợp Lô",
+    "Func": "Xem Báo Cáo / BTP Định Hình / Tổng Hợp Lô"
+  },
+  {
+    "Fu": "Báo Cáo / BTP Định Hình / Tổng Hợp Lô",
+    "Func": "Xuất Báo Cáo / BTP Định Hình / Tổng Hợp Lô"
+  },
+  {
+    "Fu": "Báo Cáo / TP Định Hình / Tổng Hợp Lô",
+    "Func": "Xem Báo Cáo / TP Định Hình / Tổng Hợp Lô"
+  },
+  {
+    "Fu": "Báo Cáo / TP Định Hình / Tổng Hợp Lô",
+    "Func": "Xuất Báo Cáo / TP Định Hình / Tổng Hợp Lô"
   },
   {
     "Fu": "Báo Cáo / TP Định Hình / Chi Tiết",
@@ -1925,6 +1949,14 @@
     "Func": "Chuyển Thành Phẩm Xử Lý Phiếu Cân / Phiếu Cân Chính Xếp Khuôn"
   },
   {
+    "Fu": "Xử Lý Phiếu Cân / Phiếu Cân Chính Xếp Khuôn",
+    "Func": "Chuyển Ngày Nguyên Liệu Xử Lý Phiếu Cân / Phiếu Cân Chính Xếp Khuôn"
+  },
+  {
+    "Fu": "Xử Lý Phiếu Cân / Phiếu Cân Ra Cối Xếp Khuôn",
+    "Func": "Chuyển Ngày Nguyên Liệu Xử Lý Phiếu Cân / Phiếu Cân Ra Cối Xếp Khuôn"
+  },
+  {
     "Fu": "Xử Lý Phiếu Cân / Phiếu Cân Sau Xếp Khuôn",
     "Func": "Xem Xử Lý Phiếu Cân / Phiếu Cân Sau Xếp Khuôn"
   },
@@ -2573,8 +2605,36 @@
     "Func": "Import Xếp Khuôn / Cối Chính"
   },
   {
-    "Fu": "Danh Mục / Xếp Khuôn / Cối Chính",
-    "Func": "Export Xếp Khuôn / Cối Chính"
+    "Fu": "Danh Mục / Xếp Khuôn / Cối Lẻ",
+    "Func": "Xem Xếp Khuôn / Cối Lẻ"
+  },
+  {
+    "Fu": "Danh Mục / Xếp Khuôn / Cối Lẻ",
+    "Func": "Thêm Xếp Khuôn / Cối Lẻ"
+  },
+  {
+    "Fu": "Danh Mục / Xếp Khuôn / Cối Lẻ",
+    "Func": "Sửa Xếp Khuôn / Cối Lẻ"
+  },
+  {
+    "Fu": "Danh Mục / Xếp Khuôn / Cối Lẻ",
+    "Func": "Xóa Xếp Khuôn / Cối Lẻ"
+  },
+  {
+    "Fu": "Danh Mục / Xếp Khuôn / Trọng Lượng Cối Theo Sản Phẩm",
+    "Func": "Xem Xếp Khuôn / Trọng Lượng Cối Theo Sản Phẩm"
+  },
+  {
+    "Fu": "Danh Mục / Xếp Khuôn / Trọng Lượng Cối Theo Sản Phẩm",
+    "Func": "Thêm Xếp Khuôn / Trọng Lượng Cối Theo Sản Phẩm"
+  },
+  {
+    "Fu": "Danh Mục / Xếp Khuôn / Trọng Lượng Cối Theo Sản Phẩm",
+    "Func": "Sửa Xếp Khuôn / Trọng Lượng Cối Theo Sản Phẩm"
+  },
+  {
+    "Fu": "Danh Mục / Xếp Khuôn / Trọng Lượng Cối Theo Sản Phẩm",
+    "Func": "Xóa Xếp Khuôn / Trọng Lượng Cối Theo Sản Phẩm"
   },
   {
     "Fu": "Danh Mục / Xếp Khuôn / Size Chính",
@@ -3784,402 +3844,309 @@
     "Fu": "Tính Lương / Kết Nối Bravo",
     "Func": "Kết Nối Bravo"
   },
-  //HQ
-  {
-    "Fu": "Danh Mục HQ / Color Code",
-    "Func": "Xem HQ / Color Code"
-  },
-  {
-    "Fu": "Danh Mục HQ / Color Code",
-    "Func": "Thêm HQ / Color Code"
-  },
-  {
-    "Fu": "Danh Mục HQ / Color Code",
-    "Func": "Sửa HQ / Color Code"
-  },
-  {
-    "Fu": "Danh Mục HQ / Color Code",
-    "Func": "Xóa HQ / Color Code"
-  },
-  {
-    "Fu": "Danh Mục HQ / Color Code",
-    "Func": "Import HQ / Color Code"
-  },
-  {
-    "Fu": "Danh Mục HQ / Color Code",
-    "Func": "Export HQ / Color Code"
-  },
-  {
-    "Fu": "Danh Mục HQ / Lô",
-    "Func": "Xem HQ / Lô"
-  },
-  {
-    "Fu": "Danh Mục HQ / Lô",
-    "Func": "Thêm HQ / Lô"
-  },
-  {
-    "Fu": "Danh Mục HQ / Lô",
-    "Func": "Sửa HQ / Lô"
-  },
-  {
-    "Fu": "Danh Mục HQ / Lô",
-    "Func": "Xóa HQ / Lô"
-  },
-  {
-    "Fu": "Danh Mục HQ / Lô",
-    "Func": "Import HQ / Lô"
-  },
-  {
-    "Fu": "Danh Mục HQ / Lô",
-    "Func": "Export HQ / Lô"
-  },
-  {
-    "Fu": "Danh Mục HQ / Loại Nguyên Liệu",
-    "Func": "Xem HQ / Loại Nguyên Liệu"
-  },
-  {
-    "Fu": "Danh Mục HQ / Loại Nguyên Liệu",
-    "Func": "Thêm HQ / Loại Nguyên Liệu"
-  },
-  {
-    "Fu": "Danh Mục HQ / Loại Nguyên Liệu",
-    "Func": "Sửa HQ / Loại Nguyên Liệu"
-  },
-  {
-    "Fu": "Danh Mục HQ / Loại Nguyên Liệu",
-    "Func": "Xóa HQ / Loại Nguyên Liệu"
-  },
-  {
-    "Fu": "Danh Mục HQ / Loại Nguyên Liệu",
-    "Func": "Import HQ / Loại Nguyên Liệu"
-  },
-  {
-    "Fu": "Danh Mục HQ / Loại Nguyên Liệu",
-    "Func": "Export HQ / Loại Nguyên Liệu"
-  },
-  {
-    "Fu": "Danh Mục HQ / Lô Chi Tiết",
-    "Func": "Xem HQ / Lô Chi Tiết"
-  },
-  {
-    "Fu": "Danh Mục HQ / Lô Chi Tiết",
-    "Func": "Thêm HQ / Lô Chi Tiết"
-  },
-  {
-    "Fu": "Danh Mục HQ / Lô Chi Tiết",
-    "Func": "Sửa HQ / Lô Chi Tiết"
-  },
-  {
-    "Fu": "Danh Mục HQ / Lô Chi Tiết",
-    "Func": "Xóa HQ / Lô Chi Tiết"
-  },
-  {
-    "Fu": "Danh Mục HQ / Lô Chi Tiết",
-    "Func": "Import HQ / Lô Chi Tiết"
-  },
-  {
-    "Fu": "Danh Mục HQ / Lô Chi Tiết",
-    "Func": "Export HQ / Lô Chi Tiết"
-  },
-  {
-    "Fu": "Danh Mục HQ / Nhân Viên",
-    "Func": "Xem HQ / Nhân Viên"
-  },
-  {
-    "Fu": "Danh Mục HQ / Nhân Viên",
-    "Func": "Thêm HQ / Nhân Viên"
-  },
-  {
-    "Fu": "Danh Mục HQ / Nhân Viên",
-    "Func": "Sửa HQ / Nhân Viên"
-  },
-  {
-    "Fu": "Danh Mục HQ / Nhân Viên",
-    "Func": "Xóa HQ / Nhân Viên"
-  },
-  {
-    "Fu": "Danh Mục HQ / Nhân Viên",
-    "Func": "Import HQ / Nhân Viên"
-  },
-  {
-    "Fu": "Danh Mục HQ / Nhân Viên",
-    "Func": "Export HQ / Nhân Viên"
-  },
-  {
-    "Fu": "Danh Mục HQ / Phiếu Cân",
-    "Func": "Xem HQ / Phiếu Cân"
-  },
-  {
-    "Fu": "Danh Mục HQ / Phiếu Cân",
-    "Func": "Thêm HQ / Phiếu Cân"
-  },
-  {
-    "Fu": "Danh Mục HQ / Phiếu Cân",
-    "Func": "Sửa HQ / Phiếu Cân"
-  },
-  {
-    "Fu": "Danh Mục HQ / Phiếu Cân",
-    "Func": "Xóa HQ / Phiếu Cân"
-  },
-  {
-    "Fu": "Danh Mục HQ / Phiếu Cân",
-    "Func": "Import HQ / Phiếu Cân"
-  },
-  {
-    "Fu": "Danh Mục HQ / Phiếu Cân",
-    "Func": "Export HQ / Phiếu Cân"
-  },
-  {
-    "Fu": "Danh Mục HQ / Size",
-    "Func": "Xem HQ / Size"
-  },
-  {
-    "Fu": "Danh Mục HQ / Size",
-    "Func": "Thêm HQ / Size"
-  },
-  {
-    "Fu": "Danh Mục HQ / Size",
-    "Func": "Sửa HQ / Size"
-  },
-  {
-    "Fu": "Danh Mục HQ / Size",
-    "Func": "Xóa HQ / Size"
-  },
-  {
-    "Fu": "Danh Mục HQ / Size",
-    "Func": "Import HQ / Size"
-  },
-  {
-    "Fu": "Danh Mục HQ / Size",
-    "Func": "Export HQ / Size"
-  },
-  {
-    "Fu": "Danh Mục HQ / Thành Phẩm",
-    "Func": "Xem HQ / Thành Phẩm"
-  },
-  {
-    "Fu": "Danh Mục HQ / Thành Phẩm",
-    "Func": "Thêm HQ / Thành Phẩm"
-  },
-  {
-    "Fu": "Danh Mục HQ / Thành Phẩm",
-    "Func": "Sửa HQ / Thành Phẩm"
-  },
-  {
-    "Fu": "Danh Mục HQ / Thành Phẩm",
-    "Func": "Xóa HQ / Thành Phẩm"
-  },
-  {
-    "Fu": "Danh Mục HQ / Thành Phẩm",
-    "Func": "Import HQ / Thành Phẩm"
-  },
-  {
-    "Fu": "Danh Mục HQ / Thành Phẩm",
-    "Func": "Export HQ / Thành Phẩm"
-  },
-  {
-    "Fu": "Danh Mục HQ / Thẻ Rổ",
-    "Func": "Xem HQ / Thẻ Rổ"
-  },
-  {
-    "Fu": "Danh Mục HQ / Thẻ Rổ",
-    "Func": "Thêm HQ / Thẻ Rổ"
-  },
-  {
-    "Fu": "Danh Mục HQ / Thẻ Rổ",
-    "Func": "Sửa HQ / Thẻ Rổ"
-  },
-  {
-    "Fu": "Danh Mục HQ / Thẻ Rổ",
-    "Func": "Xóa HQ / Thẻ Rổ"
-  },
-  {
-    "Fu": "Danh Mục HQ / Thẻ Rổ",
-    "Func": "Import HQ / Thẻ Rổ"
-  },
-  {
-    "Fu": "Danh Mục HQ / Thẻ Rổ",
-    "Func": "Export HQ / Thẻ Rổ"
-  },
-  {
-    "Fu": "Danh Mục HQ / Thẻ Thành Phẩm",
-    "Func": "Xem HQ / Thẻ Thành Phẩm"
-  },
-  {
-    "Fu": "Danh Mục HQ / Thẻ Thành Phẩm",
-    "Func": "Thêm HQ / Thẻ Thành Phẩm"
-  },
-  {
-    "Fu": "Danh Mục HQ / Thẻ Thành Phẩm",
-    "Func": "Sửa HQ / Thẻ Thành Phẩm"
-  },
-  {
-    "Fu": "Danh Mục HQ / Thẻ Thành Phẩm",
-    "Func": "Xóa HQ / Thẻ Thành Phẩm"
-  },
-  {
-    "Fu": "Danh Mục HQ / Thẻ Thành Phẩm",
-    "Func": "Import HQ / Thẻ Thành Phẩm"
-  },
-  {
-    "Fu": "Danh Mục HQ / Thẻ Thành Phẩm",
-    "Func": "Export HQ / Thẻ Thành Phẩm"
-  },
-  {
-    "Fu": "Danh Mục HQ / Thẻ Từ",
-    "Func": "Xem HQ / Thẻ Từ"
-  },
-  {
-    "Fu": "Danh Mục HQ / Thẻ Từ",
-    "Func": "Thêm HQ / Thẻ Từ"
-  },
-  {
-    "Fu": "Danh Mục HQ / Thẻ Từ",
-    "Func": "Sửa HQ / Thẻ Từ"
-  },
-  {
-    "Fu": "Danh Mục HQ / Thẻ Từ",
-    "Func": "Xóa HQ / Thẻ Từ"
-  },
-  {
-    "Fu": "Danh Mục HQ / Thẻ Từ",
-    "Func": "Import HQ / Thẻ Từ"
-  },
-  {
-    "Fu": "Danh Mục HQ / Thẻ Từ",
-    "Func": "Export HQ / Thẻ Từ"
-  },
-  {
-    "Fu": "Danh Mục HQ / Nhóm",
-    "Func": "Xem HQ / Nhóm"
-  },
-  {
-    "Fu": "Danh Mục HQ / Nhóm",
-    "Func": "Thêm HQ / Nhóm"
-  },
-  {
-    "Fu": "Danh Mục HQ / Nhóm",
-    "Func": "Sửa HQ / Nhóm"
-  },
-  {
-    "Fu": "Danh Mục HQ / Nhóm",
-    "Func": "Xóa HQ / Nhóm"
-  },
-  {
-    "Fu": "Danh Mục HQ / Nhóm",
-    "Func": "Import HQ / Nhóm"
-  },
-  {
-    "Fu": "Danh Mục HQ / Nhóm",
-    "Func": "Export HQ / Nhóm"
-  },
-  {
-    "Fu": "Danh Mục HQ / Nhân Viên Theo Nhóm",
-    "Func": "Xem HQ / Nhân Viên Theo Nhóm"
-  },
-  {
-    "Fu": "Danh Mục HQ / Nhân Viên Theo Nhóm",
-    "Func": "Thêm HQ / Nhân Viên Theo Nhóm"
-  },
-  {
-    "Fu": "Danh Mục HQ / Nhân Viên Theo Nhóm",
-    "Func": "Sửa HQ / Nhân Viên Theo Nhóm"
-  },
-  {
-    "Fu": "Danh Mục HQ / Nhân Viên Theo Nhóm",
-    "Func": "Xóa HQ / Nhân Viên Theo Nhóm"
-  },
-  {
-    "Fu": "Danh Mục HQ / Nhân Viên Theo Nhóm",
-    "Func": "Import HQ / Nhân Viên Theo Nhóm"
-  },
-  {
-    "Fu": "Danh Mục HQ / Nhân Viên Theo Nhóm",
-    "Func": "Export HQ / Nhân Viên Theo Nhóm"
-  },
-  {
-    "Fu": "Báo Cáo HQ / Chi Tiết",
-    "Func": "Xem Báo Cáo HQ / Chi Tiết"
-  },
-  {
-    "Fu": "Báo Cáo HQ / Chi Tiết",
-    "Func": "Xuất Báo Cáo HQ / Chi Tiết"
-  },
-  {
-    "Fu": "Báo Cáo HQ / Tổng Hợp Nhân Viên",
-    "Func": "Xem Báo Cáo HQ / Tổng Hợp Nhân Viên"
-  },
-  {
-    "Fu": "Báo Cáo HQ / Tổng Hợp Nhân Viên",
-    "Func": "Xuất Báo Cáo HQ / Tổng Hợp Nhân Viên"
-  },
-  {
-    "Fu": "Báo Cáo HQ / Tổng Hợp Thành Phẩm",
-    "Func": "Xem Báo Cáo HQ / Tổng Hợp Thành Phẩm"
-  },
-  {
-    "Fu": "Báo Cáo HQ / Tổng Hợp Thành Phẩm",
-    "Func": "Xuất Báo Cáo HQ / Tổng Hợp Thành Phẩm"
-  },
-  {
-    "Fu": "Xử Lý Phiếu Cân HQ / Phiếu Cân HQ",
-    "Func": "Xem Xử Lý Phiếu Cân HQ / Phiếu Cân HQ"
-  },
-  {
-    "Fu": "Xử Lý Phiếu Cân HQ / Phiếu Cân HQ",
-    "Func": "Thêm Xử Lý Phiếu Cân HQ / Phiếu Cân HQ"
-  },
-  {
-    "Fu": "Xử Lý Phiếu Cân HQ / Phiếu Cân HQ",
-    "Func": "Xoá Xử Lý Phiếu Cân HQ / Phiếu Cân HQ"
-  },
-  {
-    "Fu": "Xử Lý Phiếu Cân HQ / Phiếu Cân HQ",
-    "Func": "Sửa Xử Lý Phiếu Cân HQ / Phiếu Cân HQ"
-  },
-  {
-    "Fu": "Xử Lý Phiếu Cân HQ / Phiếu Cân HQ",
-    "Func": "Import Xử Lý Phiếu Cân HQ / Phiếu Cân HQ"
-  },
-  {
-    "Fu": "Xử Lý Phiếu Cân HQ / Phiếu Cân HQ",
-    "Func": "Export Xử Lý Phiếu Cân HQ / Phiếu Cân HQ"
-  },
-  {
-    "Fu": "Xử Lý Phiếu Cân HQ / Phiếu Cân HQ",
-    "Func": "Chuyển Xưởng Xử Lý Phiếu Cân HQ / Phiếu Cân HQ"
-  },
-  {
-    "Fu": "Xử Lý Phiếu Cân HQ / Phiếu Cân HQ",
-    "Func": "Chuyển Size Xử Lý Phiếu Cân HQ / Phiếu Cân HQ"
-  },
-  {
-    "Fu": "Xử Lý Phiếu Cân HQ / Phiếu Cân HQ",
-    "Func": "Chuyển Thành Phẩm Xử Lý Phiếu Cân HQ / Phiếu Cân HQ"
-  },
-  {
-    "Fu": "Xử Lý Phiếu Cân HQ / Phiếu Cân HQ",
-    "Func": "Chuyển Loại Nguyên Liệu Xử Lý Phiếu Cân HQ / Phiếu Cân HQ"
-  },
-  {
-    "Fu": "Xử Lý Phiếu Cân HQ / Phiếu Cân HQ",
-    "Func": "Chuyển Nhân Viên Xử Lý Phiếu Cân HQ / Phiếu Cân HQ"
-  },
-  {
-    "Fu": "Xử Lý Phiếu Cân HQ / Phiếu Cân HQ",
-    "Func": "Chuyển Nhân Viên Phục Vụ Xử Lý Phiếu Cân HQ / Phiếu Cân HQ"
-  },
-  {
-    "Fu": "Xử Lý Phiếu Cân HQ / Phiếu Cân HQ",
-    "Func": "Chuyển Nhân Viên Bàn Kiểm Xử Lý Phiếu Cân HQ / Phiếu Cân HQ"
-  },
-  {
-    "Fu": "Xử Lý Phiếu Cân HQ / Phiếu Cân HQ",
-    "Func": "Xem Xoá Xử Lý Phiếu Cân HQ / Phiếu Cân HQ"
-  },
-  {
-    "Fu": "Xử Lý Phiếu Cân HQ / Phiếu Cân HQ",
-    "Func": "Xem Sửa Xử Lý Phiếu Cân HQ / Phiếu Cân HQ"
-  }
 
+  {
+    "Fu": "Báo Cáo / TPFillet / Tổng Hợp Nhân Viên BTP Xẻ Bướm",
+    "Func": "Xem Báo Cáo / TPFillet / Tổng Hợp Nhân Viên BTP Xẻ Bướm"
+  },
+  {
+    "Fu": "Báo Cáo / BTP Định Hình / Chi Tiết Phiếu Cân Chưa Sửa",
+    "Func": "Xem Báo Cáo / BTP Định Hình / Chi Tiết Phiếu Cân Chưa Sửa"
+  },
+  {
+    "Fu": "Báo Cáo / BTP Định Hình / Chi Tiết Phiếu Cân Chưa Sửa",
+    "Func": "Xuất Báo Cáo / BTP Định Hình / Chi Tiết Phiếu Cân Chưa Sửa"
+  },
+  {
+    "Fu": "Xử Lý Phiếu Cân / Phiếu Cân Định Hình",
+    "Func": "Chuyển Nhân Viên Xử Lý Phiếu Cân / Phiếu Cân Định Hình"
+  },
+  {
+    "Fu": "Báo Cáo / TP Định Hình / Dữ Liệu Cân Read-Time",
+    "Func": "Xem Báo Cáo / TP Định Hình / Dữ Liệu Cân Read-Time"
+  },
+  {
+    "Fu": "Báo Cáo / TPFilletv2/ Dữ Liệu Cân Read-Time",
+    "Func": "Xem Báo Cáo / TPFilletv2 / Dữ Liệu Cân Read-Time"
+  },
+  {
+    "Fu": "Xử Lý Phiếu Cân / Phiếu Cân Filletv2",
+    "Func": "Xem Xử Lý Phiếu Cân / Phiếu Cân Filletv2"
+  },
+  {
+    "Fu": "Xử Lý Phiếu Cân / Phiếu Cân Filletv2",
+    "Func": "Thêm Xử Lý Phiếu Cân / Phiếu Cân Filletv2"
+  },
+  {
+    "Fu": "Xử Lý Phiếu Cân / Phiếu Cân Filletv2",
+    "Func": "Sửa Xử Lý Phiếu Cân / Phiếu Cân Filletv2"
+  },
+  {
+    "Fu": "Xử Lý Phiếu Cân / Phiếu Cân Filletv2",
+    "Func": "Xóa Xử Lý Phiếu Cân / Phiếu Cân Filletv2"
+  },
+  {
+    "Fu": "Xử Lý Phiếu Cân / Phiếu Cân Filletv2",
+    "Func": "Chuyển Xưởng Xử Lý Phiếu Cân / Phiếu Cân Filletv2"
+  },
+  {
+    "Fu": "Xử Lý Phiếu Cân / Phiếu Cân Filletv2",
+    "Func": "Chuyển Size Xử Lý Phiếu Cân / Phiếu Cân Filletv2"
+  },
+  {
+    "Fu": "Xử Lý Phiếu Cân / Phiếu Cân Filletv2",
+    "Func": "Chuyển Thành Phẩm Xử Lý Phiếu Cân / Phiếu Cân Filletv2"
+  },
+  {
+    "Fu": "Xử Lý Phiếu Cân / Phiếu Cân Filletv2",
+    "Func": "Chuyển Lô Xử Lý Phiếu Cân / Phiếu Cân Filletv2"
+  },
+  {
+    "Fu": "Xử Lý Phiếu Cân / Phiếu Cân Filletv2",
+    "Func": "Chuyển Màu Xử Lý Phiếu Cân / Phiếu Cân Filletv2"
+  },
+  {
+    "Fu": "Xử Lý Phiếu Cân / Phiếu Cân Filletv2",
+    "Func": "Chuyển Nhân Viên Xử Lý Phiếu Cân / Phiếu Cân Filletv2"
+  },
+  {
+    "Fu": "Báo Cáo / TPFillet / Tổng Hợp Định Mức TP Xẻ Bướm",
+    "Func": "Xem Báo Cáo / TPFillet / Tổng Hợp Định Mức TP Xẻ Bướm"
+  },
+  {
+    "Fu": "Dashboard",
+    "Func": "Tổng Hợp Định Mức Sản Lượng Theo Chuyền Fillet"
+  },
+  {
+    "Fu": "Dashboard",
+    "Func": "Tổng Hợp Định Mức Sản Lượng Theo Chuyền Định Hình"
+  },
+  {
+    "Fu": "Dashboard",
+    "Func": "Tổng Hợp Tỷ Lệ Thời Gian Và Định Mức Fillet"
+  },
+  {
+    "Fu": "Dashboard",
+    "Func": "Tổng Hợp Tỷ Lệ Thời Gian Và Định Mức Định Hình"
+  },
+  {
+    "Fu": "Báo Cáo / TP Định Hình / Tổng Hợp Nhân Viên Không Làm Việc",
+    "Func": "Xem Báo Cáo / TP Định Hình / Tổng Hợp Nhân Viên Không Làm Việc"
+  },
+  {
+    "Fu": "Dashboard",
+    "Func": "Tổng Hợp Tỷ Lệ Thời Gian Và Định Mức Định Hình Theo Chuyền"
+  },
+  {
+    "Fu": "Báo Cáo / Xếp Khuôn / Ra Cối / Tổng Hợp Tỷ Lệ Tăng Trọng Cối",
+    "Func": "Xem Báo Cáo / Xếp Khuôn / Ra Cối / Tổng Hợp Tỷ Lệ Tăng Trọng Cối"
+  },
+
+
+
+
+  {
+    "Fu": "Dashboard",
+    "Func": "Tổng Quan"
+  },
+  {
+    "Fu": "Dashboard",
+    "Func": "Định Mức Sửa Cá Theo Sản Phẩm"
+  },
+  {
+    "Fu": "Dashboard",
+    "Func": "Định Mức Fillet Theo Sản Phẩm"
+  },
+  {
+    "Fu": "Dashboard",
+    "Func": "Tổng Hợp Sản Lượng Xẻ Bướm"
+  },
+  {
+    "Fu": "Dashboard",
+    "Func": "Tổng Hợp Sản Lượng Và Định Mức TP Định Hình Theo Chuyền"
+  },
+  {
+    "Fu": "Dashboard",
+    "Func": "Tổng Hợp Sản Lượng Và Định Mức TP Fillet Theo Chuyền"
+  },
+  {
+    "Fu": "Dashboard",
+    "Func": "Tổng Hợp Sản Phẩm TP 2"
+  },
+  {
+    "Fu": "Báo Cáo / Thành Phẩm 2 / Chi Tiết",
+    "Func": "Xem Báo Cáo / Thành Phẩm 2 / Chi Tiết"
+  },
+  {
+    "Fu": "Báo Cáo / Thành Phẩm 2 / Tổng Hợp Sản Phẩm",
+    "Func": "Xem Báo Cáo / Thành Phẩm 2 / Tổng Hợp Sản Phẩm"
+  },
+
+
+
+  {
+    "Fu": "Báo Cáo / Thành Phẩm 2 / Tỷ Lệ Thu Hồi",
+    "Func": "Xem Báo Cáo / Thành Phẩm 2 / Tỷ Lệ Thu Hồi"
+  },
+  {
+    "Fu": "Dashboard",
+    "Func": "Tỷ Lệ Thu Hồi Thành Phẩm 2"
+  },
+  {
+    "Fu": "Xử Lý Phiếu Cân / Phiếu Cân Filletv2",
+    "Func": "Xóa Xử Lý Phiếu Cân / Phiếu Cân Filletv2"
+  },
+  {
+    "Fu": "Báo Cáo / TPFilletv2 / Tổng Hợp Nhân Viên 2",
+    "Func": "Xem Báo Cáo / TPFilletv2 / Tổng Hợp Nhân Viên 2"
+  },
+
+  {
+    "Fu": "Báo Cáo / Nguyên Liệu / Phiếu Cân Không Thể Ghi Nhận",
+    "Func": "Xem Báo Cáo / Nguyên Liệu / Phiếu Cân Không Thể Ghi Nhận"
+  },
+  {
+    "Fu": "Báo Cáo / TPFillet / Tổng Hợp Nhân Viên BTP Xẻ Bướm",
+    "Func": "Xem Báo Cáo / TPFillet / Tổng Hợp Nhân Viên BTP Xẻ Bướm"
+  },
+  {
+    "Fu": "Báo Cáo / TPFillet / Tổng Hợp Nhân Viên BTP Xẻ Bướm",
+    "Func": "Xuất Báo Cáo / TPFillet / Tổng Hợp Nhân Viên BTP Xẻ Bướm"
+  },
+  {
+    "Fu": "Báo Cáo / BTP Định Hình / Chi Tiết Phiếu Cân Chưa Sửa",
+    "Func": "Xem Báo Cáo / BTP Định Hình / Chi Tiết Phiếu Cân Chưa Sửa"
+  },
+  {
+    "Fu": "Báo Cáo / BTP Định Hình / Chi Tiết Phiếu Cân Chưa Sửa",
+    "Func": "Xuất Báo Cáo / BTP Định Hình / Chi Tiết Phiếu Cân Chưa Sửa"
+  },
+  {
+    "Fu": "Xử Lý Phiếu Cân / Phiếu Cân Định Hình",
+    "Func": "Chuyển Nhân Viên Xử Lý Phiếu Cân / Phiếu Cân Định Hình"
+  },
+  {
+    "Fu": "Báo Cáo / TP Định Hình / Dữ Liệu Cân Read-Time",
+    "Func": "Xem Báo Cáo / TP Định Hình / Dữ Liệu Cân Read-Time"
+  },
+  {
+    "Fu": "Báo Cáo / TPFilletv2/ Dữ Liệu Cân Read-Time",
+    "Func": "Xem Báo Cáo / TPFilletv2 / Dữ Liệu Cân Read-Time"
+  },
+  {
+    "Fu": "Xử Lý Phiếu Cân / Phiếu Cân Filletv2",
+    "Func": "Xem Xử Lý Phiếu Cân / Phiếu Cân Filletv2"
+  },
+  {
+    "Fu": "Báo Cáo / TPFillet / Tổng Hợp Định Mức TP Xẻ Bướm",
+    "Func": "Xem Báo Cáo / TPFillet / Tổng Hợp Định Mức TP Xẻ Bướm"
+  },
+  {
+    "Fu": "Dashboard",
+    "Func": "Tổng Hợp Định Mức Sản Lượng Theo Chuyền Fillet"
+  },
+  {
+    "Fu": "Dashboard",
+    "Func": "Tổng Hợp Định Mức Sản Lượng Theo Chuyền Định Hình"
+  },
+  {
+    "Fu": "Dashboard",
+    "Func": "Tổng Hợp Tỷ Lệ Thời Gian Và Định Mức Fillet"
+  },
+  {
+    "Fu": "Dashboard",
+    "Func": "Tổng Hợp Tỷ Lệ Thời Gian Và Định Mức Định Hình"
+  },
+  {
+    "Fu": "Báo Cáo / TP Định Hình / Tổng Hợp Nhân Viên Không Làm Việc",
+    "Func": "Xem Báo Cáo / TP Định Hình / Tổng Hợp Nhân Viên Không Làm Việc"
+  },
+  {
+    "Fu": "Báo Cáo / Xếp Khuôn / Ra Cối / Tổng Hợp Tỷ Lệ Tăng Trọng Cối",
+    "Func": "Xem Báo Cáo / Xếp Khuôn / Ra Cối / Tổng Hợp Tỷ Lệ Tăng Trọng Cối"
+  },
+  {
+    "Fu": "Dashboard",
+    "Func": "Tổng Hợp Tỷ Lệ Thời Gian Và Định Mức Định Hình Theo Chuyền"
+  },
+  {
+    "Fu": "Dashboard",
+    "Func": "Tổng Hợp Định Mức Sản Lượng Theo Chuyền Fillet"
+  },
+  {
+    "Fu": "Dashboard",
+    "Func": "Tổng Hợp Định Mức Sản Lượng Theo Chuyền Định Hình"
+  },
+  {
+    "Fu": "Dashboard",
+    "Func": "Tổng Hợp Tỷ Lệ Thời Gian Và Định Mức Fillet"
+  },
+  {
+    "Fu": "Dashboard",
+    "Func": "Tổng Hợp Tỷ Lệ Thời Gian Và Định Mức Định Hình"
+  },
+  {
+    "Fu": "Báo Cáo / TP Định Hình / Tổng Hợp Nhân Viên Không Làm Việc",
+    "Func": "Xem Báo Cáo / TP Định Hình / Tổng Hợp Nhân Viên Không Làm Việc"
+  },
+  {
+    "Fu": "Báo Cáo / TPFilletv2 / Tổng Hợp Lô",
+    "Func": "Xem Báo Cáo / TPFilletv2 / Tổng Hợp Lô"
+  },
+  {
+    "Fu": "Báo Cáo / TPFilletv2 / Tổng Hợp Lô",
+    "Func": "Xuất Báo Cáo / TPFilletv2 / Tổng Hợp Lô"
+  },
+  {
+    "Fu": "Danh Mục / Xếp Khuôn / Cối Lẻ",
+    "Func": "Xem Xếp Khuôn / Cối Lẻ"
+  },
+  {
+    "Fu": "Danh Mục / Xếp Khuôn / Cối Lẻ",
+    "Func": "Thêm Xếp Khuôn / Cối Lẻ"
+  },
+  {
+    "Fu": "Danh Mục / Xếp Khuôn / Cối Lẻ",
+    "Func": "Sửa Xếp Khuôn / Cối Lẻ"
+  },
+  {
+    "Fu": "Danh Mục / Xếp Khuôn / Cối Lẻ",
+    "Func": "Xóa Xếp Khuôn / Cối Lẻ"
+  },
+  {
+    "Fu": "Danh Mục / Xếp Khuôn / Trọng Lượng Cối Theo Sản Phẩm",
+    "Func": "Xem Xếp Khuôn / Trọng Lượng Cối Theo Sản Phẩm"
+  },
+  {
+    "Fu": "Danh Mục / Xếp Khuôn / Trọng Lượng Cối Theo Sản Phẩm",
+    "Func": "Thêm Xếp Khuôn / Trọng Lượng Cối Theo Sản Phẩm"
+  },
+  {
+    "Fu": "Danh Mục / Xếp Khuôn / Trọng Lượng Cối Theo Sản Phẩm",
+    "Func": "Sửa Xếp Khuôn / Trọng Lượng Cối Theo Sản Phẩm"
+  },
+  {
+    "Fu": "Danh Mục / Xếp Khuôn / Trọng Lượng Cối Theo Sản Phẩm",
+    "Func": "Xóa Xếp Khuôn / Trọng Lượng Cối Theo Sản Phẩm"
+  },
+  {
+    "Fu": "Xử Lý Phiếu Cân / Phiếu Cân Fillet",
+    "Func": "Chuyển Xưởng Xử Lý Phiếu Cân / Phiếu Cân Fillet"
+  },
+  {
+    "Fu": "Xử Lý Phiếu Cân / Phiếu Cân Fillet",
+    "Func": "Chuyển Size Xử Lý Phiếu Cân / Phiếu Cân Fillet"
+  },
+  {
+    "Fu": "Xử Lý Phiếu Cân / Phiếu Cân Fillet",
+    "Func": "Chuyển Thành Phẩm Xử Lý Phiếu Cân / Phiếu Cân Fillet"
+  },
+  {
+    "Fu": "Xử Lý Phiếu Cân / Phiếu Cân Fillet",
+    "Func": "Chuyển Lô Xử Lý Phiếu Cân / Phiếu Cân Fillet"
+  },
+  {
+    "Fu": "Xử Lý Phiếu Cân / Phiếu Cân Fillet",
+    "Func": "Chuyển Màu Xử Lý Phiếu Cân / Phiếu Cân Fillet"
+  }
 ]

@@ -442,12 +442,14 @@
                     grid = new ej.grids.Grid({
                         dataSource: dataManager,
                         allowPaging: true,
-                        pageSettings: { pageSize: 50 },
+                        pageSettings: { pageSize: 50, pageSizes: [50, 100, 200, 500] },
                         allowFiltering: true,
                         filterSettings: { type: 'Excel' },
                         allowSorting: true,
                         //frozenColumns: 3,
                         allowResizing: true,
+                        allowExcelExport: true,
+                        toolbar: ['ExcelExport'],
                         rowSelected: onRowSelected,
                         height: 400,
                         columns: [
@@ -461,6 +463,10 @@
                     });
                     // Hiển thị Grid trên trang web
                     grid.appendTo('#Grid');
+                    grid.toolbarClick = function (args) {
+             if (args.item.id === 'Grid_excelexport') {
+                grid.excelExport();
+             }};
                 }
             },
             error: function (error) {
@@ -507,12 +513,14 @@
                     gridCongThucChiTiet = new ej.grids.Grid({
                         dataSource: dataManager,
                         allowPaging: true,
-                        pageSettings: { pageSize: 50 },
+                        pageSettings: { pageSize: 50, pageSizes: [50, 100, 200, 500] },
                         allowFiltering: true,
                         filterSettings: { type: 'Excel' },
                         allowSorting: true,
                         //frozenColumns: 3,
                         allowResizing: true,
+                        allowExcelExport: true,
+                        toolbar: ['ExcelExport'],
                         rowSelected: onRowSelectedCongThucChiTiet,
                         height: 400,
                         columns: [
@@ -526,6 +534,10 @@
                     });
                     // Hiển thị Grid trên trang web
                     gridCongThucChiTiet.appendTo('#GridCongThucChiTiet');
+                    gridCongThucChiTiet.toolbarClick = function (args) {
+             if (args.item.id === 'Grid_excelexport') {
+                gridCongThucChiTiet.excelExport();
+             }};
                 }
             },
             error: function (error) {

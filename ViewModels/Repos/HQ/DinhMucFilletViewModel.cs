@@ -34,7 +34,7 @@ namespace ViewModels.Repos.HQ
         {
             try
             {
-                Reload();
+                ReLoadLast(DateTime.Now);
 
             }
             catch (Exception e)
@@ -216,6 +216,37 @@ namespace ViewModels.Repos.HQ
                 Console.WriteLine(e);
                 //throw;
             }
+        }
+        public List<T> GetsLast<T>(DateTime dateTime)
+        {
+            var dao = new Dao.Repos.HQ.DinhMucFillet();
+            return dao.GetsLast<T>(dateTime);
+        }
+        public void ReLoadLast(DateTime dateTime)
+        {
+            lock (Items)
+            {
+                Items.Clear();
+            }
+
+            var items = GetsLast<DinhMucFillet>(dateTime);
+            if (items.Any())
+                lock (Items)
+                {
+                    try
+                    {
+                        //Items.AddRange(items);
+                        foreach (var item in items)
+                        {
+                            Items.Add(item);
+                        }
+                    }
+                    catch (NotSupportedException e)
+                    {
+
+                    }
+
+                }
         }
         public void Reload()
         {

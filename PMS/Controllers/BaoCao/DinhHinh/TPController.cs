@@ -29,7 +29,7 @@ namespace PMS.Controllers.BaoCao.DinhHinh
             {
                 return Redirect(AppViewModels.AppViewModel.Instance.RedirectLoginUrl);
             }
-
+            ViewBag.TitlePage = "TP Định Hình | Chi Tiết";
             return View("~/Views/BaoCao/DinhHinh/ChiTietView.cshtml");
         }
         [CustomAuthorize(Fu = "Báo Cáo / TP Định Hình / Tổng Hợp Nhân Viên", Func = "Xem Báo Cáo / TP Định Hình / Tổng Hợp Nhân Viên")]
@@ -41,7 +41,7 @@ namespace PMS.Controllers.BaoCao.DinhHinh
             {
                 return Redirect(AppViewModels.AppViewModel.Instance.RedirectLoginUrl);
             }
-
+            ViewBag.TitlePage = "TP Định Hình | Tổng Hợp Nhân Viên";
             return View("~/Views/BaoCao/DinhHinh/TongHopNhanVienTPDinhHinhView.cshtml");
         }
         [CustomAuthorize(Fu = "Báo Cáo / TP Định Hình / Tổng Hợp Thành Phẩm", Func = "Xem Báo Cáo / TP Định Hình / Tổng Hợp Thành Phẩm")]
@@ -53,8 +53,32 @@ namespace PMS.Controllers.BaoCao.DinhHinh
             {
                 return Redirect(AppViewModels.AppViewModel.Instance.RedirectLoginUrl);
             }
-
+            ViewBag.TitlePage = "TP Định Hình | Tổng Hợp Thành Phẩm";
             return View("~/Views/BaoCao/DinhHinh/TongHopLoaiThanhPhamTPDinhHinhView.cshtml");
+        }
+        [CustomAuthorize(Fu = "Báo Cáo / TP Định Hình / Tổng Hợp Lô", Func = "Xem Báo Cáo / TP Định Hình / Tổng Hợp Lô")]
+        public async Task<ActionResult> TongHopLo()
+        {
+            var rl = Middlewares.AuthenticationHelpers.CheckAut(HttpContext, "TongHopLo");
+
+            if (rl == false)
+            {
+                return Redirect(AppViewModels.AppViewModel.Instance.RedirectLoginUrl);
+            }
+            ViewBag.TitlePage = "TP Định Hình | Tổng Hợp Lô";
+            return View("~/Views/BaoCao/DinhHinh/TongHopLoTPDinhHinhView.cshtml");
+        }
+        [CustomAuthorize(Fu = "Báo Cáo / TP Định Hình / Tổng Hợp Nhân Viên Không Làm Việc", Func = "Xem Báo Cáo / TP Định Hình / Tổng Hợp Nhân Viên Không Làm Việc")]
+        public async Task<ActionResult> TongHopNhanVienKhongLamViec()
+        {
+            var rl = Middlewares.AuthenticationHelpers.CheckAut(HttpContext, "TongHopNhanVienKhongLamViec");
+
+            if (rl == false)
+            {
+                return Redirect(AppViewModels.AppViewModel.Instance.RedirectLoginUrl);
+            }
+            ViewBag.TitlePage = "TP Định Hình | Tổng Hợp Nhân Viên Không Làm Việc";
+            return View("~/Views/BaoCao/DinhHinh/TongHopNhanVienKhongLamViecTPDinhHinhView.cshtml");
         }
         #region đánh giá định mức trên chi tiết
         [CustomAuthorize(Fu = "Báo Cáo / TP Định Hình / Tổng Hợp Đánh Giá Định Mức Trên Chi Tiết", Func = "Xem Báo Cáo / TP Định Hình / Tổng Hợp Đánh Giá Định Mức Trên Chi Tiết")]
@@ -207,6 +231,15 @@ namespace PMS.Controllers.BaoCao.DinhHinh
             {
                 dataSource = await GetTongHopNhanVienBanKiem(fromDate, toDate);
             }
+            else if (reportType == "TongHopLo")
+            {
+                dataSource = await GetTongHopLos(fromDate, toDate);
+            }
+
+            else if (reportType == "TongHopNhanVienKhongLamViec")
+            {
+                dataSource = await GetTongHopNhanVienKhongLamViec(toDate);
+            }
 
             if (dataSource == null || !dataSource.Any())
             {
@@ -260,6 +293,21 @@ namespace PMS.Controllers.BaoCao.DinhHinh
             }
             return dataSource;
         }
+
+        public async Task<IEnumerable<object>> GetTongHopNhanVienKhongLamViec(DateTime? dateTime = null)
+        {
+            IEnumerable<object> dataSource = ViewBag.dataSource;
+            if (dataSource == null)
+            {
+                var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/PhieuCanTPDinhHinhs/GetNhanVienKhongLamViecs/{dateTime?.ToString("yyyy-MM-dd")}";
+                using var helper = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+                ViewBag.dataSource = await helper.GetAsync<object>(HttpContext, apiUrl);
+                dataSource = ViewBag.dataSource;
+            }
+            return dataSource;
+        }
+
+
         public async Task<IEnumerable<object>> GetTongHopLoaiThanhPhams(DateTime? fromDate = null, DateTime? toDate = null, string xuongId = "1")
         {
             if (fromDate == null) fromDate = DateTime.Now;
@@ -272,6 +320,24 @@ namespace PMS.Controllers.BaoCao.DinhHinh
             if (dataSource == null)
             {
                 var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/PhieuCanTPDinhHinhs/GetTongHopLoaiThanhPhams/{fromDate?.ToString("yyyy-MM-dd")},{toDate?.ToString("yyyy-MM-dd")},{xuongId}";
+                using var helper = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+                ViewBag.dataSource = await helper.GetAsync<object>(HttpContext, apiUrl);
+                dataSource = ViewBag.dataSource;
+            }
+            return dataSource;
+        }
+        public async Task<IEnumerable<object>> GetTongHopLos(DateTime? fromDate = null, DateTime? toDate = null, string xuongId = "1")
+        {
+            if (fromDate == null) fromDate = DateTime.Now;
+            if (toDate == null) toDate = DateTime.Now;
+#if DEBUG
+            xuongId = "1";
+#endif
+            IEnumerable<object> dataSource = ViewBag.dataSource;
+            var accsessToken = HttpContext.Session.GetString("JWTToken"); // Lấy token từ session
+            if (dataSource == null)
+            {
+                var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/PhieuCanTPDinhHinhs/GetTongHopLos/{fromDate?.ToString("yyyy-MM-dd")},{toDate?.ToString("yyyy-MM-dd")},{xuongId}";
                 using var helper = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
                 ViewBag.dataSource = await helper.GetAsync<object>(HttpContext, apiUrl);
                 dataSource = ViewBag.dataSource;

@@ -262,7 +262,36 @@ ORDER BY
         {
             try
             {
-                var query = @"
+//                var query = @"
+//SELECT
+//    p.Ngay,
+//    p.MaNhanVien,
+//    n.MaHoSo,
+//    n.Name as TenNhanVien,
+//    p.MaLo,
+//    tp.Ten as ThanhPhamName,
+//    SUM(p.TrongLuong) as TrongLuong,
+//    COUNT(p.STT) as SoRo,
+//    p.MaXuong
+//from
+//    PhieuCanLangDa p,
+//    MaThanhPhamLangDa tp,
+//    NhanVienDaiThanh n
+//WHERE
+//    p.Ngay >= @fromDate and p.Ngay <= @toDate
+//    and p.MaThanhPham = tp.Ma
+//    and p.MaNhanVien = n.MaNhanVien
+//GROUP BY
+//    p.Ngay,
+//    p.MaNhanVien,
+//    n.MaHoSo,
+//    n.Name,
+//    p.MaLo,
+//    tp.Ten,
+//    p.MaXuong
+//ORDER BY
+//    n.MaHoSo DESC";
+var query = @"
 SELECT
     p.Ngay,
     p.MaNhanVien,
@@ -272,15 +301,20 @@ SELECT
     tp.Ten as ThanhPhamName,
     SUM(p.TrongLuong) as TrongLuong,
     COUNT(p.STT) as SoRo,
-    p.MaXuong
+    p.MaXuong,
+	MIN(c.ThoiGian) OVER(PARTITION BY n.MaChamCong, p.Ngay) as ThoiGianVao,
+	MAX(c.ThoiGian) OVER(PARTITION BY n.MaChamCong, p.Ngay) as ThoiGianRa,
+	DATEDIFF(hour, MIN(c.ThoiGian) OVER(PARTITION BY n.MaChamCong, p.Ngay), MAX(c.ThoiGian) OVER(PARTITION BY n.MaChamCong, p.Ngay)) as TongThoiGian
 from
     PhieuCanLangDa p,
     MaThanhPhamLangDa tp,
-    NhanVienDaiThanh n
+    NhanVienDaiThanh n,
+	CheckInOut c
 WHERE
     p.Ngay >= @fromDate and p.Ngay <= @toDate
     and p.MaThanhPham = tp.Ma
     and p.MaNhanVien = n.MaNhanVien
+	AND n.MaChamCong = c.MaChamCong AND c.ThoiGian = p.Ngay AND c.ThoiGian >= @fromDate AND c.ThoiGian <= @toDate 
 GROUP BY
     p.Ngay,
     p.MaNhanVien,
@@ -288,7 +322,10 @@ GROUP BY
     n.Name,
     p.MaLo,
     tp.Ten,
-    p.MaXuong
+    p.MaXuong,
+	p.Ngay,
+	n.MaChamCong,
+	c.ThoiGian
 ORDER BY
     n.MaHoSo DESC";
                 using var connection = new SqlConnection(connectionString);

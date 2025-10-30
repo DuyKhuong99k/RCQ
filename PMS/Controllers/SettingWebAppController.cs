@@ -32,7 +32,7 @@ namespace PMS.Controllers
         public SettingWebAppController(IHttpClientFactory httpClientFactory) { _httpClientFactory = httpClientFactory; }
         public IActionResult Index() { return View(); }
         [CustomAuthorize(Fu = "Cài Đặt", Func = "Tài Khoản")]
-        public IActionResult Account() { return View(); }
+        public IActionResult Account() { ViewBag.TitlePage = "Tài Khoản"; return View(); }
         [CustomAuthorize(Fu = "Cài Đặt", Func = "Thông Báo")]
         public IActionResult Notifications() { return View(); }
         [CustomAuthorize(Fu = "Cài Đặt", Func = "Kết Nối")]
@@ -57,6 +57,7 @@ namespace PMS.Controllers
             var xuongs = helperXuong.GetAsync<IEnumerable<XiNghiep>>(HttpContext, apiXuongUrl);
             ViewBag.listXuongs = xuongs.Result.ToList();
             ViewBag.AppKVValues = Enum.GetValues(typeof(Vars.AppKV)).Cast<Vars.AppKV>();
+            ViewBag.TitlePage = "Quản Lý Máy Cân";
             return View();
         }
         public async Task<IEnumerable<MayCan>> GetAllMayCanManagers()

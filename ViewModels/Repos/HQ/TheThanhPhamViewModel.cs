@@ -15,6 +15,7 @@ using Azure.Identity;
 using System.Collections.Specialized;
 using Models.Repos;
 using System.Globalization;
+using Vars;
 
 namespace ViewModels.Repos.HQ
 {
@@ -79,7 +80,24 @@ namespace ViewModels.Repos.HQ
                 ThanhPhamDHName = item.ThanhPhamDHName,
                 ThanhPhamFilletName = item.ThanhPhamFilletName,
                 ThanhPhamPhuPhamName = item.ThanhPhamPhuPhamName,
-                
+                MaThanhPhamChinhXepKhuon = item.MaThanhPhamChinhXepKhuon,
+                MaSizeChinhXepKhuon = item.MaSizeChinhXepKhuon,
+                MaThanhPhamPhuXepKhuon = item.MaThanhPhamPhuXepKhuon,
+                MaSizePhuXepKhuon = item.MaSizePhuXepKhuon,
+                MaChatLuongChinhXepKhuon = item.MaChatLuongChinhXepKhuon,
+                LoLevel = item.LoLevel,
+                ThanhPhamChinhXepKhuonName = item.ThanhPhamChinhXepKhuonName,
+                SizeChinhXepKhuonName = item.SizeChinhXepKhuonName,
+                ChatLuongChinhXepKhuonName = item.ChatLuongChinhXepKhuonName,
+                ThanhPhamPhuXepKhuonName = item.ThanhPhamPhuXepKhuonName,
+                SizePhuXepKhuonName = item.SizePhuXepKhuonName,
+                MaChieuXa = item.MaChieuXa,
+                ChieuXaName = item.ChieuXaName,
+                ChatLuongPhuXepKhuonName = item.ChatLuongPhuXepKhuonName,
+                LoaiNguyenLieuName = item.LoaiNguyenLieuName,
+                MaChatLuongPhuXepKhuon = item.MaChatLuongPhuXepKhuon,
+                SizeName = item.SizeName,
+                ThanhPhamName = item.ThanhPhamName
             };
         }
         public TheThanhPham CopySelectedItem()
@@ -100,13 +118,57 @@ namespace ViewModels.Repos.HQ
 
         public int Delete<T>(T item)
         {
+            try
+            {
+                dbPMScontext db = new dbPMScontext();
+                if (item is HQ_TheThanhPham_D the)
+                {
+                    the.Ngay = DateTime.Now.Date;
+                    db.HqTheThanhPhamDs.Add(the);
+                    db.SaveChanges();
+                }
+                
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                //throw;
+            }
             var dao = new Dao.Repos.HQ.TheThanhPham();
             return dao.Delete(item);
         }
         public int Delete<T>(List< T> items)
         {
+            try
+            {
+                dbPMScontext db = new dbPMScontext();
+                if (items is  List<TheThanhPham> thes)
+                {
+                    //the.Ngay = DateTime.Now.Date;
+                    //db.HqTheThanhPhamDs.Add(the);
+                    //db.SaveChanges();
+                    foreach (var theTu in thes)
+                    {
+                        var the = new HQ_TheThanhPham_D()
+                        {
+                      
+                            Ngay = DateTime.Now,
+                            MaThe = theTu.MaThe,
+                            
+                        };
+                        db.HqTheThanhPhamDs.Add(the);
+
+                    }
+                    db.SaveChanges();
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                //throw;
+            }
             var dao = new Dao.Repos.HQ.TheThanhPham();
-            return dao.Delete(Items);
+            return dao.Delete(items);
         }
         [RelayCommand(CanExecute = nameof(IsItemPass))]
         private void Delete_(TheThanhPham item)
@@ -138,19 +200,43 @@ namespace ViewModels.Repos.HQ
             var dao = new Dao.Repos.HQ.TheThanhPham();
             return dao.Gets<T>();
         }
+        private List<T> GetHqs<T>()
+        {
+            var dao = new Dao.Repos.HQ.TheThanhPham();
+            return dao.GetHqs<T>();
+        }
         public List<string> GetDs(string Ngay,int PageIndex,int PageSize)
         {
             dbPMScontext db = new dbPMScontext();
-            DateTime date = new DateTime();
-            try
+            var date = new DateTime();
+            var index = Ngay.IndexOf("=", StringComparison.Ordinal);
+            if (index == -1)
             {
-                date = DateTime.ParseExact(Ngay, "yyyyMMddHHmmss",CultureInfo.InvariantCulture);
+                try
+                {
+                    date = DateTime.ParseExact(Ngay, "yyyyMMddHHmmss", CultureInfo.InvariantCulture);
+                }
+                catch (Exception ex)
+                {
+                    //throw ex;
+                }
             }
-            catch (Exception ex)
+            else
             {
-                throw ex;
+                var _data = Ngay.Substring(index + 1).Split(',');
+                var mayCanId = _data.FirstOrDefault() ?? "";
+                var mNgay = _data.LastOrDefault() ?? "";
+                try
+                {
+                    date = DateTime.ParseExact(mNgay, "yyyyMMddHHmmss", CultureInfo.InvariantCulture);
+                }
+                catch (Exception ex)
+                {
+                    //throw ex;
+                }
+                
             }
-            return db.HqTheThanhPhamDs.Where(x=>x.Ngay > date).OrderByDescending(x=>x.Ngay).Skip((PageIndex -1)*PageSize).Take(PageSize).Select(x=>x.MaThe).ToList();
+            return db.HqTheThanhPhamDs.Where(x=>x.Ngay.Date >= date.Date).OrderByDescending(x=>x.Ngay).Skip((PageIndex -1)*PageSize).Take(PageSize).Select(x=>x.MaThe).ToList();
         }
 
         public int Insert<T>(T item)
@@ -232,26 +318,54 @@ namespace ViewModels.Repos.HQ
                 Items.Clear();
             }
 
-            var items = Gets<TheThanhPham>();
-            if (items.Any())
-                lock (Items)
-                {
-                    try
+            if (VmApp.ComName == nameof(ComNames.RCQTG))
+            {
+                var items = GetHqs<TheThanhPham>();
+                if (items.Any())
+                    lock (Items)
                     {
-                        Items.AddRange(items);
-                        //foreach (var item in items)
-                        //{
-                        //    Items.Add(item);
-                        //}
+                        try
+                        {
+                       
+                            Items.AddRange(items);
+                            //foreach (var item in items)
+                            //{
+                            //    Items.Add(item);
+                            //}
 
                      
+                        }
+                        catch (NotSupportedException e)
+                        {
+
+                        }
+
                     }
-                    catch (NotSupportedException e)
+            }
+            else
+            {
+                var items = Gets<TheThanhPham>();
+                if (items.Any())
+                    lock (Items)
                     {
+                        try
+                        {
+                       
+                            Items.AddRange(items);
+                            //foreach (var item in items)
+                            //{
+                            //    Items.Add(item);
+                            //}
+
+                     
+                        }
+                        catch (NotSupportedException e)
+                        {
+
+                        }
 
                     }
-
-                }
+            }
 
 
         }
@@ -273,11 +387,40 @@ namespace ViewModels.Repos.HQ
 
         private int Update<T>(T item)
         {
+
             var dao = new Dao.Repos.HQ.TheThanhPham();
             return dao.Update(item);
         }
         public int Update<T>(List<T> items)
         {
+            try
+            {
+                dbPMScontext db = new dbPMScontext();
+                if (items is  List<TheThanhPham> thes)
+                {
+                    //the.Ngay = DateTime.Now.Date;
+                    //db.HqTheThanhPhamDs.Add(the);
+                    //db.SaveChanges();
+                    foreach (var theTu in thes)
+                    {
+                        var the = new HQ_TheThanhPham_D()
+                        {
+                      
+                            Ngay = DateTime.Now,
+                            MaThe = theTu.MaThe,
+                            
+                        };
+                        db.HqTheThanhPhamDs.Add(the);
+
+                    }
+                    db.SaveChanges();
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                //throw;
+            }
             var dao = new Dao.Repos.HQ.TheThanhPham();
             return dao.Update(items);
         }

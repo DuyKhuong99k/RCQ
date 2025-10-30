@@ -19,18 +19,14 @@
         display: none;
     }
 </style>
-<div class="container mt-4">
+
     <div class="row">
         <div class="col-12">
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h2 class="mb-0">Danh Sách Map TPFillet Tính Lương Fillet</h2>
                     @{
-                        var themMapTPTinhLuongFillet = rolePermistions.Where(x => x.Fu == "Danh Mục / Fillet / Map TPFillet Tính Lương" && x.Func == "Thêm Fillet / Map TPFillet Tính Lương" && x.Status == 1).FirstOrDefault();
-                        if (themMapTPTinhLuongFillet != null)
-                        {
-                            <button onclick="showInsert()" type="button" class="btn btn-primary">Thêm</button>
-                        }
+                        
                     }
 
                 </div>
@@ -38,6 +34,11 @@
                     <div id="Grid"></div>
                     <div style="margin-top:20px;">
                         @{
+                            var themMapTPTinhLuongFillet = rolePermistions.Where(x => x.Fu == "Danh Mục / Fillet / Map TPFillet Tính Lương" && x.Func == "Thêm Fillet / Map TPFillet Tính Lương" && x.Status == 1).FirstOrDefault();
+                            if (themMapTPTinhLuongFillet != null)
+                            {
+                                <button onclick="showInsert()" type="button" class="btn btn-primary">Thêm</button>
+                            }
                             var suaMapTPTinhLuongFillet = rolePermistions.Where(x => x.Fu == "Danh Mục / Fillet / Map TPFillet Tính Lương" && x.Func == "Sửa Fillet / Map TPFillet Tính Lương" && x.Status == 1).FirstOrDefault();
                             if (suaMapTPTinhLuongFillet != null)
                             {
@@ -48,23 +49,14 @@
                             {
                                 <button onclick="showDelete()" style="margin-right:5px" class="btn btn-outline-danger"><i class='bx bx-trash'></i>Xoá</button>
                             }
-                            var importMapTPTinhLuongFillet = rolePermistions.Where(x => x.Fu == "Danh Mục / Fillet / Map TPFillet Tính Lương" && x.Func == "Import Fillet / Map TPFillet Tính Lương" && x.Status == 1).FirstOrDefault();
-                            if (importMapTPTinhLuongFillet != null)
-                            {
-                                <button onclick="import()" style="margin-right:5px" class="btn btn-outline-info"><i class='bx bx-import'></i>Import</button>
-                            }
-                            var exportMapTPTinhLuongFillet = rolePermistions.Where(x => x.Fu == "Danh Mục / Fillet / Map TPFillet Tính Lương" && x.Func == "Export Fillet / Map TPFillet Tính Lương" && x.Status == 1).FirstOrDefault();
-                            if (exportMapTPTinhLuongFillet != null)
-                            {
-                                <button onclick="export()" style="margin-right:5px" class="btn btn-outline-secondary"><i class='bx bx-export'></i>Export Excel</button>
-                            }
+                            
                         }
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
+
 <div class="modal fade" id="modalThem" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -286,12 +278,14 @@
                     grid = new ej.grids.Grid({
                         dataSource: dataManager,
                         allowPaging: true,
-                        pageSettings: { pageSize: 50 },
+                        pageSettings: { pageSize: 50, pageSizes: [50, 100, 200, 500] },
                         allowFiltering: true,
                         filterSettings: { type: 'Excel' },
                         allowSorting: true,
                         //frozenColumns: 3,
                         allowResizing: true,
+                        allowExcelExport: true,
+                        toolbar: ['ExcelExport'],
                         rowSelected: onRowSelected,
                         height: 400,
                         columns: [         
@@ -306,6 +300,10 @@
                     });
                     // Hiển thị Grid trên trang web
                     grid.appendTo('#Grid');
+                    grid.toolbarClick = function (args) {
+             if (args.item.id === 'Grid_excelexport') {
+                grid.excelExport();
+             }};
                 }
             },
             error: function (error) {

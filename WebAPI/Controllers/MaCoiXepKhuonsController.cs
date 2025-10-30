@@ -162,6 +162,17 @@ namespace WebAPI.Controllers
             item.Tam = model.Tam;
             try
             {
+                var newItemUs = new MaCoiXepKhuon_U
+                {
+                    MaCoi = item.Ma,
+                    Ten = item.Ten,
+                    TrongLuongMax = item.TrongLuongMax,
+                    Tam = item.Tam,
+                    MNgay = DateTime.Now,
+                };
+
+                // Thêm vào bảng HqLoaiNguyenLieuUs
+                _context.MaCoiXepKhuonUs.Add(newItemUs);
                 await _context.SaveChangesAsync();
             }
             catch (Exception ex)
@@ -205,6 +216,17 @@ namespace WebAPI.Controllers
 
             try
             {
+                var MNgay = DateTime.Now;
+                var newItemUs = new MaCoiXepKhuon_D
+                {
+                    MaCoi = item.Ma,
+                    Ten = item.Ten,
+                    TrongLuongMax = item.TrongLuongMax,
+                    Tam = item.Tam,
+                    MNgay = DateTime.Now,
+                };
+
+                _context.MaCoiXepKhuonDs.Add(newItemUs);
                 await _context.SaveChangesAsync();
             }
             catch (Exception ex)

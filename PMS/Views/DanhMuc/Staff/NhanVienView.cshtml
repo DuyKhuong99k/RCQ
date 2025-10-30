@@ -1,6 +1,7 @@
 ﻿@{
     ViewData["Title"] = "NhanVienView";
     Layout = "~/Views/Shared/_Layout.cshtml";
+    var XuongId = @Context.Session.GetString("XuongId");
     var listXuongs = ViewBag.listXuongs;
     var listNhoms = ViewBag.listNhoms;
     //lấy danh sách roleid từ cookie
@@ -14,18 +15,14 @@
         display: none;
     }
 </style>
-<div class="container mt-4">
+
     <div class="row">
         <div class="col-12">
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h2 class="mb-0">Danh Sách Nhân Viên</h2>
                     @{
-                        var themnhanvien = rolePermistions.Where(x => x.Fu == "Danh Mục / Nhân Viên" && x.Func == "Thêm Nhân Viên" && x.Status == 1).FirstOrDefault();
-                        if (themnhanvien != null)
-                        {
-                            <button onclick="showInsertNhanVien()" type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalThemNhanVien">Thêm</button>
-                        }
+                        
                     }
 
                 </div>
@@ -33,6 +30,11 @@
                     <div id="Grid"></div>
                     <div style="margin-top:20px;">
                         @{
+                            var themnhanvien = rolePermistions.Where(x => x.Fu == "Danh Mục / Nhân Viên" && x.Func == "Thêm Nhân Viên" && x.Status == 1).FirstOrDefault();
+                            if (themnhanvien != null)
+                            {
+                                <button onclick="showInsertNhanVien()" type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalThemNhanVien">Thêm</button>
+                            }
                             var suanhanvien = rolePermistions.Where(x => x.Fu == "Danh Mục / Nhân Viên" && x.Func == "Sửa Nhân Viên" && x.Status == 1).FirstOrDefault();
                             if (suanhanvien != null)
                             {
@@ -43,24 +45,24 @@
                             {
                                 <button onclick="showDeleteNhanVien()" style="margin-right:5px" class="btn btn-outline-danger"><i class='bx bx-trash'></i>Xoá</button>
                             }
-                            var importnhanvien = rolePermistions.Where(x => x.Fu == "Danh Mục / Nhân Viên" && x.Func == "Import Nhân Viên" && x.Status == 1).FirstOrDefault();
-                            if (importnhanvien != null)
-                            {
-                                <button onclick="importNhanVien()" style="margin-right:5px" class="btn btn-outline-info"><i class='bx bx-import'></i>Import</button>
-                            }
-                            var exportnhanvien = rolePermistions.Where(x => x.Fu == "Danh Mục / Nhân Viên" && x.Func == "Export Nhân Viên" && x.Status == 1).FirstOrDefault();
-                            if (exportnhanvien != null)
-                            {
-                                <button onclick="exportNhanVien()" style="margin-right:5px" class="btn btn-outline-secondary"><i class='bx bx-export'></i>Export Excel</button>
-                            }
-                        }      
+                            // var importnhanvien = rolePermistions.Where(x => x.Fu == "Danh Mục / Nhân Viên" && x.Func == "Import Nhân Viên" && x.Status == 1).FirstOrDefault();
+                            // if (importnhanvien != null)
+                            // {
+                            //     <button onclick="importNhanVien()" style="margin-right:5px" class="btn btn-outline-info"><i class='bx bx-import'></i>Import</button>
+                            // }
+                            // var exportnhanvien = rolePermistions.Where(x => x.Fu == "Danh Mục / Nhân Viên" && x.Func == "Export Nhân Viên" && x.Status == 1).FirstOrDefault();
+                            // if (exportnhanvien != null)
+                            // {
+                            //     <button onclick="exportNhanVien()" style="margin-right:5px" class="btn btn-outline-secondary"><i class='bx bx-export'></i>Export Excel</button>
+                            // }
+                        }
                     </div>
 
                 </div>
             </div>
         </div>
     </div>
-</div>
+
 <div class="modal fade" id="modalThemNhanVien" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -94,15 +96,11 @@
                             </div>
                             <div class="col-md-6 mb-4">
                                 <div class="form-outline">
-                                    <label class="form-label" for="emailAddress">Loại Sản Lượng</label>
-                                    <select id="loaiSanLuong" class="form-control form-control-lg">
-                                        <option disabled>Loại sản lượng</option>
-                                        <option value="-1">-1</option>
-                                        <option value="0">0</option>
-                                        <option value="1">1</option>
-                                    </select>
+                                    <label class="form-label" for="passWord">Mã Chấm Công</label>
+                                    <input type="text" id="maChamCong" class="form-control form-control-lg" placeholder="Nhập mã chấm công..." style="text-transform: uppercase;"/>
                                 </div>
                             </div>
+                            
                         </div>
 
                         <div class="row">
@@ -113,6 +111,17 @@
                                 </div>
                             </div>
                             <div class="col-md-6 mb-4">
+                                <div class="form-outline">
+                                    <label class="form-label" for="emailAddress">Loại Sản Lượng</label>
+                                    <select id="loaiSanLuong" class="form-control form-control-lg">
+                                        <option disabled>Loại sản lượng</option>
+                                        <option value="-1">-1</option>
+                                        <option value="0">0</option>
+                                        <option value="1">1</option>
+                                    </select>
+                                </div>
+                            </div>
+                            @* <div class="col-md-6 mb-4">
                                 <label class="form-label select-label">Xưởng</label>
                                 <select id="xuongSelect" class="form-control form-control-lg">
                                     <option disabled>Chọn Xưởng</option>
@@ -121,7 +130,8 @@
                                         <option value="@item.Ma">@item.Ten</option>
                                     }
                                 </select>
-                            </div>
+                            </div> *@
+
                         </div>
                         <div class="row">
                             <div class="col-md-6 mb-4 list-group">
@@ -215,13 +225,8 @@
                             </div>
                             <div class="col-md-6 mb-4">
                                 <div class="form-outline">
-                                    <label class="form-label" for="emailAddress">Loại Sản Lượng</label>
-                                    <select id="loaiSanLuongSua" class="form-control form-control-lg">
-                                        <option disabled>Loại sản lượng</option>
-                                        <option value="-1">-1</option>
-                                        <option value="0">0</option>
-                                        <option value="1">1</option>
-                                    </select>
+                                    <label class="form-label" for="hoTen">Mã Chấm Công</label>
+                                    <input type="text" id="maChamCongSua" class="form-control form-control-lg"  placeholder="Nhập mã chấm công..."  />
                                 </div>
                             </div>
                         </div>
@@ -233,7 +238,7 @@
                                     <input type="text" class="form-control form-control-lg" id="displayValueNhomSua" />
                                 </div>
                             </div>
-                            <div class="col-md-6 mb-4">
+                            @* <div class="col-md-6 mb-4">
                                 <label class="form-label select-label">Xưởng</label>
                                 <select id="xuongSelectSua" class="form-control form-control-lg">
                                     <option disabled>Chọn Xưởng</option>
@@ -242,6 +247,17 @@
                                         <option value="@item.Ma">@item.Ten</option>
                                     }
                                 </select>
+                            </div> *@
+                            <div class="col-md-6 mb-4">
+                                <div class="form-outline">
+                                    <label class="form-label" for="emailAddress">Loại Sản Lượng</label>
+                                    <select id="loaiSanLuongSua" class="form-control form-control-lg">
+                                        <option disabled>Loại sản lượng</option>
+                                        <option value="-1">-1</option>
+                                        <option value="0">0</option>
+                                        <option value="1">1</option>
+                                    </select>
+                                </div>
                             </div>
                         </div>
                         <div class="row">
@@ -321,9 +337,6 @@
     comboBox2.appendTo('#displayValueNhomSua');
 </script>
 <script>
-    $(document).ready(function () {
-        loadGridData();
-    });
     var grid;
     function loadGridData() {
         $.ajax({
@@ -346,12 +359,14 @@
                     grid = new ej.grids.Grid({
                         dataSource: dataManager,
                         allowPaging: true,
-                        pageSettings: { pageSize: 50 },
+                        pageSettings: { pageSize: 10, pageCount:10, pageSizes: [10,50, 100, 200, 500] },
                         allowFiltering: true,
                         allowSorting: true,
                         filterSettings: { type: 'Excel' },
                         //frozenColumns: 3,
                         allowResizing: true,
+                        allowExcelExport: true,
+                        toolbar: ['ExcelExport'],
                         rowSelected: onRowSelected,
                         height: 400,
                         columns: [
@@ -359,6 +374,7 @@
                             { field: 'MaNhanVien', headerText: 'Mã Nhân Viên', width: 150 },
                             { field: 'MaHoSo', headerText: 'Mã Số', width: 150 },
                             { field: 'Name', headerText: 'Tên Nhân Viên', width: 150 },
+                            { field: 'MaChamCong', headerText: 'Mã Chấm Công', width: 150 },
                             { field: 'DeptName0', headerText: 'Tên Nhóm', width: 150 },
                             { field: 'IsContracting', headerText: 'Trạng Thái', width: 100, displayAsCheckBox: 'true', textAlign: 'Center' },
                             { field: 'IsPhucVu', headerText: 'Phục Vụ', width: 100, displayAsCheckBox: 'true', textAlign: 'Center' },
@@ -373,6 +389,10 @@
                     });
                     // Hiển thị Grid trên trang web
                     grid.appendTo('#Grid');
+                    grid.toolbarClick = function (args) {
+             if (args.item.id === 'Grid_excelexport') {
+                grid.excelExport();
+             }};
                 }
             },
             error: function (error) {
@@ -381,6 +401,16 @@
         });
     }
     loadGridData();
+
+
+    ////optmize load dữ liệu
+    
+
+    //// end optimize loadGridData dữ liệu
+
+
+
+
     function reloadData() {
         loadGridData();
     }
@@ -404,7 +434,7 @@
                     $('#hoTen').val(rs.Name);
                     $('#loaiSanLuong').val(rs.LoaiSanLuong);
                     $('#displayValueNhom').val(rs.DeptName0);
-                    $('#xuongSelect').val(rs.Xuong);
+                    //$('#xuongSelect').val(rs.Xuong);
                     $('#isContracting').prop('checked', rs.IsContracting);
                     $('#isPhucVu').prop('checked', rs.IsPhucVu);
                     $('#isBanKiem').prop('checked', rs.IsBanKiem);
@@ -433,7 +463,7 @@
         var tenNhanVien = $('#hoTen').val();
         var loaiSL = $('#loaiSanLuong').val();
         var nhomName = $('#displayValueNhom').val();
-        var xuongId = $('#xuongSelect').val();
+        var xuongId = @XuongId;
         var isContracting = $('#isContracting').prop('checked');
         var isPhucVu = $('#isPhucVu').prop('checked');
         var isBanKiem = $('#isBanKiem').prop('checked');
@@ -442,6 +472,7 @@
         var isGiaCong = $('#isGiaCong').prop('checked');
         var isChucNang = $('#isChucNang').prop('checked');
         var isShowDinhMuc = $('#isShowDinhMuc').prop('checked');
+        var maChamCong = $('#maChamCong').val();
         document.getElementById("txtThemNhanVien").style.visibility = "hidden";
         document.getElementById("loadingIndicator").style.display = "block";
         $.ajax({
@@ -461,7 +492,8 @@
                 isBanKiem: isBanKiem,
                 isChucNang: isChucNang,
                 isNhom: isNhom,
-                isShowDinhMuc: isShowDinhMuc
+                isShowDinhMuc: isShowDinhMuc,
+                maChamCong:maChamCong
             },
             success: function (rs) {
                 if (rs.isSuccess === true) {
@@ -501,7 +533,7 @@
                     $('#hoTenSua').val(rs.Name);
                     $('#loaiSanLuongSua').val(rs.LoaiSanLuong);
                     $('#displayValueNhomSua').val(rs.DeptName0);
-                    $('#xuongSelectSua').val(rs.Xuong);
+                    //$('#xuongSelectSua').val(rs.Xuong);
                     $('#isContractingSua').prop('checked', rs.IsContracting);
                     $('#isPhucVuSua').prop('checked', rs.IsPhucVu);
                     $('#isBanKiemSua').prop('checked', rs.IsBanKiem);
@@ -510,6 +542,7 @@
                     $('#isGiaCongSua').prop('checked', rs.IsGiaCong);
                     $('#isChucNangSua').prop('checked', rs.IsChucNang);
                     $('#isShowDinhMucSua').prop('checked', rs.IsShowDinhMuc);
+                    $('#maChamCongSua').val(rs.MaChamCong);
                     $('#modalSuaNhanVien').modal('show');
                 }
                 else {
@@ -529,7 +562,7 @@
         var tenNhanVien = $('#hoTenSua').val();
         var loaiSL = $('#loaiSanLuongSua').val();
         var nhomName = $('#displayValueNhomSua').val();
-        var xuongId = $('#xuongSelectSua').val();
+        var xuongId = @XuongId;
         var isContracting = $('#isContractingSua').prop('checked');
         var isPhucVu = $('#isPhucVuSua').prop('checked');
         var isBanKiem = $('#isBanKiemSua').prop('checked');
@@ -538,6 +571,7 @@
         var isGiaCong = $('#isGiaCongSua').prop('checked');
         var isChucNang = $('#isChucNangSua').prop('checked');
         var isShowDinhMuc = $('#isShowDinhMucSua').prop('checked');
+        var maChamCong = $('#maChamCongSua').val();
         document.getElementById("txtSuaNhanVien").style.visibility = "hidden";
         document.getElementById("loadingIndicatorSua").style.display = "block";
         $.ajax({
@@ -556,7 +590,8 @@
                 isBanKiem: isBanKiem,
                 isChucNang: isChucNang,
                 isNhom: isNhom,
-                isShowDinhMuc: isShowDinhMuc
+                isShowDinhMuc: isShowDinhMuc,
+                maChamCong : maChamCong
             },
             type: 'POST',
             dataType: 'json',

@@ -13,6 +13,7 @@ namespace ViewModels.Repos.Hubs.IServices
     {
         public bool Login(string username,string tocken);
         bool IsUserAuthenticated();
+        public string GetSessionVal(string key);
         public bool IsSessionCreated();
         void Login(string username);
         bool LoginLocal(string userName,string passWord);

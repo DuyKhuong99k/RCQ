@@ -141,6 +141,11 @@ namespace ViewModels.Repos.HQ
             var dao = new Dao.Repos.HQ.PhieuCanPhuPham();
             return dao.Gets<T>();
         }
+        public T? Get<T>(string id)
+        {
+            var dao = new Dao.Repos.HQ.PhieuCanPhuPham();
+            return dao.Get<T>(id);
+        }
         public List<T> Gets<T>(DateTime dateTime)
         {
             var dao = new Dao.Repos.HQ.PhieuCanPhuPham();

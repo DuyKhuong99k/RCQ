@@ -101,7 +101,7 @@ namespace PMS.Controllers
                     // Đăng nhập người dùng bằng cookie
                     var claims = new List<Claim>
                     {
-                         new Claim(ClaimTypes.Name, username), // Thay thế "your_username" bằng tên người dùng thực tế
+                         new Claim(ClaimTypes.Name, username),
                          new Claim("jwt",Security.Crypt.ED.EncryptString(tokenData.AccessToken, AppViewModels.AppViewModel.Instance.DefaultKey)),
                          new Claim("RefreshJWT", tokenData.RefreshToken),
                          new Claim("ExpiresJWT", tokenData.Expires.ToString()),
@@ -115,17 +115,31 @@ namespace PMS.Controllers
                     var roles = listRoles.ToList();
                     foreach (var role in roles)
                     {
-                        claims.Add(new Claim(ClaimTypes.Role, role.Name));
-                        claims.Add(new Claim("RoleId", role.Id.ToString()));
+                        if (role?.Id > 0 && !string.IsNullOrWhiteSpace(role.Name))
+                        {
+                            claims.Add(new Claim(ClaimTypes.Role, role.Name));
+                            claims.Add(new Claim("RoleId", role.Id.ToString()));
+                        }
                     }
 
                     var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
 
+                    // Lưu timeout vào session để đồng bộ
+                    HttpContext.Session.SetInt32("SessionTimeout", rememberme ? (int)Math.Round(Hour) : 1);
                     var authProperties = new AuthenticationProperties
                     {
-                        ExpiresUtc = DateTimeOffset.UtcNow.Add(TimeSpan.FromHours(rememberme ? Hour : 1)),//DateTime.UtcNow.AddMinutes(rememberme ? Hour * 60 : 60), // Thời hạn là 7 ngày nếu rememberMe=true, ngược lại là 1 tiếng
-                        IsPersistent = true
+                        ExpiresUtc = DateTimeOffset.UtcNow.AddHours(rememberme ? Hour : 1),
+                        IsPersistent = rememberme,
+                        AllowRefresh = true
                     };
+
+                    //var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+
+                    //var authProperties = new AuthenticationProperties
+                    //{
+                    //    ExpiresUtc = DateTimeOffset.UtcNow.Add(TimeSpan.FromHours(rememberme ? Hour : 1)),//DateTime.UtcNow.AddMinutes(rememberme ? Hour * 60 : 60), // Thời hạn là 7 ngày nếu rememberMe=true, ngược lại là 1 tiếng
+                    //    IsPersistent = true
+                    //};
 
                     await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity), authProperties);
                     var url = "/Home/Index";
@@ -134,7 +148,7 @@ namespace PMS.Controllers
                         url = returnUrl;
                     }
 
-                    
+
                     // Tiến hành đăng nhập thành công
                     //return Json(new
                     //{
@@ -142,7 +156,7 @@ namespace PMS.Controllers
                     //    url = url
                     //    // Điều hướng đến trang sau khi đăng nhập thành công
                     //});
-                    return RedirectToAction("LoginBridge",new {url =url , isUrl = true});
+                    return RedirectToAction("LoginBridge", new { url = url, isUrl = true });
                 }
                 else
                 {
@@ -168,19 +182,19 @@ namespace PMS.Controllers
         }
         [Authorize]
         [Route("Home/Index")]
-        public async Task<IActionResult> LoginBridge(string url,bool isUrl = false)
+        public async Task<IActionResult> LoginBridge(string url, bool isUrl = false)
         {
             await CreateSession();
-            if(isUrl)
+            if (isUrl)
             {
-                 return Json(new
-            {
-                isSuccess = true,
-                url = url // Điều hướng đến trang sau khi đăng nhập thành công
-            });
+                return Json(new
+                {
+                    isSuccess = true,
+                    url = url // Điều hướng đến trang sau khi đăng nhập thành công
+                });
             }
             else
-             if(User.Identity.IsAuthenticated)
+             if (User.Identity.IsAuthenticated)
             {
                 try
                 {
@@ -189,14 +203,21 @@ namespace PMS.Controllers
                     // lấy danh sách fu func từ list roleId
                     var rolePermistions = await PMS.Middlewares.AuthenticationHelpers.GetRolePermistionsAsync(HttpContext, roleIds);
                     //return View(url);
-                    var dashboard = rolePermistions.FirstOrDefault(x => x.Fu.Contains("Dashboard") && x.Status == 1);
+                    var dashboard = rolePermistions.FirstOrDefault(x => x.Fu == "Dashboard" && x.Status == 1);
+                    var dashboardHQ = rolePermistions.FirstOrDefault(x => x.Fu == "DashboardHQ" && x.Status == 1);
                     if (dashboard != null)
                     {
-
+                        ViewBag.TitlePage = "Trang Chủ";
                         return View("~/Views/Home/Index.cshtml");
+                    }
+                    else if (dashboardHQ != null)
+                    {
+                        return RedirectToAction("Index", "DashboardHQ", new { url = "DashboardHQ/Index" });
+
                     }
                     else
                     {
+                        ViewBag.TitlePage = "Trang Chủ";
                         return View("~/Views/Home/IndexPMS.cshtml");
                     }
                 }
@@ -205,14 +226,14 @@ namespace PMS.Controllers
 
                     return View("~/Views/Authentication/LoginView.cshtml");
                 }
-                 
-               
+
+
             }
             else
             {
                 return View("~/Views/Authentication/LoginView.cshtml");
             }
-           
+
         }
         public async Task<IActionResult> CreateSession()
         {
@@ -255,6 +276,45 @@ namespace PMS.Controllers
                     //HttpContext.Session.SetString("NumberDate", numberDate?.NumberDate.ToString());
                     var handler = new JwtSecurityTokenHandler();
                     var token = handler.ReadJwtToken(accessToken);
+                    //var sessionTimeout = HttpContext.Session.GetInt32("SessionTimeout") ?? 0;
+
+
+                    //var roles = token.Claims.Where(c => c.Type == ClaimTypes.Role).Select(c => c.Value).ToList();
+                    var roles = token.Claims
+                    .Where(c => c.Type == ClaimTypes.Role || c.Type == "role")
+                    .Select(c => c.Value)
+                    .ToList();
+                    if (roles.Any())
+                    {
+                        HttpContext.Session.SetString("Roles", string.Join(",", roles));
+                    }
+
+                    //if (sessionTimeout == 0)
+                    //{
+                    //    // Nếu session timeout, tái tạo claims từ JWT
+                    //    var claims = new List<Claim>
+                    //    {
+                    //        new Claim(ClaimTypes.Name, User.Identity.Name),
+                    //        new Claim("jwt", User.FindFirst("jwt")?.Value ?? string.Empty),
+                    //        new Claim("RefreshJWT", refreshJWT ?? string.Empty),
+                    //        new Claim("ExpiresJWT", expiresJWT ?? string.Empty),
+                    //        new Claim("XuongId", xuongId ?? string.Empty)
+                    //    };
+
+                    //    foreach (var role in roles)
+                    //    {
+                    //        claims.Add(new Claim(ClaimTypes.Role, role));
+                    //    }
+
+                    //    var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                    //    var authProperties = new AuthenticationProperties
+                    //    {
+                    //        ExpiresUtc = DateTimeOffset.UtcNow.AddHours(sessionTimeout),
+                    //        IsPersistent = true
+                    //    };
+
+                    //    await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity), authProperties);
+                    //}
 
                     HttpContext.Session.SetString("ExpiresSec", token.Claims.FirstOrDefault(claim => claim.Type.ToUpper() == "ExpiresSec".ToUpper())?.Value);
                     HttpContext.Session.SetString("Id", token.Claims.FirstOrDefault(claim => claim.Type == "Id")?.Value);
@@ -300,13 +360,13 @@ namespace PMS.Controllers
                         }
 
 
-                       
+
                     }
                     else
                     {
                         HttpContext.Session.SetString("XuongName", item?.Ten?.ToString());
                         //lấy danh sách roleid từ cookie
-                       
+
 
                     }
 
@@ -315,6 +375,203 @@ namespace PMS.Controllers
             }
             return View("~/Views/Authentication/LoginView.cshtml");
         }
+        /////// bản cập nhật sủa lỗi phần không hoạt động 1 khoản thời gian thì mất cookie
+        //[AllowAnonymous]
+        //public async Task<IActionResult> DoLogin(string username, string password, string xuongId, bool rememberme, string returnUrl)
+        //{
+        //    RememberMe = rememberme;
+        //    var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/User/Validate";
+        //    using var helper = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+        //    UserInfo user = new UserInfo
+        //    {
+        //        UserName = username,
+        //        Password = password,
+        //        RememberMe = rememberme,
+        //        Hour = Hour
+        //    };
+        //    var jsonContent = new StringContent(JsonConvert.SerializeObject(user), Encoding.UTF8, "application/json");
+        //    var response = await helper.PostAsync(HttpContext, apiUrl, jsonContent);
+
+        //    HttpContext.Session.SetString("XuongId", xuongId);
+        //    AppViewModels.AppViewModel.Instance.XuongId = xuongId;
+
+        //    if (response.Success)
+        //    {
+        //        var tokenData = JsonConvert.DeserializeObject<TokenModel>(response.Data.ToString());
+        //        if (tokenData != null)
+        //        {
+        //            HttpContext.Session.SetString("JWTToken", tokenData.AccessToken);
+        //            HttpContext.Session.SetString("RefreshJWTToken", tokenData.RefreshToken);
+        //            HttpContext.Session.SetString("ExpiresJWTToken", tokenData.Expires.ToString());
+        //            HttpContext.Session.SetString("UserName", username);
+
+        //            var claims = new List<Claim>
+        //            {
+        //                new Claim(ClaimTypes.Name, username),
+        //                new Claim("jwt", Security.Crypt.ED.EncryptString(tokenData.AccessToken, AppViewModels.AppViewModel.Instance.DefaultKey)),
+        //                new Claim("RefreshJWT", tokenData.RefreshToken),
+        //                new Claim("ExpiresJWT", tokenData.Expires.ToString()),
+        //                new Claim("XuongId", xuongId)
+        //            };
+
+        //            var apiListRoles = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/User/GetRolesFull/{username}";
+        //            using var helperListRoles = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+        //            var listRoles = await helperListRoles.GetAsync<List<Role>>(HttpContext, apiListRoles);
+        //            var roles = listRoles.ToList();
+        //            foreach (var role in roles)
+        //            {
+        //                if (role?.Id > 0 && !string.IsNullOrWhiteSpace(role.Name))
+        //                {
+        //                    claims.Add(new Claim(ClaimTypes.Role, role.Name));
+        //                    claims.Add(new Claim("RoleId", role.Id.ToString()));
+        //                }
+        //            }
+
+        //            //var apiListRoles = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/User/GetRolesFull/{username}";
+        //            //var roles = await helper.GetAsync<List<Role>>(HttpContext, apiListRoles);
+
+        //            //if (roles != null)
+        //            //{
+        //            //    foreach (var role in roles)
+        //            //    {
+        //            //        claims.Add(new Claim(ClaimTypes.Role, role.Name));
+        //            //        claims.Add(new Claim("RoleId", role.Id.ToString()));
+        //            //    }
+        //            //}
+
+        //            var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+
+        //            // Lưu timeout vào session để đồng bộ
+        //            HttpContext.Session.SetInt32("SessionTimeout", rememberme ? (int)Math.Round(Hour) : 1);
+        //            var authProperties = new AuthenticationProperties
+        //            {
+        //                ExpiresUtc = DateTimeOffset.UtcNow.AddHours(rememberme ? Hour : 1),
+        //                IsPersistent = rememberme,
+        //                AllowRefresh = true
+        //            };
+
+        //            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity), authProperties);
+        //            return RedirectToAction("LoginBridge", new { url = returnUrl ?? "/Home/Index", isUrl = true });
+        //        }
+        //    }
+
+        //    return Json(new { isSuccess = false, Messages = response.Message });
+        //}
+
+        //[Authorize]
+        //[Route("Home/Index")]
+        //public async Task<IActionResult> LoginBridge(string url, bool isUrl = false)
+        //{
+        //    await CreateSession();
+        //    if (isUrl)
+        //    {
+        //        return Json(new { isSuccess = true, url = url });
+        //    }
+
+        //    if (User.Identity.IsAuthenticated)
+        //    {
+        //        var rolePermistions = await PMS.Middlewares.AuthenticationHelpers.GetRolePermistionsAsync(HttpContext, PMS.Middlewares.AuthenticationHelpers.GetRoleIdsFromCookie(HttpContext));
+        //        var dashboard = rolePermistions.FirstOrDefault(x => x.Fu == "Dashboard" && x.Status == 1);
+        //        var dashboardHQ = rolePermistions.FirstOrDefault(x => x.Fu == "DashboardHQ" && x.Status == 1);
+
+        //        if (dashboard != null)
+        //        {
+        //            return View("~/Views/Home/Index.cshtml");
+        //        }
+        //        else if (dashboardHQ != null)
+        //        {
+        //            return RedirectToAction("Index", "DashboardHQ");
+        //        }
+
+        //        return View("~/Views/Home/IndexPMS.cshtml");
+        //    }
+
+        //    return View("~/Views/Authentication/LoginView.cshtml");
+        //}
+
+        //public async Task<IActionResult> CreateSession()
+        //{
+        //    if (User.Identity.IsAuthenticated)
+        //    {
+        //        var accessToken = Security.Crypt.ED.DecryptString(User.FindFirst("jwt")?.Value, AppViewModels.AppViewModel.Instance.DefaultKey);
+        //        var refreshJWT = User.FindFirst("RefreshJWT")?.Value;
+        //        var expiresJWT = User.FindFirst("ExpiresJWT")?.Value;
+        //        var xuongId = User.FindFirst("XuongId")?.Value;
+
+        //        if (!string.IsNullOrEmpty(accessToken))
+        //        {
+        //            HttpContext.Session.SetString("JWTToken", accessToken);
+        //            HttpContext.Session.SetString("RefreshJWTToken", refreshJWT);
+        //            HttpContext.Session.SetString("ExpiresJWTToken", expiresJWT);
+        //            HttpContext.Session.SetString("XuongId", xuongId);
+
+        //            // Kiểm tra session timeout và tái tạo claims từ JWT nếu cần
+        //            var sessionTimeout = HttpContext.Session.GetInt32("SessionTimeout") ?? 0;
+        //            var tokenHandler = new JwtSecurityTokenHandler();
+        //            var token = tokenHandler.ReadJwtToken(accessToken);
+
+        //            var roles = token.Claims.Where(c => c.Type == ClaimTypes.Role).Select(c => c.Value).ToList();
+        //            if (roles.Any())
+        //            {
+        //                HttpContext.Session.SetString("Roles", string.Join(",", roles));
+        //            }
+
+        //            if (sessionTimeout == 0)
+        //            {
+        //                // Nếu session timeout, tái tạo claims từ JWT
+        //                var claims = new List<Claim>
+        //                {
+        //                    new Claim(ClaimTypes.Name, User.Identity.Name),
+        //                    new Claim("jwt", User.FindFirst("jwt")?.Value ?? string.Empty),
+        //                    new Claim("RefreshJWT", refreshJWT ?? string.Empty),
+        //                    new Claim("ExpiresJWT", expiresJWT ?? string.Empty),
+        //                    new Claim("XuongId", xuongId ?? string.Empty)
+        //                };
+
+        //                foreach (var role in roles)
+        //                {
+        //                    claims.Add(new Claim(ClaimTypes.Role, role));
+        //                }
+
+        //                var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+        //                var authProperties = new AuthenticationProperties
+        //                {
+        //                    ExpiresUtc = DateTimeOffset.UtcNow.AddHours(sessionTimeout),
+        //                    IsPersistent = true
+        //                };
+
+        //                await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity), authProperties);
+        //            }
+        //        }
+        //    }
+        //    return View("~/Views/Authentication/LoginView.cshtml");
+
+        //    //if (User.Identity.IsAuthenticated)
+        //    //{
+        //    //    var accessToken = Security.Crypt.ED.DecryptString(User.FindFirst("jwt")?.Value, AppViewModels.AppViewModel.Instance.DefaultKey);
+        //    //    if (!string.IsNullOrEmpty(accessToken))
+        //    //    {
+        //    //        var handler = new JwtSecurityTokenHandler();
+        //    //        var token = handler.ReadJwtToken(accessToken);
+
+        //    //        HttpContext.Session.SetString("JWTToken", accessToken);
+        //    //        HttpContext.Session.SetString("RefreshJWTToken", User.FindFirst("RefreshJWT")?.Value);
+        //    //        HttpContext.Session.SetString("ExpiresJWTToken", User.FindFirst("ExpiresJWT")?.Value);
+        //    //        HttpContext.Session.SetString("XuongId", User.FindFirst("XuongId")?.Value);
+
+        //    //        var roles = token.Claims.Where(c => c.Type == ClaimTypes.Role).Select(c => c.Value).ToList();
+        //    //        HttpContext.Session.SetString("Roles", string.Join(",", roles));
+        //    //    }
+        //    //}
+        //    //return View("~/Views/Authentication/LoginView.cshtml");
+        //}
+
+        //private void RemoveSession()
+        //{
+        //    HttpContext.Session.Clear();
+        //}
+
+
         public async Task<IActionResult> Logout()
         {
 
@@ -475,6 +732,7 @@ namespace PMS.Controllers
 
                 return Redirect(AppViewModels.AppViewModel.Instance.RedirectLoginUrl);
             }
+            ViewBag.TitlePage = "Người Dùng Máy Cân";
             return View("~/Views/Authentication/UserArea.cshtml");
         }
         [CustomAuthorize(Fu = "Xác Thực", Func = "Đăng Ký Tài Khoản")]
@@ -1108,6 +1366,7 @@ namespace PMS.Controllers
             {
                 return Redirect(AppViewModels.AppViewModel.Instance.RedirectLoginUrl);
             }
+            ViewBag.TitlePage = "Tạo Quyền";
             return View("~/Views/Authentication/Decentralization.cshtml");
         }
         public async Task<IEnumerable<object>> GetAllDecentralizations()
@@ -1470,6 +1729,7 @@ namespace PMS.Controllers
             {
                 return Redirect(AppViewModels.AppViewModel.Instance.RedirectLoginUrl);
             }
+            ViewBag.TitlePage = "Phân Quyền";
             return View("~/Views/Authentication/GrantAccess.cshtml");
         }
 

@@ -128,7 +128,22 @@ namespace ViewModels.Repos.HQ
             {
                 throw ex;
             }
-            return db.HqColorCodeUs.Where(x=>x.Ngay > date).OrderByDescending(x=>x.MNgay).Skip((PageIndex -1)*PageSize).Take(PageSize).ToList();
+            var latestDates = db.HqColorCodeUs
+                .Where(x => x.Ngay.Date >= date.Date)
+                .GroupBy(x => x.Code)
+                .Select(g => new { Code = g.Key, MaxId = g.Max(x => x.Id) });
+
+            var query = from hq in db.HqColorCodeUs.Where(x => x.Ngay.Date >= date.Date) 
+                join latest in latestDates
+                    on new { hq.Code, hq.Id } 
+                    equals new { latest.Code, Id = latest.MaxId }
+                orderby hq.MNgay descending
+                select hq;
+
+            var result = query.Skip((PageIndex - 1) * PageSize)
+                .Take(PageSize)
+                .ToList();
+            return result;
         }
         public List<HQ_ColorCode_D> GetDs(string Ngay,int PageIndex,int PageSize)
         {
@@ -142,7 +157,7 @@ namespace ViewModels.Repos.HQ
             {
                 throw ex;
             }
-            return db.HqColorCodeDs.Where(x=>x.Ngay > date).OrderByDescending(x=>x.MNgay).Skip((PageIndex -1)*PageSize).Take(PageSize).ToList();
+            return db.HqColorCodeDs.Where(x=>x.Ngay.Date >= date.Date).OrderByDescending(x=>x.MNgay).Skip((PageIndex -1)*PageSize).Take(PageSize).ToList();
         }
         private int Insert<T>(T item)
         {

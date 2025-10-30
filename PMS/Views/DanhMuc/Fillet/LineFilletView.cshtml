@@ -7,27 +7,26 @@
     var roleIds = PMS.Middlewares.AuthenticationHelpers.GetRoleIdsFromCookie(Context);
     // lấy danh sách fu func từ list roleId
     var rolePermistions = await PMS.Middlewares.AuthenticationHelpers.GetRolePermistionsAsync(Context, roleIds);
+    var XuongId = @Context.Session.GetString("XuongId");
 }
 
-<div class="container mt-4">
+
     <div class="row">
         <div class="col-12">
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h2 class="mb-0">Danh Sách Line Fillet</h2>
-                    @{
-                        var themlineFillet = rolePermistions.Where(x => x.Fu == "Danh Mục / Fillet / Line Fillet" && x.Func == "Thêm Fillet / Line Fillet" && x.Status == 1).FirstOrDefault();
-                        if (themlineFillet != null)
-                        {
-                            <button onclick="showInsert()" type="button" class="btn btn-primary">Thêm</button>
-                        }
-                    }
 
                 </div>
                 <div class="card-body">
                     <div id="Grid"></div>
                     <div style="margin-top:20px;">
                         @{
+                        var themlineFillet = rolePermistions.Where(x => x.Fu == "Danh Mục / Fillet / Line Fillet" && x.Func == "Thêm Fillet / Line Fillet" && x.Status == 1).FirstOrDefault();
+                        if (themlineFillet != null)
+                        {
+                            <button onclick="showInsert()" type="button" style="margin-right:5px" class="btn btn-primary">Thêm</button>
+                        }
                             var sualineFillet = rolePermistions.Where(x => x.Fu == "Danh Mục / Fillet / Line Fillet" && x.Func == "Sửa Fillet / Line Fillet" && x.Status == 1).FirstOrDefault();
                             if (sualineFillet != null)
                             {
@@ -54,7 +53,7 @@
             </div>
         </div>
     </div>
-</div>
+
 <div class="modal fade" id="modalThem" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -216,11 +215,14 @@
                     grid = new ej.grids.Grid({
                         dataSource: dataManager,
                         allowPaging: true,
-                        pageSettings: { pageSize: 50 },
+                        pageSettings: { pageSize: 50, pageSizes: [50, 100, 200, 500] },
                         allowFiltering: true,
+                        filterSettings: { type: 'Excel' },
                         allowSorting: true,
                         //frozenColumns: 3,
                         allowResizing: true,
+                        allowExcelExport: true,
+                        toolbar: ['ExcelExport'],
                         rowSelected: onRowSelected,
                         height: 400,
                         columns: [

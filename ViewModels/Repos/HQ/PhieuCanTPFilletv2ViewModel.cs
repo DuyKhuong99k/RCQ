@@ -55,6 +55,18 @@ namespace ViewModels.Repos.HQ
             var dao = new Dao.Repos.HQ.PhieuCanTPFilletv2();
             return dao.GetsLast<T>(dateTime, num);
         }
+
+        public List<T> GetsLastMinutes<T>(int minu)
+        {
+            var dao = new Dao.Repos.HQ.PhieuCanTPFilletv2();
+            return dao.GetsLastMinutes<T>(minu);
+        }
+
+        public Tuple<int, decimal> GetSoRoTongTrongLuongByNhanVienId(DateTime dateTime, string nhanVienId)
+        {
+            var dao = new Dao.Repos.HQ.PhieuCanTPFilletv2();
+            return dao.GetSoRoTongTrongLuongByNhanVienId(dateTime, nhanVienId);
+        }
         public List<T> GetChiTiets2HN<T>(DateTime fromDate, DateTime toDate, string xuongId, bool isDinhMucBinhThuong = true)
         {
             var dao = new Dao.Repos.HQ.PhieuCanTPFilletv2();
@@ -63,14 +75,14 @@ namespace ViewModels.Repos.HQ
         public List<T> GetChiTiets2HNByMaNhanVien<T>(DateTime fromDate, DateTime toDate, string maNhanVien, string xuongId, bool isDinhMucBinhThuong = true)
         {
             var dao = new Dao.Repos.HQ.PhieuCanTPFilletv2();
-            return dao.GetChiTiets2HNByMaNhanVien<T>(fromDate, toDate,maNhanVien, xuongId, isDinhMucBinhThuong);
+            return dao.GetChiTiets2HNByMaNhanVien<T>(fromDate, toDate, maNhanVien, xuongId, isDinhMucBinhThuong);
         }
-        public List<T> GetChiTiets2HNByMaHoSo<T>(DateTime fromDate, DateTime toDate,string maHoSo, string xuongId, bool isDinhMucBinhThuong = true)
+        public List<T> GetChiTiets2HNByMaHoSo<T>(DateTime fromDate, DateTime toDate, string maHoSo, string xuongId, bool isDinhMucBinhThuong = true)
         {
             var dao = new Dao.Repos.HQ.PhieuCanTPFilletv2();
-            return dao.GetChiTiets2HNByMaHoSo<T>(fromDate, toDate,maHoSo, xuongId, isDinhMucBinhThuong);
+            return dao.GetChiTiets2HNByMaHoSo<T>(fromDate, toDate, maHoSo, xuongId, isDinhMucBinhThuong);
         }
-        public List<T> GetChiTiets2HNByMeThe<T>(DateTime fromDate, DateTime toDate,string maThe, string xuongId, bool isDinhMucBinhThuong = true)
+        public List<T> GetChiTiets2HNByMeThe<T>(DateTime fromDate, DateTime toDate, string maThe, string xuongId, bool isDinhMucBinhThuong = true)
         {
             var dao = new Dao.Repos.HQ.PhieuCanTPFilletv2();
             return dao.GetChiTiets2HNByMaThe<T>(fromDate, toDate, maThe, xuongId, isDinhMucBinhThuong);
@@ -159,10 +171,107 @@ namespace ViewModels.Repos.HQ
             var dao = new Dao.Repos.HQ.PhieuCanTPFilletv2();
             return dao.GetTongHopNhanViensHN<T>(fromDate, toDate, xuongId);
         }
+
+        public List<T> GetTongHopNhanViensHN2<T>(
+            DateTime fromDate,
+            DateTime toDate,
+            string xuongId,
+            bool isDinhMucBinhThuong = true,
+            bool isFloor = true)
+        {
+            var dao = new Dao.Repos.HQ.PhieuCanTPFilletv2();
+            return dao.GetTongHopNhanViensHN2<T>(fromDate, toDate, xuongId, isDinhMucBinhThuong, isFloor);
+        }
+        public List<T> GetTongHopNhanVien2HoangLong<T>(
+            DateTime fromDate,
+            DateTime toDate,
+            string xuongId,
+            bool isDinhMucBinhThuong = true,
+            bool isFloor = true)
+        {
+            var dao = new Dao.Repos.HQ.PhieuCanTPFilletv2();
+            return dao.GetTongHopNhanVien2HoangLong<T>(fromDate, toDate, xuongId, isDinhMucBinhThuong, isFloor);
+        }
+
+       public List<T> GetDataGopTheoMaThanhPham<T>(
+    DateTime fromDate,
+    DateTime toDate,
+    string xuongId,
+    bool isDinhMucBinhThuong = true,
+    bool isFloor = true)
+{
+    var rawData = GetTongHopNhanVien2HoangLong<object>(fromDate, toDate, xuongId, isDinhMucBinhThuong, isFloor);
+    var data = rawData.Cast<dynamic>().ToList();
+
+    var grouped = data
+        .GroupBy(x => new { x.MaThanhPham, x.MaNhanVien,x.NhanVienName})
+        .Select(g =>
+        {
+            var first = g.First();
+            var dict = new Dictionary<string, object>();
+
+            dict["MaThanhPham"] = g.Key.MaThanhPham;
+            dict["MaNhanVien"] = g.Key.MaNhanVien;
+            dict["NhanVienName"] = g.Key.NhanVienName;
+            dict["ThanhPhamName"] = first.ThanhPhamName;
+            dict["XuongId"] = first.XuongId;
+            dict["Nhom"] = first.Nhom;
+            dict["LoaiCaName"] = first.LoaiCaName;
+            dict["TongDauNhan"] = g.Sum(x => (double?)x.TongDauNhan ?? 0);
+            dict["TongDauTra"] = g.Sum(x => (double?)x.TongDauTra ?? 0);
+            dict["TongRotNhan"] = g.Sum(x => (double?)x.TongRotNhan ?? 0);
+            dict["TongRotTra"] = g.Sum(x => (double?)x.TongRotTra ?? 0);
+            dict["TongSoDauTra"] = g.Sum(x => (double?)x.TongSoDauTra ?? 0);
+            dict["TongSoRotTra"] = g.Sum(x => (double?)x.TongSoRotTra ?? 0);
+            dict["TongNhan"] = g.Sum(x => (double?)x.TongNhan ?? 0);
+            dict["TongTra"] = g.Sum(x => (double?)x.TongTra ?? 0);
+            dict["TongSoTra"] = g.Sum(x => (double?)x.TongSoTra ?? 0);
+            dict["DinhMucChuan"] = g.Sum(x => (double?)x.DinhMucChuan ?? 0);
+            dict["DinhMucDau"] = g.Sum(x => (double?)x.DinhMucDau ?? 0);
+            dict["DinhMucRot"] = g.Sum(x => (double?)x.DinhMucRot ?? 0);
+            dict["DinhMucThucTe"] = g.Sum(x => (double?)x.DinhMucThucTe ?? 0);
+            dict["TongThoiGian"] = g.Sum(x => (double?)x.TongThoiGian ?? 0);
+            dict["ThoiGianVao"] = first.ThoiGianVao;
+            dict["ThoiGianRa"] = first.ThoiGianRa;
+
+            return dict;
+        })
+        .Cast<T>()
+        .ToList();
+
+    return grouped;
+}
+
+        public List<T> GetTongHopTyLeThoiGianVaDinhMuc<T>(DateTime fromDate, DateTime toDate, string xuongId, int MocThoiGian)
+        {
+            var dao = new Dao.Repos.HQ.PhieuCanTPFilletv2();
+            return dao.GetTongHopTyLeThoiGianVaDinhMuc<T>(fromDate, toDate, xuongId, MocThoiGian);
+        }
+        public List<T> GetTongHopTyLeThoiGianVaDinhMucForGrid<T>(DateTime fromDate, DateTime toDate, string xuongId, int MocThoiGian)
+        {
+            var dao = new Dao.Repos.HQ.PhieuCanTPFilletv2();
+            return dao.GetTongHopTyLeThoiGianVaDinhMucForGrid<T>(fromDate, toDate, xuongId, MocThoiGian);
+        }
         public List<T> GetTongHopThanhPhamFillet<T>(DateTime fromDate, DateTime toDate, string xuongId)
         {
             var dao = new Dao.Repos.HQ.PhieuCanTPFilletv2();
             return dao.GetTongHopThanhPham2<T>(fromDate, toDate, xuongId);
+        }
+
+        public List<T> GetTongHopDinhMucTheoSanPham<T>(DateTime fromDate, DateTime toDate, string xuongId)
+        {
+            var dao = new Dao.Repos.HQ.PhieuCanTPFilletv2();
+            return dao.GetTongHopDinhMucTheoSanPham<T>(fromDate, toDate, xuongId);
+        }
+        public List<T> GetTongHopNangSuatNhom<T>(DateTime fromDate, DateTime toDate, string xuongId)
+        {
+            var dao = new Dao.Repos.HQ.PhieuCanTPFilletv2();
+            return dao.GetTongHopNangSuatNhom<T>(fromDate, toDate, xuongId);
+        }
+        public List<T> GetTongHopLo<T>(DateTime fromDate, DateTime toDate, string xuongId)
+        {
+            var dao = new Dao.Repos.HQ.PhieuCanTPFilletv2();
+            return dao.GetTongHopLo<T>(fromDate, toDate, xuongId);
         }
         public List<T> GetTongHopNhanVienPhucVu<T>(DateTime fromDate, DateTime toDate, string xuongId)
         {
@@ -173,6 +282,40 @@ namespace ViewModels.Repos.HQ
         {
             var dao = new Dao.Repos.HQ.PhieuCanTPFilletv2();
             return dao.GetTongHopGioLamViec<T>(fromDate, toDate, xuongId);
+        }
+        public List<T> GetTongHopDinhMucSanLuongTheoNhom<T>(DateTime fromDate, DateTime toDate, string xuongId)
+        {
+            var dao = new Dao.Repos.HQ.PhieuCanTPFilletv2();
+            return dao.GetTongHopDinhMucSanLuongTheoNhom<T>(fromDate, toDate, xuongId);
+        }
+
+        public List<T> GetTongHopDinhMucSanLuongTheoThanhPham<T>(
+            DateTime dateTime,
+            string xuongId)
+        {
+            var dao = new Dao.Repos.HQ.PhieuCanTPFilletv2();
+            return dao.GetTongHopDinhMucSanLuongTheoThanhPham<T>(dateTime, xuongId);
+        }
+        public List<T> GetTongSanLuongTP<T>(DateTime fromDate, DateTime toDate, string xuongId)
+        {
+            var dao = new Dao.Repos.HQ.PhieuCanTPFilletv2();
+            return dao.GetTongSanLuongTP<T>(fromDate, toDate, xuongId);
+        }
+
+        public List<T> GetTongHopSanLuongAndDinhMucThanhPhamTheoChuyen<T>(DateTime fromDate, DateTime toDate, string xuongId)
+        {
+            var dao = new Dao.Repos.HQ.PhieuCanTPFilletv2();
+            return dao.GetTongHopSanLuongAndDinhMucThanhPhamTheoChuyen<T>(fromDate, toDate, xuongId);
+        }
+        public List<T> GetSanLuongTBTPFillet<T>(DateTime fromDate, DateTime toDate, string xuongId)
+        {
+            var dao = new Dao.Repos.HQ.PhieuCanTPFilletv2();
+            return dao.GetSanLuongTBTPFillet<T>(fromDate, toDate, xuongId);
+        }
+        public List<T> GetDinhMucLangDa<T>(DateTime fromDate, DateTime toDate, string xuongId)
+        {
+            var dao = new Dao.Repos.HQ.PhieuCanTPFilletv2();
+            return dao.GetDinhMucLangDa<T>(fromDate, toDate, xuongId);
         }
         public PhieuCanTPFilletv2 CopyItem(PhieuCanTPFilletv2 item)
         {
@@ -478,7 +621,13 @@ namespace ViewModels.Repos.HQ
                 VmMessage.SetExceptionCommand.Execute(e);
             }
         }
-
+        #region XLPC FILLETV2
+        public List<T> GetPhieuCanTPFilletv2_XLPC<T>(DateTime dateTime, string xuongId, string? connStr = null)
+        {
+            var dao = new Dao.Repos.HQ.PhieuCanTPFilletv2(connStr);
+            return dao.GetPhieuCanTPFilletv2_XLPC<T>(dateTime, xuongId);
+        }
+        #endregion
         #region Xử Lý Phiếu Cân
         public List<T> GetPhieuCanTPFillet_XLPC<T>(DateTime dateTime, string xuongId, string? connStr = null)
         {
@@ -702,24 +851,24 @@ namespace ViewModels.Repos.HQ
                     //    }
                     //}
                     var _items = (from p in phieuCans
-                        from dg in donGias
-                        where ((DateTime)p.Ngay).Date == dg.NgayDonGia.Date && (string)dg.MaLoaiDonGia == "DM" &&
-                              (string)p.MaThanhPham == (string)dg.MaThanhPham &&
-                              (string)p.MaSize == (string)dg.MaSizeFillet &&
-                              decimal.Compare((decimal)p.DinhMuc, (decimal)dg.DinhMucDown) >= 0 &&
-                              decimal.Compare((decimal)p.DinhMuc, (decimal)dg.DinhMucUp) <= 0
-                        select new
-                        {
-                            MaNhanVien = (string)p.MaNhanVien,
-                            MaHoSo = (string)p.MaHoSo,
-                            NhanVienName = (string)p.TenNhanVien,
-                            Ngay = (DateTime)p.Ngay,
-                            TrongLuong = (decimal)p.TrongLuongTra,
-                            SanPhamName = $@"{(decimal)dg.DinhMucDown}|{(string)dg.SanPhamName}",
-                            DinhMuc = (decimal)p.DinhMuc,
-                            SizeName = (string)p.SizeName,
-                            ThanhPhamName = (string)p.ThanhPhamName
-                        }).Cast<object>().ToList();
+                                  from dg in donGias
+                                  where ((DateTime)p.Ngay).Date == dg.NgayDonGia.Date && (string)dg.MaLoaiDonGia == "DM" &&
+                                        (string)p.MaThanhPham == (string)dg.MaThanhPham &&
+                                        (string)p.MaSize == (string)dg.MaSizeFillet &&
+                                        decimal.Compare((decimal)p.DinhMuc, (decimal)dg.DinhMucDown) >= 0 &&
+                                        decimal.Compare((decimal)p.DinhMuc, (decimal)dg.DinhMucUp) <= 0
+                                  select new
+                                  {
+                                      MaNhanVien = (string)p.MaNhanVien,
+                                      MaHoSo = (string)p.MaHoSo,
+                                      NhanVienName = (string)p.TenNhanVien,
+                                      Ngay = (DateTime)p.Ngay,
+                                      TrongLuong = (decimal)p.TrongLuongTra,
+                                      SanPhamName = $@"{(decimal)dg.DinhMucDown}|{(string)dg.SanPhamName}",
+                                      DinhMuc = (decimal)p.DinhMuc,
+                                      SizeName = (string)p.SizeName,
+                                      ThanhPhamName = (string)p.ThanhPhamName
+                                  }).Cast<object>().ToList();
                     return _items;
                 }
             }
@@ -737,7 +886,13 @@ namespace ViewModels.Repos.HQ
                     var items = listOfItems
                         .GroupBy(x => new
                         {
-                            x.MaNhanVien, x.MaHoSo, x.NhanVienName, x.Ngay, x.SizeName, x.ThanhPhamName, x.SanPhamName
+                            x.MaNhanVien,
+                            x.MaHoSo,
+                            x.NhanVienName,
+                            x.Ngay,
+                            x.SizeName,
+                            x.ThanhPhamName,
+                            x.SanPhamName
                         })
                         .Select(x => new
                         {

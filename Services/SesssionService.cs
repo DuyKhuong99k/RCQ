@@ -8,23 +8,18 @@ using ViewModels.Repos.Hubs.IServices;
 
 namespace Services
 {
-    public class SesssionService : ISessionService
+    public class SesssionService(IHttpContextAccessor httpContextAccessor) : ISessionService
     {
-        private readonly IHttpContextAccessor _httpContextAccessor;
         public void Set(string key, string value)
         {
-            _httpContextAccessor.HttpContext?.Session.SetString(key, value);
+            httpContextAccessor.HttpContext?.Session.SetString(key, value);
         }
-        public SesssionService(IHttpContextAccessor httpContextAccessor)
-        {
-            
-            _httpContextAccessor = httpContextAccessor;
-        }
+
         public string? Get(string key)
         {
             try
             {
-                var val = _httpContextAccessor.HttpContext?.Session.GetString(key);
+                var val = httpContextAccessor.HttpContext?.Session.GetString(key);
                 return val;
             }
             catch (Exception e)

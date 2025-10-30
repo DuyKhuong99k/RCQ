@@ -81,6 +81,9 @@ public partial class PhieuCanBTPDinhHinh
     public decimal TrongLuongBu { get; set; }
 
     public bool IsOffline { get; set; }
+    [StringLength(50)]
+    [Unicode(false)]
+    public string? MaNhanVienPhucVu { get; set; }
 
     [StringLength(50)]
     [Unicode(false)]

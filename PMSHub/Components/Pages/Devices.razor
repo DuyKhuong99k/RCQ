@@ -1,5 +1,4 @@
 ﻿@page "/Devices"
-@using PMSHub.Components.Layout
 @rendermode InteractiveServer
 @inject IJSRuntime jsRuntime
 @inject NavigationManager Navigation
@@ -10,588 +9,1565 @@
 @inject IConverterService ConverterService
 @inject ISessionService SessionService
 @inject ICoiService CoiService
+@inject ILocalStorageService LocalStorage
+@inject IToastService ToastService
 @inject HttpClient Http
 @attribute [StreamRendering]
-@using System.Text
-@using System.Text.Json
+@using Blazored.LocalStorage
+@using Handlers
+@using Models.Repos.A_Model
 @using Models.Repos.Models
+@using MvvmHelpers
 @using Syncfusion.Blazor.Buttons
+@using Syncfusion.Blazor.Calendars
 @using Syncfusion.Blazor.Cards
 @using Syncfusion.Blazor.DropDowns
 @using Syncfusion.Blazor.Grids
 @using Syncfusion.Blazor.Inputs
 @using Syncfusion.Blazor.Popups
-@using Syncfusion.Blazor.Calendars
+@using ToolsEx
 @using Vars
+@using Vars.Hubs
 @using ViewModels.Repos.Hubs.IServices
 @using Action = Action
 @using FilterType = Syncfusion.Blazor.DropDowns.FilterType
 @inherits AuthenticatedComponent
 @implements IDisposable
 
-<link rel="stylesheet" href="styles/card.css" />
+<link rel="stylesheet" href="styles/card.css"/>
 <PageTitle>Devices</PageTitle>
 <!-- Navbar -->
-<TopLayout />
+@* <TopLayout /> *@
 <!-- / Navbar -->
 <!-- Content wrapper -->
-<div class="content-wrapper">
-    <!-- Content -->
+@* <div class="content-wrapper"> *@
+@*     <!-- Content --> *@
 
-    <div class="container-xxl flex-grow-1 container-p-y">
-        <h1>Danh Sách Thiết Bị</h1>
-        <div>
-            <SfButton style="margin: 2px;" CssClass="e-primary" @onclick="() => OpenDialogReload()">Tải Lại</SfButton>
+@*     <div class="container-xxl flex-grow-1 container-p-y"> *@
+<h1>Danh Sách Thiết Bị</h1>
+<div>
+    <SfButton style="margin: 2px;" CssClass="e-primary" @onclick="() => OpenDialogReload()">Tải Lại</SfButton>
 
-        </div>
+</div>
 
-        @if (MayCanService.Items.Count <= 0)
-        {
-            <p>
-                <em>Loading... </em>
-            </p>
-        }
-        else
-        {
-            <SfListBox TValue="List<MayCan>" DataSource="@DeviceViewService.Items" TItem="MayCan" @bind-Value="@SelectedItems" AllowFiltering=true FilterType=" FilterType.Contains">
-                @* <ListBoxFieldSettings Text="Id" Value="Id"></ListBoxFieldSettings> *@
-                <ListBoxFieldSettings GroupBy="WKv" Text="SubTitle" Value="Id" />
-                <ListBoxTemplates TItem="MayCan">
-                    <ItemTemplate>
-                        @{
-                            var mayCan = context;
-                            var _buttonContent = buttonRefs.FirstOrDefault(x => x.Id == mayCan.Id)?.Content;
-                            <SfCard class="sf-card ">
-                                <CardHeader Title="@mayCan.Id">
-                                    <SubTitle>
-                                        <table style="margin-bottom: 10px;">
-                                            <tr>
-                                                <td>
-                                                    <div class="text">@mayCan.SubTitle</div>
-                                                    @if (mayCan.IsNapThe)
-                                                    {
-                                                        <div class="text">Đang Nạp Thẻ</div>
-                                                    }
-                                                </td>
-                                                <td>
-                                                    <div class="text-right" style="color: @(mayCan.IsConnected ? "yellowgreen" : "grey") !important; font-size: 24px;">&#9865;</div>
-                                                </td>
-                                                <td>
-                                                    <div class="text-right" style="color: @(mayCan.IsActive ? "yellowgreen" : "grey") !important; font-size: 24px;">@(mayCan.IsActive ? "\u2713" : "\u2715")</div>
-
-                                                </td>
-                                                <td>
-
-                                                    <SfButton Disabled="@(!mayCan.IsConnected)" style="width: 100%" CssClass="e-primary" @onclick="() => OpenDialogHieuChinh()">&#9881;</SfButton>
-
-                                                </td>
-                                                @if (mayCan.IsNapThe)
-                                                {
-                                                    <td>
-
-                                                        <SfButton Disabled="@(!mayCan.IsConnected)" style="width: 100%" CssClass="e-primary" @onclick="() => ExecuteAction(() => MayCanService.CommandSetNapThe(mayCan.Id, true))">Thoát Nạp Thẻ</SfButton>
-
-                                                    </td>
-                                                }
-                                            </tr>
-                                        </table>
-                                    </SubTitle>
-                                </CardHeader>
-
-                                <CardContent>
-                                    <table style="margin-bottom: 10px;">
-
-                                        <tr>
-                                            <td style="width: 100px">
-                                                <span class="text">Lô</span>
-
-                                            </td>
-                                            <td colspan="2">
-                                                <span style="width: 100%" class="text">@mayCan.MaLo</span>
-
-                                            </td>
-                                            <td>
-
-                                                <div style="display: grid; grid-column-gap: 4px; grid-template-columns: auto auto;">
-                                                    <div>
-                                                        <SfButton Disabled="@(!mayCan.IsConnected)" style="width: 100%" CssClass="e-primary" @onclick="() => MayCanService.CommandGetLo(mayCan.Id)">Get</SfButton>
-                                                    </div>
-                                                    <div>
-                                                        <SfButton Disabled="@(!mayCan.IsConnected)" style="width: 100%" CssClass="e-primary" @onclick="() => OpenDialogLo(mayCan)">Set</SfButton>
-                                                    </div>
+@if (MayCanService.Items.Count <= 0)
+{
+    <p>
+        <em>Loading... </em>
+    </p>
+}
+else
+{
+    <SfListBox TValue="List<MayCan>" DataSource="@DeviceViewService.Items" TItem="MayCan" @bind-Value="@SelectedItems"
+               AllowFiltering=true FilterType=" FilterType.Contains">
+        @* <ListBoxFieldSettings Text="Id" Value="Id"></ListBoxFieldSettings> *@
+        <ListBoxFieldSettings GroupBy="WKv" Text="SubTitle" Value="Id"/>
+        <ListBoxTemplates TItem="MayCan">
+            <ItemTemplate>
+                @{
+                    var mayCan = context;
+                    var _buttonContent = buttonRefs.FirstOrDefault(x => x.Id == mayCan.Id)?.Content;
+                    <SfCard class="sf-card ">
+                        <CardHeader Title="@mayCan.Id">
+                            <SubTitle>
+                                <table style="margin-bottom: 10px;">
+                                    <tr>
+                                        <td>
+                                            <div class="text">@mayCan.SubTitle</div>
+                                            @if (mayCan.IsNapThe)
+                                            {
+                                                <div class="text">Đang Nạp Thẻ</div>
+                                            }
+                                            @if (mayCan.ErrorString != null && mayCan.ErrorString != "")
+                                            {
+                                                <div>
+                                                    <SfTextBox Value="@mayCan.ErrorString"></SfTextBox>
                                                 </div>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                <span class="text">Thành Phẩm</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            <div class="text-right"
+                                                 style="color: @(mayCan.IsConnected ? "yellowgreen" : "grey") !important; font-size: 24px;">
+                                                &#9865;
+                                            </div>
+                                        </td>
+                                        @* <td>
+                                             <div class="text-right" style="color: @(mayCan.IsActive ? "yellowgreen" : "grey") !important; font-size: 24px;">@(mayCan.IsActive ? "\u2713" : "\u2715")</div>
 
-                                            </td>
-                                            <td colspan="2">
-                                                <span style="width: 100%" class="text">@(ConverterService.ThanhPhamToName(mayCan.MaThanhPham, mayCan.WKv))</span>
+                                         </td> *@
+                                        <td>
+                                            @* Disabled="@(!mayCan.IsConnected)" *@
+                                            <SfButton style="width: 100%"
+                                                      CssClass="e-primary" @onclick="() => OpenDialogHieuChinh()">
+                                                &#9881;
+                                            </SfButton>
 
-                                            </td>
-                                            <td>
-                                                <div style="display: grid; grid-column-gap: 4px; grid-template-columns: auto auto;">
-                                                    <div>
-                                                        <SfButton Disabled="@(!mayCan.IsConnected)" style="width: 100%" CssClass="e-primary" @onclick="() => MayCanService.CommandGetThanhPham(mayCan.Id)">Get</SfButton>
-                                                    </div>
-                                                    <div>
-                                                        <SfButton Disabled="@(!mayCan.IsConnected)" style="width: 100%" CssClass="e-primary" @onclick="() => OpenDialogThanhPham(mayCan)">Set</SfButton>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                <span class="text">Size</span>
-
-                                            </td>
-                                            <td colspan="2">
-                                                <span style="width: 100%" class="text">@(ConverterService.SizeToName(mayCan.MaSize, mayCan.WKv))</span>
-
-                                            </td>
-                                            <td>
-                                                <div style="display: grid; grid-column-gap: 4px; grid-template-columns: auto auto;">
-                                                    <div>
-                                                        <SfButton Disabled="@(!mayCan.IsConnected)" style="width: 100%" CssClass="e-primary" @onclick="() => MayCanService.CommandGetSize(mayCan.Id)">Get</SfButton>
-                                                    </div>
-                                                    <div>
-                                                        <SfButton Disabled="@(!mayCan.IsConnected)" style="width: 100%" CssClass="e-primary" @onclick="() => OpenDialogSize(mayCan)">Set</SfButton>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        @if (mayCan.WKv == AppKV.XepKhuon || mayCan.WKv == AppKV.XepKhuonRaCoi)
+                                        </td>
+                                        @if (mayCan.IsNapThe)
                                         {
-                                            <tr>
-                                                <td>
-                                                    <span class="text">Chiếu Xạ</span>
+                                            <td>
 
-                                                </td>
-                                                <td colspan="2">
-                                                    <span style="width: 100%" class="text">@(ConverterService.ChieuXaToName(mayCan.MaChieuXa))</span>
+                                                <SfButton Disabled="@(!mayCan.IsConnected)" style="width: 100%"
+                                                          CssClass="e-primary"
+                                                          @onclick="() => ExecuteAction(() => MayCanService.CommandSetNapThe(mayCan.Id, true))">
+                                                    Thoát Nạp Thẻ
+                                                </SfButton>
 
-                                                </td>
-                                                <td>
-                                                    <div style="display: grid; grid-column-gap: 4px; grid-template-columns: auto auto;">
-                                                        <div>
-                                                            <SfButton Disabled="@(!mayCan.IsConnected)" style="width: 100%" CssClass="e-primary" @onclick="() => MayCanService.CommandGetChieuXa(mayCan.Id)">Get</SfButton>
-                                                        </div>
-                                                        <div>
-                                                            <SfButton Disabled="@(!mayCan.IsConnected)" style="width: 100%" CssClass="e-primary" @onclick="() => OpenDialogChieuXa(mayCan)">Set</SfButton>
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td>
-                                                    <span class="text">Chất Lượng</span>
-
-                                                </td>
-                                                <td colspan="2">
-                                                    <span style="width: 100%" class="text">@(ConverterService.ChatLuongXepKhuonToName(mayCan.MaSize))</span>
-
-                                                </td>
-                                                <td>
-                                                    <div style="display: grid; grid-column-gap: 4px; grid-template-columns: auto auto;">
-                                                        <div>
-                                                            <SfButton Disabled="@(!mayCan.IsConnected)" style="width: 100%" CssClass="e-primary" @onclick="() => MayCanService.CommandGetChatLuong(mayCan.Id)">Get</SfButton>
-                                                        </div>
-                                                        <div>
-                                                            <SfButton Disabled="@(!mayCan.IsConnected)" style="width: 100%" CssClass="e-primary" @onclick="() => OpenDialogChatLuong(mayCan)">Set</SfButton>
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                            </tr>
+                                            </td>
                                         }
+                                    </tr>
+                                </table>
+                            </SubTitle>
+                        </CardHeader>
+
+                        <CardContent>
+                            <table style="margin-bottom: 10px;">
+                                @if (mayCan.WKv == AppKV.XepKhuon || mayCan.WKv == AppKV.XepKhuonRaCoi || mayCan.WKv == AppKV.XepKhuonPhu)
+                                {
+                                    <tr>
+                                        <td colspan="4" style="width: 100px">
+                                            <SfDatePicker TValue="DateTime" FloatLabelType="FloatLabelType.Auto"
+                                                          Placeholder='Ngày Nguyên Liệu'
+                                                          @bind-Value="@mayCan.NgayNguyenLieu"
+                                                          Max="@MainService.VmApp.DateTimeNow"></SfDatePicker>
+
+                                        </td>
+                                    </tr>
+                                }
+                                @if (mayCan.WKv == AppKV.XepKhuonRaCoi)
+                                {
+                                    <tr>
+                                        <td colspan="3" style="width: 100px">
+
+                                            <SfNumericTextBox ValidateDecimalOnType="true" style="width: 100%"
+                                                              Step="0.01M"
+                                                              ShowSpinButton="false" TValue="decimal?"
+                                                              @bind-Value="@mayCan.ThamSoTangTrong" Locale="en-US"
+                                                              Readonly="true" FloatLabelType="FloatLabelType.Auto"
+                                                              Placeholder='Tham Số Tăng Trọng'></SfNumericTextBox>
+                                        </td>
+                                        <td>
+                                            <SfButton style="width: 100%"
+                                                      CssClass="e-primary"
+                                                      @onclick="() => OpenDialogThamSoTangTrong (mayCan)">Set
+                                            </SfButton>
+                                        </td>
+                                    </tr>
+                                }
+                                <tr>
+
+                                    <td style="width: 100px">
+                                        <span class="text">Lô</span>
+
+                                    </td>
+                                    <td colspan="2">
+                                        <span style="width: 100%" class="text">@mayCan.MaLo</span>
+
+                                    </td>
+                                    <td>
+                                        @if (mayCan.WKv == AppKV.TPDinhHinh && MainService.VmApp.ComName == nameof(ComNames.NV))
+                                        {
+                                            <div
+                                                style="display: grid; grid-column-gap: 2px; grid-template-columns: 50% 50%;">
+                                                <div
+                                                    style="display: grid; grid-column-gap: 0px; grid-template-columns: auto auto; align-items : center;">
+                                                    <label>Sản Lượng</label>
+                                                    <SfSwitch @bind-Checked="@mayCan.IsChiSangLuong"></SfSwitch>
+                                                </div>
+                                                <div
+                                                    style="display: grid; grid-column-gap: 1px; grid-template-columns: auto auto;">
+                                                    <div>
+                                                        <SfButton Disabled="@(!mayCan.IsConnected)" style="width: 100%"
+                                                                  CssClass="e-primary"
+                                                                  @onclick="() => MayCanService.CommandGetLo(mayCan.Id)">
+                                                            Get
+                                                        </SfButton>
+                                                    </div>
+                                                    <div>
+                                                        <SfButton Disabled="@(!mayCan.IsConnected)" style="width: 100%"
+                                                                  CssClass="e-primary"
+                                                                  @onclick="() => OpenDialogLo(mayCan)">Set
+                                                        </SfButton>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <div
+                                                style="display: grid; grid-column-gap: 4px; grid-template-columns: 50% 50%;">
+
+                                                <div>
+                                                    <SfButton Disabled="@(!mayCan.IsConnected)" style="width: 100%"
+                                                              CssClass="e-primary"
+                                                              @onclick="() => MayCanService.CommandGetLo(mayCan.Id)">Get
+                                                    </SfButton>
+                                                </div>
+                                                <div>
+                                                    <SfButton Disabled="@(!mayCan.IsConnected)" style="width: 100%"
+                                                              CssClass="e-primary"
+                                                              @onclick="() => OpenDialogLo(mayCan)">Set
+                                                    </SfButton>
+                                                </div>
+
+                                            </div>
+                                        }
+                                        @* <div *@
+                                        @*     style="display: grid; grid-column-gap: 4px; grid-template-columns: auto auto;"> *@
+                                        @*      *@
+                                        @*     <div> *@
+                                        @*         <SfButton Disabled="@(!mayCan.IsConnected)" style="width: 100%" *@
+                                        @*                   CssClass="e-primary" *@
+                                        @*                   @onclick="() => MayCanService.CommandGetLo(mayCan.Id)">Get *@
+                                        @*         </SfButton> *@
+                                        @*     </div> *@
+                                        @*     <div> *@
+                                        @*         <SfButton Disabled="@(!mayCan.IsConnected)" style="width: 100%" *@
+                                        @*                   CssClass="e-primary" @onclick="() => OpenDialogLo(mayCan)">Set *@
+                                        @*         </SfButton> *@
+                                        @*     </div> *@
+                                        @* </div> *@
+                                    </td>
+                                </tr>
+                                @if (mayCan.WKv == AppKV.Hq)
+                                {
+                                    <tr>
+                                        <td>
+                                            <span class="text">Nguyên Liệu</span>
+
+                                        </td>
+                                        <td colspan="2">
+                                            <span style="width: 100%"
+                                                  class="text">@(ConverterService.LoaiNguyenLieuToName(mayCan.MaLoaiNguyenLieu))</span>
+
+                                        </td>
+                                        <td>
+                                            <div
+                                                style="display: grid; grid-column-gap: 4px; grid-template-columns: auto auto;">
+                                                <div>
+                                                    <SfButton Disabled="@(!mayCan.IsConnected)" style="width: 100%"
+                                                              CssClass="e-primary"
+                                                              @onclick="() => MayCanService.CommandGetNguyenLieu(mayCan.Id)">
+                                                        Get
+                                                    </SfButton>
+                                                </div>
+                                                <div>
+                                                    <SfButton Disabled="@(!mayCan.IsConnected)" style="width: 100%"
+                                                              CssClass="e-primary"
+                                                              @onclick="() => OpenDialogNguyenLieu(mayCan)">Set
+                                                    </SfButton>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                                <tr>
+                                    <td>
+                                        <span class="text">Thành Phẩm</span>
+
+                                    </td>
+                                    <td colspan="2">
+                                        <span style="width: 100%"
+                                              class="text">@(ConverterService.ThanhPhamToName(mayCan.MaThanhPham, mayCan.WKv))</span>
+
+                                    </td>
+                                    <td>
+                                        @if (mayCan.WKv == AppKV.TPDinhHinh && MainService.VmApp.ComName == nameof(ComNames.NV))
+                                        {
+                                            <div
+                                                style="display: grid; grid-column-gap: 2px; grid-template-columns: 50% 50%;">
+                                                <div
+                                                    style="display: grid; grid-column-gap: 0px; grid-template-columns: auto auto; align-items: center;">
+                                                    <label>Xác Định</label>
+                                                    <SfSwitch @bind-Checked="@mayCan.IsXacDinhLoaiThanhPham"></SfSwitch>
+                                                </div>
+                                                <div
+                                                    style="display: grid; grid-column-gap: 1px; grid-template-columns: auto auto;">
+                                                    <div>
+                                                        <SfButton Disabled="@(!mayCan.IsConnected)" style="width: 100%"
+                                                                  CssClass="e-primary"
+                                                                  @onclick="() => MayCanService.CommandGetThanhPham(mayCan.Id)">
+                                                            Get
+                                                        </SfButton>
+                                                    </div>
+                                                    <div>
+                                                        <SfButton Disabled="@(!mayCan.IsConnected)" style="width: 100%"
+                                                                  CssClass="e-primary"
+                                                                  @onclick="() => OpenDialogThanhPham(mayCan)">Set
+                                                        </SfButton>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <div
+                                                style="display: grid; grid-column-gap: 4px; grid-template-columns: 50% 50%;">
+
+                                                <div>
+                                                    <SfButton Disabled="@(!mayCan.IsConnected)" style="width: 100%"
+                                                              CssClass="e-primary"
+                                                              @onclick="() => MayCanService.CommandGetThanhPham(mayCan.Id)">
+                                                        Get
+                                                    </SfButton>
+                                                </div>
+                                                <div>
+                                                    <SfButton Disabled="@(!mayCan.IsConnected)" style="width: 100%"
+                                                              CssClass="e-primary"
+                                                              @onclick="() => OpenDialogThanhPham(mayCan)">Set
+                                                    </SfButton>
+
+                                                </div>
+
+                                            </div>
+                                        }
+
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <span class="text">Size</span>
+
+                                    </td>
+                                    <td colspan="2">
+                                        <span style="width: 100%"
+                                              class="text">@(ConverterService.SizeToName(mayCan.MaSize, mayCan.WKv))</span>
+
+                                    </td>
+                                    <td>
+                                        <div
+                                            style="display: grid; grid-column-gap: 4px; grid-template-columns: auto auto;">
+                                            <div>
+                                                <SfButton Disabled="@(!mayCan.IsConnected)" style="width: 100%"
+                                                          CssClass="e-primary"
+                                                          @onclick="() => MayCanService.CommandGetSize(mayCan.Id)">Get
+                                                </SfButton>
+                                            </div>
+                                            <div>
+                                                <SfButton Disabled="@(!mayCan.IsConnected)" style="width: 100%"
+                                                          CssClass="e-primary" @onclick="() => OpenDialogSize(mayCan)">
+                                                    Set
+                                                </SfButton>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                @if (mayCan.WKv == AppKV.NguyenLieu)
+                                {
+                                    <tr>
+                                        <td>
+                                            <span class="text">Ao</span>
+
+                                        </td>
+                                        <td colspan="2">
+                                            <span style="width: 100%"
+                                                  class="text">@(ConverterService.AoToName(mayCan.MaAo))</span>
+
+                                        </td>
+                                        <td>
+                                            <div
+                                                style="display: grid; grid-column-gap: 4px; grid-template-columns: auto auto;">
+                                                <div>
+                                                    <SfButton Disabled="@(!mayCan.IsConnected)" style="width: 100%"
+                                                              CssClass="e-primary"
+                                                              @onclick="() => MayCanService.CommandGetAo(mayCan.Id)">Get
+                                                    </SfButton>
+                                                </div>
+                                                <div>
+                                                    <SfButton Disabled="@(!mayCan.IsConnected)" style="width: 100%"
+                                                              CssClass="e-primary"
+                                                              @onclick="() => OpenDialogAo(mayCan)">Set
+                                                    </SfButton>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <span class="text">Phương Tiện</span>
+
+                                        </td>
+                                        <td colspan="2">
+                                            <span style="width: 100%"
+                                                  class="text">@(ConverterService.PhuongTienToName(mayCan.MaPhuongTien))</span>
+
+                                        </td>
+                                        <td>
+                                            <div
+                                                style="display: grid; grid-column-gap: 4px; grid-template-columns: auto auto;">
+                                                <div>
+                                                    <SfButton Disabled="@(!mayCan.IsConnected)" style="width: 100%"
+                                                              CssClass="e-primary"
+                                                              @onclick="() => MayCanService.CommandGetPhuongTien(mayCan.Id)">
+                                                        Get
+                                                    </SfButton>
+                                                </div>
+                                                <div>
+                                                    <SfButton Disabled="@(!mayCan.IsConnected)" style="width: 100%"
+                                                              CssClass="e-primary"
+                                                              @onclick="() => OpenDialogPhuongTien(mayCan)">Set
+                                                    </SfButton>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                                @if (mayCan.WKv == AppKV.XepKhuon || mayCan.WKv == AppKV.XepKhuonRaCoi || mayCan.WKv == AppKV.XepKhuonPhu)
+                                {
+                                    <tr>
+                                        <td>
+                                            <span class="text">Chiếu Xạ</span>
+
+                                        </td>
+                                        <td colspan="2">
+                                            <span style="width: 100%"
+                                                  class="text">@(ConverterService.ChieuXaToName(mayCan.MaChieuXa))</span>
+
+                                        </td>
+                                        <td>
+                                            <div
+                                                style="display: grid; grid-column-gap: 4px; grid-template-columns: auto auto;">
+                                                <div>
+                                                    <SfButton Disabled="@(!mayCan.IsConnected)" style="width: 100%"
+                                                              CssClass="e-primary"
+                                                              @onclick="() => MayCanService.CommandGetChieuXa(mayCan.Id)">
+                                                        Get
+                                                    </SfButton>
+                                                </div>
+                                                <div>
+                                                    <SfButton Disabled="@(!mayCan.IsConnected)" style="width: 100%"
+                                                              CssClass="e-primary"
+                                                              @onclick="() => OpenDialogChieuXa(mayCan)">Set
+                                                    </SfButton>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <span class="text">Chất Lượng</span>
+
+                                        </td>
+                                        <td colspan="2">
+                                            <span style="width: 100%"
+                                                  class="text">@(ConverterService.ChatLuongXepKhuonToName(mayCan.MaChatLuong))</span>
+
+                                        </td>
+                                        <td>
+                                            <div
+                                                style="display: grid; grid-column-gap: 4px; grid-template-columns: auto auto;">
+                                                <div>
+                                                    <SfButton Disabled="@(!mayCan.IsConnected)" style="width: 100%"
+                                                              CssClass="e-primary"
+                                                              @onclick="() => MayCanService.CommandGetChatLuong(mayCan.Id)">
+                                                        Get
+                                                    </SfButton>
+                                                </div>
+                                                <div>
+                                                    <SfButton Disabled="@(!mayCan.IsConnected)" style="width: 100%"
+                                                              CssClass="e-primary"
+                                                              @onclick="() => OpenDialogChatLuong(mayCan)">Set
+                                                    </SfButton>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                                @if (mayCan.WKv == AppKV.XepKhuon || mayCan.WKv == AppKV.XepKhuonRaCoi || mayCan.WKv == AppKV.XepKhuonPhu)
+                                {
+                                    <tr>
+                                        <td>
+                                            <span class="text">Cối</span>
+
+                                        </td>
+                                        <td colspan="2">
+                                            <span style="width: 100%"
+                                                  class="text">@(ConverterService.CoiToName(mayCan.MaCoi))</span>
+
+                                        </td>
+                                        <td>
+                                            <div
+                                                style="display: grid; grid-column-gap: 4px; grid-template-columns: auto auto;">
+                                                <div>
+                                                    <SfButton Disabled="@(!mayCan.IsConnected)" style="width: 100%"
+                                                              CssClass="e-primary"
+                                                              @onclick="() => MayCanService.CommandGetCoi(mayCan.Id)">
+                                                        Get
+                                                    </SfButton>
+                                                </div>
+                                                <div>
+                                                    <SfButton Disabled="@(!mayCan.IsConnected)" style="width: 100%"
+                                                              CssClass="e-primary"
+                                                              @onclick="() => OpenDialogCoi(mayCan)">Set
+                                                    </SfButton>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                                <tr>
+                                    <td>
+                                        <span class="text">Tare</span>
+
+                                    </td>
+                                    <td colspan="2">
+                                        <SfNumericTextBox ValidateDecimalOnType="true" style="width: 100%" Step="0.01M"
+                                                          ShowSpinButton="false" TValue="decimal?"
+                                                          @bind-Value="@mayCan.TrongLuongTare"
+                                                          Readonly="false"></SfNumericTextBox>
+
+
+                                    </td>
+
+                                    <td>
+                                        <SfButton Disabled="@(!mayCan.IsConnected)" style="width: 100%"
+                                                  CssClass="e-primary" @onclick="() => OpenDialogTare(mayCan)">Tare
+                                        </SfButton>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <span class="text">Zero</span>
+
+                                    </td>
+                                    <td colspan="2">
+                                    </td>
+                                    <td>
+                                        <SfButton Disabled="@(!mayCan.IsConnected)" style="width: 100%"
+                                                  CssClass="e-primary"
+                                                  @onclick="() => ExecuteAction(() => MayCanService.CommandZero(mayCan.Id))">
+                                            Zero
+                                        </SfButton>
+                                    </td>
+                                </tr>
+                            </table>
+                            @if (_buttonContent == collapse)
+                            {
+                                <div>
+                                    <table>
                                         <tr>
-                                            <td>
-                                                <span class="text">Tare</span>
-
-                                            </td>
-                                            <td colspan="2">
-                                                <SfNumericTextBox ValidateDecimalOnType="true" style="width: 100%" Step="0.01M" ShowSpinButton="false" TValue="decimal?" @bind-Value="@mayCan.TrongLuongTare" Readonly="false"></SfNumericTextBox>
-
-
-                                            </td>
-
-                                            <td>
-                                                <SfButton Disabled="@(!mayCan.IsConnected)" style="width: 100%" CssClass="e-primary" @onclick="() => OpenDialogTare(mayCan)">Tare</SfButton>
+                                            <td colspan="2"
+                                                style="background-color: @(string.IsNullOrEmpty(mayCan.ColorString) ? "transparent" : mayCan.ColorString)">
+                                                <SfTextBox Value="@mayCan.ThongBao"></SfTextBox>
                                             </td>
                                         </tr>
                                         <tr>
                                             <td>
-                                                <span class="text">Zero</span>
+                                                <span class="text">Trọng Lượng: </span>
+                                            </td>
+                                            <td colspan="2"
+                                                style="background-color: @(mayCan.IsStated ? "greenyellow" : "transparent")">
+                                                <SfNumericTextBox style="width: 100%" ShowSpinButton="false"
+                                                                  TValue="decimal"
+                                                                  @bind-Value="@mayCan.TrongLuong"></SfNumericTextBox>
+                                            </td>
 
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <span class="text">Thẻ: </span>
                                             </td>
                                             <td colspan="2">
+                                                <SfTextBox Value="@mayCan.TheView"></SfTextBox>
+                                            </td>
+
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <span class="text">Nhân Viên: </span>
                                             </td>
                                             <td>
-                                                <SfButton Disabled="@(!mayCan.IsConnected)" style="width: 100%" CssClass="e-primary" @onclick="() => ExecuteAction(() => MayCanService.CommandZero(mayCan.Id))">Zero</SfButton>
+                                                <SfTextBox Value="@mayCan.MaHoSo"></SfTextBox>
                                             </td>
+
                                         </tr>
                                     </table>
-                                    @if (_buttonContent == collapse)
-                                    {
-                                        <div>
-                                            <table>
-                                                <tr>
-                                                    <td colspan="2" style="background-color: @(string.IsNullOrEmpty(mayCan.ColorString) ? "transparent" : mayCan.ColorString)">
-                                                        <SfTextBox Value="@mayCan.ThongBao"></SfTextBox>
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <td>
-                                                        <span class="text">Trọng Lượng: </span>
-                                                    </td>
-                                                    <td colspan="2" style="background-color: @(mayCan.IsStated ? "greenyellow" : "transparent")">
-                                                        <SfNumericTextBox style="width: 100%" ShowSpinButton="false" TValue="decimal" @bind-Value="@mayCan.TrongLuong"></SfNumericTextBox>
-                                                    </td>
+                                    <div>
+                                        <SfGrid DataSource="@mayCan.Items" Height="320px" AllowResizing="true">
+                                            <GridColumns>
+                                                @if (mayCan.WKv == AppKV.NguyenLieu)
+                                                {
+                                                    <GridColumn Field="ThoiGianCan" HeaderText="Ngày Giờ"
+                                                                TextAlign="TextAlign.Center"
+                                                                Format="dd/MM/yyyy HH:mm:ss" Width="150"
+                                                                Type="ColumnType.DateTime"/>
+                                                    <GridColumn Field="MSL" HeaderText="Lô" TextAlign="TextAlign.Center"
+                                                                Width="90"></GridColumn>
+                                                    <GridColumn Field="MaLoaiThanhPham" AutoFit="true"
+                                                                HeaderText="Thành Phẩm"
+                                                                MinWidth="100">
+                                                        <Template Context="columContextTP">
 
-                                                </tr>
-                                                <tr>
-                                                    <td>
-                                                        <span class="text">Thẻ: </span>
-                                                    </td>
-                                                    <td colspan="2">
-                                                        <SfTextBox Value="@mayCan.TheView"></SfTextBox>
-                                                    </td>
+                                                            @{
+                                                                var a = columContextTP.GetPropValueOrDefault<string>("MaLoaiThanhPham", ""); //(columContextTP as dynamic)?.MaThanhPham;
+                                                                @ConverterService.ThanhPhamToName(a, mayCan.WKv)
+                                                                ;
+                                                            }
 
-                                                </tr>
-                                                <tr>
-                                                    <td>
-                                                        <span class="text">Nhân Viên: </span>
-                                                    </td>
-                                                    <td>
-                                                        <SfTextBox Value="@mayCan.MaHoSo"></SfTextBox>
-                                                    </td>
+                                                        </Template>
+                                                    </GridColumn>
+                                                    <GridColumn Field="MaSize" HeaderText="Size" Width="100"
+                                                                TextAlign="TextAlign.Center">
+                                                        <Template Context="columContextSize">
 
-                                                </tr>
-                                            </table>
-                                            <div>
-                                                <SfGrid DataSource="@mayCan.Items" Height="320px">
-                                                    <GridColumns>
-                                                        <GridColumn Field="STT" HeaderText="STT" TextAlign="TextAlign.Center" Width="70">
+                                                            @{
+                                                                var a = columContextSize.GetPropValueOrDefault<string>("MaSize", ""); //(columContextSize as dynamic)?.MaSize;
+                                                                @ConverterService.SizeToName(a, mayCan.WKv)
+                                                                ;
+                                                            }
 
-                                                        </GridColumn>
-                                                        <GridColumn Field="MaNhanVien" HeaderText="Mã Số" Width="70">
-                                                            <Template Context="columContextNhanVien">
+                                                        </Template>
+                                                    </GridColumn>
+                                                    <GridColumn Field="MaAo" HeaderText="Ao" Width="100"
+                                                                TextAlign="TextAlign.Center">
+                                                        <Template Context="columnContexAo">
+
+                                                            @{
+                                                                var a = columnContexAo.GetPropValueOrDefault<string>("MaAo", ""); //(columContextSize as dynamic)?.MaSize;
+                                                                @ConverterService.AoToName(a)
+                                                                ;
+                                                            }
+
+                                                        </Template>
+                                                    </GridColumn>
+                                                    <GridColumn Field="MaPhuongTien" HeaderText="Phương Tiện"
+                                                                Width="100" TextAlign="TextAlign.Center">
+                                                        <Template Context="columnContexPhuongTien">
+
+                                                            @{
+                                                                var a = columnContexPhuongTien.GetPropValueOrDefault<string>("MaPhuongTien", ""); //(columContextSize as dynamic)?.MaSize;
+                                                                @ConverterService.PhuongTienToName(a)
+                                                                ;
+                                                            }
+
+                                                        </Template>
+                                                    </GridColumn>
+                                                }
+                                                else
+                                                {
+                                                    if (mayCan.WKv == AppKV.Hq)
+                                                    {
+                                                        <GridColumn Field="NgayGio" HeaderText="Ngày Giờ"
+                                                                    TextAlign="TextAlign.Center"
+                                                                    Format="dd/MM/yyyy HH:mm:ss" Width="150"
+                                                                    Type="ColumnType.DateTime"/>
+                                                    }
+                                                    else if (mayCan.WKv == AppKV.TPFillet)
+                                                    {
+                                                        <GridColumn Field="ThoiGianCan" HeaderText="Ngày Giờ"
+                                                                    Width="150">
+                                                            <Template Context="_context">
 
                                                                 @{
-                                                                    var a = (columContextNhanVien as dynamic)?.MaNhanVien;
-                                                                    @ConverterService.NhanVienToMaHoSo(a.ToString())
+                                                                    var a = _context.GetPropValueOrDefault<TimeSpan?>("ThoiGianCan", null) ?? TimeSpan.Zero;
+                                                                    @a.ToString(@"hh\:mm\:ss")
                                                                     ;
                                                                 }
 
                                                             </Template>
                                                         </GridColumn>
-                                                        <GridColumn Field="MaThanhPham" HeaderText="Thành Phẩm" Width="150">
+                                                        <GridColumn Field="MSL" HeaderText="Lô"
+                                                                    TextAlign="TextAlign.Center"
+                                                                    Width="90"></GridColumn>
+                                                    }
+                                                    else
+                                                    {
+                                                        <GridColumn Field="STT" HeaderText="STT"
+                                                                    TextAlign="TextAlign.Center" Width="70"/>
+                                                        <GridColumn Field="MaLo" HeaderText="Lô"
+                                                                    TextAlign="TextAlign.Center"
+                                                                    Width="90"></GridColumn>
+                                                    }
+
+                                                    <GridColumn Field="MaNhanVien" HeaderText="Mã Số" Width="70">
+                                                        <Template Context="columContextNhanVien">
+
+                                                            @{
+                                                                var a = columContextNhanVien.GetPropValueOrDefault<string>("MaNhanVien", ""); //((columContextNhanVien as dynamic)?.MaNhanVien)??"";
+                                                                @ConverterService.NhanVienToMaHoSo(a)
+                                                                ;
+                                                            }
+
+                                                        </Template>
+                                                    </GridColumn>
+                                                    if (mayCan.WKv == AppKV.Hq)
+                                                    {
+                                                        <GridColumn Field="MaLoaiNguyenLieu" HeaderText="Nguyên Liệu"
+                                                                    Width="120">
+                                                            <Template Context="columContextNguyenLieu">
+
+                                                                @{
+                                                                    var a = columContextNguyenLieu.GetPropValueOrDefault<string>("MaLoaiNguyenLieu", "");
+                                                                    @ConverterService.LoaiNguyenLieuToName(a)
+                                                                    ;
+                                                                }
+
+                                                            </Template>
+                                                        </GridColumn>
+                                                    }
+
+                                                    if (mayCan.WKv == AppKV.XepKhuon)
+                                                    {
+                                                        <GridColumn Field="MaThanhPhamChinh" HeaderText="Thành Phẩm"
+                                                                    Width="150">
+                                                            <Template Context="columContextTPXepKhuon">
+
+                                                                @{
+                                                                    var a = columContextTPXepKhuon.GetPropValueOrDefault<string>("MaThanhPhamChinh", ""); //(columContextTP as dynamic)?.MaThanhPham;
+                                                                    @ConverterService.ThanhPhamToName(a, mayCan.WKv)
+                                                                    ;
+                                                                }
+
+                                                            </Template>
+                                                        </GridColumn>
+                                                        <GridColumn Field="MaSizeChinh" HeaderText="Size" Width="100"
+                                                                    TextAlign="TextAlign.Center">
+                                                            <Template Context="columContextSizeXepKhuon">
+
+                                                                @{
+                                                                    var a = columContextSizeXepKhuon.GetPropValueOrDefault<string>("MaSizeChinh", ""); //(columContextSize as dynamic)?.MaSize;
+                                                                    @ConverterService.SizeToName(a, mayCan.WKv)
+                                                                    ;
+                                                                }
+
+                                                            </Template>
+                                                        </GridColumn>
+                                                    }
+                                                    else if (mayCan.WKv == AppKV.XepKhuonRaCoi)
+                                                    {
+                                                        <GridColumn Field="MaThanhPham" HeaderText="Thành Phẩm"
+                                                                    Width="150">
+                                                            <Template Context="columContextTPXepKhuon">
+
+                                                                @{
+                                                                    var a = columContextTPXepKhuon.GetPropValueOrDefault<string>("MaThanhPham", ""); //(columContextTP as dynamic)?.MaThanhPham;
+                                                                    @ConverterService.ThanhPhamToName(a, mayCan.WKv)
+                                                                    ;
+                                                                }
+
+                                                            </Template>
+                                                        </GridColumn>
+                                                        <GridColumn Field="MaSize" HeaderText="Size" Width="100"
+                                                                    TextAlign="TextAlign.Center">
+                                                            <Template Context="columContextSizeXepKhuon">
+
+                                                                @{
+                                                                    var a = columContextSizeXepKhuon.GetPropValueOrDefault<string>("MaSize", ""); //(columContextSize as dynamic)?.MaSize;
+                                                                    @ConverterService.SizeToName(a, mayCan.WKv)
+                                                                    ;
+                                                                }
+
+                                                            </Template>
+                                                        </GridColumn>
+                                                    }
+
+                                                    else if (mayCan.WKv == AppKV.TPFillet)
+                                                    {
+                                                        <GridColumn Field="MaLoaiThanhPham" HeaderText="Thành Phẩm"
+                                                                    Width="150">
                                                             <Template Context="columContextTP">
 
                                                                 @{
-                                                                    var a = (columContextTP as dynamic)?.MaThanhPham;
-                                                                    @ConverterService.ThanhPhamToName(a.ToString(), mayCan.WKv)
+                                                                    var a = columContextTP.GetPropValueOrDefault<string>("MaLoaiThanhPham", ""); //(columContextTP as dynamic)?.MaThanhPham;
+                                                                    @ConverterService.ThanhPhamToName(a, mayCan.WKv)
                                                                     ;
                                                                 }
 
                                                             </Template>
                                                         </GridColumn>
-                                                        <GridColumn Field="MaSize" HeaderText="Size" Width="100" TextAlign="TextAlign.Center">
+                                                        <GridColumn Field="MaSize" HeaderText="Size" Width="100"
+                                                                    TextAlign="TextAlign.Center">
                                                             <Template Context="columContextSize">
 
                                                                 @{
-                                                                    var a = (columContextSize as dynamic)?.MaSize;
-                                                                    @ConverterService.SizeToName(a.ToString(), mayCan.WKv)
+                                                                    var a = columContextSize.GetPropValueOrDefault<string>("MaSize", ""); //(columContextSize as dynamic)?.MaSize;
+                                                                    @ConverterService.SizeToName(a, mayCan.WKv)
                                                                     ;
                                                                 }
 
                                                             </Template>
                                                         </GridColumn>
-                                                        @{
-                                                            if (mayCan.WKv == AppKV.TPDinhHinh)
-                                                            {
-                                                                <GridColumn Field="TrongLuongTra" HeaderText="TL Trả" TextAlign="TextAlign.Right" Width="90"></GridColumn>
-                                                                <GridColumn Field="TrongLuongNhan" HeaderText="TL Nhận" TextAlign="TextAlign.Right" Width="90"></GridColumn>
-                                                                <GridColumn Field="DinhMucThucTe" HeaderText="Định Mức" Format="0.00" TextAlign="TextAlign.Right" Width="90"></GridColumn>
-                                                            }
-                                                            else if (mayCan.WKv == AppKV.BTPDinhHinh)
-                                                            {
-                                                                <GridColumn Field="TrongLuong" HeaderText="TL" TextAlign="TextAlign.Right" Width="90"></GridColumn>
-                                                            }
-                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        <GridColumn Field="MaThanhPham" HeaderText="Thành Phẩm"
+                                                                    Width="150">
+                                                            <Template Context="columContextTP">
 
-                                                    </GridColumns>
-                                                </SfGrid>
-                                            </div>
+                                                                @{
+                                                                    var a = columContextTP.GetPropValueOrDefault<string>("MaThanhPham", ""); //(columContextTP as dynamic)?.MaThanhPham;
+                                                                    @ConverterService.ThanhPhamToName(a, mayCan.WKv)
+                                                                    ;
+                                                                }
 
-                                        </div>
-                                    }
-                                </CardContent>
-                                <CardContent EnableSeparator="true"></CardContent>
-                                <CardFooter>
-                                    <CardFooterContent>
-                                        <SfButton Disabled="@(!mayCan.IsConnected)" style="margin-top: 10px; width: 100px;" CssClass="e-info" @onclick="() => ExpandHandler(mayCan.Id)">@(_buttonContent)</SfButton>
-                                    </CardFooterContent>
-                                </CardFooter>
-                            </SfCard>
-                        }
+                                                            </Template>
+                                                        </GridColumn>
+                                                        <GridColumn Field="MaSize" HeaderText="Size" Width="100"
+                                                                    TextAlign="TextAlign.Center">
+                                                            <Template Context="columContextSize">
 
-                    </ItemTemplate>
-                </ListBoxTemplates>
-            </SfListBox>
-        }
+                                                                @{
+                                                                    var a = columContextSize.GetPropValueOrDefault<string>("MaSize", ""); //(columContextSize as dynamic)?.MaSize;
+                                                                    @ConverterService.SizeToName(a, mayCan.WKv)
+                                                                    ;
+                                                                }
 
-        <SfDialog Width="400px" IsModal="true" CloseOnEscape="true" ShowCloseIcon="true" @bind-Visible="@IsVisibleTare">
-            <DialogEvents OnOverlayModalClick="@OverlayClick"></DialogEvents>
-            <DialogTemplates>
-                <Header>
-                    <div>@item.SubTitle</div>
-                </Header>
-                <Content>
-                    <SfNumericTextBox ValidateDecimalOnType="true" Step="0.01M" style="width: 100%" ShowSpinButton="true" TValue="decimal?" @bind-Value="@item.TrongLuongTare" Readonly="false"></SfNumericTextBox>
-                </Content>
-            </DialogTemplates>
-            <DialogButtons>
-                <DialogButton Content="Xác Nhận" IsPrimary="true" OnClick="() => MayCanService.CommandTare(item.Id, item.TrongLuongTare)" />
-            </DialogButtons>
-        </SfDialog>
-        <SfDialog Width="400px" IsModal="true" CloseOnEscape="true" ShowCloseIcon="true" @bind-Visible="@IsVisibleLo">
-            <DialogEvents OnOverlayModalClick="@OverlayClick"></DialogEvents>
-            <DialogTemplates>
-                <Header>
-                    <div>@SelectedItems.FirstOrDefault()?.SubTitle</div>
-                </Header>
-                <Content>
-                    <SfComboBox TValue="string" Placeholder="Chọn Lô" FloatLabelType="FloatLabelType.Auto" AllowFiltering="true" TItem="string" @bind-Value="@MainService.VmLo.SelectedItem" DataSource="@MainService.VmLo.Items" />
-                </Content>
-            </DialogTemplates>
-            <DialogButtons>
-                <DialogButton Content="Xác Nhận" IsPrimary="true" OnClick="@CloseDialogLo" />
-            </DialogButtons>
-        </SfDialog>
-        <SfDialog Width="400px" IsModal="true" CloseOnEscape="true" ShowCloseIcon="true" @bind-Visible="@IsVisibleThanhPhamFillet">
-            <DialogEvents OnOverlayModalClick="@OverlayClick"></DialogEvents>
-            <DialogTemplates>
-                <Header>
-                    <div>@SelectedItems.FirstOrDefault()?.SubTitle</div>
-                </Header>
-                <Content>
-                    <SfDropDownList TValue="MaThanhPhamFillet" Placeholder="Chọn Thành Phẩm" FloatLabelType="FloatLabelType.Auto" AllowFiltering="true" TItem="MaThanhPhamFillet" @bind-Value="@MainService.VmThanhPhamFillet.SelectedItem" DataSource="@MainService.VmThanhPhamFillet.UsedItems">
-                        <DropDownListEvents TItem="MaThanhPhamFillet" TValue="MaThanhPhamFillet" OnOpen="BeforeOpen" Closed="ClosedHanlder" />
-                        <DropDownListFieldSettings Value="Ma" Text="Ten"></DropDownListFieldSettings>
-                    </SfDropDownList>
-                </Content>
-            </DialogTemplates>
-            <DialogButtons>
-                <DialogButton Content="Xác Nhận" IsPrimary="true" OnClick="@CloseDialogThanhPham" />
-            </DialogButtons>
-        </SfDialog>
-        <SfDialog Width="400px" IsModal="true" CloseOnEscape="true" ShowCloseIcon="true" @bind-Visible="@IsVisibleThanhPhamXepKhuon">
-            <DialogEvents OnOverlayModalClick="@OverlayClick"></DialogEvents>
-            <DialogTemplates>
-                <Header>
-                    <div>@SelectedItems.FirstOrDefault()?.SubTitle</div>
-                </Header>
-                <Content>
-                    <SfDropDownList TValue="MaThanhPhamChinhXepKhuon" Placeholder="Chọn Thành Phẩm" FloatLabelType="FloatLabelType.Auto" AllowFiltering="true" TItem="MaThanhPhamChinhXepKhuon" @bind-Value="@MainService.VmThanhPhamChinhXepKhuon.SelectedItem" DataSource="@MainService.VmThanhPhamChinhXepKhuon.UsedItems">
-                        <DropDownListEvents TItem="MaThanhPhamChinhXepKhuon" TValue="MaThanhPhamChinhXepKhuon" OnOpen="BeforeOpen" Closed="ClosedHanlder" />
-                        <DropDownListFieldSettings Value="Ma" Text="Ten"></DropDownListFieldSettings>
-                    </SfDropDownList>
-                </Content>
-            </DialogTemplates>
-            <DialogButtons>
-                <DialogButton Content="Xác Nhận" IsPrimary="true" OnClick="@CloseDialogThanhPham" />
-            </DialogButtons>
-        </SfDialog>
-        <SfDialog Width="400px" IsModal="true" CloseOnEscape="true" ShowCloseIcon="true" @bind-Visible="@IsVisibleSizeFillet">
-            <DialogEvents OnOverlayModalClick="@OverlayClick"></DialogEvents>
-            <DialogTemplates>
-                <Header>
-                    <div>@SelectedItems.FirstOrDefault()?.SubTitle</div>
-                </Header>
-                <Content>
-                    <SfDropDownList TValue="MaSizeFillet" Placeholder="Chọn Size" FloatLabelType="FloatLabelType.Auto" AllowFiltering="true" TItem="MaSizeFillet" @bind-Value="@MainService.VmSizeFillet.SelectedItem" DataSource="@MainService.VmSizeFillet.UsedItems">
-                        <DropDownListEvents TItem="MaSizeFillet" TValue="MaSizeFillet" OnOpen="BeforeOpen" Closed="ClosedHanlder" />
-                        <DropDownListFieldSettings Value="Ma" Text="Ten"></DropDownListFieldSettings>
-                    </SfDropDownList>
-                </Content>
-            </DialogTemplates>
-            <DialogButtons>
-                <DialogButton Content="Xác Nhận" IsPrimary="true" OnClick="@CloseDialogSize" />
-            </DialogButtons>
-        </SfDialog>
-        <SfDialog Width="400px" IsModal="true" CloseOnEscape="true" ShowCloseIcon="true" @bind-Visible="@IsVisibleSizeXepKhuon">
-            <DialogEvents OnOverlayModalClick="@OverlayClick"></DialogEvents>
-            <DialogTemplates>
-                <Header>
-                    <div>@SelectedItems.FirstOrDefault()?.SubTitle</div>
-                </Header>
-                <Content>
-                    <SfDropDownList TValue="MaSizeChinhXepKhuon" Placeholder="Chọn Size" FloatLabelType="FloatLabelType.Auto" AllowFiltering="true" TItem="MaSizeChinhXepKhuon" @bind-Value="@MainService.VmSizeChinhXepKhuon.SelectedItem" DataSource="@MainService.VmSizeChinhXepKhuon.UsedItems">
-                        <DropDownListEvents TItem="MaSizeChinhXepKhuon" TValue="MaSizeChinhXepKhuon" OnOpen="BeforeOpen" Closed="ClosedHanlder" />
-                        <DropDownListFieldSettings Value="Ma" Text="Ten"></DropDownListFieldSettings>
-                    </SfDropDownList>
-                </Content>
-            </DialogTemplates>
-            <DialogButtons>
-                <DialogButton Content="Xác Nhận" IsPrimary="true" OnClick="@CloseDialogSize" />
-            </DialogButtons>
-        </SfDialog>
-        <SfDialog Width="400px" IsModal="true" CloseOnEscape="true" ShowCloseIcon="true" @bind-Visible="@IsVisibleThanhPhamDinhHinh">
-            <DialogEvents OnOverlayModalClick="@OverlayClick"></DialogEvents>
-            <DialogTemplates>
-                <Header>
-                    <div>@SelectedItems.FirstOrDefault()?.SubTitle</div>
-                </Header>
-                <Content>
-                    <SfDropDownList TValue="MaThanhPhamDinhHinh" Placeholder="Chọn Thành Phẩm" FloatLabelType="FloatLabelType.Auto" AllowFiltering="true" TItem="MaThanhPhamDinhHinh" @bind-Value="@MainService.VmThanhPhamDinhHinh.SelectedItem" DataSource="@MainService.VmThanhPhamDinhHinh.UsedItems" EnablePersistence="true">
-                        <DropDownListEvents TItem="MaThanhPhamDinhHinh" TValue="MaThanhPhamDinhHinh" OnOpen="BeforeOpen" Closed="ClosedHanlder" />
-                        <DropDownListFieldSettings Value="Ma" Text="Ten"></DropDownListFieldSettings>
-                    </SfDropDownList>
-                </Content>
-            </DialogTemplates>
-            <DialogButtons>
-                <DialogButton Content="Xác Nhận" IsPrimary="true" OnClick="@CloseDialogThanhPham" />
-            </DialogButtons>
-        </SfDialog>
-        <SfDialog Width="400px" IsModal="true" CloseOnEscape="true" ShowCloseIcon="true" @bind-Visible="@IsVisibleSizeDinhHinh">
-            <DialogEvents OnOverlayModalClick="@OverlayClick"></DialogEvents>
-            <DialogTemplates>
-                <Header>
-                    <div>@SelectedItems.FirstOrDefault()?.SubTitle</div>
-                </Header>
-                <Content>
-                    <SfDropDownList TValue="MaSizeDinhHinh" Placeholder="Chọn Size" FloatLabelType="FloatLabelType.Auto" AllowFiltering="true" TItem="MaSizeDinhHinh" @bind-Value="@MainService.VmSizeDinhHinh.SelectedItem" DataSource="@MainService.VmSizeDinhHinh.UsedItems">
-                        <DropDownListEvents TItem="MaSizeDinhHinh" TValue="MaSizeDinhHinh" OnOpen="BeforeOpen" Closed="ClosedHanlder" />
-                        <DropDownListFieldSettings Value="Ma" Text="Ten"></DropDownListFieldSettings>
-                    </SfDropDownList>
-                </Content>
-            </DialogTemplates>
-            <DialogButtons>
-                <DialogButton Content="Xác Nhận" IsPrimary="true" OnClick="@CloseDialogSize" />
-            </DialogButtons>
-        </SfDialog>
-        <SfDialog Width="400px" IsModal="true" CloseOnEscape="true" ShowCloseIcon="true" @bind-Visible="@IsVisibleChieuXa">
-            <DialogEvents OnOverlayModalClick="@OverlayClick"></DialogEvents>
-            <DialogTemplates>
-                <Header>
-                    <div>@SelectedItems.FirstOrDefault()?.SubTitle</div>
-                </Header>
-                <Content>
-                    <SfDropDownList TValue="MaChieuXaXepKhuon" Placeholder="Chọn Chiếu Xạ" FloatLabelType="FloatLabelType.Auto" AllowFiltering="true" TItem="MaChieuXaXepKhuon" @bind-Value="@MainService.VmChieuXaXepKhuon.SelectedItem" DataSource="@MainService.VmChieuXaXepKhuon.UsedItems">
-                        <DropDownListEvents TItem="MaChieuXaXepKhuon" TValue="MaChieuXaXepKhuon" OnOpen="BeforeOpen" Closed="ClosedHanlder" />
-                        <DropDownListFieldSettings Value="Ma" Text="Ten"></DropDownListFieldSettings>
-                    </SfDropDownList>
-                </Content>
-            </DialogTemplates>
-            <DialogButtons>
-                <DialogButton Content="Xác Nhận" IsPrimary="true" OnClick="@CloseDialogChieuXa" />
-            </DialogButtons>
-        </SfDialog>
-        <SfDialog Width="400px" IsModal="true" CloseOnEscape="true" ShowCloseIcon="true" @bind-Visible="@IsVisibleChatLuong">
-            <DialogEvents OnOverlayModalClick="@OverlayClick"></DialogEvents>
-            <DialogTemplates>
-                <Header>
-                    <div>@SelectedItems.FirstOrDefault()?.SubTitle</div>
-                </Header>
-                <Content>
-                    <SfDropDownList TValue="MaChatLuongXepKhuon" Placeholder="Chọn Chiếu Xạ" FloatLabelType="FloatLabelType.Auto" AllowFiltering="true" TItem="MaChatLuongXepKhuon" @bind-Value="@MainService.VmChatLuong.SelectedItem" DataSource="@MainService.VmChatLuong.UsedItems">
-                        <DropDownListEvents TItem="MaChatLuongXepKhuon" TValue="MaChatLuongXepKhuon" OnOpen="BeforeOpen" Closed="ClosedHanlder" />
-                        <DropDownListFieldSettings Value="Ma" Text="Ten"></DropDownListFieldSettings>
-                    </SfDropDownList>
-                </Content>
-            </DialogTemplates>
-            <DialogButtons>
-                <DialogButton Content="Xác Nhận" IsPrimary="true" OnClick="@CloseDialogChatLuong" />
-            </DialogButtons>
+                                                            </Template>
+                                                        </GridColumn>
+                                                    }
+                                                }
+                                                @{
+                                                    if (mayCan.WKv == AppKV.TPDinhHinh || mayCan.WKv == AppKV.TPFilletv2)
+                                                    {
+                                                        <GridColumn Field="TrongLuongTra" HeaderText="TL Trả"
+                                                                    TextAlign="TextAlign.Right" Width="90"></GridColumn>
+                                                        <GridColumn Field="TrongLuongNhan" HeaderText="TL Nhận"
+                                                                    TextAlign="TextAlign.Right" Width="90"></GridColumn>
+                                                        <GridColumn Field="DinhMucThucTe" HeaderText="Định Mức"
+                                                                    Format="0.00" TextAlign="TextAlign.Right"
+                                                                    Width="90"></GridColumn>
+                                                    }
+                                                    else
+                                                    {
+                                                        <GridColumn Field="TrongLuong" HeaderText="TL"
+                                                                    TextAlign="TextAlign.Right" Width="90"></GridColumn>
+                                                    }
+                                                }
 
-        </SfDialog>
-        <SfDialog Width="400px" IsModal="true" CloseOnEscape="true" ShowCloseIcon="true" @bind-Visible="@IsVisibleSelectedDate">
-            <DialogEvents OnOverlayModalClick="@OverlayClick"></DialogEvents>
-            <DialogTemplates>
-                <Header>
-                    <div>@SelectedItems.FirstOrDefault()?.SubTitle</div>
-                </Header>
-                <Content>
-                    <SfDatePicker TValue="DateTime?" Value='@DateValue' Placeholder='Chọn Ngày'></SfDatePicker>
-                </Content>
-            </DialogTemplates>
-            <DialogButtons>
-                <DialogButton Content="Xác Nhận" IsPrimary="true" OnClick="() => PhieuCanSync(SelectedItems.FirstOrDefault()?.IPAddr)" />
-            </DialogButtons>
-        </SfDialog>
-        <SfDialog Width="400px" IsModal="true" CloseOnEscape="true" @bind-Visible="@IsVisibleReload">
-            <DialogEvents OnOverlayModalClick="@OverlayClick"></DialogEvents>
-            <DialogTemplates>
-                <Header>
-                    <div>Tải Lại</div>
-                </Header>
-                <Content>
-                    <SfButton style="margin: 2px; width: 160px;" CssClass="e-primary" @onclick="() => ExecuteAction(() => Load())">Máy Cân</SfButton>
-                    <SfButton style="margin: 2px; width: 160px;" CssClass="e-primary" @onclick="() => ExecuteAction(() => LoadCoi())">Cối</SfButton>
-                    <SfButton style="margin: 2px; width: 160px;" CssClass="e-primary" @onclick="() => ExecuteAction(() => MainService.VmNhanVien.Reload())">Nhân Viên</SfButton>
-                    <SfButton style="margin: 2px; width: 160px;" CssClass="e-primary" @onclick="() => ExecuteAction(() => MainService.VmThe.Reload())">Thẻ Nhân Viên</SfButton>
-                    <SfButton style="margin: 2px; width: 160px;" CssClass="e-primary" @onclick="() => ExecuteAction(() => MainService.VmTheRo.Reload())">Thẻ Rổ</SfButton>
-                    <SfButton style="margin: 2px; width: 160px;" CssClass="e-primary" @onclick="() => ExecuteAction(() => MainService.VmTheThanhPham.Reload())">Thẻ Chức Năng</SfButton>
-                    <SfButton style="margin: 2px; width: 160px;" CssClass="e-primary" @onclick="() => ExecuteAction(() => MainService.VmSizeDinhHinh.Reload())">Size Định Hình</SfButton>
-                    <SfButton style="margin: 2px; width: 160px;" CssClass="e-primary" @onclick="() => ExecuteAction(() => MainService.VmSizeFillet.Reload())">Size Fillet</SfButton>
-                    <SfButton style="margin: 2px; width: 160px;" CssClass="e-primary" @onclick="() => ExecuteAction(() => MainService.VmThanhPhamDinhHinh.Reload())">TP Định Hình</SfButton>
-                    <SfButton style="margin: 2px; width: 160px;" CssClass="e-primary" @onclick="() => ExecuteAction(() => MainService.VmThanhPhamFillet.Reload())">TP Fillet</SfButton>
-                </Content>
-            </DialogTemplates>
-            <DialogButtons>
-                <DialogButton Content="Đóng" IsPrimary="true" OnClick="@CloseDialogReload" />
-            </DialogButtons>
-            <DialogPositionData Y="top" X="center" />
-        </SfDialog>
-        <SfDialog Width="400px" IsModal="true" CloseOnEscape="true" @bind-Visible="@IsHieuChinh">
-            <DialogEvents OnOverlayModalClick="@OverlayClick"></DialogEvents>
-            <DialogTemplates>
-                <Header>
-                    <div>@SelectedItems.FirstOrDefault()?.SubTitle</div>
-                </Header>
-                <Content>
-                    <SfButton style="margin: 2px; width: 100px;" CssClass="e-primary" @onmousedown="() => ZeroAsync(SelectedItems.FirstOrDefault()?.IPAddr)" @onmouseup="() => HandleButtonMouseUpAsync(SelectedItems.FirstOrDefault()?.IPAddr)">Zero &#8595;</SfButton>
-                    <SfButton style="margin: 2px; width: 100px;" CssClass="e-primary" @onmousedown="() => TareAsync(SelectedItems.FirstOrDefault()?.IPAddr)" @onmouseup="() => HandleButtonMouseUpAsync(SelectedItems.FirstOrDefault()?.IPAddr)">Tare &#8593;</SfButton>
-                    <SfButton style="margin: 2px; width: 100px;" CssClass="e-primary" @onmousedown="() => ModeAsync(SelectedItems.FirstOrDefault()?.IPAddr)" @onmouseup="() => HandleButtonMouseUpAsync(SelectedItems.FirstOrDefault()?.IPAddr)">Mode &#8594;</SfButton>
-                    <SfButton style="margin: 2px; width: 100px;" CssClass="e-primary" @onmousedown="() => PrintAsync(SelectedItems.FirstOrDefault()?.IPAddr)" @onmouseup="() => HandleButtonMouseUpAsync(SelectedItems.FirstOrDefault()?.IPAddr)">Print &#8629;</SfButton>
-                    <SfButton style="margin: 2px; width: 100px;" CssClass="e-primary" @onmousedown="() => PowerAsync(SelectedItems.FirstOrDefault()?.IPAddr)" @onmouseup="() => HandleButtonMouseUpAsync(SelectedItems.FirstOrDefault()?.IPAddr)">Power &#67;</SfButton>
-                    <SfButton style="margin: 2px; width: 100px;" CssClass="e-primary" @onmousedown="() => RestartAsync(SelectedItems.FirstOrDefault()?.IPAddr)">Rst Cân</SfButton>
-                    <SfButton style="margin: 2px; width: 100px;" CssClass="e-primary" @onmousedown="() => SetTimeAsync(SelectedItems.FirstOrDefault()?.IPAddr)">Đặt Giờ</SfButton>
-                    <SfButton style="margin: 2px; width: 100px;" CssClass="e-primary" @onmousedown="() => RestartSystem(SelectedItems.FirstOrDefault()?.IPAddr)">Rst Sys</SfButton>
-                    <SfButton style="margin: 2px; width: 100px;" CssClass="e-primary" @onmousedown="() => OpenDialogSelectedDate()">Sync PhieuCan</SfButton>
-                </Content>
-            </DialogTemplates>
-            <DialogButtons>
-                <DialogButton Content="Đóng" IsPrimary="true" OnClick="@CloseDialogHieuChinh" />
-            </DialogButtons>
-            <DialogPositionData Y="top" X="center" />
-        </SfDialog>
+                                            </GridColumns>
+                                        </SfGrid>
+                                    </div>
 
-    </div>
+                                </div>
+                            }
+                        </CardContent>
+                        <CardContent EnableSeparator="true"></CardContent>
+                        <CardFooter>
+                            <CardFooterContent>
+                                <SfButton style="margin-top: 10px; width: 100px;" CssClass="e-info"
+                                          @onclick="() => ExpandHandler(mayCan.Id)">@(_buttonContent)</SfButton>
+                            </CardFooterContent>
+                        </CardFooter>
+                    </SfCard>
+                }
 
-    <!-- / Content -->
-    <!-- Footer -->
-    <FooterLayout />
-    <!-- / Footer -->
-    <div class="content-backdrop fade"></div>
-</div>
+            </ItemTemplate>
+        </ListBoxTemplates>
+    </SfListBox>
+}
+
+<SfDialog Width="400px" IsModal="true" CloseOnEscape="true" ShowCloseIcon="true" @bind-Visible="@IsVisibleTare">
+    <DialogEvents OnOverlayModalClick="@OverlayClick"></DialogEvents>
+    <DialogTemplates>
+        <Header>
+            <div>@item.SubTitle</div>
+        </Header>
+        <Content>
+            <SfNumericTextBox ValidateDecimalOnType="true" Step="0.01M" style="width: 100%" ShowSpinButton="true"
+                              TValue="decimal?" @bind-Value="@item.TrongLuongTare" Readonly="false"></SfNumericTextBox>
+        </Content>
+    </DialogTemplates>
+    <DialogButtons>
+        <DialogButton Content="Xác Nhận" IsPrimary="true"
+                      OnClick="() => MayCanService.CommandTare(item.Id, item.TrongLuongTare)"/>
+    </DialogButtons>
+</SfDialog>
+<SfDialog Width="400px" IsModal="true" CloseOnEscape="true" ShowCloseIcon="true"
+          @bind-Visible="@IsVisibleThamSoTangTrong">
+    <DialogEvents OnOverlayModalClick="@OverlayClick"></DialogEvents>
+    <DialogTemplates>
+        <Header>
+            <div>@item.SubTitle</div>
+        </Header>
+        <Content>
+            <SfNumericTextBox ValidateDecimalOnType="true" Step="0.01M" style="width: 100%" ShowSpinButton="true"
+                              TValue="decimal?" @bind-Value="@item.ThamSoTangTrong" Readonly="false"></SfNumericTextBox>
+        </Content>
+    </DialogTemplates>
+    <DialogButtons>
+        <DialogButton Content="Xác Nhận" IsPrimary="true"
+                      OnClick="() => SetThamSoTangTrong(item)"/>
+    </DialogButtons>
+</SfDialog>
+<SfDialog Width="400px" IsModal="true" CloseOnEscape="true" ShowCloseIcon="true" @bind-Visible="@IsVisibleLo">
+    <DialogEvents OnOverlayModalClick="@OverlayClick"></DialogEvents>
+    <DialogTemplates>
+        <Header>
+            <div>@SelectedItems.FirstOrDefault()?.SubTitle</div>
+        </Header>
+        <Content>
+            @if (MainService.VmApp.ComName == nameof(ComNames.HL))
+            {
+                <SfComboBox TValue="string" Placeholder="Chọn Lô" FloatLabelType="FloatLabelType.Auto"
+                            AllowFiltering="true" TItem="string" @bind-Value="@MainService.VmLoHq.SelectedItem"
+                            DataSource="@MainService.VmLoHq.Items"/>
+            }
+            else
+            {
+                <SfComboBox TValue="string" Placeholder="Chọn Lô" FloatLabelType="FloatLabelType.Auto"
+                            AllowFiltering="true" TItem="string" @bind-Value="@MainService.VmLo.SelectedItem"
+                            DataSource="@MainService.VmLo.Items"/>
+            }
+
+        </Content>
+    </DialogTemplates>
+    <DialogButtons>
+        <DialogButton Content="Xác Nhận" IsPrimary="true" OnClick="@CloseDialogLo"/>
+    </DialogButtons>
+</SfDialog>
+<SfDialog Width="400px" IsModal="true" CloseOnEscape="true" ShowCloseIcon="true" @bind-Visible="@IsVisibleNguyenLieu">
+    <DialogEvents OnOverlayModalClick="@OverlayClick"></DialogEvents>
+    <DialogTemplates>
+        <Header>
+            <div>@SelectedItems.FirstOrDefault()?.SubTitle</div>
+        </Header>
+        <Content>
+            <SfDropDownList TValue="HQ_LoaiNguyenLieu" Placeholder="Chọn Nguyên Liệu"
+                            FloatLabelType="FloatLabelType.Auto" AllowFiltering="true" TItem="HQ_LoaiNguyenLieu"
+                            @bind-Value="@MainService.VmNguyenLieuHq.SelectedItem"
+                            DataSource="@MainService.VmNguyenLieuHq.UsedItems">
+                <DropDownListEvents TItem="HQ_LoaiNguyenLieu" TValue="HQ_LoaiNguyenLieu" OnOpen="BeforeOpen"
+                                    Closed="ClosedHanlder"/>
+                <DropDownListFieldSettings Value="Id" Text="Ten"></DropDownListFieldSettings>
+            </SfDropDownList>
+        </Content>
+    </DialogTemplates>
+    <DialogButtons>
+        <DialogButton Content="Xác Nhận" IsPrimary="true" OnClick="@CloseDialogNguyenLieu"/>
+    </DialogButtons>
+</SfDialog>
+<SfDialog Width="400px" IsModal="true" CloseOnEscape="true" ShowCloseIcon="true" @bind-Visible="@IsVisibleThanhPhamHq">
+    <DialogEvents OnOverlayModalClick="@OverlayClick"></DialogEvents>
+    <DialogTemplates>
+        <Header>
+            <div>@SelectedItems.FirstOrDefault()?.SubTitle</div>
+        </Header>
+        <Content>
+            <SfDropDownList TValue="HQ_ThanhPham" Placeholder="Chọn Thành Phẩm" FloatLabelType="FloatLabelType.Auto"
+                            AllowFiltering="true" TItem="HQ_ThanhPham"
+                            @bind-Value="@MainService.VmThanhPhamHq.SelectedItem"
+                            DataSource="@MainService.VmThanhPhamHq.UsedItems">
+                <DropDownListEvents TItem="HQ_ThanhPham" TValue="HQ_ThanhPham" OnOpen="BeforeOpen"
+                                    Closed="ClosedHanlder"/>
+                <DropDownListFieldSettings Value="Id" Text="Ten"></DropDownListFieldSettings>
+            </SfDropDownList>
+        </Content>
+    </DialogTemplates>
+    <DialogButtons>
+        <DialogButton Content="Xác Nhận" IsPrimary="true" OnClick="@CloseDialogThanhPham"/>
+    </DialogButtons>
+</SfDialog>
+<SfDialog Width="400px" IsModal="true" CloseOnEscape="true" ShowCloseIcon="true"
+          @bind-Visible="@IsVisibleThanhPhamNguyenLieu">
+    <DialogEvents OnOverlayModalClick="@OverlayClick"></DialogEvents>
+    <DialogTemplates>
+        <Header>
+            <div>@SelectedItems.FirstOrDefault()?.SubTitle</div>
+        </Header>
+        <Content>
+            <SfDropDownList TValue="MaThanhPhamNguyenLieu" Placeholder="Chọn Thành Phẩm"
+                            FloatLabelType="FloatLabelType.Auto" AllowFiltering="true" TItem="MaThanhPhamNguyenLieu"
+                            @bind-Value="@MainService.VmThanhPhamNguyenLieu.SelectedItem"
+                            DataSource="@MainService.VmThanhPhamNguyenLieu.UsedItems">
+                <DropDownListEvents TItem="MaThanhPhamNguyenLieu" TValue="MaThanhPhamNguyenLieu" OnOpen="BeforeOpen"
+                                    Closed="ClosedHanlder"/>
+                <DropDownListFieldSettings Value="Ma" Text="Ten"></DropDownListFieldSettings>
+            </SfDropDownList>
+        </Content>
+    </DialogTemplates>
+    <DialogButtons>
+        <DialogButton Content="Xác Nhận" IsPrimary="true" OnClick="@CloseDialogThanhPham"/>
+    </DialogButtons>
+</SfDialog>
+<SfDialog Width="400px" IsModal="true" CloseOnEscape="true" ShowCloseIcon="true"
+          @bind-Visible="@IsVisibleThanhPhamFillet">
+    <DialogEvents OnOverlayModalClick="@OverlayClick"></DialogEvents>
+    <DialogTemplates>
+        <Header>
+            <div>@SelectedItems.FirstOrDefault()?.SubTitle</div>
+        </Header>
+        <Content>
+            <SfDropDownList TValue="MaThanhPhamFillet" Placeholder="Chọn Thành Phẩm"
+                            FloatLabelType="FloatLabelType.Auto" AllowFiltering="true" TItem="MaThanhPhamFillet"
+                            @bind-Value="@MainService.VmThanhPhamFillet.SelectedItem"
+                            DataSource="@MainService.VmThanhPhamFillet.UsedItems">
+                <DropDownListEvents TItem="MaThanhPhamFillet" TValue="MaThanhPhamFillet" OnOpen="BeforeOpen"
+                                    Closed="ClosedHanlder"/>
+                <DropDownListFieldSettings Value="Ma" Text="Ten"></DropDownListFieldSettings>
+            </SfDropDownList>
+        </Content>
+    </DialogTemplates>
+    <DialogButtons>
+        <DialogButton Content="Xác Nhận" IsPrimary="true" OnClick="@CloseDialogThanhPham"/>
+    </DialogButtons>
+</SfDialog>
+
+<SfDialog Width="400px" IsModal="true" CloseOnEscape="true" ShowCloseIcon="true"
+          @bind-Visible="@IsVisibleThanhPhamXepKhuon">
+    <DialogEvents OnOverlayModalClick="@OverlayClick"></DialogEvents>
+    <DialogTemplates>
+        <Header>
+            <div>@SelectedItems.FirstOrDefault()?.SubTitle</div>
+        </Header>
+        <Content>
+            <SfDropDownList TValue="MaThanhPhamChinhXepKhuon" Placeholder="Chọn Thành Phẩm"
+                            FloatLabelType="FloatLabelType.Auto" AllowFiltering="true" TItem="MaThanhPhamChinhXepKhuon"
+                            @bind-Value="@MainService.VmThanhPhamChinhXepKhuon.SelectedItem"
+                            DataSource="@MainService.VmThanhPhamChinhXepKhuon.UsedItems">
+                <DropDownListEvents TItem="MaThanhPhamChinhXepKhuon" TValue="MaThanhPhamChinhXepKhuon"
+                                    OnOpen="BeforeOpen" Closed="ClosedHanlder"/>
+                <DropDownListFieldSettings Value="Ma" Text="Ten"></DropDownListFieldSettings>
+            </SfDropDownList>
+        </Content>
+    </DialogTemplates>
+    <DialogButtons>
+        <DialogButton Content="Xác Nhận" IsPrimary="true" OnClick="@CloseDialogThanhPham"/>
+    </DialogButtons>
+</SfDialog>
+<SfDialog Width="400px" IsModal="true" CloseOnEscape="true" ShowCloseIcon="true"
+          @bind-Visible="@IsVisibleThanhPhamXepKhuonPhu">
+    <DialogEvents OnOverlayModalClick="@OverlayClick"></DialogEvents>
+    <DialogTemplates>
+        <Header>
+            <div>@SelectedItems.FirstOrDefault()?.SubTitle</div>
+        </Header>
+        <Content>
+            <SfDropDownList TValue="MaThanhPhamXepKhuon" Placeholder="Chọn Thành Phẩm"
+                            FloatLabelType="FloatLabelType.Auto" AllowFiltering="true" TItem="MaThanhPhamXepKhuon"
+                            @bind-Value="@MainService.VmThanhPhamPhuXepKhuon.SelectedItem"
+                            DataSource="@MainService.VmThanhPhamPhuXepKhuon.UsedItems">
+                <DropDownListEvents TItem="MaThanhPhamXepKhuon" TValue="MaThanhPhamXepKhuon"
+                                    OnOpen="BeforeOpen" Closed="ClosedHanlder"/>
+                <DropDownListFieldSettings Value="Ma" Text="Ten"></DropDownListFieldSettings>
+            </SfDropDownList>
+        </Content>
+    </DialogTemplates>
+    <DialogButtons>
+        <DialogButton Content="Xác Nhận" IsPrimary="true" OnClick="@CloseDialogThanhPham"/>
+    </DialogButtons>
+</SfDialog>
+<SfDialog Width="400px" IsModal="true" CloseOnEscape="true" ShowCloseIcon="true" @bind-Visible="@IsVisibleSizeHq">
+    <DialogEvents OnOverlayModalClick="@OverlayClick"></DialogEvents>
+    <DialogTemplates>
+        <Header>
+            <div>@SelectedItems.FirstOrDefault()?.SubTitle</div>
+        </Header>
+        <Content>
+            <SfDropDownList TValue="HQ_Size" Placeholder="Chọn Size" FloatLabelType="FloatLabelType.Auto"
+                            AllowFiltering="true" TItem="HQ_Size" @bind-Value="@MainService.VmSizeHq.SelectedItem"
+                            DataSource="@MainService.VmSizeHq.UsedItems">
+                <DropDownListEvents TItem="HQ_Size" TValue="HQ_Size" OnOpen="BeforeOpen" Closed="ClosedHanlder"/>
+                <DropDownListFieldSettings Value="Id" Text="Ten"></DropDownListFieldSettings>
+            </SfDropDownList>
+        </Content>
+    </DialogTemplates>
+    <DialogButtons>
+        <DialogButton Content="Xác Nhận" IsPrimary="true" OnClick="@CloseDialogSize"/>
+    </DialogButtons>
+</SfDialog>
+<SfDialog Width="400px" IsModal="true" CloseOnEscape="true" ShowCloseIcon="true"
+          @bind-Visible="@IsVisibleSizeNguyenLieu">
+    <DialogEvents OnOverlayModalClick="@OverlayClick"></DialogEvents>
+    <DialogTemplates>
+        <Header>
+            <div>@SelectedItems.FirstOrDefault()?.SubTitle</div>
+        </Header>
+        <Content>
+            <SfDropDownList TValue="MaSizeNguyenLieu" Placeholder="Chọn Size" FloatLabelType="FloatLabelType.Auto"
+                            AllowFiltering="true" TItem="MaSizeNguyenLieu"
+                            @bind-Value="@MainService.VmSizeNguyenLieu.SelectedItem"
+                            DataSource="@MainService.VmSizeNguyenLieu.UsedItems">
+                <DropDownListEvents TItem="MaSizeNguyenLieu" TValue="MaSizeNguyenLieu" OnOpen="BeforeOpen"
+                                    Closed="ClosedHanlder"/>
+                <DropDownListFieldSettings Value="Ma" Text="Ten"></DropDownListFieldSettings>
+            </SfDropDownList>
+        </Content>
+    </DialogTemplates>
+    <DialogButtons>
+        <DialogButton Content="Xác Nhận" IsPrimary="true" OnClick="@CloseDialogSize"/>
+    </DialogButtons>
+</SfDialog>
+<SfDialog Width="400px" IsModal="true" CloseOnEscape="true" ShowCloseIcon="true" @bind-Visible="@IsVisibleSizeFillet">
+    <DialogEvents OnOverlayModalClick="@OverlayClick"></DialogEvents>
+    <DialogTemplates>
+        <Header>
+            <div>@SelectedItems.FirstOrDefault()?.SubTitle</div>
+        </Header>
+        <Content>
+            <SfDropDownList TValue="MaSizeFillet" Placeholder="Chọn Size" FloatLabelType="FloatLabelType.Auto"
+                            AllowFiltering="true" TItem="MaSizeFillet"
+                            @bind-Value="@MainService.VmSizeFillet.SelectedItem"
+                            DataSource="@MainService.VmSizeFillet.UsedItems">
+                <DropDownListEvents TItem="MaSizeFillet" TValue="MaSizeFillet" OnOpen="BeforeOpen"
+                                    Closed="ClosedHanlder"/>
+                <DropDownListFieldSettings Value="Ma" Text="Ten"></DropDownListFieldSettings>
+            </SfDropDownList>
+        </Content>
+    </DialogTemplates>
+    <DialogButtons>
+        <DialogButton Content="Xác Nhận" IsPrimary="true" OnClick="@CloseDialogSize"/>
+    </DialogButtons>
+</SfDialog>
+<SfDialog Width="400px" IsModal="true" CloseOnEscape="true" ShowCloseIcon="true" @bind-Visible="@IsVisibleSizeXepKhuon">
+    <DialogEvents OnOverlayModalClick="@OverlayClick"></DialogEvents>
+    <DialogTemplates>
+        <Header>
+            <div>@SelectedItems.FirstOrDefault()?.SubTitle</div>
+        </Header>
+        <Content>
+            <SfDropDownList TValue="MaSizeChinhXepKhuon" Placeholder="Chọn Size" FloatLabelType="FloatLabelType.Auto"
+                            AllowFiltering="true" TItem="MaSizeChinhXepKhuon"
+                            @bind-Value="@MainService.VmSizeChinhXepKhuon.SelectedItem"
+                            DataSource="@MainService.VmSizeChinhXepKhuon.UsedItems">
+                <DropDownListEvents TItem="MaSizeChinhXepKhuon" TValue="MaSizeChinhXepKhuon" OnOpen="BeforeOpen"
+                                    Closed="ClosedHanlder"/>
+                <DropDownListFieldSettings Value="Ma" Text="Ten"></DropDownListFieldSettings>
+            </SfDropDownList>
+        </Content>
+    </DialogTemplates>
+    <DialogButtons>
+        <DialogButton Content="Xác Nhận" IsPrimary="true" OnClick="@CloseDialogSize"/>
+    </DialogButtons>
+</SfDialog>
+<SfDialog Width="400px" IsModal="true" CloseOnEscape="true" ShowCloseIcon="true"
+          @bind-Visible="@IsVisibleSizeXepKhuonPhu">
+    <DialogEvents OnOverlayModalClick="@OverlayClick"></DialogEvents>
+    <DialogTemplates>
+        <Header>
+            <div>@SelectedItems.FirstOrDefault()?.SubTitle</div>
+        </Header>
+        <Content>
+            <SfDropDownList TValue="MaSizeXepKhuon" Placeholder="Chọn Size" FloatLabelType="FloatLabelType.Auto"
+                            AllowFiltering="true" TItem="MaSizeXepKhuon"
+                            @bind-Value="@MainService.VmSizePhuXepKhuon.SelectedItem"
+                            DataSource="@MainService.VmSizePhuXepKhuon.UsedItems">
+                <DropDownListEvents TItem="MaSizeXepKhuon" TValue="MaSizeXepKhuon" OnOpen="BeforeOpen"
+                                    Closed="ClosedHanlder"/>
+                <DropDownListFieldSettings Value="Ma" Text="Ten"></DropDownListFieldSettings>
+            </SfDropDownList>
+        </Content>
+    </DialogTemplates>
+    <DialogButtons>
+        <DialogButton Content="Xác Nhận" IsPrimary="true" OnClick="@CloseDialogSize"/>
+    </DialogButtons>
+</SfDialog>
+<SfDialog Width="400px" IsModal="true" CloseOnEscape="true" ShowCloseIcon="true"
+          @bind-Visible="@IsVisibleThanhPhamDinhHinh">
+    <DialogEvents OnOverlayModalClick="@OverlayClick"></DialogEvents>
+    <DialogTemplates>
+        <Header>
+            <div>@SelectedItems.FirstOrDefault()?.SubTitle</div>
+        </Header>
+        <Content>
+            <SfDropDownList TValue="MaThanhPhamDinhHinh" Placeholder="Chọn Thành Phẩm"
+                            FloatLabelType="FloatLabelType.Auto" AllowFiltering="true" TItem="MaThanhPhamDinhHinh"
+                            @bind-Value="@MainService.VmThanhPhamDinhHinh.SelectedItem"
+                            DataSource="@MainService.VmThanhPhamDinhHinh.UsedItems" EnablePersistence="true">
+                <DropDownListEvents TItem="MaThanhPhamDinhHinh" TValue="MaThanhPhamDinhHinh" OnOpen="BeforeOpen"
+                                    Closed="ClosedHanlder"/>
+                <DropDownListFieldSettings Value="Ma" Text="Ten"></DropDownListFieldSettings>
+            </SfDropDownList>
+        </Content>
+    </DialogTemplates>
+    <DialogButtons>
+        <DialogButton Content="Xác Nhận" IsPrimary="true" OnClick="@CloseDialogThanhPham"/>
+    </DialogButtons>
+</SfDialog>
+<SfDialog Width="400px" IsModal="true" CloseOnEscape="true" ShowCloseIcon="true" @bind-Visible="@IsVisibleSizeDinhHinh">
+    <DialogEvents OnOverlayModalClick="@OverlayClick"></DialogEvents>
+    <DialogTemplates>
+        <Header>
+            <div>@SelectedItems.FirstOrDefault()?.SubTitle</div>
+        </Header>
+        <Content>
+            <SfDropDownList TValue="MaSizeDinhHinh" Placeholder="Chọn Size" FloatLabelType="FloatLabelType.Auto"
+                            AllowFiltering="true" TItem="MaSizeDinhHinh"
+                            @bind-Value="@MainService.VmSizeDinhHinh.SelectedItem"
+                            DataSource="@MainService.VmSizeDinhHinh.UsedItems">
+                <DropDownListEvents TItem="MaSizeDinhHinh" TValue="MaSizeDinhHinh" OnOpen="BeforeOpen"
+                                    Closed="ClosedHanlder"/>
+                <DropDownListFieldSettings Value="Ma" Text="Ten"></DropDownListFieldSettings>
+            </SfDropDownList>
+        </Content>
+    </DialogTemplates>
+    <DialogButtons>
+        <DialogButton Content="Xác Nhận" IsPrimary="true" OnClick="@CloseDialogSize"/>
+    </DialogButtons>
+</SfDialog>
+<SfDialog Width="400px" IsModal="true" CloseOnEscape="true" ShowCloseIcon="true" @bind-Visible="@IsVisibleChieuXa">
+    <DialogEvents OnOverlayModalClick="@OverlayClick"></DialogEvents>
+    <DialogTemplates>
+        <Header>
+            <div>@SelectedItems.FirstOrDefault()?.SubTitle</div>
+        </Header>
+        <Content>
+            <SfDropDownList TValue="MaChieuXaXepKhuon" Placeholder="Chọn Chiếu Xạ" FloatLabelType="FloatLabelType.Auto"
+                            AllowFiltering="true" TItem="MaChieuXaXepKhuon"
+                            @bind-Value="@MainService.VmChieuXaXepKhuon.SelectedItem"
+                            DataSource="@MainService.VmChieuXaXepKhuon.UsedItems">
+                <DropDownListEvents TItem="MaChieuXaXepKhuon" TValue="MaChieuXaXepKhuon" OnOpen="BeforeOpen"
+                                    Closed="ClosedHanlder"/>
+                <DropDownListFieldSettings Value="Ma" Text="Ten"></DropDownListFieldSettings>
+            </SfDropDownList>
+        </Content>
+    </DialogTemplates>
+    <DialogButtons>
+        <DialogButton Content="Xác Nhận" IsPrimary="true" OnClick="@CloseDialogChieuXa"/>
+    </DialogButtons>
+</SfDialog>
+<SfDialog Width="400px" IsModal="true" CloseOnEscape="true" ShowCloseIcon="true" @bind-Visible="@IsVisibleCoi">
+    <DialogEvents OnOverlayModalClick="@OverlayClick"></DialogEvents>
+    <DialogTemplates>
+        <Header>
+            <div>@SelectedItems.FirstOrDefault()?.SubTitle</div>
+        </Header>
+        <Content>
+            <SfDropDownList TValue="MaCoiXepKhuon" Placeholder="Chọn Cối" FloatLabelType="FloatLabelType.Auto"
+                            AllowFiltering="true" TItem="MaCoiXepKhuon" @bind-Value="@MainService.VmCoi.SelectedItem"
+                            DataSource="@MainService.VmCoi.Items">
+                <DropDownListEvents TItem="MaCoiXepKhuon" TValue="MaCoiXepKhuon" OnOpen="BeforeOpen"
+                                    Closed="ClosedHanlder"/>
+                <DropDownListFieldSettings Value="Ma" Text="Ten"></DropDownListFieldSettings>
+            </SfDropDownList>
+        </Content>
+    </DialogTemplates>
+    <DialogButtons>
+        <DialogButton Content="Xác Nhận" IsPrimary="true" OnClick="@CloseDialogCoi"/>
+    </DialogButtons>
+</SfDialog>
+<SfDialog Width="400px" IsModal="true" CloseOnEscape="true" ShowCloseIcon="true" @bind-Visible="@IsVisibleAo">
+    <DialogEvents OnOverlayModalClick="@OverlayClick"></DialogEvents>
+    <DialogTemplates>
+        <Header>
+            <div>@SelectedItems.FirstOrDefault()?.SubTitle</div>
+        </Header>
+        <Content>
+            <SfDropDownList TValue="Ao" Placeholder="Chọn Ao" FloatLabelType="FloatLabelType.Auto" AllowFiltering="true"
+                            TItem="Ao" @bind-Value="@MainService.VmAoNguyenLieu.SelectedItemAo"
+                            DataSource="@MainService.VmAoNguyenLieu.UsedItems">
+                <DropDownListEvents TItem="Ao" TValue="Ao" OnOpen="BeforeOpen" Closed="ClosedHanlder"/>
+                <DropDownListFieldSettings Value="Ma" Text="Ten"></DropDownListFieldSettings>
+            </SfDropDownList>
+        </Content>
+    </DialogTemplates>
+    <DialogButtons>
+        <DialogButton Content="Xác Nhận" IsPrimary="true" OnClick="@CloseDialogAo"/>
+    </DialogButtons>
+</SfDialog>
+<SfDialog Width="400px" IsModal="true" CloseOnEscape="true" ShowCloseIcon="true" @bind-Visible="@IsVisiblePhuongTien">
+    <DialogEvents OnOverlayModalClick="@OverlayClick"></DialogEvents>
+    <DialogTemplates>
+        <Header>
+            <div>@SelectedItems.FirstOrDefault()?.SubTitle</div>
+        </Header>
+        <Content>
+            <SfDropDownList TValue="PhuongTienChoNguyenLieu" Placeholder="Chọn Phương Tiện"
+                            FloatLabelType="FloatLabelType.Auto" AllowFiltering="true" TItem="PhuongTienChoNguyenLieu"
+                            @bind-Value="@MainService.VmPhuongTienNguyenLieu.SelectedItem"
+                            DataSource="@MainService.VmPhuongTienNguyenLieu.UsedItems">
+                <DropDownListEvents TItem="PhuongTienChoNguyenLieu" TValue="PhuongTienChoNguyenLieu" OnOpen="BeforeOpen"
+                                    Closed="ClosedHanlder"/>
+                <DropDownListFieldSettings Value="Ma" Text="Ten"></DropDownListFieldSettings>
+            </SfDropDownList>
+        </Content>
+    </DialogTemplates>
+    <DialogButtons>
+        <DialogButton Content="Xác Nhận" IsPrimary="true" OnClick="@CloseDialogPhuongTien"/>
+    </DialogButtons>
+</SfDialog>
+
+<SfDialog Width="400px" IsModal="true" CloseOnEscape="true" ShowCloseIcon="true" @bind-Visible="@IsVisibleChatLuong">
+    <DialogEvents OnOverlayModalClick="@OverlayClick"></DialogEvents>
+    <DialogTemplates>
+        <Header>
+            <div>@SelectedItems.FirstOrDefault()?.SubTitle</div>
+        </Header>
+        <Content>
+            <SfDropDownList TValue="MaChatLuongXepKhuon" Placeholder="Chọn Chất Lượng"
+                            FloatLabelType="FloatLabelType.Auto" AllowFiltering="true" TItem="MaChatLuongXepKhuon"
+                            @bind-Value="@MainService.VmChatLuong.SelectedItem"
+                            DataSource="@MainService.VmChatLuong.UsedItems">
+                <DropDownListEvents TItem="MaChatLuongXepKhuon" TValue="MaChatLuongXepKhuon" OnOpen="BeforeOpen"
+                                    Closed="ClosedHanlder"/>
+                <DropDownListFieldSettings Value="Ma" Text="Ten"></DropDownListFieldSettings>
+            </SfDropDownList>
+        </Content>
+    </DialogTemplates>
+    <DialogButtons>
+        <DialogButton Content="Xác Nhận" IsPrimary="true" OnClick="@CloseDialogChatLuong"/>
+    </DialogButtons>
+
+</SfDialog>
+<SfDialog Width="400px" IsModal="true" CloseOnEscape="true" ShowCloseIcon="true" @bind-Visible="@IsVisibleDoiKhuVuc">
+    <DialogEvents OnOverlayModalClick="@OverlayClick"></DialogEvents>
+    <DialogTemplates>
+        <Header>
+            <div>@SelectedItems.FirstOrDefault()?.SubTitle</div>
+        </Header>
+        <Content>
+            <SfDropDownList TValue="AppKV" Placeholder="Chọn khu vực chuyển đến"
+                            FloatLabelType="FloatLabelType.Auto" AllowFiltering="true" TItem="AppKV"
+                            @bind-Value="@SelectedKhuVuc"
+                            DataSource="@KhuVucs">
+                <DropDownListEvents TItem="AppKV" TValue="AppKV" OnOpen="BeforeOpen"
+                                    Closed="ClosedHanlder"/>
+                @* <DropDownListFieldSettings Value="Ma" Text="Ten"></DropDownListFieldSettings> *@
+            </SfDropDownList>
+            <SfDropDownList TValue="AppType" Placeholder="Chọn loại hình cân"
+                            FloatLabelType="FloatLabelType.Auto" AllowFiltering="true" TItem="EnumOption<AppType>"
+                            @bind-Value="@SelectedAppType"
+                            DataSource="@AppTypeOptions">
+                <DropDownListEvents TItem="EnumOption<AppType>" TValue="AppType" OnOpen="BeforeOpen"
+                                    Closed="ClosedHanlder"/>
+                <DropDownListFieldSettings Value="Value" Text="Text"></DropDownListFieldSettings>
+            </SfDropDownList>
+            <SfDropDownList TValue="XiNghiep" Placeholder="Chọn xưởng"
+                            FloatLabelType="FloatLabelType.Auto" AllowFiltering="true" TItem="XiNghiep"
+                            @bind-Value="@SelectedXiNghiep"
+                            DataSource="@MainService.VmXiNghiep.Items">
+                <DropDownListEvents TItem="XiNghiep" TValue="XiNghiep" OnOpen="BeforeOpen"
+                                    Closed="ClosedHanlder"/>
+                <DropDownListFieldSettings Value="Ma" Text="Ten"></DropDownListFieldSettings>
+            </SfDropDownList>
+        </Content>
+    </DialogTemplates>
+    <DialogButtons>
+        <DialogButton Content="Xác Nhận" IsPrimary="true" OnClick="@CloseDialogDoiKhuVuc"/>
+    </DialogButtons>
+
+</SfDialog>
+<SfDialog Width="400px" IsModal="true" CloseOnEscape="true" ShowCloseIcon="true" @bind-Visible="@IsVisibleSelectedDate">
+    <DialogEvents OnOverlayModalClick="@OverlayClick"></DialogEvents>
+    <DialogTemplates>
+        <Header>
+            <div>@SelectedItems.FirstOrDefault()?.SubTitle</div>
+        </Header>
+        <Content>
+            <SfDatePicker TValue="DateTime?" @bind-Value="@DateValue" Placeholder="Chọn Ngày"></SfDatePicker>
+        </Content>
+    </DialogTemplates>
+    <DialogButtons>
+        <DialogButton Content="Lấy Số Lượn Sync" IsPrimary="true"
+                      OnClick="() => GetPhieuCanCountStatus0(SelectedItems.FirstOrDefault()?.Id)"/>
+        <DialogButton Content="Sync" IsPrimary="true" OnClick="() => PhieuCanSync(SelectedItems.FirstOrDefault()?.Id)"/>
+    </DialogButtons>
+</SfDialog>
+<SfDialog Width="400px" IsModal="true" CloseOnEscape="true" @bind-Visible="@IsVisibleReload">
+    <DialogEvents OnOverlayModalClick="@OverlayClick"></DialogEvents>
+    <DialogTemplates>
+        <Header>
+            <div>Tải Lại</div>
+        </Header>
+        <Content>
+            <SfButton style="margin: 2px; width: 160px;" CssClass="e-primary"
+                      @onclick="() => ExecuteAction(() => Load())">Máy Cân
+            </SfButton>
+            <SfButton style="margin: 2px; width: 160px;" CssClass="e-primary"
+                      @onclick="() => ExecuteAction(() => LoadCoi())">Cối
+            </SfButton>
+            @if (MainService.VmApp.ComName?.ToUpper() == nameof(ComNames.HL))
+            {
+                <SfButton style="margin: 2px; width: 160px;" CssClass="e-primary"
+                          @onclick="() => ExecuteAction(() => MainService.VmLoHq.Reload())">Lô
+                </SfButton>
+            }
+            else
+            {
+                <SfButton style="margin: 2px; width: 160px;" CssClass="e-primary"
+                          @onclick="() => ExecuteAction(() => MainService.VmLo.Reload())">Lô
+                </SfButton>
+            }
+
+            <SfButton style="margin: 2px; width: 160px;" CssClass="e-primary"
+                      @onclick="() => ExecuteAction(() => MainService.VmNhanVien.Reload())">Nhân Viên
+            </SfButton>
+            <SfButton style="margin: 2px; width: 160px;" CssClass="e-primary"
+                      @onclick="() => ExecuteAction(() => MainService.VmThe.Reload())">Thẻ Nhân Viên
+            </SfButton>
+            <SfButton style="margin: 2px; width: 160px;" CssClass="e-primary"
+                      @onclick="() => ExecuteAction(() => MainService.VmTheRo.Reload())">Thẻ Rổ
+            </SfButton>
+            <SfButton style="margin: 2px; width: 160px;" CssClass="e-primary"
+                      @onclick="() => ExecuteAction(() => MainService.VmTheThanhPham.Reload())">Thẻ Chức Năng
+            </SfButton>
+            @if (MainService.VmApp.ComName?.ToUpper() == nameof(ComNames.RCQTG))
+            {
+                <SfButton style="margin: 2px; width: 160px;" CssClass="e-primary"
+                          @onclick="() => ExecuteAction(() => MainService.VmNguyenLieuHq.Reload())">Nguyên Liệu
+                </SfButton>
+                <SfButton style="margin: 2px; width: 160px;" CssClass="e-primary"
+                          @onclick="() => ExecuteAction(() => MainService.VmSizeHq.Reload())">Size
+                </SfButton>
+                <SfButton style="margin: 2px; width: 160px;" CssClass="e-primary"
+                          @onclick="() => ExecuteAction(() => MainService.VmThanhPhamHq.Reload())">Thành Phẩm
+                </SfButton>
+            }
+            else
+            {
+                <SfButton style="margin: 2px; width: 160px;" CssClass="e-primary"
+                          @onclick="() => ExecuteAction(() => MainService.VmSizeNguyenLieu.Reload())">Size Nguyên Liệu
+                </SfButton>
+                <SfButton style="margin: 2px; width: 160px;" CssClass="e-primary"
+                          @onclick="() => ExecuteAction(() => MainService.VmSizeDinhHinh.Reload())">Size Định Hình
+                </SfButton>
+                <SfButton style="margin: 2px; width: 160px;" CssClass="e-primary"
+                          @onclick="() => ExecuteAction(() => MainService.VmSizeFillet.Reload())">Size Fillet
+                </SfButton>
+                <SfButton style="margin: 2px; width: 160px;" CssClass="e-primary"
+                          @onclick="() => ExecuteAction(() => MainService.VmThanhPhamNguyenLieu.Reload())">TP Nguyên
+                    Liệu
+                </SfButton>
+                <SfButton style="margin: 2px; width: 160px;" CssClass="e-primary"
+                          @onclick="() => ExecuteAction(() => MainService.VmDinhMucDinhHinh.ReLoadLast(MainService.VmApp.DateTimeNow))">
+                    Định Mức Định Hình
+                </SfButton>
+                <SfButton style="margin: 2px; width: 160px;" CssClass="e-primary"
+                          @onclick="() => ExecuteAction(() => MainService.VmDinhMucFillet.ReLoadLast(MainService.VmApp.DateTimeNow))">
+                    Định Mức Fillet
+                </SfButton>
+                <SfButton style="margin: 2px; width: 160px;" CssClass="e-primary"
+                          @onclick="() => ExecuteAction(() => MainService.VmThanhPhamDinhHinh.Reload())">TP Định Hình
+                </SfButton>
+                <SfButton style="margin: 2px; width: 160px;" CssClass="e-primary"
+                          @onclick="() => ExecuteAction(() => MainService.VmThanhPhamFillet.Reload())">TP Fillet
+                </SfButton>
+                <SfButton style="margin: 2px; width: 160px;" CssClass="e-primary"
+                          @onclick="() => ExecuteAction(() => MainService.VmThanhPhamChinhXepKhuon.Reload())">TP Chính
+                    Xếp Khuôn
+                </SfButton>
+                <SfButton style="margin: 2px; width: 160px;" CssClass="e-primary"
+                          @onclick="() => ExecuteAction(() => MainService.VmSizeChinhXepKhuon.Reload())">Size Chính Xếp
+                    Khuôn
+                </SfButton>
+                <SfButton style="margin: 2px; width: 160px;" CssClass="e-primary"
+                          @onclick="() => ExecuteAction(() => MainService.VmThanhPhamPhuXepKhuon.Reload())">Thành Phẩm
+                    Phụ Xếp Khuôn
+                </SfButton>
+                <SfButton style="margin: 2px; width: 160px;" CssClass="e-primary"
+                          @onclick="() => ExecuteAction(() => MainService.VmSizePhuXepKhuon.Reload())">Size Phụ Xếp
+                    Khuôn
+                </SfButton>
+                <SfButton style="margin: 2px; width: 160px;" CssClass="e-primary"
+                          @onclick="() => ExecuteAction(() => MainService.VmChatLuong.Reload())">Chất Lượng Xếp Khuôn
+                </SfButton>
+                <SfButton style="margin: 2px; width: 160px;" CssClass="e-primary"
+                          @onclick="() => ExecuteAction(() => MainService.VmChieuXaXepKhuon.Reload())">Chiếu Xạ Xếp
+                    Khuôn
+                </SfButton>
+                <SfButton style="margin: 2px; width: 160px;" CssClass="e-primary"
+                          @onclick="() => ExecuteAction(() => MainService.VmPhuongTienNguyenLieu.Reload())">Phương Tiện
+                </SfButton>
+                <SfButton style="margin: 2px; width: 160px;" CssClass="e-primary"
+                          @onclick="() => ExecuteAction(() => MainService.VmAo.Reload())">Ao
+                </SfButton>
+            }
+
+        </Content>
+    </DialogTemplates>
+    <DialogButtons>
+        <DialogButton Content="Đóng" IsPrimary="true" OnClick="@CloseDialogReload"/>
+    </DialogButtons>
+    <DialogPositionData Y="top" X="center"/>
+</SfDialog>
+<SfDialog Width="450px" IsModal="true" CloseOnEscape="true" @bind-Visible="@IsHieuChinh">
+    <DialogEvents OnOverlayModalClick="@OverlayClick"></DialogEvents>
+    <DialogTemplates>
+        <Header>
+            <div>@SelectedItems.FirstOrDefault()?.SubTitle</div>
+        </Header>
+        <Content>
+            <div style="align-items: center; display: flex; margin: 2px;">
+                <div style="margin: 2px; width: 120px;">
+                    <span class="text">@SelectedItems.FirstOrDefault()?.IPAddr</span>
+                </div>
+                <SfButton style="margin: 2px; width: 120px;" CssClass="e-primary"
+                          @onmousedown="() => OpenIp(SelectedItems.FirstOrDefault()?.IPAddr)">&#10147;
+                </SfButton>
+            </div>
+            <SfButton style="margin: 2px; width: 120px;" CssClass="e-primary"
+                      @onmousedown="() => ZeroAsync(SelectedItems.FirstOrDefault()?.Id)"
+                      @onmouseup="() => HandleButtonMouseUpAsync(SelectedItems.FirstOrDefault()?.Id)">Zero &#8595;
+            </SfButton>
+            <SfButton style="margin: 2px; width: 120px;" CssClass="e-primary"
+                      @onmousedown="() => TareAsync(SelectedItems.FirstOrDefault()?.Id)"
+                      @onmouseup="() => HandleButtonMouseUpAsync(SelectedItems.FirstOrDefault()?.Id)">Tare &#8593;
+            </SfButton>
+            <SfButton style="margin: 2px; width: 120px;" CssClass="e-primary"
+                      @onmousedown="() => ModeAsync(SelectedItems.FirstOrDefault()?.Id)"
+                      @onmouseup="() => HandleButtonMouseUpAsync(SelectedItems.FirstOrDefault()?.Id)">Mode &#8594;
+            </SfButton>
+            <SfButton style="margin: 2px; width: 120px;" CssClass="e-primary"
+                      @onmousedown="() => PrintAsync(SelectedItems.FirstOrDefault()?.Id)"
+                      @onmouseup="() => HandleButtonMouseUpAsync(SelectedItems.FirstOrDefault()?.Id)">Print &#8629;
+            </SfButton>
+            <SfButton style="margin: 2px; width: 120px;" CssClass="e-primary"
+                      @onmousedown="() => PowerAsync(SelectedItems.FirstOrDefault()?.Id)"
+                      @onmouseup="() => HandleButtonMouseUpAsync(SelectedItems.FirstOrDefault()?.Id)">Power &#67;
+            </SfButton>
+            <SfButton style="margin: 2px; width: 120px;" CssClass="e-primary"
+                      @onmousedown="() => RestartAsync(SelectedItems.FirstOrDefault()?.Id)">Rst Cân
+            </SfButton>
+            <SfButton style="margin: 2px; width: 120px;" CssClass="e-primary"
+                      @onmousedown="() => SetTimeAsync(SelectedItems.FirstOrDefault()?.Id)">Đặt Giờ
+            </SfButton>
+            <SfButton style="margin: 2px; width: 120px;" CssClass="e-primary"
+                      @onmousedown="() => RestartSystem(SelectedItems.FirstOrDefault()?.Id)">Rst Sys
+            </SfButton>
+            <SfButton style="margin: 2px; width: 120px;" CssClass="e-primary"
+                      @onmousedown="() => GetDeviceInfos(SelectedItems.FirstOrDefault()?.Id)">Info
+            </SfButton>
+            <SfButton style="margin: 2px; width: 120px;" CssClass="e-primary"
+                      @onmousedown="() => OpenDialogSelectedDate()">Sync PhieuCan
+            </SfButton>
+            <SfButton style="margin: 2px; width: 120px;" CssClass="e-primary"
+                      @onmousedown="() => OpenDialogDoiKhuVuc(SelectedItems.FirstOrDefault())"> Đổi Khu Vực
+            </SfButton>
+        </Content>
+    </DialogTemplates>
+    <DialogButtons>
+        <DialogButton Content="Đóng" IsPrimary="true" OnClick="@CloseDialogHieuChinh"/>
+    </DialogButtons>
+    <DialogPositionData Y="top" X="center"/>
+</SfDialog>
+
+@*     </div> *@
+
+@*     <!-- / Content --> *@
+@*     <!-- Footer --> *@
+@*     <FooterLayout /> *@
+@*     <!-- / Footer --> *@
+@*     <div class="content-backdrop fade"></div> *@
+@* </div> *@
 <!-- Content wrapper -->
+
 @code {
     private bool IsVisibleSelectedDate { get; set; }
     private bool IsVisibleTare { get; set; }
+    private bool IsVisibleThamSoTangTrong { get; set; }
     private bool IsVisibleLo { get; set; }
     private bool IsVisibleThanhPhamFillet { get; set; }
     private bool IsVisibleThanhPhamXepKhuon { get; set; }
+    private bool IsVisibleThanhPhamXepKhuonPhu { get; set; }
     private bool IsVisibleSizeFillet { get; set; }
     private bool IsVisibleSizeXepKhuon { get; set; }
+    private bool IsVisibleSizeXepKhuonPhu { get; set; }
     private bool IsVisibleThanhPhamDinhHinh { get; set; }
     private bool IsVisibleSizeDinhHinh { get; set; }
     private bool IsVisibleReload { get; set; }
     private bool IsVisibleChieuXa { get; set; }
+    private bool IsVisibleCoi { get; set; }
+    private bool IsVisibleAo { get; set; }
+    private bool IsVisiblePhuongTien { get; set; }
     private bool IsVisibleChatLuong { get; set; }
+    private bool IsVisibleNguyenLieu { get; set; }
     private bool IsHieuChinh { get; set; }
+    private bool IsVisibleThanhPhamHq { get; set; }
+    private bool IsVisibleThanhPhamNguyenLieu { get; set; }
+    private bool IsVisibleSizeHq { get; set; }
+    private bool IsVisibleSizeNguyenLieu { get; set; }
+    private bool IsVisibleDoiKhuVuc { get; set; }
     private List<MayCan> SelectedItems = new();
     private MayCan item = new();
     private readonly string expand = "Chi Tiết";
@@ -601,6 +1577,21 @@
     decimal trongLuongTare = 0;
     private int userId = -1;
     public DateTime? DateValue { get; set; } = DateTime.Now;
+    private DateTime _lastUpdate = DateTime.MinValue;
+    private readonly TimeSpan _debounceInterval = TimeSpan.FromMilliseconds(300);
+    private List<AppKV> KhuVucs { get; set; }
+    private List<AppType> AppTypes { get; set; }
+    private List<EnumOption<AppType>> AppTypeOptions =
+        Enum.GetValues<AppType>()
+            .Select(v => new EnumOption<AppType> {
+                Value = v,
+                Text = v.GetDisplayName()
+            })
+            .ToList();
+    private AppType SelectedAppType { get; set; }
+    private AppKV SelectedKhuVuc { get; set; }
+    private XiNghiep SelectedXiNghiep { get; set; }
+
 
     private class ButtonModel
     {
@@ -622,13 +1613,21 @@
     protected override Task OnInitializedAsync()
     {
         var _userId = SessionService.Get("UserId");
+        var xuongId = SessionService.Get("XuongId");
+        if (!string.IsNullOrEmpty(xuongId))
+        {
+            // Gán giá trị vào SelectedItem trong ViewModel
+            var xiNghiep = MainService.VmXiNghiep.Items.FirstOrDefault(x => x.Ma == xuongId);
+            DeviceViewService.XiNghiep = xiNghiep;
+        }
+
         if (_userId != null)
         {
             userId = int.Parse(_userId);
         }
 
-        MayCanService.ItemChanged -= MayCanChangedHandler;
-        MayCanService.ItemChanged += MayCanChangedHandler;
+        DeviceViewService.DevicesChanged -= MayCanChangedHandler;
+        DeviceViewService.DevicesChanged += MayCanChangedHandler;
         MainService.AlertRequested -= AlertRequestedHandler;
         MainService.AlertRequested += AlertRequestedHandler;
         DeviceViewService.Items.Clear();
@@ -644,18 +1643,21 @@
         {
             var item = DeviceViewService.Items[i];
             buttonRefs.Add(new ButtonModel
-                {
-                    Id = item.Id,
-                    Content = buttonContent
-                });
+            {
+                Id = item.Id,
+                Content = buttonContent
+            });
         }
 
+        KhuVucs = Enum.GetValues(typeof(AppKV)).Cast<AppKV>().ToList();
+        AppTypes = Enum.GetValues(typeof(AppType)).Cast<AppType>().ToList();
         return base.OnInitializedAsync();
     }
 
     private void AlertRequestedHandler(string obj)
     {
-        jsRuntime.InvokeVoidAsync("alert", obj);
+        // jsRuntime.InvokeVoidAsync("alert", obj);
+        ToastService.ShowToast(obj, ToastType.Error);
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -667,9 +1669,14 @@
         await base.OnAfterRenderAsync(firstRender);
     }
 
-    private void MayCanChangedHandler(object? sender, EventArgs args)
+    private async void MayCanChangedHandler(object? sender, EventArgs args)
     {
-        InvokeAsync(StateHasChanged);
+        var now = DateTime.Now;
+        if (now - _lastUpdate < _debounceInterval)
+            return;
+
+        _lastUpdate = now;
+        await InvokeAsync(StateHasChanged);
     }
 
     void ExpandHandler(string id)
@@ -681,6 +1688,25 @@
             button.Content = "";
             buttonContent = content == expand ? collapse : expand;
             button.Content = buttonContent;
+        }
+    }
+
+    void SetThamSoTangTrong(MayCan _mayCan)
+    {
+        try
+        {
+            var mayCan = SelectedItems.FirstOrDefault();
+            if (mayCan != null)
+            {
+                mayCan.ThamSoTangTrong = _mayCan.ThamSoTangTrong ?? 1;
+            }
+
+            IsVisibleThamSoTangTrong = false;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            ToastService.ShowToast($"Lỗi", ToastType.Error);
         }
     }
 
@@ -701,12 +1727,14 @@
         try
         {
             action.Invoke();
-            jsRuntime.InvokeVoidAsync("alert", "Thực Hiện Xong");
+            // jsRuntime.InvokeVoidAsync("alert", "Thực Hiện Xong");
+            ToastService.ShowToast("Thực Hiện Xong", ToastType.Success);
         }
         catch (Exception e)
         {
             Console.WriteLine(e);
-            jsRuntime.InvokeVoidAsync("alert", e.ToString());
+            // jsRuntime.InvokeVoidAsync("alert", e.ToString());
+            ToastService.ShowToast(e.ToString(), ToastType.Error);
         }
     }
 
@@ -727,10 +1755,31 @@
         SelectedItems.Add(_mayCan);
         IsVisibleLo = true;
     }
+
     private void OpenDialogSelectedDate()
     {
         IsVisibleSelectedDate = true;
     }
+
+    private void OpenDialogDoiKhuVuc(MayCan? mayCan)
+    {
+        if (mayCan == null)
+        {
+            ToastService.ShowToast("Vui lòng chọn máy cân", ToastType.Warning);
+            return;
+        }
+
+        SelectedKhuVuc = mayCan.WKv;
+        SelectedAppType = mayCan.AType;
+        var mayCanXiNghiep = MainService.VmXiNghiep.Items.FirstOrDefault(x => x.Ma == mayCan.MaXuong);
+        if (mayCanXiNghiep != null)
+        {
+            SelectedXiNghiep = mayCanXiNghiep;
+        }
+
+        IsVisibleDoiKhuVuc = true;
+    }
+
     private void OpenDialogReload()
     {
         IsVisibleReload = true;
@@ -746,11 +1795,29 @@
         IsVisibleReload = false;
     }
 
-    private void CloseDialogLo()
+    private async void CloseDialogLo()
     {
-        var mayCan = SelectedItems.FirstOrDefault();
-        var id = mayCan?.Id;
-        if (id != null) MayCanService.CommandSetLo(id, MainService.VmLo.SelectedItem);
+        var hander = await ErrorHandler.HandleAsync(async () =>
+        {
+            var mayCan = SelectedItems.FirstOrDefault();
+            var id = mayCan?.Id;
+            if (id != null)
+            {
+                if (MainService.VmApp.ComName == nameof(ComNames.HL))
+                {
+                    await MayCanService.CommandSetLo(id, MainService.VmLoHq.SelectedItem);
+                }
+                else
+                {
+                    await MayCanService.CommandSetLo(id, MainService.VmLo.SelectedItem);
+                }
+            }
+        });
+        if (!hander.IsSuccess)
+        {
+            ToastService.ShowToast(hander?.Error?.Message, ToastType.Error);
+        }
+
         IsVisibleLo = false;
     }
 
@@ -758,6 +1825,7 @@
     {
         SelectedItems.Clear();
         SelectedItems.Add(_mayCan);
+
         var mayCan = SelectedItems.FirstOrDefault();
         if (mayCan != null)
         {
@@ -768,12 +1836,57 @@
             else if (mayCan.WKv == AppKV.BTPDinhHinh || mayCan.WKv == AppKV.TPDinhHinh)
             {
                 MainService.VmThanhPhamDinhHinh.SelectedItem = MainService.VmThanhPhamDinhHinh.Items.FirstOrDefault();
+                if (MainService.VmApp.ComName == nameof(ComNames.NV))
+                {
+                    var xiNghiep = MainService.VmXiNghiep.Items.FirstOrDefault(x => x.Ma == mayCan.MaXuong);
+                    if (xiNghiep != null)
+                    {
+                        var thanhPhamItems = MainService.VmThanhPhamDinhHinh.Items.Where(x => x.CodeId == xiNghiep.CodeId || (x.CodeId != null && x.CodeId.Trim() == "")).ToList();
+                        MainService.VmThanhPhamDinhHinh.UsedItems.Clear();
+                        foreach (var item in thanhPhamItems)
+                        {
+                            MainService.VmThanhPhamDinhHinh.UsedItems.Add(item);
+                        }
+                    }
+                }
 
                 IsVisibleThanhPhamDinhHinh = true;
             }
             else if (mayCan.WKv == AppKV.XepKhuon || mayCan.WKv == AppKV.XepKhuonRaCoi)
             {
                 IsVisibleThanhPhamXepKhuon = true;
+            }
+            else if (mayCan.WKv == AppKV.XepKhuonPhu)
+            {
+                IsVisibleSizeXepKhuonPhu = true;
+            }
+            else if (mayCan.WKv == AppKV.Hq)
+            {
+                IsVisibleThanhPhamHq = true;
+            }
+            else if (mayCan.WKv == AppKV.NguyenLieu)
+            {
+                IsVisibleThanhPhamNguyenLieu = true;
+            }
+        }
+    }
+
+    private void OpenDialogThamSoTangTrong(MayCan _mayCan)
+    {
+        item = _mayCan;
+        IsVisibleThamSoTangTrong = true;
+    }
+
+    private void OpenDialogNguyenLieu(MayCan _mayCan)
+    {
+        SelectedItems.Clear();
+        SelectedItems.Add(_mayCan);
+        var mayCan = SelectedItems.FirstOrDefault();
+        if (mayCan != null)
+        {
+            if (mayCan.WKv == AppKV.Hq)
+            {
+                IsVisibleNguyenLieu = true;
             }
         }
     }
@@ -800,6 +1913,39 @@
         }
     }
 
+    private void OpenDialogCoi(MayCan _mayCan)
+    {
+        SelectedItems.Clear();
+        SelectedItems.Add(_mayCan);
+        var mayCan = SelectedItems.FirstOrDefault();
+        if (mayCan != null)
+        {
+            IsVisibleCoi = true;
+        }
+    }
+
+    private void OpenDialogAo(MayCan _mayCan)
+    {
+        SelectedItems.Clear();
+        SelectedItems.Add(_mayCan);
+        var mayCan = SelectedItems.FirstOrDefault();
+        if (mayCan != null)
+        {
+            IsVisibleAo = true;
+        }
+    }
+
+    private void OpenDialogPhuongTien(MayCan _mayCan)
+    {
+        SelectedItems.Clear();
+        SelectedItems.Add(_mayCan);
+        var mayCan = SelectedItems.FirstOrDefault();
+        if (mayCan != null)
+        {
+            IsVisiblePhuongTien = true;
+        }
+    }
+
     private void OpenDialogSize(MayCan _mayCan)
     {
         SelectedItems.Clear();
@@ -819,90 +1965,328 @@
             {
                 IsVisibleSizeXepKhuon = true;
             }
-        }
-    }
-
-    private void CloseDialogThanhPham()
-    {
-        var mayCan = SelectedItems.FirstOrDefault();
-        if (mayCan != null)
-        {
-            var id = mayCan?.Id;
-            if (mayCan.WKv == AppKV.BTPFillet || mayCan.WKv == AppKV.BTPFilletv2 || mayCan.WKv == AppKV.TPFillet || mayCan.WKv == AppKV.TPFilletv2)
+            else if (mayCan.WKv == AppKV.XepKhuonPhu)
             {
-                if (id != null) MayCanService.CommandSetThanhPham(id, MainService.VmThanhPhamFillet.SelectedItem?.Ma ?? "", MainService.VmThanhPhamFillet.SelectedItem?.Ten ?? "");
-                IsVisibleThanhPhamFillet = false;
+                IsVisibleSizeXepKhuonPhu = true;
             }
-            else if (mayCan.WKv == AppKV.BTPDinhHinh || mayCan.WKv == AppKV.TPDinhHinh)
+            else if (mayCan.WKv == AppKV.Hq)
             {
-                if (id != null) MayCanService.CommandSetThanhPham(id, MainService.VmThanhPhamDinhHinh.SelectedItem?.Ma ?? "", MainService.VmThanhPhamDinhHinh.SelectedItem?.Ten ?? "");
-                IsVisibleThanhPhamDinhHinh = false;
+                IsVisibleSizeHq = true;
             }
-            else if (mayCan.WKv == AppKV.XepKhuon || mayCan.WKv == AppKV.XepKhuonRaCoi)
+            else if (mayCan.WKv == AppKV.NguyenLieu)
             {
-                if (id != null) MayCanService.CommandSetThanhPham(id, MainService.VmThanhPhamChinhXepKhuon.SelectedItem?.Ma ?? "", MainService.VmThanhPhamChinhXepKhuon.SelectedItem?.Ten ?? "");
-                IsVisibleThanhPhamXepKhuon = true;
+                IsVisibleSizeNguyenLieu = true;
             }
         }
     }
 
-    private void CloseDialogSize()
+    private async void CloseDialogThanhPham()
     {
         var mayCan = SelectedItems.FirstOrDefault();
         if (mayCan != null)
         {
-            var id = mayCan?.Id;
-            if (mayCan.WKv == AppKV.BTPFillet || mayCan.WKv == AppKV.BTPFilletv2 || mayCan.WKv == AppKV.TPFillet || mayCan.WKv == AppKV.TPFilletv2)
+            var handler = await ErrorHandler.HandleAsync(async () =>
             {
-                if (id != null) MayCanService.CommandSetSize(id, MainService.VmSizeFillet.SelectedItem?.Ma ?? "", MainService.VmSizeFillet.SelectedItem?.Ten ?? "");
-                IsVisibleSizeFillet = false;
-            }
-            else if (mayCan.WKv == AppKV.BTPDinhHinh || mayCan.WKv == AppKV.TPDinhHinh)
+                var id = mayCan?.Id;
+                if (mayCan.WKv == AppKV.BTPFillet || mayCan.WKv == AppKV.BTPFilletv2 || mayCan.WKv == AppKV.TPFillet || mayCan.WKv == AppKV.TPFilletv2)
+                {
+                    if (id != null) await MayCanService.CommandSetThanhPham(id, MainService.VmThanhPhamFillet.SelectedItem?.Ma ?? "", MainService.VmThanhPhamFillet.SelectedItem?.Ten ?? "");
+                    // IsVisibleThanhPhamFillet = false;
+                }
+                else if (mayCan.WKv == AppKV.BTPDinhHinh || mayCan.WKv == AppKV.TPDinhHinh)
+                {
+                    if (id != null) await MayCanService.CommandSetThanhPham(id, MainService.VmThanhPhamDinhHinh.SelectedItem?.Ma ?? "", MainService.VmThanhPhamDinhHinh.SelectedItem?.Ten ?? "");
+                    // IsVisibleThanhPhamDinhHinh = false;
+                }
+                else if (mayCan.WKv == AppKV.XepKhuon || mayCan.WKv == AppKV.XepKhuonRaCoi)
+                {
+                    if (id != null) await MayCanService.CommandSetThanhPham(id, MainService.VmThanhPhamChinhXepKhuon.SelectedItem?.Ma ?? "", MainService.VmThanhPhamChinhXepKhuon.SelectedItem?.Ten ?? "");
+                    // IsVisibleThanhPhamXepKhuon = false;
+                }
+                else if (mayCan.WKv == AppKV.XepKhuonPhu)
+                {
+                    if (id != null) await MayCanService.CommandSetThanhPham(id, MainService.VmThanhPhamPhuXepKhuon.SelectedItem?.Ma ?? "", MainService.VmThanhPhamPhuXepKhuon.SelectedItem?.Ten ?? "");
+                    // IsVisibleThanhPhamXepKhuonPhu = false;
+                }
+                else if (mayCan.WKv == AppKV.Hq)
+                {
+                    if (id != null) await MayCanService.CommandSetThanhPham(id, MainService.VmThanhPhamHq.SelectedItem?.Id ?? "", MainService.VmThanhPhamHq.SelectedItem?.Ten ?? "");
+                    //IsVisibleThanhPhamHq = false;
+                }
+                else if (mayCan.WKv == AppKV.NguyenLieu)
+                {
+                    if (id != null) await MayCanService.CommandSetThanhPham(id, MainService.VmThanhPhamNguyenLieu.SelectedItem?.Ma ?? "", MainService.VmThanhPhamNguyenLieu.SelectedItem?.Ten ?? "");
+                }
+            });
+            if (!handler.IsSuccess)
             {
-                if (id != null) MayCanService.CommandSetSize(id, MainService.VmSizeDinhHinh.SelectedItem?.Ma ?? "", MainService.VmSizeDinhHinh.SelectedItem?.Ten ?? "");
-                IsVisibleSizeDinhHinh = false;
+                ToastService.ShowToast(handler?.Error?.Message, ToastType.Error);
             }
-            else if (mayCan.WKv == AppKV.XepKhuon || mayCan.WKv == AppKV.XepKhuonRaCoi)
-            {
-                if (id != null) MayCanService.CommandSetSize(id, MainService.VmSizeChinhXepKhuon.SelectedItem?.Ma ?? "", MainService.VmSizeChinhXepKhuon.SelectedItem?.Ten ?? "");
-                IsVisibleSizeXepKhuon = false;
-            }
+
+            HideAllDialogs();
         }
     }
 
-    private void CloseDialogChieuXa()
+    private async void CloseDialogSize()
     {
         var mayCan = SelectedItems.FirstOrDefault();
         if (mayCan != null)
         {
-            var id = mayCan?.Id;
-            if (id != null) MayCanService.CommandSetChieuXa(id, MainService.VmChieuXaXepKhuon.SelectedItem?.Ma ?? "", MainService.VmChieuXaXepKhuon.SelectedItem?.Ten ?? "");
+            var handler = await ErrorHandler.HandleAsync(async () =>
+            {
+                var id = mayCan?.Id;
+                if (mayCan.WKv == AppKV.BTPFillet || mayCan.WKv == AppKV.BTPFilletv2 || mayCan.WKv == AppKV.TPFillet || mayCan.WKv == AppKV.TPFilletv2)
+                {
+                    if (id != null) await MayCanService.CommandSetSize(id, MainService.VmSizeFillet.SelectedItem?.Ma ?? "", MainService.VmSizeFillet.SelectedItem?.Ten ?? "");
+                    // IsVisibleSizeFillet = false;
+                }
+                else if (mayCan.WKv == AppKV.BTPDinhHinh || mayCan.WKv == AppKV.TPDinhHinh)
+                {
+                    if (id != null) await MayCanService.CommandSetSize(id, MainService.VmSizeDinhHinh.SelectedItem?.Ma ?? "", MainService.VmSizeDinhHinh.SelectedItem?.Ten ?? "");
+                    // IsVisibleSizeDinhHinh = false;
+                }
+                else if (mayCan.WKv == AppKV.XepKhuon || mayCan.WKv == AppKV.XepKhuonRaCoi)
+                {
+                    if (id != null) await MayCanService.CommandSetSize(id, MainService.VmSizeChinhXepKhuon.SelectedItem?.Ma ?? "", MainService.VmSizeChinhXepKhuon.SelectedItem?.Ten ?? "");
+                    // IsVisibleSizeXepKhuon = false;
+                }
+                else if (mayCan.WKv == AppKV.XepKhuonPhu)
+                {
+                    if (id != null) await MayCanService.CommandSetSize(id, MainService.VmSizePhuXepKhuon.SelectedItem?.Ma ?? "", MainService.VmSizePhuXepKhuon.SelectedItem?.Ten ?? "");
+                }
+                else if (mayCan.WKv == AppKV.Hq)
+                {
+                    if (id != null) await MayCanService.CommandSetSize(id, MainService.VmSizeHq.SelectedItem?.Id ?? "", MainService.VmSizeHq.SelectedItem?.Ten ?? "");
+                    // IsVisibleSizeHq = false;
+                }
+                else if (mayCan.WKv == AppKV.NguyenLieu)
+                {
+                    if (id != null) await MayCanService.CommandSetSize(id, MainService.VmSizeNguyenLieu.SelectedItem?.Ma ?? "", MainService.VmSizeNguyenLieu.SelectedItem?.Ten ?? "");
+                }
+            });
+            if (!handler.IsSuccess)
+            {
+                ToastService.ShowToast(handler?.Error?.Message, ToastType.Error);
+            }
+
+            HideAllDialogs();
+        }
+    }
+
+    private async void CloseDialogChieuXa()
+    {
+        var mayCan = SelectedItems.FirstOrDefault();
+        if (mayCan != null)
+        {
+            var handler = await ErrorHandler.HandleAsync(async () =>
+            {
+                var id = mayCan?.Id;
+                if (id != null) await MayCanService.CommandSetChieuXa(id, MainService.VmChieuXaXepKhuon.SelectedItem?.Ma ?? "", MainService.VmChieuXaXepKhuon.SelectedItem?.Ten ?? "");
+            });
+            if (!handler.IsSuccess)
+            {
+                ToastService.ShowToast(handler?.Error?.Message, ToastType.Error);
+            }
+
+            // var id = mayCan?.Id;
+            // if (id != null) MayCanService.CommandSetChieuXa(id, MainService.VmChieuXaXepKhuon.SelectedItem?.Ma ?? "", MainService.VmChieuXaXepKhuon.SelectedItem?.Ten ?? "");
             IsVisibleChieuXa = false;
         }
     }
 
-    private void CloseDialogChatLuong()
+    private async void CloseDialogCoi()
     {
         var mayCan = SelectedItems.FirstOrDefault();
         if (mayCan != null)
         {
-            var id = mayCan?.Id;
-            if (id != null) MayCanService.CommandSetChatLuong(id, MainService.VmChatLuong.SelectedItem?.Ma ?? "", MainService.VmChatLuong.SelectedItem?.Ten ?? "");
+            var handler = await ErrorHandler.HandleAsync(async () =>
+            {
+                var id = mayCan?.Id;
+                if (id != null) await MayCanService.CommandSetCoi(id, MainService.VmCoi.SelectedItem?.Ma ?? "", MainService.VmCoi.SelectedItem?.Ten ?? "");
+            });
+            if (!handler.IsSuccess)
+            {
+                ToastService.ShowToast(handler?.Error?.Message, ToastType.Error);
+            }
+
+            // var id = mayCan?.Id;
+            // if (id != null) MayCanService.CommandSetChieuXa(id, MainService.VmChieuXaXepKhuon.SelectedItem?.Ma ?? "", MainService.VmChieuXaXepKhuon.SelectedItem?.Ten ?? "");
+            IsVisibleCoi = false;
+        }
+    }
+
+    private async void CloseDialogAo()
+    {
+        var mayCan = SelectedItems.FirstOrDefault();
+        if (mayCan != null)
+        {
+            var handler = await ErrorHandler.HandleAsync(async () =>
+            {
+                var id = mayCan?.Id;
+                if (id != null) await MayCanService.CommandSetAo(id, MainService.VmAoNguyenLieu.SelectedItemAo?.Ma ?? "", MainService.VmAoNguyenLieu.SelectedItemAo?.Ten ?? "");
+            });
+            if (!handler.IsSuccess)
+            {
+                ToastService.ShowToast(handler?.Error?.Message, ToastType.Error);
+            }
+
+            // var id = mayCan?.Id;
+            // if (id != null) MayCanService.CommandSetChieuXa(id, MainService.VmChieuXaXepKhuon.SelectedItem?.Ma ?? "", MainService.VmChieuXaXepKhuon.SelectedItem?.Ten ?? "");
+            IsVisibleAo = false;
+        }
+    }
+
+    private async void CloseDialogPhuongTien()
+    {
+        var mayCan = SelectedItems.FirstOrDefault();
+        if (mayCan != null)
+        {
+            var handler = await ErrorHandler.HandleAsync(async () =>
+            {
+                var id = mayCan?.Id;
+                if (id != null) await MayCanService.CommandSetPhuongTien(id, MainService.VmPhuongTienNguyenLieu.SelectedItem?.Ma ?? "", MainService.VmPhuongTienNguyenLieu.SelectedItem?.Ten ?? "");
+            });
+            if (!handler.IsSuccess)
+            {
+                ToastService.ShowToast(handler?.Error?.Message, ToastType.Error);
+            }
+
+            // var id = mayCan?.Id;
+            // if (id != null) MayCanService.CommandSetChieuXa(id, MainService.VmChieuXaXepKhuon.SelectedItem?.Ma ?? "", MainService.VmChieuXaXepKhuon.SelectedItem?.Ten ?? "");
+            IsVisiblePhuongTien = false;
+        }
+    }
+
+    private async void CloseDialogChatLuong()
+    {
+        var mayCan = SelectedItems.FirstOrDefault();
+        if (mayCan != null)
+        {
+            var handler = await ErrorHandler.HandleAsync(async () =>
+            {
+                var id = mayCan?.Id;
+                if (id != null) await MayCanService.CommandSetChatLuong(id, MainService.VmChatLuong.SelectedItem?.Ma ?? "", MainService.VmChatLuong.SelectedItem?.Ten ?? "");
+            });
+            if (!handler.IsSuccess)
+            {
+                ToastService.ShowToast(handler?.Error?.Message, ToastType.Error);
+            }
+
+            // var id = mayCan?.Id;
+            // if (id != null) MayCanService.CommandSetChatLuong(id, MainService.VmChatLuong.SelectedItem?.Ma ?? "", MainService.VmChatLuong.SelectedItem?.Ten ?? "");
             IsVisibleChatLuong = false;
+        }
+    }
+
+    private async void CloseDialogDoiKhuVuc()
+    {
+        var mayCan = SelectedItems.FirstOrDefault();
+
+        if (mayCan != null)
+        {
+            var handler = await ErrorHandler.HandleAsync(async () =>
+            {
+                var id = mayCan?.Id;
+                var rl = false;
+                if (id != null)
+                {
+                    mayCan.WKv = SelectedKhuVuc;
+                    mayCan.MaXuong = SelectedXiNghiep.Ma;
+                    mayCan.AType = SelectedAppType;
+                    mayCan.Items = new ObservableRangeCollection<object>();
+                    // if (MainService.VmApp.ComName.ToUpper() == nameof(ComNames.HL))
+                    // {
+                    //     rl = true;
+                    // }
+                    // else
+                    // {
+                        
+                        MayCanService.CommandDoiKhuVuc(mayCan.Id, SelectedKhuVuc);
+                    // }
+
+                    // if (rl)
+                    // {
+                    MayCanService.Update(mayCan.Id, SelectedKhuVuc, SelectedAppType, SelectedXiNghiep.Ma);
+                    MayCanService.NotifyItemChanged(mayCan);
+                    ToastService.ShowToast($"Đổi Sang Khu Vực {SelectedKhuVuc} - {SelectedAppType} -{SelectedXiNghiep.Ten}", ToastType.Info);
+                    await Task.Delay(5000);
+                    Navigation.NavigateTo(Navigation.Uri, forceLoad: true);
+                    // }
+                    // else
+                    // {
+                    //     throw new Exception("Không thể đổi khu vực");
+                    // }
+                }
+            });
+            if (!handler.IsSuccess)
+            {
+                ToastService.ShowToast(handler?.Error?.Message, ToastType.Error);
+            }
+
+
+            // var id = mayCan?.Id;
+            // if (id != null) MayCanService.CommandSetChatLuong(id, MainService.VmChatLuong.SelectedItem?.Ma ?? "", MainService.VmChatLuong.SelectedItem?.Ten ?? "");
+            IsVisibleDoiKhuVuc = false;
+        }
+    }
+
+    private async void CloseDialogNguyenLieu(MouseEventArgs obj)
+    {
+        var mayCan = SelectedItems.FirstOrDefault();
+        if (mayCan != null)
+        {
+            var hander = await ErrorHandler.HandleAsync(async () =>
+            {
+                var id = mayCan?.Id;
+                if (id != null) await MayCanService.CommandSetNguyenLieu(id, MainService.VmNguyenLieuHq.SelectedItem?.Id ?? "", MainService.VmNguyenLieuHq.SelectedItem?.Ten ?? "");
+            });
+            if (!hander.IsSuccess)
+            {
+                ToastService.ShowToast(hander?.Error?.Message, ToastType.Error);
+            }
+
+            IsVisibleNguyenLieu = false;
         }
     }
 
     public void Dispose()
     {
-        MayCanService.ItemChanged -= MayCanChangedHandler;
+        DeviceViewService.DevicesChanged -= MayCanChangedHandler;
+        MainService.AlertRequested -= AlertRequestedHandler;
+        SelectedItems?.Clear();
+        buttonRefs?.Clear();
     }
 
     private async void OverlayClick(OverlayModalClickEventArgs args)
     {
         args.PreventFocus = true;
+        HideAllDialogs();
+        // IsVisibleSizeXepKhuon = false;
+        // IsVisibleSizeFillet = false;
+        // IsVisibleThanhPhamXepKhuon = false;
+        // IsVisibleThanhPhamFillet = false;
+        // IsVisibleSizeDinhHinh = false;
+        // IsVisibleThanhPhamDinhHinh = false;
+        // IsVisibleReload = false;
+        // IsVisibleLo = false;
+        // IsVisibleTare = false;
+        // IsVisibleChieuXa = false;
+        // IsVisibleChatLuong = false;
+        // IsHieuChinh = false;
+        // IsVisibleNguyenLieu = false;
+        // IsVisibleThanhPhamHq = false;
+        // IsVisibleSizeHq = false;
+        //await JsRuntime.InvokeVoidAsync("removeKeyboard");
+        //CoiService.ItemChanged -= CoiService_ItemChanged;
+    }
+
+    private void HideAllDialogs()
+    {
         IsVisibleSizeXepKhuon = false;
+        IsVisibleSizeXepKhuonPhu = false;
         IsVisibleSizeFillet = false;
         IsVisibleThanhPhamXepKhuon = false;
+        IsVisibleThanhPhamXepKhuonPhu = false;
         IsVisibleThanhPhamFillet = false;
         IsVisibleSizeDinhHinh = false;
         IsVisibleThanhPhamDinhHinh = false;
@@ -912,297 +2296,411 @@
         IsVisibleChieuXa = false;
         IsVisibleChatLuong = false;
         IsHieuChinh = false;
-        //await JsRuntime.InvokeVoidAsync("removeKeyboard");
-        //CoiService.ItemChanged -= CoiService_ItemChanged;
+        IsVisibleNguyenLieu = false;
+        IsVisibleThanhPhamHq = false;
+        IsVisibleSizeHq = false;
+        IsVisibleAo = false;
+        IsVisiblePhuongTien = false;
+        IsVisibleCoi = false;
+        IsVisibleThanhPhamNguyenLieu = false;
+        IsVisibleSizeNguyenLieu = false;
+        IsVisibleThamSoTangTrong = false;
+        IsVisibleDoiKhuVuc = false;
     }
 
-    private async Task TareAsync(string? url)
+    private async Task TareAsync(string? id)
     {
-        var data = new
-        {
-            CMD = "TARE"
-        };
+        // var data = new
+        // {
+        //     CMD = "TARE",
+        //     Path="btnptare"
+        // };
 
         try
         {
-            var _url = $"http://{url}/api/w/btnptare";
-            var requestMessage = new HttpRequestMessage(HttpMethod.Post, _url)
-                {
-                    Content = new StringContent(JsonSerializer.Serialize(data), Encoding.UTF8, "application/json")
-                };
+            // var _url = $"http:{url}/api/w/posts";
+            // var requestMessage = new HttpRequestMessage(HttpMethod.Post, _url)
+            // {
+            //     Content = new StringContent(JsonSerializer.Serialize(data), Encoding.UTF8, "application/json")
+            // };
 
-            var response = await Http.SendAsync(requestMessage);
-            if (!response.IsSuccessStatusCode)
-            {
-                throw new Exception(response.ReasonPhrase);
-            }
+            // var response = await Http.SendAsync(requestMessage);
+            // if (!response.IsSuccessStatusCode)
+            // {
+            //     throw new Exception(response.ReasonPhrase);
+            // }
+            await MayCanService.CommandBtnpTare(id ?? "");
         }
         catch (Exception ex)
         {
-            Console.WriteLine("Lỗi khi gọi API Tare: " + ex.Message);
+            // Console.WriteLine("Lỗi khi gọi API Tare: " + ex.Message);
+            ToastService.ShowToast("Lỗi khi gọi API Tare: " + ex.Message, ToastType.Error);
         }
     }
 
-    private async Task ZeroAsync(string? url)
+    private async Task ZeroAsync(string? id)
     {
-        var data = new
-        {
-            CMD = "ZERO"
-        };
+        // var data = new
+        // {
+        //     CMD = "ZERO",
+        //     Path = "btnpzero"
+        // };
 
         try
         {
-            var _url = $"http://{url}/api/w/btnpzero";
-            var requestMessage = new HttpRequestMessage(HttpMethod.Post, _url)
-                {
-                    Content = new StringContent(JsonSerializer.Serialize(data), Encoding.UTF8, "application/json")
-                };
+            // var _url = $"http:{url}/api/w/posts";
+            // var requestMessage = new HttpRequestMessage(HttpMethod.Post, _url)
+            // {
+            //     Content = new StringContent(JsonSerializer.Serialize(data), Encoding.UTF8, "application/json")
+            // };
 
-            var response = await Http.SendAsync(requestMessage);
-            if (!response.IsSuccessStatusCode)
-            {
-                throw new Exception(response.ReasonPhrase);
-            }
+            // var response = await Http.SendAsync(requestMessage);
+            // if (!response.IsSuccessStatusCode)
+            // {
+            //     throw new Exception(response.ReasonPhrase);
+            // }
+            await MayCanService.CommandBtnpZero(id ?? "");
         }
         catch (Exception ex)
         {
-            Console.WriteLine("Lỗi khi gọi API Tare: " + ex.Message);
+            // Console.WriteLine("Lỗi khi gọi API Tare: " + ex.Message);
+            ToastService.ShowToast("Lỗi khi gọi API Zero: " + ex.Message, ToastType.Error);
         }
     }
 
-    private async Task ModeAsync(string? url)
+    private async Task ModeAsync(string? id)
     {
-        var data = new
-        {
-            CMD = "MODE"
-        };
+        // var data = new
+        // {
+        //     CMD = "MODE",
+        //     Path = "btnpmode"
+        // };
 
         try
         {
-            var _url = $"http://{url}/api/w/btnpmode";
-            var requestMessage = new HttpRequestMessage(HttpMethod.Post, _url)
-                {
-                    Content = new StringContent(JsonSerializer.Serialize(data), Encoding.UTF8, "application/json")
-                };
+            // var _url = $"http:{url}/api/w/posts";
+            // var requestMessage = new HttpRequestMessage(HttpMethod.Post, _url)
+            // {
+            //     Content = new StringContent(JsonSerializer.Serialize(data), Encoding.UTF8, "application/json")
+            // };
 
-            var response = await Http.SendAsync(requestMessage);
+            // var response = await Http.SendAsync(requestMessage);
 
-            if (!response.IsSuccessStatusCode)
-            {
-                throw new Exception(response.ReasonPhrase);
-            }
+            // if (!response.IsSuccessStatusCode)
+            // {
+            //     throw new Exception(response.ReasonPhrase);
+            // }
+            await MayCanService.CommandBtnpMode(id ?? "");
         }
         catch (Exception ex)
         {
-            Console.WriteLine("Lỗi khi gọi API Tare: " + ex.Message);
+            // Console.WriteLine("Lỗi khi gọi API Tare: " + ex.Message);
+            ToastService.ShowToast("Lỗi khi gọi API Mode: " + ex.Message, ToastType.Error);
         }
     }
 
-    private async Task PrintAsync(string? url)
+    private async Task PrintAsync(string? id)
     {
-        var data = new
-        {
-            CMD = "PRINT"
-        };
+        // var data = new
+        // {
+        //     CMD = "PRINT",
+        //     Path = "btnpenter"
+        // };
 
         try
         {
-            var _url = $"http://{url}/api/w/btnpenter";
-            var requestMessage = new HttpRequestMessage(HttpMethod.Post, _url)
-                {
-                    Content = new StringContent(JsonSerializer.Serialize(data), Encoding.UTF8, "application/json")
-                };
+            // var _url = $"http:{url}/api/w/posts";
+            // var requestMessage = new HttpRequestMessage(HttpMethod.Post, _url)
+            // {
+            //     Content = new StringContent(JsonSerializer.Serialize(data), Encoding.UTF8, "application/json")
+            // };
 
-            var response = await Http.SendAsync(requestMessage);
+            // var response = await Http.SendAsync(requestMessage);
 
-            if (!response.IsSuccessStatusCode)
-            {
-                throw new Exception(response.ReasonPhrase);
-            }
+            // if (!response.IsSuccessStatusCode)
+            // {
+            //     throw new Exception(response.ReasonPhrase);
+            // }
+            await MayCanService.CommandBtnpEnter(id ?? "");
         }
         catch (Exception ex)
         {
-            Console.WriteLine("Lỗi khi gọi API Tare: " + ex.Message);
+            // Console.WriteLine("Lỗi khi gọi API Tare: " + ex.Message);
+            ToastService.ShowToast("Lỗi khi gọi API Print: " + ex.Message, ToastType.Error);
         }
     }
 
-    private async Task PowerAsync(string? url)
+    private async Task PowerAsync(string? id)
     {
-        var data = new
-        {
-            CMD = "POWER"
-        };
+        // var data = new
+        // {
+        //     CMD = "POWER",
+        //     Path = "btnpc"
+        // };
 
         try
         {
-            var _url = $"http://{url}/api/w/btnpc";
-            var requestMessage = new HttpRequestMessage(HttpMethod.Post, _url)
-                {
-                    Content = new StringContent(JsonSerializer.Serialize(data), Encoding.UTF8, "application/json")
-                };
+            // var _url = $"http:{url}/api/w/posts";
+            // var requestMessage = new HttpRequestMessage(HttpMethod.Post, _url)
+            // {
+            //     Content = new StringContent(JsonSerializer.Serialize(data), Encoding.UTF8, "application/json")
+            // };
 
-            var response = await Http.SendAsync(requestMessage);
+            // var response = await Http.SendAsync(requestMessage);
 
-            if (!response.IsSuccessStatusCode)
-            {
-                throw new Exception(response.ReasonPhrase);
-            }
+            // if (!response.IsSuccessStatusCode)
+            // {
+            //     throw new Exception(response.ReasonPhrase);
+            // }
+            await MayCanService.CommandBtnpc(id ?? "");
         }
         catch (Exception ex)
         {
-            Console.WriteLine("Lỗi khi gọi API Tare: " + ex.Message);
+            // Console.WriteLine("Lỗi khi gọi API Tare: " + ex.Message);
+            ToastService.ShowToast("Lỗi khi gọi API Power: " + ex.Message, ToastType.Error);
         }
     }
 
-    private async Task RestartAsync(string? url)
+    private async Task RestartAsync(string? id)
     {
-        var data = new
-        {
-            CMD = "RESTART"
-        };
+        // var data = new
+        // {
+        //     CMD = "RESTART",
+        //     Path = "restart"
+        // };
 
         try
         {
-            var _url = $"http://{url}/api/w/restart";
-            var requestMessage = new HttpRequestMessage(HttpMethod.Post, _url)
-                {
-                    Content = new StringContent(JsonSerializer.Serialize(data), Encoding.UTF8, "application/json")
-                };
+            // var _url = $"http:{url}/api/w/posts";
+            // var requestMessage = new HttpRequestMessage(HttpMethod.Post, _url)
+            // {
+            //     Content = new StringContent(JsonSerializer.Serialize(data), Encoding.UTF8, "application/json")
+            // };
 
-            var response = await Http.SendAsync(requestMessage);
+            // var response = await Http.SendAsync(requestMessage);
 
-            if (!response.IsSuccessStatusCode)
-            {
-                throw new Exception(response.ReasonPhrase);
-            }
+            // if (!response.IsSuccessStatusCode)
+            // {
+            //     throw new Exception(response.ReasonPhrase);
+            // }
+            await MayCanService.CommandBtnpRestart(id ?? "");
         }
         catch (Exception ex)
         {
-            Console.WriteLine("Lỗi khi gọi API Tare: " + ex.Message);
+            // Console.WriteLine("Lỗi khi gọi API Tare: " + ex.Message);
+            ToastService.ShowToast("Lỗi khi gọi API Restart: " + ex.Message, ToastType.Error);
         }
     }
 
-    private async Task HandleButtonMouseUpAsync(string? url)
+    private async Task HandleButtonMouseUpAsync(string? id)
     {
-        var data = new
-        {
-            CMD = "REPLEASE"
-        };
+        // var data = new
+        // {
+        //     CMD = "REPLEASE",
+        //     Path = "btnr"
+        // };
 
         try
         {
-            var _url = $"http://{url}/api/w/btnr";
-            var requestMessage = new HttpRequestMessage(HttpMethod.Post, _url)
-                {
-                    Content = new StringContent(JsonSerializer.Serialize(data), Encoding.UTF8, "application/json")
-                };
+            // var _url = $"http:{url}/api/w/posts";
+            // var requestMessage = new HttpRequestMessage(HttpMethod.Post, _url)
+            // {
+            //     Content = new StringContent(JsonSerializer.Serialize(data), Encoding.UTF8, "application/json")
+            // };
 
-            var response = await Http.SendAsync(requestMessage);
+            // var response = await Http.SendAsync(requestMessage);
 
-            if (!response.IsSuccessStatusCode)
-            {
-                throw new Exception(response.ReasonPhrase);
-            }
+            // if (!response.IsSuccessStatusCode)
+            // {
+            //     throw new Exception(response.ReasonPhrase);
+            // }
+            await MayCanService.CommandBtnpRelease(id ?? "");
         }
         catch (Exception ex)
         {
-            Console.WriteLine("Lỗi khi gọi API Release: " + ex.Message);
+            // Console.WriteLine("Lỗi khi gọi API Release: " + ex.Message);
+            ToastService.ShowToast("Lỗi khi gọi API Release: " + ex.Message, ToastType.Error);
         }
     }
 
-    private async Task SetTimeAsync(string? url)
+    private async Task SetTimeAsync(string? id)
     {
-        var currentDate = DateTime.Now;
+        // var currentDate = DateTime.Now;
 
-        var formattedDateTime = currentDate.ToString("yyyyMMddHHmmss");
+        // var formattedDateTime = currentDate.ToString("yyyyMMddHHmmss");
 
-        var data = new
-        {
-            datetime = formattedDateTime
-        };
+        // var data = new
+        // {
+        //     datetime = formattedDateTime,
+        //     Path = "setdatetime"
+        // };
 
         try
         {
-            var _url = $"http://{url}/api/w/setdatetime";
-            var requestMessage = new HttpRequestMessage(HttpMethod.Post, _url)
-                {
-                    Content = new StringContent(JsonSerializer.Serialize(data), Encoding.UTF8, "application/json")
-                };
+            // var _url = $"http:{url}/api/w/posts";
+            // var requestMessage = new HttpRequestMessage(HttpMethod.Post, _url)
+            // {
+            //     Content = new StringContent(JsonSerializer.Serialize(data), Encoding.UTF8, "application/json")
+            // };
 
-            var response = await Http.SendAsync(requestMessage);
+            // var response = await Http.SendAsync(requestMessage);
 
-            if (!response.IsSuccessStatusCode)
-            {
-                throw new Exception(response.ReasonPhrase);
-            }
-
-            await jsRuntime.InvokeVoidAsync("alert", "Gửi Thành công!");
+            // if (!response.IsSuccessStatusCode)
+            // {
+            //     throw new Exception(response.ReasonPhrase);
+            // }
+            await MayCanService.CommandSetUpdateTime(id ?? "");
+            // await jsRuntime.InvokeVoidAsync("alert", "Gửi Thành công!");
+            ToastService.ShowToast("Gửi Thành công!", ToastType.Success);
         }
         catch (Exception ex)
         {
-            await jsRuntime.InvokeVoidAsync("alert", "Lỗi khi gọi API: " + ex.Message);
+            // await jsRuntime.InvokeVoidAsync("alert", "Lỗi khi gọi API: " + ex.Message);
+            ToastService.ShowToast("Lỗi khi gọi API: " + ex.Message, ToastType.Error);
         }
     }
 
     private async Task RestartSystem(string? url)
     {
-        var data = new
-        {
-            CMD = "REPLEASE"
-        };
+        // var data = new
+        // {
+        //     CMD = "REPLEASE",
+        // };
 
         try
         {
-            var _url = $"http://{url}/api/dev/restart";
-            var requestMessage = new HttpRequestMessage(HttpMethod.Post, _url)
-                {
-                    Content = new StringContent(JsonSerializer.Serialize(data), Encoding.UTF8, "application/json")
-                };
+            // var _url = $"http:{url}/api/dev/restart";
+            // var requestMessage = new HttpRequestMessage(HttpMethod.Post, _url)
+            // {
+            //     Content = new StringContent(JsonSerializer.Serialize(data), Encoding.UTF8, "application/json")
+            // };
 
-            var response = await Http.SendAsync(requestMessage);
+            // var response = await Http.SendAsync(requestMessage);
 
-            if (!response.IsSuccessStatusCode)
-            {
-                throw new Exception(response.ReasonPhrase);
-            }
+            // if (!response.IsSuccessStatusCode)
+            // {
+            //     throw new Exception(response.ReasonPhrase);
+            // }
+            await MayCanService.Commandrestartsystem(url ?? "");
 
-            await jsRuntime.InvokeVoidAsync("alert", "Gửi Thành công!");
+            // await jsRuntime.InvokeVoidAsync("alert", "Gửi Thành công!");
+            ToastService.ShowToast("Gửi Thành công!", ToastType.Success);
         }
         catch (Exception ex)
         {
-            await jsRuntime.InvokeVoidAsync("alert", "Lỗi khi gọi API: " + ex.Message);
+            // await jsRuntime.InvokeVoidAsync("alert", "Lỗi khi gọi API: " + ex.Message);
+            ToastService.ShowToast("Lỗi khi gọi API: " + ex.Message, ToastType.Error);
         }
     }
 
-    private async Task PhieuCanSync(string? url)
+    private async Task GetDeviceInfos(string? url)
     {
-        var data = new
+        try
         {
-            Ngay = DateValue?.ToString("yyyMMdd") ?? DateTime.Now.ToString("yyyMMdd")
-        };
+            await MayCanService.CommandGetDeviceInfos(url ?? "");
+            ToastService.ShowToast("Gửi Thành công!", ToastType.Success);
+        }
+        catch (Exception e)
+        {
+            ToastService.ShowToast("Lỗi khi gọi API: " + e.Message, ToastType.Error);
+        }
+    }
+
+    private async Task PhieuCanSync(string? id)
+    {
+        // var data = new
+        // {
+        //     Ngay = DateValue?.ToString("yyyMMdd") ?? DateTime.Now.ToString("yyyMMdd"),
+        //     Path = "phieucansync"
+        // };
         IsVisibleSelectedDate = false;
         try
         {
-            var _url = $"http://{url}/api/db/phieucansync";
-            var requestMessage = new HttpRequestMessage(HttpMethod.Post, _url)
-                {
-                    Content = new StringContent(JsonSerializer.Serialize(data), Encoding.UTF8, "application/json")
-                };
+            // var _url = $"http:{url}/api/db/posts";
+            // var requestMessage = new HttpRequestMessage(HttpMethod.Post, _url)
+            // {
+            //     Content = new StringContent(JsonSerializer.Serialize(data), Encoding.UTF8, "application/json")
+            // };
 
-            var response = await Http.SendAsync(requestMessage);
+            // var response = await Http.SendAsync(requestMessage);
 
-            if (!response.IsSuccessStatusCode)
-            {
-                throw new Exception(response.ReasonPhrase);
-            }
+            // if (!response.IsSuccessStatusCode)
+            // {
+            //     throw new Exception(response.ReasonPhrase);
+            // }
+            await MayCanService.CommandPhieuCanSync(id ?? "", DateValue ?? DateTime.Now);
 
-            await jsRuntime.InvokeVoidAsync("alert", "Gửi Thành công!");
+            // await jsRuntime.InvokeVoidAsync("alert", "Gửi Thành công!");
+            ToastService.ShowToast("Gửi Thành công!", ToastType.Success);
+        }
+        catch (TaskCanceledException)
+        {
+            // Lỗi timeout
+            ToastService.ShowToast("Request bị timeout!", ToastType.Error);
         }
         catch (Exception ex)
         {
-            await jsRuntime.InvokeVoidAsync("alert", "Lỗi khi gọi API: " + ex.Message);
+            // await jsRuntime.InvokeVoidAsync("alert", "Lỗi khi gọi API: " + ex.Message);
+            ToastService.ShowToast("Lỗi khi gọi API: " + ex.Message, ToastType.Error);
         }
     }
+
+    private async Task GetPhieuCanCountStatus0(string? id)
+    {
+        // var data = new
+        // {
+        //     Ngay = DateValue?.ToString("yyyMMdd") ?? DateTime.Now.ToString("yyyMMdd"),
+        //     Path = "phieucansync"
+        // };
+        IsVisibleSelectedDate = false;
+        try
+        {
+            // var _url = $"http:{url}/api/db/posts";
+            // var requestMessage = new HttpRequestMessage(HttpMethod.Post, _url)
+            // {
+            //     Content = new StringContent(JsonSerializer.Serialize(data), Encoding.UTF8, "application/json")
+            // };
+
+            // var response = await Http.SendAsync(requestMessage);
+
+            // if (!response.IsSuccessStatusCode)
+            // {
+            //     throw new Exception(response.ReasonPhrase);
+            // }
+            await MayCanService.CommandGetPhieuCanCountStatus0(id ?? "", DateValue ?? DateTime.Now);
+
+            // await jsRuntime.InvokeVoidAsync("alert", "Gửi Thành công!");
+            ToastService.ShowToast("Gửi Thành công!", ToastType.Success);
+        }
+        catch (TaskCanceledException)
+        {
+            // Lỗi timeout
+            ToastService.ShowToast("Request bị timeout!", ToastType.Error);
+        }
+        catch (Exception ex)
+        {
+            // await jsRuntime.InvokeVoidAsync("alert", "Lỗi khi gọi API: " + ex.Message);
+            ToastService.ShowToast("Lỗi khi gọi API: " + ex.Message, ToastType.Error);
+        }
+    }
+
+    private async Task OpenIp(string? ip)
+    {
+        try
+        {
+            if (!string.IsNullOrEmpty(ip))
+            {
+                var url = $"http://{ip}";
+                await jsRuntime.InvokeVoidAsync("open", url, "_blank");
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            ToastService.ShowToast($"Lỗi khi mở trang {ip}", ToastType.Error);
+        }
+    }
+
 
 }
 

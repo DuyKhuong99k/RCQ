@@ -93,7 +93,7 @@ namespace Security.Crypt
                 result = Encoding.UTF8.GetString(baResult);
             } catch(Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                //Console.WriteLine(ex.Message);
                 //throw ex;
             }
 

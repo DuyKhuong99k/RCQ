@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Runtime.InteropServices.JavaScript;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -49,6 +50,23 @@ namespace WebAPI.Controllers
             }
             return Ok(item);
         }
+        [HttpGet("{tenSize}")]
+        [Authorize]
+        public IActionResult GetsByTen(string tenSize)
+        {
+            var item = _context.HqSizes.Where(x => x.Ten.Trim() == tenSize)
+                .Select(x => x.Id.ToString())
+                .FirstOrDefault();
+            if (item == null)
+            {
+                return NotFound(new ApiResponse
+                {
+                    Success = false,
+                    Message = "Tên Size này không tồn tại!."
+                });
+            }
+            return Ok(new { Ma = item });
+        }
         [HttpPost]
         [Authorize]
         public async Task<IActionResult> Insert(HQ_Size model)
@@ -81,7 +99,7 @@ namespace WebAPI.Controllers
                 Id = model.Id,
                 Ten = model.Ten,
                 SuDung = model.SuDung,
-                MNgay = model.MNgay,
+                MNgay = DateTime.Now//model.MNgay,
             };
             _context.HqSizes.Add(newItem);
             try
@@ -142,10 +160,12 @@ namespace WebAPI.Controllers
                     Errors = errors
                 });
             }
+
+            var MNgay = DateTime.Now;
             item.Id = model.Id;
             item.Ten = model.Ten;
             item.SuDung = model.SuDung;
-            //item.MNgay = model.MNgay;
+            item.MNgay = MNgay;
             try
             {
                 // Lưu thay đổi cập nhật vào bảng HqLoaiNguyenLieus
@@ -157,7 +177,7 @@ namespace WebAPI.Controllers
                     SizeId = item.Id,
                     Ten = item.Ten,
                     SuDung = item.SuDung,
-                    MNgay = item.MNgay,
+                    MNgay = MNgay,
                     Ngay = DateTime.Now // Ngày hiện tại khi tạo mới
                 };
 
@@ -208,13 +228,14 @@ namespace WebAPI.Controllers
 
             try
             {
+                var MNgay = DateTime.Now;
                 // Tạo bản ghi mới cho bảng HqLoaiNguyenLieuUs để lưu lịch sử
                 var newItemUs = new HQ_Size_D
                 {
                     SizeId = item.Id,
                     Ten = item.Ten,
                     SuDung = item.SuDung,
-                    MNgay = item.MNgay,
+                    MNgay = MNgay,
                     Ngay = DateTime.Now // Ngày hiện tại khi tạo bản ghi
                 };
 

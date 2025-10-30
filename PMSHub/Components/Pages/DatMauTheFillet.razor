@@ -9,25 +9,27 @@
 @using Syncfusion.Blazor.DropDowns
 @using System.Drawing
 @using PMSHub.Components.Layout
+@using Vars.Hubs
 @rendermode InteractiveServer
 @attribute [StreamRendering]
 @inject NavigationManager Navigation
 @inject IMainService MainService
 @inject IConverterService ConverterService
 @inject IJSRuntime JsRuntime
+@inject IToastService ToastService
 @inherits AuthenticatedComponent
 <PageTitle>Đặt màu thẻ - Fillet</PageTitle>
 <!-- Navbar -->
-<TopLayout />
+@* <TopLayout /> *@
 <!-- / Navbar -->
 <!-- Content wrapper -->
-<div class="content-wrapper">
-    <!-- Content -->
+@* <div class="content-wrapper"> *@
+@*     <!-- Content --> *@
 
-    <div class="container-xxl flex-grow-1 container-p-y">
+@*     <div class="container-xxl flex-grow-1 container-p-y"> *@
         <h1>Đặt màu thẻ - Fillet</h1>
 
-        <SfGrid Height="500" DataSource="MainService.VmThanhPhamFilletColor.Items" @ref="Grid" AllowSorting="true" AllowMultiSorting="true" TValue="MaThanhPhamFillet_Color" AllowFiltering="true">
+        <SfGrid Height="500" DataSource="MainService.VmThanhPhamFilletColor.Items" @ref="Grid" AllowSorting="true" AllowMultiSorting="true" TValue="MaThanhPhamFillet_Color" AllowFiltering="true" AllowExcelExport="true">
             <GridTemplates>
                 <ToolbarTemplate>
                     <SfToolbar>
@@ -36,6 +38,7 @@
                             <ToolbarItem Type="@ItemType.Button" PrefixIcon="e-refresh icon" Id="refresh" Text="Tải Lại"></ToolbarItem>
                             <ToolbarItem Type="@ItemType.Button" PrefixIcon="e-expand icon" Id="add" Text="Thêm"></ToolbarItem>
                             <ToolbarItem Type="@ItemType.Button" PrefixIcon="e-edit icon" Id="edit" Text="Sửa"></ToolbarItem>
+                    <ToolbarItem Type="@ItemType.Button" PrefixIcon="e-export-excel icon" Id="ExcelExport" Text="Xuất Excel"></ToolbarItem>
                             @* <ToolbarItem Type="@ItemType.Button" PrefixIcon="e-circle-remove icon" Id="delete" Text="Xóa"></ToolbarItem> *@
                         </ToolbarItems>
                     </SfToolbar>
@@ -207,14 +210,14 @@
                 <DialogButton Content="Xác Nhận" IsPrimary="true" OnClick="@CloseDialogAdd" />
             </DialogButtons>
         </SfDialog>
-    </div>
+@*     </div> *@
 
-    <!-- / Content -->
-    <!-- Footer -->
-    <FooterLayout />
-    <!-- / Footer -->
-    <div class="content-backdrop fade"></div>
-</div>
+@*     <!-- / Content --> *@
+@*     <!-- Footer --> *@
+@*     <FooterLayout /> *@
+@*     <!-- / Footer --> *@
+@*     <div class="content-backdrop fade"></div> *@
+@* </div> *@
 <!-- Content wrapper -->
 @code {
     private bool IsVisibleAdd;
@@ -256,7 +259,7 @@
             });
             if (!result.IsSuccess)
             {
-                await JsRuntime.InvokeVoidAsync("alert", result.Error?.Message); // Alert
+                ToastService.ShowToast(result.Error?.Message,ToastType.Error);
             }
 
 
@@ -273,12 +276,12 @@
                 }
                 else
                 {
-                    await JsRuntime.InvokeVoidAsync("alert", "Vui Lòng nhập đầy đủ thông tin"); // Alert
+                    ToastService.ShowToast("Vui Lòng nhập đầy đủ thông tin", ToastType.Error);
                 }
             });
             if (!result.IsSuccess)
             {
-                await JsRuntime.InvokeVoidAsync("alert", result.Error?.ToString()); // Alert
+                ToastService.ShowToast(result.Error?.Message, ToastType.Error);
             }
         }
 
@@ -312,7 +315,7 @@
             }
             else
             {
-                await JsRuntime.InvokeVoidAsync("alert", "Không có dữ liệu được chọn!"); // Alert
+                ToastService.ShowToast("Không có dữ liệu được chọn!", ToastType.Error);
             }
 
         }
@@ -320,6 +323,13 @@
         if (args.Item.Id == "delete")
         {
             var value = await Grid.GetSelectedRecordsAsync();
+        }
+        if (args.Item.Id == "ExcelExport") //Id is combination of Grid's ID and itemname
+        {
+            var ExportProperties = new ExcelExportProperties();
+            ExportProperties.ExportType = ExportType.AllPages;
+            ExportProperties.IncludeTemplateColumn = true;
+            await Grid.ExportToExcelAsync(ExportProperties);
         }
     }
 

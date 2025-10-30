@@ -289,25 +289,60 @@ and t.MaTheTu = @maThe";
         }
         public List<T> GetPhieuCanTongHopsNhanVien<T>(DateTime fromDate,DateTime toDate, string xuongId)
         {
-            var query =
-                @"Select p.MaLo as LoId,n.MaHoSo, p.MaNhanVien,n.Name as TenNhanVien,tp.Ma as MaThanhPham,tp.Ten as ThanhPhamName,Sum(p.TrongLuong) as TrongLuong,Count(*) As SoRo 
-from PhieuCanSoCheDinhHinh p,
+//            var query =
+//                @"Select p.MaLo as LoId,n.MaHoSo, p.MaNhanVien,n.Name as TenNhanVien,tp.Ma as MaThanhPham,tp.Ten as ThanhPhamName,Sum(p.TrongLuong) as TrongLuong,Count(*) As SoRo 
+//from PhieuCanSoCheDinhHinh p,
+//MaThanhPhamSoCheDinhHinh tp,
+//NhanVienDaiThanh n 
+//where 
+//p.Ngay <= @toDate
+//and p.Ngay >= @fromDate
+//and p.MaNhanVien = n.MaNhanVien 
+//and p.MaThanhPham = tp.Ma 
+//and MaXuong=@xuongId 
+//and ISNULL(GhiChu,'') <> 'HUY' 
+//Group by 
+//p.MaNhanVien,
+//n.Name,
+//tp.Ma,
+//tp.Ten,
+//p.MaLo,
+//n.MaHoSo";
+var query =
+                @"Select
+p.MaLo as LoId,
+n.MaHoSo, 
+p.MaNhanVien,
+n.Name as TenNhanVien,
+tp.Ma as MaThanhPham,
+tp.Ten as ThanhPhamName,
+Sum(p.TrongLuong) as TrongLuong,
+Count(*) As SoRo,
+MIN(c.ThoiGian) OVER(PARTITION BY n.MaChamCong, p.Ngay) as ThoiGianVao,
+MAX(c.ThoiGian) OVER(PARTITION BY n.MaChamCong, p.Ngay) as ThoiGianRa,
+DATEDIFF(hour, MIN(c.ThoiGian) OVER(PARTITION BY n.MaChamCong, p.Ngay), MAX(c.ThoiGian) OVER(PARTITION BY n.MaChamCong, p.Ngay)) as TongThoiGian
+from
+PhieuCanSoCheDinhHinh p,
 MaThanhPhamSoCheDinhHinh tp,
-NhanVienDaiThanh n 
+NhanVienDaiThanh n ,
+CheckInOut c
 where 
 p.Ngay <= @toDate
 and p.Ngay >= @fromDate
 and p.MaNhanVien = n.MaNhanVien 
 and p.MaThanhPham = tp.Ma 
 and MaXuong=@xuongId 
-and ISNULL(GhiChu,'') <> 'HUY' 
+and ISNULL(p.GhiChu,'') <> 'HUY' 
+and n.MaChamCong = c.MaChamCong AND c.ThoiGian = p.Ngay AND c.ThoiGian >= @fromDate AND c.ThoiGian <= @toDate 
 Group by 
 p.MaNhanVien,
 n.Name,
 tp.Ma,
 tp.Ten,
 p.MaLo,
-n.MaHoSo";
+n.MaHoSo,
+n.MaChamCong,
+c.ThoiGian,p.Ngay";
             using (var connection = new SqlConnection(connectionString))
             {
                 connection.Open();

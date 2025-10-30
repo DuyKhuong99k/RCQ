@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using System.Text;
+using Newtonsoft.Json;
 using Vars.Hubs;
 using ViewModels.Repos.Hubs.IServices;
 
@@ -6,6 +7,8 @@ namespace Services;
 
 public class CommunicationService(IUserService userService, ICommitService commitService) : ICommunicationService
 {
+    #region ICommunicationService Members
+
     public bool AuthProc(string connectedId, string id, int wType, string dataJson)
     {
         var item = userService.GetByConnectedId(connectedId);
@@ -19,7 +22,6 @@ public class CommunicationService(IUserService userService, ICommitService commi
         var dataTranfer = new DataTranfer();
         var isError = true;
         var error = new DataError();
-        var data = "";
         if (dataJson.Length != len)
         {
             error.ErrorString = "Dữ Liệu Không Toàn Vẹn";
@@ -98,7 +100,6 @@ public class CommunicationService(IUserService userService, ICommitService commi
                         //error.ErrorString = checkingRl.Item2;
                         //error.Cmd = cmd;
                         dataTranfer.DataError = checkingRl.Item2;
-
                     }
 
 
@@ -106,18 +107,27 @@ public class CommunicationService(IUserService userService, ICommitService commi
                 }
                 case "LITE":
                 {
-                    var val = await commitService.CommitLite(dataJson, client, cmd);
-                    if (val.Item1)
+                    try
                     {
-                        isError = false;
-                        dataTranfer.Data = val.Item2;
+                        var val = await commitService.CommitLite(dataJson, client, cmd);
+                        if (val.Item1)
+                        {
+                            isError = false;
+                            dataTranfer.Data = val.Item2;
+                        }
+                        else
+                        {
+                            //error.ErrorString = val.Item2;
+                            //error.Cmd = cmd;
+                            dataTranfer.DataError = val.Item2;
+                        }
                     }
-                    else
+                    catch (Exception e)
                     {
-                        //error.ErrorString = val.Item2;
-                        //error.Cmd = cmd;
-                        dataTranfer.DataError = val.Item2;
+                        Console.WriteLine(e);
+                        // throw;
                     }
+
 
                     break;
                 }
@@ -155,7 +165,7 @@ public class CommunicationService(IUserService userService, ICommitService commi
 
                     break;
                 }
-                
+
                 case "WLOFFLINE":
                 {
                     break;
@@ -173,8 +183,10 @@ public class CommunicationService(IUserService userService, ICommitService commi
 
         //dataTranfer.DataError = JsonConvert.SerializeObject(error);
         dataTranfer.IsError = isError;
-        data = JsonConvert.SerializeObject(dataTranfer);
-        var lendata = System.Text.ASCIIEncoding.Unicode.GetByteCount(data);
+        var data = JsonConvert.SerializeObject(dataTranfer);
+        // var lendata = ASCIIEncoding.Unicode.GetByteCount(data);
         return data;
     }
+
+    #endregion
 }

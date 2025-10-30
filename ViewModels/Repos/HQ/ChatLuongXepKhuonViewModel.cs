@@ -13,6 +13,8 @@ using ObservableObject = CommunityToolkit.Mvvm.ComponentModel.ObservableObject;
 using System.Windows.Input;
 using Azure.Identity;
 using System.Collections.Specialized;
+using Models.Repos;
+using System.Globalization;
 
 namespace ViewModels.Repos.HQ
 {
@@ -114,7 +116,44 @@ namespace ViewModels.Repos.HQ
             var dao = new Dao.Repos.HQ.MaChatLuongXepKhuon();
             return dao.Gets<T>();
         }
+        public List<MaChatLuongXepKhuon_U> GetUs(string Ngay, int PageIndex, int PageSize)
+        {
+            var db = new dbPMScontext();
+            var date = new DateTime();
+            date = DateTime.ParseExact(Ngay, "yyyyMMddHHmmss", CultureInfo.InvariantCulture);
+            var latestDates = db.MaChatLuongXepKhuonUs
+                .Where(x => x.MNgay.Date >= date.Date)
+                .GroupBy(x => x.MaChatLuong)
+                .Select(g => new { MaChatLuong = g.Key, MaxId = g.Max(x => x.Id) });
 
+            var query = from s in db.MaChatLuongXepKhuonUs.Where(x => x.MNgay.Date >= date.Date)
+                        join latest in latestDates
+                        on new { s.MaChatLuong, s.Id }
+                        equals new { latest.MaChatLuong, Id = latest.MaxId }
+                        orderby s.MNgay descending
+                        select s;
+
+            var result = query.Skip((PageIndex - 1) * PageSize)
+                .Take(PageSize)
+                .ToList();
+            return result;
+        }
+        public List<MaChatLuongXepKhuon_D> GetDs(string Ngay, int PageIndex, int PageSize)
+        {
+            var db = new dbPMScontext();
+            var date = new DateTime();
+            try
+            {
+                date = DateTime.ParseExact(Ngay, "yyyyMMddHHmmss", CultureInfo.InvariantCulture);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+            return db.MaChatLuongXepKhuonDs.Where(x => x.MNgay.Date >= date.Date).OrderByDescending(x => x.MNgay)
+                .Skip((PageIndex - 1) * PageSize).Take(PageSize).ToList();
+        }
         private int Insert<T>(T item)
         {
             var dao = new Dao.Repos.HQ.MaChatLuongXepKhuon();

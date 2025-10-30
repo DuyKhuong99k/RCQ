@@ -13,6 +13,8 @@ using ObservableObject = CommunityToolkit.Mvvm.ComponentModel.ObservableObject;
 using System.Windows.Input;
 using Azure.Identity;
 using System.Collections.Specialized;
+using Models.Repos;
+using System.Globalization;
 
 
 namespace ViewModels.Repos.HQ
@@ -28,6 +30,7 @@ namespace ViewModels.Repos.HQ
 
         [ObservableProperty][NotifyPropertyChangedFor(nameof(IsVailSelectedItem))] private PhuongTienChoNguyenLieu? selectedItem;
         [ObservableProperty] private ObservableRangeCollection<object> selectedItems = new();
+        [ObservableProperty] private ObservableRangeCollection<PhuongTienChoNguyenLieu> usedItems = new();
         [ObservableProperty] private ICommand _closeItemWindowCommand;
         [ObservableProperty] private bool _isWindowItemShown = false;
         private readonly SynchronizationContext synchronizationContext;
@@ -115,7 +118,44 @@ namespace ViewModels.Repos.HQ
             var dao = new Dao.Repos.HQ.PhuongTienChoNguyenLieu();
             return dao.Gets<T>();
         }
+        public List<PhuongTienChoNguyenLieu_U> GetUs(string Ngay, int PageIndex, int PageSize)
+        {
+            var db = new dbPMScontext();
+            var date = new DateTime();
+            date = DateTime.ParseExact(Ngay, "yyyyMMddHHmmss", CultureInfo.InvariantCulture);
+            var latestDates = db.PhuongTienChoNguyenLieuUs
+                .Where(x => x.MNgay.Date >= date.Date)
+                .GroupBy(x => x.MaPhuongTien)
+                .Select(g => new { MaPhuongTien = g.Key, MaxId = g.Max(x => x.Id) });
 
+            var query = from s in db.PhuongTienChoNguyenLieuUs.Where(x => x.MNgay.Date >= date.Date)
+                        join latest in latestDates
+                        on new { s.MaPhuongTien, s.Id }
+                        equals new { latest.MaPhuongTien, Id = latest.MaxId }
+                        orderby s.MNgay descending
+                        select s;
+
+            var result = query.Skip((PageIndex - 1) * PageSize)
+                .Take(PageSize)
+                .ToList();
+            return result;
+        }
+        public List<PhuongTienChoNguyenLieu_D> GetDs(string Ngay, int PageIndex, int PageSize)
+        {
+            var db = new dbPMScontext();
+            var date = new DateTime();
+            try
+            {
+                date = DateTime.ParseExact(Ngay, "yyyyMMddHHmmss", CultureInfo.InvariantCulture);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+            return db.PhuongTienChoNguyenLieuDs.Where(x => x.MNgay.Date >= date.Date).OrderByDescending(x => x.MNgay)
+                .Skip((PageIndex - 1) * PageSize).Take(PageSize).ToList();
+        }
         private int Insert<T>(T item)
         {
             var dao = new Dao.Repos.HQ.PhuongTienChoNguyenLieu();
@@ -193,6 +233,7 @@ namespace ViewModels.Repos.HQ
             lock (Items)
             {
                 Items.Clear();
+                UsedItems.Clear();
             }
 
             var items = Gets<PhuongTienChoNguyenLieu>();
@@ -205,6 +246,10 @@ namespace ViewModels.Repos.HQ
                         foreach (var item in items)
                         {
                             Items.Add(item);
+                            if (item.SuDung == true)
+                            {
+                                UsedItems.Add(item);
+                            }
                         }
 
                        

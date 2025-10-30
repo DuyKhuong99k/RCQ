@@ -69,20 +69,34 @@ namespace ViewModels.Repos.HQ
         //{
         //    return CopyItem(SelectedItem);
         //}
-
-        //public PhieuCanNguyenLieu CreateDefaultNew()
-        //{
-        //    var maxId = Items.Where(x => int.TryParse(x.Ma, out var rl))
-        //           .Select(x => int.Parse(x.Ma))
-        //           .DefaultIfEmpty(0)
-        //           .Max();
-        //    var id = $"{(maxId + 1).ToString()}";
-        //    return new PhieuCanNguyenLieu
-        //    {
-        //        SuDung = true,
-        //        Ma = id
-        //    };
-        //}
+        public PhieuCanNguyenLieu CreateDefaultNew()
+        {
+            return new PhieuCanNguyenLieu
+            {
+                Chuyen = 0,
+                GhiChu = "",
+                MaBanCatTiet = "",
+                MSL = "",
+                MaAo = "",
+                MaLoaiCa = "",
+                MaLoaiThanhPham = "",
+                MaMau = "",
+                MaMayTinhCan = VmApp.PCName,
+                MaPhuongTien = "",
+                MaSize = "",
+                MaUserCan = VmApp.UserName,
+                MaXuongSanXuat = VmApp.XuongId,
+                Ngay = DateTime.Now,
+                NhaCC = "",
+                Pheu = "0",
+                SuDung = true,
+                ThoiGianCan = DateTime.Now,
+                TrongLuong = 0,
+                TrongLuongOrg = 0,
+                TrongLuongTare = 0,
+                TyLeNuoc = 0,
+            };
+        }
 
         private int Delete<T>(T item)
         {
@@ -119,6 +133,12 @@ namespace ViewModels.Repos.HQ
         {
             var dao = new Dao.Repos.HQ.PhieuCanNguyenLieu();
             return dao.Gets<T>();
+        }
+
+        public T? Get<T>(string id)
+        {
+            var dao = new Dao.Repos.HQ.PhieuCanNguyenLieu();
+            return dao.Get<T>(id);
         }
         public List<T> Gets<T>(DateTime dateTime)
         {
@@ -250,6 +270,11 @@ namespace ViewModels.Repos.HQ
             return dao.Update(item);
         }
 
+        public List<T> GetTongQuans<T>(DateTime fromDate, DateTime toDate)
+        {
+            var dao = new Dao.Repos.HQ.PhieuCanNguyenLieu();
+            return dao.GetTongQuans<T>(fromDate, toDate);
+        }
         public List<T> GetsLast<T>(DateTime dateTime, int num)
         {
             var dao = new Dao.Repos.HQ.PhieuCanNguyenLieu();
@@ -438,11 +463,103 @@ namespace ViewModels.Repos.HQ
             var dao = new Dao.Repos.HQ.PhieuCanNguyenLieu(connStr);
             return dao.GetTongHopPhuongTien<T>(fromDate, toDate);
         }
+        public List<T> GetPhieuCanTongHopLos<T>(DateTime fromDate, DateTime toDate, string? connStr = null)
+        {
+            var dao = new Dao.Repos.HQ.PhieuCanNguyenLieu(connStr);
+            return dao.GetTongHopLo<T>(fromDate, toDate);
+        }
         #endregion
         public List<T> GetsCaTra<T>(DateTime dateTime, string xuongId, string? connStr = null)
         {
             var dao = new Dao.Repos.HQ.PhieuCanNguyenLieu(connStr);
             return dao.GetsCaTra<T>(dateTime, xuongId);
         }
+        public List<T> GetChiTietPhieuCanKhongTheGhiNhanDuLieu<T>(DateTime fromDate, DateTime toDate, string? connStr = null)
+        {
+            var dao = new Dao.Repos.HQ.PhieuCanNguyenLieu(connStr);
+            return dao.GetChiTietPhieuCanKhongTheGhiNhanDuLieu<T>(fromDate, toDate);
+        }
+
+        #region Báo Cao Thành Phẩm 2
+        public List<T> GetChiTietThanhPham2s<T>(DateTime fromDate, DateTime toDate, string? connStr = null)
+        {
+            var dao = new Dao.Repos.HQ.PhieuCanNguyenLieu(connStr);
+            return dao.GetChiTietThanhPham2s<T>(fromDate, toDate);
+        }
+
+
+        public class TyLeThuHoiThanhPham2s<T>
+        {
+            public string? MaLoaiThanhPham { get; set; }
+            public string? ThanhPhamName { get; set; }
+            public string? CTTYLE { get; set; }
+            public double? SanLuong { get; set; }
+            public double? SanLuongNL { get; set; }
+            public double TyLeThuHoi { get; set; }
+        }
+        public List<T> GetTongHopSLNLThanhPham2<T>(DateTime fromDate, DateTime toDate, string xuongId, string? connStr = null)
+        {
+            var dao = new Dao.Repos.HQ.PhieuCanNguyenLieu(connStr);
+            return dao.GetTongHopSLNLThanhPham2<T>(fromDate, toDate, xuongId);
+        }
+        public List<T> GetTongHopSanPhamThanhPham2<T>(DateTime fromDate, DateTime toDate, string? connStr = null)
+        {
+            var dao = new Dao.Repos.HQ.PhieuCanNguyenLieu(connStr);
+            return dao.GetTongHopSanPhamThanhPham2<T>(fromDate, toDate);
+        }
+        public List<TyLeThuHoiThanhPham2s<T>> GetTyLeThuHoiThanhPham2<T>(
+    DateTime fromDate,
+    DateTime toDate,
+    string xuongId,
+    string? connStr = null)
+        {
+            // Lấy dữ liệu thành phẩm và nguyên liệu
+            var listTP = GetTongHopSanPhamThanhPham2<T>(fromDate, toDate, connStr).Cast<dynamic>().ToList();
+            var listNL = GetTongHopSLNLThanhPham2<T>(fromDate, toDate, xuongId, connStr).Cast<dynamic>().ToList();
+
+            // Gom nhóm nguyên liệu theo MaLoaiThanhPham + NL (NL = NLFILLET, NLXEBUOM, TONGNL)
+            var tongNLTheoLoaiVaNL = listNL
+                .GroupBy(x => $"{x.NL ?? ""}")
+                .ToDictionary(
+                    g => g.Key,
+                    g => g.Sum(x => (double?)(x.TrongLuong ?? 0)) ?? 0
+                );
+
+            var result = new List<TyLeThuHoiThanhPham2s<T>>();
+
+            foreach (dynamic item in listTP)
+            {
+                string maLoai = item.MaLoaiThanhPham;
+                string tenLoai = item.TenThanhPham;
+                string cttyle = item.CTTYLE;
+                double tongSanLuong = (double)(item.TrongLuong ?? 0);
+
+                double nguyenLieu = 0;
+                double tyLe = 0;
+
+                string? loaiNL = null;
+                if (cttyle == "SL/NLFILLET") loaiNL = "NLFILLET";
+                else if (cttyle == "SL/NLXEBUOM") loaiNL = "NLXEBUOM";
+                else if (cttyle == "SL/TONGNL") loaiNL = "TONGNL";
+
+                if (loaiNL != null && tongNLTheoLoaiVaNL.TryGetValue(loaiNL, out nguyenLieu) && nguyenLieu > 0)
+                {
+                    tyLe = Math.Round(tongSanLuong / nguyenLieu, 4);
+                }
+
+                result.Add(new TyLeThuHoiThanhPham2s<T>
+                {
+                    MaLoaiThanhPham = maLoai,
+                    ThanhPhamName = tenLoai,
+                    CTTYLE = cttyle,
+                    SanLuong = tongSanLuong,
+                    SanLuongNL = nguyenLieu,
+                    TyLeThuHoi = tyLe
+                });
+            }
+
+            return result;
+        }
+        #endregion
     }
 }

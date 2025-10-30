@@ -90,7 +90,7 @@ namespace PMS.Controllers.DanhMuc.XepKhuon.Chinh
             }
         }
         [CustomAuthorize(Fu = "Danh Mục / Xếp Khuôn / Thành Phẩm Chính", Func = "Thêm Xếp Khuôn / Thành Phẩm Chính")]
-        public async Task<IActionResult> DoInsert(string ma, string ten, bool suDung, double min, double max, string bravoId, int type)
+        public async Task<IActionResult> DoInsert(string ma, string ten, double min, double max, string bravoId,bool suDung, int type, decimal thamSoTangTrong,decimal dinhMucTangTrong, bool isKhongThuoc)
         {
             var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/MaThanhPhamChinhXepKhuons/Insert";
             try
@@ -111,7 +111,10 @@ namespace PMS.Controllers.DanhMuc.XepKhuon.Chinh
                     Min = min,
                     Max = max,
                     BravoId = bravoId,
-                    _type = type
+                    _type = type,
+                    ThamSoTangTrong = thamSoTangTrong,
+                    DinhMucTangTrong = dinhMucTangTrong,
+                    IsKhongThuc = isKhongThuoc
                 };
                 var jsonContent = new StringContent(JsonConvert.SerializeObject(model), Encoding.UTF8, "application/json");
                 using var helper = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
@@ -171,7 +174,9 @@ namespace PMS.Controllers.DanhMuc.XepKhuon.Chinh
                         Max = item?.Max,
                         BravoId = item?.BravoId,
                         _type = item?._type,
-                        
+                        ThamSoTangTrong = item?.ThamSoTangTrong,
+                        DinhMucTangTrong = item?.DinhMucTangTrong,
+                        IsKhongThuc = item?.IsKhongThuc
                     });
                 }
             }
@@ -182,7 +187,7 @@ namespace PMS.Controllers.DanhMuc.XepKhuon.Chinh
             });
         }
         [CustomAuthorize(Fu = "Danh Mục / Xếp Khuôn / Thành Phẩm Chính", Func = "Sửa Xếp Khuôn / Thành Phẩm Chính")]
-        public async Task<IActionResult> DoUpDate(string ma, string ten, bool suDung, double min, double max, string bravoId, int type)
+        public async Task<IActionResult> DoUpDate(string ma, string ten,  double min, double max, string bravoId, bool suDung,int type, decimal thamSoTangTrong, decimal dinhMucTangTrong, bool isKhongThuoc)
         {
             var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/MaThanhPhamChinhXepKhuons/Update/{ma}";
             try
@@ -204,7 +209,10 @@ namespace PMS.Controllers.DanhMuc.XepKhuon.Chinh
                     Min = min,
                     Max = max,
                     BravoId = bravoId,
-                    _type = type
+                    _type = type,
+                    ThamSoTangTrong = thamSoTangTrong,
+                    DinhMucTangTrong = dinhMucTangTrong,
+                    IsKhongThuc = isKhongThuoc
 
                 };
 

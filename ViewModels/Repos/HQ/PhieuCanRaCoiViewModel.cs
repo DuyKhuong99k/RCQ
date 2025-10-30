@@ -19,7 +19,7 @@ namespace ViewModels.Repos.HQ
         public static PhieuCanRaCoiViewModel Instance => instance ??= new();
         private PhieuCanRaCoiViewModel()
         {
-            
+
         }
         [ObservableProperty] private bool idItemIsReadOnly = true;
         [ObservableProperty] private bool isAdd;
@@ -59,7 +59,7 @@ namespace ViewModels.Repos.HQ
                 MaSize = item.MaSize,
                 MaChieuXa = item.MaChieuXa,
                 MaCoi = item.MaCoi,
-                
+                ThamSoTangTrong = item.ThamSoTangTrong
 
             };
         }
@@ -70,11 +70,12 @@ namespace ViewModels.Repos.HQ
 
         public PhieuCanRaCoi CreateDefaultNew()
         {
-            
+
             return new PhieuCanRaCoi
             {
                 Ngay = AppViewModel.Instance.DateTimeNow.Date,
-                Gio = DateTime.Now.TimeOfDay
+                Gio = DateTime.Now.TimeOfDay,
+                ThamSoTangTrong = 0M,
             };
         }
 
@@ -119,7 +120,11 @@ namespace ViewModels.Repos.HQ
             var dao = new Dao.Repos.HQ.PhieuCanRaCoi();
             return dao.Gets<T>();
         }
-
+        public T? Get<T>(string id)
+        {
+            var dao = new Dao.Repos.HQ.PhieuCanRaCoi();
+            return dao.Get<T>(id);
+        }
         public int Insert<T>(T item)
         {
             var dao = new Dao.Repos.HQ.PhieuCanRaCoi();
@@ -193,7 +198,7 @@ namespace ViewModels.Repos.HQ
                  item.NgayNguyenLieu != null &&
                  !string.IsNullOrEmpty(item.IdMonitor) &&
                  !string.IsNullOrEmpty(item.Id);
-                 ;
+            ;
         }
         [RelayCommand]
         private void ForceRaseCanExcute()
@@ -228,7 +233,7 @@ namespace ViewModels.Repos.HQ
                             Items.Add(item);
                         }
 
-                      
+
                     }
                     catch (NotSupportedException e)
                     {
@@ -336,5 +341,79 @@ namespace ViewModels.Repos.HQ
                 throw;
             }
         }
+
+        public List<T> GetChiTietRaCois<T>(DateTime fromDate, DateTime toDate, string xuongId)
+        {
+            var dao = new Dao.Repos.HQ.PhieuCanRaCoi();
+            return dao.GetChiTietRaCois<T>(fromDate, toDate, xuongId);
+        }
+
+        public List<T> GetTongHopCoiRaCois<T>(DateTime fromDate, DateTime toDate, string xuongId)
+        {
+            var dao = new Dao.Repos.HQ.PhieuCanRaCoi();
+            return dao.GetTongHopCoiRaCois<T>(fromDate, toDate, xuongId);
+        }
+        public List<T> GetTongHopNhanVienRaCois<T>(DateTime fromDate, DateTime toDate, string xuongId)
+        {
+            var dao = new Dao.Repos.HQ.PhieuCanRaCoi();
+            return dao.GetTongHopNhanVienRaCois<T>(fromDate, toDate, xuongId);
+        }
+        public List<T> GetTongHopThanhPhamRaCois<T>(DateTime fromDate, DateTime toDate, string xuongId)
+        {
+            var dao = new Dao.Repos.HQ.PhieuCanRaCoi();
+            return dao.GetTongHopThanhPhamRaCois<T>(fromDate, toDate, xuongId);
+        }
+        public List<T> GetTongHopTyLeTangTrongCoiRaCois<T>(DateTime ngayNguyenLieu)
+        {
+            var dao = new Dao.Repos.HQ.PhieuCanRaCoi();
+            return dao.GetTongHopTyLeTangTrongCoiRaCois<T>(ngayNguyenLieu);
+        }
+        public class TangTrongTrungBinh
+        {
+            public string MaThanhPham { get; set; }
+            public string ThanhPhamName { get; set; }
+            public double TongTrongLuongVao { get; set; }
+            public double TongTrongLuongRa { get; set; }
+            public double TyLeTangTrong { get; set; }
+            public decimal DinhMucTangTrong {get; set;}
+        }
+        public List<TangTrongTrungBinh> TongHopTyLeTangTrongTheoThanhPham(DateTime ngayNguyenLieu)
+        {
+            var dao = new Dao.Repos.HQ.PhieuCanRaCoi();
+            var data = dao.GetTongHopTyLeTangTrongCoiRaCois<dynamic>(ngayNguyenLieu);
+
+            var result = data
+                .Where(x => x.trong_luong_vao_coi != null && x.tong_trong_luong_ra_coi != null)
+                .GroupBy(x => new { x.MaThanhPham, x.ThanhPhamName , x.DinhMucTangTrong})
+                .Select(g => new TangTrongTrungBinh
+                {
+                    MaThanhPham = g.Key.MaThanhPham,
+                    ThanhPhamName = g.Key.ThanhPhamName,
+                    TongTrongLuongVao = g.Sum(x => (double)x.trong_luong_vao_coi),
+                    TongTrongLuongRa = g.Sum(x => (double)x.tong_trong_luong_ra_coi),
+
+                    //cách 1 là tính tỷ lệ dựa trên các số
+                    //TyLeTangTrong = g.Sum(x => (double)x.tong_trong_luong_ra_coi) == 0
+                    //    ? 0
+                    //    : Math.Round(
+                    //        (g.Sum(x => (double)x.tong_trong_luong_ra_coi) - g.Sum(x => (double)x.trong_luong_vao_coi))
+                    //        / g.Sum(x => (double)x.trong_luong_vao_coi),
+                    //        2
+                    //    )
+                    // tính tổng tỷ lệ chia ra cho tổng số luogwj của từng loại
+                    TyLeTangTrong = g.Count(x => x.TyLeTangTrong != null) == 0 ? 0 : Math.Round(g.Sum(x => (double)x.TyLeTangTrong) / g.Count(x => x.TyLeTangTrong != null),2),
+                    DinhMucTangTrong = g.Key.DinhMucTangTrong
+                })
+                .ToList();
+
+            return result;
+        }
+        #region Xử Lý Phiếu Cân
+        public List<T> GetPhieuCan_XLPC<T>(DateTime dateTime, string xuongId, string? connStr = null)
+        {
+            var dao = new Dao.Repos.HQ.PhieuCanRaCoi(connStr);
+            return dao.GetPhieuCan_XLPC<T>(dateTime, xuongId);
+        }
+        #endregion
     }
 }

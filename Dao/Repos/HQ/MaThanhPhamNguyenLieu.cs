@@ -31,7 +31,7 @@ namespace Dao.Repos.HQ
            ,[IsNgopGhePhuPham]
            ,[IsNgopXePhuPham]
            ,[IsManh]
-           ,[TyLeNuoc])
+           ,[TyLeNuoc],[IsTareThung],[CTTYLE])
      VALUES
            (@MaCa
            ,@Ma
@@ -52,7 +52,7 @@ namespace Dao.Repos.HQ
            ,@IsNgopGhePhuPham
            ,@IsNgopXePhuPham
            ,@IsManh
-           ,@TyLeNuoc)";
+           ,@TyLeNuoc,@IsTareThung,@CTTYLE)";
 
         private readonly string qrUpdate = @"UPDATE [dbo].[MaThanhPhamNguyenLieu]
    SET 
@@ -73,7 +73,8 @@ namespace Dao.Repos.HQ
       ,[IsNgopGhePhuPham] = @IsNgopGhePhuPham
       ,[IsNgopXePhuPham] = @IsNgopXePhuPham
       ,[IsManh] = @IsManh
-      ,[TyLeNuoc] = @TyLeNuoc
+      ,[TyLeNuoc] = @TyLeNuoc,
+      [IsTareThung] = @IsTareThung,[CTTYLE] = @CTTYLE
  WHERE [MaCa] = @MaCa 
       and [Ma] = @Ma ";
 

@@ -212,6 +212,22 @@ order by
                 throw;
             }
         }
+
+        public List<T> Gets<T>(DateTime dateTime, string theId, bool isEnabled = false)
+        {
+            var query = @"Select * from PhieuCanBTPFilletv2 where Ngay= @ngay and MaThe = @theId and IsEnabled = @isEnabled ";
+            try
+            {
+                using var connection = new SqlConnection(connectionString);
+                connection.Open();
+                var items = connection.Query<T>(query, new { ngay = dateTime.Date, theId, isEnabled }).ToList();
+                return items;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
         public DataTable GetChiTiets(DateTime dateTime, string xuongId)
         {
             try
@@ -449,18 +465,14 @@ from (
             p.MaXuong as [Xưởng],
             p.MaNhanVienPhucVu,
             tp.DinhMucHaoHut
-        from PhieuCanBTPFilletv2 p,
-            MaLoaiCaFillet la,
-            MaThanhPhamFillet tp,
-            MaSizeFillet s,
-            MaMauFillet mau
+        from PhieuCanBTPFilletv2 p
+            left join MaLoaiCaFillet la on p.MaLoaiCa = la.Ma
+            left join MaThanhPhamFillet tp on p.MaThanhPham = tp.Ma
+            left join MaSizeFillet s on p.MaSize = s.Ma
+            left join MaMauFillet mau on p.MaMau = mau.Ma
         where p.Ngay <= @ngay
             and p.Ngay >=@fromDate
-            and p.MaXuong = @xuongId
-            and p.MaLoaiCa = la.Ma
-            and p.MaThanhPham = tp.Ma
-            and p.MaSize = s.Ma
-            and p.MaMau = mau.Ma
+            and p.MaXuong = @xuongId and tp.IsNguyenCon = 0
     ) p
     LEFT JOIN NhanVienDaiThanh n ON p.MaNhanVienPhucVu = n.MaNhanVien
     LEFT JOIN NhanVienDaiThanh nv on p.MaNhanVien = nv.MaNhanVien
@@ -769,73 +781,238 @@ order by p.STT desc,
         }
 
 
-
+        public List<T> GetChiTietPhieuCanChuaSuas<T>(DateTime fromDate, DateTime toDate, string xuongId)
+        {
+            try
+            {
+                var query = @"SELECT 
+    pbtp.STT,
+    pbtp.Ngay,
+    pbtp.MaMayCan,
+    pbtp.MaXuong,
+    pbtp.Gio,
+	pbtp.MaUserCan,
+	pbtp.MaLoaiCa,
+	lc.Ten as LoaiCaName,
+	pbtp.MaMau,
+	ma.Ten as MauName,
+	pbtp.MaSize,
+	s.Ten as SizeName,
+	pbtp.MaThanhPham,
+	tp.Ten as ThanhPhamName,
+	pbtp.MaLo,
+	pbtp.MaThe,
+    pbtp.TrongLuong,
+	pbtp.TrongLuongTare,
+    pbtp.GhiChu
+FROM 
+    PhieuCanBTPFilletv2 pbtp
+	left join MaLoaiCaFillet lc on pbtp.MaLoaiCa = lc.Ma
+	left join MaMauFillet ma on pbtp.MaMau = ma.Ma
+	left join MaSizeFillet s on pbtp.MaSize = s.Ma
+	left join MaThanhPhamFillet tp on pbtp.MaThanhPham = tp.Ma
+WHERE 
+    pbtp.Ngay >= @fromDate
+    AND pbtp.Ngay <= @toDate
+    AND pbtp.MaXuong = @xuongId and tp.IsNguyenCon = 0
+    AND NOT EXISTS (
+        SELECT 1 
+        FROM PhieuCanTPFilletv2 ptp 
+        WHERE 
+            ptp.STTBTP = pbtp.STT 
+            AND ptp.Ngay = pbtp.Ngay 
+            AND ptp.MaMayCanBTP = pbtp.MaMayCan
+            AND ptp.MaXuong = pbtp.MaXuong
+    )
+ORDER BY 
+    pbtp.Ngay, 
+    pbtp.Gio;";
+                using (var connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+                    var items = connection.QueryAsync<T>(query, new { fromDate = fromDate.Date, toDate = toDate.Date, xuongId = xuongId }).Result
+                        .ToList();
+                    return items;
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
         public List<T> GetTongHopNhanViens<T>(DateTime fromDate, DateTime toDate, string xuongId)
         {
             try
             {
-                var query =
-                    @"SELECT
-    p.[Ngày] as Ngay,
-    p.[Thời Gian Làm Việc (h)] as TGLamViec,
-    n.MaHoSo as MaHoSo,
-    n.Name as TenNhanVien,
-    p.[Lô] as Lo,
-    p.[Loại Cá] as LoaiCaName,
-    p.[Thành Phẩm] as ThanhPhamName,
-    p.[Size] as SizeName,
-    p.[Màu] as Mau,
-    p.[Cá Trả] as CaTra,
-    p.[Số Rổ] as SoRo,
-    p.[Trọng Lượng] as TrongLuong,
-    p.[TL Trước Hao Hụt] as TLTruocHaoHut
-from (
-        Select p.Ngay as [Ngày],
-            cast(
-                DATEDIFF(second, Min(p.Gio), Max(p.Gio)) / 3600.0 as decimal(18, 3)
-            ) as [Thời Gian Làm Việc (h)],
-            -- n.MaHoSo as [Mã Hồ Sơ],
-            -- n.Name as [Tên Nhân Viên],
-            p.MaNhanVien,
-            p.MaLo as [Lô],
-            la.Ten as [Loại Cá],
-            tp.Ten as [Thành Phẩm],
-            s.Ten as [Size],
-            mau.Ten as [Màu],
-            p.CaTra as [Cá Trả],
-            Count(*) as [Số Rổ],
-            Sum(p.TrongLuong) as [Trọng Lượng],
-            Sum(p.TrongLuong) * tp.DinhMucHaoHut as [TL Trước Hao Hụt]
-        from PhieuCanBTPFilletv2 p,
-            MaLoaiCaFillet la,
-            MaThanhPhamFillet tp,
-            MaSizeFillet s,
-            MaMauFillet mau
-        where p.Ngay <= @ngay
-            and p.Ngay >= @fromDate
-            and p.MaXuong = @xuongId
-            and p.MaLoaiCa = la.Ma
-            and p.MaThanhPham = tp.Ma
-            and p.MaSize = s.Ma
-            and p.MaMau = mau.Ma
-            and isnull(p.GhiChu,'') <>'HUY'
-        GROUP BY p.MaLo,
-            p.MaNhanVien,
-            la.Ten,
-            tp.Ten,
-            s.Ten,
-            mau.Ten,
-            p.CaTRa,
-            tp.DinhMucHaoHut,
-            p.Ngay
-    ) p
-    LEFT JOIN NhanVienDaiThanh n on p.MaNhanVien = n.MaNhanVien
-order by p.[Ngày],
-    n.MaHoSo,
-    p.[Lô],
-    p.[Thành Phẩm],
-    p.[Size],
-    p.[Cá Trả]";
+//                var query =
+//                    @"SELECT
+//    p.[Ngày] as Ngay,
+//    p.[Thời Gian Làm Việc (h)] as TGLamViec,
+//    n.MaHoSo as MaHoSo,
+//    n.Name as TenNhanVien,
+//    p.[Lô] as Lo,
+//    p.[Loại Cá] as LoaiCaName,
+//    p.[Thành Phẩm] as ThanhPhamName,
+//    p.[Size] as SizeName,
+//    p.[Màu] as Mau,
+//    p.[Cá Trả] as CaTra,
+//    p.[Số Rổ] as SoRo,
+//    p.[Trọng Lượng] as TrongLuong,
+//    p.[TL Trước Hao Hụt] as TLTruocHaoHut
+//from (
+//        Select p.Ngay as [Ngày],
+//            cast(
+//                DATEDIFF(second, Min(p.Gio), Max(p.Gio)) / 3600.0 as decimal(18, 3)
+//            ) as [Thời Gian Làm Việc (h)],
+//            -- n.MaHoSo as [Mã Hồ Sơ],
+//            -- n.Name as [Tên Nhân Viên],
+//            p.MaNhanVien,
+//            p.MaLo as [Lô],
+//            la.Ten as [Loại Cá],
+//            tp.Ten as [Thành Phẩm],
+//            s.Ten as [Size],
+//            mau.Ten as [Màu],
+//            p.CaTra as [Cá Trả],
+//            Count(*) as [Số Rổ],
+//            Sum(p.TrongLuong) as [Trọng Lượng],
+//            Sum(p.TrongLuong) * tp.DinhMucHaoHut as [TL Trước Hao Hụt]
+//        from PhieuCanBTPFilletv2 p,
+//            MaLoaiCaFillet la,
+//            MaThanhPhamFillet tp,
+//            MaSizeFillet s,
+//            MaMauFillet mau
+//        where p.Ngay <= @ngay
+//            and p.Ngay >= @fromDate
+//            and p.MaXuong = @xuongId
+//            and p.MaLoaiCa = la.Ma
+//            and p.MaThanhPham = tp.Ma
+//            and p.MaSize = s.Ma
+//            and p.MaMau = mau.Ma
+//            and isnull(p.GhiChu,'') <>'HUY'
+//        GROUP BY p.MaLo,
+//            p.MaNhanVien,
+//            la.Ten,
+//            tp.Ten,
+//            s.Ten,
+//            mau.Ten,
+//            p.CaTRa,
+//            tp.DinhMucHaoHut,
+//            p.Ngay
+//    ) p
+//    LEFT JOIN NhanVienDaiThanh n on p.MaNhanVien = n.MaNhanVien
+//order by p.[Ngày],
+//    n.MaHoSo,
+//    p.[Lô],
+//    p.[Thành Phẩm],
+//    p.[Size],
+//    p.[Cá Trả]";
+
+                //thêm check in out để lấy thời gian vào ra
+//var query =
+//                    @"
+//       ;WITH CheckInOutData AS (
+//    SELECT 
+//        c.MaChamCong,
+//        MIN(c.ThoiGian) AS ThoiGianVao,
+//        MAX(c.ThoiGian) AS ThoiGianRa
+//    FROM CheckInOut c 
+//    WHERE c.ThoiGian >= @fromDate AND c.ThoiGian <= @ngay
+//    GROUP BY c.MaChamCong
+//)
+//SELECT 
+//        p.Ngay,
+//        CAST(DATEDIFF(second, MIN(p.Gio), MAX(p.Gio)) / 3600.0 as decimal(18, 3)) as TGLamViec,
+//        p.MaNhanVien,
+//		n.MaHoSo,
+//		n.Name as TenNhanVien,
+//        p.MaLo as Lo,
+//        la.Ten as LoaiCaName,
+//        tp.Ten as ThanhPhamName,
+//        s.Ten as SizeName,
+//        mau.Ten as Mau,
+//        p.CaTra as CaTra,
+//        COUNT(*) as SoRo,
+//        SUM(p.TrongLuong) as TrongLuong,
+//        SUM(p.TrongLuong) * tp.DinhMucHaoHut as TLTruocHaoHut,
+//		ISNULL(c.ThoiGianVao, '1900-01-01') AS ThoiGianVao,
+//		ISNULL(c.ThoiGianRa, '1900-01-01') AS ThoiGianRa,
+//		DATEDIFF(hour, ISNULL(c.ThoiGianVao, '1900-01-01'), ISNULL(c.ThoiGianRa, '1900-01-01')) AS TongThoiGian
+//    FROM 
+//        PhieuCanBTPFilletv2 p
+//		left join MaLoaiCaFillet la on p.MaLoaiCa = la.Ma
+//        LEFT join MaThanhPhamFillet tp on p.MaThanhPham = tp.Ma
+//        left join MaSizeFillet s on p.MaSize = s.Ma
+//        left join MaMauFillet mau on p.MaMau = mau.Ma
+//        left join NhanVienDaiThanh n on p.MaNhanVien = n.MaNhanVien
+//		left join CheckInOutData c on n.MaChamCong = c.MaChamCong
+//    WHERE 
+//        p.Ngay <= @ngay
+//        AND p.Ngay >= @fromDate
+//        AND p.MaXuong = @xuongId
+//        AND ISNULL(p.GhiChu,'') <> 'HUY'
+
+//    GROUP BY 
+//        p.MaLo,
+//        p.MaNhanVien,
+//		n.MaHoSo,
+//		n.Name,
+//        la.Ten,
+//        tp.Ten,
+//        s.Ten,
+//        mau.Ten,
+//        p.CaTRa,
+//        tp.DinhMucHaoHut,
+//        p.Ngay,
+//		c.ThoiGianVao,
+//		c.ThoiGianRa";
+var query =
+                    @"
+      SELECT 
+        p.Ngay,
+        CAST(DATEDIFF(second, MIN(p.Gio), MAX(p.Gio)) / 3600.0 as decimal(18, 3)) as TGLamViec,
+        --p.MaNhanVien,
+		--n.MaHoSo,
+		--n.Name as TenNhanVien,
+        p.MaLo as Lo,
+        la.Ten as LoaiCaName,
+        tp.Ten as ThanhPhamName,
+        s.Ten as SizeName,
+        mau.Ten as Mau,
+        p.CaTra as CaTra,
+        COUNT(*) as SoRo,
+        SUM(p.TrongLuong) as TrongLuong
+        --SUM(p.TrongLuong) * tp.DinhMucHaoHut as TLTruocHaoHut,
+		--ISNULL(c.ThoiGianVao, '1900-01-01') AS ThoiGianVao,
+		--ISNULL(c.ThoiGianRa, '1900-01-01') AS ThoiGianRa,
+		--DATEDIFF(hour, ISNULL(c.ThoiGianVao, '1900-01-01'), ISNULL(c.ThoiGianRa, '1900-01-01')) AS TongThoiGian
+    FROM 
+        PhieuCanBTPFilletv2 p
+		left join MaLoaiCaFillet la on p.MaLoaiCa = la.Ma
+        LEFT join MaThanhPhamFillet tp on p.MaThanhPham = tp.Ma
+        left join MaSizeFillet s on p.MaSize = s.Ma
+        left join MaMauFillet mau on p.MaMau = mau.Ma
+        --left join NhanVienDaiThanh n on p.MaNhanVien = n.MaNhanVien
+		--left join CheckInOutData c on n.MaChamCong = c.MaChamCong
+    WHERE 
+        p.Ngay <= @ngay
+        AND p.Ngay >= @fromDate
+        AND p.MaXuong = @xuongId
+        --AND ISNULL(p.GhiChu,'') <> 'HUY'
+
+    GROUP BY 
+        p.MaLo,
+        --p.MaNhanVien,
+		--n.MaHoSo,
+		--n.Name,
+        la.Ten,
+        tp.Ten,
+        s.Ten,
+        mau.Ten,
+        p.CaTRa,
+        tp.DinhMucHaoHut,
+        p.Ngay
+		--c.ThoiGianVao,
+		--c.ThoiGianRa";
                 using (var connection = new SqlConnection(connectionString))
                 {
                     connection.Open();
@@ -856,52 +1033,108 @@ order by p.[Ngày],
         {
             try
             {
-                var query =
+//                var query =
+//                    @"Select 
+//    p.[Ngày] as Ngay,
+//    p.[Thời Gian Làm Việc (h)] as TGLamViec,
+//    n.MaHoSo as MaHoSo,
+//    n.Name as TenNhanVien,
+//    p.[Lô] as Lo,
+//    p.[Loại Cá] as LoaiCaName,
+//    p.[Thành Phẩm] ThanhPhamName,
+//    p.[Size] as SizeName,
+//    p.[Màu] as Mau,
+//    p.[Cá Trả] as CaTra,
+//    p.[Số Rổ] as SoRo,
+//    p.[Trọng Lượng] as TrongLuong,
+//    p.[TL Trước Hao Hụt] as TLTruocHaoHut
+//from (
+//        Select p.Ngay as [Ngày],
+//            cast(
+//                DATEDIFF(second, Min(p.Gio), Max(p.Gio)) / 3600.0 as decimal(18, 3)
+//            ) as [Thời Gian Làm Việc (h)],
+//            -- n.MaHoSo as [Mã Hồ Sơ],
+//            -- n.Name as [Tên Nhân Viên],
+//            p.MaNhanVienPhucVu,
+//            p.MaLo as [Lô],
+//            la.Ten as [Loại Cá],
+//            tp.Ten as [Thành Phẩm],
+//            s.Ten as [Size],
+//            mau.Ten as [Màu],
+//            p.CaTra as [Cá Trả],
+//            Count(*) as [Số Rổ],
+//            Sum(p.TrongLuong) as [Trọng Lượng],
+//            Sum(p.TrongLuong) * tp.DinhMucHaoHut as [TL Trước Hao Hụt]
+//        from PhieuCanBTPFilletv2 p,
+//            MaLoaiCaFillet la,
+//            MaThanhPhamFillet tp,
+//            MaSizeFillet s,
+//            MaMauFillet mau
+//        where p.Ngay <= @ngay
+//            and p.Ngay >= @fromDate
+//            and p.MaXuong = @xuongId -- and p.MaNhanVienPhucVu = n.MaNhanVien
+//            and p.MaLoaiCa = la.Ma
+//            and p.MaThanhPham = tp.Ma
+//            and p.MaSize = s.Ma
+//            and p.MaMau = mau.Ma
+//        GROUP BY -- n.MaHoSo,
+//            -- n.Name,
+//            p.MaLo,
+//            p.MaNhanVienPhucVu,
+//            la.Ten,
+//            tp.Ten,
+//            s.Ten,
+//            mau.Ten,
+//            p.CaTRa,
+//            tp.DinhMucHaoHut,
+//            p.Ngay
+//    ) p
+//    LEFT JOIN NhanVienDaiThanh n on p.MaNhanVienPhucVu = n.MaNhanVien
+//order by p.[Ngày],
+//    n.MaHoSo,
+//    p.[Lô],
+//    p.[Thành Phẩm],
+//    p.[Size],
+//    p.[Cá Trả]";
+//thêm checkinout để lấy thời gian vào ra
+var query =
                     @"Select 
-    p.[Ngày] as Ngay,
-    p.[Thời Gian Làm Việc (h)] as TGLamViec,
-    n.MaHoSo as MaHoSo,
-    n.Name as TenNhanVien,
-    p.[Lô] as Lo,
-    p.[Loại Cá] as LoaiCaName,
-    p.[Thành Phẩm] ThanhPhamName,
-    p.[Size] as SizeName,
-    p.[Màu] as Mau,
-    p.[Cá Trả] as CaTra,
-    p.[Số Rổ] as SoRo,
-    p.[Trọng Lượng] as TrongLuong,
-    p.[TL Trước Hao Hụt] as TLTruocHaoHut
-from (
-        Select p.Ngay as [Ngày],
+			p.Ngay,
             cast(
                 DATEDIFF(second, Min(p.Gio), Max(p.Gio)) / 3600.0 as decimal(18, 3)
-            ) as [Thời Gian Làm Việc (h)],
-            -- n.MaHoSo as [Mã Hồ Sơ],
-            -- n.Name as [Tên Nhân Viên],
+            ) as TGLamViec,
             p.MaNhanVienPhucVu,
-            p.MaLo as [Lô],
-            la.Ten as [Loại Cá],
-            tp.Ten as [Thành Phẩm],
-            s.Ten as [Size],
-            mau.Ten as [Màu],
-            p.CaTra as [Cá Trả],
-            Count(*) as [Số Rổ],
-            Sum(p.TrongLuong) as [Trọng Lượng],
-            Sum(p.TrongLuong) * tp.DinhMucHaoHut as [TL Trước Hao Hụt]
+			n.MaHoSo as MaHoSo,
+            n.Name as TenNhanVien,
+            p.MaLo as Lo,
+            la.Ten as LoaiCaName,
+            tp.Ten as ThanhPhamName,
+            s.Ten as SizeName,
+            mau.Ten as Mau,
+            p.CaTra,
+            Count(*) as SoRo,
+            Sum(p.TrongLuong) as TrongLuong,
+            Sum(p.TrongLuong) * tp.DinhMucHaoHut as TLTruocHaoHut,
+			MIN(c.ThoiGian) OVER(PARTITION BY n.MaChamCong, p.Ngay) as ThoiGianVao,
+			MAX(c.ThoiGian) OVER(PARTITION BY n.MaChamCong, p.Ngay) as ThoiGianRa,
+			DATEDIFF(hour, MIN(c.ThoiGian) OVER(PARTITION BY n.MaChamCong, p.Ngay), MAX(c.ThoiGian) OVER(PARTITION BY n.MaChamCong, p.Ngay)) as TongThoiGian
         from PhieuCanBTPFilletv2 p,
             MaLoaiCaFillet la,
             MaThanhPhamFillet tp,
             MaSizeFillet s,
-            MaMauFillet mau
+            MaMauFillet mau,
+			NhanVienDaiThanh n,
+			CheckInOut c
         where p.Ngay <= @ngay
             and p.Ngay >= @fromDate
-            and p.MaXuong = @xuongId -- and p.MaNhanVienPhucVu = n.MaNhanVien
+            and p.MaXuong = @xuongId
+			and p.MaNhanVienPhucVu = n.MaNhanVien
             and p.MaLoaiCa = la.Ma
             and p.MaThanhPham = tp.Ma
             and p.MaSize = s.Ma
             and p.MaMau = mau.Ma
-        GROUP BY -- n.MaHoSo,
-            -- n.Name,
+			AND n.MaChamCong = c.MaChamCong AND c.ThoiGian = p.Ngay AND c.ThoiGian >= @fromDate AND c.ThoiGian <= @ngay 
+        GROUP BY 
             p.MaLo,
             p.MaNhanVienPhucVu,
             la.Ten,
@@ -910,15 +1143,11 @@ from (
             mau.Ten,
             p.CaTRa,
             tp.DinhMucHaoHut,
-            p.Ngay
-    ) p
-    LEFT JOIN NhanVienDaiThanh n on p.MaNhanVienPhucVu = n.MaNhanVien
-order by p.[Ngày],
-    n.MaHoSo,
-    p.[Lô],
-    p.[Thành Phẩm],
-    p.[Size],
-    p.[Cá Trả]";
+            p.Ngay,
+			n.MaHoSo,
+			n.Name,
+			n.MaChamCong,
+			c.ThoiGian";
                 using (var connection = new SqlConnection(connectionString))
                 {
                     connection.Open();
@@ -939,7 +1168,44 @@ order by p.[Ngày],
         {
             try
             {
-                var query =
+//                var query =
+//                    @"Select
+//    p.Ngay as Ngay,
+//    cast(
+//        DATEDIFF(second, Min(p.Gio), Max(p.Gio)) / 3600.0 as decimal(18, 3)
+//    ) as TGLamViec,
+   
+//    p.MaLo as Lo,
+//    p.MaThanhPham,
+//    tp.Ten as ThanhPhamName,
+//p.MaXuong,
+//    p.CaTra,
+//    Count(*) as SoRo,
+//    Sum(p.TrongLuong) as TrongLuong,
+//    Sum(p.TrongLuong) * tp.DinhMucHaoHut as TLTruocHaoHut
+//from
+//    PhieuCanBTPFilletv2 p,
+//    MaThanhPhamFillet tp
+//where
+//    p.Ngay <= @ngay
+//    and p.Ngay >= @fromDate
+//    and p.MaXuong = @xuongId
+//    and p.MaThanhPham = tp.Ma
+//    -- and isnull(p.GhiChu,'') <>'HUY'
+//GROUP BY
+//    p.MaLo,
+//    tp.Ten,
+//    p.CaTRa,
+//    tp.DinhMucHaoHut,
+//    p.Ngay,
+//    p.MaThanhPham,
+//p.MaXuong   
+//order by
+//    p.Ngay,
+//    p.MaLo,
+//    tp.Ten,
+//    p.CaTra";
+var query =
                     @"Select
     p.Ngay as Ngay,
     cast(
@@ -955,14 +1221,14 @@ p.MaXuong,
     Sum(p.TrongLuong) as TrongLuong,
     Sum(p.TrongLuong) * tp.DinhMucHaoHut as TLTruocHaoHut
 from
-    PhieuCanBTPFilletv2 p,
-    MaThanhPhamFillet tp
+    PhieuCanBTPFilletv2 p
+    left join MaThanhPhamFillet tp on p.MaThanhPham = tp.Ma
 where
     p.Ngay <= @ngay
     and p.Ngay >= @fromDate
     and p.MaXuong = @xuongId
-    and p.MaThanhPham = tp.Ma
-     and isnull(p.GhiChu,'') <>'HUY'
+and tp.IsNguyenCon = 0 and p.IsEnabled = 1
+    -- and isnull(p.GhiChu,'') <>'HUY'
 GROUP BY
     p.MaLo,
     tp.Ten,
@@ -970,7 +1236,7 @@ GROUP BY
     tp.DinhMucHaoHut,
     p.Ngay,
     p.MaThanhPham,
-p.MaXuong   
+	p.MaXuong   
 order by
     p.Ngay,
     p.MaLo,
@@ -1230,6 +1496,65 @@ order by
                 throw;
             }
         }
+        public List<T> GetTongHopLo<T>(DateTime fromDate, DateTime toDate, string xuongId)
+        {
+            try
+            {
+                var query =
+                    @"Select
+    p.Ngay as Ngay,
+    p.MaLo as Lo,
+    p.MaThanhPham,
+    tp.Ten as ThanhPhamName,
+	p.MaSize,
+	s.Ten as SizeName,
+	p.MaXuong,
+    p.CaTra,
+    Count(*) as SoRo,
+    Sum(p.TrongLuong) as TrongLuong,
+    Sum(p.TrongLuong) * tp.DinhMucHaoHut as TLTruocHaoHut
+from
+    PhieuCanBTPFilletv2 p,
+    MaThanhPhamFillet tp,
+	MaSizeFillet s
+where
+    p.Ngay <= @ngay
+    and p.Ngay >= @fromDate
+    and p.MaXuong = @xuongId
+    and p.MaThanhPham = tp.Ma
+    and isnull(p.GhiChu,'') <>'HUY' and tp.IsNguyenCon = 0
+GROUP BY
+    p.MaLo,
+    tp.Ten,
+    p.CaTRa,
+    tp.DinhMucHaoHut,
+    p.Ngay,
+    p.MaThanhPham,
+	p.MaXuong,
+	p.MaSize,
+	s.Ten
+order by
+    p.Ngay,
+    p.MaLo,
+    tp.Ten,
+	s.Ten,
+    p.CaTra";
+                using (var connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+                    var items = connection.QueryAsync<T>(
+                            query,
+                            new { fromDate = fromDate.Date, ngay = toDate.Date, xuongId = xuongId })
+                        .Result
+                        .ToList();
+                    return items;
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
         #region BTP FILLET HAI NẮM
         public DataTable GetChiTietsHN(DateTime fromDate, DateTime toDate, string xuongId)
         {
@@ -1468,6 +1793,35 @@ order by
                 throw;
             }
         }
+        public List<T> GetsLastMinutes<T>(int minu)
+        {
+            try
+            {
+                var now = DateTime.Now;
+                var fromTime = now.AddMinutes(-1*minu).TimeOfDay;
+                var toTime = now.TimeOfDay;
+
+                var ngay = now.Date; 
+
+                var query = @"
+            SELECT TOP 100 *
+            FROM PhieuCanBTPFilletv2
+            WHERE Ngay = @ngay
+              AND Gio BETWEEN @fromTime AND @toTime
+            ORDER BY Gio DESC";
+
+                using (var connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+                    var items = connection.Query<T>(query, new { ngay, fromTime, toTime }).ToList();
+                    return items;
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
         public List<T> GetChiTiets_TG<T>(DateTime fromDate, DateTime toDate)
         {
             try
@@ -1520,14 +1874,35 @@ order by
         {
             try
             {
-                //var query = "Select top(1) * from PhieuCanBTPFilletv2 where Ngay = @ngay And MaThe = @theId And IsEnabled =@isEnabled order by Gio Desc";
-                var query = @"Select top(1) * from PhieuCanBTPFilletv2 WITH(READPAST)  where Ngay = @ngay And MaThe = @theId And IsEnabled =@isEnabled order by Gio Desc";
+                var query = "Select top(1) * from PhieuCanBTPFilletv2 WITH(READPAST) where Ngay = @ngay And MaThe = @theId And IsEnabled =@isEnabled order by Gio Desc";
+                // var query = @"Select top(1) * from PhieuCanBTPFilletv2 WITH(READPAST)  where Ngay = @ngay And MaThe = @theId And IsEnabled =@isEnabled order by Gio Desc";
                 using (var connection = new SqlConnection(connectionString))
                 {
                     connection.Open();
                     var item = connection.Query<T>(
                             query,
                             new { ngay = dateTime.Date, theId = theId, isEnabled = isEnabled })
+                        .SingleOrDefault();
+                    return item;
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+        public T? GetLastByThe<T>(DateTime dateTime, string theId)
+        {
+            try
+            {
+                var query = "Select top(1) * from PhieuCanBTPFilletv2 WITH(READPAST) where Ngay = @ngay And MaThe = @theId order by Gio Desc";
+                // var query = @"Select top(1) * from PhieuCanBTPFilletv2 WITH(READPAST)  where Ngay = @ngay And MaThe = @theId And IsEnabled =@isEnabled order by Gio Desc";
+                using (var connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+                    var item = connection.Query<T>(
+                            query,
+                            new { ngay = dateTime.Date, theId = theId})
                         .SingleOrDefault();
                     return item;
                 }
@@ -2501,6 +2876,95 @@ WHERE RowNum <= @num";
                     var rows = connection.Execute(qrUpdate, items);
                     return rows;
                 }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+
+
+        public List<T> GetTongHopThanhPhamDatBTPFillets<T>(DateTime fromDate, DateTime toDate, string xuongId)
+        {
+            try
+            {
+var query = @"select
+p.MaThanhPham as MaLoaiThanhPham,
+tp.Ten as ThanhPhamName,
+sum(p.TrongLuong)  as TrongLuong
+from PhieuCanBTPFilletv2 p 
+left join MaThanhPhamFillet tp on p.MaThanhPham = tp.Ma 
+where p.Ngay <= @toDate
+and p.Ngay >= @fromDate
+and p.MaXuong = @xuongId and tp.IsDat = 1
+group by p.MaThanhPham, tp.Ten
+";
+                using var connection = new SqlConnection(connectionString);
+                connection.Open();
+                var items = connection.Query<T>(query,
+                    new { toDate = toDate.Date, fromDate = fromDate.Date, xuongId = xuongId }).ToList();
+                return items;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+        public List<T> GetSanLuongDatNguyenConBTPFillets<T>(DateTime fromDate, DateTime toDate, string xuongId)
+        {
+            try
+            {
+var query = @"select
+p.MaThanhPham as MaLoaiThanhPham,
+tp.Ten as ThanhPhamName,
+sum(p.TrongLuong)  as TrongLuong
+from PhieuCanBTPFilletv2 p 
+left join MaThanhPhamFillet tp on p.MaThanhPham = tp.Ma 
+where p.Ngay <= @toDate
+and p.Ngay >= @fromDate
+and p.MaXuong = @xuongId and tp.IsNguyenCon = 1
+group by p.MaThanhPham, tp.Ten
+";
+                using var connection = new SqlConnection(connectionString);
+                connection.Open();
+                var items = connection.Query<T>(query,
+                    new { toDate = toDate.Date, fromDate = fromDate.Date, xuongId = xuongId }).ToList();
+                return items;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+        /// <summary>
+        /// Không bao gồm dạt nguyên con
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="fromDate"></param>
+        /// <param name="toDate"></param>
+        /// <param name="xuongId"></param>
+        /// <returns></returns>
+        public List<T> GetTongHopThanhPhamDatRjNguyenConBTPFillets<T>(DateTime fromDate, DateTime toDate, string xuongId)
+        {
+            try
+            {
+var query = @"select
+p.MaThanhPham as MaLoaiThanhPham,
+tp.Ten as ThanhPhamName,
+sum(p.TrongLuong)  as TrongLuong
+from PhieuCanBTPFilletv2 p 
+left join MaThanhPhamFillet tp on p.MaThanhPham = tp.Ma 
+where p.Ngay <= @toDate
+and p.Ngay >= @fromDate
+and p.MaXuong = @xuongId and tp.IsDat = 1 and tp.IsNguyenCon = 0
+group by p.MaThanhPham, tp.Ten
+";
+                using var connection = new SqlConnection(connectionString);
+                connection.Open();
+                var items = connection.Query<T>(query,
+                    new { toDate = toDate.Date, fromDate = fromDate.Date, xuongId = xuongId }).ToList();
+                return items;
             }
             catch (Exception)
             {

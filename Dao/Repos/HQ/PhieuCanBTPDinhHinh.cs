@@ -29,7 +29,7 @@ namespace Dao.Repos.HQ
            ,[IsEnabled]
            ,[MaXuong]
            ,[CaTra]
-           ,[GhiChu],[ChiSanLuong],[TrongLuongTare],[TrongLuongBu],[IsOffline],[Id])
+           ,[GhiChu],[ChiSanLuong],[TrongLuongTare],[TrongLuongBu],[IsOffline],[Id],[MaNhanVienPhucVu])
      VALUES
            (@STT 
            ,@Ngay 
@@ -48,7 +48,7 @@ namespace Dao.Repos.HQ
            ,@IsEnabled 
            ,@MaXuong 
            ,@CaTra 
-           ,@GhiChu,@ChiSanLuong,@TrongLuongTare,@TrongLuongBu,@IsOffline,@Id)";
+           ,@GhiChu,@ChiSanLuong,@TrongLuongTare,@TrongLuongBu,@IsOffline,@Id,@MaNhanVienPhucVu)";
         private readonly string qrUpdate = @"UPDATE [dbo].[PhieuCanBTPDinhHinh]
    SET [Gio] = @Gio
       ,[MaUserCan] = @MaUserCan 
@@ -65,12 +65,20 @@ namespace Dao.Repos.HQ
       ,[IsEnabled] = @IsEnabled 
       
       ,[CaTra] = @CaTra 
-      ,[GhiChu] = @GhiChu,ChiSanLuong=@ChiSanLuong,[TrongLuongBu] = @TrongLuongBu, [IsOffline] =@IsOffline
+      ,[GhiChu] = @GhiChu,ChiSanLuong=@ChiSanLuong,[TrongLuongBu] = @TrongLuongBu, [IsOffline] =@IsOffline, [MaNhanVienPhucVu] =@MaNhanVienPhucVu
  WHERE [STT] = @STT and [Ngay]= @Ngay and [MaMayCan] = @MaMayCan and [MaXuong] = @MaXuong";
         private readonly string qrUpdateIdIsEnabled = @"UPDATE [dbo].[PhieuCanBTPDinhHinh]
    SET 
       [IsEnabled] = @isEnabled 
  WHERE [Id] = @id";
+        private readonly string qrUpdateSTTNgayMayCanXuongIsEnabled = @"UPDATE [dbo].[PhieuCanBTPDinhHinh]
+           SET 
+              [IsEnabled] = @isEnabled 
+         WHERE [STT] = @STT and [Ngay]= @Ngay and [MaMayCan] = @MaMayCan and [MaXuong] = @MaXuong";
+        private readonly string qrUpdateSTTNgayMayCanXuongIsEnabledThanhPham = @"UPDATE [dbo].[PhieuCanBTPDinhHinh]
+           SET 
+              [IsEnabled] = @isEnabled, [MaThanhPham] = @MaThanhPham
+         WHERE [STT] = @STT and [Ngay]= @Ngay and [MaMayCan] = @MaMayCan and [MaXuong] = @MaXuong";
 
         private readonly string qrGetAll = "Select * from PhieuCanBTPDinhHinh";
 
@@ -139,6 +147,20 @@ namespace Dao.Repos.HQ
             using var connection = new SqlConnection(connectionString);
             connection.Open();
             var rows = connection.Execute(qrUpdateIdIsEnabled, new {id,isEnabled});
+            return rows;
+        }
+        public int Update(int STT, DateTime ngay,string mayCanId,string xuongId,bool isEnabled)
+        {
+            using var connection = new SqlConnection(connectionString);
+            connection.Open();
+            var rows = connection.Execute(qrUpdateSTTNgayMayCanXuongIsEnabled, new {STT,Ngay = ngay.Date,MaMayCan=mayCanId,MaXuong = xuongId,isEnabled});
+            return rows;
+        }
+        public int Update(int STT, DateTime ngay,string mayCanId,string xuongId,string thanhPhamId,bool isEnabled)
+        {
+            using var connection = new SqlConnection(connectionString);
+            connection.Open();
+            var rows = connection.Execute(qrUpdateSTTNgayMayCanXuongIsEnabledThanhPham, new {STT,Ngay = ngay.Date,MaMayCan=mayCanId,MaXuong = xuongId,MaThanhPham = thanhPhamId,isEnabled});
             return rows;
         }
         public List<T> GetsTongHopMayCan<T>(DateTime dateTime, string xuongId)
@@ -277,11 +299,9 @@ order by
     p.MaNhanVien,
     n.MaHoSo,
     n.Name as TenNhanVien,
-
-    p.MaNhanVienPhucVu,
-    n1.MaHoSo as MaHoSoPV,
-    n1.Name as TenNhanVienPV,
-
+    --p.MaNhanVienPhucVu,
+    --n1.MaHoSo as MaHoSoPV,
+    --n1.Name as TenNhanVienPV,
     la.Ten as LoaiCa,
     tp.Ten as ThanhPhamName,
     s.Ten as SizeName,
@@ -292,34 +312,89 @@ order by
     p.TrongLuongBu,
     p.TrongLuongTare,
     p.IsEnabled as MoKhoa,
-    may.Ten as MayLangDa,
+    --may.Ten as MayLangDa,
     p.MaMayCan,
     p.MaXuong,
     p.GhiChu
 from
-    PhieuCanBTPDinhHinh p,
-    MaLoaiCaDinhHinh la,
-    MaThanhPhamDinhHinh tp,
-    MaSizeDinhHinh s,
-    MaMauDinhHinh mau,
-    NhanVienDaiThanh n,
-    NhanVienDaiThanh n1,
-    MayLangDa may
+    PhieuCanBTPDinhHinh p
+    left join MaLoaiCaDinhHinh la on p.MaLoaiCa = la.ma
+    left join MaThanhPhamDinhHinh tp on p.MaThanhPham = tp.Ma
+    left join MaSizeDinhHinh s on p.MaSize = s.Ma
+    left join MaMauDinhHinh mau on p.MaMau = mau.Ma
+    left join NhanVienDaiThanh n on p.MaNhanVien = n.MaNhanVien
+    --NhanVienDaiThanh n1
+    --MayLangDa may
 where
     p.Ngay >= @fromDate
     and p.Ngay <= @toDate
     and p.MaXuong = @xuongId
-    and p.MaNhanVien = n.MaNhanVien
-    and p.MaLoaiCa = la.Ma
-    and p.MaThanhPham = tp.Ma
-    and p.MaSize = s.Ma
-    and p.MaMau = mau.Ma
-    and p.MaMayLangDa = may.Ma
-    and p.MaNhanVienPhucVu = n1.MaNhanVien
+    and p.TrongLuong >0
+    --and p.MaMayLangDa = may.Ma
+    --and p.MaNhanVienPhucVu = n1.MaNhanVien
 order by
     p.MaLo,
     p.MaMayCan,
     p.STT desc";
+                using (var connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+                    var items = connection.QueryAsync<T>(query, new { fromDate = fromDate.Date, toDate = toDate.Date, xuongId = xuongId }).Result
+                        .ToList();
+                    return items;
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+        public List<T> GetChiTietPhieuCanChuaSuas<T>(DateTime fromDate, DateTime toDate, string xuongId)
+        {
+            try
+            {
+                var query = @"SELECT 
+    pbtp.STT,
+    pbtp.Ngay,
+    pbtp.MaMayCan,
+    pbtp.MaXuong,
+    pbtp.Gio,
+	pbtp.MaUserCan,
+	pbtp.MaLoaiCa,
+	lc.Ten as LoaiCaName,
+	pbtp.MaMau,
+	ma.Ten as MauName,
+	pbtp.MaSize,
+	s.Ten as SizeName,
+	pbtp.MaThanhPham,
+	tp.Ten as ThanhPhamName,
+	pbtp.MaLo,
+	pbtp.MaThe,
+    pbtp.TrongLuong,
+	pbtp.TrongLuongTare,
+    pbtp.GhiChu
+FROM 
+    PhieuCanBTPDinhHinh pbtp
+	left join MaLoaiCaDinhHinh lc on pbtp.MaLoaiCa = lc.Ma
+	left join MaMauDinhHinh ma on pbtp.MaMau = ma.Ma
+	left join MaSizeDinhHinh s on pbtp.MaSize = s.Ma
+	left join MaThanhPhamDinhHinh tp on pbtp.MaThanhPham = tp.Ma
+WHERE 
+    pbtp.Ngay >= @fromDate
+    AND pbtp.Ngay <= @toDate
+    AND pbtp.MaXuong = @xuongId
+    AND NOT EXISTS (
+        SELECT 1 
+        FROM PhieuCanTPDinhHinh ptp 
+        WHERE 
+            ptp.STTBTP = pbtp.STT 
+            AND ptp.Ngay = pbtp.Ngay 
+            AND ptp.MaMayCanBTP = pbtp.MaMayCan
+            AND ptp.MaXuong = pbtp.MaXuong
+    )
+ORDER BY 
+    pbtp.Ngay, 
+    pbtp.Gio;";
                 using (var connection = new SqlConnection(connectionString))
                 {
                     connection.Open();
@@ -548,7 +623,7 @@ order by
             try
             {
                 var query =
-                    "Select top(1) * from PhieuCanBTPDinhHinh where Ngay = @ngay And MaThe = @theId order by Gio Desc";
+                    "Select top(1) * from PhieuCanBTPDinhHinh WITH(READPAST) where Ngay = @ngay And MaThe = @theId order by Gio Desc";
                 //var query = @"Select top(1) * from PhieuCanBTPDinhHinh WITH(READPAST) where Ngay = @ngay And MaThe = @theId And IsEnabled =@isEnabled ";
                 using var connection = new SqlConnection(connectionString);
                 connection.Open();
@@ -684,6 +759,35 @@ where
                 throw;
             }
         }
+        public List<T> GetsLastMinutes<T>(int minu)
+        {
+            try
+            {
+                var now = DateTime.Now;
+                var fromTime = now.AddMinutes(-1*minu).TimeOfDay;
+                var toTime = now.TimeOfDay;
+
+                var ngay = now.Date; 
+
+                var query = @"
+            SELECT TOP 100 *
+            FROM PhieuCanBTPDinhHinh
+            WHERE Ngay = @ngay
+              AND Gio BETWEEN @fromTime AND @toTime
+            ORDER BY Gio DESC";
+
+                using (var connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+                    var items = connection.Query<T>(query, new { ngay, fromTime, toTime }).ToList();
+                    return items;
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
         public List<T> Gets<T>(DateTime dateTime, string xuongId)
         {
             try
@@ -737,6 +841,22 @@ where
                 throw;
             }
         }
+        public List<T> Gets<T>(DateTime dateTime, string theId, bool isEnabled)
+        {
+            try
+            {
+                var query =
+                    "Select * from PhieuCanBTPDinhHinh where Ngay =@ngay and MaThe = @theId and IsEnabled = @isEnabled";
+                using var connection = new SqlConnection(connectionString);
+                connection.Open();
+                var items = connection.Query<T>(query, new { ngay = dateTime.Date, theId, isEnabled }).ToList();
+                return items;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
         public List<T> Gets<T>(DateTime dateTime, string xuongId, string mayCanId)
         {
             try
@@ -772,6 +892,20 @@ where
             catch (Exception)
             {
                 throw;
+            }
+        }
+        public Tuple<int, decimal> GetSoRoTongTrongLuongByNhanVienId(DateTime dateTime, string nhanVienId)
+        {
+            var query =
+                @"Select IsNull( Count(*),0) as Item1,isNull( Sum(TrongLuong),0) As Item2 from PhieuCanBTPDinhHinh WITH(READPAST) where MaNhanVien = @nhanVienId and Ngay =@ngay";
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+                var row = connection.Query<Tuple<int, decimal>>(
+                        query,
+                        new { ngay = dateTime.Date, nhanVienId })
+                    .SingleOrDefault();
+                return row;
             }
         }
         public List<T> Gets_STT_IsEnabled<T>(DateTime dateTime, string mayCanId)
@@ -1354,49 +1488,112 @@ order by
         {
             try
             {
-                var query = @"Select
+                //                var query = @"Select
+                //    n.MaNhanVien as MaNhanVien,
+                //    n.Name as TenNhanVien,
+                //    p.MaLo,
+                //    --may.Ten as MayLangDaName,
+                //    la.Ten as LoaiCaName,
+                //    tp.Ten as ThanhPhamName,
+                //    s.Ten as SizeName,
+                //    mau.Ten as [Màu],
+                //    mau.Ten as Mau,
+                //    p.CaTra as CaTra,
+                //    Count(*) as SoRo,
+                //    Sum(p.TrongLuong) as TrongLuong
+                //from
+                //    PhieuCanBTPDinhHinh p,
+                //    MaLoaiCaDinhHinh la,
+                //    MaThanhPhamDinhHinh tp,
+                //    MaSizeDinhHinh s,
+                //    MaMauDinhHinh mau,
+                //    NhanVienDaiThanh n
+                //    --MayLangDa may
+                //where
+                //    p.Ngay >= @fromDate
+                //and p.Ngay<= @toDate
+                //    and p.MaXuong = @xuongId
+                //    and p.MaNhanVien = n.MaNhanVien
+                //    and p.MaLoaiCa = la.Ma
+                //    and p.MaThanhPham = tp.Ma
+                //    and p.MaSize = s.Ma
+                //    and p.MaMau = mau.Ma
+                //    --and p.MaMayLangDa = may.Ma
+                //    and p.ChiSanLuong = 0
+                //and IsNull( p.GhiChu,'') <> 'HUY'
+                //GROUP BY
+                //    n.MaNhanVien,
+                //    n.Name,
+                //    p.MaLo,
+                //    --may.Ten,
+                //    la.Ten,
+                //    tp.Ten,
+                //    s.Ten,
+                //    mau.Ten,
+                //    p.CaTRa
+                //order by
+                //    n.MaNhanVien,
+                //    p.MaLo,
+                //    tp.Ten,
+                //    s.Ten,
+                //    p.CaTra";
+                //thêm checkinout để lay thoi gian vao ra của công nhân
+                var query = @";WITH CheckInOutData AS (
+    SELECT 
+        c.MaChamCong,
+        MIN(c.ThoiGian) AS ThoiGianVao,
+        MAX(c.ThoiGian) AS ThoiGianRa
+    FROM CheckInOut c 
+    WHERE c.ThoiGian >= @fromDate AND c.ThoiGian <= @toDate
+    GROUP BY c.MaChamCong
+)
+Select
     n.MaNhanVien as MaNhanVien,
     n.Name as TenNhanVien,
     p.MaLo,
-    may.Ten as MayLangDaName,
+	p.MaLoaiCa,
     la.Ten as LoaiCaName,
+	p.MaThanhPham,
     tp.Ten as ThanhPhamName,
+	p.MaSize,
     s.Ten as SizeName,
-    mau.Ten as [Màu],
+    p.MaMau,
     mau.Ten as Mau,
     p.CaTra as CaTra,
     Count(*) as SoRo,
-    Sum(p.TrongLuong) as TrongLuong
+    Sum(p.TrongLuong) as TrongLuong,
+	ISNULL(c.ThoiGianVao, '1900-01-01') AS ThoiGianVao,
+	ISNULL(c.ThoiGianRa, '1900-01-01') AS ThoiGianRa,
+	DATEDIFF(hour, ISNULL(c.ThoiGianVao, '1900-01-01'), ISNULL(c.ThoiGianRa, '1900-01-01')) AS TongThoiGian
 from
-    PhieuCanBTPDinhHinh p,
-    MaLoaiCaDinhHinh la,
-    MaThanhPhamDinhHinh tp,
-    MaSizeDinhHinh s,
-    MaMauDinhHinh mau,
-    NhanVienDaiThanh n,
-    MayLangDa may
+    PhieuCanBTPDinhHinh p
+	left join MaLoaiCaDinhHinh la on p.MaLoaiCa = la.Ma
+    left join MaThanhPhamDinhHinh tp on p.MaThanhPham = tp.Ma 
+	left join MaSizeDinhHinh s on p.MaSize = s.Ma
+    left join MaMauDinhHinh mau on p.MaMau = mau.Ma
+    left join NhanVienDaiThanh n on p.MaNhanVien = n.MaNhanVien
+	left join CheckInOutData c on n.MaChamCong = c.MaChamCong
 where
     p.Ngay >= @fromDate
-and p.Ngay<= @toDate
+	and p.Ngay<= @toDate
     and p.MaXuong = @xuongId
-    and p.MaNhanVien = n.MaNhanVien
-    and p.MaLoaiCa = la.Ma
-    and p.MaThanhPham = tp.Ma
-    and p.MaSize = s.Ma
-    and p.MaMau = mau.Ma
-    and p.MaMayLangDa = may.Ma
     and p.ChiSanLuong = 0
-and IsNull( p.GhiChu,'') <> 'HUY'
+	and IsNull( p.GhiChu,'') <> 'HUY'
 GROUP BY
     n.MaNhanVien,
     n.Name,
     p.MaLo,
-    may.Ten,
     la.Ten,
     tp.Ten,
     s.Ten,
     mau.Ten,
-    p.CaTRa
+    p.CaTRa,
+	p.MaLoaiCa,
+	p.MaThanhPham,
+	p.MaMau,
+	p.MaSize,
+	c.ThoiGianVao,
+	c.ThoiGianRa
 order by
     n.MaNhanVien,
     p.MaLo,
@@ -1421,7 +1618,58 @@ order by
         {
             try
             {
-                var query = @"Select
+//                var query = @"Select
+//    n.MaNhanVien as MaNhanVien,
+//    n.MaHoSo as MaHoSo,
+//    n.Name as TenNhanVien,
+//    p.MaLo,
+//    may.Ten as MayLangDaName,
+//    la.Ten as LoaiCaName,
+//    tp.Ten as ThanhPhamName,
+//    s.Ten as SizeName,
+//    mau.Ten as [Màu],
+//    mau.Ten as Mau,
+//    p.CaTra as CaTra,
+//    Count(*) as SoRo,
+//    Sum(p.TrongLuong) as TrongLuong
+//from
+//    PhieuCanBTPDinhHinh p,
+//    MaLoaiCaDinhHinh la,
+//    MaThanhPhamDinhHinh tp,
+//    MaSizeDinhHinh s,
+//    MaMauDinhHinh mau,
+//    NhanVienDaiThanh n,
+//    MayLangDa may
+//where
+//    p.Ngay >= @fromDate
+//    and p.Ngay<= @toDate
+//    and p.MaXuong = @xuongId
+//    and p.MaNhanVienPhucVu = n.MaNhanVien
+//    and p.MaLoaiCa = la.Ma
+//    and p.MaThanhPham = tp.Ma
+//    and p.MaSize = s.Ma
+//    and p.MaMau = mau.Ma
+//    and p.MaMayLangDa = may.Ma
+//    and p.ChiSanLuong = 0
+//and IsNull( p.GhiChu,'') <> 'HUY'
+//GROUP BY
+//    n.MaNhanVien,
+//    n.Name,
+//    p.MaLo,
+//    may.Ten,
+//    la.Ten,
+//    tp.Ten,
+//    s.Ten,
+//    mau.Ten,
+//    p.CaTRa
+//order by
+//    n.MaNhanVien,
+//    p.MaLo,
+//    tp.Ten,
+//    s.Ten,
+//    p.CaTra";
+//thêm checkinout để lay thoi gian vao ra của công nhân
+var query = @"Select
     n.MaNhanVien as MaNhanVien,
     n.MaHoSo as MaHoSo,
     n.Name as TenNhanVien,
@@ -1434,7 +1682,10 @@ order by
     mau.Ten as Mau,
     p.CaTra as CaTra,
     Count(*) as SoRo,
-    Sum(p.TrongLuong) as TrongLuong
+    Sum(p.TrongLuong) as TrongLuong,
+	MIN(c.ThoiGian) OVER(PARTITION BY n.MaChamCong, p.Ngay) as ThoiGianVao,
+	MAX(c.ThoiGian) OVER(PARTITION BY n.MaChamCong, p.Ngay) as ThoiGianRa,
+	DATEDIFF(hour, MIN(c.ThoiGian) OVER(PARTITION BY n.MaChamCong, p.Ngay), MAX(c.ThoiGian) OVER(PARTITION BY n.MaChamCong, p.Ngay)) as TongThoiGian
 from
     PhieuCanBTPDinhHinh p,
     MaLoaiCaDinhHinh la,
@@ -1442,7 +1693,8 @@ from
     MaSizeDinhHinh s,
     MaMauDinhHinh mau,
     NhanVienDaiThanh n,
-    MayLangDa may
+    MayLangDa may,
+	CheckInOut c
 where
     p.Ngay >= @fromDate
     and p.Ngay<= @toDate
@@ -1454,9 +1706,11 @@ where
     and p.MaMau = mau.Ma
     and p.MaMayLangDa = may.Ma
     and p.ChiSanLuong = 0
-and IsNull( p.GhiChu,'') <> 'HUY'
+	and IsNull( p.GhiChu,'') <> 'HUY'
+	AND n.MaChamCong = c.MaChamCong AND c.ThoiGian = p.Ngay AND c.ThoiGian >= @fromDate AND c.ThoiGian <= @toDate 
 GROUP BY
     n.MaNhanVien,
+	n.MaHoSo,
     n.Name,
     p.MaLo,
     may.Ten,
@@ -1464,13 +1718,17 @@ GROUP BY
     tp.Ten,
     s.Ten,
     mau.Ten,
-    p.CaTRa
+    p.CaTRa,
+	p.Ngay,
+	n.MaChamCong,
+	c.ThoiGian
 order by
     n.MaNhanVien,
     p.MaLo,
     tp.Ten,
     s.Ten,
-    p.CaTra";
+    p.CaTra
+	";
                 using (var connection = new SqlConnection(connectionString))
                 {
                     connection.Open();
@@ -1609,31 +1867,83 @@ order by
     p.IsOffline as Offline,
     Count(*) as SoRo,
     Sum(p.TrongLuong) as TrongLuong,
+    SUM(CASE WHEN tp.isCaDa = 1 THEN p.TrongLuong ELSE 0 END) AS TrongLuongCaDa,
     p.MaXuong
 from
-    PhieuCanBTPDinhHinh p,
-    MaLoaiCaDinhHinh la,
-    MaThanhPhamDinhHinh tp,
-    MaSizeDinhHinh s,
-    MaMauDinhHinh mau,
-    NhanVienDaiThanh n,
-    MayLangDa may
+    PhieuCanBTPDinhHinh p
+    left join MaLoaiCaDinhHinh la on p.MaLoaiCa = la.ma
+    left join MaThanhPhamDinhHinh tp on p.MaThanhPham = tp.Ma
+    left join MaSizeDinhHinh s on p.MaSize = s.Ma
+    left join MaMauDinhHinh mau on p.MaMau = mau.Ma
+    --MayLangDa may
 where
     p.Ngay >= @fromDate
 and p.Ngay <= @toDate
     and p.MaXuong = @xuongId
-    and p.MaNhanVien = n.MaNhanVien
-    and p.MaLoaiCa = la.Ma
-    and p.MaThanhPham = tp.Ma
-    and p.MaSize = s.Ma
-    and p.MaMau = mau.Ma
-    and p.MaMayLangDa = may.Ma
     and IsNull( p.GhiChu,'') <> 'HUY'
     and p.STT>0
+	and p.TrongLuong > 0
 and p.ChiSanLuong =0
 GROUP BY
     p.MaLo,
     tp.Ten,
+    p.CaTra,
+    p.IsOffline,
+    p.MaThanhPham,
+     p.MaXuong
+order by
+    p.MaLo,
+    tp.Ten,
+    p.CaTra";
+                using (var connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+                    var items = connection.QueryAsync<T>(query,
+                            new { fromDate = fromDate.Date, toDate = toDate.Date, xuongId = xuongId }).Result
+                        .ToList();
+                    return items;
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+        public List<T> GetTongHopLos<T>(DateTime fromDate, DateTime toDate, string xuongId)
+        {
+            try
+            {
+                var query = @"Select
+    p.MaLo as MaLo,
+    p.MaThanhPham,
+    tp.Ten as ThanhPhamName,
+	p.MaSize,
+	s.Ten as SizeName,
+    p.CaTra as CaTra,
+    p.IsOffline as Offline,
+    Count(*) as SoRo,
+    Sum(p.TrongLuong) as TrongLuong,
+    p.MaXuong
+from
+    PhieuCanBTPDinhHinh p
+    left join MaLoaiCaDinhHinh la on p.MaLoaiCa = la.ma
+    left join MaThanhPhamDinhHinh tp on p.MaThanhPham = tp.Ma
+    left join MaSizeDinhHinh s on p.MaSize = s.Ma
+    left join MaMauDinhHinh mau on p.MaMau = mau.Ma
+where
+    p.Ngay >= @fromDate
+and p.Ngay <= @toDate
+    and p.MaXuong = @xuongId
+    --and p.MaMayLangDa = may.Ma
+    and IsNull( p.GhiChu,'') <> 'HUY'
+    and p.STT>0
+	and p.TrongLuong>0
+and p.ChiSanLuong =0
+GROUP BY
+    p.MaLo,
+    tp.Ten,
+	p.MaSize,
+	s.Ten,
     p.CaTra,
     p.IsOffline,
     p.MaThanhPham,

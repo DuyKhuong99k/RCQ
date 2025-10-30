@@ -63,6 +63,10 @@ public partial class TheThanhPham
     [NotMapped]
     public string? ThanhPhamDHName { get; set; }
     [NotMapped]
+    public string? ThanhPhamName { get; set; }
+    [NotMapped]
+    public string? SizeName { get; set; }
+    [NotMapped]
     public string? SizeDHName { get; set; }
     [NotMapped]
     public string? ThanhPhamFilletName { get; set; }
@@ -77,4 +81,42 @@ public partial class TheThanhPham
     [Column(TypeName = "datetime2(7)")]
     public DateTime NgayGio { get; set; } = DateTime.Now;
 
+    public int LoLevel { get; set; } = 0;
+    [StringLength(50)]
+    [Unicode(false)]
+    public string? MaSizeChinhXepKhuon { get; set; }
+    [StringLength(50)]
+    [Unicode(false)]
+    public string? MaThanhPhamChinhXepKhuon { get; set; }
+    [StringLength(50)]
+    [Unicode(false)]
+    public string? MaChatLuongChinhXepKhuon { get; set; } // MaChatLuongXepKhuon
+    [StringLength(50)]
+    [Unicode(false)]
+    public string? MaSizePhuXepKhuon { get; set; }
+    [StringLength(50)]
+    [Unicode(false)]
+    public string? MaThanhPhamPhuXepKhuon { get; set; }
+    [StringLength(50)]
+    [Unicode(false)]
+    public string? MaChatLuongPhuXepKhuon { get; set; } // Không sử dụng, không có
+    [StringLength(50)]
+    [Unicode(false)]
+    public string? MaChieuXa { get; set; }
+    [NotMapped]
+    public string? ThanhPhamChinhXepKhuonName { get; set; }
+    [NotMapped]
+    public string? SizeChinhXepKhuonName { get; set; }
+    [NotMapped]
+    public string? ChatLuongChinhXepKhuonName { get; set; }
+    [NotMapped]
+    public string? ThanhPhamPhuXepKhuonName { get; set; }
+    [NotMapped]
+    public string? SizePhuXepKhuonName { get; set; }
+    [NotMapped]
+    public string? ChatLuongPhuXepKhuonName { get; set; }
+    [NotMapped]
+    public string? LoaiNguyenLieuName { get; set; } 
+    [NotMapped]
+    public string? ChieuXaName { get; set; } 
 }

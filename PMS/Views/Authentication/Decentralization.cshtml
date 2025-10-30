@@ -34,7 +34,7 @@
                 </div>
                 <div class="card-body">
                     <div class="row">
-                        <div class="col-sm-2">
+                        <div class="col-sm-3">
                             <h6>Vai trò</h6>
                             <div id="GridRole" style="margin-bottom:10px"></div>
                             <div style="margin-bottom:5px">
@@ -45,7 +45,7 @@
                             </div>
 
                         </div>
-                        <div class="col-sm-10">
+                        <div class="col-sm-9">
                             <h6>Quyền của vai trò</h6>
                             <div id="GridDecentralization" style="margin-bottom:10px"></div>
                             <div style="margin-bottom:5px">
@@ -267,12 +267,14 @@
                     gridRole = new ej.grids.Grid({
                         dataSource: dataManager,
                         allowPaging: true,
-                        pageSettings: { pageSize: 50 },
+                        pageSettings: { pageSize: 50, pageSizes: [50, 100, 200, 500] },
                         allowFiltering: true,
                         allowSorting: true,
                         filterSettings: { type: 'Excel' },
                         //frozenColumns: 3,
                         allowResizing: true,
+                        allowExcelExport: true,
+                        toolbar: ['ExcelExport'],
                         rowSelected: onRowSelectedRole,
                         height: 300,
                         columns: [
@@ -283,6 +285,10 @@
                     });
                     // Hiển thị Grid trên trang web
                     gridRole.appendTo('#GridRole');
+                    gridRole.toolbarClick = function (args) {
+             if (args.item.id === 'Grid_excelexport') {
+                gridRole.excelExport();
+             }};
                 }
             },
             error: function (error) {
@@ -347,11 +353,13 @@
         gridDecentralization = new ej.grids.Grid({
             dataSource: dataManager,
             allowPaging: true,
-            pageSettings: { pageSize: 100 },
+            pageSettings: { pageSize: 50, pageSizes: [50, 100, 200, 500] },
             allowFiltering: true,
             filterSettings: { type: 'Excel' },
             allowSorting: true,
             allowResizing: true,
+            allowExcelExport: true,
+            toolbar: ['ExcelExport'],
             rowSelected: onRowSelectedDecentralization,
             height: 300,
             columns: [
@@ -364,6 +372,10 @@
 
         // Hiển thị Grid trên trang web
         gridDecentralization.appendTo('#GridDecentralization');
+        gridDecentralization.toolbarClick = function (args) {
+             if (args.item.id === 'Grid_excelexport') {
+                gridDecentralization.excelExport();
+             }};
     }
 
     function onRowSelectedDecentralization(args) {

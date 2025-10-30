@@ -27,4 +27,7 @@ public partial class PhuongTienChoNguyenLieu
 
     [StringLength(50)]
     public string? SoGhe { get; set; }
+    [Required]
+    [Column(TypeName = "datetime2(7)")]
+    public DateTime MNgay { get; set; } = DateTime.Now;
 }

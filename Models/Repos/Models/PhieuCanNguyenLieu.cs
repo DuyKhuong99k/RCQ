@@ -74,4 +74,8 @@ public partial class PhieuCanNguyenLieu
     public string Pheu { get; set; } = null!;
 
     public int Chuyen { get; set; }
+   
+    [StringLength(50)]
+    [Unicode(false)]
+    public string? Id { get; set; }
 }

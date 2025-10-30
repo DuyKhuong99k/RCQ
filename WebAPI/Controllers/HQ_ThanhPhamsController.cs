@@ -12,6 +12,7 @@ using Models.Repos;
 using Models.Repos.Models;
 using ViewModels.Repos.API;
 using WebAPI.Models;
+using ToolsEx;
 
 namespace WebAPI.Controllers
 {
@@ -49,6 +50,24 @@ namespace WebAPI.Controllers
             }
             return Ok(item);
         }
+        [HttpGet("{tenThanhPham}")]
+        [Authorize]
+        public IActionResult GetsByTen(string tenThanhPham)
+        {
+            var item =_context.HqThanhPhams
+                .Where(x => x.Ten.Trim() == tenThanhPham)
+                .Select(x => x.Id.ToString())
+                .FirstOrDefault();
+            if (item == null)
+            {
+                return NotFound(new ApiResponse
+                {
+                    Success = false,
+                    Message = "Tên Thành Phẩm này không tồn tại!."
+                });
+            }
+           return Ok(new { Ma = item });
+        }
         [HttpPost]
         [Authorize]
         public async Task<IActionResult> Insert(HQ_ThanhPham model)
@@ -81,7 +100,7 @@ namespace WebAPI.Controllers
                 Id = model.Id,
                 Ten = model.Ten,
                 SuDung = model.SuDung,
-                MNgay = model.MNgay,
+                MNgay = DateTime.Now,
                 Max = model.Max,
                 Min = model.Min,
             };
@@ -144,10 +163,11 @@ namespace WebAPI.Controllers
                     Errors = errors
                 });
             }
+            var MNgay = DateTime.Now;
             item.Id = model.Id;
             item.Ten = model.Ten;
             item.SuDung = model.SuDung;
-            //item.MNgay = model.MNgay;
+            item.MNgay = MNgay;
             item.Max = model.Max;
             item.Min = model.Min;
             try
@@ -161,7 +181,7 @@ namespace WebAPI.Controllers
                     ThanhPhamId = item.Id,
                     Ten = item.Ten,
                     SuDung = item.SuDung,
-                    MNgay = item.MNgay,
+                    MNgay = MNgay,
                     Max = item.Max,
                     Min = item.Min,
                     Ngay = DateTime.Now // Ngày hiện tại khi tạo mới
@@ -212,13 +232,14 @@ namespace WebAPI.Controllers
 
             try
             {
+                var MNgay = DateTime.Now;
                 // Tạo bản ghi mới cho bảng HqLoaiNguyenLieuUs để lưu lịch sử
                 var newItemUs = new HQ_ThanhPham_D
                 {
                     ThanhPhamId = item.Id,
                     Ten = item.Ten,
                     SuDung = item.SuDung,
-                    MNgay = item.MNgay,
+                    MNgay = MNgay,
                     Max = item.Max,
                     Min = item.Min,
                     Ngay = DateTime.Now // Ngày hiện tại khi tạo mới

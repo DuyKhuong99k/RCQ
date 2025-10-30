@@ -23,7 +23,7 @@ namespace ViewModels.Repos.HQ
         [ObservableProperty] private bool isEdit;
         [ObservableProperty] private HQ_Size? item;
         [ObservableProperty] private ObservableRangeCollection<HQ_Size> items = new();
-        
+        [ObservableProperty] private ObservableRangeCollection<HQ_Size> usedItems = new();
         [ObservableProperty][NotifyPropertyChangedFor(nameof(IsVailSelectedItem))] private HQ_Size? selectedItem;
         [ObservableProperty] private ObservableRangeCollection<object> selectedItems = new();
         [ObservableProperty] private ICommand _closeItemWindowCommand;
@@ -192,6 +192,7 @@ namespace ViewModels.Repos.HQ
             lock (Items)
             {
                 Items.Clear();
+                UsedItems.Clear();
             }
 
             var items = Gets<HQ_Size>();
@@ -204,6 +205,10 @@ namespace ViewModels.Repos.HQ
                         foreach (var item in items)
                         {
                             Items.Add(item);
+                            if (item.SuDung)
+                            {
+                                UsedItems.Add(item);
+                            }
                         }
                     }
                     catch (NotSupportedException e)
@@ -228,7 +233,7 @@ namespace ViewModels.Repos.HQ
             {
                 throw ex;
             }
-            return db.HqSizeDs.Where(x=>x.MNgay > date).OrderByDescending(x=>x.MNgay).Skip((PageIndex -1)*PageSize).Take(PageSize).ToList();
+            return db.HqSizeDs.Where(x=>x.MNgay.Date >= date.Date).OrderByDescending(x=>x.MNgay).Skip((PageIndex -1)*PageSize).Take(PageSize).ToList();
         }
 
         public List<HQ_Size_U> GetUs(string Ngay,int PageIndex,int PageSize)
@@ -243,7 +248,22 @@ namespace ViewModels.Repos.HQ
             {
                 throw ex;
             }
-            return db.HqSizeUs.Where(x=>x.MNgay > date).OrderByDescending(x=>x.MNgay).Skip((PageIndex -1)*PageSize).Take(PageSize).ToList();
+            var latestDates = db.HqSizeUs
+                .Where(x => x.MNgay.Date >= date.Date)
+                .GroupBy(x => x.SizeId)
+                .Select(g => new { SizeId = g.Key, MaxId = g.Max(x => x.Id) });
+
+            var query = from hq in db.HqSizeUs.Where(x => x.MNgay.Date >= date.Date) 
+                join latest in latestDates
+                    on new { hq.SizeId, hq.Id } 
+                    equals new { latest.SizeId, Id = latest.MaxId }
+                orderby hq.MNgay descending
+                select hq;
+
+            var result = query.Skip((PageIndex - 1) * PageSize)
+                .Take(PageSize)
+                .ToList();
+            return result;
         }
 
         [RelayCommand]

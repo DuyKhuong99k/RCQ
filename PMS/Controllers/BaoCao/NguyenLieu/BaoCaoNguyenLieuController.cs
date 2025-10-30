@@ -163,6 +163,151 @@ namespace PMS.Controllers.BaoCao.NguyenLieu
             return View("~/Views/BaoCao/NguyenLieu/TongHopKeToanNguyenLieuView.cshtml");
         }
         #endregion
+        #region Tổng Hợp Lô
+        [CustomAuthorize(Fu = "Báo Cáo / Nguyên Liệu / Tổng Hợp Lô", Func = "Xem Báo Cáo / Nguyên Liệu / Tổng Hợp Lô")]
+        public IActionResult TongHopLoView()
+        {
+            var rl = Middlewares.AuthenticationHelpers.CheckAut(HttpContext, "TongHopLoView");
+
+            if (rl == false)
+            {
+                return Redirect(AppViewModels.AppViewModel.Instance.RedirectLoginUrl);
+            }
+            ViewBag.TitlePage = "Báo Cáo Tổng Hợp Lô";
+            return View("~/Views/BaoCao/NguyenLieu/TongHopLoView.cshtml");
+        }
+        public async Task<IEnumerable<object>> GetPhieuCanTongHopLos(DateTime? fromDate = null, DateTime? toDate = null)
+        {
+            if (fromDate == null) fromDate = DateTime.Now;
+            if (toDate == null) toDate = DateTime.Now;
+            IEnumerable<object> dataSource = ViewBag.dataSource;
+            var accsessToken = HttpContext.Session.GetString("JWTToken"); // Lấy token từ session
+            if (dataSource == null)
+            {
+                var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/PhieuCanNguyenLieux/GetPhieuCanTongHopLos/{fromDate?.ToString("yyyy-MM-dd")}/{toDate?.ToString("yyyy-MM-dd")}";
+                using var helper = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+                ViewBag.dataSource = await helper.GetAsync<object>(HttpContext, apiUrl);
+                dataSource = ViewBag.dataSource;
+            }
+            return dataSource;
+        }
+        #endregion
+        #region Thành Phẩm 2 Hoàng Long (Phụ Phẩm)
+        [CustomAuthorize(Fu = "Báo Cáo / Thành Phẩm 2 / Chi Tiết", Func = "Xem Báo Cáo / Thành Phẩm 2 / Chi Tiết")]
+        public IActionResult ChiTietThanhPham2View()
+        {
+            var rl = Middlewares.AuthenticationHelpers.CheckAut(HttpContext, "ChiTietThanhPham2View");
+
+            if (rl == false)
+            {
+                return Redirect(AppViewModels.AppViewModel.Instance.RedirectLoginUrl);
+            }
+            ViewBag.TitlePage = "Báo Cáo Chi Tiết";
+            return View("~/Views/BaoCao/TP2/Chitiettp2.cshtml");
+        }
+        public async Task<IEnumerable<object>> GetPhieuCanChiTietThanhPham2(DateTime? fromDate = null, DateTime? toDate = null)
+        {
+            if (fromDate == null) fromDate = DateTime.Now;
+            if (toDate == null) toDate = DateTime.Now;
+            IEnumerable<object> dataSource = ViewBag.dataSource;
+            var accsessToken = HttpContext.Session.GetString("JWTToken"); // Lấy token từ session
+            if (dataSource == null)
+            {
+                var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/PhieuCanNguyenLieux/GetChiTietThanhPham2s/{fromDate?.ToString("yyyy-MM-dd")}/{toDate?.ToString("yyyy-MM-dd")}";
+                using var helper = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+                ViewBag.dataSource = await helper.GetAsync<object>(HttpContext, apiUrl);
+                dataSource = ViewBag.dataSource;
+            }
+            return dataSource;
+        }
+        [CustomAuthorize(Fu = "Báo Cáo / Thành Phẩm 2 / Tổng Hợp Sản Phẩm", Func = "Xem Báo Cáo / Thành Phẩm 2 / Tổng Hợp Sản Phẩm")]
+        public IActionResult TongHopSanPhamThanhPham2View()
+        {
+            var rl = Middlewares.AuthenticationHelpers.CheckAut(HttpContext, "TongHopSanPhamThanhPham2View");
+
+            if (rl == false)
+            {
+                return Redirect(AppViewModels.AppViewModel.Instance.RedirectLoginUrl);
+            }
+            ViewBag.TitlePage = "Báo Cáo Tổng Hợp Sản Phẩm";
+            return View("~/Views/BaoCao/TP2/tonghopsptp2.cshtml");
+        }
+        public async Task<IEnumerable<object>> GetTongHopSanPhamThanhPham2(DateTime? fromDate = null, DateTime? toDate = null)
+        {
+            if (fromDate == null) fromDate = DateTime.Now;
+            if (toDate == null) toDate = DateTime.Now;
+            IEnumerable<object> dataSource = ViewBag.dataSource;
+            var accsessToken = HttpContext.Session.GetString("JWTToken"); // Lấy token từ session
+            if (dataSource == null)
+            {
+                var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/PhieuCanNguyenLieux/GetTongHopSanPhamThanhPham2/{fromDate?.ToString("yyyy-MM-dd")}/{toDate?.ToString("yyyy-MM-dd")}";
+                using var helper = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+                ViewBag.dataSource = await helper.GetAsync<object>(HttpContext, apiUrl);
+                dataSource = ViewBag.dataSource;
+            }
+            return dataSource;
+        }
+        [CustomAuthorize(Fu = "Báo Cáo / Thành Phẩm 2 / Tỷ Lệ Thu Hồi", Func = "Xem Báo Cáo / Thành Phẩm 2 / Tỷ Lệ Thu Hồi")]
+        public IActionResult TyLeThuHoiThanhPham2View()
+        {
+            var rl = Middlewares.AuthenticationHelpers.CheckAut(HttpContext, "TyLeThuHoiThanhPham2View");
+
+            if (rl == false)
+            {
+                return Redirect(AppViewModels.AppViewModel.Instance.RedirectLoginUrl);
+            }
+            ViewBag.TitlePage = "Báo Cáo Tỷ Lệ Thu Hồi";
+            return View("~/Views/BaoCao/TP2/tonghoptylethuhoitp2.cshtml");
+        }
+        public async Task<IEnumerable<object>> GetTyLeThuHoiThanhPham2(DateTime? fromDate = null, DateTime? toDate = null)
+        {
+            if (fromDate == null) fromDate = DateTime.Now;
+            if (toDate == null) toDate = DateTime.Now;
+            string xuongId = HttpContext.Session.GetString("XuongId");
+            IEnumerable<object> dataSource = ViewBag.dataSource;
+            var accsessToken = HttpContext.Session.GetString("JWTToken"); // Lấy token từ session
+            if (dataSource == null)
+            {
+                var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/PhieuCanNguyenLieux/GetTyLeThuHoiThanhPham2/{fromDate?.ToString("yyyy-MM-dd")}/{toDate?.ToString("yyyy-MM-dd")}/{xuongId}";
+                using var helper = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+                ViewBag.dataSource = await helper.GetAsync<object>(HttpContext, apiUrl);
+                dataSource = ViewBag.dataSource;
+            }
+            return dataSource;
+        }
+        #endregion
+
+
+        #region Phieu Cân Không Ghi Nhận Trọng Lương
+        [CustomAuthorize(Fu = "Báo Cáo / Nguyên Liệu / Phiếu Cân Không Thể Ghi Nhận", Func = "Xem Báo Cáo / Nguyên Liệu / Phiếu Cân Không Thể Ghi Nhận")]
+        public IActionResult ChiTietPhieuCanKhongGhiNhanDuLieuView()
+        {
+            var rl = Middlewares.AuthenticationHelpers.CheckAut(HttpContext, "ChiTietPhieuCanKhongGhiNhanDuLieuView");
+
+            if (rl == false)
+            {
+                return Redirect(AppViewModels.AppViewModel.Instance.RedirectLoginUrl);
+            }
+            ViewBag.TitlePage = "Báo Cáo Chi Tiết Phiếu Cân Không Ghi Nhận Dữ Liệu";
+            return View("~/Views/BaoCao/NguyenLieu/ChiTietPhieuCanKhongGhiNhanDuLieuView.cshtml");
+        }
+        public async Task<IEnumerable<object>> GetChiTietPhieuCanKhongGhiNhanDuLieu(DateTime? fromDate = null, DateTime? toDate = null)
+        {
+            if (fromDate == null) fromDate = DateTime.Now;
+            if (toDate == null) toDate = DateTime.Now;
+            IEnumerable<object> dataSource = ViewBag.dataSource;
+            var accsessToken = HttpContext.Session.GetString("JWTToken"); // Lấy token từ session
+            if (dataSource == null)
+            {
+                var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/PhieuCanNguyenLieux/GetPhieuKhongGhiNhan/{fromDate?.ToString("yyyy-MM-dd")}/{toDate?.ToString("yyyy-MM-dd")}";
+                using var helper = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+                ViewBag.dataSource = await helper.GetAsync<object>(HttpContext, apiUrl);
+                dataSource = ViewBag.dataSource;
+            }
+            return dataSource;
+        }
+        #endregion
+
         public async Task<ActionResult> Reload(DateTime fromDate, DateTime toDate)
         {
             IEnumerable<object> dataSource = null;
@@ -183,6 +328,26 @@ namespace PMS.Controllers.BaoCao.NguyenLieu
             else if (reportType == "TongHopPhuongTienNguyenLieuView")
             {
                 dataSource = await GetPhieuCanTongHopPhuongTiens(fromDate, toDate);
+            }
+            else if (reportType == "TongHopLoView")
+            {
+                dataSource = await GetPhieuCanTongHopLos(fromDate, toDate);
+            }
+            else if (reportType == "ChiTietThanhPham2View")
+            {
+                dataSource = await GetPhieuCanChiTietThanhPham2(fromDate, toDate);
+            }
+            else if (reportType == "TongHopSanPhamThanhPham2View")
+            {
+                dataSource = await GetTongHopSanPhamThanhPham2(fromDate, toDate);
+            }
+            else if (reportType == "TyLeThuHoiThanhPham2View")
+            {
+                dataSource = await GetTyLeThuHoiThanhPham2(fromDate, toDate);
+            }
+            else if (reportType == "ChiTietPhieuCanKhongGhiNhanDuLieuView")
+            {
+                dataSource = await GetChiTietPhieuCanKhongGhiNhanDuLieu(fromDate, toDate);
             }
             if (dataSource == null || !dataSource.Any())
             {

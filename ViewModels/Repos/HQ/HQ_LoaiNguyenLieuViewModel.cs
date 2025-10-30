@@ -26,7 +26,7 @@ namespace ViewModels.Repos.HQ
         [ObservableProperty] private bool isEdit;
         [ObservableProperty] private HQ_LoaiNguyenLieu? item;
         [ObservableProperty] private ObservableRangeCollection<HQ_LoaiNguyenLieu> items = new();
-
+        [ObservableProperty] private ObservableRangeCollection<HQ_LoaiNguyenLieu> usedItems = new();
         [ObservableProperty][NotifyPropertyChangedFor(nameof(IsVailSelectedItem))] private HQ_LoaiNguyenLieu? selectedItem;
         [ObservableProperty] private ObservableRangeCollection<object> selectedItems = new();
         [ObservableProperty] private ICommand _closeItemWindowCommand;
@@ -129,7 +129,7 @@ namespace ViewModels.Repos.HQ
             {
                 throw ex;
             }
-            return db.HqLoaiNguyenLieuDs.Where(x=>x.MNgay > date).OrderByDescending(x=>x.MNgay).Skip((PageIndex -1)*PageSize).Take(PageSize).ToList();
+            return db.HqLoaiNguyenLieuDs.Where(x=>x.MNgay.Date >= date.Date).OrderByDescending(x=>x.MNgay).Skip((PageIndex -1)*PageSize).Take(PageSize).ToList();
         }
 
         public List<HQ_LoaiNguyenLieu_U> GetUs(string Ngay,int PageIndex,int PageSize)
@@ -144,7 +144,22 @@ namespace ViewModels.Repos.HQ
             {
                 throw ex;
             }
-            return db.HqLoaiNguyenLieuUs.Where(x=>x.MNgay > date).OrderByDescending(x=>x.MNgay).Skip((PageIndex -1)*PageSize).Take(PageSize).ToList();
+            var latestDates = db.HqLoaiNguyenLieuUs
+                .Where(x => x.MNgay.Date >= date.Date)
+                .GroupBy(x => x.LoaiNguyenLieuId)
+                .Select(g => new { LoaiNguyenLieuId = g.Key, MaxId = g.Max(x => x.Id) });
+
+            var query = from hq in db.HqLoaiNguyenLieuUs.Where(x => x.MNgay.Date >= date.Date) 
+                join latest in latestDates
+                    on new { hq.LoaiNguyenLieuId, hq.Id } 
+                    equals new { latest.LoaiNguyenLieuId, Id = latest.MaxId }
+                orderby hq.MNgay descending
+                select hq;
+
+            var result = query.Skip((PageIndex - 1) * PageSize)
+                .Take(PageSize)
+                .ToList();
+            return result;
         }
         private int Insert<T>(T item)
         {
@@ -199,6 +214,7 @@ namespace ViewModels.Repos.HQ
             }
         }
         public bool IsVailSelectedItem => SelectedItem != null;
+
         private bool IsItemPass(HQ_LoaiNguyenLieu item)
         {
             return item != null && item.Ten != null && item.Ten.Trim() != "" &&
@@ -223,6 +239,7 @@ namespace ViewModels.Repos.HQ
             lock (Items)
             {
                 Items.Clear();
+                UsedItems.Clear();
             }
 
             var items = Gets<HQ_LoaiNguyenLieu>();
@@ -235,6 +252,10 @@ namespace ViewModels.Repos.HQ
                         foreach (var item in items)
                         {
                             Items.Add(item);
+                            if (item.SuDung == true)
+                            {
+                                UsedItems.Add(item);
+                            }
                         }
                     }
                     catch (NotSupportedException e)

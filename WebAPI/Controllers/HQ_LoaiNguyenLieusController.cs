@@ -49,6 +49,23 @@ namespace WebAPI.Controllers
             }
             return Ok(item);
         }
+        [HttpGet("{tenLoaiNguyenLieu}")]
+        [Authorize]
+        public IActionResult GetsByTen(string tenLoaiNguyenLieu)
+        {
+            var item = _context.HqLoaiNguyenLieus.Where(x => x.Ten.Trim() == tenLoaiNguyenLieu)
+                .Select(x => x.Id.ToString())
+                .FirstOrDefault();
+            if (item == null)
+            {
+                return NotFound(new ApiResponse
+                {
+                    Success = false,
+                    Message = "Tên Loại Nguyên Liệu này không tồn tại!."
+                });
+            }
+            return Ok(new { Ma = item });
+        }
         [HttpPost]
         [Authorize]
         public async Task<IActionResult> Insert(HQ_LoaiNguyenLieu model)
@@ -81,7 +98,7 @@ namespace WebAPI.Controllers
                 Ten = model.Ten,
                 Id = model.Id,
                 SuDung = model.SuDung,
-                MNgay = model.MNgay,
+                MNgay = DateTime.Now,
             };
             _context.HqLoaiNguyenLieus.Add(newItem);
             try
@@ -142,12 +159,12 @@ namespace WebAPI.Controllers
                     Errors = errors
                 });
             }
-
+            var MNgay = DateTime.Now;
             // Cập nhật thông tin vào item
             item.Id = model.Id;
             item.Ten = model.Ten;
             item.SuDung = model.SuDung;
-            //item.MNgay = model.MNgay;
+            item.MNgay = MNgay;
 
             try
             {
@@ -160,7 +177,7 @@ namespace WebAPI.Controllers
                     LoaiNguyenLieuId = item.Id,
                     Ten = item.Ten,
                     SuDung = item.SuDung,
-                    MNgay = item.MNgay,
+                    MNgay = MNgay,
                     Ngay = DateTime.Now // Ngày hiện tại khi tạo mới
                 };
 
@@ -212,13 +229,14 @@ namespace WebAPI.Controllers
 
             try
             {
+                var MNgay = DateTime.Now;
                 // Tạo bản ghi mới cho bảng HqLoaiNguyenLieuUs để lưu lịch sử
                 var newItemUs = new HQ_LoaiNguyenLieu_D
                 {
                     LoaiNguyenLieuId = item.Id,
                     Ten = item.Ten,
                     SuDung = item.SuDung,
-                    MNgay = item.MNgay,
+                    MNgay = MNgay,
                     Ngay = DateTime.Now // Ngày hiện tại khi tạo bản ghi
                 };
 

@@ -48,13 +48,25 @@ namespace WebAPI.Controllers
         }
         [HttpGet("{fromDate},{toDate},{xuongId}")]
         [Authorize]
-        public async Task<ActionResult<IEnumerable<object>>> GetTongHopThanhPhamsDB(string fromDate, string toDate, string xuongId)
+        public async Task<ActionResult<IEnumerable<object>>> GetTongHopThanhPhamsDB_St(string fromDate, string toDate, string xuongId)
         {
             if (_context.PhieuCanSoCheDinhHinh == null)
             {
                 return NotFound();
             }
             var items = Vm.VmDashBoard.ItemTongHopThanhPhamSoCheDinhHinh.OfType<dynamic>().Where(x => x.MaXuong == xuongId).ToList();// Sử dụng dynamic để cast các object
+            return items;
+        }
+
+        [HttpGet("{fromDate},{toDate},{xuongId}")]
+        [Authorize]
+        public async Task<ActionResult<IEnumerable<object>>> GetTongHopThanhPhamsDB(DateTime fromDate, DateTime toDate, string xuongId)
+        {
+            if (_context.PhieuCanSoCheDinhHinh == null)
+            {
+                return NotFound();
+            }
+            var items = Vm.VmPhieuCanSoCheDinhHinh.GetTongHopThanhPhams<object>(fromDate, toDate, xuongId);
             return items;
         }
 

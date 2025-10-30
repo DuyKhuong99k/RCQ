@@ -16,7 +16,7 @@
 }
 </style> *@
 
-<div class="card mb-4">
+<div class="card mb-4 minHeigh">
     <div class="card-header" style="text-align:center">
         <h6>Tổng Hợp Thành Phẩm Định Hình</h6>
     </div>
@@ -36,7 +36,7 @@
            data-bs-toggle="collapse"
            data-bs-target="#collapseExample"
            aria-expanded="false"
-           aria-controls="collapseExample">
+           aria-controls="collapseExample" style="position:relative; z-index:1;">
             Xem chi tiết
         </a>
         <div class="collapse" id="collapseExample">
@@ -58,6 +58,36 @@
     </div>
 </div>
 <script src="~/js/adduserwaitview.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var detailLink = document.getElementById('detailLink');
+        var collapseElement = document.getElementById('collapseExample');
+
+        function setColor(defaultColor, hoverColor) {
+            detailLink.style.color = defaultColor;
+
+            detailLink.onmouseenter = function () {
+                detailLink.style.color = hoverColor;
+            };
+            detailLink.onmouseleave = function () {
+                detailLink.style.color = defaultColor;
+            };
+        }
+
+        detailLink.textContent = 'Xem chi tiết';
+        setColor('#75aaff', '#0056b3');
+
+        collapseElement.addEventListener('show.bs.collapse', function () {
+            detailLink.textContent = 'Thu gọn';
+            setColor('#6c757d', '#dc3545');
+        });
+
+        collapseElement.addEventListener('hide.bs.collapse', function () {
+            detailLink.textContent = 'Xem chi tiết';
+            setColor('#75aaff', '#0056b3');
+        });
+    });
+</script>
 <script>
     if(typeof detailLink === 'undefined')
         {
@@ -84,10 +114,10 @@
     });
     function loadData() {
         var xuongId = @XuongId;
-        AddUserWaitView(xuongId);
+        //AddUserWaitView(xuongId);
         const parentElement = document.querySelector('.dinhhinh');
-        var fromDate = "@DateTime.Now.Date.AddDays(int.Parse((NumberDate ?? "0").ToString()) * -1).ToString("yyyy-MM-dd")";
-        var toDate = "@DateTime.Now.Date.ToString("yyyy-MM-dd")";
+        const fromDate = localStorage.getItem("fromDate_dashboard_user");
+        const toDate = localStorage.getItem("toDate_dashboard_user");
         $.ajax({
             url: '/Dashboard/TongHopTyLeThanhPhamWithDate',
             data: { fromDate: fromDate, toDate: toDate },
@@ -99,7 +129,7 @@
                 } else {
                     rendertChartTHTPDH(data);
                 }
-                parentElement.innerHTML = '';
+                
                 updateUI(data);
 
             },
@@ -114,7 +144,20 @@
     }
 
     function rendertChartTHTPDH(data) {
-        var _data = data.datas;
+         var _data = data.datas;
+
+        // var _data = data.datas.map(item => {
+        //     const parts = String(item.TrongLuongAndDinhMuc).split('-');
+        //     const top = (parts[0] || '').trim();
+        //     const bottom = (parts[1] || '').trim();
+
+        //     return {
+        //         ...item,
+        //         textTop: top,
+        //         textBottom: bottom
+        //     };
+        // });
+
         chartData = {
             series: [
                 {
@@ -125,9 +168,11 @@
                     text: 'DinhMucTP',
                     dataLabel: {
                         visible: true,
-                        name: 'DinhMucTP',
+                        name: 'TrongLuongAndDinhMucAnhPersente',
                         position: 'Outside',
-                        template: '<div>${point.text}</div>'
+                        // template: '<div>${point.text}</div>'
+                        template: '<div style="position:relative; z-index:1;">${point.text}</div>'
+                        //template: '<div style="position:relative; z-index:1; text-align:center; line-height:1.2;"><div>${point.textTop}</div><div style="font-size: 11px; opacity: 0.85;">${point.textBottom}</div></div>'
                     }
 
                 }
@@ -147,13 +192,36 @@
     }
    
     function updateUI(data) {
+        const rawTongTL = data.TongTL;
 
+        // Nếu không có giá trị hoặc là "underfile" thì không làm gì
+        if (
+            rawTongTL === undefined ||
+            rawTongTL === null ||
+            rawTongTL === 'underfile'
+        ) {
+            return;
+        }
+
+        // Chuẩn hóa giá trị: loại bỏ dấu phẩy và ép sang số
+        const tongTLNumber = Number(String(rawTongTL).replace(/,/g, ''));
+
+        // Nếu sau khi chuẩn hóa mà vẫn không hợp lệ hoặc = 0, thì cũng không cập nhật
+        if (isNaN(tongTLNumber) || tongTLNumber === 0) {
+            return;
+        }
         const parentElement = document.querySelector('.dinhhinh');
+        parentElement.innerHTML = '';
         //tongHopTPDHChart.centerLabel.text = 'Tổng<br>' + data.TongTL + 'Kg';
-        document.getElementById("tongTLTPDinHinh").textContent ='Tổng: '+ data.TongTL + " Kg";
+        document.getElementById("tongTLTPDinHinh").textContent ='Tổng: '+ rawTongTL+ " Kg";
         var series = tongHopTPDHChart.series[0];
         for (let i = 0; i < series.points.length; i++) {
             var item = series.points[i];
+            const trongLuongTP = item.y;
+            const trongLuongTPFormat = trongLuongTP.toLocaleString('vi-VN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            const text = item.text.split('-');
+            const lastText = text[1]?.trim();
+            const dinhMuc = parseFloat(lastText.replace(',', '.'));
             const newItem = document.createElement('tr');
             newItem.innerHTML = `
                 <td>
@@ -162,10 +230,10 @@
                     </div>
                 </td>
                 <td>
-                    <small class="fw-semibold">${item.text}</small>
+                    <small class="fw-semibold">${dinhMuc}</small>
                 </td>
                 <td style="text-align: right;">
-                    <small class="fw-semibold">${item.y} Kg</small>
+                    <small class="fw-semibold">${trongLuongTPFormat} Kg</small>
                 </td>
              `;
 
@@ -175,6 +243,13 @@
     function RefreshDBTHTPDH() {
         loadData();
     }
-    var timeInterval = @AppViewModels.AppViewModel.Instance.TimeSetIntervalDashBoardView;
+    
+    var timeInterval = localStorage.getItem("timeInterval_dashboard_user");
+
+    // Nếu null thì ép thành 30p
+    if (isNaN(timeInterval) || timeInterval <= 0) {
+        timeInterval = 1800000;
+    }
+
     setInterval(loadData, timeInterval);
 </script>

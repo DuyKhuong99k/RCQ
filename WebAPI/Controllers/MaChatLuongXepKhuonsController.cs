@@ -147,6 +147,19 @@ namespace WebAPI.Controllers
             try
             {
                 await _context.SaveChangesAsync();
+                var newItemUs = new MaChatLuongXepKhuon_U
+                {
+                    MaChatLuong = item.Ma,
+                    Ten = item.Ten,
+                    SuDung = item.SuDung,
+                    MNgay = DateTime.Now,
+                };
+
+                // Thêm vào bảng HqLoaiNguyenLieuUs
+                _context.MaChatLuongXepKhuonUs.Add(newItemUs);
+
+
+                await _context.SaveChangesAsync();
             }
             catch (Exception ex)
             {
@@ -189,6 +202,16 @@ namespace WebAPI.Controllers
 
             try
             {
+                var MNgay = DateTime.Now;
+                var newItemUs = new MaChatLuongXepKhuon_D
+                {
+                    MaChatLuong = item.Ma,
+                    Ten = item.Ten,
+                    SuDung = item.SuDung,
+                    MNgay = DateTime.Now,
+                };
+
+                _context.MaChatLuongXepKhuonDs.Add(newItemUs);
                 await _context.SaveChangesAsync();
             }
             catch (Exception ex)

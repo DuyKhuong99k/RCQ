@@ -142,7 +142,7 @@ namespace ViewModels.Repos.HQ
             }
         }
 
-        private List<T> Gets<T>()
+        public List<T> Gets<T>()
         {
             var dao = new Dao.Repos.HQ.DG_DonGia();
             return dao.Gets<T>();

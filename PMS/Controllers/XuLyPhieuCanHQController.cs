@@ -40,7 +40,7 @@ namespace PMS.Controllers
             _httpClientFactory = httpClientFactory;
         }
 
-        [CustomAuthorize(Fu = "Xử Lý Phiếu Cân HQ / Phiếu Cân HQ", Func = "Xem Xử Lý Phiếu Cân HQ / Phiếu Cân HQ")]
+        [CustomAuthorize(Fu = "Xử Lý Phiếu Cân / Phiếu Cân HQ", Func = "Xem Xử Lý Phiếu Cân / Phiếu Cân HQ")]
         public IActionResult Index()
         {
             var rl = Middlewares.AuthenticationHelpers.CheckAut(HttpContext, "XuLyPhieuCanHQView");
@@ -239,7 +239,7 @@ namespace PMS.Controllers
                 Mesages = "Lỗi!"
             });
         }
-        [CustomAuthorize(Fu = "Xử Lý Phiếu Cân HQ / Phiếu Cân HQ", Func = "Thêm Xử Lý Phiếu Cân HQ / Phiếu Cân HQ")]
+        [CustomAuthorize(Fu = "Xử Lý Phiếu Cân / Phiếu Cân HQ", Func = "Thêm Xử Lý Phiếu Cân / Phiếu Cân HQ")]
         public async Task<IActionResult> DoInsert_HQ(DateTime dateTime, TimeSpan gio, string xuongId, string id, int stt, string maLo, string maSize, string maThanhPham, string maLoaiNguyenLieu, string maNhanVien, string maNhanVienPhucVu, string maNhanVienBanKiem, decimal trongLuong)
         {
             DateOnly dateOnly = DateOnly.FromDateTime(dateTime);
@@ -248,7 +248,8 @@ namespace PMS.Controllers
             var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/HQ_PhieuCans/Insert";
             try
             {
-                if (string.IsNullOrEmpty(stt.ToString()) || string.IsNullOrEmpty(xuongId) || string.IsNullOrEmpty(maLo) || string.IsNullOrEmpty(maSize) || string.IsNullOrEmpty(maThanhPham) || string.IsNullOrEmpty(maLoaiNguyenLieu) || string.IsNullOrEmpty(maNhanVien) || string.IsNullOrEmpty(maNhanVienPhucVu) || string.IsNullOrEmpty(maNhanVienBanKiem) || string.IsNullOrEmpty(id) || string.IsNullOrEmpty(trongLuong.ToString()))
+                // if (string.IsNullOrEmpty(stt.ToString()) || string.IsNullOrEmpty(xuongId) || string.IsNullOrEmpty(maLo) || string.IsNullOrEmpty(maSize) || string.IsNullOrEmpty(maThanhPham) || string.IsNullOrEmpty(maLoaiNguyenLieu) || string.IsNullOrEmpty(maNhanVien) || string.IsNullOrEmpty(maNhanVienPhucVu) || string.IsNullOrEmpty(maNhanVienBanKiem) || string.IsNullOrEmpty(id) || string.IsNullOrEmpty(trongLuong.ToString()))
+                if (string.IsNullOrEmpty(stt.ToString()) || string.IsNullOrEmpty(xuongId) || string.IsNullOrEmpty(maLo) || string.IsNullOrEmpty(maSize) || string.IsNullOrEmpty(maThanhPham) || string.IsNullOrEmpty(maLoaiNguyenLieu) || string.IsNullOrEmpty(maNhanVien) ||  string.IsNullOrEmpty(id) || string.IsNullOrEmpty(trongLuong.ToString()))
                 {
                     return Json(new
                     {
@@ -309,14 +310,14 @@ namespace PMS.Controllers
                 });
             }
         }
-        [CustomAuthorize(Fu = "Xử Lý Phiếu Cân HQ / Phiếu Cân HQ", Func = "Sửa Xử Lý Phiếu Cân HQ / Phiếu Cân HQ")]
+        [CustomAuthorize(Fu = "Xử Lý Phiếu Cân / Phiếu Cân HQ", Func = "Sửa Xử Lý Phiếu Cân / Phiếu Cân HQ")]
         public async Task<IActionResult> DoUpDate_HQ(string id, string maLo, string maSize, string maThanhPham, string maLoaiNguyenLieu, string maNhanVien, string maNhanVienPhucVu, string maNhanVienBanKiem)
         {
             var userName = HttpContext.Session.GetString("Username");
             var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/HQ_PhieuCans/Update/{id}";
             try
             {
-                if (string.IsNullOrEmpty(id) || string.IsNullOrEmpty(maLo) || string.IsNullOrEmpty(maSize) || string.IsNullOrEmpty(maThanhPham) || string.IsNullOrEmpty(maLoaiNguyenLieu) || string.IsNullOrEmpty(maNhanVien) || string.IsNullOrEmpty(maNhanVienPhucVu) || string.IsNullOrEmpty(maNhanVienBanKiem))
+                if (string.IsNullOrEmpty(id) || string.IsNullOrEmpty(maLo) || string.IsNullOrEmpty(maSize) || string.IsNullOrEmpty(maThanhPham) || string.IsNullOrEmpty(maLoaiNguyenLieu) || string.IsNullOrEmpty(maNhanVien) )
                 {
                     return Json(new
                     {
@@ -375,7 +376,7 @@ namespace PMS.Controllers
                 });
             }
         }
-        [CustomAuthorize(Fu = "Xử Lý Phiếu Cân HQ / Phiếu Cân HQ", Func = "Xoá Xử Lý Phiếu Cân HQ / Phiếu Cân HQ")]
+        [CustomAuthorize(Fu = "Xử Lý Phiếu Cân / Phiếu Cân HQ", Func = "Xoá Xử Lý Phiếu Cân / Phiếu Cân HQ")]
         public async Task<IActionResult> DoDelete_HQ(string listInfoPhieuCan, DateTime ngay)
         {
             // Tách chuỗi thành các mảng con ngăn cách bởi dấu |
@@ -401,7 +402,7 @@ namespace PMS.Controllers
 
                     string id = parts[0];
                     int stt = int.Parse(parts[1]);
-                    if (stt <= 0)
+                    if (stt < 0)
                     {
                         return Json(new
                         {
@@ -476,7 +477,7 @@ namespace PMS.Controllers
                 });
             }
         }
-        public async Task<IActionResult> CheckQuyenHQ(string typeOption)
+        public async Task<IActionResult>  CheckQuyenHQ(string typeOption)
         {
             try
             {
@@ -489,19 +490,19 @@ namespace PMS.Controllers
                 // Kiểm tra quyền dựa trên typeOption
                 var permissionMapping = new Dictionary<string, string>
                 {
-                    { "CHUYENXUONG", "Chuyển Xưởng Xử Lý Phiếu Cân HQ / Phiếu Cân HQ" },
-                    { "CHUYENSIZE", "Chuyển Size Xử Lý Phiếu Cân HQ / Phiếu Cân HQ" },
-                    { "CHUYENTHANHPHAM", "Chuyển Thành Phẩm Xử Lý Phiếu Cân HQ / Phiếu Cân HQ" },
-                    { "CHUYENLOAINGUYENLIEU", "Chuyển Loại Nguyên Liệu Xử Lý Phiếu Cân HQ / Phiếu Cân HQ" },
-                    { "CHUYENNHANVIEN", "Chuyển Nhân Viên Xử Lý Phiếu Cân HQ / Phiếu Cân HQ" },
-                    { "CHUYENHANVIENPHUCVU", "Chuyển Nhân Viên Phục Vụ Xử Lý Phiếu Cân HQ / Phiếu Cân HQ" },
-                    { "CHUYENNHANVIENBANKIEM", "Chuyển Nhân Viên Bàn Kiểm Xử Lý Phiếu Cân HQ / Phiếu Cân HQ" }
+                    { "CHUYENXUONG", "Chuyển Xưởng Xử Lý Phiếu Cân / Phiếu Cân HQ" },
+                    { "CHUYENSIZE", "Chuyển Size Xử Lý Phiếu Cân / Phiếu Cân HQ" },
+                    { "CHUYENTHANHPHAM", "Chuyển Thành Phẩm Xử Lý Phiếu Cân / Phiếu Cân HQ" },
+                    { "CHUYENLOAINGUYENLIEU", "Chuyển Loại Nguyên Liệu Xử Lý Phiếu Cân / Phiếu Cân HQ" },
+                    { "CHUYENNHANVIEN", "Chuyển Nhân Viên Xử Lý Phiếu Cân / Phiếu Cân HQ" },
+                    { "CHUYENHANVIENPHUCVU", "Chuyển Nhân Viên Phục Vụ Xử Lý Phiếu Cân / Phiếu Cân HQ" },
+                    { "CHUYENNHANVIENBANKIEM", "Chuyển Nhân Viên Bàn Kiểm Xử Lý Phiếu Cân / Phiếu Cân HQ" }
                 };
 
                 if (permissionMapping.TryGetValue(typeOption, out var func))
                 {
                     var permission = rolePermistions
-                        .FirstOrDefault(x => x.Fu == "Xử Lý Phiếu Cân HQ / Phiếu Cân HQ" && x.Func == func && x.Status == 1);
+                        .FirstOrDefault(x => x.Fu == "Xử Lý Phiếu Cân / Phiếu Cân HQ" && x.Func == func && x.Status == 1);
 
                     if (permission != null)
                     {
@@ -535,7 +536,7 @@ namespace PMS.Controllers
                 });
             }
         }
-        [CustomAuthorize(Fu = "Xử Lý Phiếu Cân HQ / Phiếu Cân HQ", Func = "Chuyển Xưởng Xử Lý Phiếu Cân HQ / Phiếu Cân HQ")]
+        [CustomAuthorize(Fu = "Xử Lý Phiếu Cân / Phiếu Cân HQ", Func = "Chuyển Xưởng Xử Lý Phiếu Cân / Phiếu Cân HQ")]
         public async Task<IActionResult> ChuyenXuong_HQ(string listInfoPhieuCan, string maXuongChange)
         {
             // Tách chuỗi thành các mảng con ngăn cách bởi dấu |
@@ -633,7 +634,7 @@ namespace PMS.Controllers
                 });
             }
         }
-        [CustomAuthorize(Fu = "Xử Lý Phiếu Cân HQ / Phiếu Cân HQ", Func = "Chuyển Size Xử Lý Phiếu Cân HQ / Phiếu Cân HQ")]
+        [CustomAuthorize(Fu = "Xử Lý Phiếu Cân / Phiếu Cân HQ", Func = "Chuyển Size Xử Lý Phiếu Cân / Phiếu Cân HQ")]
         public async Task<IActionResult> ChuyenSize_HQ(string listInfoPhieuCan, string maSizeChange)
         {
             // Tách chuỗi thành các mảng con ngăn cách bởi dấu |
@@ -731,7 +732,7 @@ namespace PMS.Controllers
                 });
             }
         }
-        [CustomAuthorize(Fu = "Xử Lý Phiếu Cân HQ / Phiếu Cân HQ", Func = "Chuyển Thành Phẩm Xử Lý Phiếu Cân HQ / Phiếu Cân HQ")]
+        [CustomAuthorize(Fu = "Xử Lý Phiếu Cân / Phiếu Cân HQ", Func = "Chuyển Thành Phẩm Xử Lý Phiếu Cân / Phiếu Cân HQ")]
         public async Task<IActionResult> ChuyenThanhPham_HQ(string listInfoPhieuCan, string maThanhPhamChange)
         {
             // Tách chuỗi thành các mảng con ngăn cách bởi dấu |
@@ -829,7 +830,7 @@ namespace PMS.Controllers
                 });
             }
         }
-        [CustomAuthorize(Fu = "Xử Lý Phiếu Cân HQ / Phiếu Cân HQ", Func = "Chuyển Loại Nguyên Liệu Xử Lý Phiếu Cân HQ / Phiếu Cân HQ")]
+        [CustomAuthorize(Fu = "Xử Lý Phiếu Cân / Phiếu Cân HQ", Func = "Chuyển Loại Nguyên Liệu Xử Lý Phiếu Cân / Phiếu Cân HQ")]
         public async Task<IActionResult> ChuyenLoaiNguyenLieu_HQ(string listInfoPhieuCan, string maLoaiNguyenLieuChange)
         {
             // Tách chuỗi thành các mảng con ngăn cách bởi dấu |
@@ -927,7 +928,7 @@ namespace PMS.Controllers
                 });
             }
         }
-        [CustomAuthorize(Fu = "Xử Lý Phiếu Cân HQ / Phiếu Cân HQ", Func = "Chuyển Nhân Viên Xử Lý Phiếu Cân HQ / Phiếu Cân HQ")]
+        [CustomAuthorize(Fu = "Xử Lý Phiếu Cân / Phiếu Cân HQ", Func = "Chuyển Nhân Viên Xử Lý Phiếu Cân / Phiếu Cân HQ")]
         public async Task<IActionResult> ChuyenNhanVien_HQ(string listInfoPhieuCan, string maNhanVienChange)
         {
             // Tách chuỗi thành các mảng con ngăn cách bởi dấu |
@@ -1025,7 +1026,7 @@ namespace PMS.Controllers
                 });
             }
         }
-        [CustomAuthorize(Fu = "Xử Lý Phiếu Cân HQ / Phiếu Cân HQ", Func = "Chuyển Nhân Viên Phục Vụ Xử Lý Phiếu Cân HQ / Phiếu Cân HQ")]
+        [CustomAuthorize(Fu = "Xử Lý Phiếu Cân / Phiếu Cân HQ", Func = "Chuyển Nhân Viên Phục Vụ Xử Lý Phiếu Cân / Phiếu Cân HQ")]
         public async Task<IActionResult> ChuyenNhanVienPhucVu_HQ(string listInfoPhieuCan, string maNhanVienPhucVuChange)
         {
             // Tách chuỗi thành các mảng con ngăn cách bởi dấu |
@@ -1123,7 +1124,7 @@ namespace PMS.Controllers
                 });
             }
         }
-        [CustomAuthorize(Fu = "Xử Lý Phiếu Cân HQ / Phiếu Cân HQ", Func = "Chuyển Nhân Viên Bàn Kiểm Xử Lý Phiếu Cân HQ / Phiếu Cân HQ")]
+        [CustomAuthorize(Fu = "Xử Lý Phiếu Cân / Phiếu Cân HQ", Func = "Chuyển Nhân Viên Bàn Kiểm Xử Lý Phiếu Cân / Phiếu Cân HQ")]
         public async Task<IActionResult> ChuyenNhanVienBanKiem_HQ(string listInfoPhieuCan, string maNhanVienBanKiemChange)
         {
             // Tách chuỗi thành các mảng con ngăn cách bởi dấu |

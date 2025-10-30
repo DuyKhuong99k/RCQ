@@ -131,7 +131,7 @@ namespace ViewModels.Repos.HQ
             return dao.Gets<T>();
         }
 
-        private int Insert<T>(T item)
+        public int Insert<T>(T item)
         {
             var dao = new Dao.Repos.HQ.PhieuCanPhuPhamv2();
             return dao.Insert(item);
@@ -273,6 +273,11 @@ namespace ViewModels.Repos.HQ
         {
             var dao = new Dao.Repos.HQ.PhieuCanPhuPhamv2();
             return dao.GetsLast<T>(dateTime, num);
+        }
+        public T? Get<T>(string id)
+        {
+            var dao = new Dao.Repos.HQ.PhieuCanPhuPhamv2();
+            return dao.Get<T>(id);
         }
         [RelayCommand(CanExecute = nameof(IsItemPass))]
         private void Update_(PhieuCanPhuPhamv2 item)

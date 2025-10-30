@@ -23,6 +23,7 @@ using System;
 using Microsoft.AspNetCore.Authorization;
 using PMS.Attrs;
 using ViewModels.Repos.HQ;
+using Models.Migrations;
 
 namespace PMS.Controllers.DanhMuc.Fillet
 {
@@ -44,6 +45,11 @@ namespace PMS.Controllers.DanhMuc.Fillet
                 return Redirect(AppViewModels.AppViewModel.Instance.RedirectLoginUrl);
             }
             ViewBag.TitlePage = "Thành Phẩm Fillet";
+
+            var apiXuongUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/XiNghieps/GetAllXuong";
+            using var helperXuong = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+            var xuongs = helperXuong.GetAsync<IEnumerable<XiNghiep>>(HttpContext, apiXuongUrl);
+            ViewBag.listXuongs = xuongs.Result.ToList();
             return View("~/Views/DanhMuc/Fillet/ThanhPhamFilletView.cshtml");
         }
         public async Task<IEnumerable<MaThanhPhamFillet>> GetAlls()
@@ -68,7 +74,7 @@ namespace PMS.Controllers.DanhMuc.Fillet
 
                     var maxId = dataSource.Where(x => int.TryParse(x.Ma, out int rl)).Select(x => x.Ma).DefaultIfEmpty("0")
                     .Max();
-                    var id = (int.Parse(maxId) + 1).ToString("000");
+                    var id = (int.Parse(maxId) + 1).ToString("0000");
                     return Json(new
                     {
                         isSuccess = true,
@@ -84,7 +90,15 @@ namespace PMS.Controllers.DanhMuc.Fillet
                         DinhMucHaoHut = 1,
                         CodeId = XiNghiepViewModel.Instance.XiNghiepSelectedItem?.CodeId,
                         IsNotSetByTime = false,
-                        KhongPhanBietSize = false
+                        KhongPhanBietSize = false,
+                        IsXeBuom = false,
+                        IsChuyenFillet = false,
+                        IsDat = false,
+                        IsNguyenLieuXeBuom = false,
+                        IsGiaoXepKhuon = false,
+                        IsNguyenCon = false,
+                        IsNguyenConNXB = false,
+                        ThoiGianHT = 0
                     });
                 }
                 else
@@ -102,7 +116,7 @@ namespace PMS.Controllers.DanhMuc.Fillet
             }
         }
         [CustomAuthorize(Fu = "Danh Mục / Fillet / Thành Phẩm", Func = "Thêm Fillet / Thành Phẩm")]
-        public async Task<IActionResult> DoInsert(string ma, string maCa, string ten, decimal thoiGianTren1KgSeconds, decimal dinhMucHaoHut, string codeId, bool isCaMuoi, bool isSoChe, bool isNotSetByTime, bool khongPhanBietSize)
+        public async Task<IActionResult> DoInsert(string ma, string maCa, string ten, decimal thoiGianTren1KgSeconds, decimal dinhMucHaoHut, string codeId, bool isCaMuoi, bool isSoChe, bool isNotSetByTime, bool khongPhanBietSize, bool isXeBuom, bool isChuyenFillet,bool isDat, bool isNguyenLieuXeBuom, bool isGiaoXepKhuon,bool isNguyenCon, bool isNguyenConNXB, decimal thoiGianHT)
         {
             var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/MaThanhPhamFillets/Insert";
             try
@@ -136,6 +150,14 @@ namespace PMS.Controllers.DanhMuc.Fillet
                     IsNotSetByTime = isNotSetByTime,
                     ColorRGB = "",
                     KhongPhanBietSize = khongPhanBietSize,
+                    IsXeBuom = isXeBuom,
+                    IsChuyenFillet = isChuyenFillet,
+                    IsDat = isDat,
+                    IsNguyenLieuXeBuom = isNguyenLieuXeBuom,
+                    IsGiaoXepKhuon = isGiaoXepKhuon,
+                    IsNguyenCon = isNguyenCon,
+                    IsNguyenConNXB = isNguyenConNXB,
+                    ThoiGianHT = thoiGianHT
                 };
                 var jsonContent = new StringContent(JsonConvert.SerializeObject(model), Encoding.UTF8, "application/json");
                 using var helper = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
@@ -199,6 +221,7 @@ namespace PMS.Controllers.DanhMuc.Fillet
                         IsSoChe = item?.IsSoChe,
                         IsNotSetByTime = item?.IsNotSetByTime,
                         KhongPhanBietSize = item?.KhongPhanBietSize,
+                        IsXeBuom = item?.IsXeBuom,
                         SuDung = true,
                         Min = 0,
                         Max = 99999,
@@ -207,6 +230,13 @@ namespace PMS.Controllers.DanhMuc.Fillet
                         TrangThaiThanhPham = "NORMAL",
                         TrongLuongHienTai = 0,
                         ColorRGB = "",
+                        IsChuyenFillet = item?.IsChuyenFillet,
+                        IsDat = item?.IsDat,
+                        IsNguyenLieuXeBuom = item?.IsNguyenLieuXeBuom,
+                        IsGiaoXepKhuon = item?.IsGiaoXepKhuon,
+                        IsNguyenCon = item?.IsNguyenCon,
+                        IsNguyenConNXB = item?.IsNguyenConNXB,
+                        ThoiGianHT = item?.ThoiGianHT ?? 0
                     });
                 }
             }
@@ -217,7 +247,7 @@ namespace PMS.Controllers.DanhMuc.Fillet
             });
         }
         [CustomAuthorize(Fu = "Danh Mục / Fillet / Thành Phẩm", Func = "Sửa Fillet / Thành Phẩm")]
-        public async Task<IActionResult> DoUpDate(string ma, string maCa, string ten, decimal thoiGianTren1KgSeconds, decimal dinhMucHaoHut, string codeId, bool isCaMuoi, bool isSoChe, bool isNotSetByTime, bool khongPhanBietSize)
+        public async Task<IActionResult> DoUpDate(string ma, string maCa, string ten, decimal thoiGianTren1KgSeconds, decimal dinhMucHaoHut, string codeId, bool isCaMuoi, bool isSoChe, bool isNotSetByTime, bool khongPhanBietSize, bool isXeBuom, bool isChuyenFillet,bool isDat, bool isNguyenLieuXeBuom, bool isGiaoXepKhuon, bool isNguyenCon, bool isNguyenConNXB, decimal thoiGianHT)
         {
             var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/MaThanhPhamFillets/Update/{ma}";
             try
@@ -252,6 +282,14 @@ namespace PMS.Controllers.DanhMuc.Fillet
                     IsNotSetByTime = isNotSetByTime,
                     ColorRGB = "",
                     KhongPhanBietSize = khongPhanBietSize,
+                    IsXeBuom = isXeBuom,
+                    IsChuyenFillet = isChuyenFillet,
+                    IsDat = isDat,
+                    IsNguyenLieuXeBuom = isNguyenLieuXeBuom,
+                    IsGiaoXepKhuon = isGiaoXepKhuon,
+                    IsNguyenCon = isNguyenCon,
+                    IsNguyenConNXB = isNguyenConNXB,
+                    ThoiGianHT = thoiGianHT
                 };
                 var jsonContent = new StringContent(JsonConvert.SerializeObject(model), Encoding.UTF8, "application/json");
                 using var helper = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);

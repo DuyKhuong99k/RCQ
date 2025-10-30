@@ -51,4 +51,8 @@ public partial class PhieuCanPhuPhamv2
 
     [Column(TypeName = "decimal(18, 3)")]
     public decimal TrongLuong { get; set; }
+    
+    [StringLength(50)]
+    [Unicode(false)]
+    public string? Id { get; set; }
 }

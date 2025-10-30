@@ -108,6 +108,14 @@ namespace WebAPI.Controllers
                 IsNotSetByTime = model.IsNotSetByTime,
                 ColorRGB = model.ColorRGB,
                 KhongPhanBietSize = model.KhongPhanBietSize,
+                IsXeBuom = model.IsXeBuom,
+                IsChuyenFillet = model.IsChuyenFillet,
+                IsDat = model.IsDat,
+                IsNguyenLieuXeBuom = model.IsNguyenLieuXeBuom,
+                IsGiaoXepKhuon = model.IsGiaoXepKhuon,
+                IsNguyenCon = model.IsNguyenCon,
+                IsNguyenConNXB = model.IsNguyenConNXB,
+                ThoiGianHT = model.ThoiGianHT
             };
             _context.MaThanhPhamFillet.Add(newItem);
             try
@@ -187,8 +195,43 @@ namespace WebAPI.Controllers
             item.IsNotSetByTime = model.IsNotSetByTime;
             item.ColorRGB = model.ColorRGB;
             item.KhongPhanBietSize = model.KhongPhanBietSize;
+            item.IsXeBuom = model.IsXeBuom;
+            item.IsChuyenFillet = model.IsChuyenFillet;
+            item.IsDat = model.IsDat;
+            item.IsNguyenLieuXeBuom = model.IsNguyenLieuXeBuom;
+            item.IsGiaoXepKhuon = model.IsGiaoXepKhuon;
+            item.IsNguyenCon = model.IsNguyenCon;
+            item.IsNguyenConNXB = model.IsNguyenConNXB;
+            item.ThoiGianHT = model.ThoiGianHT;
             try
             {
+                var newItemUs = new MaThanhPhamFillet_U
+                {
+                    MaThanhPham = item.Ma,
+                    MaLoaiCa = item.MaCa,
+                    Ten = item.Ten,
+                    SuDung = item.SuDung,
+                    Min = item.Min,
+                    Max = item.Max,
+                    IsSoChe = item.IsSoChe,
+                    IsCaMuoi = item.IsCaMuoi,
+                    DinhMuc = item.DinhMuc,
+                    BravoId = item.BravoId,
+                    TrongLuong = item.TrongLuong,
+                    TrangThaiThanhPham = item.TrangThaiThanhPham,
+                    TrongLuongHienTai = item.TrongLuongHienTai,
+                    ThoiGianTren1kgSeconds = item.ThoiGianTren1kgSeconds,
+                    DinhMucHaoHut = item.DinhMucHaoHut,
+                    CodeId = item.CodeId,
+                    ColorRGB = item.ColorRGB,
+                    IsNotSetByTime = item.IsNotSetByTime,
+                    KhongPhanBietSize = item.KhongPhanBietSize,
+                    MNgay = DateTime.Now,
+                    IsXeBuom = item.IsXeBuom,
+                };
+
+                // Thêm vào bảng HqLoaiNguyenLieuUs
+                _context.MaThanhPhamFilletUs.Add(newItemUs);
                 await _context.SaveChangesAsync();
             }
             catch (Exception ex)
@@ -232,6 +275,33 @@ namespace WebAPI.Controllers
 
             try
             {
+                var newItemUs = new MaThanhPhamFillet_D
+                {
+                    MaThanhPham = item.Ma,
+                    MaLoaiCa = item.MaCa,
+                    Ten = item.Ten,
+                    SuDung = item.SuDung,
+                    Min = item.Min,
+                    Max = item.Max,
+                    IsSoChe = item.IsSoChe,
+                    IsCaMuoi = item.IsCaMuoi,
+                    DinhMuc = item.DinhMuc,
+                    BravoId = item.BravoId,
+                    TrongLuong = item.TrongLuong,
+                    TrangThaiThanhPham = item.TrangThaiThanhPham,
+                    TrongLuongHienTai = item.TrongLuongHienTai,
+                    ThoiGianTren1kgSeconds = item.ThoiGianTren1kgSeconds,
+                    DinhMucHaoHut = item.DinhMucHaoHut,
+                    CodeId = item.CodeId,
+                    ColorRGB = item.ColorRGB,
+                    IsNotSetByTime = item.IsNotSetByTime,
+                    KhongPhanBietSize = item.KhongPhanBietSize,
+                    MNgay = DateTime.Now,
+                    IsXeBuom = item.IsXeBuom,
+                };
+
+                // Thêm vào bảng HqLoaiNguyenLieuUs
+                _context.MaThanhPhamFilletDs.Add(newItemUs);
                 await _context.SaveChangesAsync();
             }
             catch (Exception ex)

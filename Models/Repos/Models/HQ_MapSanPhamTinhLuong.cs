@@ -21,7 +21,13 @@ namespace Models.Repos.Models
         [StringLength(50)]
         [Unicode(false)]
         public string MaThanhPham { get; set; } = null!;
+        [StringLength(50)]
+        [Unicode(false)]
+        public string MaSize { get; set; } = null!;
         [Column(TypeName = "datetime2(7)")]
         public DateTime NgayGio { get; set; } = DateTime.Now;
+        [StringLength(50)]
+        [Unicode(false)]
+        public string MaLoaiNguyenLieu { get; set; } = null!;
     }
 }

@@ -26,7 +26,7 @@ INSERT INTO [dbo].[HQ_LoaiNguyenLieu]
 UPDATE [dbo].[HQ_LoaiNguyenLieu]
    SET [Ten] = @Ten
       ,[SuDung] = @SuDung
- WHERE [Ma] = @Ma
+ WHERE [Id] = @Id
 ";
 
         private readonly string qrGetAll = "Select * from HQ_LoaiNguyenLieu";

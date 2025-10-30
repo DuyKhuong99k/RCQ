@@ -146,6 +146,17 @@ namespace WebAPI.Controllers
             item.SuDung = model.SuDung;
             try
             {
+                 var newItemUs = new MaChieuXaXepKhuon_U
+                {
+                    MaChieuXa = item.Ma,
+                    Ten = item.Ten,
+                    SuDung = item.SuDung,
+                    MNgay = DateTime.Now,
+                };
+
+                // Thêm vào bảng HqLoaiNguyenLieuUs
+                _context.MaChieuXaXepKhuonUs.Add(newItemUs);
+
                 await _context.SaveChangesAsync();
             }
             catch (Exception ex)
@@ -189,6 +200,16 @@ namespace WebAPI.Controllers
 
             try
             {
+                var MNgay = DateTime.Now;
+                var newItemUs = new MaChieuXaXepKhuon_D
+                {
+                    MaChieuXa = item.Ma,
+                    Ten = item.Ten,
+                    SuDung = item.SuDung,
+                    MNgay = DateTime.Now,
+                };
+
+                _context.MaChieuXaXepKhuonDs.Add(newItemUs);
                 await _context.SaveChangesAsync();
             }
             catch (Exception ex)

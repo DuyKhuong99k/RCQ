@@ -6,7 +6,7 @@
     // lấy danh sách fu func từ list roleId
     var rolePermistions = await PMS.Middlewares.AuthenticationHelpers.GetRolePermistionsAsync(Context, roleIds);
 }
-<div class="container-xxl flex-grow-1 container-p-y" style="margin-top:-51px">
+@* <div class="container-xxl flex-grow-1 container-p-y" style="margin-top:-51px"> *@
     <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Phân Quyền /</span> Phân Quyền</h4>
     <div class="row">
         <div class="col-md-12">
@@ -52,7 +52,7 @@
             </div>
         </div>
     </div>
-</div>
+@* </div> *@
 <div class="modal fade" id="modalThemUserRole" tabindex="-1" aria-hidden="true" data-bs-focus="false" no-enforce-focus>
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -120,6 +120,7 @@
     </div>
 
 </script>
+
 <script>
     $(document).ready(function () {
         loadGridData();
@@ -149,12 +150,14 @@
                     grid = new ej.grids.Grid({
                         dataSource: dataManager,
                         allowPaging: true,
-                        pageSettings: { pageSize: 10 },
+                        pageSettings: { pageSize: 50, pageSizes: [50, 100, 200, 500] },
                         allowFiltering: true,
                         filterSettings: { type: 'Excel' },
                         allowSorting: true,
                         //frozenColumns: 3,
                         allowResizing: true,
+                        allowExcelExport: true,
+                        toolbar: ['ExcelExport'],
                         rowSelected: onRowSelected,
                         height: 300,
                         columns: [
@@ -168,6 +171,10 @@
                     });
                     // Hiển thị Grid trên trang web
                     grid.appendTo('#Grid');
+                    grid.toolbarClick = function (args) {
+             if (args.item.id === 'Grid_excelexport') {
+                grid.excelExport();
+             }};
                 }
             },
             error: function (error) {
@@ -212,6 +219,7 @@
     }
     var gridUserRole;
     function initializeGrid(data) {
+
         var dataManager = new ej.data.DataManager({
             json: data,
             adaptor: new ej.data.JsonAdaptor()
@@ -220,11 +228,13 @@
         gridUserRole = new ej.grids.Grid({
             dataSource: dataManager,
             allowPaging: true,
-            pageSettings: { pageSize: 50 },
+            pageSettings: { pageSize: 50, pageSizes: [50, 100, 200, 500] },
             allowFiltering: true,
             filterSettings: { type: 'Excel' },
             allowSorting: true,
             allowResizing: true,
+            allowExcelExport: true,
+            toolbar: ['ExcelExport'],
             rowSelected: onRowSelectedUserRole,
             height: 300,
             columns: [
@@ -235,6 +245,10 @@
 
         // Hiển thị Grid trên trang web
         gridUserRole.appendTo('#GridUserRole');
+        gridUserRole.toolbarClick = function (args) {
+             if (args.item.id === 'Grid_excelexport') {
+                gridUserRole.excelExport();
+             }};
     }
 
     function onRowSelectedUserRole(args) {
@@ -242,19 +256,29 @@
         var IdUserRole = selectedRecord.Id;
         $('#maUserRoleRowSelected').val(IdUserRole);
     }
-
     function loadGridDataUserRole(data) {
         if (gridUserRole) {
-            var dataManager = new ej.data.DataManager({
-                json: data,
-                adaptor: new ej.data.JsonAdaptor()
-            });
-            gridUserRole.dataSource = dataManager;
-            gridUserRole.refresh();
+            // Xóa hoàn toàn dữ liệu cũ
+            gridUserRole.dataSource = [];
+
+            // Gọi dataBind để cập nhật UI ngay lập tức
+            gridUserRole.dataBind();
+
+            // Nếu có dữ liệu thì gán lại
+            if (data && data.length > 0) {
+                gridUserRole.dataSource = new ej.data.DataManager({
+                    json: data,
+                    adaptor: new ej.data.JsonAdaptor()
+                });
+
+                // Gọi lại dataBind để Grid load lại dữ liệu mới
+                gridUserRole.dataBind();
+            }
         } else {
             initializeGrid(data);
         }
     }
+          
 
 </script>
 <script>

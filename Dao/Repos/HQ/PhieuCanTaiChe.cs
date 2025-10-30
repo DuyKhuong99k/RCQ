@@ -318,8 +318,58 @@ and t.MaTheTu = @maThe";
         {
             try
             {
+                //var query =
+                //    @"Select p.MaNhanVien,n.MaHoSo,n.[Name] as NhanVien,p.MaLo,cv.Ten as CongViecName,tp.Ten as ThanhPhamName,s.Ten as SizeName,cl.Ten as ChatLuongName,ma.Ten as MauName,Sum(p.TrongLuong) as TrongLuong, COUNT(*) as SoRo from PhieuCanTaiChe p,NhanVienDaiThanh n,MaSizeTaiChe s, MaChatLuongTaiChe cl,MaMauTaiChe ma,MaThanhPhamTaiChe tp,MaCongViecTaiChe cv where Ngay <=@toDate and p.Ngay >= @fromDate and MaXuong = @xuongId and p.MaNhanVien = n.MaNhanVien and p.MaMau = ma.Ma and p.MaChatLuong = cl.Ma and p.MaSize = s.Ma and p.MaThanhPham = tp.Ma and p.MaCongViec = cv.Ma group by p.MaNhanVien,n.MaHoSo,n.[Name] ,p.MaLo,p.MaLo,tp.Ten ,s.Ten ,cl.Ten ,ma.Ten,cv.Ten";
                 var query =
-                    @"Select p.MaNhanVien,n.MaHoSo,n.[Name] as NhanVien,p.MaLo,cv.Ten as CongViecName,tp.Ten as ThanhPhamName,s.Ten as SizeName,cl.Ten as ChatLuongName,ma.Ten as MauName,Sum(p.TrongLuong) as TrongLuong, COUNT(*) as SoRo from PhieuCanTaiChe p,NhanVienDaiThanh n,MaSizeTaiChe s, MaChatLuongTaiChe cl,MaMauTaiChe ma,MaThanhPhamTaiChe tp,MaCongViecTaiChe cv where Ngay <=@toDate and p.Ngay >= @fromDate and MaXuong = @xuongId and p.MaNhanVien = n.MaNhanVien and p.MaMau = ma.Ma and p.MaChatLuong = cl.Ma and p.MaSize = s.Ma and p.MaThanhPham = tp.Ma and p.MaCongViec = cv.Ma group by p.MaNhanVien,n.MaHoSo,n.[Name] ,p.MaLo,p.MaLo,tp.Ten ,s.Ten ,cl.Ten ,ma.Ten,cv.Ten";
+                    @"Select 
+p.MaNhanVien,
+n.MaHoSo,
+n.[Name] as NhanVien,
+p.MaLo,
+cv.Ten as CongViecName,
+tp.Ten as ThanhPhamName,
+s.Ten as SizeName,
+cl.Ten as ChatLuongName,
+ma.Ten as MauName,
+Sum(p.TrongLuong) as TrongLuong,
+COUNT(*) as SoRo ,
+MIN(c.ThoiGian) OVER(PARTITION BY n.MaChamCong, p.Ngay) as ThoiGianVao,
+MAX(c.ThoiGian) OVER(PARTITION BY n.MaChamCong, p.Ngay) as ThoiGianRa,
+DATEDIFF(hour, MIN(c.ThoiGian) OVER(PARTITION BY n.MaChamCong, p.Ngay), MAX(c.ThoiGian) OVER(PARTITION BY n.MaChamCong, p.Ngay)) as TongThoiGian
+from PhieuCanTaiChe p,
+NhanVienDaiThanh n,
+MaSizeTaiChe s,
+MaChatLuongTaiChe cl,
+MaMauTaiChe ma,
+MaThanhPhamTaiChe tp,
+MaCongViecTaiChe cv ,
+CheckInOut c
+where 
+Ngay <=@toDate 
+and p.Ngay >= @fromDate 
+and MaXuong = @xuongId 
+and p.MaNhanVien = n.MaNhanVien 
+and p.MaMau = ma.Ma 
+and p.MaChatLuong = cl.Ma 
+and p.MaSize = s.Ma 
+and p.MaThanhPham = tp.Ma 
+and p.MaCongViec = cv.Ma 
+AND n.MaChamCong = c.MaChamCong AND c.ThoiGian = p.Ngay AND c.ThoiGian >= @fromDate AND c.ThoiGian <= @toDate 
+group by 
+p.MaNhanVien,
+n.MaHoSo,
+n.[Name] ,
+p.MaLo,
+p.MaLo,
+tp.Ten ,
+s.Ten ,
+cl.Ten ,
+ma.Ten,
+cv.Ten,
+p.Ngay,
+n.MaChamCong,
+c.ThoiGian
+";
                 using (var connection = new SqlConnection(connectionString))
                 {
                     connection.Open();

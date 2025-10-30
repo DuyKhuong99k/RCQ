@@ -55,6 +55,86 @@ namespace Models.Migrations
                     b.ToTable("API_User");
                 });
 
+            modelBuilder.Entity("Models.Repos.Models.Ao", b =>
+                {
+                    b.Property<string>("Ma")
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<DateTime>("MNgay")
+                        .HasColumnType("datetime2(7)");
+
+                    b.Property<bool?>("SuDung")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Ten")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("Ma");
+
+                    b.ToTable("Ao");
+                });
+
+            modelBuilder.Entity("Models.Repos.Models.Ao_D", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<DateTime>("MNgay")
+                        .HasColumnType("datetime2(7)");
+
+                    b.Property<string>("MaAo")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<bool?>("SuDung")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Ten")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Ao_D");
+                });
+
+            modelBuilder.Entity("Models.Repos.Models.Ao_U", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<DateTime>("MNgay")
+                        .HasColumnType("datetime2(7)");
+
+                    b.Property<string>("MaAo")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<bool?>("SuDung")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Ten")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Ao_U");
+                });
+
             modelBuilder.Entity("Models.Repos.Models.BT_KhachHang", b =>
                 {
                     b.Property<string>("Ma")
@@ -878,6 +958,40 @@ namespace Models.Migrations
                     b.ToTable("BravoSoChe");
                 });
 
+            modelBuilder.Entity("Models.Repos.Models.CheckInOut", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("GhiChu")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("MaChamCong")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<int>("MaSoMay")
+                        .HasColumnType("int");
+
+                    b.Property<string>("TenMay")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<DateTime>("ThoiGian")
+                        .HasColumnType("datetime2(7)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("CheckInOut");
+                });
+
             modelBuilder.Entity("Models.Repos.Models.ChiTietRaCoi", b =>
                 {
                     b.Property<long>("Id")
@@ -936,6 +1050,40 @@ namespace Models.Migrations
                     b.HasKey("Ma");
 
                     b.ToTable("ChucVu");
+                });
+
+            modelBuilder.Entity("Models.Repos.Models.CoiLeXepKhuon", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("MaCoi")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<string>("MaSanPham")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<DateTime>("NgayGio")
+                        .HasColumnType("datetime2(7)");
+
+                    b.Property<DateTime>("NgayNguyenLieu")
+                        .HasColumnType("date");
+
+                    b.Property<decimal>("TrongLuong")
+                        .HasColumnType("decimal(18, 2)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("CoiLeXepKhuon");
                 });
 
             modelBuilder.Entity("Models.Repos.Models.CoiLogs", b =>
@@ -1916,6 +2064,30 @@ namespace Models.Migrations
                     b.ToTable("HQ_Ca");
                 });
 
+            modelBuilder.Entity("Models.Repos.Models.HQ_CodeGen", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("DangKyIds")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTime>("NgayTao")
+                        .HasColumnType("datetime2(7)");
+
+                    b.Property<bool>("Printed")
+                        .HasColumnType("bit");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("HQ_CodeGen");
+                });
+
             modelBuilder.Entity("Models.Repos.Models.HQ_ColorCode_D", b =>
                 {
                     b.Property<long>("Id")
@@ -1996,6 +2168,62 @@ namespace Models.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("HQ_ColorCode_U");
+                });
+
+            modelBuilder.Entity("Models.Repos.Models.HQ_DuyetThucDon", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("GhiChu")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTime>("NgayTao")
+                        .HasColumnType("datetime2(7)");
+
+                    b.Property<string>("NguoiTao")
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<long>("ThucDonId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("HQ_DuyetThucDon");
+                });
+
+            modelBuilder.Entity("Models.Repos.Models.HQ_HuyThucDon", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("GhiChu")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTime>("NgayTao")
+                        .HasColumnType("datetime2(7)");
+
+                    b.Property<string>("NguoiTao")
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<long>("ThucDonId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("HQ_HuyThucDon");
                 });
 
             modelBuilder.Entity("Models.Repos.Models.HQ_Lo", b =>
@@ -2191,6 +2419,28 @@ namespace Models.Migrations
                     b.ToTable("HQ_Lo_U");
                 });
 
+            modelBuilder.Entity("Models.Repos.Models.HQ_LoaiMonAn", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("GhiChu")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("Ten")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("HQ_LoaiMonAn");
+                });
+
             modelBuilder.Entity("Models.Repos.Models.HQ_LoaiNguyenLieu", b =>
                 {
                     b.Property<string>("Id")
@@ -2291,7 +2541,19 @@ namespace Models.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("MaLoaiNguyenLieu")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
+
                     b.Property<string>("MaSanPham")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<string>("MaSize")
                         .IsRequired()
                         .HasMaxLength(50)
                         .IsUnicode(false)
@@ -2309,6 +2571,34 @@ namespace Models.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("HQ_MapSanPhamTinhLuong");
+                });
+
+            modelBuilder.Entity("Models.Repos.Models.HQ_MonAn", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("GhiChu")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("LoaiMonAnId")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<string>("Ten")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("HQ_MonAn");
                 });
 
             modelBuilder.Entity("Models.Repos.Models.HQ_NhanVienTheoCa", b =>
@@ -2589,6 +2879,74 @@ namespace Models.Migrations
                     b.ToTable("HQ_NhanVien_U");
                 });
 
+            modelBuilder.Entity("Models.Repos.Models.HQ_NhatKyDangKyMonAn", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("GhiChu")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<int>("MonAnId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("NgayGio")
+                        .HasColumnType("datetime2(7)");
+
+                    b.Property<string>("NhanVienId")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<string>("ThietBi")
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("HQ_NhatKyDangKyMonAn");
+                });
+
+            modelBuilder.Entity("Models.Repos.Models.HQ_NhatKyNhanMonAn", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("CodeId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("GhiChu")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTime>("NgayGio")
+                        .HasColumnType("datetime2(7)");
+
+                    b.Property<string>("NhanVienId")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<string>("ThietBi")
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("HQ_NhatKyNhanMonAn");
+                });
+
             modelBuilder.Entity("Models.Repos.Models.HQ_Nhom", b =>
                 {
                     b.Property<string>("Id")
@@ -2597,8 +2955,12 @@ namespace Models.Migrations
                         .HasColumnType("varchar(50)");
 
                     b.Property<string>("GhiChu")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("MaSanPham")
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
 
                     b.Property<bool>("SuDung")
                         .HasColumnType("bit");
@@ -2928,6 +3290,82 @@ namespace Models.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("HQ_PhieuCan_U");
+                });
+
+            modelBuilder.Entity("Models.Repos.Models.HQ_PhieuThongKeSanXuat", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("Ca")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<DateTime>("GioBatDau")
+                        .HasColumnType("datetime2(7)");
+
+                    b.Property<DateTime>("GioKetThuc")
+                        .HasColumnType("datetime2(7)");
+
+                    b.Property<string>("MaCongViec")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<string>("MaNhanVien")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<string>("MaTo")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<DateTime>("Ngay")
+                        .HasColumnType("date");
+
+                    b.Property<DateTime>("NgayGioTao")
+                        .HasColumnType("datetime2(7)");
+
+                    b.Property<decimal>("SanLuong")
+                        .HasColumnType("decimal(18, 3)");
+
+                    b.Property<string>("SoChungTu")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<string>("TenCongViec")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .IsUnicode(true)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("TenNhanVien")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .IsUnicode(true)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("TenTo")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .IsUnicode(true)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("HQ_PhieuThongKeSanXuat");
                 });
 
             modelBuilder.Entity("Models.Repos.Models.HQ_Size", b =>
@@ -3442,6 +3880,67 @@ namespace Models.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("HQ_TheTu_U");
+                });
+
+            modelBuilder.Entity("Models.Repos.Models.HQ_ThucDon", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("GhiChu")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTime>("Ngay")
+                        .HasColumnType("date");
+
+                    b.Property<DateTime>("NgayTao")
+                        .HasColumnType("datetime2(7)");
+
+                    b.Property<string>("NguoiTao")
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<string>("Ten")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("ThietBi")
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("HQ_ThucDon");
+                });
+
+            modelBuilder.Entity("Models.Repos.Models.HQ_ThucDonChiTiet", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("GhiChu")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<int>("MonAnId")
+                        .HasColumnType("int");
+
+                    b.Property<long>("ThucDonId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("HQ_ThucDonChiTiet");
                 });
 
             modelBuilder.Entity("Models.Repos.Models.KD_DonHang", b =>
@@ -4432,6 +4931,9 @@ namespace Models.Migrations
                         .IsUnicode(false)
                         .HasColumnType("varchar(50)");
 
+                    b.Property<DateTime>("MNgay")
+                        .HasColumnType("datetime2(7)");
+
                     b.Property<bool>("SuDung")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")
@@ -4469,12 +4971,75 @@ namespace Models.Migrations
                     b.ToTable("MaChatLuongXepKhuonBlock");
                 });
 
+            modelBuilder.Entity("Models.Repos.Models.MaChatLuongXepKhuon_D", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<DateTime>("MNgay")
+                        .HasColumnType("datetime2(7)");
+
+                    b.Property<string>("MaChatLuong")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<bool>("SuDung")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Ten")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("MaChatLuongXepKhuon_D");
+                });
+
+            modelBuilder.Entity("Models.Repos.Models.MaChatLuongXepKhuon_U", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<DateTime>("MNgay")
+                        .HasColumnType("datetime2(7)");
+
+                    b.Property<string>("MaChatLuong")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<bool>("SuDung")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Ten")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("MaChatLuongXepKhuon_U");
+                });
+
             modelBuilder.Entity("Models.Repos.Models.MaChieuXaXepKhuon", b =>
                 {
                     b.Property<string>("Ma")
                         .HasMaxLength(50)
                         .IsUnicode(false)
                         .HasColumnType("varchar(50)");
+
+                    b.Property<DateTime>("MNgay")
+                        .HasColumnType("datetime2(7)");
 
                     b.Property<bool>("SuDung")
                         .ValueGeneratedOnAdd()
@@ -4489,6 +5054,66 @@ namespace Models.Migrations
                     b.HasKey("Ma");
 
                     b.ToTable("MaChieuXaXepKhuon");
+                });
+
+            modelBuilder.Entity("Models.Repos.Models.MaChieuXaXepKhuon_D", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<DateTime>("MNgay")
+                        .HasColumnType("datetime2(7)");
+
+                    b.Property<string>("MaChieuXa")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<bool>("SuDung")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Ten")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("MaChieuXaXepKhuon_D");
+                });
+
+            modelBuilder.Entity("Models.Repos.Models.MaChieuXaXepKhuon_U", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<DateTime>("MNgay")
+                        .HasColumnType("datetime2(7)");
+
+                    b.Property<string>("MaChieuXa")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<bool>("SuDung")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Ten")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("MaChieuXaXepKhuon_U");
                 });
 
             modelBuilder.Entity("Models.Repos.Models.MaChuAoVungNuoi", b =>
@@ -4520,6 +5145,9 @@ namespace Models.Migrations
                         .IsUnicode(false)
                         .HasColumnType("varchar(50)");
 
+                    b.Property<DateTime>("MNgay")
+                        .HasColumnType("datetime2(7)");
+
                     b.Property<bool>("Tam")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")
@@ -4536,6 +5164,72 @@ namespace Models.Migrations
                     b.HasKey("Ma");
 
                     b.ToTable("MaCoiXepKhuon");
+                });
+
+            modelBuilder.Entity("Models.Repos.Models.MaCoiXepKhuon_D", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<DateTime>("MNgay")
+                        .HasColumnType("datetime2(7)");
+
+                    b.Property<string>("MaCoi")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<bool>("Tam")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Ten")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<double>("TrongLuongMax")
+                        .HasColumnType("float");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("MaCoiXepKhuon_D");
+                });
+
+            modelBuilder.Entity("Models.Repos.Models.MaCoiXepKhuon_U", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<DateTime>("MNgay")
+                        .HasColumnType("datetime2(7)");
+
+                    b.Property<string>("MaCoi")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<bool>("Tam")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Ten")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<double>("TrongLuongMax")
+                        .HasColumnType("float");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("MaCoiXepKhuon_U");
                 });
 
             modelBuilder.Entity("Models.Repos.Models.MaCongDoanVungNuoi", b =>
@@ -5541,6 +6235,9 @@ namespace Models.Migrations
                     b.Property<int>("Idx")
                         .HasColumnType("int");
 
+                    b.Property<DateTime>("MNgay")
+                        .HasColumnType("datetime2(7)");
+
                     b.Property<bool>("SuDung")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")
@@ -5557,6 +6254,78 @@ namespace Models.Migrations
                     b.HasKey("Ma");
 
                     b.ToTable("MaSizeChinhXepKhuon");
+                });
+
+            modelBuilder.Entity("Models.Repos.Models.MaSizeChinhXepKhuon_D", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<int>("Idx")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("MNgay")
+                        .HasColumnType("datetime2(7)");
+
+                    b.Property<string>("MaSize")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<bool>("SuDung")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Ten")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<int>("_type")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("MaSizeChinhXepKhuon_D");
+                });
+
+            modelBuilder.Entity("Models.Repos.Models.MaSizeChinhXepKhuon_U", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<int>("Idx")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("MNgay")
+                        .HasColumnType("datetime2(7)");
+
+                    b.Property<string>("MaSize")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<bool>("SuDung")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Ten")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<int>("_type")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("MaSizeChinhXepKhuon_U");
                 });
 
             modelBuilder.Entity("Models.Repos.Models.MaSizeDinhHinh", b =>
@@ -5587,6 +6356,9 @@ namespace Models.Migrations
                         .IsUnicode(false)
                         .HasColumnType("varchar(50)");
 
+                    b.Property<DateTime>("MNgay")
+                        .HasColumnType("datetime2(7)");
+
                     b.Property<bool?>("SuDung")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")
@@ -5599,6 +6371,70 @@ namespace Models.Migrations
                     b.HasKey("Ma");
 
                     b.ToTable("MaSizeFillet");
+                });
+
+            modelBuilder.Entity("Models.Repos.Models.MaSizeFillet_D", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<DateTime>("MNgay")
+                        .HasColumnType("datetime2(7)");
+
+                    b.Property<string>("MaSize")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<DateTime>("Ngay")
+                        .HasColumnType("datetime2(7)");
+
+                    b.Property<bool?>("SuDung")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Ten")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("MaSizeFillet_D");
+                });
+
+            modelBuilder.Entity("Models.Repos.Models.MaSizeFillet_U", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<DateTime>("MNgay")
+                        .HasColumnType("datetime2(7)");
+
+                    b.Property<string>("MaSize")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<DateTime>("Ngay")
+                        .HasColumnType("datetime2(7)");
+
+                    b.Property<bool?>("SuDung")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Ten")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("MaSizeFillet_U");
                 });
 
             modelBuilder.Entity("Models.Repos.Models.MaSizeLangDa", b =>
@@ -5629,6 +6465,9 @@ namespace Models.Migrations
                         .IsUnicode(false)
                         .HasColumnType("varchar(50)");
 
+                    b.Property<DateTime>("MNgay")
+                        .HasColumnType("datetime2(7)");
+
                     b.Property<bool?>("SuDung")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")
@@ -5641,6 +6480,64 @@ namespace Models.Migrations
                     b.HasKey("Ma");
 
                     b.ToTable("MaSizeNguyenLieu");
+                });
+
+            modelBuilder.Entity("Models.Repos.Models.MaSizeNguyenLieu_D", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<DateTime>("MNgay")
+                        .HasColumnType("datetime2(7)");
+
+                    b.Property<string>("MaSize")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<bool?>("SuDung")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Ten")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("MaSizeNguyenLieu_D");
+                });
+
+            modelBuilder.Entity("Models.Repos.Models.MaSizeNguyenLieu_U", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<DateTime>("MNgay")
+                        .HasColumnType("datetime2(7)");
+
+                    b.Property<string>("MaSize")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<bool?>("SuDung")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Ten")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("MaSizeNguyenLieu_U");
                 });
 
             modelBuilder.Entity("Models.Repos.Models.MaSizeNguyenLieu_temp", b =>
@@ -5717,6 +6614,9 @@ namespace Models.Migrations
                         .IsUnicode(false)
                         .HasColumnType("varchar(50)");
 
+                    b.Property<DateTime>("MNgay")
+                        .HasColumnType("datetime2(7)");
+
                     b.Property<bool?>("SuDung")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")
@@ -5774,6 +6674,64 @@ namespace Models.Migrations
                     b.HasKey("Ma");
 
                     b.ToTable("MaSizeXepKhuonKHC");
+                });
+
+            modelBuilder.Entity("Models.Repos.Models.MaSizeXepKhuon_D", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<DateTime>("MNgay")
+                        .HasColumnType("datetime2(7)");
+
+                    b.Property<string>("MaSize")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<bool?>("SuDung")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Ten")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("MaSizeXepKhuon_D");
+                });
+
+            modelBuilder.Entity("Models.Repos.Models.MaSizeXepKhuon_U", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<DateTime>("MNgay")
+                        .HasColumnType("datetime2(7)");
+
+                    b.Property<string>("MaSize")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<bool?>("SuDung")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Ten")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("MaSizeXepKhuon_U");
                 });
 
             modelBuilder.Entity("Models.Repos.Models.MaThanhPhamCaoThit", b =>
@@ -5846,6 +6804,15 @@ namespace Models.Migrations
                         .IsUnicode(false)
                         .HasColumnType("varchar(50)");
 
+                    b.Property<decimal>("DinhMucTangTrong")
+                        .HasColumnType("decimal(18, 2)");
+
+                    b.Property<bool>("IsKhongThuc")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("MNgay")
+                        .HasColumnType("datetime2(7)");
+
                     b.Property<double>("Max")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("float")
@@ -5862,12 +6829,103 @@ namespace Models.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
+                    b.Property<decimal>("ThamSoTangTrong")
+                        .HasColumnType("decimal(18, 2)");
+
                     b.Property<int>("_type")
                         .HasColumnType("int");
 
                     b.HasKey("Ma");
 
                     b.ToTable("MaThanhPhamChinhXepKhuon");
+                });
+
+            modelBuilder.Entity("Models.Repos.Models.MaThanhPhamChinhXepKhuon_D", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("BravoId")
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<DateTime>("MNgay")
+                        .HasColumnType("datetime2(7)");
+
+                    b.Property<string>("MaThanhPham")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<double>("Max")
+                        .HasColumnType("float");
+
+                    b.Property<double>("Min")
+                        .HasColumnType("float");
+
+                    b.Property<bool>("SuDung")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Ten")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<int>("_type")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("MaThanhPhamChinhXepKhuon_D");
+                });
+
+            modelBuilder.Entity("Models.Repos.Models.MaThanhPhamChinhXepKhuon_U", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("BravoId")
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<DateTime>("MNgay")
+                        .HasColumnType("datetime2(7)");
+
+                    b.Property<string>("MaThanhPham")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<double>("Max")
+                        .HasColumnType("float");
+
+                    b.Property<double>("Min")
+                        .HasColumnType("float");
+
+                    b.Property<bool>("SuDung")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Ten")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<int>("_type")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("MaThanhPhamChinhXepKhuon_U");
                 });
 
             modelBuilder.Entity("Models.Repos.Models.MaThanhPhamDinhHinh", b =>
@@ -5913,6 +6971,9 @@ namespace Models.Migrations
                         .HasColumnType("decimal(18, 4)")
                         .HasDefaultValue(1m);
 
+                    b.Property<bool>("IsCaDa")
+                        .HasColumnType("bit");
+
                     b.Property<bool>("IsDauVaoBatBuoc")
                         .HasColumnType("bit");
 
@@ -5920,6 +6981,9 @@ namespace Models.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")
                         .HasDefaultValue(true);
+
+                    b.Property<bool>("IsKhongDauRa")
+                        .HasColumnType("bit");
 
                     b.Property<bool>("IsSuDungThoiGianGiuaLoaiThanhPham")
                         .HasColumnType("bit");
@@ -5952,6 +7016,9 @@ namespace Models.Migrations
                     b.Property<string>("Ten")
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
+
+                    b.Property<decimal>("ThoiGianHT")
+                        .HasColumnType("decimal(18, 2)");
 
                     b.Property<decimal>("TrongLuongTare")
                         .HasColumnType("decimal(18, 3)");
@@ -6096,14 +7163,38 @@ namespace Models.Migrations
                     b.Property<bool>("IsCaMuoi")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("IsChuyenFillet")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDat")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsGiaoXepKhuon")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsNguyenCon")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsNguyenConNXB")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsNguyenLieuXeBuom")
+                        .HasColumnType("bit");
+
                     b.Property<bool>("IsNotSetByTime")
                         .HasColumnType("bit");
 
                     b.Property<bool>("IsSoChe")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("IsXeBuom")
+                        .HasColumnType("bit");
+
                     b.Property<bool>("KhongPhanBietSize")
                         .HasColumnType("bit");
+
+                    b.Property<DateTime>("MNgay")
+                        .HasColumnType("datetime2(7)");
 
                     b.Property<double?>("Max")
                         .ValueGeneratedOnAdd()
@@ -6123,6 +7214,9 @@ namespace Models.Migrations
                     b.Property<string>("Ten")
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
+
+                    b.Property<decimal>("ThoiGianHT")
+                        .HasColumnType("decimal(18, 2)");
 
                     b.Property<decimal>("ThoiGianTren1kgSeconds")
                         .HasColumnType("decimal(18, 3)")
@@ -6181,6 +7275,99 @@ namespace Models.Migrations
                     b.HasKey("ColorCode", "Ngay", "MaLo", "MaXuong");
 
                     b.ToTable("MaThanhPhamFillet_Color");
+                });
+
+            modelBuilder.Entity("Models.Repos.Models.MaThanhPhamFillet_D", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("BravoId")
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<string>("CodeId")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<string>("ColorRGB")
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<decimal>("DinhMuc")
+                        .HasColumnType("decimal(18, 4)");
+
+                    b.Property<decimal>("DinhMucHaoHut")
+                        .HasColumnType("decimal(18, 4)");
+
+                    b.Property<bool>("IsCaMuoi")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsNotSetByTime")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsSoChe")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsXeBuom")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("KhongPhanBietSize")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("MNgay")
+                        .HasColumnType("datetime2(7)");
+
+                    b.Property<string>("MaLoaiCa")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<string>("MaThanhPham")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<double?>("Max")
+                        .HasColumnType("float");
+
+                    b.Property<double?>("Min")
+                        .HasColumnType("float");
+
+                    b.Property<bool?>("SuDung")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Ten")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<decimal>("ThoiGianTren1kgSeconds")
+                        .HasColumnType("decimal(18, 3)");
+
+                    b.Property<string>("TrangThaiThanhPham")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<decimal>("TrongLuong")
+                        .HasColumnType("decimal(18, 2)");
+
+                    b.Property<decimal>("TrongLuongHienTai")
+                        .HasColumnType("decimal(18, 2)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("MaThanhPhamFillet_D");
                 });
 
             modelBuilder.Entity("Models.Repos.Models.MaThanhPhamFillet_HanMucTrongLuong", b =>
@@ -6250,6 +7437,99 @@ namespace Models.Migrations
                     b.HasKey("STT", "Ngay", "MaXuong");
 
                     b.ToTable("MaThanhPhamFillet_ThanhPhamMacDinh");
+                });
+
+            modelBuilder.Entity("Models.Repos.Models.MaThanhPhamFillet_U", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("BravoId")
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<string>("CodeId")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<string>("ColorRGB")
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<decimal>("DinhMuc")
+                        .HasColumnType("decimal(18, 4)");
+
+                    b.Property<decimal>("DinhMucHaoHut")
+                        .HasColumnType("decimal(18, 4)");
+
+                    b.Property<bool>("IsCaMuoi")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsNotSetByTime")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsSoChe")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsXeBuom")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("KhongPhanBietSize")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("MNgay")
+                        .HasColumnType("datetime2(7)");
+
+                    b.Property<string>("MaLoaiCa")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<string>("MaThanhPham")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<double?>("Max")
+                        .HasColumnType("float");
+
+                    b.Property<double?>("Min")
+                        .HasColumnType("float");
+
+                    b.Property<bool?>("SuDung")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Ten")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<decimal>("ThoiGianTren1kgSeconds")
+                        .HasColumnType("decimal(18, 3)");
+
+                    b.Property<string>("TrangThaiThanhPham")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<decimal>("TrongLuong")
+                        .HasColumnType("decimal(18, 2)");
+
+                    b.Property<decimal>("TrongLuongHienTai")
+                        .HasColumnType("decimal(18, 2)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("MaThanhPhamFillet_U");
                 });
 
             modelBuilder.Entity("Models.Repos.Models.MaThanhPhamLangDa", b =>
@@ -6337,6 +7617,10 @@ namespace Models.Migrations
                         .IsUnicode(false)
                         .HasColumnType("varchar(50)");
 
+                    b.Property<string>("CTTYLE")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<bool>("IsCaCanTin")
                         .HasColumnType("bit");
 
@@ -6384,6 +7668,12 @@ namespace Models.Migrations
                         .HasColumnType("bit")
                         .HasDefaultValue(true);
 
+                    b.Property<bool>("IsTareThung")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("MNgay")
+                        .HasColumnType("datetime2(7)");
+
                     b.Property<double?>("Max")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("float")
@@ -6409,6 +7699,184 @@ namespace Models.Migrations
                     b.HasKey("MaCa", "Ma");
 
                     b.ToTable("MaThanhPhamNguyenLieu");
+                });
+
+            modelBuilder.Entity("Models.Repos.Models.MaThanhPhamNguyenLieu_D", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<bool>("IsCaCanTin")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsCaNgopGheAoBanNgoai")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsCaNgopGheTuoiBanNgoai")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsCaNgopXeMuoi")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDatNho")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsManh")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsMuoiGhePhuPham")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsNgopAoMuoi")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsNgopAoPhuPham")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsNgopGhe")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsNgopGheMuoi")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsNgopGhePhuPham")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsNgopXePhuPham")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsPhuPhamCaTap")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsSNL")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("MNgay")
+                        .HasColumnType("datetime2(7)");
+
+                    b.Property<string>("MaLoaiCa")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<string>("MaThanhPham")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<double?>("Max")
+                        .HasColumnType("float");
+
+                    b.Property<double?>("Min")
+                        .HasColumnType("float");
+
+                    b.Property<bool?>("SuDung")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Ten")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<decimal>("TyLeNuoc")
+                        .HasColumnType("numeric(18, 4)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("MaThanhPhamNguyenLieu_D");
+                });
+
+            modelBuilder.Entity("Models.Repos.Models.MaThanhPhamNguyenLieu_U", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<bool>("IsCaCanTin")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsCaNgopGheAoBanNgoai")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsCaNgopGheTuoiBanNgoai")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsCaNgopXeMuoi")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDatNho")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsManh")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsMuoiGhePhuPham")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsNgopAoMuoi")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsNgopAoPhuPham")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsNgopGhe")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsNgopGheMuoi")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsNgopGhePhuPham")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsNgopXePhuPham")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsPhuPhamCaTap")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsSNL")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("MNgay")
+                        .HasColumnType("datetime2(7)");
+
+                    b.Property<string>("MaLoaiCa")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<string>("MaThanhPham")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<double?>("Max")
+                        .HasColumnType("float");
+
+                    b.Property<double?>("Min")
+                        .HasColumnType("float");
+
+                    b.Property<bool?>("SuDung")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Ten")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<decimal>("TyLeNuoc")
+                        .HasColumnType("numeric(18, 4)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("MaThanhPhamNguyenLieu_U");
                 });
 
             modelBuilder.Entity("Models.Repos.Models.MaThanhPhamNguyenLieu_temp", b =>
@@ -6748,6 +8216,9 @@ namespace Models.Migrations
                         .IsUnicode(false)
                         .HasColumnType("varchar(50)");
 
+                    b.Property<DateTime>("MNgay")
+                        .HasColumnType("datetime2(7)");
+
                     b.Property<double>("Max")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("float")
@@ -6919,6 +8390,88 @@ namespace Models.Migrations
                     b.HasKey("ColorCode", "Ngay", "MaLo", "MaXuong");
 
                     b.ToTable("MaThanhPhamXepKhuon_Color");
+                });
+
+            modelBuilder.Entity("Models.Repos.Models.MaThanhPhamXepKhuon_D", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("BravoId")
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<DateTime>("MNgay")
+                        .HasColumnType("datetime2(7)");
+
+                    b.Property<string>("MaThanhPham")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<double>("Max")
+                        .HasColumnType("float");
+
+                    b.Property<double>("Min")
+                        .HasColumnType("float");
+
+                    b.Property<bool>("SuDung")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Ten")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("MaThanhPhamXepKhuon_D");
+                });
+
+            modelBuilder.Entity("Models.Repos.Models.MaThanhPhamXepKhuon_U", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("BravoId")
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<DateTime>("MNgay")
+                        .HasColumnType("datetime2(7)");
+
+                    b.Property<string>("MaThanhPham")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<double>("Max")
+                        .HasColumnType("float");
+
+                    b.Property<double>("Min")
+                        .HasColumnType("float");
+
+                    b.Property<bool>("SuDung")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Ten")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("MaThanhPhamXepKhuon_U");
                 });
 
             modelBuilder.Entity("Models.Repos.Models.MaThanhPham_PhoiTron", b =>
@@ -9696,6 +11249,11 @@ namespace Models.Migrations
                     b.Property<TimeSpan>("Gio")
                         .HasColumnType("time(7)");
 
+                    b.Property<string>("Id")
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
+
                     b.Property<string>("IdMonitor")
                         .HasMaxLength(50)
                         .IsUnicode(false)
@@ -10127,6 +11685,11 @@ namespace Models.Migrations
                     b.Property<string>("GhiChu")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Id")
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
+
                     b.Property<string>("MSL")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -10331,6 +11894,11 @@ namespace Models.Migrations
                     b.Property<string>("GhiChu")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Id")
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
+
                     b.Property<string>("MSL")
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
@@ -10415,6 +11983,11 @@ namespace Models.Migrations
                         .HasColumnType("time(7)")
                         .HasDefaultValueSql("(getdate())");
 
+                    b.Property<string>("Id")
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
+
                     b.Property<string>("MaLo")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -10476,6 +12049,21 @@ namespace Models.Migrations
                     b.Property<TimeSpan>("Gio")
                         .HasColumnType("time(7)");
 
+                    b.Property<string>("Id")
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<string>("MaChatLuong")
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<string>("MaChieuXa")
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
+
                     b.Property<string>("MaKhuVuc")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -10529,6 +12117,9 @@ namespace Models.Migrations
                         .HasColumnType("varchar(50)");
 
                     b.Property<decimal>("TrongLuong")
+                        .HasColumnType("decimal(18, 2)");
+
+                    b.Property<decimal>("TrongLuongTare")
                         .HasColumnType("decimal(18, 2)");
 
                     b.HasKey("STT", "Ngay", "MaXuong", "MaMayCan");
@@ -10708,6 +12299,9 @@ namespace Models.Migrations
 
                     b.Property<int>("STT")
                         .HasColumnType("int");
+
+                    b.Property<decimal>("ThamSoTangTrong")
+                        .HasColumnType("decimal(18, 2)");
 
                     b.Property<decimal>("TrongLuong")
                         .HasColumnType("decimal(18, 3)");
@@ -11378,6 +12972,11 @@ namespace Models.Migrations
                     b.Property<string>("HoVaTen")
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Id")
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
 
                     b.Property<string>("LoaiCan")
                         .IsRequired()
@@ -12375,6 +13974,9 @@ namespace Models.Migrations
                         .HasColumnType("bit")
                         .HasDefaultValue(true);
 
+                    b.Property<DateTime>("MNgay")
+                        .HasColumnType("datetime2(7)");
+
                     b.Property<string>("SoGhe")
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(50)
@@ -12401,6 +14003,94 @@ namespace Models.Migrations
                     b.HasKey("Ma");
 
                     b.ToTable("PhuongTienChoNguyenLieu");
+                });
+
+            modelBuilder.Entity("Models.Repos.Models.PhuongTienChoNguyenLieu_D", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<bool>("IsGhe")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsHD")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("MNgay")
+                        .HasColumnType("datetime2(7)");
+
+                    b.Property<string>("MaPhuongTien")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("SoGhe")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<bool?>("SuDung")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Ten")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("VungNuoiId")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("PhuongTienChoNguyenLieu_D");
+                });
+
+            modelBuilder.Entity("Models.Repos.Models.PhuongTienChoNguyenLieu_U", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<bool>("IsGhe")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsHD")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("MNgay")
+                        .HasColumnType("datetime2(7)");
+
+                    b.Property<string>("MaPhuongTien")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("SoGhe")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<bool?>("SuDung")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Ten")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("VungNuoiId")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("PhuongTienChoNguyenLieu_U");
                 });
 
             modelBuilder.Entity("Models.Repos.Models.PhuongTienChoNguyenLieu_temp", b =>
@@ -15739,6 +17429,24 @@ namespace Models.Migrations
                     b.Property<bool?>("IsZero")
                         .HasColumnType("bit");
 
+                    b.Property<int>("LoLevel")
+                        .HasColumnType("int");
+
+                    b.Property<string>("MaChatLuongChinhXepKhuon")
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<string>("MaChatLuongPhuXepKhuon")
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<string>("MaChieuXa")
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
+
                     b.Property<string>("MaCoiXepKhuon")
                         .HasMaxLength(50)
                         .IsUnicode(false)
@@ -15764,6 +17472,11 @@ namespace Models.Migrations
                         .IsUnicode(false)
                         .HasColumnType("varchar(50)");
 
+                    b.Property<string>("MaSizeChinhXepKhuon")
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
+
                     b.Property<string>("MaSizeDinhHinh")
                         .HasMaxLength(50)
                         .IsUnicode(false)
@@ -15774,7 +17487,17 @@ namespace Models.Migrations
                         .IsUnicode(false)
                         .HasColumnType("varchar(50)");
 
+                    b.Property<string>("MaSizePhuXepKhuon")
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
+
                     b.Property<string>("MaThanhPham")
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<string>("MaThanhPhamChinhXepKhuon")
                         .HasMaxLength(50)
                         .IsUnicode(false)
                         .HasColumnType("varchar(50)");
@@ -15785,6 +17508,11 @@ namespace Models.Migrations
                         .HasColumnType("varchar(50)");
 
                     b.Property<string>("MaThanhPhamPhuPham")
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<string>("MaThanhPhamPhuXepKhuon")
                         .HasMaxLength(50)
                         .IsUnicode(false)
                         .HasColumnType("varchar(50)");
@@ -16165,6 +17893,59 @@ namespace Models.Migrations
                     b.HasKey("Ngay", "MaAo");
 
                     b.ToTable("TrongLuongBinhQuanCaChet");
+                });
+
+            modelBuilder.Entity("Models.Repos.Models.TrongLuongCoiTheoSanPham", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("MaCoi")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<string>("MaSanPham")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<decimal>("TrongLuong")
+                        .HasColumnType("decimal(18, 2)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("TrongLuongCoiTheoSanPham");
+                });
+
+            modelBuilder.Entity("Models.Repos.Models.TrongLuongCoiTheoThanhPham", b =>
+                {
+                    b.Property<string>("MaCoi")
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<string>("MaThanhPham")
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<string>("MaXuong")
+                        .HasMaxLength(50)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<decimal>("TrongLuongMax")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("MaCoi", "MaThanhPham", "MaXuong");
+
+                    b.ToTable("TrongLuongCoiTheoThanhPham");
                 });
 
             modelBuilder.Entity("Models.Repos.Models.TrongLuongGioiHanDinhHinh", b =>

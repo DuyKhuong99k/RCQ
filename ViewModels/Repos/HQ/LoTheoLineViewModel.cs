@@ -318,5 +318,54 @@ namespace ViewModels.Repos.HQ
                 throw;
             }
         }
+
+        public List<string> GetDefaultLos()
+        {
+            try
+            {
+                var items = new List<string>();
+                for (int i = 1; i <= 50; i++)
+                {
+                    var item = $@"{AppViewModel.Instance.DateTimeNow:yyyyMMdd}.{i:00}";
+                    items.Add(item);
+                }
+
+                return items;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public List<string> GetLosWithDate(DateTime ngay)
+        {
+            try
+            {
+                var items = new List<string>();
+                for (int i = 1; i <= 50; i++)
+                {
+                    var item = $@"{ngay:yyyyMMdd}.{i:00}";
+                    items.Add(item);
+                }
+
+                return items;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public List<T> GetsFullField<T>(DateTime ngay, string maLo)
+        {
+            var dao = new Dao.Repos.HQ.LoTheoLine();
+            return dao.GetLoTheoLines<T>(ngay,maLo);
+        }
+        public List<T> GetsFullFieldLastNew<T>(DateTime ngay,string maLo)
+        {
+            var dao = new Dao.Repos.HQ.LoTheoLine();
+            return dao.GetLoTheoLinesMoiNhat<T>(ngay, maLo);
+        }
     }
 }

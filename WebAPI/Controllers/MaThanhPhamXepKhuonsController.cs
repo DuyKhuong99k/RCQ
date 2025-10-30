@@ -88,6 +88,7 @@ namespace WebAPI.Controllers
             _context.MaThanhPhamXepKhuon.Add(newItem);
             try
             {
+                
                 await _context.SaveChangesAsync();
             }
             catch (Exception ex)
@@ -152,6 +153,19 @@ namespace WebAPI.Controllers
             item.BravoId = model.BravoId;
             try
             {
+                var newItemUs = new MaThanhPhamXepKhuon_U
+                {
+                    MaThanhPham = item.Ma,
+                    Ten = item.Ten,
+                    SuDung = item.SuDung,
+                    Min = item.Min,
+                    Max = item.Max,
+                    BravoId = item.BravoId,
+                    MNgay = DateTime.Now,
+                };
+
+                // Thêm vào bảng HqLoaiNguyenLieuUs
+                _context.MaThanhPhamXepKhuonUs.Add(newItemUs);
                 await _context.SaveChangesAsync();
             }
             catch (Exception ex)
@@ -195,6 +209,19 @@ namespace WebAPI.Controllers
 
             try
             {
+                var newItemUs = new MaThanhPhamXepKhuon_D
+                {
+                    MaThanhPham = item.Ma,
+                    Ten = item.Ten,
+                    SuDung = item.SuDung,
+                    Min = item.Min,
+                    Max = item.Max,
+                    BravoId = item.BravoId,
+                    MNgay = DateTime.Now,
+                };
+
+                // Thêm vào bảng HqLoaiNguyenLieuUs
+                _context.MaThanhPhamXepKhuonDs.Add(newItemUs);
                 await _context.SaveChangesAsync();
             }
             catch (Exception ex)

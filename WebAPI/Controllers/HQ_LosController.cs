@@ -82,7 +82,7 @@ namespace WebAPI.Controllers
                 Id = model.Id,
                 NgayNguyenLieu = model.NgayNguyenLieu,
                 SuDung = model.SuDung,
-                MNgay = model.MNgay,
+                MNgay = DateTime.Now,
             };
             _context.HqLos.Add(newItem);
             try
@@ -144,11 +144,12 @@ namespace WebAPI.Controllers
                 });
             }
 
+            var MNgay = DateTime.Now;
             // Cập nhật thông tin vào item
             item.Id = model.Id;
             item.NgayNguyenLieu = model.NgayNguyenLieu;
             item.SuDung = model.SuDung;
-            //item.MNgay = model.MNgay;
+            item.MNgay = MNgay;
 
             try
             {
@@ -161,7 +162,7 @@ namespace WebAPI.Controllers
                     LoId = item.Id,
                     NgayNguyenLieu = item.NgayNguyenLieu,
                     SuDung = item.SuDung,
-                    MNgay = item.MNgay,
+                    MNgay = MNgay,
                     Ngay = DateTime.Now // Ngày hiện tại khi tạo mới
                 };
 

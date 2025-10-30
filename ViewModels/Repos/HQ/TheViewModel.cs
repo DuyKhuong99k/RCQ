@@ -14,6 +14,7 @@ using System.Windows.Input;
 using Azure.Identity;
 using System.Collections.Specialized;
 using System.Globalization;
+using Microsoft.AspNetCore.OutputCaching;
 using Models.Repos;
 
 namespace ViewModels.Repos.HQ
@@ -80,11 +81,71 @@ namespace ViewModels.Repos.HQ
 
         public int Delete<T>(T item)
         {
+            try
+            {
+                dbPMScontext db = new dbPMScontext();
+                if (item is TheTu the)
+                {
+                    var _the = new HQ_TheTu_D()
+                    {
+                        MaTheTu = the.MaTheTu,
+                        Ngay = DateTime.Now,
+                        NgayGio = the.NgayGio,
+                        MaNhanVien = the.MaNhanVien,
+                        NhanVienName = the.NhanVienName,
+                        MaSo = the.MaSo,
+                        PCName = the.PCName
+                    
+                    };
+                    db.HqTheTuDs.Add(_the);
+                    db.SaveChanges();
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                //throw;
+            }
+            
             var dao = new Dao.Repos.HQ.TheTu();
             return dao.Delete(item);
         }
         public int Delete<T>(List<T> items)
         {
+            try
+            {
+                dbPMScontext db = new dbPMScontext();
+                if (items is  List<TheTu> thes)
+                {
+                    //the.Ngay = DateTime.Now.Date;
+                    //db.HqTheThanhPhamDs.Add(the);
+                    //db.SaveChanges();
+                    foreach (var theTu in thes)
+                    {
+                        var the = new HQ_TheTu_D()
+                        {
+                      
+                            Ngay = DateTime.Now,
+                            NgayGio = theTu.NgayGio,
+                            MaNhanVien = theTu.MaNhanVien,
+                            MaSo = theTu.MaSo,
+                            MaTheTu = theTu.MaTheTu,
+                            PCName = theTu.PCName,
+                            NhanVienName = theTu.NhanVienName
+
+
+                        };
+                        db.HqTheTuDs.Add(the);
+
+                    }
+                    db.SaveChanges();
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                //throw;
+            }
             var dao = new Dao.Repos.HQ.TheTu();
             return dao.Delete(items);
         }
@@ -121,16 +182,35 @@ namespace ViewModels.Repos.HQ
         public List<string> GetDs(string Ngay,int PageIndex,int PageSize)
         {
             dbPMScontext db = new dbPMScontext();
-            DateTime date = new DateTime();
-            try
+            var date = new DateTime();
+            var index = Ngay.IndexOf("=", StringComparison.Ordinal);
+            if (index == -1)
             {
-                date = DateTime.ParseExact(Ngay, "yyyyMMddHHmmss",CultureInfo.InvariantCulture);
+                try
+                {
+                    date = DateTime.ParseExact(Ngay, "yyyyMMddHHmmss", CultureInfo.InvariantCulture);
+                }
+                catch (Exception ex)
+                {
+                    //throw ex;
+                }
             }
-            catch (Exception ex)
+            else
             {
-                throw ex;
+                var _data = Ngay.Substring(index + 1).Split(',');
+                var mayCanId = _data.FirstOrDefault() ?? "";
+                var mNgay = _data.LastOrDefault() ?? "";
+                try
+                {
+                    date = DateTime.ParseExact(mNgay, "yyyyMMddHHmmss", CultureInfo.InvariantCulture);
+                }
+                catch (Exception ex)
+                {
+                    //throw ex;
+                }
+                
             }
-            return db.HqTheTuDs.Where(x=>x.Ngay > date).OrderByDescending(x=>x.Ngay).Skip((PageIndex -1)*PageSize).Take(PageSize).Select(x=>x.MaTheTu).ToList();
+            return db.HqTheTuDs.Where(x=>x.Ngay.Date >= date.Date).OrderByDescending(x=>x.Ngay).Skip((PageIndex -1)*PageSize).Take(PageSize).Select(x=>x.MaTheTu).ToList();
         }
         public int Insert<T>(T item)
         {
@@ -258,6 +338,41 @@ namespace ViewModels.Repos.HQ
 
         public int Update<T>(List<T> items)
         {
+            try
+            {
+                dbPMScontext db = new dbPMScontext();
+                if (items is  List<TheTu> thes)
+                {
+                    //the.Ngay = DateTime.Now.Date;
+                    //db.HqTheThanhPhamDs.Add(the);
+                    //db.SaveChanges();
+                    foreach (var theTu in thes)
+                    {
+                        var the = new HQ_TheTu_D()
+                        {
+                      
+                            Ngay = DateTime.Now,
+                            NgayGio = theTu.NgayGio,
+                            MaNhanVien = theTu.MaNhanVien,
+                            MaSo = theTu.MaSo,
+                            MaTheTu = theTu.MaTheTu,
+                            PCName = theTu.PCName,
+                            NhanVienName = theTu.NhanVienName,
+
+
+                        };
+                        db.HqTheTuDs.Add(the);
+
+                    }
+                    db.SaveChanges();
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                //throw;
+            }
+            
             var dao = new Dao.Repos.HQ.TheTu();
             return dao.Update(items);
         }

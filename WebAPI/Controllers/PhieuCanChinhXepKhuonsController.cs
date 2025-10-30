@@ -47,7 +47,7 @@ namespace WebAPI.Controllers
         }
         [HttpGet("{fromDate}/{toDate}/{xuongId}")]
         [Authorize]
-        public async Task<ActionResult<IEnumerable<object>>> GetPhieuCanTongHopChinhXepKhuonsDB(string fromDate, string toDate, string xuongId)
+        public async Task<ActionResult<IEnumerable<object>>> GetPhieuCanTongHopChinhXepKhuonsDB_St(string fromDate, string toDate, string xuongId)
         {
             if (_context.PhieuCanChinhXepKhuon == null)
             {
@@ -56,6 +56,19 @@ namespace WebAPI.Controllers
             DateTime date1 = DateTime.ParseExact(fromDate, "yyyy-MM-dd", CultureInfo.InvariantCulture);
             DateTime date2 = DateTime.ParseExact(toDate, "yyyy-MM-dd", CultureInfo.InvariantCulture);
             var items = Vm.VmDashBoard.ItemTongHopThanhPhamChinhXepKhuon.OfType<dynamic>().Where(x => x.MaXuong == xuongId).ToList();// Sử dụng dynamic để cast các object
+            return items;
+        }
+        [HttpGet("{fromDate}/{toDate}/{xuongId}")]
+        [Authorize]
+        public async Task<ActionResult<IEnumerable<object>>> GetPhieuCanTongHopChinhXepKhuonsDB(string fromDate, string toDate, string xuongId)
+        {
+            if (_context.PhieuCanChinhXepKhuon == null)
+            {
+                return NotFound();
+            }
+            DateTime date1 = DateTime.ParseExact(fromDate, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+            DateTime date2 = DateTime.ParseExact(toDate, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+            var items = Vm.VmPhieuCanChinhXepKhuon.GetPhieuCanTongHopChinhXepKhuons<object>(date1, date2, xuongId);
             return items;
         }
         #region Xử Lý Phiếu Cân
@@ -142,6 +155,7 @@ namespace WebAPI.Controllers
                 MaNhanVienPvPhanCo = model.MaNhanVienPvPhanCo,
                 TrongLuongTare = model.TrongLuongTare,
                 NgayNguyenLieu = model.NgayNguyenLieu,
+                Id = model.Id,
             };
             _context.PhieuCanChinhXepKhuon.Add(newItem);
             try
@@ -654,6 +668,76 @@ namespace WebAPI.Controllers
                 Message = "Cập nhật thông tin thành công!"
             });
         }
+        [HttpPost("{stt}/{ngay}/{maMayCan}/{maXuong}")]
+        [Authorize]
+        public async Task<IActionResult> ChuyenNgayNguyenLieu(int stt, string ngay, string maMayCan, string maXuong, Tuple<string> dataT)
+        {
+            var model = JsonSerializer.Deserialize<PhieuCanChinhXepKhuon>(dataT.Item1);
+            // Kiểm tra xem ID người dùng được cập nhật có hợp lệ không
+            if (string.IsNullOrEmpty(stt.ToString()) || string.IsNullOrEmpty(ngay) || string.IsNullOrEmpty(maMayCan) || string.IsNullOrEmpty(maXuong))
+            {
+                return BadRequest(new ApiResponse
+                {
+                    Success = false,
+                    Message = "Vui lòng cung cấp đủ thông tin!."
+                });
+            }
+            DateTime ngayConvert = DateTime.ParseExact(ngay, "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture);
+            var item = await _context.PhieuCanChinhXepKhuon.FirstOrDefaultAsync(x => x.STT == stt && x.NgayNguyenLieu == ngayConvert && x.MaMayCan == maMayCan && x.MaXuong == maXuong);
+
+            if (item == null)
+            {
+                return BadRequest(new ApiResponse
+                {
+                    Success = false,
+                    Message = "Mục không tồn tại."
+                });
+            }
+
+            // Kiểm tra xem dữ liệu đầu vào có hợp lệ không và trả về danh sách lỗi nếu có.
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState.Values.SelectMany(v => v.Errors)
+                                              .Select(e => e.ErrorMessage)
+                                              .ToList();
+
+                return BadRequest(new ApiResponse
+                {
+                    Success = false,
+                    Message = "Dữ liệu không hợp lệ.",
+                    Errors = errors
+                });
+            }
+            var options = new JsonSerializerOptions
+            {
+                WriteIndented = true
+            };
+            // Lưu trạng thái cũ của đối tượng trước khi thay đổi
+            var oldData = JsonSerializer.Serialize(new
+            {
+                item.NgayNguyenLieu
+            }, options);
+            item.NgayNguyenLieu = model.NgayNguyenLieu;
+            item.GhiChu = item.GhiChu + "," + oldData.ToString() + "," + model.GhiChu;
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new ApiResponse
+                {
+                    Success = false,
+                    Message = "Đã xảy ra lỗi khi cập nhật dữ liệu.",
+                    Errors = new List<string> { ex.Message }
+                });
+            }
+            return Ok(new ApiResponse
+            {
+                Success = true,
+                Message = "Cập nhật thông tin thành công!"
+            });
+        }
         #endregion
         #region Báo Cáo
         [HttpGet("{fromDate}/{toDate}/{xuongId}")]
@@ -718,7 +802,7 @@ namespace WebAPI.Controllers
             }
             DateTime date1 = DateTime.ParseExact(fromDate, "yyyy-MM-dd", CultureInfo.InvariantCulture);
             DateTime date2 = DateTime.ParseExact(toDate, "yyyy-MM-dd", CultureInfo.InvariantCulture);
-            var items = Vm.VmPhieuCanChinhXepKhuon.GetPhieuCanTongHopCoisFromDateToDate(date1, date2, xuongId);
+            var items = Vm.VmPhieuCanChinhXepKhuon.GetChiTietCoiChinh<object>(date1, date2, xuongId);
             return items;
         }
         [HttpGet("{fromDate}/{toDate}/{xuongId}")]

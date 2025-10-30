@@ -6,16 +6,17 @@
     var roleIds = PMS.Middlewares.AuthenticationHelpers.GetRoleIdsFromCookie(Context);
     // lấy danh sách fu func từ list roleId
     var rolePermistions = await PMS.Middlewares.AuthenticationHelpers.GetRolePermistionsAsync(Context, roleIds);
+    var listMaSanPhamhq = ViewBag.listMaSanPhamhq;
 }
 
-<div class="container mt-4">
+<div class="container-fluid mt-4">
     <div class="row">
         <div class="col-12">
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h2 class="mb-0">Danh Sách Nhóm</h2>
                     @{
-                        var themHQ_Nhom = rolePermistions.Where(x => x.Fu == "Danh Mục HQ / Nhóm" && x.Func == "Thêm HQ / Nhóm" && x.Status == 1).FirstOrDefault();
+                        var themHQ_Nhom = rolePermistions.Where(x => x.Fu == "Danh Mục / Nhóm HQ" && x.Func == "Thêm Nhóm HQ" && x.Status == 1).FirstOrDefault();
                         if (themHQ_Nhom != null)
                         {
                             <button onclick="showInsert()" type="button" class="btn btn-primary">Thêm</button>
@@ -27,22 +28,22 @@
                     <div id="Grid"></div>
                     <div style="margin-top:20px;">
                         @{
-                            var suaHQ_Nhom = rolePermistions.Where(x => x.Fu == "Danh Mục HQ / Nhóm" && x.Func == "Sửa HQ / Nhóm" && x.Status == 1).FirstOrDefault();
+                            var suaHQ_Nhom = rolePermistions.Where(x => x.Fu == "Danh Mục / Nhóm HQ" && x.Func == "Sửa Nhóm HQ" && x.Status == 1).FirstOrDefault();
                             if (suaHQ_Nhom != null)
                             {
                                 <button onclick="showUpdate()" style="margin-right:5px" class="btn btn-outline-warning"><i class='bx bx-edit-alt'></i>Sửa</button>
                             }
-                            var xoaHQ_Nhom = rolePermistions.Where(x => x.Fu == "Danh Mục HQ / Nhóm" && x.Func == "Xóa HQ / Nhóm" && x.Status == 1).FirstOrDefault();
+                            var xoaHQ_Nhom = rolePermistions.Where(x => x.Fu == "Danh Mục / Nhóm HQ" && x.Func == "Xóa Nhóm HQ" && x.Status == 1).FirstOrDefault();
                             if (xoaHQ_Nhom != null)
                             {
                                 <button onclick="showDelete()" style="margin-right:5px" class="btn btn-outline-danger"><i class='bx bx-trash'></i>Xoá</button>
                             }
-                            var importHQ_Nhom = rolePermistions.Where(x => x.Fu == "Danh Mục HQ / Nhóm" && x.Func == "Import HQ / Nhóm" && x.Status == 1).FirstOrDefault();
+                            var importHQ_Nhom = rolePermistions.Where(x => x.Fu == "Danh Mục / Nhóm HQ" && x.Func == "Import Nhóm HQ" && x.Status == 1).FirstOrDefault();
                             if (importHQ_Nhom != null)
                             {
                                 <button onclick="import()" style="margin-right:5px" class="btn btn-outline-info"><i class='bx bx-import'></i>Import</button>
                             }
-                            var exportHQ_Nhom = rolePermistions.Where(x => x.Fu == "Danh Mục HQ / Nhóm" && x.Func == "Export HQ / Nhóm" && x.Status == 1).FirstOrDefault();
+                            var exportHQ_Nhom = rolePermistions.Where(x => x.Fu == "Danh Mục / Nhóm HQ" && x.Func == "Export Nhóm HQ" && x.Status == 1).FirstOrDefault();
                             if (exportHQ_Nhom != null)
                             {
                                 <button onclick="export()" style="margin-right:5px" class="btn btn-outline-secondary"><i class='bx bx-export'></i>Export Excel</button>
@@ -77,6 +78,20 @@
                                 <div class="form-outline">
                                     <label class="form-label">Tên</label>
                                     <input type="text" id="tenNHQ" class="form-control form-control-lg" placeholder="Nhập Tên..." />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 mb-12 ">
+                                <div class="form-outline">
+                                    <label class="form-label">Sản Phẩm</label>
+                                    <select id="maSanPhamNHQ" class="form-control form-control-lg">
+                                        <option disabled selected>Chọn Sản Phẩm</option>
+                                        @foreach (var item in listMaSanPhamhq)
+                                        {
+                                            <option value="@item.Ma">@item.Ma</option>
+                                        }
+                                    </select>
                                 </div>
                             </div>
                         </div>
@@ -140,6 +155,20 @@
                                 <div class="form-outline">
                                     <label class="form-label">Tên</label>
                                     <input type="text" id="tenNHQSua" class="form-control form-control-lg" placeholder="Nhập Tên..." />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 mb-12 ">
+                                <div class="form-outline">
+                                    <label class="form-label">Sản Phẩm</label>
+                                    <select id="maSanPhamNHQSua" class="form-control form-control-lg">
+                                        <option disabled selected>Chọn Sản Phẩm</option>
+                                        @foreach (var item in listMaSanPhamhq)
+                                        {
+                                            <option value="@item.Ma">@item.Ma</option>
+                                        }
+                                    </select>
                                 </div>
                             </div>
                         </div>
@@ -218,7 +247,7 @@
                     grid = new ej.grids.Grid({
                         dataSource: dataManager,
                         allowPaging: true,
-                        pageSettings: { pageSize: 50 },
+                        pageSettings: { pageSize: 50, pageSizes: [50, 100, 200, 500] },
                         allowFiltering: true,
                         filterSettings: { type: 'Excel' },
                         allowSorting: true,
@@ -229,6 +258,7 @@
                         columns: [
                             { field: 'Id', headerText: 'Id', width: 150 },
                             { field: 'Ten', headerText: 'Tên', width: 150 },
+                            { field: 'MaSanPham', headerText: 'Mã Sản Phẩm', width: 150 },
                             { field: 'SuDung', headerText: 'Sử Dụng', width: 100, displayAsCheckBox: 'true', textAlign: 'Center' },
                             { field: 'GhiChu', headerText: 'Ghi Chú', width: 150 },
 
@@ -267,6 +297,7 @@
                     $('#tenNHQ').val(rs.Ten);
                     $('#suDungNHQ').prop('checked', rs.SuDung);
                     $('#ghiChuNHQ').val(rs.GhiChu);
+                    $('#maSanPhamNHQ').val(rs.MaSanPham);
 
                     $('#modalThem').modal('show');
                 }
@@ -286,6 +317,7 @@
         var ten = $('#tenNHQ').val();
         var suDung = $('#suDungNHQ').prop('checked');
         var ghiChu = $('#ghiChuNHQ').val();
+        var maSanPham = $('#maSanPhamNHQ').val();
         document.getElementById("txtThem").style.visibility = "hidden";
         document.getElementById("loadingIndicator").style.display = "block";
         $.ajax({
@@ -296,6 +328,7 @@
                 ten: ten,
                 suDung: suDung,
                 ghiChu: ghiChu,
+                maSanPham: maSanPham
             },
             success: function (rs) {
                 if (rs.isSuccess === true) {
@@ -333,6 +366,7 @@
                     $('#tenNHQSua').val(rs.Ten);
                     $('#suDungNHQSua').prop('checked', rs.SuDung);
                     $('#ghiChuNHQSua').val(rs.GhiChu);
+                    $('#maSanPhamNHQSua').val(rs.MaSanPham);
                     $('#modalSua').modal('show');
                 }
                 else {
@@ -351,6 +385,7 @@
         var ten = $('#tenNHQSua').val();
         var suDung = $('#suDungNHQSua').prop('checked');
         var ghiChu = $('#ghiChuNHQSua').val();
+        var maSanPham = $('#maSanPhamNHQSua').val();
         document.getElementById("txtSua").style.visibility = "hidden";
         document.getElementById("loadingIndicatorSua").style.display = "block";
         $.ajax({
@@ -360,7 +395,7 @@
                 ten: ten,
                 suDung: suDung,
                 ghiChu: ghiChu,
-
+                maSanPham : maSanPham
             },
             type: 'POST',
             dataType: 'json',

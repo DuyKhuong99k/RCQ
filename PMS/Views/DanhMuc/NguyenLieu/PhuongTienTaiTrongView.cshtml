@@ -14,34 +14,35 @@
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h2 class="mb-0">Danh Sách Phương Tiện - Tải Trọng</h2>
                     @{
-                        var themphuongtientaitrongnguyenlieu = rolePermistions.Where(x => x.Fu == "Danh Mục / Nguyên Liệu / Phương Tiện Tải Trọng" && x.Func == "Thêm Nguyên Liệu / Phương Tiện Tải Trọng" && x.Status == 1).FirstOrDefault();
-                        if (themphuongtientaitrongnguyenlieu != null)
-                        {
-                            <button onclick="showInsert()" type="button" class="btn btn-primary">Thêm</button>
-                        }
+                        
                     }
                 </div>
                 <div class="card-body">
                     <div id="Grid"></div>
                     <div style="margin-top:20px;">
                         @{
+                            var themphuongtientaitrongnguyenlieu = rolePermistions.Where(x => x.Fu == "Danh Mục / Nguyên Liệu / Phương Tiện Tải Trọng" && x.Func == "Thêm Nguyên Liệu / Phương Tiện Tải Trọng" && x.Status == 1).FirstOrDefault();
+                            if (themphuongtientaitrongnguyenlieu != null)
+                            {
+                                <button onclick="showInsert()" type="button" class="btn btn-primary">Thêm</button>
+                            }
                             var suaphuongtientaitrongnguyenlieu = rolePermistions.Where(x => x.Fu == "Danh Mục / Nguyên Liệu / Phương Tiện Tải Trọng" && x.Func == "Sửa Nguyên Liệu / Phương Tiện Tải Trọng" && x.Status == 1).FirstOrDefault();
                             if (suaphuongtientaitrongnguyenlieu != null)
                             {
                                 <button onclick="showUpdate()" style="margin-right:5px" class="btn btn-outline-warning"><i class='bx bx-edit-alt'></i>Sửa</button>
                             }
                             var xoaphuongtientaitrongnguyenlieu = rolePermistions.Where(x => x.Fu == "Danh Mục / Nguyên Liệu / Phương Tiện Tải Trọng" && x.Func == "Xoá Nguyên Liệu / Phương Tiện Tải Trọng" && x.Status == 1).FirstOrDefault();
-                            if (themphuongtientaitrongnguyenlieu != null)
+                            if (xoaphuongtientaitrongnguyenlieu != null)
                             {
                                 <button onclick="showDelete()" style="margin-right:5px" class="btn btn-outline-danger"><i class='bx bx-trash'></i>Xoá</button>
                             }
                             var importphuongtientaitrongnguyenlieu = rolePermistions.Where(x => x.Fu == "Danh Mục / Nguyên Liệu / Phương Tiện Tải Trọng" && x.Func == "Import Nguyên Liệu / Phương Tiện Tải Trọng" && x.Status == 1).FirstOrDefault();
-                            if (themphuongtientaitrongnguyenlieu != null)
+                            if (importphuongtientaitrongnguyenlieu != null)
                             {
                                 <button onclick="import()" style="margin-right:5px" class="btn btn-outline-info"><i class='bx bx-import'></i>Import</button>
                             }
                             var exportphuongtientaitrongnguyenlieu = rolePermistions.Where(x => x.Fu == "Danh Mục / Nguyên Liệu / Phương Tiện Tải Trọng" && x.Func == "Export Nguyên Liệu / Phương Tiện Tải Trọng" && x.Status == 1).FirstOrDefault();
-                            if (themphuongtientaitrongnguyenlieu != null)
+                            if (exportphuongtientaitrongnguyenlieu != null)
                             {
                                 <button onclick="export()" style="margin-right:5px" class="btn btn-outline-secondary"><i class='bx bx-export'></i>Export Excel</button>
                             }
@@ -187,264 +188,270 @@
     </div>
     <input type="hidden" id="maPhuongTienTaiTrongRowSelected" />
     <input type="hidden" id="ngayApDungRowSelect" />
-    </div>
-    <script>
-        var now = new Date();
+</div>
+<script>
+    var now = new Date();
 
-        var day = ("0" + now.getDate()).slice(-2);
-        var month = ("0" + (now.getMonth() + 1)).slice(-2);
+    var day = ("0" + now.getDate()).slice(-2);
+    var month = ("0" + (now.getMonth() + 1)).slice(-2);
 
-        var today = now.getFullYear() + "-" + (month) + "-" + (day);
+    var today = now.getFullYear() + "-" + (month) + "-" + (day);
 
-        $('#ngayApDungSua').val(today);
-        $('#ngayApDung').val(today);
-    </script>
-    <script>
-        $(document).ready(function () {
-            loadGridData();
-        });
-        var grid;
-        function loadGridData() {
-            $.ajax({
-                url: '/PhuongTienTaiTrong/GetAlls',
-                type: 'GET',
-                dataType: 'json',
-                success: function (data) {
-                    var dataManager = new ej.data.DataManager({
-                        json: data,
-                        adaptor: new ej.data.JsonAdaptor()
-                    });
-                    if (grid) {
-                        grid.dataSource = dataManager;
-                        grid.refresh();
-                    } else {
-                        grid = new ej.grids.Grid({
-                            dataSource: dataManager,
-                            allowPaging: true,
-                            pageSettings: { pageSize: 50 },
-                            allowFiltering: true,
-                        filterSettings: { type: 'Excel' },
-                            allowSorting: true,
-                            //frozenColumns: 3,
-                            allowResizing: true,
-                            rowSelected: onRowSelected,
-                            height: 400,
-                            columns: [
-                                { field: 'MaPhuongTien', headerText: 'Mã Phương Tiện', width: 150 },
-                                { field: 'Ten', headerText: 'Tên Phương Tiện', width: 150 },
-                                { field: 'TaiTrong', headerText: 'Tải Trọng', type: 'number', width: 150 },
-                                { field: 'NgayApDung', headerText: 'Ngày Áp Dụng', type: 'date', format: 'dd/MM/yyyy', width: 200 },
-                                { field: 'GhiChu', headerText: 'Ghi Chú', width: 200 },
-                            ]
-                        });
-                        // Hiển thị Grid trên trang web
-                        grid.appendTo('#Grid');
-                    }
-                },
-                error: function (error) {
-                    console.error(error);
-                }
-            });
-        }
+    $('#ngayApDungSua').val(today);
+    $('#ngayApDung').val(today);
+</script>
+<script>
+    $(document).ready(function () {
         loadGridData();
-        function reloadData() {
-            loadGridData();
-        }
-        function onRowSelected(args) {
-            // Lấy dữ liệu của hàng được chọn
-            var selectedRecord = args.data;
-            // Lấy giá trị Id từ dữ liệu của hàng được chọn
-            var MaPhuongTien = selectedRecord.MaPhuongTien;
-            var NgayApDung = selectedRecord.NgayApDung;
-            $('#maPhuongTienTaiTrongRowSelected').val(MaPhuongTien);
-            $('#ngayApDungRowSelect').val(NgayApDung);
-        }
-    </script>
-    <script>
-        function showInsert() {
-            $.ajax({
-                type: "GET",
-                url: "/PhuongTienTaiTrong/CreatDefautNew", // Đường dẫn đến action trong controller
-                success: function (rs) {
-                    if (rs.isSuccess === true) {
-                        $('#taiTrong').val(rs.TaiTrong);
-                        $('#modalThem').modal('show');
-                    }
-                    else {
-                        toastOptionNotyfi();
-                        toastr["warning"](rs.Mesages, "Thông báo");
-                    }
-                },
-                error: function () {
-                    toastOptionNotyfi();
-                    toastr["error"]('Đã xảy ra lỗi: ' + error, "Thông báo");
+    });
+    var grid;
+    function loadGridData() {
+        $.ajax({
+            url: '/PhuongTienTaiTrong/GetAlls',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                var dataManager = new ej.data.DataManager({
+                    json: data,
+                    adaptor: new ej.data.JsonAdaptor()
+                });
+                if (grid) {
+                    grid.dataSource = dataManager;
+                    grid.refresh();
+                } else {
+                    grid = new ej.grids.Grid({
+                        dataSource: dataManager,
+                        allowPaging: true,
+                        pageSettings: { pageSize: 50, pageSizes: [50, 100, 200, 500] },
+                        allowFiltering: true,
+                        filterSettings: { type: 'Excel' },
+                        allowSorting: true,
+                        //frozenColumns: 3,
+                        allowResizing: true,
+                        allowExcelExport: true,
+                        toolbar: ['ExcelExport'],
+                        rowSelected: onRowSelected,
+                        height: 400,
+                        columns: [
+                            { field: 'MaPhuongTien', headerText: 'Mã Phương Tiện', width: 150 },
+                            { field: 'Ten', headerText: 'Tên Phương Tiện', width: 150 },
+                            { field: 'TaiTrong', headerText: 'Tải Trọng', type: 'number', width: 150 },
+                            { field: 'NgayApDung', headerText: 'Ngày Áp Dụng', type: 'date', format: 'dd/MM/yyyy', width: 200 },
+                            { field: 'GhiChu', headerText: 'Ghi Chú', width: 200 },
+                        ]
+                    });
+                    // Hiển thị Grid trên trang web
+                    grid.appendTo('#Grid');
+                    grid.toolbarClick = function (args) {
+             if (args.item.id === 'Grid_excelexport') {
+                grid.excelExport();
+             }};
                 }
-            });
-        }
-        function insert() {
-            var maPhuongTien = $('#maPhuongTien').val();
-            var ngayApDung = $('#ngayApDung').val();
-            var taiTrong = $('#taiTrong').val();
-            var ghiChu = $('#ghiChu').val();
-            document.getElementById("txtThem").style.visibility = "hidden";
-            document.getElementById("loadingIndicator").style.display = "block";
-            $.ajax({
-                type: 'POST',
-                url: '/PhuongTienTaiTrong/DoInsert',
-                data: {
-                    maPhuongTien: maPhuongTien,
-                    ngayApDung: ngayApDung,
-                    taiTrong: taiTrong,
-                    ghiChu: ghiChu
-                },
-                success: function (rs) {
-                    if (rs.isSuccess === true) {
-                        toastOptionNotyfi();
-                        toastr["success"](rs.Messages, "Thông báo");
-                        $('#modalThem').modal('hide');
-                        reloadData();
-                    } else {
-                        toastOptionNotyfi();
-                        toastr["warning"](rs.Messages, "Thông báo");
-                    }
-                },
-                error: function (error) {
-                    toastOptionNotyfi();
-                    toastr["error"]('Đã xảy ra lỗi: ' + error, "Thông báo");
-                },
-                complete: function () {
-                    document.getElementById("loadingIndicator").style.display = "none";
-                    document.getElementById("txtThem").style.visibility = "visible";
+            },
+            error: function (error) {
+                console.error(error);
+            }
+        });
+    }
+    loadGridData();
+    function reloadData() {
+        loadGridData();
+    }
+    function onRowSelected(args) {
+        // Lấy dữ liệu của hàng được chọn
+        var selectedRecord = args.data;
+        // Lấy giá trị Id từ dữ liệu của hàng được chọn
+        var MaPhuongTien = selectedRecord.MaPhuongTien;
+        var NgayApDung = selectedRecord.NgayApDung;
+        $('#maPhuongTienTaiTrongRowSelected').val(MaPhuongTien);
+        $('#ngayApDungRowSelect').val(NgayApDung);
+    }
+</script>
+<script>
+    function showInsert() {
+        $.ajax({
+            type: "GET",
+            url: "/PhuongTienTaiTrong/CreatDefautNew", // Đường dẫn đến action trong controller
+            success: function (rs) {
+                if (rs.isSuccess === true) {
+                    $('#taiTrong').val(rs.TaiTrong);
+                    $('#modalThem').modal('show');
                 }
-            });
-        }
-    </script>
-    <script>
-        function showUpdate() {
-            var maPhuongTien = $('#maPhuongTienTaiTrongRowSelected').val();
-            var ngayApDung = $('#ngayApDungRowSelect').val();
-            $.ajax({
-                url: "/PhuongTienTaiTrong/GetByMaPhuongTienAndNgayApDung",
-                data: { maPhuongTien: maPhuongTien, ngayApDung: ngayApDung },
-                type: 'GET',
-                dataType: 'json',
-                success: function (rs) {
-                    if (rs.isSuccess === true) {
-                        $('#maPhuongTienSua').val(rs.MaPhuongTien);
-                        $('#taiTrongSua').val(rs.TaiTrong);
-                        $('#ghiChuSua').val(rs.GhiChu);
-                        $('#ngayApDungSua').val(rs.NgayApDung);
-                        $('#modalSua').modal('show');
-                    }
-                    else {
-                        toastOptionNotyfi();
-                        toastr["warning"](rs.Mesages, "Thông báo");
-                    }
-                },
-                error: function (error) {
+                else {
                     toastOptionNotyfi();
-                    toastr["error"]('Đã xảy ra lỗi: ' + error, "Thông báo");
+                    toastr["warning"](rs.Mesages, "Thông báo");
                 }
-            });
-        }
-        function update() {
-            var maPhuongTien = $('#maPhuongTienSua').val();
-            var ngayApDung = $('#ngayApDungSua').val();
-            var taiTrong = $('#taiTrongSua').val();
-            var ghiChu = $('#ghiChuSua').val();
-            document.getElementById("txtSua").style.visibility = "hidden";
-            document.getElementById("loadingIndicatorSua").style.display = "block";
-            $.ajax({
-                url: '/PhuongTienTaiTrong/DoUpdate',
-                data: {
-                    maPhuongTien: maPhuongTien,
-                    ngayApDung: ngayApDung,
-                    taiTrong: taiTrong,
-                    ghiChu: ghiChu
-                },
-                type: 'POST',
-                dataType: 'json',
-                success: function (rs) {
-                    if (rs.isSuccess === true) {
-                        $('#modalSua').modal('hide');
-                        reloadData();
-                        toastOptionNotyfi();
-                        toastr["success"](rs.Messages, "Thông báo");
-                    } else {
-                        toastOptionNotyfi();
-                        toastr["warning"](rs.Messages, "Thông báo");
-                    }
-                },
-                error: function (error) {
+            },
+            error: function () {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error, "Thông báo");
+            }
+        });
+    }
+    function insert() {
+        var maPhuongTien = $('#maPhuongTien').val();
+        var ngayApDung = $('#ngayApDung').val();
+        var taiTrong = $('#taiTrong').val();
+        var ghiChu = $('#ghiChu').val();
+        document.getElementById("txtThem").style.visibility = "hidden";
+        document.getElementById("loadingIndicator").style.display = "block";
+        $.ajax({
+            type: 'POST',
+            url: '/PhuongTienTaiTrong/DoInsert',
+            data: {
+                maPhuongTien: maPhuongTien,
+                ngayApDung: ngayApDung,
+                taiTrong: taiTrong,
+                ghiChu: ghiChu
+            },
+            success: function (rs) {
+                if (rs.isSuccess === true) {
                     toastOptionNotyfi();
-                    toastr["error"]('Đã xảy ra lỗi: ' + error.toString(), "Thông báo");
-                },
-                complete: function () {
-                    document.getElementById("loadingIndicatorSua").style.display = "none";
-                    document.getElementById("txtSua").style.visibility = "visible";
+                    toastr["success"](rs.Messages, "Thông báo");
+                    $('#modalThem').modal('hide');
+                    reloadData();
+                } else {
+                    toastOptionNotyfi();
+                    toastr["warning"](rs.Messages, "Thông báo");
                 }
-            });
-        }
-    </script>
-    <script>
-        function showDelete() {
-            var maPhuongTien = $('#maPhuongTienTaiTrongRowSelected').val();
-            var ngayApDung = $('#ngayApDungRowSelect').val();
-            $.ajax({
-                url: "/PhuongTienTaiTrong/GetByMaPhuongTienAndNgayApDung",
-                data: { maPhuongTien: maPhuongTien, ngayApDung: ngayApDung },
-                type: 'GET',
-                dataType: 'json',
-                success: function (rs) {
-                    if (rs.isSuccess === true) {
-                        bootbox.confirm({
-                            title: "Thông báo!",
-                            message: "Bạn có chắc muốn xoá : " + rs.MaPhuongTien,
-                            buttons: {
-                                confirm: {
-                                    label: 'OK',
-                                    className: 'btn btn-primary'
-                                }
-                            },
-                            callback: function (result) {
-                                if (result) {
-                                    //Người dùng đã bấm OK, Gọi API xóa ở đây
-                                    $.ajax({
-                                        url: '/PhuongTienTaiTrong/DoDelete',
-                                        data: { maPhuongTien: maPhuongTien, ngayApDung: ngayApDung },
-                                        type: 'POST',
-                                        dataType: 'json',
-                                        success: function (rs) {
-                                            if (rs.isSuccess === true) {
-                                                reloadData();
-                                                toastOptionNotyfi();
-                                                toastr["success"](rs.Messages, "Thông báo");
-                                            } else {
-                                                toastOptionNotyfi();
-                                                toastr["warning"](rs.Messages, "Thông báo");
-                                            }
-                                        },
-                                        error: function (error) {
-                                            toastOptionNotyfi();
-                                            toastr["error"]('Đã xảy ra lỗi: ' + error.toString(), "Thông báo");
-                                        }
-                                    });
-                                }
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error, "Thông báo");
+            },
+            complete: function () {
+                document.getElementById("loadingIndicator").style.display = "none";
+                document.getElementById("txtThem").style.visibility = "visible";
+            }
+        });
+    }
+</script>
+<script>
+    function showUpdate() {
+        var maPhuongTien = $('#maPhuongTienTaiTrongRowSelected').val();
+        var ngayApDung = $('#ngayApDungRowSelect').val();
+        $.ajax({
+            url: "/PhuongTienTaiTrong/GetByMaPhuongTienAndNgayApDung",
+            data: { maPhuongTien: maPhuongTien, ngayApDung: ngayApDung },
+            type: 'GET',
+            dataType: 'json',
+            success: function (rs) {
+                if (rs.isSuccess === true) {
+                    $('#maPhuongTienSua').val(rs.MaPhuongTien);
+                    $('#taiTrongSua').val(rs.TaiTrong);
+                    $('#ghiChuSua').val(rs.GhiChu);
+                    $('#ngayApDungSua').val(rs.NgayApDung);
+                    $('#modalSua').modal('show');
+                }
+                else {
+                    toastOptionNotyfi();
+                    toastr["warning"](rs.Mesages, "Thông báo");
+                }
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error, "Thông báo");
+            }
+        });
+    }
+    function update() {
+        var maPhuongTien = $('#maPhuongTienSua').val();
+        var ngayApDung = $('#ngayApDungSua').val();
+        var taiTrong = $('#taiTrongSua').val();
+        var ghiChu = $('#ghiChuSua').val();
+        document.getElementById("txtSua").style.visibility = "hidden";
+        document.getElementById("loadingIndicatorSua").style.display = "block";
+        $.ajax({
+            url: '/PhuongTienTaiTrong/DoUpdate',
+            data: {
+                maPhuongTien: maPhuongTien,
+                ngayApDung: ngayApDung,
+                taiTrong: taiTrong,
+                ghiChu: ghiChu
+            },
+            type: 'POST',
+            dataType: 'json',
+            success: function (rs) {
+                if (rs.isSuccess === true) {
+                    $('#modalSua').modal('hide');
+                    reloadData();
+                    toastOptionNotyfi();
+                    toastr["success"](rs.Messages, "Thông báo");
+                } else {
+                    toastOptionNotyfi();
+                    toastr["warning"](rs.Messages, "Thông báo");
+                }
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error.toString(), "Thông báo");
+            },
+            complete: function () {
+                document.getElementById("loadingIndicatorSua").style.display = "none";
+                document.getElementById("txtSua").style.visibility = "visible";
+            }
+        });
+    }
+</script>
+<script>
+    function showDelete() {
+        var maPhuongTien = $('#maPhuongTienTaiTrongRowSelected').val();
+        var ngayApDung = $('#ngayApDungRowSelect').val();
+        $.ajax({
+            url: "/PhuongTienTaiTrong/GetByMaPhuongTienAndNgayApDung",
+            data: { maPhuongTien: maPhuongTien, ngayApDung: ngayApDung },
+            type: 'GET',
+            dataType: 'json',
+            success: function (rs) {
+                if (rs.isSuccess === true) {
+                    bootbox.confirm({
+                        title: "Thông báo!",
+                        message: "Bạn có chắc muốn xoá : " + rs.MaPhuongTien,
+                        buttons: {
+                            confirm: {
+                                label: 'OK',
+                                className: 'btn btn-primary'
                             }
-                        });
-                    } else {
-                        toastOptionNotyfi();
-                        toastr["warning"]('Không tìm thấy thông tin!', "Thông báo");
-                    }
-                },
-                error: function (error) {
+                        },
+                        callback: function (result) {
+                            if (result) {
+                                //Người dùng đã bấm OK, Gọi API xóa ở đây
+                                $.ajax({
+                                    url: '/PhuongTienTaiTrong/DoDelete',
+                                    data: { maPhuongTien: maPhuongTien, ngayApDung: ngayApDung },
+                                    type: 'POST',
+                                    dataType: 'json',
+                                    success: function (rs) {
+                                        if (rs.isSuccess === true) {
+                                            reloadData();
+                                            toastOptionNotyfi();
+                                            toastr["success"](rs.Messages, "Thông báo");
+                                        } else {
+                                            toastOptionNotyfi();
+                                            toastr["warning"](rs.Messages, "Thông báo");
+                                        }
+                                    },
+                                    error: function (error) {
+                                        toastOptionNotyfi();
+                                        toastr["error"]('Đã xảy ra lỗi: ' + error.toString(), "Thông báo");
+                                    }
+                                });
+                            }
+                        }
+                    });
+                } else {
                     toastOptionNotyfi();
-                    toastr["error"]('Đã xảy ra lỗi: ' + error.toString(), "Thông báo");
+                    toastr["warning"]('Không tìm thấy thông tin!', "Thông báo");
                 }
-            });
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error.toString(), "Thông báo");
+            }
+        });
 
-        }
-    </script>
+    }
+</script>
 
 
 

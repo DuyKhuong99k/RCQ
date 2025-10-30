@@ -60,7 +60,42 @@ namespace Dao.Repos.HQ
       and [MaThanhPham] = @MaThanhPham 
       and [MaXuong] = @MaXuong 
       and [CaTra] = @CaTra";
-
+        private readonly string qrLast = @"Select
+    *
+from
+    (
+        Select
+            dm.STT,
+            dm.Ngay,
+            dm.Gio,
+            dm.MaLo,
+            dm.MaLoaiCa,
+            dm.MaMau,
+            dm.MaSize,
+            dm.MaThanhPham,
+            dm.MaXuong,
+            dm.CaTra,
+            dm.DinhMuc,
+            dm.SuDung,
+            ROW_NUMBER() OVER (
+                PARTITION BY MaLo,
+                MaLoaiCa,
+                MaMau,
+                MaSize,
+                MaThanhPham,
+                CaTra,
+                Ngay
+                ORDER BY
+                    Gio DESC
+            ) AS [ROW NUMBER]
+        from
+            DinhMucFillet dm
+        where
+            Ngay = @ngay
+            And SuDung = 1
+    ) dm where dm.[ROW NUMBER] =1
+order by
+    dm.STT";
         private readonly string qrGetAll = "Select * from DinhMucFillet";
 
         public DinhMucFillet(string? _connectionString = null)
@@ -82,6 +117,13 @@ namespace Dao.Repos.HQ
             using var connection = new SqlConnection(connectionString);
             connection.Open();
             var rows = connection.Query<T>(qrGetAll).ToList();
+            return rows;
+        }
+        public List<T> GetsLast<T>(DateTime dateTime)
+        {
+            using var connection = new SqlConnection(connectionString);
+            connection.Open();
+            var rows = connection.Query<T>(qrLast, new {ngay = dateTime.Date}).ToList();
             return rows;
         }
 

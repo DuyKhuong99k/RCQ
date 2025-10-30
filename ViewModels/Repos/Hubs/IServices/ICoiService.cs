@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System.Collections.Concurrent;
+using System.ComponentModel;
 using Models.Repos.Models;
 using MvvmHelpers;
 using Vars.Hubs;
@@ -8,6 +9,7 @@ namespace ViewModels.Repos.Hubs.IServices;
 public interface ICoiService : INotifyPropertyChanged, IDisposable
 {
     public ObservableRangeCollection<PLCChiTiet> Items { get; set; }
+    public ConcurrentDictionary<string, MaCoiXepKhuon> CoiInfos { get; set; }
     public List<PLCChiTiet> SelectedItems { get; set; }
     public event EventHandler? ItemChanged;
     public bool Command_PAUSE(PLCChiTiet item);

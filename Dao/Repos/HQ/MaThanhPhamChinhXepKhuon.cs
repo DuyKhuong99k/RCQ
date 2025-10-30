@@ -18,7 +18,7 @@ namespace Dao.Repos.HQ
            ,[Min]
            ,[Max]
            ,[BravoId]
-           ,[_type])
+           ,[_type],[ThamSoTangTrong],[DinhMucTangTrong])
      VALUES
            (@Ma 
            ,@Ten 
@@ -26,7 +26,7 @@ namespace Dao.Repos.HQ
            ,@Min
            ,@Max
            ,@BravoId
-           ,@_type)";
+           ,@_type,@ThamSoTangTrong,@DinhMucTangTrong)";
 
         private readonly string qrUpdate = @"UPDATE [dbo].[MaThanhPhamChinhXepKhuon]
    SET [Ten] = @Ten  
@@ -34,7 +34,7 @@ namespace Dao.Repos.HQ
       ,[Min] = @Min
       ,[Max] = @Max
       ,[BravoId]
-      ,[_type] = @_type
+      ,[_type] = @_type,[ThamSoTangTrong] = @ThamSoTangTrong, [DinhMucTangTrong] = @DinhMucTangTrong
  WHERE  [Ma] = @Ma";
 
         private readonly string qrGetAll = "Select * from MaThanhPhamChinhXepKhuon";

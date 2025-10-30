@@ -129,7 +129,8 @@ public partial class PhieuCanChinhXepKhuonViewModel : ObservableObject
             ThoiGianBatDauQuay = item.ThoiGianBatDauQuay,
             ThoiGianRaCoi = item.ThoiGianRaCoi,
             TrongLuong = item.TrongLuong,
-            MayQuay = item.MayQuay
+            MayQuay = item.MayQuay,
+            Id = item.Id
         };
     }
 
@@ -162,6 +163,11 @@ public partial class PhieuCanChinhXepKhuonViewModel : ObservableObject
     {
         var dao = new Dao.Repos.HQ.PhieuCanChinhXepKhuon();
         return dao.GetLiteReport<T>(idMonitor);
+    }
+    public T? Get<T>(string id)
+    {
+        var dao = new Dao.Repos.HQ.PhieuCanChinhXepKhuon();
+        return dao.Get<T>(id);
     }
 
     //[RelayCommand(CanExecute = nameof(IsItemPass))]
@@ -278,7 +284,7 @@ public partial class PhieuCanChinhXepKhuonViewModel : ObservableObject
         return dao.GetsByIdMonitor<T>(idMonitor);
     }
 
-    private int Insert<T>(T item)
+    public int Insert<T>(T item)
     {
         var dao = new Dao.Repos.HQ.PhieuCanChinhXepKhuon();
         return dao.Insert(item);
@@ -546,7 +552,19 @@ public partial class PhieuCanChinhXepKhuonViewModel : ObservableObject
             throw;
         }
     }
-
+    public List<T> GetChiTietCoiChinh<T>(DateTime fromDate, DateTime toDate, string xuongId)
+    {
+        try
+        {
+            var dao = new Dao.Repos.HQ.PhieuCanChinhXepKhuon();
+            return dao.GetPhieuCanTongHopCoisFromDateToDate<T>(fromDate, toDate, xuongId);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+            throw;
+        }
+    }
 
     /// <summary>
     /// Báo Cáo Chi Tiết Cối

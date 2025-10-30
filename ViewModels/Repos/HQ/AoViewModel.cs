@@ -13,6 +13,8 @@ using ObservableObject = CommunityToolkit.Mvvm.ComponentModel.ObservableObject;
 using System.Windows.Input;
 using Azure.Identity;
 using System.Collections.Specialized;
+using System.Globalization;
+using Models.Repos;
 
 namespace ViewModels.Repos.HQ
 {
@@ -24,9 +26,12 @@ namespace ViewModels.Repos.HQ
         [ObservableProperty] private bool isEdit;
         [ObservableProperty] private MaAoVungNuoi? item;
         [ObservableProperty] private ObservableRangeCollection<MaAoVungNuoi> items = new();
-
+        [ObservableProperty] private ObservableRangeCollection<Ao> itemsAo = new(); 
         [ObservableProperty][NotifyPropertyChangedFor(nameof(IsVailSelectedItem))] private MaAoVungNuoi? selectedItem;
+        [ObservableProperty] private Ao? selectedItemAo;
         [ObservableProperty] private ObservableRangeCollection<object> selectedItems = new();
+        [ObservableProperty] private ObservableRangeCollection<object> selectedItemsAo = new();
+        [ObservableProperty] private ObservableRangeCollection<Ao> usedItems = new();
         [ObservableProperty] private ICommand _closeItemWindowCommand;
         [ObservableProperty] private bool _isWindowItemShown = false;
         private readonly SynchronizationContext synchronizationContext;
@@ -77,13 +82,96 @@ namespace ViewModels.Repos.HQ
                 Ma = id
             };
         }
+        public Ao CopyItemAo(Ao item)
+        {
+            return new Ao
+            {
+                SuDung = item.SuDung,
+                Ma = item?.Ma,
+                Ten = item?.Ten,
+                MNgay = item.MNgay
+            };
+        }
+        public Ao CopySelectedItemAo()
+        {
+            return CopyItemAo(SelectedItemAo);
+        }
+        public List<Ao_U> GetUs(string Ngay,int PageIndex,int PageSize)
+        {
+            dbPMScontext db = new dbPMScontext();
+            DateTime date = new DateTime();
+            try
+            {
+                date = DateTime.ParseExact(Ngay, "yyyyMMddHHmmss",CultureInfo.InvariantCulture);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            ////return db.AoUs.Where(x=>x.MNgay.Date >= date.Date).OrderByDescending(x=>x.MNgay).Skip((PageIndex -1)*PageSize).Take(PageSize).ToList();
+            //return db.AoUs .Where(x => x.MNgay.Date >= date.Date)
+            //    .GroupBy(x => x.MaAo)
+            //    .Select(g => g.OrderByDescending(x => x.MNgay).FirstOrDefault())
+            //    .Where(x => x != null) 
+            //    .OrderByDescending(x => x!.MNgay)
+            //    .Skip((PageIndex - 1) * PageSize)
+            //    .Take(PageSize)
+            //    .ToList();
+            var latestDates = db.AoUs
+                .Where(x => x.MNgay.Date >= date.Date)
+                .GroupBy(x => x.MaAo)
+                .Select(g => new { MaAo = g.Key, MaxId = g.Max(x => x.Id) });
 
+            var query = from hq in db.AoUs.Where(x => x.MNgay.Date >= date.Date) 
+                join latest in latestDates
+                    on new { hq.MaAo, hq.Id } 
+                    equals new { latest.MaAo, Id = latest.MaxId }
+                orderby hq.MNgay descending
+                select hq;
+
+            var result = query.Skip((PageIndex - 1) * PageSize)
+                .Take(PageSize)
+                .ToList();
+            return result;
+        }
+        public List<Ao_D> GetDs(string Ngay,int PageIndex,int PageSize)
+        {
+            dbPMScontext db = new dbPMScontext();
+            DateTime date = new DateTime();
+            try
+            {
+                date = DateTime.ParseExact(Ngay, "yyyyMMddHHmmss",CultureInfo.InvariantCulture);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            return db.AoDs.Where(x=>x.MNgay.Date >= date.Date).OrderByDescending(x=>x.MNgay).Skip((PageIndex -1)*PageSize).Take(PageSize).ToList();
+        }
+        public Ao CreateDefaultNewAo()
+        {
+            var maxId = Items.Where(x => int.TryParse(x.Ma, out var rl))
+                .Select(x => int.Parse(x.Ma))
+                .DefaultIfEmpty(0)
+                .Max();
+            var id = $"{(maxId + 1).ToString()}";
+            return new Ao
+            {
+                SuDung = true,
+                Ma = id,
+                MNgay = DateTime.Now
+            };
+        }
         private int Delete<T>(T item)
         {
             var dao = new Dao.Repos.HQ.MaAoVungNuoi();
             return dao.Delete(item);
         }
-
+        public int DeleteAo<T>(T item)
+        {
+            var dao = new Dao.Repos.HQ.Ao();
+            return dao.Delete(item);
+        }
         [RelayCommand(CanExecute = nameof(IsItemPass))]
         private void Delete_(MaAoVungNuoi item)
         {
@@ -114,10 +202,19 @@ namespace ViewModels.Repos.HQ
             var dao = new Dao.Repos.HQ.MaAoVungNuoi();
             return dao.Gets<T>();
         }
-
+        public List<T> GetsAo<T>()
+        {
+            var dao = new Dao.Repos.HQ.Ao();
+            return dao.Gets<T>();
+        }
         private int Insert<T>(T item)
         {
             var dao = new Dao.Repos.HQ.MaAoVungNuoi();
+            return dao.Insert(item);
+        }
+        public int InsertAo<T>(T item)
+        {
+            var dao = new Dao.Repos.HQ.Ao();
             return dao.Insert(item);
         }
 
@@ -212,8 +309,34 @@ namespace ViewModels.Repos.HQ
                     }
 
                 }
+            lock (ItemsAo)
+            {
+                ItemsAo.Clear();
+                UsedItems.Clear();
+            }
 
+            var itemsAo = GetsAo<Ao>();
+            if (itemsAo.Any())
+                lock (ItemsAo)
+                {
+                    try
+                    {
+                        //Items.AddRange(items);
+                        foreach (var item in itemsAo)
+                        {
+                            ItemsAo.Add(item);
+                            if (item.SuDung == true)
+                            {
+                                UsedItems.Add(item);
+                            }
+                        }
+                    }
+                    catch (NotSupportedException e)
+                    {
 
+                    }
+
+                }
         }
 
         [RelayCommand]
@@ -236,7 +359,11 @@ namespace ViewModels.Repos.HQ
             var dao = new Dao.Repos.HQ.MaAoVungNuoi();
             return dao.Update(item);
         }
-
+        public int UpdateAo<T>(T item)
+        {
+            var dao = new Dao.Repos.HQ.Ao();
+            return dao.Update(item);
+        }
         [RelayCommand(CanExecute = nameof(IsItemPass))]
         private void Update_(MaAoVungNuoi item)
         {
@@ -298,6 +425,18 @@ namespace ViewModels.Repos.HQ
                 throw;
             }
         }
+        public Ao? FindAo(string ma)
+        {
+            try
+            {
+                return ItemsAo.FirstOrDefault(x => x.Ma == ma);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
+        }
 
         public bool Exists(string ma)
         {
@@ -305,6 +444,19 @@ namespace ViewModels.Repos.HQ
             {
 
                 return Find(ma) != null;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
+        }
+        public bool ExistsAo(string ma)
+        {
+            try
+            {
+
+                return FindAo(ma) != null;
             }
             catch (Exception e)
             {

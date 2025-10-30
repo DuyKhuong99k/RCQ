@@ -111,7 +111,13 @@ WHERE RowNum <= @num";
             var rows = connection.Query<T>(qrGetAll).ToList();
             return rows;
         }
-
+        public T? Get<T>(string id)
+        {
+            using var connection = new SqlConnection(connectionString);
+            connection.Open();
+            var rows = connection.Query<T>("select * from PhieuCanPhuPham where Id = @id", new {id}).FirstOrDefault();
+            return rows;
+        }
         public int Insert<T>(T item)
         {
             using var connection = new SqlConnection(connectionString);

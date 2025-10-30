@@ -1,7 +1,21 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Linq;
+using System.Runtime.InteropServices;
+using System.Text.Json;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Models.Repos;
 using Models.Repos.Models;
 using ViewModels.Repos.API;
+using WebAPI.Models;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace WebAPI.Controllers;
 
@@ -18,78 +32,133 @@ public class BoTriLoSizeThanhPhamsController : ControllerBase
 
     private MainViewModel Vm => MainViewModel.Instance;
 
-    // DELETE: api/BoTriLoSizeThanhPhams/5
-    [HttpDelete("{id}")]
+    [HttpGet]
+    [Authorize]
+    public IActionResult GetAlls()
+    {
+        var items = _context.BoTriLoSizeThanhPham.ToList();
+
+        return Ok(items);
+    }
+
+    [HttpGet("{ngay}/{maLo}")]
+    [Authorize]
+    public IActionResult GetAllsFullField(string ngay, string maLo)
+    {
+        DateTime date = DateTime.ParseExact(ngay, "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture);
+        var items = Vm.VmBoTriLoSizeThanhPham.GetsFullField<object>(date, maLo);
+        return Ok(items);
+    }
+    [HttpGet("{ngay}/{maLo}")]
+    [Authorize]
+    public IActionResult GetsFullFieldLastNew(string ngay, string maLo)
+    {
+        DateTime date = DateTime.ParseExact(ngay, "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture);
+        var items = Vm.VmBoTriLoSizeThanhPham.GetsFullFieldLastNew<object>(date, maLo);
+        return Ok(items);
+    }
+
+    [HttpPost]
+    [Authorize]
+    public async Task<IActionResult> Insert(Tuple<string> dataT)
+    {
+        var model = JsonSerializer.Deserialize<BoTriLoSizeThanhPham>(dataT.Item1);
+        if (!ModelState.IsValid)
+        {
+            var errors = ModelState.Values.SelectMany(v => v.Errors)
+                                          .Select(e => e.ErrorMessage)
+                                          .ToList();
+
+            return BadRequest(new ApiResponse
+            {
+                Success = false,
+                Message = "Dữ liệu không hợp lệ.",
+                Errors = errors
+            });
+        }
+        if (_context.BoTriLoSizeThanhPham.Any(x => x.Id == model.Id))
+        {
+            return BadRequest(new ApiResponse
+            {
+                Success = false,
+                Message = "Mã này đã tồn tại.",
+            });
+        }
+        var newItem = new BoTriLoSizeThanhPham
+        {
+            Id = model.Id,
+            CodeId = model.CodeId,
+            MaLo = model.MaLo,
+            MaViTri = model.MaViTri,
+            MaSize = model.MaSize,
+            MaThanhPham = model.MaThanhPham,
+            Ngay = model.Ngay,
+            Gio = model.Gio,
+            MaSizePhu = model.MaSizePhu
+        };
+
+        _context.BoTriLoSizeThanhPham.Add(newItem);
+        try
+        {
+            await _context.SaveChangesAsync();
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new ApiResponse
+            {
+                Success = false,
+                Message = "Đã xảy ra lỗi khi lưu dữ liệu." + ex.Message.ToString(),
+                Errors = new List<string> { ex.Message.ToString() }
+            });
+        }
+        return Ok(new ApiResponse
+        {
+            Success = true,
+            Message = "Thêm thành công!"
+        });
+    }
+
+    [HttpPost("{id}")]
+    [Authorize]
     public async Task<IActionResult> Delete(int id)
     {
-        if (_context.BoTriLoSizeThanhPham == null) { return NotFound(); }
-
-        var boTriLoSizeThanhPham = Vm.VmBoTriLoSizeThanhPham.Find(id);
-        if (boTriLoSizeThanhPham == null) { return NotFound(); }
-
-        Vm.VmBoTriLoSizeThanhPham.Delete_Command.Execute(boTriLoSizeThanhPham);
-
-        return NoContent();
-    }
-
-    private bool Exists(int id)
-    {
-        return Vm.VmBoTriLoSizeThanhPham.Items.Any(x => x.Id == id);
-    }
-
-    // GET: api/BoTriLoSizeThanhPhams/5
-    [HttpGet("{id}")]
-    public async Task<ActionResult<BoTriLoSizeThanhPham>> Get(int id)
-    {
-        if (_context.BoTriLoSizeThanhPham == null) { return NotFound(); }
-
-        var boTriLoSizeThanhPham = Vm.VmBoTriLoSizeThanhPham.Find(id);
-
-        if (boTriLoSizeThanhPham == null) { return NotFound(); }
-
-        return boTriLoSizeThanhPham;
-    }
-
-    // GET: api/BoTriLoSizeThanhPhams
-    [HttpGet]
-    public async Task<ActionResult<IEnumerable<BoTriLoSizeThanhPham>>> Gets()
-    {
-        if (_context.BoTriLoSizeThanhPham == null) { return NotFound(); }
-
-        return Vm.VmBoTriLoSizeThanhPham.Items;
-    }
-
-    // POST: api/BoTriLoSizeThanhPhams
-    // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-    [HttpPost]
-    public async Task<ActionResult<BoTriLoSizeThanhPham>> Post(
-        BoTriLoSizeThanhPham boTriLoSizeThanhPham)
-    {
-        if (_context.BoTriLoSizeThanhPham == null)
-            return Problem("Entity set 'dbPMScontext.BoTriLoSizeThanhPham'  is null.");
-        if (Vm.VmBoTriLoSizeThanhPham.Exists(boTriLoSizeThanhPham))
+        if (id == null || id <= 0)
         {
-            return Conflict();
+            return BadRequest(new ApiResponse
+            {
+                Success = false,
+                Message = "Bạn chưa chọn thông tin!."
+            });
         }
-        Vm.VmBoTriLoSizeThanhPham.Insert_Command.Execute(boTriLoSizeThanhPham);
-
-        return CreatedAtAction("Get", new { id = boTriLoSizeThanhPham.Id }, boTriLoSizeThanhPham);
-    }
-
-    // PUT: api/BoTriLoSizeThanhPhams/5
-    // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-    [HttpPut("{id}")]
-    public async Task<IActionResult> Put(int id, BoTriLoSizeThanhPham boTriLoSizeThanhPham)
-    {
-        if (id != boTriLoSizeThanhPham.Id) { return BadRequest(); }
-
-        if (!Vm.VmBoTriLoSizeThanhPham.Exists(boTriLoSizeThanhPham))
+        var item = await _context.BoTriLoSizeThanhPham.Where(x => x.Id == id).FirstAsync();
+        if (item == null)
         {
-            return NotFound();
+            return NotFound(new ApiResponse
+            {
+                Success = false,
+                Message = "Không tồn tại."
+            });
         }
-            
-        Vm.VmBoTriLoSizeThanhPham.Update_Command.Execute(boTriLoSizeThanhPham);
+        _context.BoTriLoSizeThanhPham.Remove(item);
+        try
+        {
+            await _context.SaveChangesAsync();
+        }
+        catch (Exception ex)
+        {
+            // Xử lý lỗi nếu có
+            return BadRequest(new ApiResponse
+            {
+                Success = false,
+                Message = "Đã xảy ra lỗi khi xóa.",
+                Errors = new List<string> { ex.Message }
+            });
+        }
 
-        return NoContent();
+        return Ok(new ApiResponse
+        {
+            Success = true,
+            Message = "Đã xoá!"
+        });
     }
 }

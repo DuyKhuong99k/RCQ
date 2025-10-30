@@ -70,35 +70,54 @@ namespace WebAPI.Controllers
 
         [HttpGet("{fromDate},{toDate},{xuongId}")]
         [Authorize]
-        public async Task<ActionResult<IEnumerable<object>>> GetChiTietsFromdateTodate(DateTime fromDate, DateTime toDate, string xuongId)
+        public async Task<ActionResult<IEnumerable<object>>> GetChiTietsFromdateTodate(string fromDate, string toDate, string xuongId)
         {
             if (_context.PhieuCanTPDinhHinh == null)
             {
                 return NotFound();
             }
-            var items = Vm.VmPhieuCanTPDinhHinh.GetChiTiets<object>(fromDate, toDate, xuongId);
+            DateTime from = DateTime.ParseExact(fromDate, "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture);
+            DateTime to = DateTime.ParseExact(toDate, "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture);
+            var items = Vm.VmPhieuCanTPDinhHinh.GetChiTiets<object>(from, to, xuongId);
             return items;
         }
         [HttpGet("{fromDate},{toDate},{xuongId}")]
         [Authorize]
-        public async Task<ActionResult<IEnumerable<object>>> GetTongHopNhanVien(DateTime fromDate, DateTime toDate, string xuongId)
+        public async Task<ActionResult<IEnumerable<object>>> GetTongHopNhanVien(string fromDate, string toDate, string xuongId)
         {
             if (_context.PhieuCanTPDinhHinh == null)
             {
                 return NotFound();
             }
-            var items = Vm.VmPhieuCanTPDinhHinh.GetTongHopNhanViens<object>(fromDate, toDate, xuongId);
+            DateTime from = DateTime.ParseExact(fromDate, "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture);
+            DateTime to = DateTime.ParseExact(toDate, "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture);
+            var items = Vm.VmPhieuCanTPDinhHinh.GetTongHopNhanViens<object>(from, to, xuongId);
             return items;
         }
         [HttpGet("{fromDate},{toDate},{xuongId}")]
         [Authorize]
-        public async Task<ActionResult<IEnumerable<object>>> GetTongHopLoaiThanhPhams(DateTime fromDate, DateTime toDate, string xuongId)
+        public async Task<ActionResult<IEnumerable<object>>> GetTongHopLoaiThanhPhams(string fromDate, string toDate, string xuongId)
         {
             if (_context.PhieuCanTPDinhHinh == null)
             {
                 return NotFound();
             }
-            var items = Vm.VmPhieuCanTPDinhHinh.GetTongHopLoaiThanhPhams<object>(fromDate, toDate, xuongId);
+            DateTime from = DateTime.ParseExact(fromDate, "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture);
+            DateTime to = DateTime.ParseExact(toDate, "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture);
+            var items = Vm.VmPhieuCanTPDinhHinh.GetTongHopLoaiThanhPhams<object>(from, to, xuongId);
+            return items;
+        }
+        [HttpGet("{fromDate},{toDate},{xuongId}")]
+        [Authorize]
+        public async Task<ActionResult<IEnumerable<object>>> GetTongHopLos(string fromDate, string toDate, string xuongId)
+        {
+            if (_context.PhieuCanTPDinhHinh == null)
+            {
+                return NotFound();
+            }
+            DateTime from = DateTime.ParseExact(fromDate, "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture);
+            DateTime to = DateTime.ParseExact(toDate, "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture);
+            var items = Vm.VmPhieuCanTPDinhHinh.GetTongHopLos<object>(from, to, xuongId);
             return items;
         }
         [HttpGet("{fromDate}/{toDate}/{xuongId}")]
@@ -116,7 +135,7 @@ namespace WebAPI.Controllers
         }
         [HttpGet("{fromDate}/{toDate}/{xuongId}")]
         [Authorize]
-        public async Task<ActionResult<IEnumerable<object>>> GetTongHopLoaiThanhPhams2DB(string fromDate, string toDate, string xuongId)
+        public async Task<ActionResult<IEnumerable<object>>> GetTongHopLoaiThanhPhams2DB_St(string fromDate, string toDate, string xuongId)
         {
             if (_context.PhieuCanTPDinhHinh == null)
             {
@@ -125,6 +144,199 @@ namespace WebAPI.Controllers
             DateTime date1 = DateTime.ParseExact(fromDate, "yyyy-MM-dd", CultureInfo.InvariantCulture);
             DateTime date2 = DateTime.ParseExact(toDate, "yyyy-MM-dd", CultureInfo.InvariantCulture);
             var items = Vm.VmDashBoard.ItemTongHopThanhPhamTPDinhHinh.OfType<dynamic>().Where(x => x.MaXuong == xuongId).ToList();// Sử dụng dynamic để cast các object
+            return items;
+        }
+        [HttpGet("{fromDate}/{toDate}/{xuongId}")]
+        [Authorize]
+        public async Task<ActionResult<IEnumerable<object>>> GetTongHopLoaiThanhPhams2DB(string fromDate, string toDate, string xuongId)
+        {
+            if (_context.PhieuCanTPDinhHinh == null)
+            {
+                return NotFound();
+            }
+            DateTime date1 = DateTime.ParseExact(fromDate, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+            DateTime date2 = DateTime.ParseExact(toDate, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+            var items = Vm.VmPhieuCanTPDinhHinh.GetTongHopLoaiThanhPhams<object>(date1, date2, xuongId);
+            return items;
+        }
+        [HttpGet("{fromDate}/{toDate}/{xuongId}")]
+        [Authorize]
+        public async Task<ActionResult<IEnumerable<object>>> GetTongHopDinhMucSanLuongTheoChuyenDinhHinhDB_St(string fromDate, string toDate, string xuongId)
+        {
+            if (_context.PhieuCanTPDinhHinh == null)
+            {
+                return NotFound();
+            }
+            DateTime date1 = DateTime.ParseExact(fromDate, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+            DateTime date2 = DateTime.ParseExact(toDate, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+            var items = Vm.VmDashBoard.ItemTongHopDinhMucSanLuongTheoChuyenDinhHinh.OfType<dynamic>().ToList();// Sử dụng dynamic để cast các object
+            return items;
+        }
+
+        [HttpGet("{fromDate}/{toDate}/{xuongId}")]
+        [Authorize]
+        public async Task<ActionResult<IEnumerable<object>>> GetTongHopDinhMucSanLuongTheoChuyenDinhHinhDB(string fromDate, string toDate, string xuongId)
+        {
+            if (_context.PhieuCanTPDinhHinh == null)
+            {
+                return NotFound();
+            }
+            DateTime date1 = DateTime.ParseExact(fromDate, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+            DateTime date2 = DateTime.ParseExact(toDate, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+            var items = Vm.VmPhieuCanTPDinhHinh.GetTongHopDinhMucSanLuongTheoNhom<object>(date1,date2, xuongId);
+            return items;
+        }
+        [HttpGet("{fromDate}/{toDate}/{xuongId}")]
+        [Authorize]
+        public async Task<ActionResult<IEnumerable<object>>> GetTongHopSanLuongAndDinhMucThanhPhamTheoChuyen(string fromDate, string toDate, string xuongId)
+        {
+            if (_context.PhieuCanTPDinhHinh == null)
+            {
+                return NotFound();
+            }
+            DateTime date1 = DateTime.ParseExact(fromDate, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+            DateTime date2 = DateTime.ParseExact(toDate, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+            var items = Vm.VmPhieuCanTPDinhHinh.GetTongHopSanLuongAndDinhMucThanhPhamTheoChuyen<object>(date1,date2, xuongId);
+            return items;
+        }
+        [HttpGet("{fromDate}/{toDate}/{xuongId}")]
+        [Authorize]
+        public async Task<ActionResult<IEnumerable<object>>> GetSanLuongTBTPDinhHinh(string fromDate, string toDate, string xuongId)
+        {
+            if (_context.PhieuCanTPDinhHinh == null)
+            {
+                return NotFound();
+            }
+            DateTime date1 = DateTime.ParseExact(fromDate, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+            DateTime date2 = DateTime.ParseExact(toDate, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+            var items = Vm.VmPhieuCanTPDinhHinh.GetSanLuongTBTPDinhHinh<object>(date1, date2, xuongId);
+            return items;
+        }
+
+
+        [HttpGet("{fromDate}/{toDate}/{xuongId}")]
+        [Authorize]
+        public async Task<ActionResult<IEnumerable<object>>> GetTongHopDinhMucSanLuongTheoThanhPhamDinhHinhDB_St(string fromDate, string toDate, string xuongId)
+        {
+            if (_context.PhieuCanTPDinhHinh == null)
+            {
+                return NotFound();
+            }
+            DateTime date1 = DateTime.ParseExact(fromDate, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+            DateTime date2 = DateTime.ParseExact(toDate, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+            var items = Vm.VmDashBoard.ItemTongHopDinhMucSanLuongTheoThanhPhamDinhHinh.OfType<dynamic>().Where(x => x.MaXuong == xuongId).ToList();// Sử dụng dynamic để cast các object
+            return items;
+        }
+
+        [HttpGet("{fromDate}/{toDate}/{xuongId}")]
+        [Authorize]
+        public async Task<ActionResult<IEnumerable<object>>> GetTongHopDinhMucSanLuongTheoThanhPhamDinhHinhDB(string fromDate, string toDate, string xuongId)
+        {
+            if (_context.PhieuCanTPDinhHinh == null)
+            {
+                return NotFound();
+            }
+            DateTime date1 = DateTime.ParseExact(fromDate, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+            DateTime date2 = DateTime.ParseExact(toDate, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+            var items = Vm.VmPhieuCanTPDinhHinh.GetTongHopDinhMucSanLuongTheoThanhPham<object>(date1, xuongId);
+            return items;
+        }
+        [HttpGet("{fromDate}/{toDate}/{xuongId}")]
+        [Authorize]
+        public async Task<ActionResult<IEnumerable<object>>> GetTongHopTyLeThoiGianVaDinhMucDinhHinhDB_St(string fromDate, string toDate, string xuongId)
+        {
+            if (_context.PhieuCanTPDinhHinh == null)
+            {
+                return NotFound();
+            }
+            DateTime date1 = DateTime.ParseExact(fromDate, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+            DateTime date2 = DateTime.ParseExact(toDate, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+            var items = Vm.VmDashBoard.ItemTongHopTyLeThoiGianVaDinhMucDinhHinh.OfType<dynamic>().ToList();// Sử dụng dynamic để cast các object
+            return items;
+        }
+        [HttpGet("{fromDate}/{toDate}/{xuongId}")]
+        [Authorize]
+        public async Task<ActionResult<IEnumerable<object>>> GetTongHopTyLeThoiGianVaDinhMucDinhHinhDB(string fromDate, string toDate, string xuongId)
+        {
+            if (_context.PhieuCanTPDinhHinh == null)
+            {
+                return NotFound();
+            }
+            int mocThoiGian = AppViewModel.Instance.MocThoiGian1;
+            DateTime date1 = DateTime.ParseExact(fromDate, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+            DateTime date2 = DateTime.ParseExact(toDate, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+            var items = Vm.VmPhieuCanTPDinhHinh.GetTongHopTyLeThoiGianVaDinhMuc<object>(date1,date2, xuongId, mocThoiGian);
+            return items;
+        }
+        [HttpGet("{fromDate}/{toDate}/{xuongId}")]
+        [Authorize]
+        public async Task<ActionResult<IEnumerable<object>>> GetTongHopTyLeThoiGianVaDinhMucForGridDinhHinhDB(string fromDate, string toDate, string xuongId)
+        {
+            if (_context.PhieuCanTPDinhHinh == null)
+            {
+                return NotFound();
+            }
+            int mocThoiGian = AppViewModel.Instance.MocThoiGian1;
+            DateTime date1 = DateTime.ParseExact(fromDate, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+            DateTime date2 = DateTime.ParseExact(toDate, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+            var items = Vm.VmPhieuCanTPDinhHinh.GetTongHopTyLeThoiGianVaDinhMucForGrid<object>(date1,date2, xuongId, mocThoiGian);
+            return items;
+        }
+        [HttpGet("{fromDate}/{toDate}/{xuongId}")]
+        [Authorize]
+        public async Task<ActionResult<IEnumerable<object>>> GetTongHopTyLeThoiGianVaDinhMucDinhHinhTheoNhomDB_St(string fromDate, string toDate, string xuongId)
+        {
+            if (_context.PhieuCanTPDinhHinh == null)
+            {
+                return NotFound();
+            }
+            DateTime date1 = DateTime.ParseExact(fromDate, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+            DateTime date2 = DateTime.ParseExact(toDate, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+            var items = Vm.VmDashBoard.ItemTongHopTyLeThoiGianVaDinhMucDinhHinhTheoNhom.OfType<dynamic>().ToList();// Sử dụng dynamic để cast các object
+            return items;
+        }
+
+        [HttpGet("{fromDate}/{toDate}/{xuongId}")]
+        [Authorize]
+        public async Task<ActionResult<IEnumerable<object>>> GetTongHopTyLeThoiGianVaDinhMucDinhHinhTheoNhomDB(string fromDate, string toDate, string xuongId)
+        {
+            if (_context.PhieuCanTPDinhHinh == null)
+            {
+                return NotFound();
+            }
+            int mocThoiGian1 = AppViewModels.AppViewModel.Instance.MocThoiGian1;
+            int mocThoiGian2 = AppViewModels.AppViewModel.Instance.MocThoiGian2;
+            DateTime date1 = DateTime.ParseExact(fromDate, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+            DateTime date2 = DateTime.ParseExact(toDate, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+            var items = Vm.VmPhieuCanTPDinhHinh.GetTongHopTyLeThoiGianVaDinhMucTheoNhom<object>(date1,date2, xuongId, mocThoiGian1, mocThoiGian2);
+            return items;
+        }
+        [HttpGet("{fromDate}/{toDate}/{xuongId}")]
+        [Authorize]
+        public async Task<ActionResult<IEnumerable<object>>> GetTongHopNangSuatNhom(string fromDate, string toDate, string xuongId)
+        {
+            DateTime date1 = DateTime.ParseExact(fromDate, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+            DateTime date2 = DateTime.ParseExact(toDate, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+            var items = Vm.VmPhieuCanTPDinhHinh.GetTongHopNangSuatNhom<object>(date1, date2, xuongId);
+            return items;
+        }
+        [HttpGet("{fromDate}/{toDate}/{xuongId}")]
+        [Authorize]
+        public async Task<ActionResult<IEnumerable<object>>> GetTongHopDinhMucTheoSanPham(string fromDate, string toDate, string xuongId)
+        {
+            DateTime date1 = DateTime.ParseExact(fromDate, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+            DateTime date2 = DateTime.ParseExact(toDate, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+            var items = Vm.VmPhieuCanTPDinhHinh.GetTongHopDinhMucTheoSanPham<object>(date1, date2, xuongId);
+            return items;
+        }
+
+        [HttpGet("{fromDate}/{toDate}/{xuongId}")]
+        [Authorize]
+        public async Task<ActionResult<IEnumerable<object>>> GetTongHopHaoHut(string fromDate, string toDate, string xuongId)
+        {
+            DateTime date1 = DateTime.ParseExact(fromDate, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+            DateTime date2 = DateTime.ParseExact(toDate, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+            var items = Vm.VmPhieuCanTPDinhHinh.GetTongHopHaoHut<object>(date1, date2);
             return items;
         }
         [HttpGet("{fromDate}/{toDate}/{xuongId}")]
@@ -570,6 +782,24 @@ namespace WebAPI.Controllers
             return _items;
         }
 
+        [HttpGet("{datetime}")]
+        [Authorize]
+        public async Task<ActionResult<IEnumerable<object>>> GetNhanVienKhongLamViecs(string datetime)
+        {
+            if (_context.PhieuCanTPDinhHinh == null)
+            {
+                return NotFound();
+            }
+            DateTime ngay = DateTime.ParseExact(datetime, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+            var items = Vm.VmPhieuCanTPDinhHinh.GetNhanVienKhongLamViecs<dynamic>(ngay);
+            var _items = items
+                    .ToList()
+                    .OrderByDescending(x => x.MaHoSo)
+                    .Cast<object>()
+                    .ToList();
+            return _items;
+        }
+
         //[HttpGet("{fromDate}/{toDate}/{xuongId}")]
         //[Authorize]
         //public async Task<ActionResult<IEnumerable<object>>> CommandReLoadTongHopPivot()
@@ -822,7 +1052,7 @@ namespace WebAPI.Controllers
                 });
             }
             // ... kiểm tra mã nhân viên đã tồn tại chưa ...
-            if (_context.PhieuCanTPDinhHinh.Any(u => u.STT == model.STT && u.Ngay == model.Ngay && u.MaXuong == model.MaXuong))
+            if (_context.PhieuCanTPDinhHinh.Any(u => u.STT == model.STT && u.Ngay == model.Ngay && u.MaXuong == model.MaXuong && u.MaMayCan == model.MaMayCan))
             {
                 return BadRequest(new ApiResponse
                 {
@@ -858,7 +1088,10 @@ namespace WebAPI.Controllers
                 TrongLuongBu = model.TrongLuongBu,
                 IsOffline = model.IsOffline,
                 GhiChu = model.GhiChu,
-                MaNhanVienPhucVu = model.MaNhanVienPhucVu
+                MaNhanVienPhucVu = model.MaNhanVienPhucVu,
+                Id = model.Id,
+                IdIn = model.IdIn,
+
 
             };
             _context.PhieuCanTPDinhHinh.Add(newItem);
@@ -946,7 +1179,7 @@ namespace WebAPI.Controllers
             var oldData = JsonSerializer.Serialize(new
             {
                 item.MaLoaiCa,
-                item.CaTra,
+                //item.CaTra,
                 item.DinhMucThucTe,
                 item.Gio,
                 item.MaLo,
@@ -955,13 +1188,13 @@ namespace WebAPI.Controllers
                 item.TrongLuongNhan,
                 item.MaThanhPham,
                 item.MaNhanVien,
-                item.MaNhanVienPhucVu,
+                //item.MaNhanVienPhucVu,
                 item.TrongLuongTra,
                 item.GhiChu
             }, options);
 
             item.MaLoaiCa = model.MaLoaiCa;
-            item.CaTra = model.CaTra;
+            //item.CaTra = model.CaTra;
             item.DinhMucThucTe = model.DinhMucThucTe;
             item.Gio = model.Gio;
             item.MaLo = model.MaLo;
@@ -970,7 +1203,7 @@ namespace WebAPI.Controllers
             item.TrongLuongNhan = model.TrongLuongNhan;
             item.MaThanhPham = model.MaThanhPham;
             item.MaNhanVien = model.MaNhanVien;
-            item.MaNhanVienPhucVu = model.MaNhanVienPhucVu;
+            //item.MaNhanVienPhucVu = model.MaNhanVienPhucVu;
             item.TrongLuongTra = model.TrongLuongTra;
             item.GhiChu = item.GhiChu + "," + oldData.ToString() + "," + model.GhiChu;
             try
@@ -1074,6 +1307,8 @@ namespace WebAPI.Controllers
                 TrongLuongBu = item.TrongLuongBu,
                 IsOffline = item.IsOffline,
                 MaNhanVienPhucVu = item.MaNhanVienPhucVu,
+                Id = item.Id,
+                IdIn = item.IdIn,
                 GhiChu = item.GhiChu + "," + oldData + "," + model.GhiChu
 
             };
@@ -1230,6 +1465,8 @@ namespace WebAPI.Controllers
                 TrongLuongTra = item.TrongLuongTra,
                 TrongLuongBu = item.TrongLuongBu,
                 IsOffline = item.IsOffline,
+                Id = item.Id,
+                IdIn = item.IdIn,
                 GhiChu = item.GhiChu + "," + oldData + "," + model.GhiChu
 
             };
@@ -1489,6 +1726,77 @@ namespace WebAPI.Controllers
                 item.MaThanhPham
             }, options);
             item.MaThanhPham = model.MaThanhPham;
+            item.GhiChu = item.GhiChu + "," + oldData.ToString() + "," + model.GhiChu;
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new ApiResponse
+                {
+                    Success = false,
+                    Message = "Đã xảy ra lỗi khi cập nhật dữ liệu.",
+                    Errors = new List<string> { ex.Message }
+                });
+            }
+            return Ok(new ApiResponse
+            {
+                Success = true,
+                Message = "Cập nhật thông tin thành công!"
+            });
+        }
+
+        [HttpPost("{stt}/{ngay}/{maMayCan}/{maXuong}")]
+        [Authorize]
+        public async Task<IActionResult> ChuyenNhanVien_XLPC(int stt, string ngay, string maMayCan, string maXuong, Tuple<string> dataT)
+        {
+            var model = JsonSerializer.Deserialize<PhieuCanTPDinhHinh>(dataT.Item1);
+            // Kiểm tra xem ID người dùng được cập nhật có hợp lệ không
+            if (string.IsNullOrEmpty(stt.ToString()) || string.IsNullOrEmpty(ngay) || string.IsNullOrEmpty(maMayCan) || string.IsNullOrEmpty(maXuong))
+            {
+                return BadRequest(new ApiResponse
+                {
+                    Success = false,
+                    Message = "Vui lòng cung cấp đủ thông tin!."
+                });
+            }
+            DateTime ngayConvert = DateTime.ParseExact(ngay, "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture);
+            var item = await _context.PhieuCanTPDinhHinh.FirstOrDefaultAsync(x => x.STT == stt && x.Ngay == ngayConvert && x.MaMayCan == maMayCan && x.MaXuong == maXuong);
+
+            if (item == null)
+            {
+                return BadRequest(new ApiResponse
+                {
+                    Success = false,
+                    Message = "Mục không tồn tại."
+                });
+            }
+
+            // Kiểm tra xem dữ liệu đầu vào có hợp lệ không và trả về danh sách lỗi nếu có.
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState.Values.SelectMany(v => v.Errors)
+                                              .Select(e => e.ErrorMessage)
+                                              .ToList();
+
+                return BadRequest(new ApiResponse
+                {
+                    Success = false,
+                    Message = "Dữ liệu không hợp lệ.",
+                    Errors = errors
+                });
+            }
+            var options = new JsonSerializerOptions
+            {
+                WriteIndented = true
+            };
+            // Lưu trạng thái cũ của đối tượng trước khi thay đổi
+            var oldData = JsonSerializer.Serialize(new
+            {
+                item.MaNhanVien
+            }, options);
+            item.MaNhanVien = model.MaNhanVien;
             item.GhiChu = item.GhiChu + "," + oldData.ToString() + "," + model.GhiChu;
             try
             {

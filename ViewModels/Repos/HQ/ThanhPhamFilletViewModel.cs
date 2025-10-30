@@ -13,6 +13,8 @@ using ObservableObject = CommunityToolkit.Mvvm.ComponentModel.ObservableObject;
 using System.Windows.Input;
 using Azure.Identity;
 using System.Collections.Specialized;
+using Models.Repos;
+using System.Globalization;
 
 namespace ViewModels.Repos.HQ
 {
@@ -58,7 +60,25 @@ namespace ViewModels.Repos.HQ
             {
                 SuDung = item.SuDung,
                 Ma = item?.Ma,
-                Ten = item?.Ten
+                Ten = item?.Ten,
+                Min = item?.Min,
+                Max = item?.Max,
+                IsSoChe = item?.IsSoChe ?? false,
+                IsCaMuoi = item?.IsCaMuoi ?? false,
+                DinhMuc = item?.DinhMuc ?? 0,
+                BravoId = item?.BravoId,
+                ThoiGianTren1kgSeconds = item?.ThoiGianTren1kgSeconds ?? 0,
+                DinhMucHaoHut = item?.DinhMucHaoHut ?? 0,
+                CodeId = item?.CodeId,
+                IsNotSetByTime = item?.IsNotSetByTime ?? false,
+                ColorRGB = item?.ColorRGB,
+                KhongPhanBietSize = item?.KhongPhanBietSize ?? false,
+                IsXeBuom = item?.IsXeBuom ?? false,
+                IsChuyenFillet = item?.IsChuyenFillet ?? false,
+                IsDat = item?.IsDat ?? false,
+                IsNguyenLieuXeBuom = item?.IsNguyenLieuXeBuom ?? false,
+                IsNguyenCon = item?.IsNguyenCon ?? false,
+                
             };
         }
         public MaThanhPhamFillet CopySelectedItem()
@@ -116,7 +136,50 @@ namespace ViewModels.Repos.HQ
             var dao = new Dao.Repos.HQ.MaThanhPhamFillet();
             return dao.Gets<T>();
         }
+        public List<MaThanhPhamFillet_U> GetUs(string Ngay, int PageIndex, int PageSize)
+        {
+            var db = new dbPMScontext();
+            var date = new DateTime();
+            date = DateTime.ParseExact(Ngay, "yyyyMMddHHmmss", CultureInfo.InvariantCulture);
+            var latestDates = db.MaThanhPhamFilletUs
+                .Where(x => x.MNgay.Date >= date.Date)
+                .GroupBy(x => x.MaThanhPham)
+                .Select(g => new { MaThanhPham = g.Key, MaxId = g.Max(x => x.Id) });
 
+            var query = from hq in db.MaThanhPhamFilletUs.Where(x => x.MNgay.Date >= date.Date) 
+                join latest in latestDates
+                    on new { hq.MaThanhPham, hq.Id } 
+                    equals new { latest.MaThanhPham, Id = latest.MaxId }
+                orderby hq.MNgay descending
+                select hq;
+
+            var result = query.Skip((PageIndex - 1) * PageSize)
+                .Take(PageSize)
+                .ToList();
+            return result;
+        }
+        public List<MaThanhPhamFillet_D> GetDs(string Ngay, int PageIndex, int PageSize)
+        {
+            var db = new dbPMScontext();
+            var date = new DateTime();
+            date = DateTime.ParseExact(Ngay, "yyyyMMddHHmmss", CultureInfo.InvariantCulture);
+            var latestDates = db.MaThanhPhamFilletDs
+                .Where(x => x.MNgay.Date >= date.Date)
+                .GroupBy(x => x.MaThanhPham)
+                .Select(g => new { MaThanhPham = g.Key, MaxId = g.Max(x => x.Id) });
+
+            var query = from hq in db.MaThanhPhamFilletDs.Where(x => x.MNgay.Date >= date.Date) 
+                join latest in latestDates
+                    on new { hq.MaThanhPham, hq.Id } 
+                    equals new { latest.MaThanhPham, Id = latest.MaxId }
+                orderby hq.MNgay descending
+                select hq;
+
+            var result = query.Skip((PageIndex - 1) * PageSize)
+                .Take(PageSize)
+                .ToList();
+            return result;
+        }
         private int Insert<T>(T item)
         {
             var dao = new Dao.Repos.HQ.MaThanhPhamFillet();

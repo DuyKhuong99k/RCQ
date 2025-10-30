@@ -58,17 +58,30 @@ namespace PMS.Controllers.DanhMuc.Fillet
             ViewBag.TitlePage = "Nhân viên theo bàn Fillet";
             return View("~/Views/DanhMuc/Fillet/NhanVienTheoBanView.cshtml");
         }
-        public async Task<IEnumerable<object>> GetAllsFullField(string maBan, string maXuong)
+        public async Task<IEnumerable<object>> GetAllsFullField(string maBan, string maXuong, bool isCheckNow)
         {
-            IEnumerable<object> dataSource = ViewBag.dataSource;
-            if (dataSource == null)
-            {
-                var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/NhanVienTheoBans/GetAllsFullField/{maBan}/{maXuong}";
-                using var helper = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
-                ViewBag.dataSource = await helper.GetAsync<IEnumerable<object>>(HttpContext, apiUrl);
-                dataSource = ViewBag.dataSource;
-            }
-            return dataSource;
+            //IEnumerable<object> dataSource = ViewBag.dataSource;
+            //if (dataSource == null)
+            //{
+            //    var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/NhanVienTheoBans/GetAllsFullField/{maBan}/{maXuong}";
+            //    using var helper = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+            //    ViewBag.dataSource = await helper.GetAsync<IEnumerable<object>>(HttpContext, apiUrl);
+            //    dataSource = ViewBag.dataSource;
+            //}
+            //return dataSource;
+
+            IEnumerable<object> dataSource = null;
+
+            string endpoint = isCheckNow
+                ? "GetNhanVienTheoBansMoiNhat"
+                : "GetAllsFullField";
+
+            string apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/NhanVienTheoBans/{endpoint}/{maBan}/{maXuong}";
+
+            using var helper = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+            dataSource = await helper.GetAsync<IEnumerable<object>>(HttpContext, apiUrl);
+
+            return dataSource ?? Enumerable.Empty<object>();
         }
         public async Task<IEnumerable<MaThanhPhamFillet_HanMucTrongLuong>> GetAlls()
         {

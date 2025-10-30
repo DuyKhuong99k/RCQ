@@ -1,5 +1,6 @@
 ﻿@page "/TheRo"
 @using System.Drawing
+@using Handlers
 @using Models.Repos.Models
 @using Syncfusion.Blazor.Buttons
 @using Syncfusion.Blazor.Data
@@ -8,10 +9,9 @@
 @using Syncfusion.Blazor.Inputs
 @using Syncfusion.Blazor.Navigations
 @using Syncfusion.Blazor.Popups
+@using Vars.Hubs
 @using ViewModels.Repos.Hubs.IServices
-@using PMSHub.Components.Layout
 @using EventArgs = EventArgs
-@using FilteringEventArgs = Syncfusion.Blazor.DropDowns.FilteringEventArgs
 @using FilterType = Syncfusion.Blazor.Grids.FilterType
 @using SelectionMode = Syncfusion.Blazor.Grids.SelectionMode
 @using SelectionType = Syncfusion.Blazor.Grids.SelectionType
@@ -24,258 +24,264 @@
 @inject ICardService cardService
 @inject IDeviceViewService DeviceViewService
 @inject IJSRuntime JsRuntime
-<link rel="stylesheet" href="styles/grid.css" />
+@inject IToastService ToastService
+<link rel="stylesheet" href="styles/grid.css"/>
 <PageTitle>Thẻ Rổ</PageTitle>
 <!-- Navbar -->
-<TopLayout />
+@* <TopLayout /> *@
 <!-- / Navbar -->
 <!-- Content wrapper -->
-<div class="content-wrapper">
-    <!-- Content -->
+@* <div class="content-wrapper"> *@
+@*     <!-- Content --> *@
 
-    <div class="container-xxl flex-grow-1 container-p-y">
-        <h3>Thẻ Rổ</h3>
-        <SfGrid DataSource="MainService.VmTheRo.Items" Height="500" @ref="Grid" AllowSorting="true" AllowMultiSorting="true" TValue="Models.Repos.Models.TheRo" AllowFiltering="true" AllowPaging="true" AllowSelection="true">
-            <GridPageSettings PageCount="10" PageSize="10" PageSizes="@(new[] { "5", "10", "15", "20", "100", "200", "500" })"></GridPageSettings>
-            <GridTemplates>
-                <ToolbarTemplate>
-                    <SfToolbar>
-                        <ToolbarEvents Clicked="ToolbarClickHandler"></ToolbarEvents>
-                        <ToolbarItems>
-                            <ToolbarItem Type="@ItemType.Button" PrefixIcon="e-refresh icon" Id="refresh" Text="Tải Lại"></ToolbarItem>
-                            <ToolbarItem Type="@ItemType.Button" PrefixIcon="e-expand icon" Id="add" Text="Thêm"></ToolbarItem>
-                            <ToolbarItem Type="@ItemType.Button" PrefixIcon="e-edit icon" Id="edit" Text="Sửa"></ToolbarItem>
-                            @* <ToolbarItem Type="@ItemType.Button" PrefixIcon="e-export-excel icon" Id="ExcelExport" Text="Xuất Excel"></ToolbarItem> *@
-                            <ToolbarItem Type="@ItemType.Button" PrefixIcon="e-circle-remove icon" Id="delete" Text="Xóa"></ToolbarItem>
-                        </ToolbarItems>
-                    </SfToolbar>
-                </ToolbarTemplate>
-            </GridTemplates>
-            <GridSortSettings>
-                <GridSortColumns>
-                    <GridSortColumn Field="@nameof(Models.Repos.Models.TheRo.CreatedDateTime)" Direction="SortDirection.Descending"></GridSortColumn>
-                </GridSortColumns>
-            </GridSortSettings>
-            <GridFilterSettings Type="FilterType.Excel"></GridFilterSettings>
-            <GridSelectionSettings AllowDragSelection="true" Mode="SelectionMode.Row" Type="SelectionType.Multiple" EnableSimpleMultiRowSelection="true" CheckboxOnly="true" PersistSelection="true"></GridSelectionSettings>
-            <GridColumns>
-                <GridColumn Type="ColumnType.CheckBox" Width="50"></GridColumn>
-                <GridColumn Field="@nameof(Models.Repos.Models.TheRo.MaThe)" HeaderText="Id" Type="ColumnType.String" TextAlign="TextAlign.Center" Width="130"></GridColumn>
-                <GridColumn Field="@nameof(Models.Repos.Models.TheRo.ColorCode)" HeaderText="Màu 1" Type="ColumnType.String" TextAlign="TextAlign.Center" Width="120">
-                    <Template>
+@*     <div class="container-xxl flex-grow-1 container-p-y"> *@
+<h3>Thẻ Rổ</h3>
+<SfGrid DataSource="MainService.VmTheRo.Items" Height="500" @ref="Grid" AllowExcelExport="true" AllowSorting="true" AllowMultiSorting="true" TValue="Models.Repos.Models.TheRo" AllowFiltering="true" AllowPaging="true" AllowSelection="true">
+    <GridPageSettings PageCount="10" PageSize="10" PageSizes="@(new[] { "5", "10", "15", "20", "100", "200", "500" })"></GridPageSettings>
+    <GridTemplates>
+        <ToolbarTemplate>
+            <SfToolbar>
+                <ToolbarEvents Clicked="ToolbarClickHandler"></ToolbarEvents>
+                <ToolbarItems>
+                    <ToolbarItem Type="@ItemType.Button" PrefixIcon="e-refresh icon" Id="refresh" Text="Tải Lại"></ToolbarItem>
+                    <ToolbarItem Type="@ItemType.Button" PrefixIcon="e-expand icon" Id="add" Text="Thêm"></ToolbarItem>
+                    <ToolbarItem Type="@ItemType.Button" PrefixIcon="e-edit icon" Id="edit" Text="Sửa"></ToolbarItem>
+                    <ToolbarItem Type="@ItemType.Button" PrefixIcon="e-circle-remove icon" Id="delete" Text="Xóa"></ToolbarItem>
+                    <ToolbarItem Type="@ItemType.Button" PrefixIcon="e-export-excel icon" Id="ExcelExport" Text="Xuất Excel"></ToolbarItem>
+                </ToolbarItems>
+            </SfToolbar>
+        </ToolbarTemplate>
+    </GridTemplates>
+    <GridSortSettings>
+        <GridSortColumns>
+            <GridSortColumn Field="@nameof(Models.Repos.Models.TheRo.CreatedDateTime)" Direction="SortDirection.Descending"></GridSortColumn>
+        </GridSortColumns>
+    </GridSortSettings>
+    <GridFilterSettings Type="FilterType.Excel"></GridFilterSettings>
+    <GridSelectionSettings AllowDragSelection="true" Mode="SelectionMode.Row" Type="SelectionType.Multiple" EnableSimpleMultiRowSelection="true" CheckboxOnly="true" PersistSelection="true"></GridSelectionSettings>
+    <GridColumns>
+        <GridColumn Type="ColumnType.CheckBox" Width="50"></GridColumn>
+        <GridColumn Field="@nameof(Models.Repos.Models.TheRo.MaThe)" HeaderText="Id" Type="ColumnType.String" TextAlign="TextAlign.Center" Width="130"></GridColumn>
+        <GridColumn Field="@nameof(Models.Repos.Models.TheRo.ColorCode)" HeaderText="Màu 1" Type="ColumnType.String" TextAlign="TextAlign.Center" Width="120">
+            <Template>
 
-                        @{
-                            var a = (context as Models.Repos.Models.TheRo)?.ColorCode.ToLower();
-                            if (a != null)
-                            {
-                                a = a.Split(",").FirstOrDefault() ?? "";
-                                a = ColorTranslator.ToHtml(ColorTranslator.FromHtml(a));
-                            }
-
-                            <h1 style="background-color: @a;">&nbsp;</h1>
-                        }
-
-                    </Template>
-
-                </GridColumn>
-                <GridColumn Field="@nameof(Models.Repos.Models.TheRo.ColorCode)" HeaderText="Màu 2" Type="ColumnType.String" TextAlign="TextAlign.Center" Width="120">
-                    <Template>
-
-                        @{
-                            var a = (context as Models.Repos.Models.TheRo)?.ColorCode.ToLower();
-                            if (a != null)
-                            {
-                                a = a.Split(",").LastOrDefault() ?? "";
-                                a = ColorTranslator.ToHtml(ColorTranslator.FromHtml(a));
-                            }
-
-                            <h1 style="background-color: @a;">&nbsp;</h1>
-                        }
-
-                    </Template>
-                </GridColumn>
-                <GridColumn Field="@nameof(Models.Repos.Models.TheRo.CreatedDateTime)" HeaderText="Ngày Giờ" Type="ColumnType.DateTime" Format="dd/MM/yyyy HH:mm:ss" TextAlign="TextAlign.Center" Width="130"></GridColumn>
-
-            </GridColumns>
-        </SfGrid>
-        <SfDialog Width="500px" Height="650px" ShowCloseIcon="true" IsModal="true" CloseOnEscape="true" @bind-Visible="@IsVisibleAdd">
-            <DialogEvents OnOverlayModalClick="@OverlayClick" Closed="Closed"></DialogEvents>
-            <DialogTemplates>
-                <Header>
-                    <div>@(isXoa == false ? "Thêm" : "Xóa")</div>
-                </Header>
-                <Content>
-                    @if (isXoa == false)
+                @{
+                    var a = (context as Models.Repos.Models.TheRo)?.ColorCode.ToLower();
+                    if (a != null)
                     {
-                        <SfDropDownList TValue="string" Placeholder="Màu" FloatLabelType="FloatLabelType.Auto" AllowFiltering="true" TItem="ColorCode" @bind-Value="@cardService.ItemRo.ColorCode" DataSource="@MainService.VmColorCode.Items">
-                            <DropDownListFieldSettings Value="Code" Text="Name" />
-                            <DropDownListEvents TValue="string" TItem="ColorCode" ValueChange="ChangeMau"></DropDownListEvents>
-                            <DropDownListTemplates TItem="ColorCode">
-                                <ItemTemplate>
-                                    <div style="width: 100%; display: flex">
-                                        @{
-                                            var con = context as ColorCode;
-                                            var c1 = (con?.Code ?? "").Split(",").FirstOrDefault() ?? "";
-                                            var c2 = (con?.Code ?? "").Split(",").LastOrDefault() ?? ""; ;
-                                            c1 = ColorTranslator.ToHtml(ColorTranslator.FromHtml(c1));
-                                            c2 = ColorTranslator.ToHtml(ColorTranslator.FromHtml(c2));
-                                        }
-                                        <div style="width: 60%;">
-                                            <p>@con?.Name</p>
-                                        </div>
-                                        <div style="width: 20%;">
-                                            <p style="background-color: @c1;">&nbsp;</p>
-                                        </div>
-                                        <div style="width: 20%;">
-                                            <p style="background-color: @c2;">&nbsp;</p>
-                                        </div>
-                                    </div>
-                                </ItemTemplate>
-                            </DropDownListTemplates>
-                        </SfDropDownList>
-                        <div style="width: 100%">
-                            <table style="width: 100%">
-                                <tr>
-                                    @{
-                                        code1 = (cardService.ItemRo.ColorCode ?? "").Split(",").FirstOrDefault() ?? "";
-                                        code2 = (cardService.ItemRo.ColorCode ?? "").Split(",").LastOrDefault() ?? ""; ;
-                                        code1 = ColorTranslator.ToHtml(ColorTranslator.FromHtml(code1));
-                                        code2 = ColorTranslator.ToHtml(ColorTranslator.FromHtml(code2));
-                                    }
-                                    <td>
-                                        <h1 style="background-color: @code1;">&nbsp;</h1>
-                                    </td>
-                                    <td>
-                                        <h1 style="background-color: @code2;">&nbsp;</h1>
-                                    </td>
-                                </tr>
-                            </table>
-                        </div>
+                        a = a.Split(",").FirstOrDefault() ?? "";
+                        a = ColorTranslator.ToHtml(ColorTranslator.FromHtml(a));
                     }
 
-                    <div class="grid-container">
-                        <div class="grid-item">
-                            <SfDropDownList EnableVirtualization="true" TValue="string" Placeholder="Máy Cân" FloatLabelType="FloatLabelType.Auto" AllowFiltering="true" CssClass="e-multi-column" TItem="MayCan" DataSource="@MayCansService.Items" @bind-Value="DeviceViewService.DeviceSelectedId">
-                                <DropDownListFieldSettings Value="Id" Text="SubTitle"></DropDownListFieldSettings>
-                                <DropDownListTemplates TItem="MayCan">
+                    <h1 style="background-color: @a;">&nbsp;</h1>
+                }
 
-                                    <HeaderTemplate>
+            </Template>
 
-                                        <table>
-                                            <tr>
-                                                <th>Tên</th>
-                                            </tr>
-                                        </table>
+        </GridColumn>
+        <GridColumn Field="@nameof(Models.Repos.Models.TheRo.ColorCode)" HeaderText="Màu 2" Type="ColumnType.String" TextAlign="TextAlign.Center" Width="120">
+            <Template>
 
-                                    </HeaderTemplate>
+                @{
+                    var a = (context as Models.Repos.Models.TheRo)?.ColorCode.ToLower();
+                    if (a != null)
+                    {
+                        a = a.Split(",").LastOrDefault() ?? "";
+                        a = ColorTranslator.ToHtml(ColorTranslator.FromHtml(a));
+                    }
 
-                                    <ItemTemplate>
+                    <h1 style="background-color: @a;">&nbsp;</h1>
+                }
 
-                                        <table>
-                                            <tbody>
-                                                <tr>
-                                                    <td>@context.SubTitle</td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
+            </Template>
+        </GridColumn>
+        <GridColumn Field="@nameof(Models.Repos.Models.TheRo.CreatedDateTime)" HeaderText="Ngày Giờ" Type="ColumnType.DateTime" Format="dd/MM/yyyy HH:mm:ss" TextAlign="TextAlign.Center" Width="130"></GridColumn>
 
-                                    </ItemTemplate>
+    </GridColumns>
+</SfGrid>
+<SfDialog Width="500px" Height="650px" ShowCloseIcon="true" IsModal="true" CloseOnEscape="true" @bind-Visible="@IsVisibleAdd">
+    <DialogEvents OnOverlayModalClick="@OverlayClick" Closed="Closed"></DialogEvents>
+    <DialogTemplates>
+        <Header>
+            <div>@(isXoa == false ? "Thêm" : "Xóa")</div>
+        </Header>
+        <Content>
+            @if (isXoa == false)
+            {
+                <SfDropDownList TValue="string" Placeholder="Màu" FloatLabelType="FloatLabelType.Auto" AllowFiltering="true" TItem="ColorCode" @bind-Value="@cardService.ItemRo.ColorCode" DataSource="@MainService.VmColorCode.Items">
+                    <DropDownListFieldSettings Value="Code" Text="Name"/>
+                    <DropDownListEvents TValue="string" TItem="ColorCode" ValueChange="ChangeMau"></DropDownListEvents>
+                    <DropDownListTemplates TItem="ColorCode">
+                        <ItemTemplate>
+                            <div style="display: flex; width: 100%;">
+                                @{
+                                    var con = context;
+                                    var c1 = (con?.Code ?? "").Split(",").FirstOrDefault() ?? "";
+                                    var c2 = (con?.Code ?? "").Split(",").LastOrDefault() ?? "";
+                                    ;
+                                    c1 = ColorTranslator.ToHtml(ColorTranslator.FromHtml(c1));
+                                    c2 = ColorTranslator.ToHtml(ColorTranslator.FromHtml(c2));
+                                }
+                                <div style="width: 60%;">
+                                    <p>@con?.Name</p>
+                                </div>
+                                <div style="width: 20%;">
+                                    <p style="background-color: @c1;">&nbsp;</p>
+                                </div>
+                                <div style="width: 20%;">
+                                    <p style="background-color: @c2;">&nbsp;</p>
+                                </div>
+                            </div>
+                        </ItemTemplate>
+                    </DropDownListTemplates>
+                </SfDropDownList>
+                <div style="width: 100%">
+                    <table style="width: 100%">
+                        <tr>
+                            @{
+                                code1 = (cardService.ItemRo.ColorCode ?? "").Split(",").FirstOrDefault() ?? "";
+                                code2 = (cardService.ItemRo.ColorCode ?? "").Split(",").LastOrDefault() ?? "";
+                                ;
+                                code1 = ColorTranslator.ToHtml(ColorTranslator.FromHtml(code1));
+                                code2 = ColorTranslator.ToHtml(ColorTranslator.FromHtml(code2));
+                            }
+                            <td>
+                                <h1 style="background-color: @code1;">&nbsp;</h1>
+                            </td>
+                            <td>
+                                <h1 style="background-color: @code2;">&nbsp;</h1>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            }
 
-                                </DropDownListTemplates>
+            <div class="grid-container">
+                <div class="grid-item">
+                    <SfDropDownList EnableVirtualization="true" TValue="string" Placeholder="Máy Cân" FloatLabelType="FloatLabelType.Auto" AllowFiltering="true" CssClass="e-multi-column" TItem="MayCan" DataSource="@DeviceViewService.Items" @bind-Value="DeviceViewService.DeviceSelectedId">
+                        <DropDownListFieldSettings Value="Id" Text="SubTitle"></DropDownListFieldSettings>
+                        <DropDownListTemplates TItem="MayCan">
 
-                            </SfDropDownList>
-                        </div>
-                        <div class="grid-item">
-                            <SfButton style="margin: 2px; width: 100%;" Disabled="@(DeviceViewService.DeviceCard == null ? false : DeviceViewService.DeviceCard.IsNapThe)" @onclick="() => MayCanStartStop(DeviceViewService.DeviceSelectedId)" CssClass="e-primary">Bắt Đầu</SfButton>
-                        </div>
-                        <div class="grid-item">
-                            <SfButton style="margin: 2px; width: 100%;" Disabled="@(DeviceViewService.DeviceCard == null ? true : !DeviceViewService.DeviceCard.IsNapThe)" @onclick="() => MayCanStartStop(DeviceViewService.DeviceSelectedId)" CssClass="e-primary">Dừng</SfButton>
-                        </div>
-                    </div>
-                    <SfTextBox Placeholder="Thẻ Id" Value="@TheId" ValueChange="@ValueChangeHandler"></SfTextBox>
-                    <SfTextBox Placeholder="Thông Báo" Value="@ThongBao"></SfTextBox>
-                    <SfGrid DataSource="cardService.ItemsByMau" Height="200px" AllowSorting="true" AllowMultiSorting="true" TValue="Models.Repos.Models.TheRo" AllowPaging="true" AllowSelection="true">
-                        <GridPageSettings PageCount="10" PageSize="10" PageSizes="@(new[] { "5", "10", "15", "20", "100", "200", "500" })"></GridPageSettings>
-                        <GridSortSettings>
-                            <GridSortColumns>
-                                <GridSortColumn Field="@nameof(Models.Repos.Models.TheRo.CreatedDateTime)" Direction="SortDirection.Descending"></GridSortColumn>
-                            </GridSortColumns>
-                        </GridSortSettings>
-                        <GridColumns>
-                            <GridColumn Field="@nameof(Models.Repos.Models.TheRo.MaThe)" HeaderText="Id" Type="ColumnType.String" TextAlign="TextAlign.Center" Width="100"></GridColumn>
+                            <HeaderTemplate>
 
-                            <GridColumn Field="@nameof(Models.Repos.Models.TheRo.CreatedDateTime)" HeaderText="Ngày Giờ" Type="ColumnType.DateTime" Format="dd/MM/yyyy HH:mm:ss" TextAlign="TextAlign.Center" Width="150"></GridColumn>
+                                <table>
+                                    <tr>
+                                        <th>Tên</th>
+                                    </tr>
+                                </table>
 
-                        </GridColumns>
-                    </SfGrid>
+                            </HeaderTemplate>
 
-                </Content>
-            </DialogTemplates>
-            @* <DialogButtons>
+                            <ItemTemplate>
+
+                                <table>
+                                    <tbody>
+                                    <tr>
+                                        <td>@context.SubTitle</td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+
+                            </ItemTemplate>
+
+                        </DropDownListTemplates>
+
+                    </SfDropDownList>
+                </div>
+                <div class="grid-item">
+                    <SfButton style="margin: 2px; width: 100%;" Disabled="@(DeviceViewService.DeviceCard == null ? false : DeviceViewService.DeviceCard.IsNapThe)" @onclick="() => MayCanStartStop(DeviceViewService.DeviceSelectedId)" CssClass="e-primary">Bắt Đầu</SfButton>
+                </div>
+                <div class="grid-item">
+                    <SfButton style="margin: 2px; width: 100%;" Disabled="@(DeviceViewService.DeviceCard == null ? true : !DeviceViewService.DeviceCard.IsNapThe)" @onclick="() => MayCanStartStop(DeviceViewService.DeviceSelectedId)" CssClass="e-primary">Dừng</SfButton>
+                </div>
+            </div>
+            <SfTextBox Placeholder="Thẻ Id" Value="@TheId" ValueChange="@ValueChangeHandler"></SfTextBox>
+            <SfTextBox Placeholder="Thông Báo" Value="@ThongBao"></SfTextBox>
+            <SfGrid DataSource="cardService.ItemsByMau" Height="200px" AllowSorting="true" AllowMultiSorting="true" TValue="Models.Repos.Models.TheRo" AllowPaging="true" AllowSelection="true">
+                <GridPageSettings PageCount="10" PageSize="10" PageSizes="@(new[] { "5", "10", "15", "20", "100", "200", "500" })"></GridPageSettings>
+                <GridSortSettings>
+                    <GridSortColumns>
+                        <GridSortColumn Field="@nameof(Models.Repos.Models.TheRo.CreatedDateTime)" Direction="SortDirection.Descending"></GridSortColumn>
+                    </GridSortColumns>
+                </GridSortSettings>
+                <GridColumns>
+                    <GridColumn Field="@nameof(Models.Repos.Models.TheRo.MaThe)" HeaderText="Id" Type="ColumnType.String" TextAlign="TextAlign.Center" Width="100"></GridColumn>
+
+                    <GridColumn Field="@nameof(Models.Repos.Models.TheRo.CreatedDateTime)" HeaderText="Ngày Giờ" Type="ColumnType.DateTime" Format="dd/MM/yyyy HH:mm:ss" TextAlign="TextAlign.Center" Width="150"></GridColumn>
+
+                </GridColumns>
+            </SfGrid>
+
+        </Content>
+    </DialogTemplates>
+    @* <DialogButtons>
             <DialogButton Content="Close" IsPrimary="true" OnClick="@CloseDialogAdd"/>
             </DialogButtons> *@
-        </SfDialog>
-        <SfDialog Width="500px" ShowCloseIcon="true" IsModal="true" CloseOnEscape="true" @bind-Visible="@IsVisibleEdit">
-            <DialogEvents OnOverlayModalClick="@OverlayClick"></DialogEvents>
-            <DialogTemplates>
-                <Header>
-                    <div>Chọn Màu</div>
-                </Header>
-                <Content>
-                    <SfDropDownList TValue="string" Placeholder="Màu" FloatLabelType="FloatLabelType.Auto" AllowFiltering="true" TItem="ColorCode" @bind-Value="@cardService.ItemRo.ColorCode" DataSource="@MainService.VmColorCode.Items">
-                        <DropDownListFieldSettings Value="Code" Text="Name" />
-                        <DropDownListTemplates TItem="ColorCode">
-                            <ItemTemplate>
-                                <div style="width: 100%; display: flex">
-                                    @{
-                                        var con = context as ColorCode;
-                                        var c1 = (con?.Code ?? "").Split(",").FirstOrDefault() ?? "";
-                                        var c2 = (con?.Code ?? "").Split(",").LastOrDefault() ?? ""; ;
-                                        c1 = ColorTranslator.ToHtml(ColorTranslator.FromHtml(c1));
-                                        c2 = ColorTranslator.ToHtml(ColorTranslator.FromHtml(c2));
-                                    }
-                                    <div style="width: 60%;">
-                                        <p>@con?.Name</p>
-                                    </div>
-                                    <div style="width: 20%;">
-                                        <p style="background-color: @c1;">&nbsp;</p>
-                                    </div>
-                                    <div style="width: 20%;">
-                                        <p style="background-color: @c2;">&nbsp;</p>
-                                    </div>
-                                </div>
-                            </ItemTemplate>
-                        </DropDownListTemplates>
-                    </SfDropDownList>
+</SfDialog>
+<SfDialog Width="500px" ShowCloseIcon="true" IsModal="true" CloseOnEscape="true" @bind-Visible="@IsVisibleEdit">
+    <DialogEvents OnOverlayModalClick="@OverlayClick"></DialogEvents>
+    <DialogTemplates>
+        <Header>
+            <div>Chọn Màu</div>
+        </Header>
+        <Content>
+            <SfDropDownList TValue="string" Placeholder="Màu" FloatLabelType="FloatLabelType.Auto" AllowFiltering="true" TItem="ColorCode" @bind-Value="@cardService.ItemRo.ColorCode" DataSource="@MainService.VmColorCode.Items">
+                <DropDownListFieldSettings Value="Code" Text="Name"/>
+                <DropDownListTemplates TItem="ColorCode">
+                    <ItemTemplate>
+                        <div style="display: flex; width: 100%;">
+                            @{
+                                var con = context;
+                                var c1 = (con?.Code ?? "").Split(",").FirstOrDefault() ?? "";
+                                var c2 = (con?.Code ?? "").Split(",").LastOrDefault() ?? "";
+                                ;
+                                c1 = ColorTranslator.ToHtml(ColorTranslator.FromHtml(c1));
+                                c2 = ColorTranslator.ToHtml(ColorTranslator.FromHtml(c2));
+                            }
+                            <div style="width: 60%;">
+                                <p>@con?.Name</p>
+                            </div>
+                            <div style="width: 20%;">
+                                <p style="background-color: @c1;">&nbsp;</p>
+                            </div>
+                            <div style="width: 20%;">
+                                <p style="background-color: @c2;">&nbsp;</p>
+                            </div>
+                        </div>
+                    </ItemTemplate>
+                </DropDownListTemplates>
+            </SfDropDownList>
 
 
-                </Content>
-            </DialogTemplates>
-            <DialogButtons>
-                <DialogButton Content="OK" IsPrimary="true" OnClick="@Edit" />
-                <DialogButton Content="Close" IsPrimary="true" OnClick="@CloseDialogAdd" />
-            </DialogButtons>
-        </SfDialog>
-    </div>
+        </Content>
+    </DialogTemplates>
+    <DialogButtons>
+        <DialogButton Content="OK" IsPrimary="true" OnClick="@Edit"/>
+        <DialogButton Content="Close" IsPrimary="true" OnClick="@CloseDialogAdd"/>
+    </DialogButtons>
+</SfDialog>
+@*     </div> *@
 
-    <!-- / Content -->
-    <!-- Footer -->
-    <FooterLayout />
-    <!-- / Footer -->
-    <div class="content-backdrop fade"></div>
-</div>
+@*     <!-- / Content --> *@
+@*     <!-- Footer --> *@
+@*     <FooterLayout /> *@
+@*     <!-- / Footer --> *@
+@*     <div class="content-backdrop fade"></div> *@
+@* </div> *@
 <!-- Content wrapper -->
+
 @code {
     private SfGrid<Models.Repos.Models.TheRo> Grid;
     private bool IsVisibleAdd;
     private bool IsVisibleEdit;
     private bool isXoa;
-    SfDropDownList<string, Models.Repos.Models.ColorCode> DropNhanVien;
+    SfDropDownList<string, ColorCode> DropNhanVien;
     private readonly Query LocalDataQuery = new Query().Take(10);
     private string TheId = "";
     private string ThongBao = "";
     private string code1 = "";
     private string code2 = "";
+
     private async void Edit()
     {
         var edit = async () =>
@@ -285,7 +291,6 @@
             {
                 if (cardService.ItemRo.ColorCode != null && cardService.ItemRo.ColorCode.Trim() != "")
                 {
-
                     foreach (var val in values)
                     {
                         val.ColorCode = cardService.ItemRo.ColorCode;
@@ -312,32 +317,37 @@
                         }
                         else
                         {
-                            await JsRuntime.InvokeVoidAsync("alert", "Không Thể Cập Nhật!"); // Alert
+                            // await JsRuntime.InvokeVoidAsync("alert", "Không Thể Cập Nhật!"); Alert
+                            ToastService.ShowToast("Không Thể Cập Nhật!", ToastType.Warning);
                         }
                     }
                     catch (Exception e)
                     {
                         Console.WriteLine(e);
-                        await JsRuntime.InvokeVoidAsync("alert", e.ToString()); // Alert
+                        // await JsRuntime.InvokeVoidAsync("alert", e.ToString()); Alert
+                        ToastService.ShowToast(e.ToString(), ToastType.Error);
                     }
-
                 }
                 else
                 {
-                    await JsRuntime.InvokeVoidAsync("alert", "Chưa chọn màu!"); // Alert
+                    // await JsRuntime.InvokeVoidAsync("alert", "Chưa chọn màu!"); Alert
+                    ToastService.ShowToast("Chưa chọn màu!", ToastType.Warning);
                 }
             }
             else
             {
-                await JsRuntime.InvokeVoidAsync("alert", "Không có dữ liệu được chọn!"); // Alert
+                // await JsRuntime.InvokeVoidAsync("alert", "Không có dữ liệu được chọn!"); Alert
+                ToastService.ShowToast("Không có dữ liệu được chọn!", ToastType.Warning);
             }
         };
-        var result = await Handlers.ErrorHandler.HandleAsync(edit);
+        var result = await ErrorHandler.HandleAsync(edit);
+        await Grid.ClearSelectionAsync();
         if (!result.IsSuccess)
         {
             var e = result.Error;
             Console.WriteLine(e);
-            await JsRuntime.InvokeVoidAsync("alert", e.ToString()); // Alert
+            // await JsRuntime.InvokeVoidAsync("alert", e.ToString()); Alert
+            ToastService.ShowToast(e.ToString(), ToastType.Error);
         }
     }
 
@@ -360,11 +370,12 @@
     {
         if (cardService.ItemRo.ColorCode == null && isXoa == false)
         {
-            await JsRuntime.InvokeVoidAsync("alert", "Chưa chọn Màu!"); // Alert
+            // await JsRuntime.InvokeVoidAsync("alert", "Chưa chọn Màu!"); Alert
+            ToastService.ShowToast("Chưa chọn Màu!", ToastType.Warning);
             return;
         }
 
-        DeviceViewService.DeviceCard = MayCansService.Items.FirstOrDefault(x => x.Id == id);
+        DeviceViewService.DeviceCard = MayCansService.Find(id);//MayCansService.Items.FirstOrDefault(x => x.Id == id);
         DeviceViewService.DeviceSelectedId = id;
 
         if (DeviceViewService.DeviceCard != null)
@@ -372,18 +383,18 @@
             DeviceViewService.DeviceCard.IsNapThe = !DeviceViewService.DeviceCard.IsNapThe;
             if (DeviceViewService.DeviceCard.IsNapThe)
             {
-                MayCansService.ItemChanged -= MayCanChangedHandler;
-                MayCansService.ItemChanged += MayCanChangedHandler;
+                // MayCansService.ItemChanged -= MayCanChangedHandler;
+                // MayCansService.ItemChanged += MayCanChangedHandler;
                 await MayCansService.CommandSendMess(DeviceViewService.DeviceCard.Id, "Nạp Thẻ");
             }
             else
             {
-                MayCansService.ItemChanged -= MayCanChangedHandler;
+                // MayCansService.ItemChanged -= MayCanChangedHandler;
                 await MayCansService.CommandSendMess(DeviceViewService.DeviceCard.Id, "");
             }
 
 
-            MayCansService.NotifyItemChanged();
+            MayCansService.NotifyItemChanged(DeviceViewService.DeviceCard);
         }
     }
 
@@ -394,12 +405,12 @@
             ThongBao = "";
             //JsRuntime.InvokeVoidAsync("alert", args.Value); // Alert
             var the = new Models.Repos.Models.TheRo
-                {
-                    MaThe = args.Value,
-                    ColorCode = cardService.ItemRo.ColorCode,
-                    CreatedDateTime = DateTime.Now,
-                    IsRach = false
-                };
+            {
+                MaThe = args.Value,
+                ColorCode = cardService.ItemRo.ColorCode,
+                CreatedDateTime = DateTime.Now,
+                IsRach = false
+            };
             var mes = cardService.Find(args.Value);
             if (mes == "")
             {
@@ -459,7 +470,8 @@
         {
             MainService.VmTheRo.Reload();
             await Grid.Refresh();
-            await JsRuntime.InvokeVoidAsync("alert", "Thực hiện xong!"); // Alert
+            // await JsRuntime.InvokeVoidAsync("alert", "Thực hiện xong!"); Alert
+            ToastService.ShowToast("Thực hiện xong!", ToastType.Success);
         }
 
         if (args.Item.Id == "add")
@@ -469,7 +481,8 @@
             cardService.ItemRo = new Models.Repos.Models.TheRo();
             if (DeviceViewService.DeviceCard != null && DeviceViewService.DeviceSelectedId != "")
             {
-                var mayCan = MayCansService.Items.FirstOrDefault(x => x.Id == DeviceViewService.DeviceCard.Id);
+                // var mayCan = MayCansService.Items.FirstOrDefault(x => x.Id == DeviceViewService.DeviceCard.Id);
+                var mayCan = MayCansService.Find(DeviceViewService.DeviceCard.Id);
                 DeviceViewService.DeviceCard.IsNapThe = mayCan.IsNapThe;
             }
 
@@ -486,7 +499,8 @@
             }
             else
             {
-                await JsRuntime.InvokeVoidAsync("alert", "Không có dữ liệu được chọn!"); // Alert
+                // await JsRuntime.InvokeVoidAsync("alert", "Không có dữ liệu được chọn!"); Alert
+                ToastService.ShowToast("Không có dữ liệu được chọn!", ToastType.Warning);
             }
         }
 
@@ -500,7 +514,6 @@
                 {
                     if (MainService.VmTheRo.Delete(value) > 0)
                     {
-
                         foreach (var val in value)
                         {
                             var item = MainService.VmTheRo.Items.FirstOrDefault(x => x.MaThe == val.MaThe);
@@ -510,10 +523,12 @@
                                 MainService.VmTheRo.Items.RemoveAt(index);
                             }
                         }
+                        // Xóa số lượng select record
+                        await Grid.ClearSelectionAsync();
                     }
                     else
                     {
-                        ThongBao = $"Không Thể Xóa Thẻ!";
+                        ThongBao = "Không Thể Xóa Thẻ!";
                     }
                 }
             }
@@ -524,13 +539,23 @@
                 cardService.ItemRo = new Models.Repos.Models.TheRo();
                 if (DeviceViewService.DeviceCard != null && DeviceViewService.DeviceSelectedId != "")
                 {
-                    var mayCan = MayCansService.Items.FirstOrDefault(x => x.Id == DeviceViewService.DeviceCard.Id);
+                    // var mayCan = MayCansService.Items.FirstOrDefault(x => x.Id == DeviceViewService.DeviceCard.Id);
+                    var mayCan = MayCansService.Find(DeviceViewService.DeviceCard.Id);
                     DeviceViewService.DeviceCard.IsNapThe = mayCan.IsNapThe;
                 }
+
                 cardService.ItemsByMau.Clear();
                 IsVisibleAdd = true;
                 //await JsRuntime.InvokeVoidAsync("alert", "Không có dữ liệu được chọn!"); // Alert
             }
+        }
+
+        if (args.Item.Id == "ExcelExport") //Id is combination of Grid's ID and itemname
+        {
+            var ExportProperties = new ExcelExportProperties();
+            ExportProperties.ExportType = ExportType.AllPages;
+            ExportProperties.IncludeTemplateColumn = true;
+            await Grid.ExportToExcelAsync(ExportProperties);
         }
     }
 
@@ -538,18 +563,17 @@
     {
         IsVisibleAdd = false;
         IsVisibleEdit = false;
-        MayCansService.ItemChanged -= MayCanChangedHandler;
+        // MayCansService.ItemChanged -= MayCanChangedHandler;
 
         if (DeviceViewService.DeviceCard != null)
         {
             DeviceViewService.DeviceCard.IsNapThe = false;
-            MayCansService.NotifyItemChanged();
+            MayCansService.NotifyItemChanged(DeviceViewService.DeviceCard);
         }
     }
 
 
-
-    public async void ChangeMau(ChangeEventArgs<string, Models.Repos.Models.ColorCode> args)
+    public async void ChangeMau(ChangeEventArgs<string, ColorCode> args)
     {
         try
         {
@@ -558,7 +582,8 @@
         catch (Exception e)
         {
             Console.WriteLine(e);
-            await JsRuntime.InvokeVoidAsync("alert", e.ToString()); // Alert
+            // await JsRuntime.InvokeVoidAsync("alert", e.ToString()); Alert
+            ToastService.ShowToast(e.ToString(), ToastType.Error);
         }
     }
 
@@ -566,12 +591,12 @@
     {
         IsVisibleAdd = false;
         IsVisibleEdit = false;
-        MayCansService.ItemChanged -= MayCanChangedHandler;
+        // MayCansService.ItemChanged -= MayCanChangedHandler;
 
         if (DeviceViewService.DeviceCard != null)
         {
             DeviceViewService.DeviceCard.IsNapThe = false;
-            MayCansService.NotifyItemChanged();
+            MayCansService.NotifyItemChanged(DeviceViewService.DeviceCard);
         }
     }
 

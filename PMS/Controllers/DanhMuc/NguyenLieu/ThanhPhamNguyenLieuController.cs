@@ -90,6 +90,8 @@ namespace PMS.Controllers.DanhMuc.NguyenLieu
                         TyLeNuoc = 0,
                         IsCaNgopGheTuoiBanNgoai = false,
                         IsCaNgopGheAoBanNgoai = false,
+                        IsTareThung = false,
+                        CTTYLE = "",
                     });
                 }
                 else
@@ -107,7 +109,7 @@ namespace PMS.Controllers.DanhMuc.NguyenLieu
             }
         }
         [CustomAuthorize(Fu = "Danh Mục / Nguyên Liệu / Thành Phẩm", Func = "Thêm Nguyên Liệu / Thành Phẩm")]
-        public async Task<IActionResult> DoInsert(string ma, string ten, decimal tyLeNuoc, bool suDung, bool isSNL, bool isNgopGhe, bool isNgopGheMuoi, bool isMuoiGhePhuPham, bool isNgopAoMuoi, bool isNgopAoPhuPham, bool isDatNho, bool isPhuPhamCaTap, bool isCaCanTin, bool isCaNgopXeMuoi, bool isNgopGhePhuPham, bool isNgopXePhuPham, bool isNgopGheTuoiBanNgoai, bool isCaNgopGheAoBanNgoai, bool isManh)
+        public async Task<IActionResult> DoInsert(string ma, string ten, decimal tyLeNuoc, bool suDung, bool isSNL, bool isNgopGhe, bool isNgopGheMuoi, bool isMuoiGhePhuPham, bool isNgopAoMuoi, bool isNgopAoPhuPham, bool isDatNho, bool isPhuPhamCaTap, bool isCaCanTin, bool isCaNgopXeMuoi, bool isNgopGhePhuPham, bool isNgopXePhuPham, bool isNgopGheTuoiBanNgoai, bool isCaNgopGheAoBanNgoai, bool isManh, bool isTareThung,string cttyle)
         {
             var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/MaThanhPhamNguyenLieux/Insert";
             try
@@ -143,7 +145,9 @@ namespace PMS.Controllers.DanhMuc.NguyenLieu
                     IsManh = isManh,
                     TyLeNuoc = tyLeNuoc,
                     IsCaNgopGheTuoiBanNgoai = isNgopGheTuoiBanNgoai,
-                    IsCaNgopGheAoBanNgoai = isCaNgopGheAoBanNgoai
+                    IsCaNgopGheAoBanNgoai = isCaNgopGheAoBanNgoai,
+                    IsTareThung = isTareThung,
+                    CTTYLE = cttyle ?? "SL/NLFILLET"
 
                 };
                 var jsonContent = new StringContent(JsonConvert.SerializeObject(model), Encoding.UTF8, "application/json");
@@ -217,7 +221,9 @@ namespace PMS.Controllers.DanhMuc.NguyenLieu
                         IsManh = item?.IsManh,
                         TyLeNuoc = item?.TyLeNuoc,
                         IsCaNgopGheTuoiBanNgoai = item?.IsCaNgopGheTuoiBanNgoai,
-                        IsCaNgopGheAoBanNgoai = item?.IsCaNgopGheAoBanNgoai
+                        IsCaNgopGheAoBanNgoai = item?.IsCaNgopGheAoBanNgoai,
+                        IsTareThung = item?.IsTareThung,
+                        CTTYLE = item?.CTTYLE
                     });
                 }
             }
@@ -228,7 +234,7 @@ namespace PMS.Controllers.DanhMuc.NguyenLieu
             });
         }
         [CustomAuthorize(Fu = "Danh Mục / Nguyên Liệu / Thành Phẩm", Func = "Sửa Nguyên Liệu / Thành Phẩm")]
-        public async Task<IActionResult> DoUpDate(string ma, string ten, decimal tyLeNuoc, bool suDung, bool isSNL, bool isNgopGhe, bool isNgopGheMuoi, bool isMuoiGhePhuPham, bool isNgopAoMuoi, bool isNgopAoPhuPham, bool isDatNho, bool isPhuPhamCaTap, bool isCaCanTin, bool isCaNgopXeMuoi, bool isNgopGhePhuPham, bool isNgopXePhuPham, bool isNgopGheTuoiBanNgoai, bool isCaNgopGheAoBanNgoai, bool isManh)
+        public async Task<IActionResult> DoUpDate(string ma, string ten, decimal tyLeNuoc, bool suDung, bool isSNL, bool isNgopGhe, bool isNgopGheMuoi, bool isMuoiGhePhuPham, bool isNgopAoMuoi, bool isNgopAoPhuPham, bool isDatNho, bool isPhuPhamCaTap, bool isCaCanTin, bool isCaNgopXeMuoi, bool isNgopGhePhuPham, bool isNgopXePhuPham, bool isNgopGheTuoiBanNgoai, bool isCaNgopGheAoBanNgoai, bool isManh, bool isTareThung,string cttyle)
         {
             var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/MaThanhPhamNguyenLieux/Update/{ma}";
             try
@@ -265,7 +271,9 @@ namespace PMS.Controllers.DanhMuc.NguyenLieu
                     IsManh = isManh,
                     TyLeNuoc = tyLeNuoc,
                     IsCaNgopGheTuoiBanNgoai = isNgopGheTuoiBanNgoai,
-                    IsCaNgopGheAoBanNgoai = isCaNgopGheAoBanNgoai
+                    IsCaNgopGheAoBanNgoai = isCaNgopGheAoBanNgoai,
+                    IsTareThung = isTareThung,
+                    CTTYLE = cttyle ?? "SL/NLFILLET"
                 };
 
                 var jsonContent = new StringContent(JsonConvert.SerializeObject(model), Encoding.UTF8, "application/json");

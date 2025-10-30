@@ -16,9 +16,10 @@
     }
 </style>
 <link href="~/css/dbtonghoptpstyle.css" rel="stylesheet" />
-<div class="card mb-4">
-    <div class="card-header" style="text-align: center">
-        <h6>Tổng Hợp Thành Phẩm BTP Định Hình</h6>
+<div class="card mb-4 minHeigh">
+    <div class="card-header text-center">
+        <h6 class="mb-1 fw-semibold">Tổng Hợp Thành Phẩm BTP Định Hình</h6>
+        <small class="text-muted">ĐM Lạng Da: <strong id="dmLangDaDBBTPDinhHinh">0.000</strong></small>
     </div>
     <div style="margin-top: -1.5rem !important" class="card-body ">
         <div class="fixed-chartPie d-flex flex-column justify-content-between align-items-center mb-3" style="height: 200px; width: 100%;">
@@ -36,7 +37,7 @@
            data-bs-toggle="collapse"
            data-bs-target="#collapseExampleTPBTPDinhHinh"
            aria-expanded="false"
-           aria-controls="collapseExample">
+           aria-controls="collapseExample" style="position:relative; z-index:1;">
             Xem chi tiết
         </a>
         <div class="collapse" id="collapseExampleTPBTPDinhHinh">
@@ -58,6 +59,36 @@
     </div>
 </div>
 <script src="~/js/adduserwaitview.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var detailLink = document.getElementById('detailLinkTPBTPDinhHinh');
+        var collapseElement = document.getElementById('collapseExampleTPBTPDinhHinh');
+
+        function setColor(defaultColor, hoverColor) {
+            detailLink.style.color = defaultColor;
+
+            detailLink.onmouseenter = function () {
+                detailLink.style.color = hoverColor;
+            };
+            detailLink.onmouseleave = function () {
+                detailLink.style.color = defaultColor;
+            };
+        }
+
+        detailLink.textContent = 'Xem chi tiết';
+        setColor('#75aaff', '#0056b3');
+
+        collapseElement.addEventListener('show.bs.collapse', function () {
+            detailLink.textContent = 'Thu gọn';
+            setColor('#6c757d', '#dc3545');
+        });
+
+        collapseElement.addEventListener('hide.bs.collapse', function () {
+            detailLink.textContent = 'Xem chi tiết';
+            setColor('#75aaff', '#0056b3');
+        });
+    });
+</script>
 <script>
     if (typeof detailLinkTPBTPDinhHinh === 'undefined') {
         var detailLinkTPBTPDinhHinh = document.getElementById('detailLinkTPBTPDinhHinh');
@@ -87,13 +118,13 @@
 
     function loadDataTPBTPDinhHinh() {
         var xuongId = @XuongId;
-        AddUserWaitView(xuongId);
+        //AddUserWaitView(xuongId);
         const parentElement = document.querySelector('.btpdinhhinh');
-        const fromDate = "@DateTime.Now.Date.AddDays(int.Parse(NumberDate ?? "0") * -1).ToString("yyyy-MM-dd")";
-        const toDate = "@DateTime.Now.Date.ToString("yyyy-MM-dd")";
+        const fromDate = localStorage.getItem("fromDate_dashboard_user");
+        const toDate = localStorage.getItem("toDate_dashboard_user");
         $.ajax({
             url: '/Dashboard/TongHopTyLeThanhPhamBTPDinhHinhWithDate',
-            data: { fromDate: fromDate, toDate: toDate },
+            data: { fromDate: fromDate, toDate: toDate, xuongId: xuongId },
             type: 'GET',
             dataType: 'json',
             success: function (data) {
@@ -102,7 +133,7 @@
                 } else {
                     rendertChartTHTPTPBTPDinhHinh(data);
                 }
-                parentElement.innerHTML = '';
+                
                 updateUITPBTPDinhHinh(data);
 
             },
@@ -128,9 +159,9 @@
                     text: 'TrongLuongTP',
                     dataLabel: {
                         visible: true,
-                        name: 'TrongLuongTP',
+                        name: 'TrongLuongAndPersente',
                         position: 'Outside',
-                        template: '<div>${point.text}</div>'
+                        template: '<div style="position:relative; z-index:1;">${point.text}</div>'
                     }
 
                 }
@@ -151,13 +182,33 @@
     }
 
     function updateUITPBTPDinhHinh(data) {
+        const rawTongTL = data.TongTL;
+        var dmLangDa = data.DinhMucLangDa;
+        // Nếu không có giá trị hoặc là "underfile" thì không làm gì
+        if (
+            rawTongTL === undefined ||
+            rawTongTL === null ||
+            rawTongTL === 'underfile'
+        ) {
+            return;
+        }
+        document.getElementById("dmLangDaDBBTPDinhHinh").textContent = dmLangDa;
+        // Chuẩn hóa giá trị: loại bỏ dấu phẩy và ép sang số
+        const tongTLNumber = Number(String(rawTongTL).replace(/,/g, ''));
 
+        // Nếu sau khi chuẩn hóa mà vẫn không hợp lệ hoặc = 0, thì cũng không cập nhật
+        if (isNaN(tongTLNumber) || tongTLNumber === 0) {
+            return;
+        }
         const parentElement = document.querySelector('.btpdinhhinh');
+        parentElement.innerHTML = '';
         //tongHopTPDHChart.centerLabel.text = 'Tổng<br>' + data.TongTL + 'Kg';
-        document.getElementById("tongTLTPTPBTPDinhHinh").textContent = `Tổng: ${data.TongTL} Kg`;
+        document.getElementById("tongTLTPTPBTPDinhHinh").textContent = `Tổng: ${rawTongTL} Kg`;
         const series = tongHopTPTPBTPDinhHinhChart.series[0];
         for (let i = 0; i < series.points.length; i++) {
             const item = series.points[i];
+            const trongLuongTP = item.y;
+            const trongLuongTPFormat = trongLuongTP.toLocaleString('vi-VN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
             const newItem = document.createElement('tr');
             newItem.innerHTML = `
                                                 <td>
@@ -166,14 +217,21 @@
                                                     </div>
                                                 </td>
                                                 <td style="text-align: right;">
-                                                    <small class="fw-semibold">${item.y} Kg</small>
+                                                    <small class="fw-semibold">${trongLuongTPFormat} Kg</small>
                                                 </td>
                                              `;
 
             parentElement.appendChild(newItem);
         }
     }
-    var timeInterval = @AppViewModels.AppViewModel.Instance.TimeSetIntervalDashBoardView;
+    
+    var timeInterval = localStorage.getItem("timeInterval_dashboard_user");
+
+    // Nếu null thì ép thành 30p
+    if (isNaN(timeInterval) || timeInterval <= 0) {
+        timeInterval = 1800000;
+    }
+
     setInterval(loadDataTPBTPDinhHinh, timeInterval);
 </script>
 

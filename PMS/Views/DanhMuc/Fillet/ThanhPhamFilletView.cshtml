@@ -5,19 +5,16 @@
     var roleIds = PMS.Middlewares.AuthenticationHelpers.GetRoleIdsFromCookie(Context);
     // lấy danh sách fu func từ list roleId
     var rolePermistions = await PMS.Middlewares.AuthenticationHelpers.GetRolePermistionsAsync(Context, roleIds);
+    var listXuongs = ViewBag.listXuongs;
 }
-<div class="container mt-4">
+
     <div class="row">
         <div class="col-12">
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h2 class="mb-0">Danh Sách Thành Phẩm Fillet</h2>
                     @{
-                        var themthanhphamFillet = rolePermistions.Where(x => x.Fu == "Danh Mục / Fillet / Thành Phẩm" && x.Func == "Thêm Fillet / Thành Phẩm" && x.Status == 1).FirstOrDefault();
-                        if (themthanhphamFillet != null)
-                        {
-                            <button onclick="showInsert()" type="button" class="btn btn-primary">Thêm</button>
-                        }
+                        
                     }
 
                 </div>
@@ -25,33 +22,29 @@
                     <div id="Grid"></div>
                     <div style="margin-top:20px;">
                         @{
+                            var themthanhphamFillet = rolePermistions.Where(x => x.Fu == "Danh Mục / Fillet / Thành Phẩm" && x.Func == "Thêm Fillet / Thành Phẩm" && x.Status == 1).FirstOrDefault();
+                            if (themthanhphamFillet != null)
+                            {
+                                <button onclick="showInsert()" type="button" class="btn btn-primary">Thêm</button>
+                            }
                             var suathanhphamFillet = rolePermistions.Where(x => x.Fu == "Danh Mục / Fillet / Thành Phẩm" && x.Func == "Sửa Fillet / Thành Phẩm" && x.Status == 1).FirstOrDefault();
                             if (suathanhphamFillet != null)
                             {
                                 <button onclick="showUpdate()" style="margin-right:5px" class="btn btn-outline-warning"><i class='bx bx-edit-alt'></i>Sửa</button>
                             }
                             var xoathanhphamFillet = rolePermistions.Where(x => x.Fu == "Danh Mục / Fillet / Thành Phẩm" && x.Func == "Xoá Fillet / Thành Phẩm" && x.Status == 1).FirstOrDefault();
-                            if (themthanhphamFillet != null)
+                            if (xoathanhphamFillet != null)
                             {
                                 <button onclick="showDelete()" style="margin-right:5px" class="btn btn-outline-danger"><i class='bx bx-trash'></i>Xoá</button>
                             }
-                            var importthanhphamFillet = rolePermistions.Where(x => x.Fu == "Danh Mục / Fillet / Thành Phẩm" && x.Func == "Import Fillet / Thành Phẩm" && x.Status == 1).FirstOrDefault();
-                            if (themthanhphamFillet != null)
-                            {
-                                <button onclick="import()" style="margin-right:5px" class="btn btn-outline-info"><i class='bx bx-import'></i>Import</button>
-                            }
-                            var exportthanhphamFillet = rolePermistions.Where(x => x.Fu == "Danh Mục / Fillet / Thành Phẩm" && x.Func == "Export Fillet / Thành Phẩm" && x.Status == 1).FirstOrDefault();
-                            if (themthanhphamFillet != null)
-                            {
-                                <button onclick="export()" style="margin-right:5px" class="btn btn-outline-secondary"><i class='bx bx-export'></i>Export Excel</button>
-                            }
+                            
                         }
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
+
 <div class="modal fade" id="modalThem" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -97,6 +90,14 @@
                         <div class="row">
                             <div class="col-md-12 mb-12 ">
                                 <div class="form-outline">
+                                    <label class="form-label" for="x1">Định Mức</label>
+                                    <input type="number" min="0" step="0.001" id="dinhMucTPFL" class="form-control form-control-lg" autocomplete="off" placeholder="0,000" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 mb-12 ">
+                                <div class="form-outline">
                                     <label class="form-label" for="x1">Định Mức Hao Hụt</label>
                                     <input type="number" min="0" step="0.001" id="dinhMucHaoHutTPFL" class="form-control form-control-lg" autocomplete="off" placeholder="0,000" />
                                 </div>
@@ -105,8 +106,23 @@
                         <div class="row">
                             <div class="col-md-12 mb-12 ">
                                 <div class="form-outline">
-                                    <label class="form-label">Xí Nghiệp</label>
-                                    <input type="text" id="codeIdTPFL" class="form-control form-control-lg" autocomplete="off" placeholder="Nhập Mã Xưởng..." />
+                                    <label class="form-label" for="x1">Thời Gian Hoàn Thành</label>
+                                    <input type="number" min="0" step="0.001" id="thoiGianHTTPFL" class="form-control form-control-lg" autocomplete="off" placeholder="0,000" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 mb-12 ">
+                                
+                                <div class="form-outline">
+                                    <label class="form-label">Xưởng</label>
+                                    <select id="codeIdTPFL" class="form-control form-control-lg">
+                                        <option disabled selected>Chọn Xưởng</option>
+                                        @foreach (var item in listXuongs)
+                                        {
+                                            <option value="@item.Ma">@item.Ten</option>
+                                        }
+                                    </select>
                                 </div>
                             </div>
                         </div>
@@ -128,6 +144,34 @@
                                     <label class="">
                                         <input class="form-check-input me-1" type="checkbox" value="" id="khongPhanBietSizeTPFL" />
                                         Không Phân Biệt Size
+                                    </label>
+                                    <label class="">
+                                        <input class="form-check-input me-1" type="checkbox" value="" id="isXeBuomTPFL" />
+                                        Xẻ Bướm
+                                    </label>
+                                    <label class="">
+                                        <input class="form-check-input me-1" type="checkbox" value="" id="isChuyenFilletTPFL" />
+                                        Chuyền Fillet
+                                    </label>
+                                    <label class="">
+                                        <input class="form-check-input me-1" type="checkbox" value="" id="isDatTPFL" />
+                                        Dạt
+                                    </label>
+                                    <label class="">
+                                        <input class="form-check-input me-1" type="checkbox" value="" id="isNguyenLieuXeBuomTPFL" />
+                                        Nguyên Liệu Xẻ Bướm
+                                    </label>
+                                    <label class="">
+                                        <input class="form-check-input me-1" type="checkbox" value="" id="isGiaoXepKhuonTPFL" />
+                                        Giao Xếp Khuôn
+                                    </label>
+                                    <label class="">
+                                        <input class="form-check-input me-1" type="checkbox" value="" id="isNguyenConTPFL" />
+                                        Nguyên Con
+                                    </label>
+                                    <label class="">
+                                        <input class="form-check-input me-1" type="checkbox" value="" id="isNguyenConNXBTPFL" />
+                                        Nguyên Con NXB
                                     </label>
                                 </div>
                             </div>
@@ -196,6 +240,14 @@
                         <div class="row">
                             <div class="col-md-12 mb-12 ">
                                 <div class="form-outline">
+                                    <label class="form-label" for="x1">Định Mức</label>
+                                    <input type="number" min="0" step="0.001" id="dinhMucTPFLSua" class="form-control form-control-lg" autocomplete="off" placeholder="0,000" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 mb-12 ">
+                                <div class="form-outline">
                                     <label class="form-label" for="x1">Định Mức Hao Hụt</label>
                                     <input type="number" min="0" step="0.001" id="dinhMucHaoHutTPFLSua" class="form-control form-control-lg" autocomplete="off" placeholder="0,000" />
                                 </div>
@@ -204,8 +256,22 @@
                         <div class="row">
                             <div class="col-md-12 mb-12 ">
                                 <div class="form-outline">
-                                    <label class="form-label">Xí Nghiệp</label>
-                                    <input type="text" id="codeIdTPFLSua" class="form-control form-control-lg" autocomplete="off" placeholder="Nhập Mã Xưởng..." />
+                                    <label class="form-label" for="x1">Thời Gian Hoàn Thành</label>
+                                    <input type="number" min="0" step="0.001" id="thoiGianHTTPFLSua" class="form-control form-control-lg" autocomplete="off" placeholder="0,000" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 mb-12 ">
+                                <div class="form-outline">
+                                    <label class="form-label">Xưởng</label>
+                                    <select id="codeIdTPFLSua" class="form-control form-control-lg">
+                                        <option disabled selected>Chọn Xưởng</option>
+                                        @foreach (var item in listXuongs)
+                                        {
+                                            <option value="@item.Ma">@item.Ten</option>
+                                        }
+                                    </select>
                                 </div>
                             </div>
                         </div>
@@ -227,6 +293,34 @@
                                     <label class="">
                                         <input class="form-check-input me-1" type="checkbox" value="" id="khongPhanBietSizeTPFLSua" />
                                         Không Phân Biệt Size
+                                    </label>
+                                    <label class="">
+                                        <input class="form-check-input me-1" type="checkbox" value="" id="isXeBuomTPFLSua" />
+                                        Xẻ Bướm
+                                    </label>
+                                    <label class="">
+                                        <input class="form-check-input me-1" type="checkbox" value="" id="isChuyenFilletTPFLSua" />
+                                        Chuyền Fillet
+                                    </label>
+                                    <label class="">
+                                        <input class="form-check-input me-1" type="checkbox" value="" id="isDatTPFLSua" />
+                                        Dạt
+                                    </label>
+                                    <label class="">
+                                        <input class="form-check-input me-1" type="checkbox" value="" id="isNguyenLieuXeBuomTPFLSua" />
+                                        Nguyên Liệu Xẻ Bướm
+                                    </label>
+                                    <label class="">
+                                        <input class="form-check-input me-1" type="checkbox" value="" id="isGiaoXepKhuonTPFLSua" />
+                                        Giao Xếp Khuôn
+                                    </label>
+                                    <label class="">
+                                        <input class="form-check-input me-1" type="checkbox" value="" id="isNguyenConTPFLSua" />
+                                        Nguyên Con
+                                    </label>
+                                    <label class="">
+                                        <input class="form-check-input me-1" type="checkbox" value="" id="isNguyenConNXBTPFLSua" />
+                                        Nguyên Con NXB
                                     </label>
                                 </div>
                             </div>
@@ -273,12 +367,14 @@
                     grid = new ej.grids.Grid({
                         dataSource: dataManager,
                         allowPaging: true,
-                        pageSettings: { pageSize: 50 },
+                        pageSettings: { pageSize: 50, pageSizes: [50, 100, 200, 500] },
                         allowFiltering: true,
                         filterSettings: { type: 'Excel' },
                         allowSorting: true,
                         //frozenColumns: 3,
                         allowResizing: true,
+                        allowExcelExport: true,
+                        toolbar: ['ExcelExport'],
                         rowSelected: onRowSelected,
                         height: 400,
                         columns: [
@@ -288,17 +384,30 @@
                             //{ field: 'BravoId', headerText: 'Mã Tính Lương', width: 150 },
                             { field: 'Min', headerText: 'TL Min', type: 'number', width: 150 },
                             { field: 'Max', headerText: 'TL Max', type: 'number', width: 150 },
+                            { field: 'DinhMuc', headerText: 'Định Mức', type: 'number', width: 150 },
                             { field: 'DinhMucHaoHut', headerText: 'Định Mức Hao Hụt', type: 'number', width: 150 },
                             { field: 'ThoiGianTren1kgSeconds', headerText: 'Thời Gian Trên 1Kg (s)', type: 'number', width: 170},
+                            { field: 'ThoiGianHT', headerText: 'Thời Gian Hoàn Thành', type: 'number', width: 170},
                             { field: 'IsSoChe', headerText: 'Sơ Chế', width: 100, displayAsCheckBox: 'true', textAlign: 'Center' },
                             { field: 'IsCaMuoi', headerText: 'Cá Muối', width: 100, displayAsCheckBox: 'true', textAlign: 'Center' },
                             { field: 'IsNotSetByTime', headerText: 'Không Áp Dụng Thời Gian', width: 200, displayAsCheckBox: 'true', textAlign: 'Center' },
                             { field: 'KhongPhanBietSize', headerText: 'Không Phân Biệt Size', width: 170, displayAsCheckBox: 'true', textAlign: 'Center' },
+                            { field: 'IsXeBuom', headerText: 'Xẻ Bướm', width: 170, displayAsCheckBox: 'true', textAlign: 'Center' },
+                            { field: 'IsChuyenFillet', headerText: 'Chuyền Fillet', width: 170, displayAsCheckBox: 'true', textAlign: 'Center' },
+                            { field: 'IsDat', headerText: 'Dạt', width: 170, displayAsCheckBox: 'true', textAlign: 'Center' },
+                            { field: 'IsNguyenLieuXeBuom', headerText: 'Nguyên Liệu Xẻ Bướm', width: 170, displayAsCheckBox: 'true', textAlign: 'Center' },
+                            { field: 'IsGiaoXepKhuon', headerText: 'Giao Xếp Khuôn', width: 170, displayAsCheckBox: 'true', textAlign: 'Center' },
+                            { field: 'IsNguyenCon', headerText: 'Nguyên Con', width: 170, displayAsCheckBox: 'true', textAlign: 'Center' },
+                            { field: 'IsNguyenConNXB', headerText: 'Nguyên Con NXB', width: 170, displayAsCheckBox: 'true', textAlign: 'Center' },
                             { field: 'SuDung', headerText: 'Sử Dụng', width: 100, displayAsCheckBox: 'true', textAlign: 'Center' },
                         ]
                     });
                     // Hiển thị Grid trên trang web
                     grid.appendTo('#Grid');
+                    grid.toolbarClick = function (args) {
+             if (args.item.id === 'Grid_excelexport') {
+                grid.excelExport();
+             }};
                 }
             },
             error: function (error) {
@@ -330,10 +439,19 @@
                     $('#maCaTPFL').val(rs.MaCa);
                     $('#thoiGianTren1kgSecondsTPFL').val(rs.ThoiGianTren1kgSeconds);
                     $('#dinhMucHaoHutTPFL').val(rs.DinhMucHaoHut);
+                    $('#thoiGianHTTPFL').val(rs.ThoiGianHT);
+                    $('#dinhMucTPFL').val(rs.DinhMuc);
                     $('#codeIdTPFL').val(rs.CodeId);
                     $('#isNotSetByTimeTPFL').val(rs.IsNotSetByTime);
                     $('#khongPhanBietSizeTPFL').val(rs.KhongPhanBietSize);
+                    $('#isXeBuomTPFL').val(rs.IsXeBuom);
                     $('#tenTPFL').val(rs.Ten);
+                    $('#isChuyenFilletTPFL').val(rs.IsChuyenFillet);
+                    $('#isDatPFL').val(rs.IsDat);
+                    $('#isNguyenLieuXeBuomTPFL').val(rs.IsNguyennLieuXeBuom);
+                    $('#isGiaoXepKhuonTPFL').val(rs.IsGiaoXepKhuon);
+                    $('#isNguyenConTPFL').val(rs.IsNguyenCon);
+                    $('#isNguyenConNXBTPFL').val(rs.IsNguyenConNXB);
                     $('#modalThem').modal('show');
                 }
                 else {
@@ -353,11 +471,20 @@
         var ten = $('#tenTPFL').val();
         var thoiGianTren1kgSeconds = $('#thoiGianTren1kgSecondsTPFL').val();
         var dinhMucHaoHut = $('#dinhMucHaoHutTPFL').val();
+        var dinhMuc = $('#dinhMucTPFL').val();
         var codeId = $('#codeIdTPFL').val();
         var isCaMuoi = $('#isCaMuoiTPFL').prop('checked');
         var isSoChe = $('#isSoCheTPFL').prop('checked');
         var isNotSetByTime = $('#isNotSetByTimeTPFL').prop('checked');
         var khongPhanBietSize = $('#khongPhanBietSizeTPFL').prop('checked');
+        var isXeBuom = $('#isXeBuomTPFL').prop('checked');
+        var isChuyenFillet = $('#isChuyenFilletTPFL').prop('checked');
+        var isDat = $('#isDatTPFL').prop('checked');
+        var isNguyenLieuXeBuom = $('#isNguyenLieuXeBuomTPFL').prop('checked');
+        var isGiaoXepKhuon = $('#isGiaoXepKhuonTPFL').prop('checked');
+        var isNguyenCon = $('#isNguyenConTPFL').prop('checked');
+        var isNguyenConNXB = $('#isNguyenConNXBTPFL').prop('checked');
+        var thoiGianHT = $('#thoiGianHTTPFL').val();
         document.getElementById("txtThem").style.visibility = "hidden";
         document.getElementById("loadingIndicator").style.display = "block";
         $.ajax({
@@ -369,11 +496,20 @@
                 ten: ten,
                 thoiGianTren1kgSeconds: thoiGianTren1kgSeconds,
                 dinhMucHaoHut: dinhMucHaoHut,
+                dinhMuc: dinhMuc,
                 codeId: codeId,
                 isCaMuoi: isCaMuoi,
                 isSoChe: isSoChe,
                 isNotSetByTime: isNotSetByTime,
-                khongPhanBietSize: khongPhanBietSize
+                khongPhanBietSize: khongPhanBietSize,
+                isXeBuom:isXeBuom,
+                isChuyenFillet:isChuyenFillet,
+                isDat:isDat,
+                isNguyenLieuXeBuom:isNguyenLieuXeBuom,
+                isGiaoXepKhuon: isGiaoXepKhuon,
+                isNguyenCon:isNguyenCon,
+                isNguyenConNXB:isNguyenConNXB,
+                thoiGianHT : thoiGianHT
             },
             success: function (rs) {
                 if (rs.isSuccess === true) {
@@ -412,11 +548,20 @@
                     $('#tenTPFLSua').val(rs.Ten);
                     $('#thoiGianTren1kgSecondsTPFLSua').val(rs.ThoiGianTren1kgSeconds);
                     $('#dinhMucHaoHutTPFLSua').val(rs.DinhMucHaoHut);
+                    $('#dinhMucTPFLSua').val(rs.DinhMuc);
                     $('#codeIdTPFLSua').val(rs.CodeId);
                     $('#isCaMuoiTPFLSua').prop('checked', rs.IsCaMuoi);
                     $('#isSoCheTPFLSua').prop('checked', rs.IsSoChe);
                     $('#isNotSetByTimeTPFLSua').prop('checked', rs.IsNotSetByTime);
                     $('#khongPhanBietSizeTPFLSua').prop('checked', rs.KhongPhanBietSize);
+                    $('#isXeBuomTPFLSua').prop('checked', rs.IsXeBuom);
+                    $('#isChuyenFilletTPFLSua').prop('checked', rs.IsChuyenFillet);
+                    $('#isDatTPFLSua').prop('checked', rs.IsDat);
+                    $('#isNguyenLieuXeBuomTPFLSua').prop('checked', rs.IsNguyenLieuXeBuom);
+                    $('#isGiaoXepKhuonTPFLSua').prop('checked', rs.IsGiaXepKhuon);
+                    $('#isNguyenConTPFLSua').prop('checked', rs.IsNguyenCon);
+                    $('#isNguyenConNXBTPFLSua').prop('checked', rs.IsNguyenConNXB);
+                    $('#thoiGianHTTPFLSua').val(rs.ThoiGianHT);
                     $('#modalSua').modal('show');
                 }
                 else {
@@ -436,11 +581,20 @@
         var ten = $('#tenTPFLSua').val();
         var thoiGianTren1kgSeconds = $('#thoiGianTren1kgSecondsTPFLSua').val();
         var dinhMucHaoHut = $('#dinhMucHaoHutTPFLSua').val();
+        var dinhMuc = $('#dinhMucTPFLSua').val();
         var codeId = $('#codeIdTPFLSua').val();
         var isCaMuoi = $('#isCaMuoiTPFLSua').prop('checked');
         var isSoChe = $('#isSoCheTPFLSua').prop('checked');
         var isNotSetByTime = $('#isNotSetByTimeTPFLSua').prop('checked');
         var khongPhanBietSize = $('#khongPhanBietSizeTPFLSua').prop('checked');
+        var isXeBuom = $('#isXeBuomTPFLSua').prop('checked');
+        var isChuyenFillet = $('#isChuyenFilletTPFLSua').prop('checked');
+        var isDat = $('#isDatTPFLSua').prop('checked');
+        var isNguyenLieuXeBuom = $('#isNguyenLieuXeBuomTPFLSua').prop('checked');
+        var isGiaoXepKhuon = $('#isGiaoXepKhuonTPFLSua').prop('checked');
+        var isNguyenCon = $('#isNguyenConTPFLSua').prop('checked');
+        var isNguyenConNXB = $('#isNguyenConNXBTPFLSua').prop('checked');
+        var thoiGianHT = $('#thoiGianHTTPFLSua').val();
         document.getElementById("txtSua").style.visibility = "hidden";
         document.getElementById("loadingIndicatorSua").style.display = "block";
         $.ajax({
@@ -451,11 +605,20 @@
                 ten: ten,
                 thoiGianTren1kgSeconds: thoiGianTren1kgSeconds,
                 dinhMucHaoHut: dinhMucHaoHut,
+                dinhMuc: dinhMuc,
                 codeId: codeId,
                 isCaMuoi: isCaMuoi,
                 isSoChe: isSoChe,
                 isNotSetByTime: isNotSetByTime,
-                khongPhanBietSize: khongPhanBietSize
+                khongPhanBietSize: khongPhanBietSize,
+                isXeBuom:isXeBuom,
+                isChuyenFillet:isChuyenFillet,
+                isDat: isDat,
+                isNguyenLieuXeBuom:isNguyenLieuXeBuom,
+                isGiaoXepKhuon:isGiaoXepKhuon,
+                isNguyenCon:isNguyenCon,
+                isNguyenConNXB: isNguyenConNXB,
+                thoiGianHT: thoiGianHT  
             },
             type: 'POST',
             dataType: 'json',

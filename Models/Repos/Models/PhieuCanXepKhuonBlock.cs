@@ -77,4 +77,7 @@ public partial class PhieuCanXepKhuonBlock
 
     [Column(TypeName = "decimal(18, 2)")]
     public decimal TrongLuong { get; set; }
+    [StringLength(50)]
+    [Unicode(false)]
+    public string Id { get; set; } = "";
 }

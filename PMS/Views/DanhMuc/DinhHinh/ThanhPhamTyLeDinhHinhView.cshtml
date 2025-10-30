@@ -9,25 +9,23 @@
     var rolePermistions = await PMS.Middlewares.AuthenticationHelpers.GetRolePermistionsAsync(Context, roleIds);
 }
 
-<div class="container mt-4">
+
     <div class="row">
         <div class="col-12">
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h2 class="mb-0">Danh Sách Thành Phẩm Tỷ Lệ Định Hình</h2>
-                    @{
-                        var themThanhPhamTyLeDinhHinh = rolePermistions.Where(x => x.Fu == "Danh Mục / Định Hình / Thành Phẩm Tỷ Lệ" && x.Func == "Thêm Định Hình / Thành Phẩm Tỷ Lệ" && x.Status == 1).FirstOrDefault();
-                        if (themThanhPhamTyLeDinhHinh != null)
-                        {
-                            <button onclick="showInsert()" type="button" class="btn btn-primary">Thêm</button>
-                        }
-                    }
 
                 </div>
                 <div class="card-body">
                     <div id="Grid"></div>
                     <div style="margin-top:20px;">
                         @{
+                            var themThanhPhamTyLeDinhHinh = rolePermistions.Where(x => x.Fu == "Danh Mục / Định Hình / Thành Phẩm Tỷ Lệ" && x.Func == "Thêm Định Hình / Thành Phẩm Tỷ Lệ" && x.Status == 1).FirstOrDefault();
+                            if (themThanhPhamTyLeDinhHinh != null)
+                            {
+                                <button onclick="showInsert()" type="button" class="btn btn-primary" style="margin-right:5px">Thêm</button>
+                            }
                             var suaThanhPhamTyLeDinhHinh = rolePermistions.Where(x => x.Fu == "Danh Mục / Định Hình / Thành Phẩm Tỷ Lệ" && x.Func == "Sửa Định Hình / Thành Phẩm Tỷ Lệ" && x.Status == 1).FirstOrDefault();
                             if (suaThanhPhamTyLeDinhHinh != null)
                             {
@@ -38,23 +36,14 @@
                             {
                                 <button onclick="showDelete()" style="margin-right:5px" class="btn btn-outline-danger"><i class='bx bx-trash'></i>Xoá</button>
                             }
-                            var importThanhPhamTyLeDinhHinh = rolePermistions.Where(x => x.Fu == "Danh Mục / Định Hình / Thành Phẩm Tỷ Lệ" && x.Func == "Import Định Hình / Thành Phẩm Tỷ Lệ" && x.Status == 1).FirstOrDefault();
-                            if (importThanhPhamTyLeDinhHinh != null)
-                            {
-                                <button onclick="import()" style="margin-right:5px" class="btn btn-outline-info"><i class='bx bx-import'></i>Import</button>
-                            }
-                            var exportThanhPhamTyLeDinhHinh = rolePermistions.Where(x => x.Fu == "Danh Mục / Định Hình / Thành Phẩm Tỷ Lệ" && x.Func == "Export Định Hình / Thành Phẩm Tỷ Lệ" && x.Status == 1).FirstOrDefault();
-                            if (exportThanhPhamTyLeDinhHinh != null)
-                            {
-                                <button onclick="export()" style="margin-right:5px" class="btn btn-outline-secondary"><i class='bx bx-export'></i>Export Excel</button>
-                            }
+                            
                         }
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
+
 <div class="modal fade" id="modalThem" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -256,17 +245,19 @@
                     grid = new ej.grids.Grid({
                         dataSource: dataManager,
                         allowPaging: true,
-                        pageSettings: { pageSize: 50 },
+                        pageSettings: { pageSize: 50, pageSizes: [50, 100, 200, 500] },
                         allowFiltering: true,
                         filterSettings: { type: 'Excel' },
                         allowSorting: true,
                         //frozenColumns: 3,
                         allowResizing: true,
+                        allowExcelExport: true,
+                        toolbar: ['ExcelExport'],
                         rowSelected: onRowSelected,
                         height: 400,
                         columns: [
                             { field: 'Id', headerText: 'Id', width: 150 },
-                            { field: 'NgayGio', headerText: 'Ngày Giờ', width: 150 },
+                            { field: 'NgayGio', headerText: 'Ngày Giờ', width: 150, type: 'date', format: 'dd-MM-yyyy HH:mm:ss'  },
                             { field: 'ThanhPhamName', headerText: 'Thành Phẩm', width: 150 },
                             { field: 'TyLeDau', headerText: 'Tỷ Lệ Đậu', type: 'number', width: 150 },
                             { field: 'TyLeRot', headerText: 'Tỷ Lệ Rớt', type: 'number', width: 150 },
@@ -275,6 +266,10 @@
                     });
                     // Hiển thị Grid trên trang web
                     grid.appendTo('#Grid');
+                    grid.toolbarClick = function (args) {
+             if (args.item.id === 'Grid_excelexport') {
+                grid.excelExport();
+             }};
                 }
             },
             error: function (error) {

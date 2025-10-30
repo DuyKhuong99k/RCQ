@@ -36,7 +36,46 @@ namespace Dao.Repos.HQ
             connectionString = _connectionString ?? AppViewModels.Base.Ins.ConnectionString;
 
         }
-
+        public List<T> GetsLast<T>(DateTime dateTime)
+        {
+            try
+            {
+                var query = @" 
+ Select
+    *
+from
+    (
+        Select
+            dm.*,
+            ROW_NUMBER() OVER (
+                PARTITION BY MaThanhPham, MaXuong
+                ORDER BY
+                    NgayGio DESC
+            ) AS [ROW NUMBER]
+        from
+            MaThanhPhamDinhHinh_TyLe dm
+        where
+           cast(NgayGio as Date) <=@ngay
+    ) dm where dm.[ROW NUMBER] =1
+order by
+  MaThanhPham
+";
+                using var connection = new SqlConnection(connectionString);
+                connection.Open();
+                var items = connection.Query<T>(
+                        query,
+                        new
+                        {
+                            ngay = dateTime.Date
+                        })
+                    .ToList();
+                return items;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
         public int Delete<T>(T item)
         {
             using var connection = new SqlConnection(connectionString);
@@ -53,6 +92,7 @@ namespace Dao.Repos.HQ
             return rows;
         }
 
+       
         public int Insert<T>(T item)
         {
             using var connection = new SqlConnection(connectionString);

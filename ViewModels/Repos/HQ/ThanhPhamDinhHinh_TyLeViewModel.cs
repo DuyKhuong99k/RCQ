@@ -199,7 +199,7 @@ namespace ViewModels.Repos.HQ
                 Items.Clear();
             }
 
-            var items = Gets<MaThanhPhamDinhHinh_TyLe>();
+            var items = GetsLast<MaThanhPhamDinhHinh_TyLe>(DateTime.Now);//Gets<MaThanhPhamDinhHinh_TyLe>();
             if (items.Any())
                 lock (Items)
                 {
@@ -323,6 +323,11 @@ namespace ViewModels.Repos.HQ
         {
             var dao = new Dao.Repos.HQ.MaThanhPhamDinhHinh_TyLe(connStr);
             return dao.GetsFullField<T>();
+        }
+        public List<T> GetsLast<T>(DateTime dateTime)
+        {
+          var dao = new Dao.Repos.HQ.MaThanhPhamDinhHinh_TyLe();  
+            return dao.GetsLast<T>(dateTime);
         }
     }
 }

@@ -1,63 +1,156 @@
 ﻿using System.Globalization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ViewModels.Repos.Hubs.IServices;
 
-namespace PMSHub.Controllers
+namespace PMSHub.Controllers;
+
+[Route("api/[controller]/[action]")]
+[ApiController]
+public class MauTheController(IMainService mainService, IMayCansService mayCansService) : ControllerBase
 {
-    [Route("api/[controller]/[action]")]
-    [ApiController]
-    public class MauTheController(IMainService mainService) : ControllerBase
+    [HttpGet]
+    public IActionResult GetDs(string Ngay, int PageIndex, int PageSize)
     {
-        [HttpGet]
-        public IActionResult Gets(string Ngay,int PageIndex,int PageSize)
+        
+        var index = Ngay.IndexOf("=", StringComparison.Ordinal);
+        var date = new DateTime();
+        if (index == -1)
         {
-            DateTime date = new DateTime();
-            try
+            //
+            var items = mainService.VmColorCode.GetDs(Ngay, PageIndex, PageSize);
+            var json = new
             {
-                date = DateTime.ParseExact(Ngay, "yyyyMMddHHmmss",CultureInfo.InvariantCulture);
-            }
-            catch (Exception ex)
+                data = items.Select(x => new
+                        { Id = x.Code, Ten = x.Name, x.Code, x.Code2, MNgay = $"{x.MNgay.ToString("yyyyMMddHHmmss")}" })
+                    .ToList(),
+                total = items.Count,
+                PageIndex
+            };
+
+            return Ok(json);
+        }
+
+        var _data = Ngay.Substring(index + 1).Split(',');
+        var mayCanId = _data.FirstOrDefault() ?? "";
+        var mNgay = _data.LastOrDefault() ?? "";
+        date = DateTime.ParseExact(mNgay, "yyyyMMddHHmmss", CultureInfo.InvariantCulture);
+        var mayCan = mayCansService.Find(mayCanId);
+        if (mayCan != null)
+
+        {
+            //c
+            var items = mainService.VmColorCode.GetDs(mNgay, PageIndex, PageSize);
+            var json = new
             {
-                throw ex;
-            }
-         
-            var items = mainService.VmColorCode.Items.Where(x=>x.MNgay >date).OrderBy(x=>x.Code) .Skip((PageIndex -1)* PageSize).Take(PageSize).Select(x=>new {Id=x.Code,Ten=x.Name,Code = x.Code,Code2 = x.Code2,MNgay = $"{x.MNgay.ToString("yyyyMMddHHmmss")}"}).ToList();
+                data = items.Select(x => new
+                        { Id = x.Code, Ten = x.Name, x.Code, x.Code2, MNgay = $"{x.MNgay.ToString("yyyyMMddHHmmss")}" })
+                    .ToList(),
+                total = items.Count,
+                PageIndex
+            };
+
+            return Ok(json);
+            //break;
+        }
+
+        return NotFound("Not Found");
+    }
+
+    [HttpGet]
+    public IActionResult Gets(string Ngay, int PageIndex, int PageSize)
+    {
+        var index = Ngay.IndexOf("=", StringComparison.Ordinal);
+        var date = new DateTime();
+        if (index == -1)
+        {
+            //
+            date = DateTime.ParseExact(Ngay, "yyyyMMddHHmmss", CultureInfo.InvariantCulture);
+            var items = mainService.VmColorCode.Items.Where(x => x.MNgay.Date >= date.Date).OrderBy(x => x.Code)
+                .Skip((PageIndex - 1) * PageSize).Take(PageSize).Select(x => new
+                    { Id = x.Code, Ten = x.Name, x.Code, x.Code2, MNgay = $"{x.MNgay.ToString("yyyyMMddHHmmss")}" })
+                .ToList();
             var json = new
             {
                 data = items,
                 total = items.Count,
-                PageIndex 
+                PageIndex
             };
 
             return Ok(json);
         }
-        [HttpGet]
-        public IActionResult GetUs(string Ngay,int PageIndex,int PageSize)
+
+        var _data = Ngay.Substring(index + 1).Split(',');
+        var mayCanId = _data.FirstOrDefault() ?? "";
+        var mNgay = _data.LastOrDefault() ?? "";
+        date = DateTime.ParseExact(mNgay, "yyyyMMddHHmmss", CultureInfo.InvariantCulture);
+        var mayCan = mayCansService.Find(mayCanId);
+        if (mayCan != null)
+
         {
+            //c
+            var items = mainService.VmColorCode.Items.Where(x => x.MNgay.Date >= date.Date).OrderBy(x => x.Code)
+                .Skip((PageIndex - 1) * PageSize).Take(PageSize).Select(x => new
+                    { Id = x.Code, Ten = x.Name, x.Code, x.Code2, MNgay = $"{x.MNgay.ToString("yyyyMMddHHmmss")}" })
+                .ToList();
+            var json = new
+            {
+                data = items,
+                total = items.Count,
+                PageIndex
+            };
+
+            return Ok(json);
+            //break;
+        }
+
+        return NotFound("Not Found");
+    }
+
+    [HttpGet]
+    public IActionResult GetUs(string Ngay, int PageIndex, int PageSize)
+    {
+       
+        var index = Ngay.IndexOf("=", StringComparison.Ordinal);
+        var date = new DateTime();
+        if (index == -1)
+        {
+            //
             var items = mainService.VmColorCode.GetUs(Ngay, PageIndex, PageSize);
             var json = new
             {
-                data = items.Select(x=>new {Id=x.Code,Ten=x.Name,Code = x.Code,Code2 = x.Code2,MNgay = $"{x.MNgay.ToString("yyyyMMddHHmmss")}"}).ToList(),
+                data = items.Select(x => new
+                        { Id = x.Code, Ten = x.Name, x.Code, x.Code2, MNgay = $"{x.MNgay.ToString("yyyyMMddHHmmss")}" })
+                    .ToList(),
                 total = items.Count,
-                PageIndex 
+                PageIndex
             };
 
             return Ok(json);
         }
-        [HttpGet]
-        public IActionResult GetDs(string Ngay,int PageIndex,int PageSize)
+
+        var _data = Ngay.Substring(index + 1).Split(',');
+        var mayCanId = _data.FirstOrDefault() ?? "";
+        var mNgay = _data.LastOrDefault() ?? "";
+        date = DateTime.ParseExact(mNgay, "yyyyMMddHHmmss", CultureInfo.InvariantCulture);
+        var mayCan = mayCansService.Find(mayCanId);
+        if (mayCan != null)
+
         {
-            var items = mainService.VmColorCode.GetDs(Ngay, PageIndex, PageSize);
+            //c
+            var items = mainService.VmColorCode.GetUs(mNgay, PageIndex, PageSize);
             var json = new
             {
-                data = items.Select(x=>new {Id=x.Code,Ten=x.Name,Code = x.Code,Code2 = x.Code2,MNgay = $"{x.MNgay.ToString("yyyyMMddHHmmss")}"}).ToList(),
+                data = items.Select(x => new
+                        { Id = x.Code, Ten = x.Name, x.Code, x.Code2, MNgay = $"{x.MNgay.ToString("yyyyMMddHHmmss")}" })
+                    .ToList(),
                 total = items.Count,
-                PageIndex 
+                PageIndex
             };
 
             return Ok(json);
+            //break;
         }
-       
+
+        return NotFound("Not Found");
     }
 }

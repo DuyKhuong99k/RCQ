@@ -29,7 +29,7 @@ namespace WebAPI.Controllers
         [Authorize]
         public IActionResult GetAlls()
         {
-            var items = _context.ViTriFillet.OrderByDescending(x => x.Ma).ToList();
+            var items = _context.ViTriFillet.OrderBy(x => x.Ma).ToList();
 
             return Ok(items);
         }

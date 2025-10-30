@@ -63,6 +63,33 @@ td.fitwidth {
         height: 350px
     }
 
+    div#elementBTPXeBuom.e-lib.e-accumulationchart.e-control.e-touch.e-accumulationchart-focused {
+        height: 0 !important;
+        margin-top: -8.5rem !important;
+    }
+
+    svg#elementBTPXeBuom_svg {
+        height: 350px
+    }
+
+    div#elementTPXeBuom.e-lib.e-accumulationchart.e-control.e-touch.e-accumulationchart-focused {
+        height: 0 !important;
+        margin-top: -8.5rem !important;
+    }
+
+    svg#elementTPXeBuom_svg {
+        height: 350px
+    }
+
+
+    div#elementRaCoiXepKhuon.e-lib.e-accumulationchart.e-control.e-touch.e-accumulationchart-focused {
+        height: 0 !important;
+        margin-top: -8.5rem !important;
+    }
+
+    svg#elementRaCoiXepKhuon_svg {
+        height: 350px
+    }
    /* div#elementBTPFillet.e-lib.e-accumulationchart.e-control.e-accumulationchart-focused{
         height:0 !important;
         margin-top: -8.5rem !important;

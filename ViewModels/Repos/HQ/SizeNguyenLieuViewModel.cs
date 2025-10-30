@@ -13,6 +13,8 @@ using ObservableObject = CommunityToolkit.Mvvm.ComponentModel.ObservableObject;
 using System.Windows.Input;
 using Azure.Identity;
 using System.Collections.Specialized;
+using System.Globalization;
+using Models.Repos;
 
 namespace ViewModels.Repos.HQ
 {
@@ -27,6 +29,7 @@ namespace ViewModels.Repos.HQ
 
         [ObservableProperty][NotifyPropertyChangedFor(nameof(IsVailSelectedItem))] private MaSizeNguyenLieu? selectedItem;
         [ObservableProperty] private ObservableRangeCollection<object> selectedItems = new();
+        [ObservableProperty] private ObservableRangeCollection<MaSizeNguyenLieu> usedItems = new();
         [ObservableProperty] private ICommand _closeItemWindowCommand;
         [ObservableProperty] private bool _isWindowItemShown = false;
         private readonly SynchronizationContext synchronizationContext;
@@ -114,7 +117,64 @@ namespace ViewModels.Repos.HQ
             var dao = new Dao.Repos.HQ.MaSizeNguyenLieu();
             return dao.Gets<T>();
         }
+        public List<MaSizeNguyenLieu_U> GetUs(string Ngay,int PageIndex,int PageSize)
+        {
+            dbPMScontext db = new dbPMScontext();
+            DateTime date = new DateTime();
+            try
+            {
+                date = DateTime.ParseExact(Ngay, "yyyyMMddHHmmss",CultureInfo.InvariantCulture);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            var latestDates = db.MaSizeNguyenLieuUs
+                .Where(x => x.MNgay.Date >= date.Date)
+                .GroupBy(x => x.MaSize)
+                .Select(g => new { MaSize = g.Key, MaxId = g.Max(x => x.Id) });
 
+            var query = from hq in db.MaSizeNguyenLieuUs.Where(x => x.MNgay.Date >= date.Date) 
+                join latest in latestDates
+                    on new { hq.MaSize, hq.Id } 
+                    equals new { latest.MaSize, Id = latest.MaxId }
+                orderby hq.MNgay descending
+                select hq;
+
+            var result = query.Skip((PageIndex - 1) * PageSize)
+                .Take(PageSize)
+                .ToList();
+            return result;
+        }
+        public List<MaSizeNguyenLieu_D> GetDs(string Ngay,int PageIndex,int PageSize)
+        {
+            dbPMScontext db = new dbPMScontext();
+            DateTime date = new DateTime();
+            try
+            {
+                date = DateTime.ParseExact(Ngay, "yyyyMMddHHmmss",CultureInfo.InvariantCulture);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            var latestDates = db.MaSizeNguyenLieuDs
+                .Where(x => x.MNgay.Date >= date.Date)
+                .GroupBy(x => x.MaSize)
+                .Select(g => new { MaSize = g.Key, MaxId = g.Max(x => x.Id) });
+
+            var query = from hq in db.MaSizeNguyenLieuDs.Where(x => x.MNgay.Date >= date.Date) 
+                join latest in latestDates
+                    on new { hq.MaSize, hq.Id } 
+                    equals new { latest.MaSize, Id = latest.MaxId }
+                orderby hq.MNgay descending
+                select hq;
+
+            var result = query.Skip((PageIndex - 1) * PageSize)
+                .Take(PageSize)
+                .ToList();
+            return result;
+        }
         private int Insert<T>(T item)
         {
             var dao = new Dao.Repos.HQ.MaSizeNguyenLieu();
@@ -192,6 +252,7 @@ namespace ViewModels.Repos.HQ
             lock (Items)
             {
                 Items.Clear();
+                UsedItems.Clear();
             }
 
             var items = Gets<MaSizeNguyenLieu>();
@@ -204,6 +265,10 @@ namespace ViewModels.Repos.HQ
                         foreach (var item in items)
                         {
                             Items.Add(item);
+                            if (item.SuDung == true)
+                            {
+                                UsedItems.Add(item);
+                            }
                         }
 
                    

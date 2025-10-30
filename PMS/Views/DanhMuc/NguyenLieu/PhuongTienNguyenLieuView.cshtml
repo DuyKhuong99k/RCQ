@@ -13,34 +13,35 @@
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h2 class="mb-0">Danh Sách Phương Tiện Nguyên Liệu</h2>
                     @{
-                        var themphuongtiennguyenlieu = rolePermistions.Where(x => x.Fu == "Danh Mục / Nguyên Liệu / Phương Tiện Nguyên Liệu" && x.Func == "Thêm Nguyên Liệu / Phương Tiện Nguyên Liệu" && x.Status == 1).FirstOrDefault();
-                        if (themphuongtiennguyenlieu != null)
-                        {
-                            <button onclick="showInsert()" type="button" class="btn btn-primary">Thêm</button>
-                        }
+                        
                     }
                 </div>
                 <div class="card-body">
                     <div id="Grid"></div>
                     <div style="margin-top:20px;">
                         @{
+                            var themphuongtiennguyenlieu = rolePermistions.Where(x => x.Fu == "Danh Mục / Nguyên Liệu / Phương Tiện Nguyên Liệu" && x.Func == "Thêm Nguyên Liệu / Phương Tiện Nguyên Liệu" && x.Status == 1).FirstOrDefault();
+                            if (themphuongtiennguyenlieu != null)
+                            {
+                                <button onclick="showInsert()" type="button" class="btn btn-primary">Thêm</button>
+                            }
                             var suaphuongtiennguyenlieu = rolePermistions.Where(x => x.Fu == "Danh Mục / Nguyên Liệu / Phương Tiện Nguyên Liệu" && x.Func == "Sửa Nguyên Liệu / Phương Tiện Nguyên Liệu" && x.Status == 1).FirstOrDefault();
                             if (suaphuongtiennguyenlieu != null)
                             {
                                 <button onclick="showUpdate()" style="margin-right:5px" class="btn btn-outline-warning"><i class='bx bx-edit-alt'></i>Sửa</button>
                             }
                             var xoaphuongtiennguyenlieu = rolePermistions.Where(x => x.Fu == "Danh Mục / Nguyên Liệu / Phương Tiện Nguyên Liệu" && x.Func == "Xoá Nguyên Liệu / Phương Tiện Nguyên Liệu" && x.Status == 1).FirstOrDefault();
-                            if (themphuongtiennguyenlieu != null)
+                            if (xoaphuongtiennguyenlieu != null)
                             {
                                 <button onclick="showDelete()" style="margin-right:5px" class="btn btn-outline-danger"><i class='bx bx-trash'></i>Xoá</button>
                             }
                             var importphuongtiennguyenlieu = rolePermistions.Where(x => x.Fu == "Danh Mục / Nguyên Liệu / Phương Tiện Nguyên Liệu" && x.Func == "Import Nguyên Liệu / Phương Tiện Nguyên Liệu" && x.Status == 1).FirstOrDefault();
-                            if (themphuongtiennguyenlieu != null)
+                            if (importphuongtiennguyenlieu != null)
                             {
                                 <button onclick="import()" style="margin-right:5px" class="btn btn-outline-info"><i class='bx bx-import'></i>Import</button>
                             }
                             var exportphuongtiennguyenlieu = rolePermistions.Where(x => x.Fu == "Danh Mục / Nguyên Liệu / Phương Tiện Nguyên Liệu" && x.Func == "Export Nguyên Liệu / Phương Tiện Nguyên Liệu" && x.Status == 1).FirstOrDefault();
-                            if (themphuongtiennguyenlieu != null)
+                            if (exportphuongtiennguyenlieu != null)
                             {
                                 <button onclick="export()" style="margin-right:5px" class="btn btn-outline-secondary"><i class='bx bx-export'></i>Export Excel</button>
                             }
@@ -232,12 +233,14 @@
                     grid = new ej.grids.Grid({
                         dataSource: dataManager,
                         allowPaging: true,
-                        pageSettings: { pageSize: 50 },
+                        pageSettings: { pageSize: 50, pageSizes: [50, 100, 200, 500] },
                         allowFiltering: true,
                         filterSettings: { type: 'Excel' },
                         allowSorting: true,
                         //frozenColumns: 3,
                         allowResizing: true,
+                        allowExcelExport: true,
+                        toolbar: ['ExcelExport'],
                         rowSelected: onRowSelected,
                         height: 400,
                         columns: [
@@ -252,6 +255,10 @@
                     });
                     // Hiển thị Grid trên trang web
                     grid.appendTo('#Grid');
+                    grid.toolbarClick = function (args) {
+             if (args.item.id === 'Grid_excelexport') {
+                grid.excelExport();
+             }};
                 }
             },
             error: function (error) {

@@ -26,14 +26,14 @@
             json: data,
             adaptor: new ej.data.JsonAdaptor()
         });
-        if (grid && data != null && data != "") {
+        if (grid!= null) {
             grid.dataSource = dataManager;
             grid.refresh();
         } else {
             grid = new ej.grids.Grid({
                 dataSource: dataManager,
                 allowPaging: true,
-                pageSettings: { pageSize: 50 },
+                pageSettings: { pageSize: 50, pageSizes: [50, 100, 200, 500] },
                 allowFiltering: true,
                 allowSorting: true,
                 filterSettings: { type: 'Excel' },
@@ -67,11 +67,14 @@
                     // { field: 'DinhMuc', headerText: 'Định Mức', type: 'number', width: 150 },
                     // { field: 'DinhMucChuan', headerText: 'Định Mức Chuẩn', type: 'number', width: 150 },
                     // { field: 'TrongLuongNhan', headerText: 'Trọng Lượng Nhận', type: 'number', width: 150 },
-                    { field: 'TrongLuong', headerText: 'Trọng Lượng', type: 'number', width: 150 },
+                    { field: 'TrongLuong', headerText: 'Trọng Lượng', type: 'number',format:'N2', width: 150 },
                     // { field: 'SoRo', headerText: 'Số Rổ', type: 'number', width: 150 },
                     // { field: 'DanhGia', headerText: 'Đánh Gía', width: 100, displayAsCheckBox: 'true', textAlign: 'Center' },
                     // { field: 'DonGia', headerText: 'Đơn Gía', type: 'number', width: 150 },
                     // { field: 'ThanhTien', headerText: 'Thành Tiền', type: 'number', width: 150 },
+                    { field: 'ThoiGianVao', headerText: 'TG Vào', type: 'date', width: 150, format: 'HH:mm:ss'  },
+                    { field: 'ThoiGianRa', headerText: 'TG Ra', type: 'date', width: 150, format: 'HH:mm:ss'  },
+                    { field: 'TongThoiGian', headerText: 'Tổng Thời Gian', type: 'number', width: 150 },
                 ],
                 aggregates: [{
                     columns: [
@@ -85,14 +88,29 @@
                 }]
             });
             grid.appendTo('#Grid');
+            grid.toolbarClick = function (args) {
+             if (args.item.id === 'Grid_excelexport') {
+                grid.excelExport();
+             }};
         }
     }
     loadGridData();
 
 </script>
 <script>
+    function ClearData(GridId) {
+        try {
+            var gridObj = document.getElementById(GridId).ej2_instances[0];
+            if(gridObj)
+                gridObj.dataSource = [];
+        } catch (e) {
+            Console.log(e);
+        }
+
+    }
     document.getElementById('RefreshButton').addEventListener("click",
         function () {
+            ClearData("Grid");
             var btn = document.getElementById('RefreshButton').ej2_instances[0];
             var content = btn.content;
             btn.content = "Đang Tải ...";
@@ -108,7 +126,7 @@
                     if (response.Success) {
                         loadGridData(response.Data);
                     } else {
-                        loadGridData(response.Data);
+                        loadGridData();
                         console.error(response.Messages);
                         toastOptionNotyfi();
                         toastr["error"](response.Messages, "Không có dữ liệu!");

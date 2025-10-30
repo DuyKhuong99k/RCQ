@@ -34,7 +34,7 @@ namespace PMS.Controllers.DanhMucHQ
             _httpClientFactory = httpClientFactory;
         }
 
-        [CustomAuthorize(Fu = "Danh Mục HQ / Nhân Viên Theo Nhóm", Func = "Xem HQ / Nhân Viên Theo Nhóm")]
+        [CustomAuthorize(Fu = "Danh Mục / Nhân Viên Theo Nhóm HQ", Func = "Xem Nhân Viên Theo Nhóm HQ")]
         public IActionResult Index()
         {
             var rl = Middlewares.AuthenticationHelpers.CheckAut(HttpContext, "HQ_NhanVienTheoNhom");
@@ -112,7 +112,7 @@ namespace PMS.Controllers.DanhMucHQ
                 throw;
             }
         }
-        [CustomAuthorize(Fu = "Danh Mục HQ / Nhân Viên Theo Nhóm", Func = "Thêm HQ / Nhân Viên Theo Nhóm")]
+        [CustomAuthorize(Fu = "Danh Mục / Nhân Viên Theo Nhóm HQ", Func = "Thêm Nhân Viên Theo Nhóm HQ")]
         public async Task<IActionResult> DoInsert(long id, string maNhanVien, string maNhom, DateTime ngayGioBatDau, decimal heSo)
         {
             var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/HQ_NhanVienTheoNhoms/Insert";
@@ -199,14 +199,14 @@ namespace PMS.Controllers.DanhMucHQ
                 Mesages = "Lỗi!"
             });
         }
-        [CustomAuthorize(Fu = "Danh Mục HQ / Nhân Viên Theo Nhóm", Func = "Sửa HQ / Nhân Viên Theo Nhóm")]
+        [CustomAuthorize(Fu = "Danh Mục / Nhân Viên Theo Nhóm HQ", Func = "Sửa Nhân Viên Theo Nhóm HQ")]
         public async Task<IActionResult> DoUpDate(long id, string maNhanVien, string maNhom, DateTime ngayGioBatDau, decimal heSo)
         {
             var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/HQ_NhanVienTheoNhoms/Update/{id}";
             try
             {
                 // Kiểm tra dữ liệu đầu vào
-                if (id != null)
+                if (id == null)
                 {
                     return Json(new
                     {
@@ -250,7 +250,7 @@ namespace PMS.Controllers.DanhMucHQ
                 });
             }
         }
-        [CustomAuthorize(Fu = "Danh Mục HQ / Nhân Viên Theo Nhóm", Func = "Xoá HQ / Nhân Viên Theo Nhóm")]
+        [CustomAuthorize(Fu = "Danh Mục / Nhân Viên Theo Nhóm HQ", Func = "Xoá Nhân Viên Theo Nhóm HQ")]
         public async Task<IActionResult> DoDelete(long id)
         {
             try

@@ -25,14 +25,14 @@
             json: data,
             adaptor: new ej.data.JsonAdaptor()
         });
-        if (grid && data != null && data != "") {
+        if (grid!= null) {
             grid.dataSource = dataManager;
             grid.refresh();
         } else {
             grid = new ej.grids.Grid({
                 dataSource: dataManager,
                 allowPaging: true,
-                pageSettings: { pageSize: 50 },
+                pageSettings: { pageSize: 50, pageSizes: [50, 100, 200, 500] },
                 allowFiltering: true,
                 allowSorting: true,
                 filterSettings: { type: 'Excel' },
@@ -50,7 +50,7 @@
                 height: 400,
                 columns: [
                     //{ field: 'STT', headerText: 'STT', width: 150 },
-                    { field: 'Ngay', headerText: 'Ngày', width: 150 },
+                    { field: 'Ngay', headerText: 'Ngày', width: 150 , type: 'date', format: 'dd-MM-yyyy'},
                     { field: 'TenXuong', headerText: 'Xưởng', width: 150 },
                     { field: 'TenNCC', headerText: 'Nhà Cung Cấp', width: 150 },
                     { field: 'MaLo', headerText: 'Lô', width: 150 },
@@ -60,7 +60,7 @@
                     { field: 'TenThanhPham', headerText: 'Thành Phẩm', width: 150 },
                     { field: 'TenSize', headerText: 'Size', width: 150 },
                     { field: 'TenMau', headerText: 'Màu', width: 150 },
-                    { field: 'TrongLuong', headerText: 'Trọng Lượng', type: 'number', width: 150 }, 
+                    { field: 'TrongLuong', headerText: 'Trọng Lượng', type: 'number',format:'N2', width: 150 },
                 ],
                 aggregates: [{
                     columns: [
@@ -68,48 +68,86 @@
                             type: 'Sum',
                             field: 'TrongLuong',
                             //format: '0,000',
+                            format: '#,###.##',
                             footerTemplate: 'Tổng Trọng Lượng: ${Sum} Kg'
                         }
                     ]
                 }]
             });
             grid.appendTo('#Grid');
+            grid.toolbarClick = function (args) {
+             if (args.item.id === 'Grid_excelexport') {
+                grid.excelExport();
+             }};
         }
     }
     loadGridData();
 
 </script>
 <script>
-    document.getElementById('RefreshButton').addEventListener("click",
-        function () {
-            var btn = document.getElementById('RefreshButton').ej2_instances[0];
-            var content = btn.content;
-            btn.content = "Đang Tải ...";
-            var grid = document.getElementById("Grid").ej2_instances[0]; // ej2-grid instance
-            var fromDate = document.getElementById("datepicker1").ej2_instances[0];
-            var toDate = document.getElementById("datepicker2").ej2_instances[0];
-            $.ajax({
-                url: "@Url.Action("Reload", "BaoCaoNguyenLieu")",
-                type: "POST",
-                data: { "fromDate": fromDate.value.toDateString(), "toDate": toDate.value.toDateString() },
-                success: function (response) {
-                    // Kiểm tra trạng thái "Success" trong dữ liệu JSON từ máy chủ
-                    if (response.Success) {
-                        loadGridData(response.Data);
-                    } else {
-                        loadGridData(response.Data);
-                        console.error(response.Messages);
-                        toastOptionNotyfi();
-                        toastr["error"](response.Messages, "Không có dữ liệu!");
-                    }
-                },
-                error: function (error) {
-                    toastOptionNotyfi();
-                    toastr["error"](error, "Thông báo");
-                }
+    function ClearData(GridId) {
+        try {
+            var gridObj = document.getElementById(GridId).ej2_instances[0];
+            if(gridObj)
+                gridObj.dataSource = [];
+        } catch (e) {
+            Console.log(e);
+        }
 
-            }).always(function () {
-                btn.content = content;
-            });
+    }
+    </script>
+    <script>
+    document.getElementById('RefreshButton').addEventListener("click", function () {
+        var btnEle = document.getElementById('RefreshButton');
+        var btn = btnEle.ej2_instances[0];
+
+        if (btnEle.classList.contains("loading")) return;
+        btnEle.classList.add("loading");
+
+        ClearData("Grid");
+
+        var originalContent = btn.content;
+        // btn.disabled = true;
+
+        var dots = 0;
+        btn.content = "Đang tải";
+        var loadingInterval = setInterval(function () {
+            dots = (dots + 1) % 4;
+            btn.content = "Đang tải" + ".".repeat(dots);
+        }, 500);
+
+        var grid = document.getElementById("Grid").ej2_instances[0];
+        var fromDate = document.getElementById("datepicker1").ej2_instances[0];
+        var toDate = document.getElementById("datepicker2").ej2_instances[0];
+
+
+        $.ajax({
+            url: "@Url.Action("Reload", "BaoCaoNguyenLieu")",
+            type: "POST",
+            data: {
+                fromDate: fromDate.value ? fromDate.value.toDateString() : null,
+                toDate: toDate.value ? toDate.value.toDateString() : null
+                // xuongId: xuongId
+            },
+            success: function (response) {
+                if (response.Success) {
+                    loadGridData(response.Data);
+                } else {
+                    loadGridData();
+                    console.error(response.Messages);
+                    if (typeof toastOptionNotyfi === "function") toastOptionNotyfi();
+                    toastr["error"](response.Messages, "Không có dữ liệu!");
+                }
+            },
+            error: function (error) {
+                if (typeof toastOptionNotyfi === "function") toastOptionNotyfi();
+                toastr["error"](error.statusText || "Lỗi không xác định", "Thông báo");
+            }
+        }).always(function () {
+            clearInterval(loadingInterval);
+            btn.content = originalContent;
+            // btn.disabled = false;
+            btnEle.classList.remove("loading");
         });
+    });
 </script>

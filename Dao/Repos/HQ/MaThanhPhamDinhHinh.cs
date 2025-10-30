@@ -18,7 +18,7 @@ namespace Dao.Repos.HQ
            ,[SuDung]
            ,[DinhMuc]
            ,[Min]
-           ,[Max],[BravoId],[TyLeDinhMucDau],[TyLeDinhMucRot],[TrongLuongTare],[IsDauVaoBatBuoc],[DinhMucKhongDauVao],[IsDisplay],[CodeId],[DinhMucCaTra],[BaoCaoDauRot],[IsSuDungThoiGianGiuaLoaiThanhPham])
+           ,[Max],[BravoId],[TyLeDinhMucDau],[TyLeDinhMucRot],[TrongLuongTare],[IsDauVaoBatBuoc],[DinhMucKhongDauVao],[IsDisplay],[CodeId],[DinhMucCaTra],[BaoCaoDauRot],[IsSuDungThoiGianGiuaLoaiThanhPham],[IsCaDa],[ThoiGianHT])
      VALUES
            (@MaCa 
            ,@Ma 
@@ -26,14 +26,14 @@ namespace Dao.Repos.HQ
            ,@SuDung 
            ,@DinhMuc 
            ,@Min 
-           ,@Max,@BravoId,@TyLeDinhMucDau,@TyLeDinhMucRot,@TrongLuongTare,@IsDauVaoBatBuoc, @DinhMucKhongDauVao,@IsDisplay,@CodeId,@DinhMucCaTra,@BaoCaoDauRot,@IsSuDungThoiGianGiuaLoaiThanhPham)";
+           ,@Max,@BravoId,@TyLeDinhMucDau,@TyLeDinhMucRot,@TrongLuongTare,@IsDauVaoBatBuoc, @DinhMucKhongDauVao,@IsDisplay,@CodeId,@DinhMucCaTra,@BaoCaoDauRot,@IsSuDungThoiGianGiuaLoaiThanhPham,@IsCaDa,@ThoiGianHT)";
 
         private readonly string qrUpdate = @"UPDATE [dbo].[MaThanhPhamDinhHinh]
    SET [Ten] = @Ten 
       ,[SuDung] = @SuDung 
       ,[DinhMuc] = @DinhMuc 
       ,[Min] = @Min 
-      ,[Max] = @Max,[BravoId]= @BravoId ,[TyLeDinhMucDau] =@TyLeDinhMucDau,[TyLeDinhMucRot] =@TyLeDinhMucRot, [TrongLuongTare] = @TrongLuongTare,[IsDauVaoBatBuoc]= @IsDauVaoBatBuoc,[DinhMucKhongDauVao]=@DinhMucKhongDauVao,[IsDisplay] = @IsDisplay,[CodeId] =@CodeId,[DinhMucCaTra] = @DinhMucCaTra,[BaoCaoDauRot] =@BaoCaoDauRot,[IsSuDungThoiGianGiuaLoaiThanhPham]=@IsSuDungThoiGianGiuaLoaiThanhPham
+      ,[Max] = @Max,[BravoId]= @BravoId ,[TyLeDinhMucDau] =@TyLeDinhMucDau,[TyLeDinhMucRot] =@TyLeDinhMucRot, [TrongLuongTare] = @TrongLuongTare,[IsDauVaoBatBuoc]= @IsDauVaoBatBuoc,[DinhMucKhongDauVao]=@DinhMucKhongDauVao,[IsDisplay] = @IsDisplay,[CodeId] =@CodeId,[DinhMucCaTra] = @DinhMucCaTra,[BaoCaoDauRot] =@BaoCaoDauRot,[IsSuDungThoiGianGiuaLoaiThanhPham]=@IsSuDungThoiGianGiuaLoaiThanhPham, [IsCaDa] = @IsCaDa,[ThoiGianHT] = @ThoiGianHT
  WHERE [MaCa] = @MaCa 
       and [Ma] = @Ma ";
 
@@ -101,7 +101,8 @@ tp.IsSuDungThoiGianGiuaLoaiThanhPham,
 tp.BaoCaoDauRot,
 tp.SuDung,
 tp.CodeId,
-x.Ten as XuongName
+tp.IsCaDa,
+x.Ten as XuongName, tp.ThoiGianHT
 from MaThanhPhamDinhHinh tp
 left join DG_SanPhamTinhLuong sptl on tp.BravoId = sptl.Ma
 left join XiNghiep x on tp.CodeId = x.Ma

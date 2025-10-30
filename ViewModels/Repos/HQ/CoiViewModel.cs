@@ -1,4 +1,5 @@
-﻿using AppViewModels;
+﻿using System.Globalization;
+using AppViewModels;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Models.Repos.A_Model;
@@ -7,6 +8,7 @@ using MvvmHelpers;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.AspNetCore.OutputCaching;
+using Models.Repos;
 using ObservableObject = CommunityToolkit.Mvvm.ComponentModel.ObservableObject;
 using Models.Repos.SoketModels;
 
@@ -114,6 +116,58 @@ namespace ViewModels.Repos.HQ
             }
                 
         }
+        public List<MaCoiXepKhuon_U> GetUs(string Ngay,int PageIndex,int PageSize)
+        {
+            dbPMScontext db = new dbPMScontext();
+            DateTime date = new DateTime();
+            try
+            {
+                date = DateTime.ParseExact(Ngay, "yyyyMMddHHmmss",CultureInfo.InvariantCulture);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            ////return db.AoUs.Where(x=>x.MNgay.Date >= date.Date).OrderByDescending(x=>x.MNgay).Skip((PageIndex -1)*PageSize).Take(PageSize).ToList();
+            //return db.AoUs .Where(x => x.MNgay.Date >= date.Date)
+            //    .GroupBy(x => x.MaAo)
+            //    .Select(g => g.OrderByDescending(x => x.MNgay).FirstOrDefault())
+            //    .Where(x => x != null) 
+            //    .OrderByDescending(x => x!.MNgay)
+            //    .Skip((PageIndex - 1) * PageSize)
+            //    .Take(PageSize)
+            //    .ToList();
+            var latestDates = db.MaCoiXepKhuonUs
+                .Where(x => x.MNgay.Date >= date.Date)
+                .GroupBy(x => x.MaCoi)
+                .Select(g => new { MaCoi = g.Key, MaxId = g.Max(x => x.Id) });
+
+            var query = from hq in db.MaCoiXepKhuonUs.Where(x => x.MNgay.Date >= date.Date) 
+                join latest in latestDates
+                    on new { hq.MaCoi, hq.Id } 
+                    equals new { latest.MaCoi, Id = latest.MaxId }
+                orderby hq.MNgay descending
+                select hq;
+
+            var result = query.Skip((PageIndex - 1) * PageSize)
+                .Take(PageSize)
+                .ToList();
+            return result;
+        }
+        public List<MaCoiXepKhuon_D> GetDs(string Ngay,int PageIndex,int PageSize)
+        {
+            dbPMScontext db = new dbPMScontext();
+            DateTime date = new DateTime();
+            try
+            {
+                date = DateTime.ParseExact(Ngay, "yyyyMMddHHmmss",CultureInfo.InvariantCulture);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            return db.MaCoiXepKhuonDs.Where(x=>x.MNgay.Date >= date.Date).OrderByDescending(x=>x.MNgay).Skip((PageIndex -1)*PageSize).Take(PageSize).ToList();
+        }
         public void CoiTamAddItem(CoiTamChiTiet item, PhieuCanChinhXepKhuon phieuCan) { item.AddItem(phieuCan); }
 
         public void CoiTamAddItems(CoiTamChiTiet item, List<PhieuCanChinhXepKhuon> phieuCans)
@@ -214,6 +268,17 @@ namespace ViewModels.Repos.HQ
         {
             var dao = new Dao.Repos.HQ.MaCoiXepKhuon();
             return dao.Gets<T>();
+        }
+
+        public List<T> GetLatestWeightPerXuongAndCoi<T>()
+        {
+            var dao = new Dao.Repos.HQ.MaCoiXepKhuon();
+            return dao.GetLatestWeightPerXuongAndCoi<T>();
+        }
+        public List<T> GetLatestWeightPerXuongAndCoiRa<T>()
+        {
+            var dao = new Dao.Repos.HQ.MaCoiXepKhuon();
+            return dao.GetLatestWeightPerXuongAndCoiRa<T>();
         }
         public List<T> GetCoiTams<T>()
         {

@@ -87,6 +87,11 @@ namespace ViewModels.Repos.HQ
             var dao = new Dao.Repos.HQ.PhieuCanTPFillet();
             return dao.Gets<T>();
         }
+        public T? Get<T>(string id)
+        {
+            var dao = new Dao.Repos.HQ.PhieuCanTPFillet();
+            return dao.Get<T>(id);
+        }
         public List<T> Gets<T>(DateTime dateTime)
         {
             var dao = new Dao.Repos.HQ.PhieuCanTPFillet();
@@ -196,6 +201,22 @@ namespace ViewModels.Repos.HQ
             var dao = new Dao.Repos.HQ.PhieuCanTPFillet();
             return dao.GetTongHopNhanVienPhucVus<T>(dateTime, sanPhamId, xuongId);
         }
+        public Tuple<int, decimal> GetSoRoTongTrongLuongByNhanVienId(
+            DateTime dateTime,
+            string nhanVienId)
+        {
+            var dao = new Dao.Repos.HQ.PhieuCanTPFillet();
+            return dao.GetSoRoTongTrongLuongByNhanVienId(dateTime, nhanVienId);
+        }
+
+        public Tuple<int, decimal> GetSoRoTongTrongLuongByNhanVienIdandThanhPhamId(DateTime dateTime, string nhanVienId,
+            string thanhPhamId)
+        {
+            var dao = new Dao.Repos.HQ.PhieuCanTPFillet();
+            return dao.GetSoRoTongTrongLuongByNhanVienIdandThanhPhamId(dateTime, nhanVienId, thanhPhamId);
+        }
+
+        
         #region Tính Lương Fillet
         public List<T> GetPhieuTinhLuongs<T>(DateTime dateTime, string xuongId)
         {
@@ -241,6 +262,77 @@ namespace ViewModels.Repos.HQ
             var dao = new Dao.Repos.HQ.PhieuCanTPFillet();
             return dao.GetsTPSoft<T>(dateTime, xuongId);
         }
+        #endregion
+
+        #region Xẻ bướm
+        public List<T> GetChiTietBTPXeBuoms<T>(DateTime fromDate, DateTime toDate, string xuongId)
+        {
+            var dao = new Dao.Repos.HQ.PhieuCanTPFillet();
+            return dao.GetChiTietBTPXeBuoms<T>(fromDate, toDate, xuongId);
+        }
+        public List<T> GetTongHopLTPSBTPXeBuoms<T>(DateTime fromDate, DateTime toDate, string xuongId)
+        {
+            var dao = new Dao.Repos.HQ.PhieuCanTPFillet();
+            return dao.GetTongHopLTPSBTPXeBuoms<T>(fromDate, toDate, xuongId);
+        }
+        public List<T> GetTongHopNhanVienBTPXeBuoms<T>(DateTime fromDate, DateTime toDate, string xuongId)
+        {
+            var dao = new Dao.Repos.HQ.PhieuCanTPFillet();
+            return dao.GetTongHopNhanVienBTPXeBuoms<T>(fromDate, toDate, xuongId);
+        }
+        public List<T> GetTongHopThanhPhamBTPXeBuoms<T>(DateTime fromDate, DateTime toDate, string xuongId)
+        {
+            var dao = new Dao.Repos.HQ.PhieuCanTPFillet();
+            return dao.GetTongHopThanhPhamBTPXeBuoms<T>(fromDate, toDate, xuongId);
+        }
+        public List<T> GetChiTietTPXeBuoms<T>(DateTime fromDate, DateTime toDate, string xuongId)
+        {
+            var dao = new Dao.Repos.HQ.PhieuCanTPFillet();
+            return dao.GetChiTietTPXeBuoms<T>(fromDate, toDate, xuongId);
+        }
+        public List<T> GetTongHopLTPSTPXeBuoms<T>(DateTime fromDate, DateTime toDate, string xuongId)
+        {
+            var dao = new Dao.Repos.HQ.PhieuCanTPFillet();
+            return dao.GetTongHopLTPSTPXeBuoms<T>(fromDate, toDate, xuongId);
+        }
+        public List<T> GetTongHopThanhPhamTPXeBuoms<T>(DateTime fromDate, DateTime toDate, string xuongId)
+        {
+            var dao = new Dao.Repos.HQ.PhieuCanTPFillet();
+            return dao.GetTongHopThanhPhamTPXeBuoms<T>(fromDate, toDate, xuongId);
+        }
+        public List<T> GetTongHopThanhPhamTPXeBuoms2<T>(DateTime fromDate, DateTime toDate, string xuongId)
+        {
+            var dao = new Dao.Repos.HQ.PhieuCanTPFillet();
+            return dao.GetTongHopThanhPhamTPXeBuoms2<T>(fromDate, toDate, xuongId);
+        }
+        public List<T> GetTongHopNhanVienTPXeBuoms<T>(DateTime fromDate, DateTime toDate, string xuongId)
+        {
+            var dao = new Dao.Repos.HQ.PhieuCanTPFillet();
+            return dao.GetTongHopNhanVienTPXeBuoms<T>(fromDate, toDate, xuongId);
+        }
+        public List<T> GetTongHopDinhMucTPXeBuoms<T>(DateTime fromDate, DateTime toDate, string xuongId)
+        {
+            var dao = new Dao.Repos.HQ.PhieuCanTPFillet();
+            return dao.GetTongHopDinhMucTPXeBuoms<T>(fromDate, toDate, xuongId);
+        }
+        #endregion
+
+        #region XLPC
+        #region BTP XẺ BƯỚM
+        public List<T> GetPhieuCanBTPXeBuom_XLPC<T>(DateTime dateTime, string xuongId, string? connStr = null)
+        {
+            var dao = new Dao.Repos.HQ.PhieuCanTPFillet(connStr);
+            return dao.GetPhieuCanBTPXeBuom_XLPC<T>(dateTime, xuongId);
+        }
+        #endregion
+
+        #region TP XẺ BƯỚM
+        public List<T> GetPhieuCanTPXeBuom_XLPC<T>(DateTime dateTime, string xuongId, string? connStr = null)
+        {
+            var dao = new Dao.Repos.HQ.PhieuCanTPFillet(connStr);
+            return dao.GetPhieuCanTPXeBuom_XLPC<T>(dateTime, xuongId);
+        }
+        #endregion
         #endregion
     }
 }

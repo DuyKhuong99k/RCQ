@@ -17,6 +17,7 @@ namespace Models.Repos.AppModel
         public string SizeName { get; set; }
 
         public string ChieuXaName { get; set; }
+        public string ChatLuongName { get; set; }
 
         public string MauName { get; set; }
 

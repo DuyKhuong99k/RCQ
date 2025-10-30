@@ -52,6 +52,8 @@ public class MainViewModel : ObservableObject, IMainService
     public TheViewModel VmThe => TheViewModel.Instance;
     public TheRoViewModel VmTheRo => TheRoViewModel.Instance;
     public ThanhPhamDinhHinh_ColorViewModel VmThanhPhamDinhHinhColor => ThanhPhamDinhHinh_ColorViewModel.Instance;
+    public ThanhPhamDinhHinh_TyLeViewModel VmThanhPhamDinhHinhTyLe { get; }
+    public ThanhPhamDinhHinh_TyLeViewModel VmThanhPhamTyLe => ThanhPhamDinhHinh_TyLeViewModel.Instance;
     public ThanhPhamFillet_ColorViewModel VmThanhPhamFilletColor => ThanhPhamFillet_ColorViewModel.Instance;
     public TheThanhPhamViewModel VmTheThanhPham => TheThanhPhamViewModel.Instance;
 
@@ -85,6 +87,7 @@ public class MainViewModel : ObservableObject, IMainService
     public ThanhPhamKHCViewModel VmThanhPhamKHCXepKhuon => ThanhPhamKHCViewModel.Instance;
     public MaSizeChinhXepKhuonViewModel VmSizeChinhXepKhuon => MaSizeChinhXepKhuonViewModel.Instance;
     public SizeKHCViewModel VmSizeKHCXepKhuon => SizeKHCViewModel.Instance;
+   
     public MaChieuXaXepKhuonViewModel VmChieuXaXepKhuon => MaChieuXaXepKhuonViewModel.Instance;
 
 
@@ -99,6 +102,8 @@ public class MainViewModel : ObservableObject, IMainService
     public CoiLogsViewModel VmCoiLogs => CoiLogsViewModel.Instance;
     public CoiMonitorViewModel VmCoiMonitor => CoiMonitorViewModel.Instance;
     public ChatLuongXepKhuonViewModel VmChatLuong => ChatLuongXepKhuonViewModel.Instance;
+    public NETXepKhuonViewModel VmNETXepKhuon => NETXepKhuonViewModel.Instance;
+    public CongDoanXepKhuonViewModel VmCongDoanXepKhuon => CongDoanXepKhuonViewModel.Instance;
     public PhieuCanRaCoiViewModel VmPhieuCanRaCoi => PhieuCanRaCoiViewModel.Instance;
     public UserAreaViewModel VmUserArea => UserAreaViewModel.Instance;
     public NguoiDungViewModel VmNguoiDung => NguoiDungViewModel.Instance;
@@ -113,9 +118,11 @@ public class MainViewModel : ObservableObject, IMainService
     public SizeNguyenLieuViewModel VmSizeNguyenLieu => SizeNguyenLieuViewModel.Instance;
     public BanCatTietViewModel VmBanCatTiet => BanCatTietViewModel.Instance;
     public MauNguyenLieuViewModel VmMauNguyenLieu => MauNguyenLieuViewModel.Instance;
+    public MauBlockXepKhuonViewModel VmMauBlockXepKhuon => MauBlockXepKhuonViewModel.Instance;
     public PhieuCanNguyenLieuViewModel VmPhieuCanNguyenLieu => PhieuCanNguyenLieuViewModel.Instance;
     public PhieuCanPhuXepKhuonViewModel VmPhieuCanPhuXepKhuon => PhieuCanPhuXepKhuonViewModel.Instance;
     public PhieuCanXepKhuonKHCViewModel VmPhieuCanXepKhuonKXL => PhieuCanXepKhuonKHCViewModel.Instance;
+    public PhieuCanXepKhuonBlockViewModel VmPhieuCanXepKhuonBlock => PhieuCanXepKhuonBlockViewModel.Instance;
     public PhieuCanPhuPhamViewModel VmPhieuCanPhuPham => PhieuCanPhuPhamViewModel.Instance;
     public PhieuCanPhuPhamv2ViewModel VmPhieuCanPhuPhamv2 => PhieuCanPhuPhamv2ViewModel.Instance;
     public HQ_SizeViewModel VmSizeHq => HQ_SizeViewModel.Instance;
@@ -125,7 +132,9 @@ public class MainViewModel : ObservableObject, IMainService
     public HQ_NhanVienViewModel VmNhanVienHq => HQ_NhanVienViewModel.Instance;
     public HQ_PhieuCanViewModel VmPhieuCanHq => HQ_PhieuCanViewModel.Instance;
     CoiViewModel IMainService.VmCoi => CoiViewModel.Instance;
-
+    public AoViewModel VmAoNguyenLieu => AoViewModel.Instance;
+    public TrongLuongCoiTheoThanhPhamViewModel VmTrongLuongCoiTheoThanhPham => TrongLuongCoiTheoThanhPhamViewModel.Instance;
+    public LoaiCaXepKhuonViewModel VmLoaiCaXepKhuon => LoaiCaXepKhuonViewModel.Instance;
     public event Action<string> AlertRequested;
 
     private int MessageBoxShow(string message, string title, int button)
@@ -139,7 +148,16 @@ public class MainViewModel : ObservableObject, IMainService
         //{
         //    await JsRuntime.InvokeVoidAsync("alert", message);
         //});
-        AlertRequested(message);
+        try
+        {
+            AlertRequested(message);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            //throw;
+        }
+       
         return 0;
     }
 }

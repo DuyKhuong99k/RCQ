@@ -108,37 +108,37 @@
 
                     <div style="margin-top:20px;">
                         @{
-                            var themHQ_PhieuCan = rolePermistions.Where(x => x.Fu == "Xử Lý Phiếu Cân HQ / Phiếu Cân HQ" && x.Func == "Thêm Xử Lý Phiếu Cân HQ / Phiếu Cân HQ" && x.Status == 1).FirstOrDefault();
+                            var themHQ_PhieuCan = rolePermistions.Where(x => x.Fu == "Xử Lý Phiếu Cân / Phiếu Cân HQ" && x.Func == "Thêm Xử Lý Phiếu Cân / Phiếu Cân HQ" && x.Status == 1).FirstOrDefault();
                             if (themHQ_PhieuCan != null)
                             {
                                 <button onclick="showInsert()" style="margin-right:5px" class="btn btn-outline-primary">Thêm</button>
                             }
-                            var suaHQ_PhieuCan = rolePermistions.Where(x => x.Fu == "Xử Lý Phiếu Cân HQ / Phiếu Cân HQ" && x.Func == "Sửa Xử Lý Phiếu Cân HQ / Phiếu Cân HQ" && x.Status == 1).FirstOrDefault();
+                            var suaHQ_PhieuCan = rolePermistions.Where(x => x.Fu == "Xử Lý Phiếu Cân / Phiếu Cân HQ" && x.Func == "Sửa Xử Lý Phiếu Cân / Phiếu Cân HQ" && x.Status == 1).FirstOrDefault();
                             if (suaHQ_PhieuCan != null)
                             {
                                 <button onclick="showUpdate()" style="margin-right:5px" class="btn btn-outline-warning"><i class='bx bx-edit-alt'></i>Sửa</button>
                             }
-                            var xoaHQ_PhieuCan = rolePermistions.Where(x => x.Fu == "Xử Lý Phiếu Cân HQ / Phiếu Cân HQ" && x.Func == "Xoá Xử Lý Phiếu Cân HQ / Phiếu Cân HQ" && x.Status == 1).FirstOrDefault();
+                            var xoaHQ_PhieuCan = rolePermistions.Where(x => x.Fu == "Xử Lý Phiếu Cân / Phiếu Cân HQ" && x.Func == "Xoá Xử Lý Phiếu Cân / Phiếu Cân HQ" && x.Status == 1).FirstOrDefault();
                             if (xoaHQ_PhieuCan != null)
                             {
                                 <button onclick="showDelete()" style="margin-right:5px" class="btn btn-outline-danger"><i class='bx bx-trash'></i>Xoá</button>
                             }
-                            var xemSuaHQ_PhieuCan = rolePermistions.Where(x => x.Fu == "Xử Lý Phiếu Cân HQ / Phiếu Cân HQ" && x.Func == "Xem Sửa Xử Lý Phiếu Cân HQ / Phiếu Cân HQ" && x.Status == 1).FirstOrDefault();
+                            var xemSuaHQ_PhieuCan = rolePermistions.Where(x => x.Fu == "Xử Lý Phiếu Cân / Phiếu Cân HQ" && x.Func == "Xem Sửa Xử Lý Phiếu Cân / Phiếu Cân HQ" && x.Status == 1).FirstOrDefault();
                             if (xemSuaHQ_PhieuCan != null)
                             {
                                 <button onclick="showPhieuCanSua()" style="margin-right:5px" class="btn btn-outline-primary">Xem Phiếu Cân Sửa</button>
                             }
-                            var xemXoaHQ_PhieuCan = rolePermistions.Where(x => x.Fu == "Xử Lý Phiếu Cân HQ / Phiếu Cân HQ" && x.Func == "Xem Xoá Xử Lý Phiếu Cân HQ / Phiếu Cân HQ" && x.Status == 1).FirstOrDefault();
+                            var xemXoaHQ_PhieuCan = rolePermistions.Where(x => x.Fu == "Xử Lý Phiếu Cân / Phiếu Cân HQ" && x.Func == "Xem Xoá Xử Lý Phiếu Cân / Phiếu Cân HQ" && x.Status == 1).FirstOrDefault();
                             if (xemXoaHQ_PhieuCan != null)
                             {
                                 <button onclick="showPhieuCanXoa()" style="margin-right:5px" class="btn btn-outline-primary">Xem Phiếu Cân Xóa</button>
                             }
-                            var importHQ_PhieuCan = rolePermistions.Where(x => x.Fu == "Xử Lý Phiếu Cân HQ / Phiếu Cân HQ" && x.Func == "Import Xử Lý Phiếu Cân HQ / Phiếu Cân HQ" && x.Status == 1).FirstOrDefault();
+                            var importHQ_PhieuCan = rolePermistions.Where(x => x.Fu == "Xử Lý Phiếu Cân / Phiếu Cân HQ" && x.Func == "Import Xử Lý Phiếu Cân / Phiếu Cân HQ" && x.Status == 1).FirstOrDefault();
                             if (importHQ_PhieuCan != null)
                             {
                                 <button onclick="import()" style="margin-right:5px" class="btn btn-outline-info"><i class='bx bx-import'></i>Import</button>
                             }
-                            var exportHQ_PhieuCan = rolePermistions.Where(x => x.Fu == "Xử Lý Phiếu Cân HQ / Phiếu Cân HQ" && x.Func == "Export Xử Lý Phiếu Cân HQ / Phiếu Cân HQ" && x.Status == 1).FirstOrDefault();
+                            var exportHQ_PhieuCan = rolePermistions.Where(x => x.Fu == "Xử Lý Phiếu Cân / Phiếu Cân HQ" && x.Func == "Export Xử Lý Phiếu Cân / Phiếu Cân HQ" && x.Status == 1).FirstOrDefault();
                             if (exportHQ_PhieuCan != null)
                             {
                                 <button onclick="export()" style="margin-right:5px" class="btn btn-outline-secondary"><i class='bx bx-export'></i>Export Excel</button>
@@ -924,7 +924,7 @@
             grid = new ej.grids.Grid({
                 dataSource: dataManager,
                 allowPaging: true,
-                pageSettings: { pageSize: 500 },
+                pageSettings: { pageSize: 50, pageSizes: [50, 100, 200, 500, 1000] },
                 allowSelection: true,
                 allowFiltering: true,
                 allowSorting: true,
@@ -943,8 +943,8 @@
                     { type: "checkbox", field: "", allowFiltering: false, allowSorting: false, width: '50' },
                     { field: 'Id', headerText: 'Id', width: 150 },
                     { field: 'STT', headerText: 'STT', width: 150 },
-                    { field: 'Ngay', headerText: 'Ngày', width: 150 },
-                    { field: 'NgayGio', headerText: 'Ngày Giờ', width: 150 },
+                    { field: 'Ngay', headerText: 'Ngày', width: 150, type: 'date', format: 'dd-MM-yyyy HH:mm:ss' },
+                    { field: 'NgayGio', headerText: 'Ngày Giờ', width: 150, type: 'date', format: 'dd-MM-yyyy HH:mm:ss'  },
                     { field: 'MaNhanVien', headerText: 'Mã Nhân Viên', width: 150 },
                     { field: 'MaHoSo', headerText: 'Mã Hồ Sơ', width: 150 },
                     { field: 'NhanVienName', headerText: 'Tên Nhân Viên', width: 150 },
@@ -1731,7 +1731,7 @@
             },
             callback: function (result) {
                 if (result) {
-                    //Người dùng đã bấm OK, Gọi API xóa ở đây
+                    //Người dùng đã bấm OK, Gọi API xóa ở đây        
                     $.ajax({
                         url: '/XuLyPhieuCanHQ/DoDelete_HQ',
                         data: { listInfoPhieuCan: selectedIdsString, ngay: dateTime },
@@ -2012,8 +2012,22 @@
     }
 </script>
 <script>
+    //  function ClearData(GridId) {
+    //     try {
+    //         var gridObj = document.getElementById(GridId).ej2_instances[0];
+    //         if(gridObj)
+    //             gridObj.dataSource = [];
+    //     } catch (e) {
+    //         Console.log(e);
+    //     }
+
+    // }
+
+
     var gridPhieuCanSua;
     function showPhieuCanSua() {
+        //ClearData("GridPhieuCanSua");
+        $('#modalXemPhieuCanSua').modal('show');
         var dateTime = $('#dateTimeXLPC').val();
         var xuongId = @XuongId;
         $.ajax({
@@ -2071,7 +2085,7 @@
                     });
                     // Hiển thị Grid trên trang web
                     gridPhieuCanSua.appendTo('#GridPhieuCanSua');
-                    $('#modalXemPhieuCanSua').modal('show');
+                    
                 }
             },
             error: function (error) {
@@ -2081,6 +2095,8 @@
     }
     var gridPhieuCanXoa;
     function showPhieuCanXoa() {
+        //ClearData("GridPhieuCanXoa");s
+        $('#modalXemPhieuCanXoa').modal('show');
         var dateTime = $('#dateTimeXLPC').val();
         var xuongId = @XuongId;
         $.ajax({
@@ -2138,7 +2154,7 @@
                     });
                     // Hiển thị Grid trên trang web
                     gridPhieuCanXoa.appendTo('#GridPhieuCanXoa');
-                    $('#modalXemPhieuCanXoa').modal('show');
+                    
                 }
             },
             error: function (error) {

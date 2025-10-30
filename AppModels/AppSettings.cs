@@ -19,6 +19,11 @@ public partial class AppSettings : ObservableObject
 
     [ObservableProperty] private string _usr = "pmsvn";
 
+    [ObservableProperty] private string _dbBravo = "";
+    [ObservableProperty] private string _usrBravo = "";
+    [ObservableProperty] private string _passBravo = "";
+    [ObservableProperty] private string _serverNameBravo = "";
+
     public AppSettings GetValues()
     {
         return new AppSettings()
@@ -28,7 +33,11 @@ public partial class AppSettings : ObservableObject
             ReaderPort = ReaderPort,
             Usr = Usr,
             ServerName = "115.74.218.101,2400",
-            TimeOut = 10
+            TimeOut = 10,
+            DbBravo = DbBravo,
+            PassBravo = PassBravo,
+            UsrBravo = UsrBravo,
+            ServerNameBravo = ServerNameBravo
         };
     }
 

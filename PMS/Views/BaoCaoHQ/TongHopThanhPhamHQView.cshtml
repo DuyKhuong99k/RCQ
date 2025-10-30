@@ -1,5 +1,4 @@
-﻿
-@{
+﻿@{
     ViewData["Title"] = "TongHopThanhPhamHQView";
     Layout = "~/Views/Shared/_Layout.cshtml";
     var XuongId = @Context.Session.GetString("XuongId");
@@ -11,7 +10,7 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h2 class="mb-0">Chi Tiết</h2>
+                    <h2 class="mb-0">Tổng Hợp Thành Phẩm</h2>
                 </div>
                 <div class="card-body">
                     <div id="Grid"></div>
@@ -21,24 +20,84 @@
     </div>
 </div>
 <script>
+    // document.addEventListener("DOMContentLoaded", function () {
+    //     let fromDate = document.getElementById("fromDateBCHQ");
+
+    //     if (fromDate) {
+    //         let now = new Date();
+    //         let year = now.getFullYear();
+    //         let month = String(now.getMonth() + 1).padStart(2, "0");
+    //         let day = String(now.getDate()).padStart(2, "0");
+    //         // 00:00:00
+    //         fromDate.value = `${year}-${month}-${day}T00:00:00`;
+    //     }
+
+    //     let toDate = document.getElementById("toDateBCHQ");
+
+    //     if (toDate) {
+    //         let now = new Date();
+    //         let year = now.getFullYear();
+    //         let month = String(now.getMonth() + 1).padStart(2, "0");
+    //         let day = String(now.getDate()).padStart(2, "0");
+    //         //23:59:59
+    //         toDate.value = `${year}-${month}-${day}T23:59:59`;
+    //     }
+    // });
+    document.addEventListener("DOMContentLoaded", function () {
+        let fromDate = document.getElementById("fromDateBCHQ");
+        let toDate = document.getElementById("toDateBCHQ");
+
+        if (fromDate) {
+            fromDate.step = "1";
+            let now = new Date();
+            let year = now.getFullYear();
+            let month = String(now.getMonth() + 1).padStart(2, "0");
+            let day = String(now.getDate()).padStart(2, "0");
+            // 00:00:00
+            fromDate.value = `${year}-${month}-${day}T00:00:00`;
+        }
+
+        if (toDate) {
+            toDate.step = "1";
+            let now = new Date();
+            let year = now.getFullYear();
+            let month = String(now.getMonth() + 1).padStart(2, "0");
+            let day = String(now.getDate()).padStart(2, "0");
+            // 23:59:59
+            toDate.value = `${year}-${month}-${day}T23:59:59`;
+        }
+    });
     var grid;
+    var datalength = 0;
     function loadGridData(data) {
         var dataManager = new ej.data.DataManager({
             json: data,
             adaptor: new ej.data.JsonAdaptor()
         });
-        if (grid && data != null && data != "") {
+        if(data != null && data.length !=null){
+            datalength = data.length;
+        }
+        else{
+            datalength = 0;
+        }
+        if (grid != null) {
             grid.dataSource = dataManager;
             grid.refresh();
         } else {
             grid = new ej.grids.Grid({
                 dataSource: dataManager,
                 allowPaging: true,
-                pageSettings: { pageSize: 50 },
+                pageSettings: { pageSize: 50, pageSizes: [50, 100, 200, 500] },
                 allowFiltering: true,
                 allowSorting: true,
                 filterSettings: { type: 'Excel' },
                 selectionSettings: { persistSelection: true },
+                actionBegin: function (args) {
+                    if (args.requestType == 'filterchoicerequest' || args.requestType == 'filtersearchbegin') {
+
+                        args.filterChoiceCount = datalength;
+                    }
+                },
                 //frozenColumns: 3,
                 allowResizing: true,
                 //rowSelected: onRowSelected,
@@ -66,11 +125,17 @@
                     { field: 'ThanhPhamName', headerText: 'Thành Phẩm', width: 150 },
                     { field: 'MaLo', headerText: 'Lô', width: 150 },
                     { field: 'SizeName', headerText: 'Size', width: 150 },
-                   
-                    { field: 'LoaiNguyenLieuName', headerText: 'Loại Thành Phẩm', width: 150 },
+
+                    { field: 'LoaiNguyenLieuName', headerText: 'Nguyên Liệu', width: 150 },
 
                     { field: 'TrongLuong', headerText: 'Trọng Lượng', type: 'number', width: 150 },
                     { field: 'SoRo', headerText: 'Số Rổ', type: 'number', width: 150 },
+                    { field: 'GioBatDauCanThanhPham', headerText: 'Giờ Bất Đầu', width: 150 },
+                    { field: 'GioKetThucCanThanhPham', headerText: 'Giờ Kết Thúc', width: 150 },
+                    { field: 'TongGioLamViec', headerText: 'Tổng Giờ', width: 150 },
+                    { field: 'GioBatDau', headerText: 'Giờ Bất Đầu (KPL)', width: 150 },
+                    { field: 'GioKetThuc', headerText: 'Giờ Kết Thúc (KPL)', width: 150 },
+                    { field: 'SoGio', headerText: 'Tổng Giờ (KPL)', width: 150 },
                     // { field: 'ChiSanLuong', headerText: 'Chỉ SL', width: 100, displayAsCheckBox: 'true', textAlign: 'Center' },
                     // { field: 'TheId', headerText: 'Mã Thẻ', width: 150 },
                     // { field: 'MaMayCan', headerText: 'Máy Cân', width: 150 },
@@ -80,7 +145,7 @@
                         {
                             type: 'Sum',
                             field: 'TrongLuong',
-                            //format: '0,000',
+                            format: '####.000',
                             footerTemplate: 'Tổng Trọng Lượng: ${Sum} Kg'
                         },
                         {
@@ -93,28 +158,42 @@
                 }]
             });
             grid.appendTo('#Grid');
+            grid.toolbarClick = function (args) {
+             if (args.item.id === 'Grid_excelexport') {
+                grid.excelExport();
+             }};
         }
     }
     loadGridData();
 
 </script>
 <script>
-    document.getElementById('RefreshButton').addEventListener("click",
+    function ClearData(GridId) {
+        try {
+            var gridObj = document.getElementById(GridId).ej2_instances[0];
+            if(gridObj)
+                gridObj.dataSource = [];
+        } catch (e) {
+            Console.log(e);
+        }
+
+    }
+    document.getElementById('RefreshButtonBCHQ').addEventListener("click",
         function () {
-            var btn = document.getElementById('RefreshButton').ej2_instances[0];
+            var btn = document.getElementById('RefreshButtonBCHQ').ej2_instances[0];
             var content = btn.content;
             btn.content = "Đang Tải ...";
-            var grid = document.getElementById("Grid").ej2_instances[0]; // ej2-grid instance
-            var fromDate = document.getElementById("datepicker1").ej2_instances[0];
-            var toDate = document.getElementById("datepicker2").ej2_instances[0];
+            var fromDate =$('#fromDateBCHQ').val();
+            var toDate = $('#toDateBCHQ').val();
             var xuongId = @XuongId;
             $.ajax({
                 url: "@Url.Action("Reload", "BaoCaoHQ")",
                 type: "POST",
-                data: { "fromDate": fromDate.value.toDateString(), "toDate": toDate.value.toDateString(), xuongId: xuongId },
+                data: { "fromDate": fromDate, "toDate": toDate, xuongId: xuongId },
                 success: function (response) {
                     // Kiểm tra trạng thái "Success" trong dữ liệu JSON từ máy chủ
                     if (response.Success) {
+                        ClearData("Grid");
                         loadGridData(response.Data);
                     } else {
                         loadGridData(response.Data);

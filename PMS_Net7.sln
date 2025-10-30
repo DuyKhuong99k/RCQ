@@ -45,6 +45,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JsonTreeView2", "JsonTreeVi
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PrintIt", "PrintIt\PrintIt.csproj", "{26DB1F05-9251-439B-8184-2224D856F6EA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PMSSetUpRolepermistion", "PMSSetUpRolepermistion\PMSSetUpRolepermistion.csproj", "{38DAC674-EF01-4212-A036-81684D1F85AA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UploadDataByExcelConsole", "UploadDataByExcelConsole\UploadDataByExcelConsole.csproj", "{803FEDCA-DB8E-46AA-B769-9AC588759DD5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -135,6 +139,14 @@ Global
 		{26DB1F05-9251-439B-8184-2224D856F6EA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{26DB1F05-9251-439B-8184-2224D856F6EA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{26DB1F05-9251-439B-8184-2224D856F6EA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{38DAC674-EF01-4212-A036-81684D1F85AA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{38DAC674-EF01-4212-A036-81684D1F85AA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{38DAC674-EF01-4212-A036-81684D1F85AA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{38DAC674-EF01-4212-A036-81684D1F85AA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{803FEDCA-DB8E-46AA-B769-9AC588759DD5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{803FEDCA-DB8E-46AA-B769-9AC588759DD5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{803FEDCA-DB8E-46AA-B769-9AC588759DD5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{803FEDCA-DB8E-46AA-B769-9AC588759DD5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -29,14 +29,14 @@
             json: data,
             adaptor: new ej.data.JsonAdaptor()
         });
-        if (grid && data != null && data != "") {
+        if (grid != null) {
             grid.dataSource = dataManager;
             grid.refresh();
         } else {
             grid = new ej.grids.Grid({
                 dataSource: dataManager,
                 allowPaging: true,
-                pageSettings: { pageSize: 50 },
+                pageSettings: { pageSize: 50, pageSizes: [50, 100, 200, 500] },
                 allowFiltering: true,
                 allowSorting: true,
                 filterSettings: { type: 'Excel' },
@@ -76,8 +76,8 @@
                     //{ field: 'NetName', headerText: 'NET', width: 150 },
                     //{ field: 'ChieuXaName', headerText: 'Chiếu Xạ', width: 150 },
                     //{ field: 'MauName', headerText: 'Màu', width: 150 },
-                    { field: 'SoRo', headerText: 'Số Rổ', type: 'number', width: 150 },
-                    { field: 'TrongLuong', headerText: 'Trọng Lượng', type: 'number', width: 150 },
+                    { field: 'SoRo', headerText: 'Số Rổ', type: 'number',format:'N2', width: 150 },
+                    { field: 'TrongLuong', headerText: 'Trọng Lượng', type: 'number',format:'N2', width: 150 },
                     // { field: 'TrongLuongNguyenLieu', headerText: 'Trọng Lượng NL', type: 'number', width: 150 },
                     // { field: 'LyDoName', headerText: 'Lý Do', width: 150 },
                     // { field: 'Block', headerText: 'Block', width: 150 },
@@ -89,6 +89,9 @@
                     // { field: 'XuongName', headerText: 'Xưởng', width: 150 },
                     { field: 'MaMayCan', headerText: 'Máy Cân', width: 150 },
                     //{ field: 'MayQuay', headerText: 'Máy Quay', width: 150 },
+                    { field: 'ThoiGianVao', headerText: 'TG Vào', type: 'date', width: 150, format: 'HH:mm:ss'  },
+                    { field: 'ThoiGianRa', headerText: 'TG Ra', type: 'date', width: 150, format: 'HH:mm:ss'  },
+                    { field: 'TongThoiGian', headerText: 'Tổng Thời Gian', type: 'number', width: 150 },
                 ],
                 aggregates: [{
                     columns: [
@@ -108,14 +111,29 @@
                 }]
             });
             grid.appendTo('#Grid');
+            grid.toolbarClick = function (args) {
+             if (args.item.id === 'Grid_excelexport') {
+                grid.excelExport();
+             }};
         }
     }
     loadGridData();
 
 </script>
 <script>
+    function ClearData(GridId) {
+        try {
+            var gridObj = document.getElementById(GridId).ej2_instances[0];
+            if(gridObj)
+                gridObj.dataSource = [];
+        } catch (e) {
+            Console.log(e);
+        }
+
+    }
     document.getElementById('RefreshButton').addEventListener("click",
         function () {
+            ClearData("Grid");
             var btn = document.getElementById('RefreshButton').ej2_instances[0];
             var content = btn.content;
             btn.content = "Đang Tải ...";

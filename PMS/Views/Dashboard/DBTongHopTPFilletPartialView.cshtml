@@ -5,9 +5,10 @@
 }
 <link href="~/css/dbtonghoptpstyle.css" rel="stylesheet" />
 
-<div class="card mb-4">
+<div class="card mb-4 minHeigh">
     <div class="card-header" style="text-align:center">
-        <h6>Tổng Hợp Thành Phẩm Fillet</h6>
+        <h6 class="mb-1 fw-semibold">Tổng Hợp Thành Phẩm Fillet</h6>
+        <small class="text-muted">ĐM Fillet: <strong id="dmFilletTPFillet">0.000</strong></small>
     </div>
     <div style="margin-top:-1.5rem !important" class="card-body ">
         <div class="fixed-chartPie d-flex flex-column justify-content-between align-items-center mb-3" style="width:100%; height:200px;">
@@ -25,7 +26,7 @@
            data-bs-toggle="collapse"
            data-bs-target="#collapseExampleFillet"
            aria-expanded="false"
-           aria-controls="collapseExample">
+           aria-controls="collapseExample" style="position:relative; z-index:1;">
             Xem chi tiết
         </a>
         <div class="collapse" id="collapseExampleFillet">
@@ -48,118 +49,178 @@
 </div>
 <script src="~/js/adduserwaitview.js"></script>
 <script>
-    if (typeof detailLinkFillet === 'undefined') {
-        var detailLinkFillet = document.getElementById('detailLinkFillet');
-    }
-   if(typeof tongHopTPFilletChart === 'undefined') {
-       var tongHopTPFilletChart;
-   }
-    detailLinkFillet.addEventListener('click', function () {
-        if (this.classList.contains('active-link')) {
-            this.classList.remove('active-link');
-        } else {
-            this.classList.add('active-link');
+    document.addEventListener('DOMContentLoaded', function () {
+        var detailLink = document.getElementById('detailLinkFillet');
+        var collapseElement = document.getElementById('collapseExampleFillet');
+
+        function setColor(defaultColor, hoverColor) {
+            detailLink.style.color = defaultColor;
+
+            detailLink.onmouseenter = function () {
+                detailLink.style.color = hoverColor;
+            };
+            detailLink.onmouseleave = function () {
+                detailLink.style.color = defaultColor;
+            };
         }
-    });
 
+        detailLink.textContent = 'Xem chi tiết';
+        setColor('#75aaff', '#0056b3');
 
-    $(document).ready(function () {
-        document.getElementById("loadingIndicatorFillet").style.display = "block";
-        loadDataFillet();
-        //var XuongId = @Context.Session.GetString("XuongId");
-        // var xuongId = @XuongId;
-        // AddUserWaitView(xuongId);
-    });
-    function loadDataFillet() {
-        var xuongId = @XuongId;
-        AddUserWaitView(xuongId);
-        const parentElement = document.querySelector('.fillet');
-        var fromDate = "@DateTime.Now.Date.AddDays(int.Parse((NumberDate ?? "0").ToString()) * -1).ToString("yyyy-MM-dd")";
-        var toDate = "@DateTime.Now.Date.ToString("yyyy-MM-dd")";
-        $.ajax({
-            url: '/Dashboard/TongHopTyLeThanhPhamFilletWithDate',
-            data: { fromDate: fromDate, toDate: toDate },
-            type: 'GET',
-            dataType: 'json',
-            success: function (data) {
-                if (tongHopTPFilletChart) {
-                    tongHopTPFilletChart.series[0].dataSource = data.datas;
-                } else {
-                    rendertChartTHTPFillet(data);
-                }
-                parentElement.innerHTML = '';
-                updateUIFillet(data);
-
-            },
-            error: function (error) {
-                toastOptionNotyfi();
-                toastr["error"]('Đã xảy ra lỗi khi lấy dữ liệu từ server: ', error, "Thông báo");
-            },
-            complete: function () {
-                document.getElementById("loadingIndicatorFillet").style.display = "none";
-            }
+        collapseElement.addEventListener('show.bs.collapse', function () {
+            detailLink.textContent = 'Thu gọn';
+            setColor('#6c757d', '#dc3545');
         });
+
+        collapseElement.addEventListener('hide.bs.collapse', function () {
+            detailLink.textContent = 'Xem chi tiết';
+            setColor('#75aaff', '#0056b3');
+        });
+    });
+</script>
+<script>
+     if (typeof detailLinkFillet === 'undefined') {
+         var detailLinkFillet = document.getElementById('detailLinkFillet');
+     }
+    if(typeof tongHopTPFilletChart === 'undefined') {
+        var tongHopTPFilletChart;
     }
+     detailLinkFillet.addEventListener('click', function () {
+         if (this.classList.contains('active-link')) {
+             this.classList.remove('active-link');
+         } else {
+             this.classList.add('active-link');
+         }
+     });
 
-    function rendertChartTHTPFillet(data) {
-        var _data = data.datas;
-        chartData = {
-            series: [
-                {
-                    dataSource: _data,
-                    innerRadius: '80%',
-                    xName: 'labels',
-                    yName: 'TrongLuongTP',
-                    text: 'DinhMucTP',
-                    dataLabel: {
-                        visible: true,
-                        name: 'DinhMucTP',
-                        position: 'Outside',
-                        template: '<div>${point.text}</div>'
-                    }
 
-                }
-            ],
-            centerLabel: {
-                text: ' ',
-                hoverTextFormat: '${point.x}<br>${point.percentage}%'
-            }, legendSettings: {
-                visible: false
-            },
-            //title: 'Tổng Hợp Loại Thành Phẩm Định Hình',
-            width: '100%',
-            height: '100%'
-        };
-        tongHopTPFilletChart = new ej.charts.AccumulationChart(chartData, '#elementFillet');
+     $(document).ready(function () {
+         document.getElementById("loadingIndicatorFillet").style.display = "block";
+         loadDataFillet();
+         //var XuongId = @Context.Session.GetString("XuongId");
+         // var xuongId = @XuongId;
+         // AddUserWaitView(xuongId);
+     });
+     function loadDataFillet() {
+         var xuongId = @XuongId;
+         //AddUserWaitView(xuongId);
+         const parentElement = document.querySelector('.fillet');
+         const fromDate = localStorage.getItem("fromDate_dashboard_user");
+         const toDate = localStorage.getItem("toDate_dashboard_user");
+         $.ajax({
+             url: '/Dashboard/TongHopTyLeThanhPhamFilletWithDate',
+             data: { fromDate: fromDate, toDate: toDate ,xuongId:xuongId},
+             type: 'GET',
+             dataType: 'json',
+             success: function (data) {
+                 if (tongHopTPFilletChart) {
+                     tongHopTPFilletChart.series[0].dataSource = data.datas;
+                 } else {
+                     rendertChartTHTPFillet(data);
+                 }
+                 
+                 updateUIFillet(data);
 
-    }
+             },
+             error: function (error) {
+                 toastOptionNotyfi();
+                 toastr["error"]('Đã xảy ra lỗi khi lấy dữ liệu từ server: ', error, "Thông báo");
+             },
+             complete: function () {
+                 document.getElementById("loadingIndicatorFillet").style.display = "none";
+             }
+         });
+     }
 
-    function updateUIFillet(data) {
+     function rendertChartTHTPFillet(data) {
+         var _data = data.datas;
+         chartData = {
+             series: [
+                 {
+                     dataSource: _data,
+                     innerRadius: '80%',
+                     xName: 'labels',
+                     yName: 'TrongLuongTP',
+                     text: 'DinhMucTP',
+                     dataLabel: {
+                         visible: true,
+                         name: 'TrongLuongAndDinhMucAnhPersente',
+                         position: 'Outside',
+                         template: '<div style="position:relative; z-index:1;">${point.text}</div>'
+                     }
 
-        const parentElement = document.querySelector('.fillet');
-        //tongHopTPDHChart.centerLabel.text = 'Tổng<br>' + data.TongTL + 'Kg';
-        document.getElementById("tongTLTPFillet").textContent = 'Tổng: ' + data.TongTL + " Kg";
-        var series = tongHopTPFilletChart.series[0];
-        for (let i = 0; i < series.points.length; i++) {
-            var item = series.points[i];
-            const newItem = document.createElement('tr');
-            newItem.innerHTML = `
-                    <td>
-                        <div>
-                            <h6 style="color: ${item.color}" class="mb-0">${item.x}</h6>
-                        </div>
-                    </td>
-                    <td>
-                        <small class="fw-semibold">${item.text}</small>
-                    </td>
-                    <td style="text-align: right;">
-                        <small class="fw-semibold">${item.y} Kg</small>
-                    </td>
-                 `;
+                 }
+             ],
+             centerLabel: {
+                 text: ' ',
+                 hoverTextFormat: '${point.x}<br>${point.percentage}%'
+             }, legendSettings: {
+                 visible: false
+             },
+             //title: 'Tổng Hợp Loại Thành Phẩm Định Hình',
+             width: '100%',
+             height: '100%'
+         };
+         tongHopTPFilletChart = new ej.charts.AccumulationChart(chartData, '#elementFillet');
 
-            parentElement.appendChild(newItem);
+     }
+
+     function updateUIFillet(data) {
+         const rawTongTL = data.TongTL;
+         var dmFillet = data.DinhMucFillet;
+        // Nếu không có giá trị hoặc là "underfile" thì không làm gì
+        if (
+            rawTongTL === undefined ||
+            rawTongTL === null ||
+            rawTongTL === 'underfile'
+        ) {
+            return;
         }
+        document.getElementById("dmFilletTPFillet").textContent = dmFillet;
+        // Chuẩn hóa giá trị: loại bỏ dấu phẩy và ép sang số
+        const tongTLNumber = Number(String(rawTongTL).replace(/,/g, ''));
+
+        // Nếu sau khi chuẩn hóa mà vẫn không hợp lệ hoặc = 0, thì cũng không cập nhật
+        if (isNaN(tongTLNumber) || tongTLNumber === 0) {
+            return;
+        }
+         const parentElement = document.querySelector('.fillet');
+         parentElement.innerHTML = '';
+         //tongHopTPDHChart.centerLabel.text = 'Tổng<br>' + data.TongTL + 'Kg';
+         document.getElementById("tongTLTPFillet").textContent = 'Tổng: ' + rawTongTL + " Kg";
+         var series = tongHopTPFilletChart.series[0];
+         for (let i = 0; i < series.points.length; i++) {
+             var item = series.points[i];
+             const trongLuongTP = item.y;
+             const trongLuongTPFormat = trongLuongTP.toLocaleString('vi-VN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+             const text = item.text.split('-');
+             const lastText = text[1]?.trim();
+             const dinhMuc = parseFloat(lastText.replace(',', '.'));
+             const newItem = document.createElement('tr');
+                 newItem.innerHTML = `
+                     <td>
+                         <div>
+                             <h6 style="color: ${item.color}" class="mb-0">${item.x}</h6>
+                         </div>
+                     </td>
+                     <td>
+                         <small class="fw-semibold">${dinhMuc}</small>
+                     </td>
+                     <td style="text-align: right;">
+                         <small class="fw-semibold">${trongLuongTPFormat} Kg</small>
+                     </td>
+                  `;
+
+             parentElement.appendChild(newItem);
+         }
+     }
+     
+     var timeInterval = localStorage.getItem("timeInterval_dashboard_user");
+
+    // Nếu null thì ép thành 30p
+    if (isNaN(timeInterval) || timeInterval <= 0) {
+        timeInterval = 1800000;
     }
-    var timeInterval = @AppViewModels.AppViewModel.Instance.TimeSetIntervalDashBoardView;
+
     setInterval(loadDataFillet, timeInterval);
 </script>

@@ -10,7 +10,7 @@ namespace Handlers
     {
         public Exception? Error { get; private set; }
         public bool IsSuccess => Error == null;
-
+        public bool ErrorCode { get; set; }
         public OperationResult(Exception? error)
         {
             Error = error;

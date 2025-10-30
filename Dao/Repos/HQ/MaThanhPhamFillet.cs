@@ -17,21 +17,21 @@ namespace Dao.Repos.HQ
            ,[Ten]
            ,[SuDung]
            ,[Min]
-           ,[Max],[IsSoChe],[IsCaMuoi],[DinhMuc],[BravoId],[ThoiGianTren1kgSeconds],[DinhMucHaoHut],[CodeId],[IsNotSetByTime],[ColorRGB],[KhongPhanBietSize])
+           ,[Max],[IsSoChe],[IsCaMuoi],[DinhMuc],[BravoId],[ThoiGianTren1kgSeconds],[DinhMucHaoHut],[CodeId],[IsNotSetByTime],[ColorRGB],[KhongPhanBietSize],[IsXeBuom],[IsChuyenFillet],[IsDat],[IsNguyenLieuXeBuom],[IsNguyenCon],[ThoiGianHT])
      VALUES
            (@MaCa 
            ,@Ma 
            ,@Ten 
            ,@SuDung  
            ,@Min 
-           ,@Max,@IsSoChe,@IsCaMuoi,@DinhMuc,@BravoId,@ThoiGianTren1kgSeconds,@DinhMucHaoHut, @CodeId,@IsNotSetByTime,@ColorRGB,@KhongPhanBietSize)";
+           ,@Max,@IsSoChe,@IsCaMuoi,@DinhMuc,@BravoId,@ThoiGianTren1kgSeconds,@DinhMucHaoHut, @CodeId,@IsNotSetByTime,@ColorRGB,@KhongPhanBietSize,@IsXeBuom,@IsChuyenFillet,@IsDat,@IsNguyenLieuXeBuom,@IsNguyenCon, @ThoiGianHT)";
 
         private readonly string qrUpdate = @"UPDATE [dbo].[MaThanhPhamFillet]
    SET [Ten] = @Ten 
       ,[SuDung] = @SuDung 
       ,[Min] = @Min 
       ,[Max] = @Max
-        ,[IsSoChe] = @IsSoChe, [IsCaMuoi] = @IsCaMuoi, [DinhMuc] = @DinhMuc,[BravoId] = @BravoId,[ThoiGianTren1kgSeconds] = @ThoiGianTren1kgSeconds , [DinhMucHaoHut] =@DinhMucHaoHut,[CodeId] = @CodeId,[IsNotSetByTime]= @IsNotSetByTime,[ColorRGB] = @ColorRGB, [KhongPhanBietSize]=@KhongPhanBietSize
+        ,[IsSoChe] = @IsSoChe, [IsCaMuoi] = @IsCaMuoi, [DinhMuc] = @DinhMuc,[BravoId] = @BravoId,[ThoiGianTren1kgSeconds] = @ThoiGianTren1kgSeconds , [DinhMucHaoHut] =@DinhMucHaoHut,[CodeId] = @CodeId,[IsNotSetByTime]= @IsNotSetByTime,[ColorRGB] = @ColorRGB, [KhongPhanBietSize]=@KhongPhanBietSize, [IsXeBuom]=@IsXeBuom, IsChuyenFillet=@IsChuyenFillet,[IsDat] = @IsDat, [IsNguyenLieuXeBuom] = @IsNguyenLieuXeBuom, [IsNguyenCon] = @IsNguyenCon, [ThoiGianHT] = @ThoiGianHT
  WHERE [MaCa] = @MaCa 
       and [Ma] = @Ma ";
 

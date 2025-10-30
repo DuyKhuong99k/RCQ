@@ -61,6 +61,24 @@ namespace ViewModels.Repos.HQ
                 throw;
             }
         }
+        public List<T> GetsLast<T>(DateTime dateTime, int num)
+        {
+            var dao = new Dao.Repos.HQ.PhieuCanXepKhuonBlock();
+            return dao.GetsLast<T>(dateTime, num);
+        }
+        public int Insert<T>(T item)
+        {
+            try
+            {
+                var dao = new Dao.Repos.HQ.PhieuCanXepKhuonBlock();
+                return dao.Insert(item);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
+        }
         #region Xử Lý Phiếu Cân
         public List<T> GetPhieuCan_XLPC<T>(DateTime dateTime, string xuongId, string? connStr = null)
         {

@@ -69,4 +69,19 @@ public partial class MaThanhPhamFillet
     public string? ColorRGB { get; set; }
 
     public bool KhongPhanBietSize { get; set; }
+    [Required]
+    [Column(TypeName = "datetime2(7)")]
+    public DateTime MNgay { get; set; } = DateTime.Now;
+    public bool IsXeBuom { get; set; } = false;
+    public bool IsChuyenFillet { get; set; } = false;
+    public bool IsNguyenLieuXeBuom { get; set; } = false;
+    /// <summary>
+    /// Dạt
+    /// </summary>
+    public bool IsDat { get; set; } = false;
+    public bool IsGiaoXepKhuon { get; set; } = false;
+    public bool IsNguyenCon { get; set; } = false;
+    public bool IsNguyenConNXB { get; set; } = false;
+    [Column(TypeName = "decimal(18, 2)")]
+    public decimal ThoiGianHT { get; set; } = 30M;
 }

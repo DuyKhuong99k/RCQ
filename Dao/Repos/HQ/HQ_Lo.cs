@@ -8,31 +8,24 @@ namespace Dao.Repos.HQ
         private readonly string connectionString;
         private string tableName = @"HQ_Lo";
         private readonly string qrDelete = @"DELETE FROM [dbo].[HQ_Lo]
-      WHERE [Ma] = @Ma
+      WHERE [Id] = @Id
 ";
 
         private readonly string qrInsert = @"INSERT INTO [dbo].[HQ_Lo]
-           ([Ma]
-           ,[Ten]
+           ([Id]
+           ,[NgayNguyenLieu]
            ,[SuDung]
-           ,[NgayTao]
-           ,[TrangThai]
-           ,[Ngay])
+           ,[MNgay])
      VALUES
-           (@Ma
-           ,@Ten
-           ,@SuDung
-           ,@NgayTao
-           ,@TrangThai
-           ,@Ngay)";
+           (@Id
+           ,@NgayNguyenLieu
+           ,@SuDung,@MNgay)";
 
         private readonly string qrUpdate = @"UPDATE [dbo].[HQ_Lo]
-   SET [Ten] = @Ten
+   SET [NgayNguyenLieu] = @NgayNguyenLieu
       ,[SuDung] = @SuDung
-      ,[NgayTao] = @NgayTao
-      ,[TrangThai] = @TrangThai
-      ,[Ngay] = @Ngay
- WHERE [Ma] = @Ma";
+      ,[MNgay] = @MNgay
+ WHERE [Id] = @Id";
 
         private readonly string qrGetAll = "Select * from HQ_Lo";
 
@@ -58,6 +51,13 @@ namespace Dao.Repos.HQ
             return rows;
         }
 
+        public T? Get<T>(string id)
+        {
+            using var connection = new SqlConnection(connectionString);
+            connection.Open();
+            var item = connection.QueryFirstOrDefault<T>($"Select * from {tableName} where Id = @id", new { id });
+            return item;
+        }
         public int Insert<T>(T item)
         {
             using var connection = new SqlConnection(connectionString);

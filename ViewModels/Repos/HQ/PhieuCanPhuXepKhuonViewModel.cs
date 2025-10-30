@@ -67,6 +67,23 @@ namespace ViewModels.Repos.HQ
             var dao = new Dao.Repos.HQ.PhieuCanPhuXepKhuon();
             return dao.GetsLast<T>(dateTime, num);
         }
+
+        public T? Get<T>(string id)
+        {
+            var dao = new Dao.Repos.HQ.PhieuCanPhuXepKhuon();
+            return dao.Get<T>(id);
+        }
+
+        public int Insert<T>(T item)
+        {
+
+            var dao = new Dao.Repos.HQ.PhieuCanPhuXepKhuon();
+            return dao.Insert(item);
+        }
+        public PhieuCanPhuXepKhuon CreateDefaultNew()
+        {
+            return new PhieuCanPhuXepKhuon();
+        }
         #region Xử Lý Phiếu Cân
         public List<T> GetPhieuCan_XLPC<T>(DateTime dateTime, string xuongId, string? connStr = null)
         {
@@ -193,6 +210,8 @@ namespace ViewModels.Repos.HQ
                 throw;
             }
         }
+
+      
         #endregion
     }
 }

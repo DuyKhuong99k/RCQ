@@ -9,27 +9,29 @@
 @using Syncfusion.Blazor.DropDowns
 @using System.Drawing
 @using PMSHub.Components.Layout
+@using Vars.Hubs
 @rendermode InteractiveServer
 @attribute [StreamRendering]
 @inject NavigationManager Navigation
 @inject IMainService MainService
 @inject IConverterService ConverterService
 @inject IJSRuntime JsRuntime
+@inject IToastService ToastService
 @inherits AuthenticatedComponent
 <PageTitle>Đặt màu thẻ - Định Hình</PageTitle>
 
 
 
 <!-- Navbar -->
-<TopLayout />
+@* <TopLayout /> *@
 <!-- / Navbar -->
 <!-- Content wrapper -->
-<div class="content-wrapper">
-    <!-- Content -->
+@* <div class="content-wrapper"> *@
+@*     <!-- Content --> *@
 
-    <div class="container-xxl flex-grow-1 container-p-y">
+@*     <div class="container-xxl flex-grow-1 container-p-y"> *@
         <h1>Đặt màu thẻ - Định Hình</h1>
-        <SfGrid DataSource="MainService.VmThanhPhamDinhHinhColor.Items" Height="500" @ref="Grid" AllowSorting="true" AllowMultiSorting="true" TValue="MaThanhPhamDinhHinh_Color" AllowFiltering="true">
+        <SfGrid DataSource="MainService.VmThanhPhamDinhHinhColor.Items" Height="500" @ref="Grid" AllowSorting="true" AllowMultiSorting="true" TValue="MaThanhPhamDinhHinh_Color" AllowFiltering="true" AllowExcelExport="true">
             <GridTemplates>
                 <ToolbarTemplate>
                     <SfToolbar>
@@ -38,8 +40,7 @@
                             <ToolbarItem Type="@ItemType.Button" PrefixIcon="e-refresh icon" Id="refresh" Text="Tải Lại"></ToolbarItem>
                             <ToolbarItem Type="@ItemType.Button" PrefixIcon="e-expand icon" Id="add" Text="Thêm"></ToolbarItem>
                             <ToolbarItem Type="@ItemType.Button" PrefixIcon="e-edit icon" Id="edit" Text="Sửa"></ToolbarItem>
-                            @* <ToolbarItem Type="@ItemType.Button" PrefixIcon="e-export-excel icon" Id="ExcelExport" Text="Xuất Excel"></ToolbarItem> *@
-                            @* <ToolbarItem Type="@ItemType.Button" PrefixIcon="e-circle-remove icon" Id="delete" Text="Xóa"></ToolbarItem> *@
+                            <ToolbarItem Type="@ItemType.Button" PrefixIcon="e-export-excel icon" Id="ExcelExport" Text="Xuất Excel"></ToolbarItem>
                         </ToolbarItems>
                     </SfToolbar>
                 </ToolbarTemplate>
@@ -214,14 +215,14 @@
                 <DialogButton Content="Xác Nhận" IsPrimary="true" OnClick="@CloseDialogAdd" />
             </DialogButtons>
         </SfDialog>
-    </div>
+@*     </div> *@
 
-    <!-- / Content -->
-    <!-- Footer -->
-    <FooterLayout />
-    <!-- / Footer -->
-    <div class="content-backdrop fade"></div>
-</div>
+@*     <!-- / Content --> *@
+@*     <!-- Footer --> *@
+@*     <FooterLayout /> *@
+@*     <!-- / Footer --> *@
+@*     <div class="content-backdrop fade"></div> *@
+@* </div> *@
 <!-- Content wrapper -->
 <style>
     @@media print {
@@ -272,7 +273,14 @@
             });
             if (!result.IsSuccess)
             {
-                await JsRuntime.InvokeVoidAsync("alert", result.Error?.ToString()); // Alert
+                var o = new ToastOption
+                    {
+                        Title = "Thông Báo",
+                        Content = result.Error?.ToString() ?? "Có lỗi xảy ra"
+                    };
+                o.SetType(ToastType.Error);
+
+                ToastService.ShowToast(o);
             }
 
 
@@ -289,12 +297,26 @@
                 }
                 else
                 {
-                    await JsRuntime.InvokeVoidAsync("alert", "Vui Lòng nhập đầy đủ thông tin"); // Alert
+                    var o = new ToastOption
+                    {
+                        Title = "Thông Báo",
+                            Content = "Vui Lòng nhập đầy đủ thông tin"
+                    };
+                    o.SetType(ToastType.Error);
+
+                    ToastService.ShowToast(o);
                 }
             });
             if (!result.IsSuccess)
             {
-                await JsRuntime.InvokeVoidAsync("alert", result.Error?.ToString()); // Alert
+                var o = new ToastOption
+                {
+                    Title = "Thông Báo",
+                    Content = result.Error?.ToString() ?? "Có lỗi xảy ra"
+                };
+                o.SetType(ToastType.Error);
+
+                ToastService.ShowToast(o);
             }
         }
     }
@@ -326,16 +348,25 @@
             }
             else
             {
-                await JsRuntime.InvokeVoidAsync("alert", "Không có dữ liệu được chọn!"); // Alert
+                var o = new ToastOption
+                    {
+                        Title = "Thông Báo",
+                        Content = "Không có dữ liệu được chọn!"
+                    };
+                o.SetType(ToastType.Error);
+
+                ToastService.ShowToast(o);
             }
 
         }
 
-        // if (args.Item.Id == "ExcelExport")
-        // {
-
-        //     await Grid.PrintAsync();
-        // }
+        if (args.Item.Id == "ExcelExport") //Id is combination of Grid's ID and itemname
+        {
+            var ExportProperties = new ExcelExportProperties();
+            ExportProperties.ExportType = ExportType.AllPages;
+            ExportProperties.IncludeTemplateColumn = true;
+            await Grid.ExportToExcelAsync(ExportProperties);
+        }
     }
 
 

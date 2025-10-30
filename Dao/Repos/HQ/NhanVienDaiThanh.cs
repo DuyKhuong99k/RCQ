@@ -30,6 +30,7 @@ Insert Into NhanVienDaiThanh ([MaNhanVien],[MaChamCong],[MaHoSo],[Xuong],[Name],
  WHERE [MaNhanVien] = @MaNhanVien";
 
         private readonly string qrGetAll = "Select * from NhanVienDaiThanh";
+        private readonly string qrGetAllIsNhom = "Select * from NhanVienDaiThanh nv where nv.IsNhom = 1";
 
         public NhanVienDaiThanh(string? _connectionString = null)
         {
@@ -50,6 +51,13 @@ Insert Into NhanVienDaiThanh ([MaNhanVien],[MaChamCong],[MaHoSo],[Xuong],[Name],
             using var connection = new SqlConnection(connectionString);
             connection.Open();
             var rows = connection.Query<T>(qrGetAll).ToList();
+            return rows;
+        }
+        public List<T> GetDanhSachNhanVienIsNhoms<T>()
+        {
+            using var connection = new SqlConnection(connectionString);
+            connection.Open();
+            var rows = connection.Query<T>(qrGetAllIsNhom).ToList();
             return rows;
         }
 
@@ -358,6 +366,32 @@ END) as  [FirstWorkingDate] from NhanVienDaiThanh where MaHoSo = @maHoSo";
                 {
                     connection.Open();
                     var items = connection.QueryAsync<Models.Repos.Models.NhanVienDaiThanh>(query, new { maHoSo = maHoSo }).Result
+                        .ToList();
+                    return items;
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+
+        public List<Models.Repos.Models.NhanVienDaiThanh> GetListNhanVienDaiThanhFilltered(string xuongId)
+        {
+            try
+            {
+                var query = @"select * from NhanVienDaiThanh
+                        where IsNhom = 0 
+                        and IsContracting = 1 
+                        and IsHuman = 1 
+                        and IsPhucVu = 0 
+                        and IsBanKiem = 0 
+                        and Xuong = @xuongId";
+                using (var connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+                    var items = connection.QueryAsync<Models.Repos.Models.NhanVienDaiThanh>(query, new { xuongId = xuongId }).Result
                         .ToList();
                     return items;
                 }

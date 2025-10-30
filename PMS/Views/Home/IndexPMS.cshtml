@@ -3,6 +3,14 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 <div class="d-flex justify-content-center align-items-center" style="margin-top:17%">
-    <img src="~/assets/img/logo/pmslogo.png" alt="Logo" class="img-fluid" />
+    @if (AppViewModels.AppViewModel.Instance.Company == "PhanBach")
+    {
+        <img src="~/assets/img/logo/PhanBachLogo.png" alt="Logo" class="img-fluid" />
+    }
+    else
+    {
+        <img src="~/assets/img/logo/PMSLogo.png" alt="Logo" class="img-fluid" />
+    }
+
 </div>
 

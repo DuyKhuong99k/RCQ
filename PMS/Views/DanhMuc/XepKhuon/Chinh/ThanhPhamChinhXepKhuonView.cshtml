@@ -13,11 +13,7 @@
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h2 class="mb-0">Danh Sách Thành Phẩm Chính Xếp Khuôn</h2>
                     @{
-                        var themThanhPhamChinhXepKhuon = rolePermistions.Where(x => x.Fu == "Danh Mục / Xếp Khuôn / Thành Phẩm Chính" && x.Func == "Thêm Xếp Khuôn / Thành Phẩm Chính" && x.Status == 1).FirstOrDefault();
-                        if (themThanhPhamChinhXepKhuon != null)
-                        {
-                            <button onclick="showInsert()" type="button" class="btn btn-primary">Thêm</button>
-                        }
+                        
                     }
 
                 </div>
@@ -25,6 +21,11 @@
                     <div id="Grid"></div>
                     <div style="margin-top:20px;">
                         @{
+                            var themThanhPhamChinhXepKhuon = rolePermistions.Where(x => x.Fu == "Danh Mục / Xếp Khuôn / Thành Phẩm Chính" && x.Func == "Thêm Xếp Khuôn / Thành Phẩm Chính" && x.Status == 1).FirstOrDefault();
+                            if (themThanhPhamChinhXepKhuon != null)
+                            {
+                                <button onclick="showInsert()" type="button" class="btn btn-primary">Thêm</button>
+                            }
                             var suaThanhPhamChinhXepKhuon = rolePermistions.Where(x => x.Fu == "Danh Mục / Xếp Khuôn / Thành Phẩm Chính" && x.Func == "Sửa Xếp Khuôn / Thành Phẩm Chính" && x.Status == 1).FirstOrDefault();
                             if (suaThanhPhamChinhXepKhuon != null)
                             {
@@ -107,6 +108,32 @@
                                 <div class="form-outline">
                                     <label class="form-label" for="x1">Type</label>
                                     <input type="number" id="typeTPCXK" class="form-control form-control-lg" autocomplete="off" placeholder="Nhập Type..." />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 mb-12 ">
+                                <div class="form-outline">
+                                    <label class="form-label">Tham Số Tăng Trọng</label>
+                                    <input type="number" min="0" step="0.01" id="thamSoTangTrongTPCXK" class="form-control form-control-lg" autocomplete="off" placeholder="0,000" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 mb-12 ">
+                                <div class="form-outline">
+                                    <label class="form-label">Định Mức Tăng Trọng</label>
+                                    <input type="number" min="0" step="0.01" id="dinhMucTangTrongTPCXK" class="form-control form-control-lg" autocomplete="off" placeholder="0,000" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-12">
+                                <div class="list-group form-outline">
+                                    <label class="">
+                                        <input class="form-check-input me-1" type="checkbox" value="" id="isKhongThuocTPCXK" />
+                                        Không Thuốc
+                                    </label>
                                 </div>
                             </div>
                         </div>
@@ -198,6 +225,32 @@
                             </div>
                         </div>
                         <div class="row">
+                            <div class="col-md-12 mb-12 ">
+                                <div class="form-outline">
+                                    <label class="form-label">Tham Số Tăng Trọng</label>
+                                    <input type="number" min="0" step="0.01" id="thamSoTangTrongTPCXKSua" class="form-control form-control-lg" autocomplete="off" placeholder="0,000" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 mb-12 ">
+                                <div class="form-outline">
+                                    <label class="form-label">Định Mức Tăng Trọng</label>
+                                    <input type="number" min="0" step="0.01" id="dinhMucTangTrongTPCXKSua" class="form-control form-control-lg" autocomplete="off" placeholder="0,000" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-12">
+                                <div class="list-group form-outline">
+                                    <label class="">
+                                        <input class="form-check-input me-1" type="checkbox" value="" id="isKhongThuocTPCXKSua" />
+                                        Không Thuốc
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
                             <div class="col-md-6 mb-12">
                                 <div class="list-group form-outline">
                                     <label class="">
@@ -249,12 +302,14 @@
                     grid = new ej.grids.Grid({
                         dataSource: dataManager,
                         allowPaging: true,
-                        pageSettings: { pageSize: 50 },
+                        pageSettings: { pageSize: 50, pageSizes: [50, 100, 200, 500] },
                         allowFiltering: true,
                         filterSettings: { type: 'Excel' },
                         allowSorting: true,
                         //frozenColumns: 3,
                         allowResizing: true,
+                        allowExcelExport: true,
+                        toolbar: ['ExcelExport'],
                         rowSelected: onRowSelected,
                         height: 400,
                         columns: [
@@ -264,11 +319,18 @@
                             { field: 'Max', headerText: 'TL Max', type: 'number', width: 150 },
                             { field: 'BravoId', headerText: 'BravoId', width: 150 },
                             { field: '_type', headerText: 'Type', type: 'number', width: 150 },
+                            { field: 'ThamSoTangTrong', headerText: 'Tham Số Tăng Trọng', type: 'number', width: 200 },
+                            { field: 'DinhMucTangTrong', headerText: 'Định Mức Tăng Trọng', type: 'number', width: 200 },
+                            { field: 'IsKhongThuc', headerText: 'Không Thuốc', width: 100, displayAsCheckBox: 'true', textAlign: 'Center' },
                             { field: 'SuDung', headerText: 'Sử Dụng', width: 100, displayAsCheckBox: 'true', textAlign: 'Center' },
                         ]
                     });
                     // Hiển thị Grid trên trang web
                     grid.appendTo('#Grid');
+                    grid.toolbarClick = function (args) {
+             if (args.item.id === 'Grid_excelexport') {
+                grid.excelExport();
+             }};
                 }
             },
             error: function (error) {
@@ -302,7 +364,10 @@
                     $('#maxTPCXK').val(rs.Max);
                     $('#bravoIdTPCXK').val(rs.BravoId);
                     $('#suDungTPCXK').prop('checked', rs.SuDung);
+                    $('#isKhongThuocTPCXK').prop('checked', rs.IsKhuongThuc);
                     $('#typeTPCXK').val(rs._type);
+                    $('#thamSoTangTrongTPCXK').val(rs.ThamSoTangTrong);
+                    $('#dinhMucTangTrongTPCXK').val(rs.DinhMucTangTrong);
                     $('#modalThem').modal('show');
                 }
                 else {
@@ -323,7 +388,10 @@
         var max = $('#maxTPCXK').val();
         var bravoId = $('#bravoIdTPCXK').val();
         var suDung = $('#suDungTPCXK').prop('checked');
+        var isKhongThuoc = $('#isKhongThuocTPCXK').prop('checked');
         var type = $('#typeTPCXK').val();
+        var thamSoTangTrong = $('#thamSoTangTrongTPCXK').val();
+        var dinhMucTangTrong = $('#dinhMucTangTrongTPCXK').val();
         document.getElementById("txtThem").style.visibility = "hidden";
         document.getElementById("loadingIndicator").style.display = "block";
         $.ajax({
@@ -336,7 +404,10 @@
                 max: max,
                 bravoId: bravoId,
                 suDung: suDung,
-                type: type
+                type: type,
+                thamSoTangTrong:thamSoTangTrong,
+                dinhMucTangTrong:dinhMucTangTrong,
+                isKhongThuoc:isKhongThuoc,
             },
             success: function (rs) {
                 if (rs.isSuccess === true) {
@@ -376,7 +447,10 @@
                     $('#maxTPCXKSua').val(rs.Max);
                     $('#bravoIdTPCXKSua').val(rs.BravoId);
                     $('#suDungTPCXKSua').prop('checked', rs.SuDung);
+                    $('#isKhongThuocTPCXKSua').prop('checked', rs.IsKhongThuc);
                     $('#typeTPCXKSua').val(rs._type);
+                    $('#thamSoTangTrongTPCXKSua').val(rs.ThamSoTangTrong);
+                    $('#dinhMucTangTrongTPCXKSua').val(rs.DinhMucTangTrong);
                     $('#modalSua').modal('show');
                 }
                 else {
@@ -396,8 +470,11 @@
         var min = $('#minTPCXKSua').val();
         var max = $('#maxTPCXKSua').val();
         var bravoId = $('#bravoIdTPCXKSua').val();
-        var suDung = $('#suDungTPCXK').prop('checked');
+        var suDung = $('#suDungTPCXKSua').prop('checked');
+        var isKhongThuoc = $('#isKhongThuocTPCXKSua').prop('checked');
         var type = $('#typeTPCXK').val();
+        var thamSoTangTrong = $('#thamSoTangTrongTPCXKSua').val();
+        var dinhMucTangTrong = $('#dinhMucTangTrongTPCXKSua').val();
         document.getElementById("txtSua").style.visibility = "hidden";
         document.getElementById("loadingIndicatorSua").style.display = "block";
         $.ajax({
@@ -409,7 +486,10 @@
                 max: max,
                 bravoId: bravoId,
                 suDung: suDung,
-                type: type
+                type: type,
+                thamSoTangTrong:thamSoTangTrong,
+                dinhMucTangTrong:dinhMucTangTrong,
+                isKhongThuoc:isKhongThuoc,
             },
             type: 'POST',
             dataType: 'json',

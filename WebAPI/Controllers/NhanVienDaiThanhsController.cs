@@ -35,6 +35,32 @@ namespace WebAPI.Controllers
             return Ok(nhanViens);
         }
 
+        //[HttpGet]
+        //[Authorize]
+        //public IActionResult GetAllNhanViens(int pageIndex = 1, int pageSize = 500)
+        //{
+        //    if (pageIndex <= 0 || pageSize <= 0)
+        //    {
+        //        return BadRequest("pageIndex and pageSize must be greater than zero.");
+        //    }
+
+        //    var nhanViens = _context.NhanVienDaiThanh
+        //                            .OrderByDescending(x => x.MaNhanVien)
+        //                            .Skip((pageIndex - 1) * pageSize)
+        //                            .Take(pageSize)
+        //                            .ToList();
+
+        //    bool hasMore = nhanViens.Count == pageSize;
+
+        //    var result = new
+        //    {
+        //        Data = nhanViens,
+        //        HasMore = hasMore
+        //    };
+
+        //    return Ok(result);
+        //}
+
         [HttpGet]
         [Authorize]
         public IActionResult GetAllNhanVienWithDataNeededs()
@@ -46,7 +72,8 @@ namespace WebAPI.Controllers
                                         nv.MaNhanVien,
                                         nv.Name,
                                         nv.DeptName0,
-                                        nv.MaHoSo
+                                        nv.MaHoSo,
+                                        nv.MaChamCong
                                         // Chọn các trường khác cần thiết ở đây
                                     })
                                     .ToList();
@@ -65,7 +92,8 @@ namespace WebAPI.Controllers
                                         nv.MaNhanVien,
                                         nv.Name,
                                         nv.MaHoSo,
-                                        nv.DeptName0
+                                        nv.DeptName0,
+                                        nv.MaChamCong
                                         // Chọn các trường khác cần thiết ở đây
                                     })
                                     .ToList();
@@ -137,6 +165,22 @@ namespace WebAPI.Controllers
         public IActionResult GetNhanVienByMaHoSo(string maHoSo)
         {
             var nhanVien = _context.NhanVienDaiThanh.FirstOrDefault(u => u.MaHoSo == maHoSo);
+            if (nhanVien == null)
+            {
+                return NotFound(new ApiResponse
+                {
+                    Success = false,
+                    Message = "Mã nhân viên không tồn tại!."
+                });
+            }
+
+            return Ok(nhanVien);
+        }
+        [HttpGet("{maChamCong}")]
+        [Authorize]
+        public IActionResult GetNhanVienByMaChamCong(string maChamCong)
+        {
+            var nhanVien = _context.NhanVienDaiThanh.FirstOrDefault(u => u.MaChamCong == maChamCong);
             if (nhanVien == null)
             {
                 return NotFound(new ApiResponse
@@ -272,6 +316,8 @@ namespace WebAPI.Controllers
                 IsChucNang = model.IsChucNang,
                 IsNhom = model.IsNhom,
                 IsShowDinhMuc = model.IsShowDinhMuc,
+                MaChamCong = model.MaChamCong
+
             };
             _context.NhanVienDaiThanh.Add(newNhanVien);
             try
@@ -332,7 +378,7 @@ namespace WebAPI.Controllers
                     Errors = errors
                 });
             }
-
+            var MNgay = DateTime.Now;
             // Cập nhật thông tin người dùng từ dữ liệu đầu vào
             //nhanVien.MaNhanVien = model.MaNhanVien,
             nhanVien.MaHoSo = model.MaHoSo;
@@ -348,10 +394,49 @@ namespace WebAPI.Controllers
             nhanVien.IsChucNang = model.IsChucNang;
             nhanVien.IsNhom = model.IsNhom;
             nhanVien.IsShowDinhMuc = model.IsShowDinhMuc;
+            nhanVien.MNgay = MNgay;
+            nhanVien.MaChamCong = model.MaChamCong;
 
             // Lưu thay đổi vào cơ sở dữ liệu
             try
             {
+                await _context.SaveChangesAsync();
+                // Tạo bản ghi mới cho bảng HqLoaiNguyenLieuUs
+                var newItemUs = new HQ_NhanVien_U()
+                {
+                    MaNhanVien = nhanVien.MaNhanVien,
+                    MNgay = MNgay,
+                    Ngay = DateTime.Now,
+                    AC = nhanVien.AC,
+                    Address = nhanVien.Address,
+                    BirthDate = nhanVien.BirthDate,
+                    ChucVu = nhanVien.ChucVu,
+                    DeptCode0 = nhanVien.DeptCode0,
+                    DeptName0 = nhanVien.DeptName0,
+                    FirstWorkingDate = nhanVien.FirstWorkingDate,
+                    GenderName = nhanVien.GenderName,
+                    IsBanKiem = nhanVien.IsBanKiem,
+                    IsChucNang = nhanVien.IsChucNang,
+                    IsContracting = nhanVien.IsContracting,
+                    IsGiaCong = nhanVien.IsGiaCong,
+                    IsHuman = nhanVien.IsHuman,
+                    IsNhom = nhanVien.IsNhom,
+                    IsPhucVu = nhanVien.IsPhucVu,
+                    IsShowDinhMuc = nhanVien.IsShowDinhMuc,
+                    LoaiSanLuong = nhanVien.LoaiSanLuong,
+                    MaHoSo = nhanVien.MaHoSo,
+                    Name = nhanVien.Name,
+                    Xuong = nhanVien.Xuong,
+                    IsNhanVienCat = nhanVien.IsNhanVienCat,
+                    JobPositionName0 = nhanVien.JobPositionName0,
+                    MaChamCong = nhanVien.MaChamCong,
+                    Tel = nhanVien.Tel,
+                };
+
+                // Thêm vào bảng HqLoaiNguyenLieuUs
+                _context.HqNhanVienUs.Add(newItemUs);
+
+                // Lưu thay đổi vào cơ sở dữ liệu
                 await _context.SaveChangesAsync();
             }
             catch (Exception ex)
@@ -396,6 +481,42 @@ namespace WebAPI.Controllers
 
             try
             {
+                var MNgay = DateTime.Now;
+                // Tạo bản ghi mới cho bảng HqLoaiNguyenLieuUs để lưu lịch sử
+                var newItemUs = new HQ_NhanVien_D()
+                {
+                    MaNhanVien = nhanVien.MaNhanVien,
+                    MNgay = MNgay,
+                    Ngay = DateTime.Now,
+                    AC = nhanVien.AC,
+                    Address = nhanVien.Address,
+                    BirthDate = nhanVien.BirthDate,
+                    ChucVu = nhanVien.ChucVu,
+                    DeptCode0 = nhanVien.DeptCode0,
+                    DeptName0 = nhanVien.DeptName0,
+                    FirstWorkingDate = nhanVien.FirstWorkingDate,
+                    GenderName = nhanVien.GenderName,
+                    IsBanKiem = nhanVien.IsBanKiem,
+                    IsChucNang = nhanVien.IsChucNang,
+                    IsContracting = nhanVien.IsContracting,
+                    IsGiaCong = nhanVien.IsGiaCong,
+                    IsHuman = nhanVien.IsHuman,
+                    IsNhom = nhanVien.IsNhom,
+                    IsPhucVu = nhanVien.IsPhucVu,
+                    IsShowDinhMuc = nhanVien.IsShowDinhMuc,
+                    LoaiSanLuong = nhanVien.LoaiSanLuong,
+                    MaHoSo = nhanVien.MaHoSo,
+                    Name = nhanVien.Name,
+                    Xuong = nhanVien.Xuong,
+                    IsNhanVienCat = nhanVien.IsNhanVienCat,
+                    JobPositionName0 = nhanVien.JobPositionName0,
+                    MaChamCong = nhanVien.MaChamCong,
+                    Tel = nhanVien.Tel
+
+                };
+
+                // Thêm bản ghi vào bảng HqLoaiNguyenLieuUs
+                _context.HqNhanVienDs.Add(newItemUs);
                 await _context.SaveChangesAsync();
             }
             catch (Exception ex)
@@ -414,6 +535,22 @@ namespace WebAPI.Controllers
                 Success = true,
                 Message = "Xóa nhân viên thành công!"
             });
+        }
+        [HttpGet("{xuongId}")]
+        [Authorize]
+        public IActionResult GetListNhanVienDaiThanhFilltered(string xuongId)
+        {
+            var items = Vm.VmNhanVien.GetListNhanVienDaiThanhFilltered(xuongId);
+            if (items == null)
+            {
+                return NotFound(new ApiResponse
+                {
+                    Success = false,
+                    Message = "Danh sách nhân viên rỗng!"
+                });
+            }
+
+            return Ok(items);
         }
     }
 }

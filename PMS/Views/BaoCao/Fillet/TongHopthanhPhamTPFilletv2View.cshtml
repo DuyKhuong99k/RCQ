@@ -13,7 +13,7 @@
                         <h2 class="mb-0">Tổng Hợp Thành Phẩm TPFilletv2</h2>
                     </div>
                     <div class="card-body">
-                        <ejs-grid height="400" id="Grid" dataSource="@ViewBag.datasource" allowResizing="true" actionComplete="actionComplete" allowReordering="true" allowExcelExport="true" allowPaging="true" allowSorting="true" toolbarClick="toolbarClick" toolbar="@(new List<string> { "ExcelExport", "Search" })" allowExcelExport="true" allowFiltering="true">
+                        <ejs-grid height="400" id="Grid" dataSource="@ViewBag.datasource" allowResizing="true" actionComplete="actionComplete" actionBegin="actionBegin" allowReordering="true" allowExcelExport="true" allowPaging="true" allowSorting="true" toolbarClick="toolbarClick" toolbar="@(new List<string> { "ExcelExport" })" allowExcelExport="true" allowFiltering="true">
                             <e-grid-pagesettings pageSizes="@(new string[] {"20" ,"50", "100" , "200", "500", "All" })" pageSize="20">
                             </e-grid-pagesettings>
                             @*<e-data-manager url="@Url.Action("GetChiTiet", "TP")" adaptor="UrlAdaptor"></e-data-manager>*@
@@ -31,14 +31,14 @@
                             </e-grid-aggregates>
                             <e-grid-columns>
                                 <e-grid-column field="Ngay" headerText="Ngày" type="datetime" format="dd/MM/yyyy" textAlign="Center" width="140"></e-grid-column>
-                                <e-grid-column field="LoaiCaName" headerText="Loại Cá" type="string" textAlign="Right" width="140"></e-grid-column>
+                                @* <e-grid-column field="LoaiCaName" headerText="Loại Cá" type="string" textAlign="Right" width="140"></e-grid-column> *@
                                 <e-grid-column field="ThanhPhamName" headerText="Thành Phẩm" type="string" textAlign="Right" width="140"></e-grid-column>
-                                <e-grid-column field="MauName" headerText="Màu" type="string" textAlign="Right" width="140"></e-grid-column>
-                                <e-grid-column field="DinhMuc" headerText="Định Mức" type="number" textAlign="Right" width="120"></e-grid-column>
-                                <e-grid-column field="DinhMucChuan" headerText="Định Mức Chuẩn" type="number" textAlign="Right" width="120"></e-grid-column>
-                                <e-grid-column field="TrongLuongNhan" headerText="Trọng Lượng Nhận" type="number" textAlign="Right" width="140"></e-grid-column>
-                                <e-grid-column field="TrongLuongTra" headerText="Trọng Lượng Trả" type="number" textAlign="Right" width="140"></e-grid-column>
-                                <e-grid-column field="SoRo" headerText="Số Rổ" type="number" textAlign="Right" width="120"></e-grid-column>
+                                @* <e-grid-column field="MauName" headerText="Màu" type="string" textAlign="Right" width="140"></e-grid-column> *@
+                                <e-grid-column field="DinhMuc" headerText="Định Mức" type="number" format="N2" textAlign="Right" width="120"></e-grid-column>
+                                <e-grid-column field="DinhMucChuan" headerText="Định Mức Chuẩn" type="number" format="N2" textAlign="Right" width="180"></e-grid-column>
+                                <e-grid-column field="TrongLuongNhan" headerText="Trọng Lượng Nhận" type="number" format="N2" textAlign="Right" width="180"></e-grid-column>
+                                <e-grid-column field="TrongLuongTra" headerText="Trọng Lượng Trả" type="number" format="N2" textAlign="Right" width="180"></e-grid-column>
+                                <e-grid-column field="SoRo" headerText="Số Rổ" type="number" format="N2" textAlign="Right" width="120"></e-grid-column>
                             </e-grid-columns>
                         </ejs-grid>
                     </div>
@@ -96,43 +96,68 @@
                 gridObj.excelExport();
             }
         }
-
+        function actionBegin(args) {
+            if (args.requestType == 'filterchoicerequest' || args.requestType == 'filtersearchbegin') {
+                 args.filterChoiceCount = datalength;
+            }
+        }
 
     </script>
     <script>
-        document.getElementById('RefreshButton').addEventListener("click",
-            function () {
-                var btn = document.getElementById('RefreshButton').ej2_instances[0];
-                var content = btn.content;
-                btn.content = "Đang Tải ...";
-                var grid = document.getElementById("Grid").ej2_instances[0]; // ej2-grid instance
-                var fromDate = document.getElementById("datepicker1").ej2_instances[0];
-                var toDate = document.getElementById("datepicker2").ej2_instances[0];
-                $.ajax({
-                    url: "@Url.Action("Reload", "TPFilletv2")",
-                    type: "POST",
-                    data: { "fromDate": fromDate.value.toDateString(), "toDate": toDate.value.toDateString() },
-                    success: function (response) {
-                        // Kiểm tra trạng thái "Success" trong dữ liệu JSON từ máy chủ
-                        if (response.Success) {
-                            grid.dataSource = response.Data; // Cập nhật dữ liệu trong grid
-                            grid.refresh(); // Refresh grid để hiển thị dữ liệu mới
-                        } else {
-                            grid.dataSource = response.Data;
-                            console.error(response.Messages);
-                            toastOptionNotyfi();
-                            toastr["error"](response.Messages, "Không có dữ liệu!");
-                        }
-                    },
-                    error: function (error) {
-                        toastOptionNotyfi();
-                        toastr["error"](error, "Thông báo");
-                    }
+        var datalength = 0;
+            var refreshHandler = function () {
+            var btnEle = document.getElementById('RefreshButton');
+            var btn = btnEle.ej2_instances[0];
 
-                }).always(function () {
-                    btn.content = content;
-                });
+            if (btnEle.classList.contains("loading")) return;
+            btnEle.classList.add("loading");
+
+            var originalContent = btn.content;
+
+            var dots = 0;
+            btn.content = "Đang tải";
+            var loadingInterval = setInterval(function () {
+                dots = (dots + 1) % 4;
+                btn.content = "Đang tải" + ".".repeat(dots);
+            }, 500);
+
+            var grid = document.getElementById("Grid").ej2_instances[0];
+            var fromDate = document.getElementById("datepicker1").ej2_instances[0];
+            var toDate = document.getElementById("datepicker2").ej2_instances[0];
+            
+
+            $.ajax({
+                url: "@Url.Action("Reload", "TPFilletv2")",
+                type: "POST",
+                data: {
+                    "fromDate": fromDate.value.toDateString(),
+                    "toDate": toDate.value.toDateString(),
+                   
+                },
+                success: function (response) {
+                    if (response.Success) {
+                        datalength = (response.Data && response.Data.length) ? response.Data.length : 0;
+                        grid.dataSource = response.Data;
+                        grid.refresh();
+                    } else {
+                        grid.dataSource = [];
+                        console.error(response.Messages);
+                        toastOptionNotyfi();
+                        toastr["error"](response.Messages, "Không có dữ liệu!");
+                    }
+                },
+                error: function (error) {
+                    toastOptionNotyfi();
+                    toastr["error"](error, "Thông báo");
+                }
+            }).always(function () {
+                clearInterval(loadingInterval);
+                btn.content = originalContent;
+                btnEle.classList.remove("loading");
             });
+        };
+
+        document.getElementById('RefreshButton').addEventListener("click", refreshHandler);
     </script>
 
 }

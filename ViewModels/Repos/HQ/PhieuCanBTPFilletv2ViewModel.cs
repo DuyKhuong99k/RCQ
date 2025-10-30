@@ -50,7 +50,24 @@ namespace ViewModels.Repos.HQ
         private AppViewModel VmApp => AppViewModel.Instance;
         private MessageViewModel VmMessage => MessageViewModel.Instance;
 
+        public List<T> Gets<T>(DateTime dateTime, string theId,bool isEnabled = false)
+        {
+            try
+            {
+                var dao = new Dao.Repos.HQ.PhieuCanBTPFilletv2();
+                return dao.Gets<T>(dateTime, theId, isEnabled);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
 
+        public List<T> GetsLastMinutes<T>(int minu)
+        {
+            var dao = new Dao.Repos.HQ.PhieuCanBTPFilletv2();
+            return dao.GetsLastMinutes<T>(minu);
+        }
         public List<T> GetChiTiets<T>(DateTime fromDate, DateTime toDate, string xuongId)
         {
             try
@@ -111,6 +128,12 @@ namespace ViewModels.Repos.HQ
                 throw;
             }
         }
+
+        public List<T> GetChiTietPhieuCanChuaSuas<T>(DateTime fromDate, DateTime toDate, string xuongId)
+        {
+            var dao = new Dao.Repos.HQ.PhieuCanBTPFilletv2();
+            return dao.GetChiTietPhieuCanChuaSuas<T>(fromDate, toDate, xuongId);
+        }
         public List<T> GetTongHopPhucVus<T>(DateTime fromDate, DateTime toDate, string xuongId)
         {
             try
@@ -134,6 +157,18 @@ namespace ViewModels.Repos.HQ
             {
                 var dao = new Dao.Repos.HQ.PhieuCanBTPFilletv2();
                 return dao.GetTongHopThanhPhams<T>(fromDate, toDate, xuongId);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+        public List<T> GetTongHopLos<T>(DateTime fromDate, DateTime toDate, string xuongId)
+        {
+            try
+            {
+                var dao = new Dao.Repos.HQ.PhieuCanBTPFilletv2();
+                return dao.GetTongHopLo<T>(fromDate, toDate, xuongId);
             }
             catch (Exception)
             {
@@ -427,6 +462,12 @@ namespace ViewModels.Repos.HQ
             var dao = new Dao.Repos.HQ.PhieuCanBTPFilletv2();
             return dao.Update(item);
         }
+
+        public int Update<T>(List<T> items)
+        {
+            var dao = new Dao.Repos.HQ.PhieuCanBTPFilletv2();
+            return dao.Update(items);
+        }
         public int Update(string id, bool isEnabled)
         {
             try
@@ -521,7 +562,7 @@ namespace ViewModels.Repos.HQ
                 throw;
             }
         }
-        public T? GetLastByTheId<T>(DateTime dateTime, string theId, bool isEnabled = false)
+        public T? GetLastByTheId<T>(DateTime dateTime, string theId, bool isEnabled )
         {
             try
             {
@@ -533,7 +574,35 @@ namespace ViewModels.Repos.HQ
                 throw;
             }
         }
+        public T? GetLastByTheId<T>(DateTime dateTime, string theId )
+        {
+            try
+            {
+                var dao = new Dao.Repos.HQ.PhieuCanBTPFilletv2();
+                return dao.GetLastByThe<T>(dateTime, theId);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
 
+
+        public List<T> GetTongHopThanhPhamDatBTPFillets<T>(DateTime fromDate, DateTime toDate, string xuongId)
+        {
+            var dao = new Dao.Repos.HQ.PhieuCanBTPFilletv2();
+            return dao.GetTongHopThanhPhamDatBTPFillets<T>(fromDate, toDate, xuongId);
+        }
+        public List<T> GetSanLuongDatNguyenConBTPFillets<T>(DateTime fromDate, DateTime toDate, string xuongId)
+        {
+            var dao = new Dao.Repos.HQ.PhieuCanBTPFilletv2();
+            return dao.GetSanLuongDatNguyenConBTPFillets<T>(fromDate, toDate, xuongId);
+        }
+        public List<T> GetTongHopThanhPhamDatRjNguyenConBTPFillets<T>(DateTime fromDate, DateTime toDate, string xuongId)
+        {
+            var dao = new Dao.Repos.HQ.PhieuCanBTPFilletv2();
+            return dao.GetTongHopThanhPhamDatRjNguyenConBTPFillets<T>(fromDate, toDate, xuongId);
+        }
         #region Xử Lý Phiếu Cân
         public List<T> GetPhieuCanBTPFillet_XLPC<T>(DateTime dateTime, string xuongId, string? connStr = null)
         {

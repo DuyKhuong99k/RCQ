@@ -13,11 +13,7 @@
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h2 class="mb-0">Danh Sách Thành Phẩm Nguyên Liệu</h2>
                     @{
-                        var themthanhphamnguyenlieu = rolePermistions.Where(x => x.Fu == "Danh Mục / Nguyên Liệu / Thành Phẩm" && x.Func == "Xem Nguyên Liệu / Thành Phẩm" && x.Status == 1).FirstOrDefault();
-                        if (themthanhphamnguyenlieu != null)
-                        {
-                            <button onclick="showInsert()" type="button" class="btn btn-primary">Thêm</button>
-                        }
+                        
                     }
                         
                 </div>
@@ -25,23 +21,28 @@
                     <div id="Grid"></div>
                     <div style="margin-top:20px;">
                         @{
-                            var suathanhphamnguyenlieu = rolePermistions.Where(x => x.Fu == "Danh Mục / Nguyên Liệu / Thành Phẩm" && x.Func == "Sửa Nguyên Liệu / Thành Phẩm" && x.Status == 1).FirstOrDefault();
+                            var themthanhphamnguyenlieu = rolePermistions.Where(x => x.Fu == "Danh Mục / Nguyên Liệu / Thành Phẩm" && x.Func == "Xem Nguyên Liệu / Thành Phẩm" && x.Status == 1).FirstOrDefault();
                             if (themthanhphamnguyenlieu != null)
+                            {
+                                <button onclick="showInsert()" type="button" class="btn btn-primary">Thêm</button>
+                            }
+                            var suathanhphamnguyenlieu = rolePermistions.Where(x => x.Fu == "Danh Mục / Nguyên Liệu / Thành Phẩm" && x.Func == "Sửa Nguyên Liệu / Thành Phẩm" && x.Status == 1).FirstOrDefault();
+                            if (suathanhphamnguyenlieu != null)
                             {
                                 <button onclick="showUpdate()" style="margin-right:5px" class="btn btn-outline-warning"><i class='bx bx-edit-alt'></i>Sửa</button>
                             }
                             var xoathanhphamnguyenlieu = rolePermistions.Where(x => x.Fu == "Danh Mục / Nguyên Liệu / Thành Phẩm" && x.Func == "Xoá Nguyên Liệu / Thành Phẩm" && x.Status == 1).FirstOrDefault();
-                            if (themthanhphamnguyenlieu != null)
+                            if (xoathanhphamnguyenlieu != null)
                             {
                                 <button onclick="showDelete()" style="margin-right:5px" class="btn btn-outline-danger"><i class='bx bx-trash'></i>Xoá</button>
                             }
                             var importthanhphamnguyenlieu = rolePermistions.Where(x => x.Fu == "Danh Mục / Nguyên Liệu / Thành Phẩm" && x.Func == "Import Nguyên Liệu / Thành Phẩm" && x.Status == 1).FirstOrDefault();
-                            if (themthanhphamnguyenlieu != null)
+                            if (importthanhphamnguyenlieu != null)
                             {
                                 <button onclick="import()" style="margin-right:5px" class="btn btn-outline-info"><i class='bx bx-import'></i>Import</button>
                             }
                             var Exportthanhphamnguyenlieu = rolePermistions.Where(x => x.Fu == "Danh Mục / Nguyên Liệu / Thành Phẩm" && x.Func == "Export Nguyên Liệu / Thành Phẩm" && x.Status == 1).FirstOrDefault();
-                            if (themthanhphamnguyenlieu != null)
+                            if (Exportthanhphamnguyenlieu != null)
                             {
                                 <button onclick="export()" style="margin-right:5px" class="btn btn-outline-secondary"><i class='bx bx-export'></i>Export Excel</button>
                             }
@@ -83,6 +84,22 @@
                                 <div class="form-outline">
                                     <label class="form-label" for="x1">Tỷ Lệ Nước (%)</label>
                                     <input type="number" min="0" step="0.01" id="tyLeNuocTPNL" class="form-control form-control-lg" autocomplete="off" placeholder="Nhập Tỷ Lệ Nước..." />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 mb-12 ">
+                                <div class="form-outline">
+                                    <label class="form-label" for="x1">CTTYLE</label>
+                                    @* <input type="text" id="cttyleTPNL" class="form-control form-control-lg" autocomplete="off" placeholder="Nhập CTTYLE..." /> *@
+                                    <select id="cttyleTPNL" class="form-control form-control-lg">
+                                        <option disabled selected>Chọn Công thức...</option>
+                                        <option value="SL/NLFILLET">SL/NLFILLET</option>
+                                        <option value="SL/NLXEBUOM">SL/NLXEBUOM</option>
+                                        <option value="SL/TONGNL">SL/TONGNL</option>
+                                        <option value="">Không Công Thức</option>
+                                        
+                                    </select>
                                 </div>
                             </div>
                         </div>
@@ -163,6 +180,10 @@
                                         <input class="form-check-input me-1" type="checkbox" value="" id="isCaNgopGheAoBanNgoai" />
                                         Ngộp Ghe Ao Bán Ngoài
                                     </label>
+                                    <label class="">
+                                        <input class="form-check-input me-1" type="checkbox" value="" id="isTareThung" />
+                                        Tare Thùng
+                                    </label>
                                 </div>
 
                             </div>
@@ -217,6 +238,21 @@
                                 <div class="form-outline">
                                     <label class="form-label" for="x1">Tỷ Lệ Nước (%)</label>
                                     <input type="number" id="tyLeNuocTPNLSua" min="0" step="0.01" class="form-control form-control-lg" autocomplete="off" placeholder="Nhập Tỷ Lệ Nước..." />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 mb-12 ">
+                                <div class="form-outline">
+                                    <label class="form-label" for="x1">CTTYLE</label>
+                                    <select id="cttyleTPNLSua" class="form-control form-control-lg">
+                                        <option disabled selected>Chọn Công thức...</option>
+                                        <option value="SL/NLFILLET">SL/NLFILLET</option>
+                                        <option value="SL/NLXEBUOM">SL/NLXEBUOM</option>
+                                        <option value="SL/TONGNL">SL/TONGNL</option>
+                                        <option value="">Không Công Thức</option>
+
+                                    </select>
                                 </div>
                             </div>
                         </div>
@@ -298,6 +334,10 @@
                                         <input class="form-check-input me-1" type="checkbox" value="" id="isCaNgopGheAoBanNgoaiSua" />
                                         Ngọp Ghe Ao Bán Ngoài
                                     </label>
+                                    <label class="">
+                                        <input class="form-check-input me-1" type="checkbox" value="" id="isTareThungSua" />
+                                        Tare Thùng
+                                    </label>
                                 </div>
                                 
                             </div>
@@ -345,12 +385,14 @@
                     grid = new ej.grids.Grid({
                         dataSource: dataManager,
                         allowPaging: true,
-                        pageSettings: { pageSize: 50 },
+                        pageSettings: { pageSize: 50, pageSizes: [50, 100, 200, 500] },
                         allowFiltering: true,
                         filterSettings: { type: 'Excel' },
                         allowSorting: true,
                         //frozenColumns: 3,
                         allowResizing: true,
+                        allowExcelExport: true,
+                        toolbar: ['ExcelExport'],
                         rowSelected: onRowSelected,
                         height: 400,
                         columns: [
@@ -373,10 +415,17 @@
                             { field: 'IsCaNgopGheAoBanNgoai', headerText: 'Ngộp Ao Ghe Bán Ngoài', width: 150, displayAsCheckBox: 'true', textAlign: 'Center' },
                             { field: 'IsManh', headerText: 'Mạnh', width: 150, displayAsCheckBox: 'true', textAlign: 'Center' },
                             { field: 'TyLeNuoc', headerText: 'Tỷ Lệ Nước', type: 'number', width: 150 },
+                            { field: 'IsManh', headerText: 'Mạnh', width: 150, displayAsCheckBox: 'true', textAlign: 'Center' },
+                            { field: 'IsTareThung', headerText: 'Tare Thùng', width: 150, displayAsCheckBox: 'true', textAlign: 'Center' },
+                            { field: 'CTTYLE', headerText: 'CTTYLTE', width: 150 },
                         ]
                     });
                     // Hiển thị Grid trên trang web
                     grid.appendTo('#Grid');
+                    grid.toolbarClick = function (args) {
+             if (args.item.id === 'Grid_excelexport') {
+                grid.excelExport();
+             }};
                 }
             },
             error: function (error) {
@@ -406,6 +455,7 @@
                 if (rs.isSuccess === true) {
                     $('#maTPNL').val(rs.Ma);
                     $('#tenTPNL').val(rs.Ten);
+                    $('#cttyleTPNL').val(rs.CTTYLE);
                     $('#tyLeNuocTPNL').val(rs.TyLeNuoc);
                     $('#suDungTPNL').prop('checked', rs.SuDung);
                     $('#isSNL').prop('checked', rs.IsSNL);
@@ -423,6 +473,7 @@
                     $('#isCaNgopXeMuoi').prop('checked', rs.IsCaNgopXeMuoi);
                     $('#isNgopXePhuPham').prop('checked', rs.IsNgopXePhuPham);
                     $('#isCaNgopGheAoBanNgoai').prop('checked', rs.IsCaNgopGheAoBanNgoai);
+                    $('#isTareThung').prop('checked', rs.IsTareThung);
                     $('#modalThem').modal('show');
                 }
                 else {
@@ -439,6 +490,7 @@
     function insert() {
         var ma = $('#maTPNL').val();
         var ten = $('#tenTPNL').val();
+        var cttyle = $('#cttyleTPNL').val();
         var tyLeNuoc = $('#tyLeNuocTPNL').val();
         var suDung = $('#suDungTPNL').prop('checked');
         var isSNL = $('#isSNL').prop('checked');
@@ -456,6 +508,7 @@
         var isCaNgopXeMuoi = $('#isCaNgopXeMuoi').prop('checked');
         var isNgopXePhuPham = $('#isNgopXePhuPham').prop('checked');
         var isCaNgopGheAoBanNgoai = $('#isCaNgopGheAoBanNgoai').prop('checked');
+        var isTareThung = $('#isTareThung').prop('checked');
         document.getElementById("txtThem").style.visibility = "hidden";
         document.getElementById("loadingIndicator").style.display = "block";
         $.ajax({
@@ -480,7 +533,9 @@
                 isNgopXePhuPham: isNgopXePhuPham,
                 isNgopGheTuoiBanNgoai: isNgopGheTuoiBanNgoai,
                 isCaNgopGheAoBanNgoai: isCaNgopGheAoBanNgoai,
-                isManh: isManh
+                isManh: isManh,
+                isTareThung: isTareThung,
+                cttyle:cttyle
             },
             success: function (rs) {
                 if (rs.isSuccess === true) {
@@ -516,6 +571,7 @@
                 if (rs.isSuccess === true) {
                     $('#maTPNLSua').val(rs.Ma);
                     $('#tenTPNLSua').val(rs.Ten);
+                    $('#cttyleTPNLSua').val(rs.CTTYLE);
                     $('#tyLeNuocTPNLSua').val(rs.TyLeNuoc);
                     $('#suDungTPNLSua').prop('checked', rs.SuDung);
                     $('#isSNLSua').prop('checked', rs.IsSNL);
@@ -533,6 +589,7 @@
                     $('#isCaNgopXeMuoiSua').prop('checked', rs.IsCaNgopXeMuoi);
                     $('#isNgopXePhuPhamSua').prop('checked', rs.IsNgopXePhuPham);
                     $('#isCaNgopGheAoBanNgoaiSua').prop('checked', rs.IsCaNgopGheAoBanNgoai);
+                    $('#isTareThungSua').prop('checked', rs.IsTareThung);
                     $('#modalSua').modal('show');
                 }
                 else {
@@ -549,6 +606,7 @@
     function update() {
         var ma = $('#maTPNLSua').val();
         var ten = $('#tenTPNLSua').val();
+        var cttyle = $('#cttyleTPNLSua').val();
         var tyLeNuoc = $('#tyLeNuocTPNLSua').val();
         var suDung = $('#suDungTPNLSua').prop('checked');
         var isSNL = $('#isSNLSua').prop('checked');
@@ -566,6 +624,7 @@
         var isCaNgopXeMuoi = $('#isCaNgopXeMuoiSua').prop('checked');
         var isNgopXePhuPham = $('#isNgopXePhuPhamSua').prop('checked');
         var isCaNgopGheAoBanNgoai = $('#isCaNgopGheAoBanNgoaiSua').prop('checked');
+        var isTareThung = $('#isTareThungSua').prop('checked');
         document.getElementById("txtSua").style.visibility = "hidden";
         document.getElementById("loadingIndicatorSua").style.display = "block";
         $.ajax({
@@ -589,7 +648,9 @@
                 isNgopXePhuPham: isNgopXePhuPham,
                 isNgopGheTuoiBanNgoai: isNgopGheTuoiBanNgoai,
                 isCaNgopGheAoBanNgoai: isCaNgopGheAoBanNgoai,
-                isManh: isManh
+                isManh: isManh,
+                isTareThung: isTareThung,
+                cttyle:cttyle
             },
             type: 'POST',
             dataType: 'json',

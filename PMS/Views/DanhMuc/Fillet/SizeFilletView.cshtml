@@ -8,18 +8,14 @@
     var rolePermistions = await PMS.Middlewares.AuthenticationHelpers.GetRolePermistionsAsync(Context, roleIds);
 }
 
-<div class="container mt-4">
+
     <div class="row">
         <div class="col-12">
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h2 class="mb-0">Danh Sách Size Fillet</h2>
                     @{
-                        var themsizeFillet = rolePermistions.Where(x => x.Fu == "Danh Mục / Fillet / Size" && x.Func == "Thêm Fillet / Size" && x.Status == 1).FirstOrDefault();
-                        if (themsizeFillet != null)
-                        {
-                            <button onclick="showInsert()" type="button" class="btn btn-primary">Thêm</button>
-                        }
+                        
                     }
 
                 </div>
@@ -27,6 +23,11 @@
                     <div id="Grid"></div>
                     <div style="margin-top:20px;">
                         @{
+                            var themsizeFillet = rolePermistions.Where(x => x.Fu == "Danh Mục / Fillet / Size" && x.Func == "Thêm Fillet / Size" && x.Status == 1).FirstOrDefault();
+                            if (themsizeFillet != null)
+                            {
+                                <button onclick="showInsert()" type="button" class="btn btn-primary">Thêm</button>
+                            }
                             var suasizeFillet = rolePermistions.Where(x => x.Fu == "Danh Mục / Fillet / Size" && x.Func == "Sửa Fillet / Size" && x.Status == 1).FirstOrDefault();
                             if (suasizeFillet != null)
                             {
@@ -37,23 +38,14 @@
                             {
                                 <button onclick="showDelete()" style="margin-right:5px" class="btn btn-outline-danger"><i class='bx bx-trash'></i>Xoá</button>
                             }
-                            var importsizeFillet = rolePermistions.Where(x => x.Fu == "Danh Mục / Fillet / Size" && x.Func == "Import Fillet / Size" && x.Status == 1).FirstOrDefault();
-                            if (importsizeFillet != null)
-                            {
-                                <button onclick="import()" style="margin-right:5px" class="btn btn-outline-info"><i class='bx bx-import'></i>Import</button>
-                            }
-                            var exportsizeFillet = rolePermistions.Where(x => x.Fu == "Danh Mục / Fillet / Size" && x.Func == "Export Fillet / Size" && x.Status == 1).FirstOrDefault();
-                            if (exportsizeFillet != null)
-                            {
-                                <button onclick="export()" style="margin-right:5px" class="btn btn-outline-secondary"><i class='bx bx-export'></i>Export Excel</button>
-                            }
+                            
                         }
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
+
 <div class="modal fade" id="modalThem" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -187,12 +179,14 @@
                     grid = new ej.grids.Grid({
                         dataSource: dataManager,
                         allowPaging: true,
-                        pageSettings: { pageSize: 50 },
+                        pageSettings: { pageSize: 50, pageSizes: [50, 100, 200, 500] },
                         allowFiltering: true,
                         filterSettings: { type: 'Excel' },
                         allowSorting: true,
                         //frozenColumns: 3,
                         allowResizing: true,
+                        allowExcelExport: true,
+                        toolbar: ['ExcelExport'],
                         rowSelected: onRowSelected,
                         height: 400,
                         columns: [
@@ -203,6 +197,10 @@
                     });
                     // Hiển thị Grid trên trang web
                     grid.appendTo('#Grid');
+                    grid.toolbarClick = function (args) {
+             if (args.item.id === 'Grid_excelexport') {
+                grid.excelExport();
+             }};
                 }
             },
             error: function (error) {

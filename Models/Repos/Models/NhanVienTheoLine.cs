@@ -10,6 +10,7 @@ namespace Models.Repos.Models;
 public partial class NhanVienTheoLine
 {
     [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
     [Key]
     [Column(TypeName = "date")]

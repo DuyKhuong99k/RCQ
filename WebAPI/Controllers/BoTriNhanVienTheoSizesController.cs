@@ -107,20 +107,17 @@ namespace WebAPI.Controllers
         [Authorize]
         public async Task<IActionResult> Update(string maNhanVien, string ngay, string maLo, string maXuong, [FromBody] BoTriNhanVienTheoSize model)
         {
-            //// Kiểm tra xem ID người dùng được cập nhật có hợp lệ không
-            //if (string.IsNullOrEmpty(stt))
-            //{
-            //    return BadRequest(new ApiResponse
-            //    {
-            //        Success = false,
-            //        Message = "Mã này không hợp lệ."
-            //    });
-            //}
             DateTime dateTime = DateTime.Parse(ngay);
-            // Kiểm tra xem nhân viên có tồn tại trong cơ sở dữ liệu không
-            var items = await _context.BoTriNhanVienTheoSize.Where(x => x.MaNhanVien == maNhanVien && x.Ngay == dateTime && x.MaLo == maLo && x.MaXuong == maXuong).ToListAsync();
-            var item = items.FirstOrDefault();
-            if (item == null)
+
+            // Lấy danh sách item cũ
+            var items = await _context.BoTriNhanVienTheoSize
+                .Where(x => x.MaNhanVien == maNhanVien
+                         && x.Ngay == dateTime
+                         && x.MaLo == maLo
+                         && x.MaXuong == maXuong)
+                .ToListAsync();
+
+            if (!items.Any())
             {
                 return BadRequest(new ApiResponse
                 {
@@ -129,7 +126,7 @@ namespace WebAPI.Controllers
                 });
             }
 
-            // Kiểm tra xem dữ liệu đầu vào có hợp lệ không và trả về danh sách lỗi nếu có.
+            // Kiểm tra model hợp lệ
             if (!ModelState.IsValid)
             {
                 var errors = ModelState.Values.SelectMany(v => v.Errors)
@@ -143,16 +140,26 @@ namespace WebAPI.Controllers
                     Errors = errors
                 });
             }
-            item.Ngay = model.Ngay;
-            item.MaNhanVien = model.MaNhanVien;
-            item.MaLo = model.MaLo;
-            item.MaSize = model.MaSize;
-            item.ThoiGianBatDau = model.ThoiGianBatDau;
-            item.MaXuong = model.MaXuong;
-            item.SuDung = model.SuDung;
 
             try
             {
+                // Xóa toàn bộ bản ghi cũ
+                _context.BoTriNhanVienTheoSize.RemoveRange(items);
+
+                // Thêm mới lại bản ghi với dữ liệu đã thay đổi
+                var newItem = new BoTriNhanVienTheoSize
+                {
+                    Ngay = model.Ngay,
+                    MaNhanVien = model.MaNhanVien,
+                    MaLo = model.MaLo,
+                    MaSize = model.MaSize,  // chỉ thay đổi
+                    ThoiGianBatDau = model.ThoiGianBatDau, // chỉ thay đổi
+                    MaXuong = model.MaXuong,
+                    SuDung = model.SuDung
+                };
+
+                _context.BoTriNhanVienTheoSize.Add(newItem);
+
                 await _context.SaveChangesAsync();
             }
             catch (Exception ex)
@@ -164,6 +171,7 @@ namespace WebAPI.Controllers
                     Errors = new List<string> { ex.Message }
                 });
             }
+
             return Ok(new ApiResponse
             {
                 Success = true,

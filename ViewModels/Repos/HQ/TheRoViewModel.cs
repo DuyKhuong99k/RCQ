@@ -79,8 +79,63 @@ namespace ViewModels.Repos.HQ
 
         public int Delete<T>(T item)
         {
+            try
+            {
+                dbPMScontext db = new dbPMScontext();
+                if (item is TheRo the)
+                {
+                    var _the = new HQ_TheRo_D()
+                    {
+                        MaThe = the.MaThe,
+                        Ngay = DateTime.Now,
+                        CreatedDateTime = the.CreatedDateTime,
+                    
+                    };
+                    db.HqTheRoDs.Add(_the);
+                    db.SaveChanges();
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                //throw;
+            }
+            
             var dao = new Dao.Repos.HQ.TheRo();
             return dao.Delete(item);
+        }
+        public int Delete<T>(List<T> items)
+        {
+            try
+            {
+                dbPMScontext db = new dbPMScontext();
+                
+                if (items is  List<TheRo> thes)
+                {
+                    foreach (var the in thes)
+                    {
+                        var _the = new HQ_TheRo_D()
+                        {
+                            MaThe = the.MaThe,
+                            Ngay = DateTime.Now,
+                            CreatedDateTime = the.CreatedDateTime,
+                    
+                        };
+                        db.HqTheRoDs.Add(_the);
+
+                    }
+                    db.SaveChanges();
+                }
+               
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                //throw;
+            }
+            
+            var dao = new Dao.Repos.HQ.TheRo();
+            return dao.Delete(items);
         }
 
         [RelayCommand(CanExecute = nameof(IsItemPass))]
@@ -116,16 +171,35 @@ namespace ViewModels.Repos.HQ
         public List<string> GetDs(string Ngay,int PageIndex,int PageSize)
         {
             dbPMScontext db = new dbPMScontext();
-            DateTime date = new DateTime();
-            try
+            var date = new DateTime();
+            var index = Ngay.IndexOf("=", StringComparison.Ordinal);
+            if (index == -1)
             {
-                date = DateTime.ParseExact(Ngay, "yyyyMMddHHmmss",CultureInfo.InvariantCulture);
+                try
+                {
+                    date = DateTime.ParseExact(Ngay, "yyyyMMddHHmmss", CultureInfo.InvariantCulture);
+                }
+                catch (Exception ex)
+                {
+                    //throw ex;
+                }
             }
-            catch (Exception ex)
+            else
             {
-                throw ex;
+                var _data = Ngay.Substring(index + 1).Split(',');
+                var mayCanId = _data.FirstOrDefault() ?? "";
+                var mNgay = _data.LastOrDefault() ?? "";
+                try
+                {
+                    date = DateTime.ParseExact(mNgay, "yyyyMMddHHmmss", CultureInfo.InvariantCulture);
+                }
+                catch (Exception ex)
+                {
+                    //throw ex;
+                }
+                
             }
-            return db.HqTheRoDs.Where(x=>x.Ngay > date).OrderByDescending(x=>x.Ngay).Skip((PageIndex -1)*PageSize).Take(PageSize).Select(x=>x.MaThe).ToList();
+            return db.HqTheRoDs.Where(x=>x.Ngay.Date >= date.Date).OrderByDescending(x=>x.Ngay).Skip((PageIndex -1)*PageSize).Take(PageSize).Select(x=>x.MaThe).ToList();
         }
         public int Insert<T>(T item)
         {
@@ -250,6 +324,26 @@ namespace ViewModels.Repos.HQ
 
         public int Update<T>(List<T> items)
         {
+            dbPMScontext db = new dbPMScontext();
+            if (items is  List<TheRo> thes)
+            {
+                //the.Ngay = DateTime.Now.Date;
+                //db.HqTheThanhPhamDs.Add(the);
+                //db.SaveChanges();
+                foreach (var theRo in thes)
+                {
+                    var the = new HQ_TheRo_U()
+                    {
+                       MaThe = theRo.MaThe,
+                       Ngay = DateTime.Now,
+                       CreatedDateTime = theRo.CreatedDateTime
+                        
+                    };
+                    db.HqTheRoUs.Add(the);
+
+                }
+                db.SaveChanges();
+            }
             var dao = new Dao.Repos.HQ.TheRo();
             return dao.Update(items);
         }

@@ -61,5 +61,7 @@ namespace Models.Repos.Models
         public string MaThe { get; set; }
         public string? GhiChu { get; set; }
         public int STT { get; set; }
+        [Column(TypeName = "decimal(18, 2)")]
+        public decimal ThamSoTangTrong { get; set; } = 1M;
     }
 }

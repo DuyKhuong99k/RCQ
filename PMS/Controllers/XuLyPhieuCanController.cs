@@ -30,6 +30,8 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 using Syncfusion.EJ2.Layouts;
 using ToolsEx;
 
+
+
 namespace PMS.Controllers
 {
     [Authorize]
@@ -50,6 +52,7 @@ namespace PMS.Controllers
             {
                 return Redirect(AppViewModels.AppViewModel.Instance.RedirectLoginUrl);
             }
+            ViewBag.TitlePage = "XLPC | Tôm";
             return View();
         }
         [CustomAuthorize(Fu = "Xử Lý Phiếu Cân / Phiếu Cân Nguyên Liệu", Func = "Xem Xử Lý Phiếu Cân / Phiếu Cân Nguyên Liệu")]
@@ -61,7 +64,7 @@ namespace PMS.Controllers
             {
                 return Redirect(AppViewModels.AppViewModel.Instance.RedirectLoginUrl);
             }
-            ViewBag.titile = "Xử Lý Phiếu Cân Nguyên Liệu";
+            ViewBag.TitlePage = "Xử Lý Phiếu Cân Nguyên Liệu";
             var xuongId = HttpContext.Session.GetString("XuongId");
 
             var apiMaLoaiCaUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/MaLoaiCaNguyenLieux/GetAlls";
@@ -125,7 +128,7 @@ namespace PMS.Controllers
             {
                 return Redirect(AppViewModels.AppViewModel.Instance.RedirectLoginUrl);
             }
-            ViewBag.titile = "Xử Lý Phiếu Cân Phụ Xếp Khuôn";
+            ViewBag.TitlePage = "Xử Lý Phiếu Cân Phụ Xếp Khuôn";
 
             var apiMaLoUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/MaLos/GetsMSLWithSize";
             using var helperMaLo = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
@@ -168,6 +171,16 @@ namespace PMS.Controllers
             var xuongs = helperXuong.GetAsync<IEnumerable<XiNghiep>>(HttpContext, apiXuongUrl);
             ViewBag.listXuongs = xuongs.Result.ToList();
 
+            var apiChieuXaUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/MaChieuXaXepKhuons/GetAlls";
+            using var helperChieuXa = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+            var chieuxas = helperChieuXa.GetAsync<IEnumerable<MaChieuXaXepKhuon>>(HttpContext, apiChieuXaUrl);
+            ViewBag.listChieuXas = chieuxas.Result.ToList();
+
+            var apiChatLuongUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/MaChatLuongXepKhuons/GetAlls";
+            using var helperChatLuong = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+            var chatluongs = helperChatLuong.GetAsync<IEnumerable<MaChatLuongXepKhuon>>(HttpContext, apiChatLuongUrl);
+            ViewBag.listChatLuongs = chatluongs.Result.ToList();
+
             return View();
         }
         [CustomAuthorize(Fu = "Xử Lý Phiếu Cân / Phiếu Cân Chính Xếp Khuôn", Func = "Xem Xử Lý Phiếu Cân / Phiếu Cân Chính Xếp Khuôn")]
@@ -179,7 +192,7 @@ namespace PMS.Controllers
             {
                 return Redirect(AppViewModels.AppViewModel.Instance.RedirectLoginUrl);
             }
-            ViewBag.titile = "Xử Lý Phiếu Cân Chính Xếp Khuôn";
+            ViewBag.TitlePage = "Xử Lý Phiếu Cân Chính Xếp Khuôn";
             var apiMaLoUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/MaLos/GetsMSLWithSize";
             using var helperMaLo = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
             var malos = helperMaLo.GetAsync<IEnumerable<object>>(HttpContext, apiMaLoUrl);
@@ -256,7 +269,7 @@ namespace PMS.Controllers
             {
                 return Redirect(AppViewModels.AppViewModel.Instance.RedirectLoginUrl);
             }
-            ViewBag.titile = "Xử Lý Phiếu Cân Chính Xếp Khuôn";
+            ViewBag.TitlePage = "Xử Lý Phiếu Cân Chính Xếp Khuôn";
             var apiMaLoUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/MaLos/GetsMSLWithSize";
             using var helperMaLo = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
             var malos = helperMaLo.GetAsync<IEnumerable<object>>(HttpContext, apiMaLoUrl);
@@ -310,7 +323,7 @@ namespace PMS.Controllers
             {
                 return Redirect(AppViewModels.AppViewModel.Instance.RedirectLoginUrl);
             }
-            ViewBag.titile = "Xử Lý Phiếu Cân KXL Xếp Khuôn";
+            ViewBag.TitlePage = "Xử Lý Phiếu Cân KXL Xếp Khuôn";
             var apiMaLoUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/MaLos/GetsMSLWithSize";
             using var helperMaLo = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
             var malos = helperMaLo.GetAsync<IEnumerable<object>>(HttpContext, apiMaLoUrl);
@@ -363,7 +376,7 @@ namespace PMS.Controllers
             {
                 return Redirect(AppViewModels.AppViewModel.Instance.RedirectLoginUrl);
             }
-            ViewBag.titile = "Xử Lý Phiếu Cân Block Xếp Khuôn";
+            ViewBag.TitlePage = "Xử Lý Phiếu Cân Block Xếp Khuôn";
 
             var apiMaLoUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/MaLos/GetsMSLWithSize";
             using var helperMaLo = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
@@ -432,7 +445,7 @@ namespace PMS.Controllers
             {
                 return Redirect(AppViewModels.AppViewModel.Instance.RedirectLoginUrl);
             }
-            ViewBag.titile = "Xử Lý Phiếu Cân Bao Tử";
+            ViewBag.TitlePage = "Xử Lý Phiếu Cân Bao Tử";
 
             var apiMaLoaiCaUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/BT_MaLoaiCa/GetAlls";
             using var helperMaLoaiCa = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
@@ -470,7 +483,7 @@ namespace PMS.Controllers
             {
                 return Redirect(AppViewModels.AppViewModel.Instance.RedirectLoginUrl);
             }
-            ViewBag.titile = "Xử Lý Phiếu Cân Tái Chế";
+            ViewBag.TitlePage = "Xử Lý Phiếu Cân Tái Chế";
 
             var apiMaLoUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/MaLos/GetsMSLWithSize";
             using var helperMaLo = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
@@ -528,7 +541,7 @@ namespace PMS.Controllers
             {
                 return Redirect(AppViewModels.AppViewModel.Instance.RedirectLoginUrl);
             }
-            ViewBag.titile = "Xử Lý Phiếu Cân Phụ Gia";
+            ViewBag.TitlePage = "Xử Lý Phiếu Cân Phụ Gia";
 
 
             var apiSanPhamUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/PD_SanPham/GetAlls";
@@ -572,7 +585,7 @@ namespace PMS.Controllers
             {
                 return Redirect(AppViewModels.AppViewModel.Instance.RedirectLoginUrl);
             }
-            ViewBag.titile = "Xử Lý Phiếu Cân Phụ Phẩm";
+            ViewBag.TitlePage = "Xử Lý Phiếu Cân Phụ Phẩm";
 
             var apiMaLoaiCaUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/MaLoaiCaPhuPhams/GetAlls";
             using var helperMaLoaiCa = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
@@ -625,7 +638,7 @@ namespace PMS.Controllers
             {
                 return Redirect(AppViewModels.AppViewModel.Instance.RedirectLoginUrl);
             }
-            ViewBag.titile = "Xử Lý Phiếu Cân Phụ Phẩm v2";
+            ViewBag.TitlePage = "Xử Lý Phiếu Cân Phụ Phẩm v2";
 
             var apiMaLoaiCaUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/MaLoaiCaPhuPhams/GetAlls";
             using var helperMaLoaiCa = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
@@ -683,7 +696,7 @@ namespace PMS.Controllers
             {
                 return Redirect(AppViewModels.AppViewModel.Instance.RedirectLoginUrl);
             }
-            ViewBag.titile = "Xử Lý Phiếu Cân Lạng Da";
+            ViewBag.TitlePage = "Xử Lý Phiếu Cân Lạng Da";
             var apiPhieuCanDHUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/NhanVienDaiThanhs/GetAllNhanVienWithDataNeededs";
             using var helperPhieuCanDH = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
             var phieucandinhhinhs = helperPhieuCanDH.GetAsync<IEnumerable<object>>(HttpContext, apiPhieuCanDHUrl);
@@ -742,7 +755,7 @@ namespace PMS.Controllers
             {
                 return Redirect(AppViewModels.AppViewModel.Instance.RedirectLoginUrl);
             }
-            ViewBag.titile = "Xử Lý Phiếu Cân Vùng Nuôi Đại Thành Side";
+            ViewBag.TitlePage = "Xử Lý Phiếu Cân Vùng Nuôi Đại Thành Side";
 
             var apiMaLoUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/MaLos/GetsMSLWithSize";
             using var helperMaLo = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
@@ -769,7 +782,7 @@ namespace PMS.Controllers
             {
                 return Redirect(AppViewModels.AppViewModel.Instance.RedirectLoginUrl);
             }
-            ViewBag.titile = "Xử Lý Phiếu Cân Cá Giống Đại Thành Side";
+            ViewBag.TitlePage = "Xử Lý Phiếu Cân Cá Giống Đại Thành Side";
 
             var apiMaLoUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/MaLos/GetsMSLWithSize";
             using var helperMaLo = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
@@ -797,7 +810,7 @@ namespace PMS.Controllers
             {
                 return Redirect(AppViewModels.AppViewModel.Instance.RedirectLoginUrl);
             }
-            ViewBag.titile = "Xử Lý Phiếu Cân Cá Chết Đại Thành Side";
+            ViewBag.TitlePage = "Xử Lý Phiếu Cân Cá Chết Đại Thành Side";
             return View();
         }
         [CustomAuthorize(Fu = "Xử Lý Phiếu Cân / Phiếu Cân Định Hình", Func = "Xem Xử Lý Phiếu Cân / Phiếu Cân Định Hình")]
@@ -809,7 +822,7 @@ namespace PMS.Controllers
             {
                 return Redirect(AppViewModels.AppViewModel.Instance.RedirectLoginUrl);
             }
-            ViewBag.titile = "Xử Lý Phiếu Cân Định Hình";
+            ViewBag.TitlePage = "Xử Lý Phiếu Cân Định Hình";
             var apiPhieuCanDHUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/NhanVienDaiThanhs/GetAllNhanVienWithDataNeededs";
             using var helperPhieuCanDH = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
             var phieucandinhhinhs = helperPhieuCanDH.GetAsync<IEnumerable<object>>(HttpContext, apiPhieuCanDHUrl);
@@ -871,7 +884,7 @@ namespace PMS.Controllers
             {
                 return Redirect(AppViewModels.AppViewModel.Instance.RedirectLoginUrl);
             }
-            ViewBag.titile = "Xử Lý Phiếu Cân BTP Fillet";
+            ViewBag.TitlePage = "Xử Lý Phiếu Cân BTP Fillet";
 
             var apiPhieuCanDHUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/NhanVienDaiThanhs/GetAllNhanVienWithDataNeededs";
             using var helperPhieuCanDH = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
@@ -913,6 +926,7 @@ namespace PMS.Controllers
 
             return View();
         }
+
         [CustomAuthorize(Fu = "Xử Lý Phiếu Cân / Phiếu Cân Fillet", Func = "Xem Xử Lý Phiếu Cân / Phiếu Cân Fillet")]
         public IActionResult XuLyPhieuCanTPFilletView()
         {
@@ -922,7 +936,7 @@ namespace PMS.Controllers
             {
                 return Redirect(AppViewModels.AppViewModel.Instance.RedirectLoginUrl);
             }
-            ViewBag.titile = "Xử Lý Phiếu Cân TP Fillet";
+            ViewBag.TitlePage = "Xử Lý Phiếu Cân TP Fillet";
 
             var apiPhieuCanDHUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/NhanVienDaiThanhs/GetAllNhanVienWithDataNeededs";
             using var helperPhieuCanDH = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
@@ -977,6 +991,106 @@ namespace PMS.Controllers
             ViewBag.listBanFLs = banfls.Result.ToList();
             return View();
         }
+
+        [CustomAuthorize(Fu = "Xử Lý Phiếu Cân / Phiếu Cân Fillet", Func = "Xem Xử Lý Phiếu Cân / Phiếu Cân Fillet")]
+        public IActionResult XuLyPhieuCanTPFilletv1View()
+        {
+
+            var rl = Middlewares.AuthenticationHelpers.CheckAut(HttpContext, "XuLyPhieuCanTPFilletv1View");
+            if (rl == false)
+            {
+                return Redirect(AppViewModels.AppViewModel.Instance.RedirectLoginUrl);
+            }
+            ViewBag.TitlePage = "Xử Lý Phiếu Cân TP Fillet v1";
+
+            var apiMaLoUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/MaLos/GetsMSLWithSize";
+            using var helperMaLo = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+            var malos = helperMaLo.GetAsync<IEnumerable<object>>(HttpContext, apiMaLoUrl);
+            ViewBag.listMaLos = malos.Result.ToList();
+
+            var apiMaLoaiCaUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/MaLoaiCaFillets/GetAlls";
+            using var helperMaLoaiCa = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+            var maloaiCas = helperMaLoaiCa.GetAsync<IEnumerable<MaLoaiCaFillet>>(HttpContext, apiMaLoaiCaUrl);
+            ViewBag.listMaLoaiCas = maloaiCas.Result.ToList();
+
+            var codeId = HttpContext.Session.GetString("XuongId");
+            var apiThanhPhamUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/MaThanhPhamFillets/GetAllsByCodeId/{codeId}";
+            using var helperThanhPham = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+            var thanhPhams = helperThanhPham.GetAsync<IEnumerable<MaThanhPhamFillet>>(HttpContext, apiThanhPhamUrl);
+            ViewBag.listThanhPhams = thanhPhams.Result.ToList();
+
+            var apiSFLUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/MaSizeFillets/GetAlls";
+            using var helperSFL = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+            var sfls = helperSFL.GetAsync<IEnumerable<MaSizeFillet>>(HttpContext, apiSFLUrl);
+            ViewBag.listSFLs = sfls.Result.ToList();
+
+            var apiMaMauUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/MaMauFillets/GetAlls";
+            using var helperMaMau = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+            var mamaus = helperMaMau.GetAsync<IEnumerable<MaMauFillet>>(HttpContext, apiMaMauUrl);
+            ViewBag.listMaMaus = mamaus.Result.ToList();
+
+            var apiXuongUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/XiNghieps/GetAllXuong";
+            using var helperXuong = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+            var xuongs = helperXuong.GetAsync<IEnumerable<XiNghiep>>(HttpContext, apiXuongUrl);
+            ViewBag.listXuongs = xuongs.Result.ToList();
+
+            var apiNhanVienUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/NhanVienDaiThanhs/GetAllNhanVienWithDataNeededs";
+            using var helperNhanVien = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+            var nhanviens = helperNhanVien.GetAsync<IEnumerable<object>>(HttpContext, apiNhanVienUrl);
+            ViewBag.DataNhanVien = nhanviens.Result.ToList();
+            return View();
+        }
+
+
+        [CustomAuthorize(Fu = "Xử Lý Phiếu Cân / Phiếu Cân Filletv2", Func = "Xem Xử Lý Phiếu Cân / Phiếu Cân Filletv2")]
+        public IActionResult XuLyPhieuCanTPFilletv2View()
+        {
+
+            var rl = Middlewares.AuthenticationHelpers.CheckAut(HttpContext, "XuLyPhieuCanTPFilletv2View");
+            if (rl == false)
+            {
+                return Redirect(AppViewModels.AppViewModel.Instance.RedirectLoginUrl);
+            }
+            ViewBag.TitlePage = "Xử Lý Phiếu Cân TP Fillet";
+
+            var apiMaLoUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/MaLos/GetsMSLWithSize";
+            using var helperMaLo = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+            var malos = helperMaLo.GetAsync<IEnumerable<object>>(HttpContext, apiMaLoUrl);
+            ViewBag.listMaLos = malos.Result.ToList();
+
+            var apiMaLoaiCaUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/MaLoaiCaFillets/GetAlls";
+            using var helperMaLoaiCa = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+            var maloaiCas = helperMaLoaiCa.GetAsync<IEnumerable<MaLoaiCaFillet>>(HttpContext, apiMaLoaiCaUrl);
+            ViewBag.listMaLoaiCas = maloaiCas.Result.ToList();
+
+            var codeId = HttpContext.Session.GetString("XuongId");
+            var apiThanhPhamUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/MaThanhPhamFillets/GetAllsByCodeId/{codeId}";
+            using var helperThanhPham = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+            var thanhPhams = helperThanhPham.GetAsync<IEnumerable<MaThanhPhamFillet>>(HttpContext, apiThanhPhamUrl);
+            ViewBag.listThanhPhams = thanhPhams.Result.ToList();
+
+            var apiSFLUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/MaSizeFillets/GetAlls";
+            using var helperSFL = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+            var sfls = helperSFL.GetAsync<IEnumerable<MaSizeFillet>>(HttpContext, apiSFLUrl);
+            ViewBag.listSFLs = sfls.Result.ToList();
+
+            var apiMaMauUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/MaMauFillets/GetAlls";
+            using var helperMaMau = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+            var mamaus = helperMaMau.GetAsync<IEnumerable<MaMauFillet>>(HttpContext, apiMaMauUrl);
+            ViewBag.listMaMaus = mamaus.Result.ToList();
+
+            var apiNhanVienUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/NhanVienDaiThanhs/GetAllNhanVienWithDataNeededs";
+            using var helperNhanVien = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+            var nhanviens = helperNhanVien.GetAsync<IEnumerable<object>>(HttpContext, apiNhanVienUrl);
+            ViewBag.DataNhanVien = nhanviens.Result.ToList();
+
+            var apiXuongUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/XiNghieps/GetAllXuong";
+            using var helperXuong = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+            var xuongs = helperXuong.GetAsync<IEnumerable<XiNghiep>>(HttpContext, apiXuongUrl);
+            ViewBag.listXuongs = xuongs.Result.ToList();
+
+            return View();
+        }
         [CustomAuthorize(Fu = "Xử Lý Phiếu Cân / Phiếu Cân Sơ Chế Định Hình", Func = "Xem Xử Lý Phiếu Cân / Phiếu Cân Sơ Chế Định Hình")]
         public IActionResult XuLyPhieuCanSoCheDinhHinhView()
         {
@@ -986,7 +1100,7 @@ namespace PMS.Controllers
             {
                 return Redirect(AppViewModels.AppViewModel.Instance.RedirectLoginUrl);
             }
-            ViewBag.titile = "Xử Lý Phiếu Cân Sơ Chế Định Hình";
+            ViewBag.TitlePage = "Xử Lý Phiếu Cân Sơ Chế Định Hình";
 
             var apiMaLoUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/MaLos/GetsMSLWithSize";
             using var helperMaLo = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
@@ -1021,6 +1135,160 @@ namespace PMS.Controllers
 
             return View();
         }
+
+        [CustomAuthorize(Fu = "Xử Lý Phiếu Cân / Phiếu Cân BTP Xẻ Bướm", Func = "Xem Xử Lý Phiếu Cân / Phiếu Cân BTP Xẻ Bướm")]
+        public IActionResult XuLyPhieuCanBTPXeBuomView()
+        {
+
+            var rl = Middlewares.AuthenticationHelpers.CheckAut(HttpContext, "XuLyPhieuCanBTPXeBuomView");
+            if (rl == false)
+            {
+                return Redirect(AppViewModels.AppViewModel.Instance.RedirectLoginUrl);
+            }
+            ViewBag.TitlePage = "Xử Lý Phiếu Cân BTP Xẻ Bướm";
+
+            var apiMaLoUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/MaLos/GetsMSLWithSize";
+            using var helperMaLo = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+            var malos = helperMaLo.GetAsync<IEnumerable<object>>(HttpContext, apiMaLoUrl);
+            ViewBag.listMaLos = malos.Result.ToList();
+
+            var apiMaLoaiCaUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/MaLoaiCaFillets/GetAlls";
+            using var helperMaLoaiCa = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+            var maloaiCas = helperMaLoaiCa.GetAsync<IEnumerable<MaLoaiCaFillet>>(HttpContext, apiMaLoaiCaUrl);
+            ViewBag.listMaLoaiCas = maloaiCas.Result.ToList();
+
+            var codeId = HttpContext.Session.GetString("XuongId");
+            var apiThanhPhamUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/MaThanhPhamFillets/GetAllsByCodeId/{codeId}";
+            using var helperThanhPham = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+            var thanhPhams = helperThanhPham.GetAsync<IEnumerable<MaThanhPhamFillet>>(HttpContext, apiThanhPhamUrl);
+            ViewBag.listThanhPhams = thanhPhams.Result.ToList();
+
+            var apiSFLUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/MaSizeFillets/GetAlls";
+            using var helperSFL = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+            var sfls = helperSFL.GetAsync<IEnumerable<MaSizeFillet>>(HttpContext, apiSFLUrl);
+            ViewBag.listSFLs = sfls.Result.ToList();
+
+            var apiMaMauUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/MaMauFillets/GetAlls";
+            using var helperMaMau = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+            var mamaus = helperMaMau.GetAsync<IEnumerable<MaMauFillet>>(HttpContext, apiMaMauUrl);
+            ViewBag.listMaMaus = mamaus.Result.ToList();
+
+            var apiXuongUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/XiNghieps/GetAllXuong";
+            using var helperXuong = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+            var xuongs = helperXuong.GetAsync<IEnumerable<XiNghiep>>(HttpContext, apiXuongUrl);
+            ViewBag.listXuongs = xuongs.Result.ToList();
+            return View();
+        }
+
+        [CustomAuthorize(Fu = "Xử Lý Phiếu Cân / Phiếu Cân Fillet", Func = "Xem Xử Lý Phiếu Cân / Phiếu Cân Fillet")]
+        public IActionResult XuLyPhieuCanTPXeBuomView()
+        {
+
+            var rl = Middlewares.AuthenticationHelpers.CheckAut(HttpContext, "XuLyPhieuCanTPXeBuomView");
+            if (rl == false)
+            {
+                return Redirect(AppViewModels.AppViewModel.Instance.RedirectLoginUrl);
+            }
+            ViewBag.TitlePage = "Xử Lý Phiếu Cân TP Xẻ Bướm";
+
+            var apiMaLoUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/MaLos/GetsMSLWithSize";
+            using var helperMaLo = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+            var malos = helperMaLo.GetAsync<IEnumerable<object>>(HttpContext, apiMaLoUrl);
+            ViewBag.listMaLos = malos.Result.ToList();
+
+            var apiMaLoaiCaUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/MaLoaiCaFillets/GetAlls";
+            using var helperMaLoaiCa = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+            var maloaiCas = helperMaLoaiCa.GetAsync<IEnumerable<MaLoaiCaFillet>>(HttpContext, apiMaLoaiCaUrl);
+            ViewBag.listMaLoaiCas = maloaiCas.Result.ToList();
+
+            var codeId = HttpContext.Session.GetString("XuongId");
+            var apiThanhPhamUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/MaThanhPhamFillets/GetAllsByCodeId/{codeId}";
+            using var helperThanhPham = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+            var thanhPhams = helperThanhPham.GetAsync<IEnumerable<MaThanhPhamFillet>>(HttpContext, apiThanhPhamUrl);
+            ViewBag.listThanhPhams = thanhPhams.Result.ToList();
+
+            var apiSFLUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/MaSizeFillets/GetAlls";
+            using var helperSFL = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+            var sfls = helperSFL.GetAsync<IEnumerable<MaSizeFillet>>(HttpContext, apiSFLUrl);
+            ViewBag.listSFLs = sfls.Result.ToList();
+
+            var apiMaMauUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/MaMauFillets/GetAlls";
+            using var helperMaMau = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+            var mamaus = helperMaMau.GetAsync<IEnumerable<MaMauFillet>>(HttpContext, apiMaMauUrl);
+            ViewBag.listMaMaus = mamaus.Result.ToList();
+
+            var apiXuongUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/XiNghieps/GetAllXuong";
+            using var helperXuong = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+            var xuongs = helperXuong.GetAsync<IEnumerable<XiNghiep>>(HttpContext, apiXuongUrl);
+            ViewBag.listXuongs = xuongs.Result.ToList();
+
+            var apiNhanVienUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/NhanVienDaiThanhs/GetAllNhanVienWithDataNeededs";
+            using var helperNhanVien = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+            var nhanviens = helperNhanVien.GetAsync<IEnumerable<object>>(HttpContext, apiNhanVienUrl);
+            ViewBag.DataNhanVien = nhanviens.Result.ToList();
+            return View();
+        }
+        [CustomAuthorize(Fu = "Xử Lý Phiếu Cân / Phiếu Cân Fillet", Func = "Xem Xử Lý Phiếu Cân / Phiếu Cân Fillet")]
+        public IActionResult XuLyPhieuCanRaCoiXepKhuonView()
+        {
+
+            var rl = Middlewares.AuthenticationHelpers.CheckAut(HttpContext, "XuLyPhieuCanRaCoiXepKhuonView");
+            if (rl == false)
+            {
+                return Redirect(AppViewModels.AppViewModel.Instance.RedirectLoginUrl);
+            }
+            ViewBag.TitlePage = "Xử Lý Phiếu Cân Ra Cối Xếp Khuôn";
+
+            var apiMaLoUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/MaLos/GetsMSLWithSize";
+            using var helperMaLo = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+            var malos = helperMaLo.GetAsync<IEnumerable<object>>(HttpContext, apiMaLoUrl);
+            ViewBag.listMaLos = malos.Result.ToList();
+
+            var apiNhanVienUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/NhanVienDaiThanhs/GetAllNhanVienWithDataNeededs";
+            using var helperNhanVien = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+            var nhanviens = helperNhanVien.GetAsync<IEnumerable<object>>(HttpContext, apiNhanVienUrl);
+            ViewBag.DataNhanVien = nhanviens.Result.ToList();
+
+            var apiThanhPhamUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/MaThanhPhamChinhXepKhuons/GetAlls";
+            using var helperThanhPham = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+            var thanhPhams = helperThanhPham.GetAsync<IEnumerable<MaThanhPhamChinhXepKhuon>>(HttpContext, apiThanhPhamUrl);
+            ViewBag.listThanhPhams = thanhPhams.Result.ToList();
+
+
+            var apiSFLUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/MaSizeChinhXepKhuons/GetAlls";
+            using var helperSFL = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+            var sfls = helperSFL.GetAsync<IEnumerable<MaSizeChinhXepKhuon>>(HttpContext, apiSFLUrl);
+            ViewBag.listSFLs = sfls.Result.ToList();
+
+            var apiCoiChinhUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/MaCoiXepKhuons/GetAllCoiChinhs";
+            using var helperCoiChinh = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+            var coiChinhs = helperCoiChinh.GetAsync<IEnumerable<MaCoiXepKhuon>>(HttpContext, apiCoiChinhUrl);
+            ViewBag.listCoiChinhs = coiChinhs.Result.ToList();
+
+            var apiMaLoaiCaUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/MaLoaiCaXepKhuons/GetAlls";
+            using var helperMaLoaiCa = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+            var maloaiCas = helperMaLoaiCa.GetAsync<IEnumerable<MaLoaiCaXepKhuon>>(HttpContext, apiMaLoaiCaUrl);
+            ViewBag.listMaLoaiCas = maloaiCas.Result.ToList();
+
+            var apiChieuXaUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/MaChieuXaXepKhuons/GetAlls";
+            using var helperChieuXa = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+            var chieuxas = helperChieuXa.GetAsync<IEnumerable<MaChieuXaXepKhuon>>(HttpContext, apiChieuXaUrl);
+            ViewBag.listChieuXas = chieuxas.Result.ToList();
+
+            var apiChatLuongUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/MaChatLuongXepKhuons/GetAlls";
+            using var helperChatLuong = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+            var chatluong = helperChatLuong.GetAsync<IEnumerable<MaChatLuongXepKhuon>>(HttpContext, apiChatLuongUrl);
+            ViewBag.listChatLuongs = chatluong.Result.ToList();
+
+            var apiXuongUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/XiNghieps/GetAllXuong";
+            using var helperXuong = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+            var xuongs = helperXuong.GetAsync<IEnumerable<XiNghiep>>(HttpContext, apiXuongUrl);
+            ViewBag.listXuongs = xuongs.Result.ToList();
+
+            return View();
+        }
+
+
         #endregion
         #region get data with API
         public async Task<IEnumerable<object>> GetAlls(DateTime dateTime)
@@ -1070,6 +1338,48 @@ namespace PMS.Controllers
                 var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/PhieuCanTPFilletv2/GetPhieuCanTPFillet_XLPC/{dateTime.ToString("yyyy-MM-dd")}/{xuongId}";
                 using var helper = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
                 ViewBag.dataSource = await helper.GetAsync<IEnumerable<object>>(HttpContext, apiUrl);
+                dataSource = ViewBag.dataSource;
+            }
+
+            return dataSource;
+        }
+
+        public async Task<IEnumerable<object>> GetPhieuCanTPFilletv2s_XLPC(DateTime dateTime, string xuongId)
+        {
+            IEnumerable<object> dataSource = ViewBag.dataSource;
+            if (dataSource == null)
+            {
+                var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/PhieuCanTPFilletv2/GetPhieuCanTPFilletv2_XLPC/{dateTime.ToString("yyyy-MM-dd")}/{xuongId}";
+                using var helper = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+                ViewBag.dataSource = await helper.GetAsync<IEnumerable<object>>(HttpContext, apiUrl);
+                dataSource = ViewBag.dataSource;
+            }
+
+            return dataSource;
+        }
+        public async Task<IEnumerable<PhieuCanBTPFilletv2>> GetAllsWithDateAndXuongBTPFilletv2(DateTime dateTime, string xuongId)
+        {
+            //var maMayCan = AppViewModel.Instance.PCName;
+            IEnumerable<PhieuCanBTPFilletv2> dataSource = ViewBag.dataSourceBTPFillet;
+            if (dataSource == null)
+            {
+                var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/PhieuCanBTPFilletv2/GetAllsWithDateAndXuong/{dateTime.ToString("yyyy-MM-dd")}/{xuongId}";
+                using var helper = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+                ViewBag.dataSourceBTPFillet = await helper.GetAsync<IEnumerable<PhieuCanBTPFilletv2>>(HttpContext, apiUrl);
+                dataSource = ViewBag.dataSourceBTPFillet;
+            }
+
+            return dataSource;
+        }
+        public async Task<IEnumerable<PhieuCanTPFilletv2>> GetAllsWithDateAndXuongFilletv2(DateTime dateTime, string xuongId)
+        {
+            //var maMayCan = AppViewModel.Instance.PCName;
+            IEnumerable<PhieuCanTPFilletv2> dataSource = ViewBag.dataSource;
+            if (dataSource == null)
+            {
+                var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/PhieuCanTPFilletv2/GetAllsWithDateAndXuong/{dateTime.ToString("yyyy-MM-dd")}/{xuongId}";
+                using var helper = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+                ViewBag.dataSource = await helper.GetAsync<IEnumerable<PhieuCanTPFilletv2>>(HttpContext, apiUrl);
                 dataSource = ViewBag.dataSource;
             }
 
@@ -1452,6 +1762,85 @@ namespace PMS.Controllers
 
             return dataSource;
         }
+
+        public async Task<IEnumerable<object>> GetPhieuCanBTPXeBuoms_XLPC(DateTime dateTime, string xuongId)
+        {
+            IEnumerable<object> dataSource = ViewBag.dataSource;
+            if (dataSource == null)
+            {
+                var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/PhieuCanTPFillets/GetPhieuCanBTPXeBuom_XLPC/{dateTime.ToString("yyyy-MM-dd")}/{xuongId}";
+                using var helper = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+                ViewBag.dataSource = await helper.GetAsync<IEnumerable<object>>(HttpContext, apiUrl);
+                dataSource = ViewBag.dataSource;
+            }
+
+            return dataSource;
+        }
+        public async Task<IEnumerable<PhieuCanTPFillet>> GetAllsWithDateAndXuongBTPXeBuom(DateTime dateTime, string xuongId)
+        {
+            IEnumerable<PhieuCanTPFillet> dataSource = ViewBag.dataSource;
+            if (dataSource == null)
+            {
+                var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/PhieuCanTPFillets/GetAllsWithDateAndXuong/{dateTime.ToString("yyyy-MM-dd")}/{xuongId}";
+                using var helper = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+                ViewBag.dataSource = await helper.GetAsync<IEnumerable<PhieuCanTPFillet>>(HttpContext, apiUrl);
+                dataSource = ViewBag.dataSource;
+            }
+
+            return dataSource;
+        }
+        public async Task<IEnumerable<object>> GetPhieuCanTPXeBuoms_XLPC(DateTime dateTime, string xuongId)
+        {
+            IEnumerable<object> dataSource = ViewBag.dataSource;
+            if (dataSource == null)
+            {
+                var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/PhieuCanTPFillets/GetPhieuCanTPXeBuom_XLPC/{dateTime.ToString("yyyy-MM-dd")}/{xuongId}";
+                using var helper = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+                ViewBag.dataSource = await helper.GetAsync<IEnumerable<object>>(HttpContext, apiUrl);
+                dataSource = ViewBag.dataSource;
+            }
+
+            return dataSource;
+        }
+        public async Task<IEnumerable<PhieuCanTPFillet>> GetAllsWithDateAndXuongTPXeBuom(DateTime dateTime, string xuongId)
+        {
+            IEnumerable<PhieuCanTPFillet> dataSource = ViewBag.dataSource;
+            if (dataSource == null)
+            {
+                var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/PhieuCanTPFillet/GetAllsWithDateAndXuong/{dateTime.ToString("yyyy-MM-dd")}/{xuongId}";
+                using var helper = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+                ViewBag.dataSource = await helper.GetAsync<IEnumerable<PhieuCanTPFillet>>(HttpContext, apiUrl);
+                dataSource = ViewBag.dataSource;
+            }
+
+            return dataSource;
+        }
+        public async Task<IEnumerable<object>> GetPhieuCanRaCoiXepKhuons_XLPC(DateTime dateTime, string xuongId)
+        {
+            IEnumerable<object> dataSource = ViewBag.dataSource;
+            if (dataSource == null)
+            {
+                var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/PhieuCanRaCois/GetPhieuCan_XLPC/{dateTime.ToString("yyyy-MM-dd")}/{xuongId}";
+                using var helper = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+                ViewBag.dataSource = await helper.GetAsync<IEnumerable<object>>(HttpContext, apiUrl);
+                dataSource = ViewBag.dataSource;
+            }
+
+            return dataSource;
+        }
+        public async Task<IEnumerable<PhieuCanRaCoi>> GetAllsWithDateAndXuongRaCoiXepKhuon(DateTime dateTime, string xuongId)
+        {
+            IEnumerable<PhieuCanRaCoi> dataSource = ViewBag.dataSource;
+            if (dataSource == null)
+            {
+                var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/PhieuCanRaCois/GetAllsWithDateAndXuong/{dateTime.ToString("yyyy-MM-dd")}/{xuongId}";
+                using var helper = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+                ViewBag.dataSource = await helper.GetAsync<IEnumerable<PhieuCanRaCoi>>(HttpContext, apiUrl);
+                dataSource = ViewBag.dataSource;
+            }
+
+            return dataSource;
+        }
         #endregion
         #region xử lý các hàm
         public async Task<ActionResult> Reload(DateTime dateTime, string xuongId, string typeValue)
@@ -1481,6 +1870,18 @@ namespace PMS.Controllers
                     case "TPFILLET":
                         dataSource = await GetPhieuCanTPFillets_XLPC(dateTime, xuongId);
                         break;
+                    case "TPFILLETV1":
+                        dataSource = await GetPhieuCanTPXeBuoms_XLPC(dateTime, xuongId);
+                        break;
+                    case "FILLETV2":
+                        dataSource = await GetPhieuCanTPFilletv2s_XLPC(dateTime, xuongId);
+                        break;
+                    case "BTPXEBUOM":
+                        dataSource = await GetPhieuCanBTPXeBuoms_XLPC(dateTime, xuongId);
+                        break;
+                    case "TPXEBUOM":
+                        dataSource = await GetPhieuCanTPXeBuoms_XLPC(dateTime, xuongId);
+                        break;
                     case "DINHHINH":
                         dataSource = await GetPhieuCanDinhHinhs_XLPC(dateTime, xuongId);
                         break;
@@ -1498,6 +1899,9 @@ namespace PMS.Controllers
                         break;
                     case "XEPKHUONBLOCK":
                         dataSource = await GetPhieuCanXepKhuonBlock_XLPC(dateTime, xuongId);
+                        break;
+                    case "RACOIXEPKHUON":
+                        dataSource = await GetPhieuCanRaCoiXepKhuons_XLPC(dateTime, xuongId);
                         break;
                     case "PHUGIA":
                         dataSource = await GetPhieuCanPhuGia_XLPC(dateTime, xuongId);
@@ -1633,7 +2037,7 @@ namespace PMS.Controllers
                     MaLo = maLo,
                     MaUserCan = "Xử Lý Phiếu Cân",
                     GhiChu = $@"Người thực hiện: {userName}, trên máy: {AppViewModels.AppViewModel.Instance.PCName}, thời gian: {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}, loại: THEM PHIEU CAN",
-                    MaLoaiCaDaiThanhId = maLoaiCaVungNuoi??"",
+                    MaLoaiCaDaiThanhId = maLoaiCaVungNuoi ?? "",
                     TenLoaiCa = tenLoaiCa,
                     CanLai = canLai,
                     MaGhe = maGhe,
@@ -1742,26 +2146,26 @@ namespace PMS.Controllers
             {
                 string[] parts = listInfoPhieuCan.TrimEnd('|').Split(',');
 
-            // Gán tên cho từng phần tử
-            int stt = int.Parse(parts[0]);
-            string maMayCan = parts[1];
-            string biosId = parts[2];
-            if (stt <= 0)
-            {
-                return Json(new
+                // Gán tên cho từng phần tử
+                int stt = int.Parse(parts[0]);
+                string maMayCan = parts[1];
+                string biosId = parts[2];
+                if (stt <= 0)
                 {
-                    isSuccess = false,
-                    Mesages = "Trong danh sách chọn có phiếu cân đã xóa! Vui lòng kiểm tra lại!."
-                });
-            }
-            if (string.IsNullOrEmpty(stt.ToString()) || string.IsNullOrEmpty(ngay.ToString()) || string.IsNullOrEmpty(maMayCan) || string.IsNullOrEmpty(biosId))
-            {
-                return Json(new
+                    return Json(new
+                    {
+                        isSuccess = false,
+                        Mesages = "Trong danh sách chọn có phiếu cân đã xóa! Vui lòng kiểm tra lại!."
+                    });
+                }
+                if (string.IsNullOrEmpty(stt.ToString()) || string.IsNullOrEmpty(ngay.ToString()) || string.IsNullOrEmpty(maMayCan) || string.IsNullOrEmpty(biosId))
                 {
-                    isSuccess = false,
-                    Mesages = "Chưa chọn thông tin!."
-                });
-            }
+                    return Json(new
+                    {
+                        isSuccess = false,
+                        Mesages = "Chưa chọn thông tin!."
+                    });
+                }
                 //var biosIdEncry = Security.Crypt.ED.EncryptString(biosId);
                 //string sanitizedBiosId;
 
@@ -1780,56 +2184,56 @@ namespace PMS.Controllers
                 if (dataSource == null)
                 {
                     var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/PhieuCanVungNuoiDaiThanhSides/GetsByMa/{stt}/{ngay.ToString("yyyy-MM-dd")}/{maMayCan}/{sanitizedBiosId}";
-                using var helper = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
-                var item = await helper.GetAsync<PhieuCanVungNuoiDaiThanhSide>(HttpContext, apiUrl);
-                if (item != null)
-                {
-                    return Json(new
+                    using var helper = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+                    var item = await helper.GetAsync<PhieuCanVungNuoiDaiThanhSide>(HttpContext, apiUrl);
+                    if (item != null)
                     {
-                        isSuccess = true,
-                        Mesages = "Thành Công",
-                        STT = item.STT,
-                        Ngay = item.Ngay,
-                        MaMayCan = item.MaMayCan,
-                        BiosId = item.BiosId,
-                        NgayTai = item.NgayTai,
-                        GioTai = item.GioTai,
-                        Gio = item.Gio,
-                        MaLo = item.MaLo,
-                        MaUserCan = item.MaUserCan,
-                        GhiChu = item.GhiChu,
-                        MaLoaiCaDaiThanhId = item.MaLoaiCaDaiThanhId,
-                        TenLoaiCa = item.TenLoaiCa,
-                        CanLai = item.CanLai,
-                        MaGhe = item.MaGhe,
-                        TenGhe = item.TenGhe,
-                        TenAo = item.TenAo,
-                        TenCongDoan = item.TenCongDoan,
-                        TenThongKeDauAo = item.TenThongKeDauAo,
-                        TrongLuongTare = item.TrongLuongTare,
-                        TrongLuong = item.TrongLuong,
-                        IsTap = item.IsTap
-                    });
+                        return Json(new
+                        {
+                            isSuccess = true,
+                            Mesages = "Thành Công",
+                            STT = item.STT,
+                            Ngay = item.Ngay,
+                            MaMayCan = item.MaMayCan,
+                            BiosId = item.BiosId,
+                            NgayTai = item.NgayTai,
+                            GioTai = item.GioTai,
+                            Gio = item.Gio,
+                            MaLo = item.MaLo,
+                            MaUserCan = item.MaUserCan,
+                            GhiChu = item.GhiChu,
+                            MaLoaiCaDaiThanhId = item.MaLoaiCaDaiThanhId,
+                            TenLoaiCa = item.TenLoaiCa,
+                            CanLai = item.CanLai,
+                            MaGhe = item.MaGhe,
+                            TenGhe = item.TenGhe,
+                            TenAo = item.TenAo,
+                            TenCongDoan = item.TenCongDoan,
+                            TenThongKeDauAo = item.TenThongKeDauAo,
+                            TrongLuongTare = item.TrongLuongTare,
+                            TrongLuong = item.TrongLuong,
+                            IsTap = item.IsTap
+                        });
+                    }
+                    else
+                    {
+                        return Json(new
+                        {
+                            isSuccess = false,
+                            Mesages = $"Item Null {apiUrl}"
+                        });
+                    }
                 }
                 else
                 {
                     return Json(new
                     {
                         isSuccess = false,
-                        Mesages = $"Item Null {apiUrl}"
+                        Mesages = "DataSource Null"
                     });
                 }
-            }
-                else
-            {
-                return Json(new
-                {
-                    isSuccess = false,
-                    Mesages = "DataSource Null"
-                });
-            }
 
-        }
+            }
             catch (Exception e)
             {
                 Console.WriteLine(e);
@@ -1839,7 +2243,7 @@ namespace PMS.Controllers
                     Mesages = e.ToString()
                 });
             }
-            
+
         }
         [CustomAuthorize(Fu = "Xử Lý Phiếu Cân / Phiếu Cân BTP Fillet", Func = "Xoá Xử Lý Phiếu Cân / Phiếu Cân BTP Fillet")]
         public async Task<IActionResult> DoDelete_VungNuoiDaiThanhSide(string listInfoPhieuCan, DateTime ngay)
@@ -2627,6 +3031,7 @@ namespace PMS.Controllers
                     TrongLuongTare = 0,
                     Pheu = "0",
                     Chuyen = 0,
+                    Id = $@"{AppViewModels.AppViewModel.Instance.PCName}" + "." + $@"{DateTime.Now.ToString("yyyyMMddHHmmss")}",
                     GhiChu = $@"Người thực hiện: {userName}, trên máy: {AppViewModels.AppViewModel.Instance.PCName}, thời gian: {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}, loại: THEM PHIEU CAN",
                 };
                 var dataTuple = new Tuple<string>(JsonConvert.SerializeObject(model));
@@ -4890,10 +5295,3489 @@ namespace PMS.Controllers
 
 
         #endregion
+        #region Filletv2
+        [CustomAuthorize(Fu = "Xử Lý Phiếu Cân / Phiếu Cân Filletv2", Func = "Thêm Xử Lý Phiếu Cân / Phiếu Cân Filletv2")]
+        public async Task<IActionResult> DoInsert_Filletv2(DateTime dateTime, string xuongId, TimeSpan gio, string maLo, string maLoaiCa, string maThanhPham, string maSize, string maMau, string maNhanVien, decimal trongLuongNhan, decimal dinhMuc)
+        {
+            var userName = HttpContext.Session.GetString("Username");
+            var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/PhieuCanTPFilletv2/Insert";
+            var apiPhieuCanBTPDinhHinhUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/PhieuCanBTPFilletv2/Insert";
+            try
+            {
+                if (maLo == null)
+                {
+                    maLo = "LoTest";
+                }
+                // Kiểm tra và xác thực dữ liệu đầu vào
+                if (string.IsNullOrEmpty(gio.ToString()) || string.IsNullOrEmpty(maLo) || string.IsNullOrEmpty(maLoaiCa) || string.IsNullOrEmpty(maThanhPham) || string.IsNullOrEmpty(maSize) || string.IsNullOrEmpty(maMau) || string.IsNullOrEmpty(maNhanVien) || string.IsNullOrEmpty(trongLuongNhan.ToString()) || string.IsNullOrEmpty(dinhMuc.ToString()) || string.IsNullOrEmpty(xuongId) || string.IsNullOrEmpty(dateTime.ToString()))
+                {
+                    return Json(new
+                    {
+                        isSuccess = false,
+                        Messages = "Vui lòng nhập đầy đủ thông tin."
+                    });
+                }
+
+
+                var dataTP = await GetAllsWithDateAndXuongFilletv2(dateTime, xuongId);
+                var stt = dataTP.Where(x => x.MaMayCan == AppViewModels.AppViewModel.Instance.PCName)
+                           .Where(x => x.STT != null)
+                           .Select(x => Math.Abs(x.STT))
+                           .DefaultIfEmpty(0)
+                           .Max();
+                var dataBTP = await GetAllsWithDateAndXuongBTPFilletv2(dateTime, xuongId);
+                var sttBTP = dataBTP.Where(x => x.MaMayCan == AppViewModels.AppViewModel.Instance.PCName)
+                    .Where(x => x.STT != null)
+                    .Select(x => x.STT)
+                    .DefaultIfEmpty(0)
+                    .Max();
+                //var trongLuongNhan = trongLuongTra * dinhMuc;
+                var model = new PhieuCanTPFilletv2
+                {
+                    STT = stt + 1,
+                    Ngay = dateTime,
+                    MaMayCan = AppViewModel.Instance.PCName,
+                    MaXuong = xuongId,
+                    Gio = gio,
+                    MaUserCan = userName,
+                    MaLoaiCa = maLoaiCa,
+                    MaMau = maMau,
+                    MaSize = maSize,
+                    MaThanhPham = maThanhPham,
+                    MaLo = maLo,
+                    MaThe = "",
+                    TrongLuongNhan = trongLuongNhan,
+                    //TrongLuongTra = trongLuongTra,
+                    DinhMucThucTe = dinhMuc,
+                    DinhMucYeuCau = 0,
+                    MaNhanVien = maNhanVien,
+                    CaTra = false,
+                    STTBTP = sttBTP + 1,
+                    MaMayCanBTP = AppViewModel.Instance.PCName,
+                    GhiChu = $@"Người thực hiện: {userName}, trên máy: {AppViewModels.AppViewModel.Instance.PCName}, thời gian: {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}, loại: THÊM,",
+                    TrongLuongTare = 0,
+                    MaNhanVienPhucVu = "",
+                    MaBan = "",
+                    ThePhieuSanLuongId = "",
+                    Id = $@"{AppViewModels.AppViewModel.Instance.PCName}" + "." + $@"{DateTime.Now.ToString("yyyyMMddHHmmss")}",
+                    IdIn = $@"{AppViewModels.AppViewModel.Instance.PCName}" + "." + $@"{DateTime.Now.ToString("yyyyMMddHHmmss")}",
+                };
+                model.TrongLuongTra = model.TrongLuongNhan / model.DinhMucThucTe;
+
+                // Chuẩn bị dữ liệu cho PhieuCanBTPDinhHinh
+                var modelBTP = new PhieuCanBTPFilletv2
+                {
+                    STT = sttBTP + 1,
+                    Ngay = dateTime,
+                    MaMayCan = AppViewModel.Instance.PCName,
+                    MaXuong = xuongId,
+                    Gio = gio,
+                    MaUserCan = userName,
+                    MaLoaiCa = maLoaiCa,
+                    MaMau = maMau,
+                    MaSize = maSize,
+                    MaThanhPham = maThanhPham,
+                    MaLo = maLo,
+                    MaThe = "",
+                    MaNhanVien = maNhanVien,
+                    MaMayLangDa = "",
+                    TrongLuong = trongLuongNhan,
+                    IsEnabled = false,
+                    CaTra = false,
+                    GhiChu = $@"Người thực hiện: {userName}, trên máy: {AppViewModels.AppViewModel.Instance.PCName}, thời gian: {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}, loại: THÊM,",
+                    TrongLuongTare = 0,
+                    MaNhanVienPhucVu = "",
+                    Id = "",
+                };
+
+
+                using var transactionScope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+
+
+                var dataTuple = new Tuple<string>(JsonConvert.SerializeObject(model));
+                var jsonContent = new StringContent(JsonConvert.SerializeObject(dataTuple), Encoding.UTF8, "application/json");
+                using var helper = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+                var responseTP = await helper.PostAsync(HttpContext, apiUrl, jsonContent);
+                if (responseTP.Success)
+                {
+                    var dataTupleBTP = new Tuple<string>(JsonConvert.SerializeObject(modelBTP));
+                    var jsonContentBTP = new StringContent(JsonConvert.SerializeObject(dataTupleBTP), Encoding.UTF8, "application/json");
+                    var responseBTP = await helper.PostAsync(HttpContext, apiPhieuCanBTPDinhHinhUrl, jsonContentBTP);
+
+                    if (responseBTP.Success)
+                    {
+                        transactionScope.Complete();
+
+                        return Json(new
+                        {
+                            isSuccess = true,
+                            Messages = "Đã thêm 2 phiếu ở BTP Fillet và TP Fillet"
+                        });
+                    }
+                    else
+                    {
+                        return Json(new
+                        {
+                            isSuccess = false,
+                            Messages = "Thêm Phiếu Cân BTP Fillet thất bại: " + responseBTP.Message
+                        });
+                    }
+                }
+                else
+                {
+                    return Json(new
+                    {
+                        isSuccess = false,
+                        Messages = "Thêm Phiếu Cân TP Fillet thất bại: " + responseTP.Message
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    isSuccess = false,
+                    Messages = "Đã xảy ra lỗi: " + ex.Message.ToString()
+                });
+            }
+        }
+        public async Task<IActionResult> GetsByMa_Filletv2(string listInfoPhieuCan, DateTime ngay)
+        {
+            string[] parts = listInfoPhieuCan.TrimEnd('|').Split(',');
+            int stt = int.Parse(parts[0]);
+            string maMayCan = parts[1];
+            string maXuong = parts[2];
+            int sttBTP = int.Parse(parts[3]);
+            string maMayCanBTP = parts[4];
+            if (stt <= 0 || sttBTP <= 0)
+            {
+                return Json(new
+                {
+                    isSuccess = false,
+                    Mesages = "Trong danh sách chọn có phiếu cân đã xóa! Vui lòng kiểm tra lại!."
+                });
+            }
+            if (string.IsNullOrEmpty(stt.ToString()) || string.IsNullOrEmpty(ngay.ToString()) || string.IsNullOrEmpty(maMayCan) || string.IsNullOrEmpty(maXuong))
+            {
+                return Json(new
+                {
+                    isSuccess = false,
+                    Mesages = "Chưa chọn thông tin!."
+                });
+            }
+            IEnumerable<object> dataSource = ViewBag.dataSource;
+            if (dataSource == null)
+            {
+                var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/PhieuCanTPFilletv2/GetsByMa/{stt}/{ngay.ToString("yyyy-MM-dd")}/{maMayCan}/{maXuong}";
+                using var helper = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+                var item = await helper.GetAsync<PhieuCanTPFilletv2>(HttpContext, apiUrl);
+                var apiBTPUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/PhieuCanBTPFilletv2/GetsByMa/{sttBTP}/{ngay.ToString("yyyy-MM-dd")}/{maMayCanBTP}/{maXuong}";
+                using var helperBTP = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+                var itemBTP = await helperBTP.GetAsync<PhieuCanBTPFilletv2>(HttpContext, apiBTPUrl);
+                if (item != null && itemBTP != null)
+                {
+                    return Json(new
+                    {
+                        isSuccess = true,
+                        Mesages = "Thành Công",
+                        STT = item.STT,
+                        Ngay = item.Ngay,
+                        MaMayCan = item.MaMayCan,
+                        MaXuong = item.MaXuong,
+                        Gio = item.Gio,
+                        MaUserCan = item.MaUserCan,
+                        MaLoaiCa = item.MaLoaiCa,
+                        MaMau = item.MaMau,
+                        MaSize = item.MaSize,
+                        MaThanhPham = item.MaThanhPham,
+                        MaLo = item.MaLo,
+                        MaThe = item.MaThe,
+                        TrongLuongNhan = item.TrongLuongNhan,
+                        TrongLuongTra = item.TrongLuongTra,
+                        DinhMucThucTe = item.DinhMucThucTe,
+                        DinhMucYeuCau = item.DinhMucYeuCau,
+                        MaNhanVien = item.MaNhanVien,
+                        CaTra = item.CaTra,
+                        STTBTP = item.STTBTP,
+                        MaMayCanBTP = item.MaMayCanBTP,
+                        GhiChu = item.GhiChu,
+                        TrongLuongTare = item.TrongLuongTare,
+                        MaNhanVienPhucVu = item.MaNhanVienPhucVu,
+                        MaBan = item.MaBan,
+                        ThePhieuSanLuongId = item.ThePhieuSanLuongId,
+                        Id = item.Id,
+                        IdIn = item.IdIn,
+                    });
+                }
+            }
+            return Json(new
+            {
+                isSuccess = false,
+                Mesages = "Lỗi!"
+            });
+        }
+        [CustomAuthorize(Fu = "Xử Lý Phiếu Cân / Phiếu Cân Filletv2", Func = "Sửa Xử Lý Phiếu Cân / Phiếu Cân Filletv2")]
+        public async Task<IActionResult> DoUpDate_Filletv2(int stt, int sttBTP, string maMayCan, string maMayCanBTP, DateTime ngay, string maXuong, string maLo, string maLoaiCa, string maThanhPham, string maSize, string maMau, string maNhanVien)
+        {
+            var userName = HttpContext.Session.GetString("Username");
+            var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/PhieuCanTPFilletv2/Update_Filletv2/{stt}/{ngay.ToString("yyyy-MM-dd")}/{maMayCan}/{maXuong}";
+            var apiBTPUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/PhieuCanBTPFilletv2/Update_Filletv2/{sttBTP}/{ngay.ToString("yyyy-MM-dd")}/{maMayCanBTP}/{maXuong}";
+            try
+            {
+                if (stt <= 0 || sttBTP <= 0)
+                {
+                    return Json(new
+                    {
+                        isSuccess = false,
+                        Mesages = "Trong danh sách chọn có phiếu cân đã xóa! Vui lòng kiểm tra lại!."
+                    });
+                }
+                if (maLo == null)
+                {
+                    maLo = "LoTest";
+                }
+                // Kiểm tra dữ liệu đầu vào
+                // Kiểm tra và xác thực dữ liệu đầu vào
+                if (string.IsNullOrEmpty(maLo) || string.IsNullOrEmpty(maLoaiCa) || string.IsNullOrEmpty(maThanhPham) || string.IsNullOrEmpty(maSize) || string.IsNullOrEmpty(maMau) || string.IsNullOrEmpty(maNhanVien))
+                {
+                    return Json(new
+                    {
+                        isSuccess = false,
+                        Messages = "Vui lòng nhập đầy đủ thông tin."
+                    });
+                }
+                var model = new PhieuCanTPFilletv2
+                {
+                    MaLoaiCa = maLoaiCa,
+                    MaLo = maLo,
+                    MaSize = maSize,
+                    MaMau = maMau,
+                    MaThanhPham = maThanhPham,
+                    MaNhanVien = maNhanVien,
+                    GhiChu = $@"Người thực hiện: {userName}, trên máy: {AppViewModels.AppViewModel.Instance.PCName}, thời gian: {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}, loại: SỬA",
+                };
+                // Chuẩn bị dữ liệu cho PhieuCanBTPDinhHinh
+                var modelBTP = new PhieuCanBTPFilletv2
+                {
+                    MaLoaiCa = maLoaiCa,
+                    MaMau = maMau,
+                    MaSize = maSize,
+                    MaThanhPham = maThanhPham,
+                    MaLo = maLo,
+                    MaNhanVien = maNhanVien,
+                    GhiChu = $@"Người thực hiện: {userName}, trên máy: {AppViewModels.AppViewModel.Instance.PCName}, thời gian: {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}, loại: SỬA",
+                };
+
+
+                using var transactionScope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+
+                // Thực hiện insert PhieuCanTPDinhHinh
+                var dataTuple = new Tuple<string>(JsonConvert.SerializeObject(model));
+                var jsonContent = new StringContent(JsonConvert.SerializeObject(dataTuple), Encoding.UTF8, "application/json");
+                using var helper = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+                var responseTP = await helper.PostAsync(HttpContext, apiUrl, jsonContent);
+
+                // Thực hiện insert PhieuCanBTPDinhHinh nếu insert PhieuCanTPDinhHinh thành công
+                if (responseTP.Success)
+                {
+                    var dataTupleBTP = new Tuple<string>(JsonConvert.SerializeObject(modelBTP));
+                    var jsonContentBTP = new StringContent(JsonConvert.SerializeObject(dataTupleBTP), Encoding.UTF8, "application/json");
+                    var responseBTP = await helper.PostAsync(HttpContext, apiBTPUrl, jsonContentBTP);
+
+                    if (responseBTP.Success)
+                    {
+                        // Hoàn thành transaction nếu cả hai update đều thành công
+                        transactionScope.Complete();
+
+                        return Json(new
+                        {
+                            isSuccess = true,
+                            Messages = "Đã sửa 2 phiếu ở BTP Fillet và TP Fillet"
+                        });
+                    }
+                    else
+                    {
+                        // Quay lại trạng thái trước transaction nếu update PhieuCanBTPDinhHinh thất bại
+                        return Json(new
+                        {
+                            isSuccess = false,
+                            Messages = "Sửa Phiếu Cân BTP Fillet thất bại: " + responseBTP.Message
+                        });
+                    }
+                }
+                else
+                {
+                    // Quay lại trạng thái trước transaction nếu update PhieuCanTPDinhHinh thất bại
+                    return Json(new
+                    {
+                        isSuccess = false,
+                        Messages = "Sửa Phiếu Cân TP Fillet thất bại: " + responseTP.Message
+                    });
+                }
+
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    isSuccess = false,
+                    Messages = "Đã xảy ra lỗi: " + ex.Message
+                });
+            }
+        }
+        [CustomAuthorize(Fu = "Xử Lý Phiếu Cân / Phiếu Cân Filletv2", Func = "Xóa Xử Lý Phiếu Cân / Phiếu Cân Filletv2")]
+        public async Task<IActionResult> DoDelete_Filletv2(string listInfoPhieuCan, DateTime ngay)
+        {
+            // Tách chuỗi thành các mảng con ngăn cách bởi dấu |
+            string[] subArrays = listInfoPhieuCan.Split('|', StringSplitOptions.RemoveEmptyEntries);
+
+            // Khởi tạo danh sách kết quả
+            List<string[]> result = new List<string[]>();
+
+            // Tách các phần tử trong từng mảng con ngăn cách bởi dấu ,
+            foreach (string subArray in subArrays)
+            {
+                string[] elements = subArray.Split(',');
+                result.Add(elements);
+            }
+
+            var userName = HttpContext.Session.GetString("Username");
+
+            using var transactionScope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+
+            try
+            {
+                using var helper = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+
+                foreach (var parts in result)
+                {
+                    // Khởi tạo các biến từ mảng con
+                    int stt = int.Parse(parts[0]);
+                    string maMayCan = parts[1];
+                    string maXuong = parts[2];
+                    int sttBTP = int.Parse(parts[3]);
+                    string maMayCanBTP = parts[4];
+                    if (stt <= 0 || sttBTP <= 0)
+                    {
+                        return Json(new
+                        {
+                            isSuccess = false,
+                            Mesages = "Trong danh sách chọn có phiếu cân đã xóa! Vui lòng kiểm tra lại!."
+                        });
+                    }
+                    var model = new PhieuCanTPFilletv2
+                    {
+                        STT = stt * -1,
+                        STTBTP = sttBTP * -1,
+                        TrongLuongNhan = 0,
+                        TrongLuongTra = 0,
+                        TrongLuongTare = 0,
+                        DinhMucThucTe = 0,
+                        GhiChu = $@"Người thực hiện: {userName}, trên máy: {AppViewModels.AppViewModel.Instance.PCName}, thời gian: {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}, loại: XOA",
+                    };
+
+                    var modelBTP = new PhieuCanBTPFilletv2
+                    {
+                        STT = sttBTP * -1,
+                        TrongLuong = 0,
+                        TrongLuongTare = 0,
+                        GhiChu = $@"Người thực hiện: {userName}, trên máy: {AppViewModels.AppViewModel.Instance.PCName}, thời gian: {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}, loại: XOA",
+                    };
+
+                    // Chuẩn bị URL cho các API
+                    var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/PhieuCanTPFilletv2/Delete/{stt}/{ngay.ToString("yyyy-MM-dd")}/{maMayCan}/{maXuong}";
+                    var apiBTPUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/PhieuCanBTPFilletv2/Delete/{sttBTP}/{ngay.ToString("yyyy-MM-dd")}/{maMayCanBTP}/{maXuong}";
+
+                    // Thực hiện insert PhieuCanTPDinhHinh
+                    var dataTuple = new Tuple<string>(JsonConvert.SerializeObject(model));
+                    var jsonContent = new StringContent(JsonConvert.SerializeObject(dataTuple), Encoding.UTF8, "application/json");
+                    var responseTP = await helper.PostAsync(HttpContext, apiUrl, jsonContent);
+
+                    if (responseTP.Success)
+                    {
+                        // Thực hiện insert PhieuCanBTPDinhHinh nếu insert PhieuCanTPDinhHinh thành công
+                        var dataTupleBTP = new Tuple<string>(JsonConvert.SerializeObject(modelBTP));
+                        var jsonContentBTP = new StringContent(JsonConvert.SerializeObject(dataTupleBTP), Encoding.UTF8, "application/json");
+                        var responseBTP = await helper.PostAsync(HttpContext, apiBTPUrl, jsonContentBTP);
+
+                        if (!responseBTP.Success)
+                        {
+                            return Json(new
+                            {
+                                isSuccess = false,
+                                Messages = "Sửa Phiếu Cân BTP Fillet thất bại: " + responseBTP.Message
+                            });
+                        }
+                    }
+                    else
+                    {
+                        return Json(new
+                        {
+                            isSuccess = false,
+                            Messages = "Sửa Phiếu Cân TP Fillet thất bại: " + responseTP.Message
+                        });
+                    }
+                }
+
+                // Hoàn thành transaction nếu tất cả các update đều thành công
+                transactionScope.Complete();
+
+                return Json(new
+                {
+                    isSuccess = true,
+                    Messages = "Đã sửa 2 phiếu ở BTP Fillet và TP Fillet"
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    isSuccess = false,
+                    Messages = "Đã xảy ra lỗi: " + ex.Message
+                });
+            }
+        }
+        public async Task<IActionResult> CheckQuyenXLPC_Filletv2(string typeOption)
+        {
+            try
+            {
+                // Lấy danh sách roleid từ cookie
+                var roleIds = PMS.Middlewares.AuthenticationHelpers.GetRoleIdsFromCookie(HttpContext);
+
+                // Lấy danh sách role permissions từ list roleId
+                var rolePermistions = await PMS.Middlewares.AuthenticationHelpers.GetRolePermistionsAsync(HttpContext, roleIds);
+
+                // Kiểm tra quyền dựa trên typeOption
+                var permissionMapping = new Dictionary<string, string>
+                {
+                    { "CHUYENXUONG", "Chuyển Xưởng Xử Lý Phiếu Cân / Phiếu Cân Filletv2" },
+                    { "CHUYENSIZE", "Chuyển Size Xử Lý Phiếu Cân / Phiếu Cân Filletv2" },
+                    { "CHUYENTHANHPHAM", "Chuyển Thành Phẩm Xử Lý Phiếu Cân / Phiếu Cân Filletv2" },
+                    { "CHUYENLO", "Chuyển Lô Xử Lý Phiếu Cân / Phiếu Cân Filletv2" },
+                    { "CHUYENMAU", "Chuyển Màu Xử Lý Phiếu Cân / Phiếu Cân Filletv2" },
+                    { "CHUYENNHANVIEN", "Chuyển Nhân Viên Xử Lý Phiếu Cân / Phiếu Cân Filletv2" }
+                };
+
+                if (permissionMapping.TryGetValue(typeOption, out var func))
+                {
+                    var permission = rolePermistions
+                        .FirstOrDefault(x => x.Fu == "Xử Lý Phiếu Cân / Phiếu Cân Filletv2" && x.Func == func && x.Status == 1);
+
+                    if (permission != null)
+                    {
+                        return Json(new
+                        {
+                            isSuccess = true,
+                        });
+                    }
+                    else
+                    {
+                        return Json(new
+                        {
+                            isSuccess = false,
+                            Messages = "Bạn không có quyền sử dụng chức năng này!"
+                        });
+                    }
+                }
+
+                return Json(new
+                {
+                    isSuccess = false,
+                    Messages = "Tùy chọn không hợp lệ!"
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    isSuccess = false,
+                    Messages = "Đã xảy ra lỗi: " + ex.Message
+                });
+            }
+        }
+        [CustomAuthorize(Fu = "Xử Lý Phiếu Cân / Phiếu Cân Filletv2", Func = "Chuyển Xưởng Xử Lý Phiếu Cân / Phiếu Cân Filletv2")]
+        public async Task<IActionResult> ChuyenXuong_Filletv2(string listInfoPhieuCan, DateTime ngay, string maXuongChange)
+        {
+            // Tách chuỗi thành các mảng con ngăn cách bởi dấu |
+            string[] subArrays = listInfoPhieuCan.Split('|', StringSplitOptions.RemoveEmptyEntries);
+
+            // Khởi tạo danh sách kết quả
+            List<string[]> result = new List<string[]>();
+
+            // Tách các phần tử trong từng mảng con ngăn cách bởi dấu ,
+            foreach (string subArray in subArrays)
+            {
+                string[] elements = subArray.Split(',');
+                result.Add(elements);
+            }
+
+            var userName = HttpContext.Session.GetString("Username");
+
+            using var transactionScope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+
+            try
+            {
+                using var helper = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+
+                foreach (var parts in result)
+                {
+                    int stt = int.Parse(parts[0]);
+                    string maMayCan = parts[1];
+                    string maXuong = parts[2];
+                    int sttBTP = int.Parse(parts[3]);
+                    string maMayCanBTP = parts[4];
+                    if (stt <= 0 || sttBTP <= 0)
+                    {
+                        return Json(new
+                        {
+                            isSuccess = false,
+                            Mesages = "Trong danh sách chọn có phiếu cân đã xóa! Vui lòng kiểm tra lại!."
+                        });
+                    }
+                    // Chuẩn bị dữ liệu cho PhieuCanTPDinhHinh
+                    var model = new PhieuCanTPFilletv2
+                    {
+                        MaXuong = maXuongChange,
+                        GhiChu = $@"Người thực hiện: {userName}, trên máy: {AppViewModels.AppViewModel.Instance.PCName}, thời gian: {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}, loại: CHUYEN XUONG"
+                    };
+                    // Chuẩn bị dữ liệu cho PhieuCanBTPDinhHinh
+                    var modelBTP = new PhieuCanBTPFilletv2
+                    {
+                        MaXuong = maXuongChange,
+                        GhiChu = $@"Người thực hiện: {userName}, trên máy: {AppViewModels.AppViewModel.Instance.PCName}, thời gian: {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}, loại: CHUYEN XUONG"
+                    };
+
+                    // Chuẩn bị URL cho các API
+                    var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/PhieuCanTPFilletv2/ChuyenXuong_Filletv2/{stt}/{ngay.ToString("yyyy-MM-dd")}/{maMayCan}/{maXuong}";
+                    var apiBTPUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/PhieuCanBTPFilletv2/ChuyenXuong/{sttBTP}/{ngay.ToString("yyyy-MM-dd")}/{maMayCanBTP}/{maXuong}";
+
+                    // Thực hiện insert PhieuCanTPDinhHinh
+                    var dataTuple = new Tuple<string>(JsonConvert.SerializeObject(model));
+                    var jsonContent = new StringContent(JsonConvert.SerializeObject(dataTuple), Encoding.UTF8, "application/json");
+                    var responseTP = await helper.PostAsync(HttpContext, apiUrl, jsonContent);
+
+                    if (responseTP.Success)
+                    {
+                        // Thực hiện insert PhieuCanBTPDinhHinh nếu insert PhieuCanTPDinhHinh thành công
+                        var dataTupleBTP = new Tuple<string>(JsonConvert.SerializeObject(modelBTP));
+                        var jsonContentBTP = new StringContent(JsonConvert.SerializeObject(dataTupleBTP), Encoding.UTF8, "application/json");
+                        var responseBTP = await helper.PostAsync(HttpContext, apiBTPUrl, jsonContentBTP);
+
+                        if (!responseBTP.Success)
+                        {
+                            return Json(new
+                            {
+                                isSuccess = false,
+                                Messages = "Chuyển Xưởng Phiếu Cân BTP Fillet thất bại: " + responseBTP.Message
+                            });
+                        }
+                    }
+                    else
+                    {
+                        return Json(new
+                        {
+                            isSuccess = false,
+                            Messages = "Chuyển Xưởng Phiếu Cân TP Fillet thất bại: " + responseTP.Message
+                        });
+                    }
+                }
+
+                // Hoàn thành transaction nếu tất cả các update đều thành công
+                transactionScope.Complete();
+
+                return Json(new
+                {
+                    isSuccess = true,
+                    Messages = "Đã Chuyển Xưởng các phiếu  đã chọn ở BTP Fillet và TP Fillet! Vui lòng đổi xưởng để kiểm tra!"
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    isSuccess = false,
+                    Messages = "Đã xảy ra lỗi: " + ex.Message
+                });
+            }
+        }
+        [CustomAuthorize(Fu = "Xử Lý Phiếu Cân / Phiếu Cân Filletv2", Func = "Chuyển Size Xử Lý Phiếu Cân / Phiếu Cân Filletv2")]
+        public async Task<IActionResult> ChuyenSize_Filletv2(string listInfoPhieuCan, DateTime ngay, string maSizeChange)
+        {
+            // Tách chuỗi thành các mảng con ngăn cách bởi dấu |
+            string[] subArrays = listInfoPhieuCan.Split('|', StringSplitOptions.RemoveEmptyEntries);
+
+            // Khởi tạo danh sách kết quả
+            List<string[]> result = new List<string[]>();
+
+            // Tách các phần tử trong từng mảng con ngăn cách bởi dấu ,
+            foreach (string subArray in subArrays)
+            {
+                string[] elements = subArray.Split(',');
+                result.Add(elements);
+            }
+
+            var userName = HttpContext.Session.GetString("Username");
+
+            using var transactionScope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+
+            try
+            {
+                using var helper = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+
+                foreach (var parts in result)
+                {
+                    // Khởi tạo các biến từ mảng con
+                    int stt = int.Parse(parts[0]);
+                    string maMayCan = parts[1];
+                    string maXuong = parts[2];
+                    int sttBTP = int.Parse(parts[3]);
+                    string maMayCanBTP = parts[4];
+                    if (stt <= 0 || sttBTP <= 0)
+                    {
+                        return Json(new
+                        {
+                            isSuccess = false,
+                            Mesages = "Trong danh sách chọn có phiếu cân đã xóa! Vui lòng kiểm tra lại!."
+                        });
+                    }
+                    // Chuẩn bị dữ liệu cho PhieuCanTPDinhHinh
+                    var model = new PhieuCanTPFilletv2
+                    {
+                        MaSize = maSizeChange,
+                        GhiChu = $@"Người thực hiện: {userName}, trên máy: {AppViewModels.AppViewModel.Instance.PCName}, thời gian: {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}, loại: CHUYEN SIZE"
+                    };
+                    // Chuẩn bị dữ liệu cho PhieuCanBTPDinhHinh
+                    var modelBTP = new PhieuCanBTPFilletv2
+                    {
+                        MaSize = maSizeChange,
+                        GhiChu = $@"Người thực hiện: {userName}, trên máy: {AppViewModels.AppViewModel.Instance.PCName}, thời gian: {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}, loại: CHUYEN SIZE"
+                    };
+
+                    // Chuẩn bị URL cho các API
+                    var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/PhieuCanTPFilletv2/ChuyenSize_Fillet/{stt}/{ngay.ToString("yyyy-MM-dd")}/{maMayCan}/{maXuong}";
+                    var apiBTPUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/PhieuCanBTPFilletv2/ChuyenSize/{sttBTP}/{ngay.ToString("yyyy-MM-dd")}/{maMayCanBTP}/{maXuong}";
+
+                    // Thực hiện insert PhieuCanTPDinhHinh
+                    var dataTuple = new Tuple<string>(JsonConvert.SerializeObject(model));
+                    var jsonContent = new StringContent(JsonConvert.SerializeObject(dataTuple), Encoding.UTF8, "application/json");
+                    var responseTP = await helper.PostAsync(HttpContext, apiUrl, jsonContent);
+
+                    if (responseTP.Success)
+                    {
+                        // Thực hiện insert PhieuCanBTPDinhHinh nếu insert PhieuCanTPDinhHinh thành công
+                        var dataTupleBTP = new Tuple<string>(JsonConvert.SerializeObject(modelBTP));
+                        var jsonContentBTP = new StringContent(JsonConvert.SerializeObject(dataTupleBTP), Encoding.UTF8, "application/json");
+                        var responseBTP = await helper.PostAsync(HttpContext, apiBTPUrl, jsonContentBTP);
+
+                        if (!responseBTP.Success)
+                        {
+                            return Json(new
+                            {
+                                isSuccess = false,
+                                Messages = "Chuyển Size Phiếu Cân BTP Fillet thất bại: " + responseBTP.Message
+                            });
+                        }
+                    }
+                    else
+                    {
+                        return Json(new
+                        {
+                            isSuccess = false,
+                            Messages = "Chuyển Size Phiếu Cân TP Fillet thất bại: " + responseTP.Message
+                        });
+                    }
+                }
+
+                // Hoàn thành transaction nếu tất cả các update đều thành công
+                transactionScope.Complete();
+
+                return Json(new
+                {
+                    isSuccess = true,
+                    Messages = "Đã Chuyển Size các phiếu  đã chọn ở BTP Fillet và TP Fillet!"
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    isSuccess = false,
+                    Messages = "Đã xảy ra lỗi: " + ex.Message
+                });
+            }
+        }
+        [CustomAuthorize(Fu = "Xử Lý Phiếu Cân / Phiếu Cân Filletv2", Func = "Chuyển Thành Phẩm Xử Lý Phiếu Cân / Phiếu Cân Filletv2")]
+        public async Task<IActionResult> ChuyenThanhPham_Filletv2(string listInfoPhieuCan, DateTime ngay, string maThanhPhamChange)
+        {
+            // Tách chuỗi thành các mảng con ngăn cách bởi dấu |
+            string[] subArrays = listInfoPhieuCan.Split('|', StringSplitOptions.RemoveEmptyEntries);
+
+            // Khởi tạo danh sách kết quả
+            List<string[]> result = new List<string[]>();
+
+            // Tách các phần tử trong từng mảng con ngăn cách bởi dấu ,
+            foreach (string subArray in subArrays)
+            {
+                string[] elements = subArray.Split(',');
+                result.Add(elements);
+            }
+
+            var userName = HttpContext.Session.GetString("Username");
+
+            using var transactionScope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+
+            try
+            {
+                using var helper = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+
+                foreach (var parts in result)
+                {
+                    // Khởi tạo các biến từ mảng con
+                    int stt = int.Parse(parts[0]);
+                    string maMayCan = parts[1];
+                    string maXuong = parts[2];
+                    int sttBTP = int.Parse(parts[3]);
+                    string maMayCanBTP = parts[4];
+                    if (stt <= 0 || sttBTP <= 0)
+                    {
+                        return Json(new
+                        {
+                            isSuccess = false,
+                            Mesages = "Trong danh sách chọn có phiếu cân đã xóa! Vui lòng kiểm tra lại!."
+                        });
+                    }
+                    // Chuẩn bị dữ liệu cho PhieuCanTPDinhHinh
+                    var model = new PhieuCanTPFilletv2
+                    {
+                        MaThanhPham = maThanhPhamChange,
+                        GhiChu = $@"Người thực hiện: {userName}, trên máy: {AppViewModels.AppViewModel.Instance.PCName}, thời gian: {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}, loại: CHUYEN THANH PHAM"
+                    };
+                    // Chuẩn bị dữ liệu cho PhieuCanBTPDinhHinh
+                    var modelBTP = new PhieuCanBTPFilletv2
+                    {
+                        MaThanhPham = maThanhPhamChange,
+                        GhiChu = $@"Người thực hiện: {userName}, trên máy: {AppViewModels.AppViewModel.Instance.PCName}, thời gian: {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}, loại: CHUYEN THANH PHAM"
+                    };
+
+                    // Chuẩn bị URL cho các API
+                    var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/PhieuCanTPFilletv2/ChuyenThanhPham_Fillet/{stt}/{ngay.ToString("yyyy-MM-dd")}/{maMayCan}/{maXuong}";
+                    var apiBTPUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/PhieuCanBTPFilletv2/ChuyenThanhPham/{sttBTP}/{ngay.ToString("yyyy-MM-dd")}/{maMayCanBTP}/{maXuong}";
+
+                    // Thực hiện insert PhieuCanTPDinhHinh
+                    var dataTuple = new Tuple<string>(JsonConvert.SerializeObject(model));
+                    var jsonContent = new StringContent(JsonConvert.SerializeObject(dataTuple), Encoding.UTF8, "application/json");
+                    var responseTP = await helper.PostAsync(HttpContext, apiUrl, jsonContent);
+
+                    if (responseTP.Success)
+                    {
+                        // Thực hiện insert PhieuCanBTPDinhHinh nếu insert PhieuCanTPDinhHinh thành công
+                        var dataTupleBTP = new Tuple<string>(JsonConvert.SerializeObject(modelBTP));
+                        var jsonContentBTP = new StringContent(JsonConvert.SerializeObject(dataTupleBTP), Encoding.UTF8, "application/json");
+                        var responseBTP = await helper.PostAsync(HttpContext, apiBTPUrl, jsonContentBTP);
+
+                        if (!responseBTP.Success)
+                        {
+                            return Json(new
+                            {
+                                isSuccess = false,
+                                Messages = "Chuyển Size Phiếu Cân BTP Fillet thất bại: " + responseBTP.Message
+                            });
+                        }
+                    }
+                    else
+                    {
+                        return Json(new
+                        {
+                            isSuccess = false,
+                            Messages = "Chuyển Size Phiếu Cân TP Fillet thất bại: " + responseTP.Message
+                        });
+                    }
+                }
+
+                // Hoàn thành transaction nếu tất cả các update đều thành công
+                transactionScope.Complete();
+
+                return Json(new
+                {
+                    isSuccess = true,
+                    Messages = "Đã Chuyển Size các phiếu  đã chọn ở BTP Fillet và TP Fillet!"
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    isSuccess = false,
+                    Messages = "Đã xảy ra lỗi: " + ex.Message
+                });
+            }
+        }
+        [CustomAuthorize(Fu = "Xử Lý Phiếu Cân / Phiếu Cân Filletv2", Func = "Chuyển Lô Xử Lý Phiếu Cân / Phiếu Cân Filletv2")]
+        public async Task<IActionResult> ChuyenLo_Filletv2(string listInfoPhieuCan, DateTime ngay, string maLoChange)
+        {
+            // Tách chuỗi thành các mảng con ngăn cách bởi dấu |
+            string[] subArrays = listInfoPhieuCan.Split('|', StringSplitOptions.RemoveEmptyEntries);
+
+            // Khởi tạo danh sách kết quả
+            List<string[]> result = new List<string[]>();
+
+            // Tách các phần tử trong từng mảng con ngăn cách bởi dấu ,
+            foreach (string subArray in subArrays)
+            {
+                string[] elements = subArray.Split(',');
+                result.Add(elements);
+            }
+
+            var userName = HttpContext.Session.GetString("Username");
+
+            using var transactionScope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+
+            try
+            {
+                using var helper = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+
+                foreach (var parts in result)
+                {
+                    // Khởi tạo các biến từ mảng con
+                    int stt = int.Parse(parts[0]);
+                    string maMayCan = parts[1];
+                    string maXuong = parts[2];
+                    int sttBTP = int.Parse(parts[3]);
+                    string maMayCanBTP = parts[4];
+                    if (stt <= 0 || sttBTP <= 0)
+                    {
+                        return Json(new
+                        {
+                            isSuccess = false,
+                            Mesages = "Trong danh sách chọn có phiếu cân đã xóa! Vui lòng kiểm tra lại!."
+                        });
+                    }
+                    // Chuẩn bị dữ liệu cho PhieuCanTPDinhHinh
+                    var model = new PhieuCanTPFilletv2
+                    {
+                        MaLo = maLoChange,
+                        GhiChu = $@"Người thực hiện: {userName}, trên máy: {AppViewModels.AppViewModel.Instance.PCName}, thời gian: {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}, loại: CHUYEN THANH PHAM"
+                    };
+                    // Chuẩn bị dữ liệu cho PhieuCanBTPDinhHinh
+                    var modelBTP = new PhieuCanBTPFilletv2
+                    {
+                        MaLo = maLoChange,
+                        GhiChu = $@"Người thực hiện: {userName}, trên máy: {AppViewModels.AppViewModel.Instance.PCName}, thời gian: {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}, loại: CHUYEN THANH PHAM"
+                    };
+
+                    // Chuẩn bị URL cho các API
+                    var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/PhieuCanTPFilletv2/ChuyenLo_Fillet/{stt}/{ngay.ToString("yyyy-MM-dd")}/{maMayCan}/{maXuong}";
+                    var apiBTPUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/PhieuCanBTPFilletv2/ChuyenLo/{sttBTP}/{ngay.ToString("yyyy-MM-dd")}/{maMayCanBTP}/{maXuong}";
+
+                    // Thực hiện insert PhieuCanTPDinhHinh
+                    var dataTuple = new Tuple<string>(JsonConvert.SerializeObject(model));
+                    var jsonContent = new StringContent(JsonConvert.SerializeObject(dataTuple), Encoding.UTF8, "application/json");
+                    var responseTP = await helper.PostAsync(HttpContext, apiUrl, jsonContent);
+
+                    if (responseTP.Success)
+                    {
+                        // Thực hiện insert PhieuCanBTPDinhHinh nếu insert PhieuCanTPDinhHinh thành công
+                        var dataTupleBTP = new Tuple<string>(JsonConvert.SerializeObject(modelBTP));
+                        var jsonContentBTP = new StringContent(JsonConvert.SerializeObject(dataTupleBTP), Encoding.UTF8, "application/json");
+                        var responseBTP = await helper.PostAsync(HttpContext, apiBTPUrl, jsonContentBTP);
+
+                        if (!responseBTP.Success)
+                        {
+                            return Json(new
+                            {
+                                isSuccess = false,
+                                Messages = "Chuyển Size Phiếu Cân BTP Fillet thất bại: " + responseBTP.Message
+                            });
+                        }
+                    }
+                    else
+                    {
+                        return Json(new
+                        {
+                            isSuccess = false,
+                            Messages = "Chuyển Size Phiếu Cân TP Fillet thất bại: " + responseTP.Message
+                        });
+                    }
+                }
+
+                // Hoàn thành transaction nếu tất cả các update đều thành công
+                transactionScope.Complete();
+
+                return Json(new
+                {
+                    isSuccess = true,
+                    Messages = "Đã Chuyển Size các phiếu  đã chọn ở BTP Fillet và TP Fillet!"
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    isSuccess = false,
+                    Messages = "Đã xảy ra lỗi: " + ex.Message
+                });
+            }
+        }
+        [CustomAuthorize(Fu = "Xử Lý Phiếu Cân / Phiếu Cân Filletv2", Func = "Chuyển Màu Xử Lý Phiếu Cân / Phiếu Cân Filletv2")]
+        public async Task<IActionResult> ChuyenMau_Filletv2(string listInfoPhieuCan, DateTime ngay, string maMauChange)
+        {
+            // Tách chuỗi thành các mảng con ngăn cách bởi dấu |
+            string[] subArrays = listInfoPhieuCan.Split('|', StringSplitOptions.RemoveEmptyEntries);
+
+            // Khởi tạo danh sách kết quả
+            List<string[]> result = new List<string[]>();
+
+            // Tách các phần tử trong từng mảng con ngăn cách bởi dấu ,
+            foreach (string subArray in subArrays)
+            {
+                string[] elements = subArray.Split(',');
+                result.Add(elements);
+            }
+
+            var userName = HttpContext.Session.GetString("Username");
+
+            using var transactionScope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+
+            try
+            {
+                using var helper = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+
+                foreach (var parts in result)
+                {
+                    // Khởi tạo các biến từ mảng con
+                    int stt = int.Parse(parts[0]);
+                    string maMayCan = parts[1];
+                    string maXuong = parts[2];
+                    int sttBTP = int.Parse(parts[3]);
+                    string maMayCanBTP = parts[4];
+                    if (stt <= 0 || sttBTP <= 0)
+                    {
+                        return Json(new
+                        {
+                            isSuccess = false,
+                            Mesages = "Trong danh sách chọn có phiếu cân đã xóa! Vui lòng kiểm tra lại!."
+                        });
+                    }
+                    // Chuẩn bị dữ liệu cho PhieuCanTPDinhHinh
+                    var model = new PhieuCanTPFilletv2
+                    {
+                        MaMau = maMauChange,
+                        GhiChu = $@"Người thực hiện: {userName}, trên máy: {AppViewModels.AppViewModel.Instance.PCName}, thời gian: {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}, loại: CHUYEN THANH PHAM"
+                    };
+                    // Chuẩn bị dữ liệu cho PhieuCanBTPDinhHinh
+                    var modelBTP = new PhieuCanBTPFilletv2
+                    {
+                        MaMau = maMauChange,
+                        GhiChu = $@"Người thực hiện: {userName}, trên máy: {AppViewModels.AppViewModel.Instance.PCName}, thời gian: {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}, loại: CHUYEN THANH PHAM"
+                    };
+
+                    // Chuẩn bị URL cho các API
+                    var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/PhieuCanTPFilletv2/ChuyenMau_Fillet/{stt}/{ngay.ToString("yyyy-MM-dd")}/{maMayCan}/{maXuong}";
+                    var apiBTPUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/PhieuCanBTPFilletv2/ChuyenMau/{sttBTP}/{ngay.ToString("yyyy-MM-dd")}/{maMayCanBTP}/{maXuong}";
+
+                    // Thực hiện insert PhieuCanTPDinhHinh
+                    var dataTuple = new Tuple<string>(JsonConvert.SerializeObject(model));
+                    var jsonContent = new StringContent(JsonConvert.SerializeObject(dataTuple), Encoding.UTF8, "application/json");
+                    var responseTP = await helper.PostAsync(HttpContext, apiUrl, jsonContent);
+
+                    if (responseTP.Success)
+                    {
+                        // Thực hiện insert PhieuCanBTPDinhHinh nếu insert PhieuCanTPDinhHinh thành công
+                        var dataTupleBTP = new Tuple<string>(JsonConvert.SerializeObject(modelBTP));
+                        var jsonContentBTP = new StringContent(JsonConvert.SerializeObject(dataTupleBTP), Encoding.UTF8, "application/json");
+                        var responseBTP = await helper.PostAsync(HttpContext, apiBTPUrl, jsonContentBTP);
+
+                        if (!responseBTP.Success)
+                        {
+                            return Json(new
+                            {
+                                isSuccess = false,
+                                Messages = "Chuyển Size Phiếu Cân BTP Fillet thất bại: " + responseBTP.Message
+                            });
+                        }
+                    }
+                    else
+                    {
+                        return Json(new
+                        {
+                            isSuccess = false,
+                            Messages = "Chuyển Size Phiếu Cân TP Fillet thất bại: " + responseTP.Message
+                        });
+                    }
+                }
+
+                // Hoàn thành transaction nếu tất cả các update đều thành công
+                transactionScope.Complete();
+
+                return Json(new
+                {
+                    isSuccess = true,
+                    Messages = "Đã Chuyển Size các phiếu  đã chọn ở BTP Fillet và TP Fillet!"
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    isSuccess = false,
+                    Messages = "Đã xảy ra lỗi: " + ex.Message
+                });
+            }
+        }
+        [CustomAuthorize(Fu = "Xử Lý Phiếu Cân / Phiếu Cân Filletv2", Func = "Chuyển Nhân Viên Xử Lý Phiếu Cân / Phiếu Cân Filletv2")]
+        public async Task<IActionResult> ChuyenNhanVien_Filletv2(string listInfoPhieuCan, DateTime ngay, string maNhanVienChange)
+        {
+            // Tách chuỗi thành các mảng con ngăn cách bởi dấu |
+            string[] subArrays = listInfoPhieuCan.Split('|', StringSplitOptions.RemoveEmptyEntries);
+
+            // Khởi tạo danh sách kết quả
+            List<string[]> result = new List<string[]>();
+
+            // Tách các phần tử trong từng mảng con ngăn cách bởi dấu ,
+            foreach (string subArray in subArrays)
+            {
+                string[] elements = subArray.Split(',');
+                result.Add(elements);
+            }
+
+            var userName = HttpContext.Session.GetString("Username");
+
+            using var transactionScope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+
+            try
+            {
+                using var helper = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+
+                foreach (var parts in result)
+                {
+                    // Khởi tạo các biến từ mảng con
+                    int stt = int.Parse(parts[0]);
+                    string maMayCan = parts[1];
+                    string maXuong = parts[2];
+                    int sttBTP = int.Parse(parts[3]);
+                    string maMayCanBTP = parts[4];
+                    if (stt <= 0 || sttBTP <= 0)
+                    {
+                        return Json(new
+                        {
+                            isSuccess = false,
+                            Mesages = "Trong danh sách chọn có phiếu cân đã xóa! Vui lòng kiểm tra lại!."
+                        });
+                    }
+                    // Chuẩn bị dữ liệu cho PhieuCanTPDinhHinh
+                    var model = new PhieuCanTPFilletv2
+                    {
+                        MaNhanVien = maNhanVienChange,
+                        GhiChu = $@"Người thực hiện: {userName}, trên máy: {AppViewModels.AppViewModel.Instance.PCName}, thời gian: {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}, loại: CHUYEN THANH PHAM"
+                    };
+                    // Chuẩn bị dữ liệu cho PhieuCanBTPDinhHinh
+                    var modelBTP = new PhieuCanBTPFilletv2
+                    {
+                        MaNhanVien = maNhanVienChange,
+                        GhiChu = $@"Người thực hiện: {userName}, trên máy: {AppViewModels.AppViewModel.Instance.PCName}, thời gian: {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}, loại: CHUYEN THANH PHAM"
+                    };
+
+                    // Chuẩn bị URL cho các API
+                    var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/PhieuCanTPFilletv2/ChuyenNhanVien_Fillet/{stt}/{ngay.ToString("yyyy-MM-dd")}/{maMayCan}/{maXuong}";
+                    var apiBTPUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/PhieuCanBTPFilletv2/ChuyenNhanVien/{sttBTP}/{ngay.ToString("yyyy-MM-dd")}/{maMayCanBTP}/{maXuong}";
+
+                    // Thực hiện insert PhieuCanTPDinhHinh
+                    var dataTuple = new Tuple<string>(JsonConvert.SerializeObject(model));
+                    var jsonContent = new StringContent(JsonConvert.SerializeObject(dataTuple), Encoding.UTF8, "application/json");
+                    var responseTP = await helper.PostAsync(HttpContext, apiUrl, jsonContent);
+
+                    if (responseTP.Success)
+                    {
+                        // Thực hiện insert PhieuCanBTPDinhHinh nếu insert PhieuCanTPDinhHinh thành công
+                        var dataTupleBTP = new Tuple<string>(JsonConvert.SerializeObject(modelBTP));
+                        var jsonContentBTP = new StringContent(JsonConvert.SerializeObject(dataTupleBTP), Encoding.UTF8, "application/json");
+                        var responseBTP = await helper.PostAsync(HttpContext, apiBTPUrl, jsonContentBTP);
+
+                        if (!responseBTP.Success)
+                        {
+                            return Json(new
+                            {
+                                isSuccess = false,
+                                Messages = "Chuyển Nhân Viên Phiếu Cân BTP Fillet thất bại: " + responseBTP.Message
+                            });
+                        }
+                    }
+                    else
+                    {
+                        return Json(new
+                        {
+                            isSuccess = false,
+                            Messages = "Chuyển Nhân Viên Phiếu Cân TP Fillet thất bại: " + responseTP.Message
+                        });
+                    }
+                }
+
+                // Hoàn thành transaction nếu tất cả các update đều thành công
+                transactionScope.Complete();
+
+                return Json(new
+                {
+                    isSuccess = true,
+                    Messages = "Đã Chuyển Nhân Viên các phiếu  đã chọn ở BTP Fillet và TP Fillet!"
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    isSuccess = false,
+                    Messages = "Đã xảy ra lỗi: " + ex.Message
+                });
+            }
+        }
+        #endregion
+
+        #region Filletv1
+        public async Task<IActionResult> CreatDefautNewTPFilletv1(DateTime dateTime, string xuongId)
+        {
+            try
+            {
+                var dataSource = await GetAllsWithDateAndXuongTPXeBuom(dateTime, xuongId);
+                if (dataSource != null)
+                {
+
+                    var maxstt = dataSource.Where(x => x.MaMayTinhCan == AppViewModels.AppViewModel.Instance.PCName)
+        .Where(x => x.Id != null)
+        .Select(x => Math.Abs(int.Parse(x.Id)))
+        .DefaultIfEmpty(0)
+        .Max();
+                    var stt = maxstt + 1;
+                    return Json(new
+                    {
+                        isSuccess = true,
+                        Id = stt,
+                        SuDung = true,
+                    });
+                }
+                else
+                {
+                    return Json(new
+                    {
+                        isSuccess = false,
+                        Mesages = "Lỗi!"
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        [CustomAuthorize(Fu = "Xử Lý Phiếu Cân / Phiếu Cân Fillet", Func = "Thêm Xử Lý Phiếu Cân / Phiếu Cân Fillet")]
+        public async Task<IActionResult> DoInsert_TPFilletv1(DateTime dateTime, string xuongId, TimeSpan gio, string maLo, string maLoaiCa, string maThanhPham, string maSize, string maMau, string maNhanVien, decimal trongLuong)
+        {
+            var userName = HttpContext.Session.GetString("Username");
+            var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/PhieuCanTPFillets/InsertTPXeBuom";
+            try
+            {
+                if (string.IsNullOrEmpty(xuongId) || string.IsNullOrEmpty(gio.ToString()) || string.IsNullOrEmpty(maLo) || string.IsNullOrEmpty(maThanhPham) || string.IsNullOrEmpty(maSize) || string.IsNullOrEmpty(maMau) || string.IsNullOrEmpty(maLoaiCa) || string.IsNullOrEmpty(maNhanVien) || string.IsNullOrEmpty(trongLuong.ToString()))
+                {
+                    return Json(new
+                    {
+                        isSuccess = false,
+                        Messages = "Vui lòng nhập đầy đủ thông tin."
+                    });
+                }
+                var model = new PhieuCanTPFillet
+                {
+                    MaMayTinhCan = AppViewModels.AppViewModel.Instance.PCName,
+                    MaUserCan = userName,
+                    ThoiGianCan = gio,
+                    Ngay = dateTime,
+                    MaXuongSanXuat = xuongId,
+                    MSL = maLo,
+                    MaLoaiCa = maLoaiCa,
+                    MaLoaiThanhPham = maThanhPham,
+                    MaSize = maSize,
+                    MaMau = maMau,
+                    MaNhanVien = maNhanVien,
+                    //HoVaTen = "",
+                    MaTheTu = "0",
+                    TrongLuong = trongLuong,
+                    //SuDung = true,
+                    GhiChu = $@"Người thực hiện: {userName}, trên máy: {AppViewModels.AppViewModel.Instance.PCName}, thời gian: {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}, loại: THÊM,",
+                    //MaNhanVienPhucVu = "",
+                    //LoaiCan = "",
+                    TrongLuongTare = 0,
+                    //Id = stt + dateTime.ToString("yyyyMMdd") + AppViewModels.AppViewModel.Instance.PCName + xuongId,
+                    Id = $@"{AppViewModels.AppViewModel.Instance.PCName}" + "." + $@"{DateTime.Now.ToString("yyyyMMddHHmmss")}",
+                };
+                var dataTuple = new Tuple<string>(JsonConvert.SerializeObject(model));
+                var jsonContent = new StringContent(JsonConvert.SerializeObject(dataTuple), Encoding.UTF8, "application/json");
+                using var helper = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+                var response = await helper.PostAsync(HttpContext, apiUrl, jsonContent);
+
+                if (response.Success)
+                {
+                    // Đăng ký thành công
+                    return Json(new
+                    {
+                        isSuccess = response.Success,
+                        Messages = response.Message
+                    });
+                }
+
+                return Json(new
+                {
+                    isSuccess = response.Success,
+                    Messages = response.Message
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    isSuccess = false,
+                    Messages = "Đã xảy ra lỗi: " + ex.Message.ToString()
+                });
+            }
+        }
+        public async Task<IActionResult> GetsByMaTPFilletv1(string listInfoPhieuCan, DateTime ngay)
+        {
+            string[] parts = listInfoPhieuCan.TrimEnd('|').Split(',');
+
+            // Gán tên cho từng phần tử
+            string maMayTinhCan = parts[0];
+            string maUserCan = parts[1];
+            TimeSpan thoiGianCan = TimeSpan.Parse(parts[2]);
+            decimal trongLuong = decimal.Parse(parts[3]);
+
+            if (trongLuong <= 0)
+            {
+                return Json(new
+                {
+                    isSuccess = false,
+                    Mesages = "Trong danh sách chọn có phiếu cân đã xóa! Vui lòng kiểm tra lại!."
+                });
+            }
+            if (string.IsNullOrEmpty(maMayTinhCan) || string.IsNullOrEmpty(maUserCan) || string.IsNullOrEmpty(thoiGianCan.ToString()))
+            {
+                return Json(new
+                {
+                    isSuccess = false,
+                    Mesages = "Chưa chọn thông tin!."
+                });
+            }
+            IEnumerable<object> dataSource = ViewBag.dataSource;
+            if (dataSource == null)
+            {
+                var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/PhieuCanTPFillets/GetsByMaTPXeBuom/{maMayTinhCan}/{maUserCan}/{thoiGianCan}/{ngay.ToString("yyyy-MM-dd")}";
+                using var helper = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+                var item = await helper.GetAsync<PhieuCanTPFillet>(HttpContext, apiUrl);
+                if (item != null)
+                {
+                    return Json(new
+                    {
+                        isSuccess = true,
+                        Mesages = "Thành Công",
+                        MaMayTinhCan = item.MaMayTinhCan,
+                        MaUserCan = item.MaUserCan,
+                        ThoiGianCan = item.ThoiGianCan,
+                        Ngay = item.Ngay,
+                        MaXuongSanXuat = item.MaXuongSanXuat,
+                        MSL = item.MSL,
+                        MaLoaiCa = item.MaLoaiCa,
+                        MaLoaiThanhPham = item.MaLoaiThanhPham,
+                        MaSize = item.MaSize,
+                        MaMau = item.MaMau,
+                        MaNhanVien = item.MaNhanVien,
+                        //HoVaTen = "",
+                        MaTheTu = item.MaTheTu,
+                        TrongLuong = item.TrongLuong,
+                        //SuDung = true,
+                        GhiChu = item.GhiChu,
+                        //MaNhanVienPhucVu = "",
+                        //LoaiCan = "",
+                        TrongLuongTare = item.TrongLuongTare,
+                        //Id = stt + dateTime.ToString("yyyyMMdd") + AppViewModels.AppViewModel.Instance.PCName + xuongId,
+                    });
+                }
+            }
+            return Json(new
+            {
+                isSuccess = false,
+                Mesages = "Lỗi!"
+            });
+        }
+        [CustomAuthorize(Fu = "Xử Lý Phiếu Cân / Phiếu Cân Fillet", Func = "Sửa Xử Lý Phiếu Cân / Phiếu Cân Fillet")]
+        public async Task<IActionResult> DoUpDateTPFilletv1(DateTime ngay, string maXuong, string maMayTinhCan, string maUserCan, TimeSpan gio, string maLo, string maLoaiCa, string maThanhPham, string maSize, string maMau, string maNhanVien, decimal trongLuong)
+        {
+            var userName = HttpContext.Session.GetString("Username");
+            var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/PhieuCanTPFillets/UpdateTPXeBuom/{maMayTinhCan}/{maUserCan}/{gio}/{ngay.ToString("yyyy-MM-dd")}";
+            try
+            {
+                // Kiểm tra dữ liệu đầu vào
+                if (string.IsNullOrEmpty(maXuong) || string.IsNullOrEmpty(maMayTinhCan) || string.IsNullOrEmpty(maUserCan) || string.IsNullOrEmpty(gio.ToString()) || string.IsNullOrEmpty(maLo) || string.IsNullOrEmpty(maLoaiCa) || string.IsNullOrEmpty(maThanhPham) || string.IsNullOrEmpty(maSize) || string.IsNullOrEmpty(maMau) || string.IsNullOrEmpty(trongLuong.ToString()))
+                {
+                    return Json(new
+                    {
+                        isSuccess = false,
+                        Messages = "Vui lòng nhập đầy đủ thông tin."
+                    });
+                }
+                var model = new PhieuCanTPFillet
+                {
+                    MSL = maLo,
+                    MaLoaiCa = maLoaiCa,
+                    MaLoaiThanhPham = maThanhPham,
+                    MaSize = maSize,
+                    MaMau = maMau,
+                    MaNhanVien = maNhanVien,
+                    GhiChu = $@"Người thực hiện: {userName}, trên máy: {AppViewModels.AppViewModel.Instance.PCName}, thời gian: {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}, loại: SỬA",
+                };
+                var dataTuple = new Tuple<string>(JsonConvert.SerializeObject(model));
+                var jsonContent = new StringContent(JsonConvert.SerializeObject(dataTuple), Encoding.UTF8, "application/json");
+                using var helper = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+                var rl = await helper.PostAsync(HttpContext, apiUrl, jsonContent);
+                if (rl.Success)
+                {
+                    return Json(new
+                    {
+                        isSuccess = rl.Success,
+                        Messages = rl.Message
+                    });
+                }
+                return Json(new
+                {
+                    isSuccess = rl.Success,
+                    Messages = rl.Message
+                });
+
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    isSuccess = false,
+                    Messages = "Đã xảy ra lỗi: " + ex.Message
+                });
+            }
+        }
+        [CustomAuthorize(Fu = "Xử Lý Phiếu Cân / Phiếu Cân Fillet", Func = "Xoá Xử Lý Phiếu Cân / Phiếu Cân Fillet")]
+        public async Task<IActionResult> DoDeleteTPFilletv1(string listInfoPhieuCan, DateTime ngay)
+        {
+            // Tách chuỗi thành các mảng con ngăn cách bởi dấu |
+            string[] subArrays = listInfoPhieuCan.Split('|', StringSplitOptions.RemoveEmptyEntries);
+
+            // Khởi tạo danh sách kết quả
+            List<string[]> result = new List<string[]>();
+
+            // Tách các phần tử trong từng mảng con ngăn cách bởi dấu ,
+            foreach (string subArray in subArrays)
+            {
+                string[] elements = subArray.Split(',');
+                result.Add(elements);
+            }
+
+            var userName = HttpContext.Session.GetString("Username");
+            try
+            {
+                using var helper = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+
+                foreach (var parts in result)
+                {
+
+                    string maMayTinhCan = parts[0];
+                    string maUserCan = parts[1];
+                    TimeSpan thoiGianCan = TimeSpan.Parse(parts[2]);
+                    decimal trongLuong = decimal.Parse(parts[3]);
+                    if (trongLuong <= 0)
+                    {
+                        return Json(new
+                        {
+                            isSuccess = false,
+                            Mesages = "Trong danh sách chọn có phiếu cân đã xóa! Vui lòng kiểm tra lại!."
+                        });
+                    }
+                    // Chuẩn bị dữ liệu cho PhieuCanTPDinhHinh
+                    var model = new PhieuCanTPFillet
+                    {
+                        TrongLuong = 0,
+                        TrongLuongTare = 0,
+                        GhiChu = $@"Người thực hiện: {userName}, trên máy: {AppViewModels.AppViewModel.Instance.PCName}, thời gian: {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}, loại: XOA",
+                    };
+
+                    // Chuẩn bị URL cho các API
+                    var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/PhieuCanTPFillets/DeleteBTPXeBuom/{maMayTinhCan}/{maUserCan}/{thoiGianCan}/{ngay.ToString("yyyy-MM-dd")}";
+
+                    // Thực hiện insert PhieuCanTPDinhHinh
+                    var dataTuple = new Tuple<string>(JsonConvert.SerializeObject(model));
+                    var jsonContent = new StringContent(JsonConvert.SerializeObject(dataTuple), Encoding.UTF8, "application/json");
+                    var responseTP = await helper.PostAsync(HttpContext, apiUrl, jsonContent);
+
+                    if (!responseTP.Success)
+                    {
+
+                        return Json(new
+                        {
+                            isSuccess = responseTP.Success,
+                            Messages = responseTP.Message
+                        });
+
+                    }
+                }
+                return Json(new
+                {
+                    isSuccess = true,
+                    Messages = "Đã xoá toàn bộ phiếu cân được chọn!"
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    isSuccess = false,
+                    Messages = "Đã xảy ra lỗi: " + ex.Message
+                });
+            }
+        }
+        public async Task<IActionResult> CheckQuyenTPFilletv1(string typeOption)
+        {
+            try
+            {
+                // Lấy danh sách roleid từ cookie
+                var roleIds = PMS.Middlewares.AuthenticationHelpers.GetRoleIdsFromCookie(HttpContext);
+
+                // Lấy danh sách role permissions từ list roleId
+                var rolePermistions = await PMS.Middlewares.AuthenticationHelpers.GetRolePermistionsAsync(HttpContext, roleIds);
+
+                // Kiểm tra quyền dựa trên typeOption
+                var permissionMapping = new Dictionary<string, string>
+                {
+                    { "CHUYENXUONG", "Chuyển Xưởng Xử Lý Phiếu Cân / Phiếu Cân Fillet" },
+                    { "CHUYENSIZE", "Chuyển Size Xử Lý Phiếu Cân / Phiếu Cân Fillet" },
+                    { "CHUYENTHANHPHAM", "Chuyển Thành Phẩm Xử Lý Phiếu Cân / Phiếu Cân Fillet" },
+                    { "CHUYENLO", "Chuyển Lô Xử Lý Phiếu Cân / Phiếu Cân Fillet" },
+                    { "CHUYENMAU", "Chuyển Màu Xử Lý Phiếu Cân / Phiếu Cân Fillet" },
+                };
+
+                if (permissionMapping.TryGetValue(typeOption, out var func))
+                {
+                    var permission = rolePermistions
+                        .FirstOrDefault(x => x.Fu == "Xử Lý Phiếu Cân / Phiếu Cân Fillet" && x.Func == func && x.Status == 1);
+
+                    if (permission != null)
+                    {
+                        return Json(new
+                        {
+                            isSuccess = true,
+                        });
+                    }
+                    else
+                    {
+                        return Json(new
+                        {
+                            isSuccess = false,
+                            Messages = "Bạn không có quyền sử dụng chức năng này!"
+                        });
+                    }
+                }
+
+                return Json(new
+                {
+                    isSuccess = false,
+                    Messages = "Tùy chọn không hợp lệ!"
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    isSuccess = false,
+                    Messages = "Đã xảy ra lỗi: " + ex.Message
+                });
+            }
+        }
+        [CustomAuthorize(Fu = "Xử Lý Phiếu Cân / Phiếu Cân Fillet", Func = "Chuyển Xưởng Xử Lý Phiếu Cân / Phiếu Cân Fillet")]
+        public async Task<IActionResult> ChuyenXuong_TPFilletv1(string listInfoPhieuCan, DateTime ngay, string maXuongChange)
+        {
+            // Tách chuỗi thành các mảng con ngăn cách bởi dấu |
+            string[] subArrays = listInfoPhieuCan.Split('|', StringSplitOptions.RemoveEmptyEntries);
+
+            // Khởi tạo danh sách kết quả
+            List<string[]> result = new List<string[]>();
+
+            // Tách các phần tử trong từng mảng con ngăn cách bởi dấu ,
+            foreach (string subArray in subArrays)
+            {
+                string[] elements = subArray.Split(',');
+                result.Add(elements);
+            }
+
+            var userName = HttpContext.Session.GetString("Username");
+
+            using var transactionScope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+
+            try
+            {
+                using var helper = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+
+                foreach (var parts in result)
+                {
+                    string maMayTinhCan = parts[0];
+                    string maUserCan = parts[1];
+                    TimeSpan thoiGianCan = TimeSpan.Parse(parts[2]);
+                    decimal trongLuong = decimal.Parse(parts[3]);
+
+                    if (trongLuong <= 0)
+                    {
+                        return Json(new
+                        {
+                            isSuccess = false,
+                            Mesages = "Trong danh sách chọn có phiếu cân đã xóa! Vui lòng kiểm tra lại!."
+                        });
+                    }
+                    // Chuẩn bị dữ liệu cho PhieuCanTPDinhHinh
+                    var model = new PhieuCanTPFillet
+                    {
+                        MaXuongSanXuat = maXuongChange,
+                        GhiChu = $@"Người thực hiện: {userName}, trên máy: {AppViewModels.AppViewModel.Instance.PCName}, thời gian: {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}, loại: CHUYEN XUONG"
+                    };
+
+
+                    // Chuẩn bị URL cho các API
+                    var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/PhieuCanTPFillets/ChuyenXuong_TPXeBuom/{maMayTinhCan}/{maUserCan}/{thoiGianCan}/{ngay.ToString("yyyy-MM-dd")}";
+
+                    // Thực hiện insert PhieuCanTPDinhHinh
+                    var dataTuple = new Tuple<string>(JsonConvert.SerializeObject(model));
+                    var jsonContent = new StringContent(JsonConvert.SerializeObject(dataTuple), Encoding.UTF8, "application/json");
+                    var responseTP = await helper.PostAsync(HttpContext, apiUrl, jsonContent);
+
+                    if (!responseTP.Success)
+                    {
+                        return Json(new
+                        {
+                            isSuccess = false,
+                            Messages = "Chuyển Xưởng Phiếu Cân TP Xẻ Bướm thất bại: " + responseTP.Message
+                        });
+
+                    }
+                }
+
+                // Hoàn thành transaction nếu tất cả các update đều thành công
+                transactionScope.Complete();
+
+                return Json(new
+                {
+                    isSuccess = true,
+                    Messages = "Đã Chuyển Xưởng các phiếu  đã chọn! Vui lòng đổi xưởng để kiểm tra!"
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    isSuccess = false,
+                    Messages = "Đã xảy ra lỗi: " + ex.Message
+                });
+            }
+        }
+        [CustomAuthorize(Fu = "Xử Lý Phiếu Cân / Phiếu Cân Fillet", Func = "Chuyển Size Xử Lý Phiếu Cân / Phiếu Cân Fillet")]
+        public async Task<IActionResult> ChuyenSize_TPFilletv1(string listInfoPhieuCan, DateTime ngay, string maSizeChange)
+        {
+            // Tách chuỗi thành các mảng con ngăn cách bởi dấu |
+            string[] subArrays = listInfoPhieuCan.Split('|', StringSplitOptions.RemoveEmptyEntries);
+
+            // Khởi tạo danh sách kết quả
+            List<string[]> result = new List<string[]>();
+
+            // Tách các phần tử trong từng mảng con ngăn cách bởi dấu ,
+            foreach (string subArray in subArrays)
+            {
+                string[] elements = subArray.Split(',');
+                result.Add(elements);
+            }
+
+            var userName = HttpContext.Session.GetString("Username");
+
+            using var transactionScope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+
+            try
+            {
+                using var helper = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+
+                foreach (var parts in result)
+                {
+                    string maMayTinhCan = parts[0];
+                    string maUserCan = parts[1];
+                    TimeSpan thoiGianCan = TimeSpan.Parse(parts[2]);
+                    decimal trongLuong = decimal.Parse(parts[3]);
+
+                    if (trongLuong <= 0)
+                    {
+                        return Json(new
+                        {
+                            isSuccess = false,
+                            Mesages = "Trong danh sách chọn có phiếu cân đã xóa! Vui lòng kiểm tra lại!."
+                        });
+                    }
+                    // Chuẩn bị dữ liệu cho PhieuCanTPDinhHinh
+                    var model = new PhieuCanTPFillet
+                    {
+                        MaSize = maSizeChange,
+                        GhiChu = $@"Người thực hiện: {userName}, trên máy: {AppViewModels.AppViewModel.Instance.PCName}, thời gian: {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}, loại: CHUYEN SIZE"
+                    };
+
+
+                    // Chuẩn bị URL cho các API
+                    var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/PhieuCanTPFillets/ChuyenSize_TPXeBuom/{maMayTinhCan}/{maUserCan}/{thoiGianCan}/{ngay.ToString("yyyy-MM-dd")}";
+
+                    // Thực hiện insert PhieuCanTPDinhHinh
+                    var dataTuple = new Tuple<string>(JsonConvert.SerializeObject(model));
+                    var jsonContent = new StringContent(JsonConvert.SerializeObject(dataTuple), Encoding.UTF8, "application/json");
+                    var responseTP = await helper.PostAsync(HttpContext, apiUrl, jsonContent);
+
+                    if (!responseTP.Success)
+                    {
+                        return Json(new
+                        {
+                            isSuccess = false,
+                            Messages = "Chuyển Size Phiếu Cân TP Xẻ Bướm thất bại: " + responseTP.Message
+                        });
+
+                    }
+                }
+
+                // Hoàn thành transaction nếu tất cả các update đều thành công
+                transactionScope.Complete();
+
+                return Json(new
+                {
+                    isSuccess = true,
+                    Messages = "Đã Chuyển Size các phiếu  đã chọn! Vui lòng đổi Size để kiểm tra!"
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    isSuccess = false,
+                    Messages = "Đã xảy ra lỗi: " + ex.Message
+                });
+            }
+        }
+        [CustomAuthorize(Fu = "Xử Lý Phiếu Cân / Phiếu Cân Fillet", Func = "Chuyển Thành Phẩm Xử Lý Phiếu Cân / Phiếu Cân Fillet")]
+        public async Task<IActionResult> ChuyenThanhPham_TPFilletv1(string listInfoPhieuCan, DateTime ngay, string maThanhPhamChange)
+        {
+            // Tách chuỗi thành các mảng con ngăn cách bởi dấu |
+            string[] subArrays = listInfoPhieuCan.Split('|', StringSplitOptions.RemoveEmptyEntries);
+
+            // Khởi tạo danh sách kết quả
+            List<string[]> result = new List<string[]>();
+
+            // Tách các phần tử trong từng mảng con ngăn cách bởi dấu ,
+            foreach (string subArray in subArrays)
+            {
+                string[] elements = subArray.Split(',');
+                result.Add(elements);
+            }
+
+            var userName = HttpContext.Session.GetString("Username");
+
+            using var transactionScope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+
+            try
+            {
+                using var helper = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+
+                foreach (var parts in result)
+                {
+                    string maMayTinhCan = parts[0];
+                    string maUserCan = parts[1];
+                    TimeSpan thoiGianCan = TimeSpan.Parse(parts[2]);
+                    decimal trongLuong = decimal.Parse(parts[3]);
+
+                    if (trongLuong <= 0)
+                    {
+                        return Json(new
+                        {
+                            isSuccess = false,
+                            Mesages = "Trong danh sách chọn có phiếu cân đã xóa! Vui lòng kiểm tra lại!."
+                        });
+                    }
+                    // Chuẩn bị dữ liệu cho PhieuCanTPDinhHinh
+                    var model = new PhieuCanTPFillet
+                    {
+                        MaLoaiThanhPham = maThanhPhamChange,
+                        GhiChu = $@"Người thực hiện: {userName}, trên máy: {AppViewModels.AppViewModel.Instance.PCName}, thời gian: {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}, loại: CHUYEN THANH PHAM"
+                    };
+
+
+                    // Chuẩn bị URL cho các API
+                    var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/PhieuCanTPFillets/ChuyenThanhPham_TPXeBuom/{maMayTinhCan}/{maUserCan}/{thoiGianCan}/{ngay.ToString("yyyy-MM-dd")}";
+                    // Thực hiện insert PhieuCanTPDinhHinh
+                    var dataTuple = new Tuple<string>(JsonConvert.SerializeObject(model));
+                    var jsonContent = new StringContent(JsonConvert.SerializeObject(dataTuple), Encoding.UTF8, "application/json");
+                    var responseTP = await helper.PostAsync(HttpContext, apiUrl, jsonContent);
+
+                    if (!responseTP.Success)
+                    {
+                        return Json(new
+                        {
+                            isSuccess = false,
+                            Messages = "Chuyển Thành Phẩm Phiếu Cân TP Xẻ Bướm thất bại: " + responseTP.Message
+                        });
+
+                    }
+                }
+
+                // Hoàn thành transaction nếu tất cả các update đều thành công
+                transactionScope.Complete();
+
+                return Json(new
+                {
+                    isSuccess = true,
+                    Messages = "Đã Chuyển Thành Phẩm các phiếu  đã chọn!"
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    isSuccess = false,
+                    Messages = "Đã xảy ra lỗi: " + ex.Message
+                });
+            }
+        }
+        [CustomAuthorize(Fu = "Xử Lý Phiếu Cân / Phiếu Cân Fillet", Func = "Chuyển Lô Xử Lý Phiếu Cân / Phiếu Cân Fillet")]
+        public async Task<IActionResult> ChuyenLo_TPFilletv1(string listInfoPhieuCan, DateTime ngay, string maLoChange)
+        {
+            // Tách chuỗi thành các mảng con ngăn cách bởi dấu |
+            string[] subArrays = listInfoPhieuCan.Split('|', StringSplitOptions.RemoveEmptyEntries);
+
+            // Khởi tạo danh sách kết quả
+            List<string[]> result = new List<string[]>();
+
+            // Tách các phần tử trong từng mảng con ngăn cách bởi dấu ,
+            foreach (string subArray in subArrays)
+            {
+                string[] elements = subArray.Split(',');
+                result.Add(elements);
+            }
+
+            var userName = HttpContext.Session.GetString("Username");
+
+            using var transactionScope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+
+            try
+            {
+                using var helper = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+
+                foreach (var parts in result)
+                {
+                    string maMayTinhCan = parts[0];
+                    string maUserCan = parts[1];
+                    TimeSpan thoiGianCan = TimeSpan.Parse(parts[2]);
+                    decimal trongLuong = decimal.Parse(parts[3]);
+
+                    if (trongLuong <= 0)
+                    {
+                        return Json(new
+                        {
+                            isSuccess = false,
+                            Mesages = "Trong danh sách chọn có phiếu cân đã xóa! Vui lòng kiểm tra lại!."
+                        });
+                    }
+                    // Chuẩn bị dữ liệu cho PhieuCanTPDinhHinh
+                    var model = new PhieuCanTPFillet
+                    {
+                        MSL = maLoChange,
+                        GhiChu = $@"Người thực hiện: {userName}, trên máy: {AppViewModels.AppViewModel.Instance.PCName}, thời gian: {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}, loại: CHUYEN LO"
+                    };
+
+
+                    // Chuẩn bị URL cho các API
+                    var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/PhieuCanTPFillets/ChuyenLo_TPXeBuom/{maMayTinhCan}/{maUserCan}/{thoiGianCan}/{ngay.ToString("yyyy-MM-dd")}";
+                    // Thực hiện insert PhieuCanTPDinhHinh
+                    var dataTuple = new Tuple<string>(JsonConvert.SerializeObject(model));
+                    var jsonContent = new StringContent(JsonConvert.SerializeObject(dataTuple), Encoding.UTF8, "application/json");
+                    var responseTP = await helper.PostAsync(HttpContext, apiUrl, jsonContent);
+
+                    if (!responseTP.Success)
+                    {
+                        return Json(new
+                        {
+                            isSuccess = false,
+                            Messages = "Chuyển Lô Phiếu Cân TP Xẻ Bướm thất bại: " + responseTP.Message
+                        });
+
+                    }
+                }
+
+                // Hoàn thành transaction nếu tất cả các update đều thành công
+                transactionScope.Complete();
+
+                return Json(new
+                {
+                    isSuccess = true,
+                    Messages = "Đã Chuyển Lô các phiếu  đã chọn!"
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    isSuccess = false,
+                    Messages = "Đã xảy ra lỗi: " + ex.Message
+                });
+            }
+        }
+        [CustomAuthorize(Fu = "Xử Lý Phiếu Cân / Phiếu Cân Fillet", Func = "Chuyển Màu Xử Lý Phiếu Cân / Phiếu Cân Fillet")]
+        public async Task<IActionResult> ChuyenMau_TPFilletv1(string listInfoPhieuCan, DateTime ngay, string maMauChange)
+        {
+            // Tách chuỗi thành các mảng con ngăn cách bởi dấu |
+            string[] subArrays = listInfoPhieuCan.Split('|', StringSplitOptions.RemoveEmptyEntries);
+
+            // Khởi tạo danh sách kết quả
+            List<string[]> result = new List<string[]>();
+
+            // Tách các phần tử trong từng mảng con ngăn cách bởi dấu ,
+            foreach (string subArray in subArrays)
+            {
+                string[] elements = subArray.Split(',');
+                result.Add(elements);
+            }
+
+            var userName = HttpContext.Session.GetString("Username");
+
+            using var transactionScope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+
+            try
+            {
+                using var helper = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+
+                foreach (var parts in result)
+                {
+                    string maMayTinhCan = parts[0];
+                    string maUserCan = parts[1];
+                    TimeSpan thoiGianCan = TimeSpan.Parse(parts[2]);
+                    decimal trongLuong = decimal.Parse(parts[3]);
+
+                    if (trongLuong <= 0)
+                    {
+                        return Json(new
+                        {
+                            isSuccess = false,
+                            Mesages = "Trong danh sách chọn có phiếu cân đã xóa! Vui lòng kiểm tra lại!."
+                        });
+                    }
+                    // Chuẩn bị dữ liệu cho PhieuCanTPDinhHinh
+                    var model = new PhieuCanTPFillet
+                    {
+                        MaMau = maMauChange,
+                        GhiChu = $@"Người thực hiện: {userName}, trên máy: {AppViewModels.AppViewModel.Instance.PCName}, thời gian: {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}, loại: CHUYEN LO"
+                    };
+
+
+                    // Chuẩn bị URL cho các API
+                    var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/PhieuCanTPFillets/ChuyenMau_TPXeBuom/{maMayTinhCan}/{maUserCan}/{thoiGianCan}/{ngay.ToString("yyyy-MM-dd")}";
+                    // Thực hiện insert PhieuCanTPDinhHinh
+                    var dataTuple = new Tuple<string>(JsonConvert.SerializeObject(model));
+                    var jsonContent = new StringContent(JsonConvert.SerializeObject(dataTuple), Encoding.UTF8, "application/json");
+                    var responseTP = await helper.PostAsync(HttpContext, apiUrl, jsonContent);
+
+                    if (!responseTP.Success)
+                    {
+                        return Json(new
+                        {
+                            isSuccess = false,
+                            Messages = "Chuyển Màu Phiếu Cân BTP Xẻ Bướm thất bại: " + responseTP.Message
+                        });
+
+                    }
+                }
+
+                // Hoàn thành transaction nếu tất cả các update đều thành công
+                transactionScope.Complete();
+
+                return Json(new
+                {
+                    isSuccess = true,
+                    Messages = "Đã Chuyển Màu các phiếu  đã chọn!"
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    isSuccess = false,
+                    Messages = "Đã xảy ra lỗi: " + ex.Message
+                });
+            }
+        }
+        #endregion
+        #endregion
+        #region Xẻ Bướm
+
+        #region BTP Xẻ Bướm
+        public async Task<IActionResult> CreatDefautNewBTPXeBuom(DateTime dateTime, string xuongId)
+        {
+            try
+            {
+                var dataSource = await GetAllsWithDateAndXuongBTPXeBuom(dateTime, xuongId);
+                if (dataSource != null)
+                {
+
+                    var maxstt = dataSource.Where(x => x.MaMayTinhCan == AppViewModels.AppViewModel.Instance.PCName)
+        .Where(x => x.Id != null)
+        .Select(x => Math.Abs(int.Parse(x.Id)))
+        .DefaultIfEmpty(0)
+        .Max();
+                    var stt = maxstt + 1;
+                    return Json(new
+                    {
+                        isSuccess = true,
+                        Id = stt,
+                        SuDung = true,
+                    });
+                }
+                else
+                {
+                    return Json(new
+                    {
+                        isSuccess = false,
+                        Mesages = "Lỗi!"
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        [CustomAuthorize(Fu = "Xử Lý Phiếu Cân / Phiếu Cân BTP Xẻ Bướm", Func = "Thêm Xử Lý Phiếu Cân / Phiếu Cân BTP Xẻ Bướm")]
+        public async Task<IActionResult> DoInsert_BTPXeBuom(DateTime dateTime, string xuongId, TimeSpan gio, string maLo, string maLoaiCa, string maThanhPham, string maSize, string maMau, decimal trongLuong)
+        {
+            var userName = HttpContext.Session.GetString("Username");
+            var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/PhieuCanTPFillets/InsertBTPXeBuom";
+            try
+            {
+                if (string.IsNullOrEmpty(xuongId) || string.IsNullOrEmpty(gio.ToString()) || string.IsNullOrEmpty(maLo) || string.IsNullOrEmpty(maThanhPham) || string.IsNullOrEmpty(maSize) || string.IsNullOrEmpty(maMau) || string.IsNullOrEmpty(maLoaiCa) || string.IsNullOrEmpty(trongLuong.ToString()))
+                {
+                    return Json(new
+                    {
+                        isSuccess = false,
+                        Messages = "Vui lòng nhập đầy đủ thông tin."
+                    });
+                }
+                var model = new PhieuCanTPFillet
+                {
+                    MaMayTinhCan = AppViewModels.AppViewModel.Instance.PCName,
+                    MaUserCan = userName,
+                    ThoiGianCan = gio,
+                    Ngay = dateTime,
+                    MaXuongSanXuat = xuongId,
+                    MSL = maLo,
+                    MaLoaiCa = maLoaiCa,
+                    MaLoaiThanhPham = maThanhPham,
+                    MaSize = maSize,
+                    MaMau = maMau,
+                    //MaNhanVien = "",
+                    //HoVaTen = "",
+                    MaTheTu = "0",
+                    TrongLuong = trongLuong,
+                    //SuDung = true,
+                    GhiChu = $@"Người thực hiện: {userName}, trên máy: {AppViewModels.AppViewModel.Instance.PCName}, thời gian: {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}, loại: THÊM,",
+                    //MaNhanVienPhucVu = "",
+                    //LoaiCan = "",
+                    TrongLuongTare = 0,
+                    Id = $@"{AppViewModels.AppViewModel.Instance.PCName}" + "." + $@"{DateTime.Now.ToString("yyyyMMddHHmmss")}",
+                    //Id = stt + dateTime.ToString("yyyyMMdd") + AppViewModels.AppViewModel.Instance.PCName + xuongId,
+                };
+                var dataTuple = new Tuple<string>(JsonConvert.SerializeObject(model));
+                var jsonContent = new StringContent(JsonConvert.SerializeObject(dataTuple), Encoding.UTF8, "application/json");
+                using var helper = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+                var response = await helper.PostAsync(HttpContext, apiUrl, jsonContent);
+
+                if (response.Success)
+                {
+                    // Đăng ký thành công
+                    return Json(new
+                    {
+                        isSuccess = response.Success,
+                        Messages = response.Message
+                    });
+                }
+
+                return Json(new
+                {
+                    isSuccess = response.Success,
+                    Messages = response.Message
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    isSuccess = false,
+                    Messages = "Đã xảy ra lỗi: " + ex.Message.ToString()
+                });
+            }
+        }
+        public async Task<IActionResult> GetsByMaBTPXeBuom(string listInfoPhieuCan, DateTime ngay)
+        {
+            string[] parts = listInfoPhieuCan.TrimEnd('|').Split(',');
+
+            // Gán tên cho từng phần tử
+            string maMayTinhCan = parts[0];
+            string maUserCan = parts[1];
+            TimeSpan thoiGianCan = TimeSpan.Parse(parts[2]);
+            decimal trongLuong = decimal.Parse(parts[3]);
+
+            if (trongLuong <= 0)
+            {
+                return Json(new
+                {
+                    isSuccess = false,
+                    Mesages = "Trong danh sách chọn có phiếu cân đã xóa! Vui lòng kiểm tra lại!."
+                });
+            }
+            if (string.IsNullOrEmpty(maMayTinhCan) || string.IsNullOrEmpty(maUserCan) || string.IsNullOrEmpty(thoiGianCan.ToString()))
+            {
+                return Json(new
+                {
+                    isSuccess = false,
+                    Mesages = "Chưa chọn thông tin!."
+                });
+            }
+            IEnumerable<object> dataSource = ViewBag.dataSource;
+            if (dataSource == null)
+            {
+                var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/PhieuCanTPFillets/GetsByMaBTPXeBuom/{maMayTinhCan}/{maUserCan}/{thoiGianCan}/{ngay.ToString("yyyy-MM-dd")}";
+                using var helper = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+                var item = await helper.GetAsync<PhieuCanTPFillet>(HttpContext, apiUrl);
+                if (item != null)
+                {
+                    return Json(new
+                    {
+                        isSuccess = true,
+                        Mesages = "Thành Công",
+                        MaMayTinhCan = item.MaMayTinhCan,
+                        MaUserCan = item.MaUserCan,
+                        ThoiGianCan = item.ThoiGianCan,
+                        Ngay = item.Ngay,
+                        MaXuongSanXuat = item.MaXuongSanXuat,
+                        MSL = item.MSL,
+                        MaLoaiCa = item.MaLoaiCa,
+                        MaLoaiThanhPham = item.MaLoaiThanhPham,
+                        MaSize = item.MaSize,
+                        MaMau = item.MaMau,
+                        //MaNhanVien = "",
+                        //HoVaTen = "",
+                        MaTheTu = item.MaTheTu,
+                        TrongLuong = item.TrongLuong,
+                        //SuDung = true,
+                        GhiChu = item.GhiChu,
+                        //MaNhanVienPhucVu = "",
+                        //LoaiCan = "",
+                        TrongLuongTare = item.TrongLuongTare,
+                        //Id = stt + dateTime.ToString("yyyyMMdd") + AppViewModels.AppViewModel.Instance.PCName + xuongId,
+                    });
+                }
+            }
+            return Json(new
+            {
+                isSuccess = false,
+                Mesages = "Lỗi!"
+            });
+        }
+        [CustomAuthorize(Fu = "Xử Lý Phiếu Cân / Phiếu Cân BTP Xẻ Bướm", Func = "Sửa Xử Lý Phiếu Cân / Phiếu Cân BTP Xẻ Bướm")]
+        public async Task<IActionResult> DoUpDateBTPXeBuom(DateTime ngay, string maXuong, string maMayTinhCan, string maUserCan, TimeSpan gio, string maLo, string maLoaiCa, string maThanhPham, string maSize, string maMau, decimal trongLuong)
+        {
+            var userName = HttpContext.Session.GetString("Username");
+            var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/PhieuCanTPFillets/UpdateBTPXeBuom/{maMayTinhCan}/{maUserCan}/{gio}/{ngay.ToString("yyyy-MM-dd")}";
+            try
+            {
+                // Kiểm tra dữ liệu đầu vào
+                if (string.IsNullOrEmpty(maXuong) || string.IsNullOrEmpty(maMayTinhCan) || string.IsNullOrEmpty(maUserCan) || string.IsNullOrEmpty(gio.ToString()) || string.IsNullOrEmpty(maLo) || string.IsNullOrEmpty(maLoaiCa) || string.IsNullOrEmpty(maThanhPham) || string.IsNullOrEmpty(maSize) || string.IsNullOrEmpty(maMau) || string.IsNullOrEmpty(trongLuong.ToString()))
+                {
+                    return Json(new
+                    {
+                        isSuccess = false,
+                        Messages = "Vui lòng nhập đầy đủ thông tin."
+                    });
+                }
+                var model = new PhieuCanTPFillet
+                {
+                    MSL = maLo,
+                    MaLoaiCa = maLoaiCa,
+                    MaLoaiThanhPham = maThanhPham,
+                    MaSize = maSize,
+                    MaMau = maMau,
+                    GhiChu = $@"Người thực hiện: {userName}, trên máy: {AppViewModels.AppViewModel.Instance.PCName}, thời gian: {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}, loại: SỬA",
+                };
+                var dataTuple = new Tuple<string>(JsonConvert.SerializeObject(model));
+                var jsonContent = new StringContent(JsonConvert.SerializeObject(dataTuple), Encoding.UTF8, "application/json");
+                using var helper = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+                var rl = await helper.PostAsync(HttpContext, apiUrl, jsonContent);
+                if (rl.Success)
+                {
+                    return Json(new
+                    {
+                        isSuccess = rl.Success,
+                        Messages = rl.Message
+                    });
+                }
+                return Json(new
+                {
+                    isSuccess = rl.Success,
+                    Messages = rl.Message
+                });
+
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    isSuccess = false,
+                    Messages = "Đã xảy ra lỗi: " + ex.Message
+                });
+            }
+        }
+        [CustomAuthorize(Fu = "Xử Lý Phiếu Cân / Phiếu Cân BTP Xẻ Bướm", Func = "Xoá Xử Lý Phiếu Cân / Phiếu Cân BTP Xẻ Bướm")]
+        public async Task<IActionResult> DoDeleteBTPXeBuom(string listInfoPhieuCan, DateTime ngay)
+        {
+            // Tách chuỗi thành các mảng con ngăn cách bởi dấu |
+            string[] subArrays = listInfoPhieuCan.Split('|', StringSplitOptions.RemoveEmptyEntries);
+
+            // Khởi tạo danh sách kết quả
+            List<string[]> result = new List<string[]>();
+
+            // Tách các phần tử trong từng mảng con ngăn cách bởi dấu ,
+            foreach (string subArray in subArrays)
+            {
+                string[] elements = subArray.Split(',');
+                result.Add(elements);
+            }
+
+            var userName = HttpContext.Session.GetString("Username");
+            try
+            {
+                using var helper = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+
+                foreach (var parts in result)
+                {
+
+                    string maMayTinhCan = parts[0];
+                    string maUserCan = parts[1];
+                    TimeSpan thoiGianCan = TimeSpan.Parse(parts[2]);
+                    decimal trongLuong = decimal.Parse(parts[3]);
+                    if (trongLuong <= 0)
+                    {
+                        return Json(new
+                        {
+                            isSuccess = false,
+                            Mesages = "Trong danh sách chọn có phiếu cân đã xóa! Vui lòng kiểm tra lại!."
+                        });
+                    }
+                    // Chuẩn bị dữ liệu cho PhieuCanTPDinhHinh
+                    var model = new PhieuCanTPFillet
+                    {
+                        TrongLuong = 0,
+                        TrongLuongTare = 0,
+                        GhiChu = $@"Người thực hiện: {userName}, trên máy: {AppViewModels.AppViewModel.Instance.PCName}, thời gian: {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}, loại: XOA",
+                    };
+
+                    // Chuẩn bị URL cho các API
+                    var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/PhieuCanTPFillets/DeleteBTPXeBuom/{maMayTinhCan}/{maUserCan}/{thoiGianCan}/{ngay.ToString("yyyy-MM-dd")}";
+
+                    // Thực hiện insert PhieuCanTPDinhHinh
+                    var dataTuple = new Tuple<string>(JsonConvert.SerializeObject(model));
+                    var jsonContent = new StringContent(JsonConvert.SerializeObject(dataTuple), Encoding.UTF8, "application/json");
+                    var responseTP = await helper.PostAsync(HttpContext, apiUrl, jsonContent);
+
+                    if (!responseTP.Success)
+                    {
+
+                        return Json(new
+                        {
+                            isSuccess = responseTP.Success,
+                            Messages = responseTP.Message
+                        });
+
+                    }
+                }
+                return Json(new
+                {
+                    isSuccess = true,
+                    Messages = "Đã xoá toàn bộ phiếu cân được chọn!"
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    isSuccess = false,
+                    Messages = "Đã xảy ra lỗi: " + ex.Message
+                });
+            }
+        }
+        public async Task<IActionResult> CheckQuyenBTPXeBuom(string typeOption)
+        {
+            try
+            {
+                // Lấy danh sách roleid từ cookie
+                var roleIds = PMS.Middlewares.AuthenticationHelpers.GetRoleIdsFromCookie(HttpContext);
+
+                // Lấy danh sách role permissions từ list roleId
+                var rolePermistions = await PMS.Middlewares.AuthenticationHelpers.GetRolePermistionsAsync(HttpContext, roleIds);
+
+                // Kiểm tra quyền dựa trên typeOption
+                var permissionMapping = new Dictionary<string, string>
+                {
+                    { "CHUYENXUONG", "Chuyển Xưởng Xử Lý Phiếu Cân / Phiếu Cân BTP Xẻ Bướm" },
+                    { "CHUYENSIZE", "Chuyển Size Xử Lý Phiếu Cân / Phiếu Cân BTP Xẻ Bướm" },
+                    { "CHUYENTHANHPHAM", "Chuyển Thành Phẩm Xử Lý Phiếu Cân / Phiếu Cân BTP Xẻ Bướm" },
+                    { "CHUYENLO", "Chuyển Lô Xử Lý Phiếu Cân / Phiếu Cân BTP Xẻ Bướm" },
+                    { "CHUYENMAU", "Chuyển Màu Xử Lý Phiếu Cân / Phiếu Cân BTP Xẻ Bướm" },
+                };
+
+                if (permissionMapping.TryGetValue(typeOption, out var func))
+                {
+                    var permission = rolePermistions
+                        .FirstOrDefault(x => x.Fu == "Xử Lý Phiếu Cân / Phiếu Cân BTP Xẻ Bướm" && x.Func == func && x.Status == 1);
+
+                    if (permission != null)
+                    {
+                        return Json(new
+                        {
+                            isSuccess = true,
+                        });
+                    }
+                    else
+                    {
+                        return Json(new
+                        {
+                            isSuccess = false,
+                            Messages = "Bạn không có quyền sử dụng chức năng này!"
+                        });
+                    }
+                }
+
+                return Json(new
+                {
+                    isSuccess = false,
+                    Messages = "Tùy chọn không hợp lệ!"
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    isSuccess = false,
+                    Messages = "Đã xảy ra lỗi: " + ex.Message
+                });
+            }
+        }
+        [CustomAuthorize(Fu = "Xử Lý Phiếu Cân / Phiếu Cân BTP Xẻ Bướm", Func = "Chuyển Xưởng Xử Lý Phiếu Cân / Phiếu Cân BTP Xẻ Bướm")]
+        public async Task<IActionResult> ChuyenXuong_BTPXeBuom(string listInfoPhieuCan, DateTime ngay, string maXuongChange)
+        {
+            // Tách chuỗi thành các mảng con ngăn cách bởi dấu |
+            string[] subArrays = listInfoPhieuCan.Split('|', StringSplitOptions.RemoveEmptyEntries);
+
+            // Khởi tạo danh sách kết quả
+            List<string[]> result = new List<string[]>();
+
+            // Tách các phần tử trong từng mảng con ngăn cách bởi dấu ,
+            foreach (string subArray in subArrays)
+            {
+                string[] elements = subArray.Split(',');
+                result.Add(elements);
+            }
+
+            var userName = HttpContext.Session.GetString("Username");
+
+            using var transactionScope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+
+            try
+            {
+                using var helper = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+
+                foreach (var parts in result)
+                {
+                    string maMayTinhCan = parts[0];
+                    string maUserCan = parts[1];
+                    TimeSpan thoiGianCan = TimeSpan.Parse(parts[2]);
+                    decimal trongLuong = decimal.Parse(parts[3]);
+
+                    if (trongLuong <= 0)
+                    {
+                        return Json(new
+                        {
+                            isSuccess = false,
+                            Mesages = "Trong danh sách chọn có phiếu cân đã xóa! Vui lòng kiểm tra lại!."
+                        });
+                    }
+                    // Chuẩn bị dữ liệu cho PhieuCanTPDinhHinh
+                    var model = new PhieuCanTPFillet
+                    {
+                        MaXuongSanXuat = maXuongChange,
+                        GhiChu = $@"Người thực hiện: {userName}, trên máy: {AppViewModels.AppViewModel.Instance.PCName}, thời gian: {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}, loại: CHUYEN XUONG"
+                    };
+
+
+                    // Chuẩn bị URL cho các API
+                    var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/PhieuCanTPFillets/ChuyenXuong_BTPXeBuom/{maMayTinhCan}/{maUserCan}/{thoiGianCan}/{ngay.ToString("yyyy-MM-dd")}";
+
+                    // Thực hiện insert PhieuCanTPDinhHinh
+                    var dataTuple = new Tuple<string>(JsonConvert.SerializeObject(model));
+                    var jsonContent = new StringContent(JsonConvert.SerializeObject(dataTuple), Encoding.UTF8, "application/json");
+                    var responseTP = await helper.PostAsync(HttpContext, apiUrl, jsonContent);
+
+                    if (!responseTP.Success)
+                    {
+                        return Json(new
+                        {
+                            isSuccess = false,
+                            Messages = "Chuyển Xưởng Phiếu Cân BTP Xẻ Bướm thất bại: " + responseTP.Message
+                        });
+
+                    }
+                }
+
+                // Hoàn thành transaction nếu tất cả các update đều thành công
+                transactionScope.Complete();
+
+                return Json(new
+                {
+                    isSuccess = true,
+                    Messages = "Đã Chuyển Xưởng các phiếu  đã chọn! Vui lòng đổi xưởng để kiểm tra!"
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    isSuccess = false,
+                    Messages = "Đã xảy ra lỗi: " + ex.Message
+                });
+            }
+        }
+        [CustomAuthorize(Fu = "Xử Lý Phiếu Cân / Phiếu Cân BTP Xẻ Bướm", Func = "Chuyển Size Xử Lý Phiếu Cân / Phiếu Cân BTP Xẻ Bướm")]
+        public async Task<IActionResult> ChuyenSize_BTPXeBuom(string listInfoPhieuCan, DateTime ngay, string maSizeChange)
+        {
+            // Tách chuỗi thành các mảng con ngăn cách bởi dấu |
+            string[] subArrays = listInfoPhieuCan.Split('|', StringSplitOptions.RemoveEmptyEntries);
+
+            // Khởi tạo danh sách kết quả
+            List<string[]> result = new List<string[]>();
+
+            // Tách các phần tử trong từng mảng con ngăn cách bởi dấu ,
+            foreach (string subArray in subArrays)
+            {
+                string[] elements = subArray.Split(',');
+                result.Add(elements);
+            }
+
+            var userName = HttpContext.Session.GetString("Username");
+
+            using var transactionScope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+
+            try
+            {
+                using var helper = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+
+                foreach (var parts in result)
+                {
+                    string maMayTinhCan = parts[0];
+                    string maUserCan = parts[1];
+                    TimeSpan thoiGianCan = TimeSpan.Parse(parts[2]);
+                    decimal trongLuong = decimal.Parse(parts[3]);
+
+                    if (trongLuong <= 0)
+                    {
+                        return Json(new
+                        {
+                            isSuccess = false,
+                            Mesages = "Trong danh sách chọn có phiếu cân đã xóa! Vui lòng kiểm tra lại!."
+                        });
+                    }
+                    // Chuẩn bị dữ liệu cho PhieuCanTPDinhHinh
+                    var model = new PhieuCanTPFillet
+                    {
+                        MaSize = maSizeChange,
+                        GhiChu = $@"Người thực hiện: {userName}, trên máy: {AppViewModels.AppViewModel.Instance.PCName}, thời gian: {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}, loại: CHUYEN SIZE"
+                    };
+
+
+                    // Chuẩn bị URL cho các API
+                    var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/PhieuCanTPFillets/ChuyenSize_BTPXeBuom/{maMayTinhCan}/{maUserCan}/{thoiGianCan}/{ngay.ToString("yyyy-MM-dd")}";
+
+                    // Thực hiện insert PhieuCanTPDinhHinh
+                    var dataTuple = new Tuple<string>(JsonConvert.SerializeObject(model));
+                    var jsonContent = new StringContent(JsonConvert.SerializeObject(dataTuple), Encoding.UTF8, "application/json");
+                    var responseTP = await helper.PostAsync(HttpContext, apiUrl, jsonContent);
+
+                    if (!responseTP.Success)
+                    {
+                        return Json(new
+                        {
+                            isSuccess = false,
+                            Messages = "Chuyển Size Phiếu Cân BTP Xẻ Bướm thất bại: " + responseTP.Message
+                        });
+
+                    }
+                }
+
+                // Hoàn thành transaction nếu tất cả các update đều thành công
+                transactionScope.Complete();
+
+                return Json(new
+                {
+                    isSuccess = true,
+                    Messages = "Đã Chuyển Size các phiếu  đã chọn! Vui lòng đổi Size để kiểm tra!"
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    isSuccess = false,
+                    Messages = "Đã xảy ra lỗi: " + ex.Message
+                });
+            }
+        }
+        [CustomAuthorize(Fu = "Xử Lý Phiếu Cân / Phiếu Cân BTP Xẻ Bướm", Func = "Chuyển Thành Phẩm Xử Lý Phiếu Cân / Phiếu Cân BTP Xẻ Bướm")]
+        public async Task<IActionResult> ChuyenThanhPham_BTPXeBuom(string listInfoPhieuCan, DateTime ngay, string maThanhPhamChange)
+        {
+            // Tách chuỗi thành các mảng con ngăn cách bởi dấu |
+            string[] subArrays = listInfoPhieuCan.Split('|', StringSplitOptions.RemoveEmptyEntries);
+
+            // Khởi tạo danh sách kết quả
+            List<string[]> result = new List<string[]>();
+
+            // Tách các phần tử trong từng mảng con ngăn cách bởi dấu ,
+            foreach (string subArray in subArrays)
+            {
+                string[] elements = subArray.Split(',');
+                result.Add(elements);
+            }
+
+            var userName = HttpContext.Session.GetString("Username");
+
+            using var transactionScope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+
+            try
+            {
+                using var helper = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+
+                foreach (var parts in result)
+                {
+                    string maMayTinhCan = parts[0];
+                    string maUserCan = parts[1];
+                    TimeSpan thoiGianCan = TimeSpan.Parse(parts[2]);
+                    decimal trongLuong = decimal.Parse(parts[3]);
+
+                    if (trongLuong <= 0)
+                    {
+                        return Json(new
+                        {
+                            isSuccess = false,
+                            Mesages = "Trong danh sách chọn có phiếu cân đã xóa! Vui lòng kiểm tra lại!."
+                        });
+                    }
+                    // Chuẩn bị dữ liệu cho PhieuCanTPDinhHinh
+                    var model = new PhieuCanTPFillet
+                    {
+                        MaLoaiThanhPham = maThanhPhamChange,
+                        GhiChu = $@"Người thực hiện: {userName}, trên máy: {AppViewModels.AppViewModel.Instance.PCName}, thời gian: {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}, loại: CHUYEN THANH PHAM"
+                    };
+
+
+                    // Chuẩn bị URL cho các API
+                    var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/PhieuCanTPFillets/ChuyenThanhPham_BTPXeBuom/{maMayTinhCan}/{maUserCan}/{thoiGianCan}/{ngay.ToString("yyyy-MM-dd")}";
+                    // Thực hiện insert PhieuCanTPDinhHinh
+                    var dataTuple = new Tuple<string>(JsonConvert.SerializeObject(model));
+                    var jsonContent = new StringContent(JsonConvert.SerializeObject(dataTuple), Encoding.UTF8, "application/json");
+                    var responseTP = await helper.PostAsync(HttpContext, apiUrl, jsonContent);
+
+                    if (!responseTP.Success)
+                    {
+                        return Json(new
+                        {
+                            isSuccess = false,
+                            Messages = "Chuyển Thành Phẩm Phiếu Cân BTP Xẻ Bướm thất bại: " + responseTP.Message
+                        });
+
+                    }
+                }
+
+                // Hoàn thành transaction nếu tất cả các update đều thành công
+                transactionScope.Complete();
+
+                return Json(new
+                {
+                    isSuccess = true,
+                    Messages = "Đã Chuyển Thành Phẩm các phiếu  đã chọn!"
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    isSuccess = false,
+                    Messages = "Đã xảy ra lỗi: " + ex.Message
+                });
+            }
+        }
+        [CustomAuthorize(Fu = "Xử Lý Phiếu Cân / Phiếu Cân BTP Xẻ Bướm", Func = "Chuyển Lô Xử Lý Phiếu Cân / Phiếu Cân BTP Xẻ Bướm")]
+        public async Task<IActionResult> ChuyenLo_BTPXeBuom(string listInfoPhieuCan, DateTime ngay, string maLoChange)
+        {
+            // Tách chuỗi thành các mảng con ngăn cách bởi dấu |
+            string[] subArrays = listInfoPhieuCan.Split('|', StringSplitOptions.RemoveEmptyEntries);
+
+            // Khởi tạo danh sách kết quả
+            List<string[]> result = new List<string[]>();
+
+            // Tách các phần tử trong từng mảng con ngăn cách bởi dấu ,
+            foreach (string subArray in subArrays)
+            {
+                string[] elements = subArray.Split(',');
+                result.Add(elements);
+            }
+
+            var userName = HttpContext.Session.GetString("Username");
+
+            using var transactionScope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+
+            try
+            {
+                using var helper = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+
+                foreach (var parts in result)
+                {
+                    string maMayTinhCan = parts[0];
+                    string maUserCan = parts[1];
+                    TimeSpan thoiGianCan = TimeSpan.Parse(parts[2]);
+                    decimal trongLuong = decimal.Parse(parts[3]);
+
+                    if (trongLuong <= 0)
+                    {
+                        return Json(new
+                        {
+                            isSuccess = false,
+                            Mesages = "Trong danh sách chọn có phiếu cân đã xóa! Vui lòng kiểm tra lại!."
+                        });
+                    }
+                    // Chuẩn bị dữ liệu cho PhieuCanTPDinhHinh
+                    var model = new PhieuCanTPFillet
+                    {
+                        MSL = maLoChange,
+                        GhiChu = $@"Người thực hiện: {userName}, trên máy: {AppViewModels.AppViewModel.Instance.PCName}, thời gian: {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}, loại: CHUYEN LO"
+                    };
+
+
+                    // Chuẩn bị URL cho các API
+                    var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/PhieuCanTPFillets/ChuyenLo_BTPXeBuom/{maMayTinhCan}/{maUserCan}/{thoiGianCan}/{ngay.ToString("yyyy-MM-dd")}";
+                    // Thực hiện insert PhieuCanTPDinhHinh
+                    var dataTuple = new Tuple<string>(JsonConvert.SerializeObject(model));
+                    var jsonContent = new StringContent(JsonConvert.SerializeObject(dataTuple), Encoding.UTF8, "application/json");
+                    var responseTP = await helper.PostAsync(HttpContext, apiUrl, jsonContent);
+
+                    if (!responseTP.Success)
+                    {
+                        return Json(new
+                        {
+                            isSuccess = false,
+                            Messages = "Chuyển Lô Phiếu Cân BTP Xẻ Bướm thất bại: " + responseTP.Message
+                        });
+
+                    }
+                }
+
+                // Hoàn thành transaction nếu tất cả các update đều thành công
+                transactionScope.Complete();
+
+                return Json(new
+                {
+                    isSuccess = true,
+                    Messages = "Đã Chuyển Lô các phiếu  đã chọn!"
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    isSuccess = false,
+                    Messages = "Đã xảy ra lỗi: " + ex.Message
+                });
+            }
+        }
+        [CustomAuthorize(Fu = "Xử Lý Phiếu Cân / Phiếu Cân BTP Xẻ Bướm", Func = "Chuyển Màu Xử Lý Phiếu Cân / Phiếu Cân BTP Xẻ Bướm")]
+        public async Task<IActionResult> ChuyenMau_BTPXeBuom(string listInfoPhieuCan, DateTime ngay, string maMauChange)
+        {
+            // Tách chuỗi thành các mảng con ngăn cách bởi dấu |
+            string[] subArrays = listInfoPhieuCan.Split('|', StringSplitOptions.RemoveEmptyEntries);
+
+            // Khởi tạo danh sách kết quả
+            List<string[]> result = new List<string[]>();
+
+            // Tách các phần tử trong từng mảng con ngăn cách bởi dấu ,
+            foreach (string subArray in subArrays)
+            {
+                string[] elements = subArray.Split(',');
+                result.Add(elements);
+            }
+
+            var userName = HttpContext.Session.GetString("Username");
+
+            using var transactionScope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+
+            try
+            {
+                using var helper = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+
+                foreach (var parts in result)
+                {
+                    string maMayTinhCan = parts[0];
+                    string maUserCan = parts[1];
+                    TimeSpan thoiGianCan = TimeSpan.Parse(parts[2]);
+                    decimal trongLuong = decimal.Parse(parts[3]);
+
+                    if (trongLuong <= 0)
+                    {
+                        return Json(new
+                        {
+                            isSuccess = false,
+                            Mesages = "Trong danh sách chọn có phiếu cân đã xóa! Vui lòng kiểm tra lại!."
+                        });
+                    }
+                    // Chuẩn bị dữ liệu cho PhieuCanTPDinhHinh
+                    var model = new PhieuCanTPFillet
+                    {
+                        MaMau = maMauChange,
+                        GhiChu = $@"Người thực hiện: {userName}, trên máy: {AppViewModels.AppViewModel.Instance.PCName}, thời gian: {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}, loại: CHUYEN LO"
+                    };
+
+
+                    // Chuẩn bị URL cho các API
+                    var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/PhieuCanTPFillets/ChuyenMau_BTPXeBuom/{maMayTinhCan}/{maUserCan}/{thoiGianCan}/{ngay.ToString("yyyy-MM-dd")}";
+                    // Thực hiện insert PhieuCanTPDinhHinh
+                    var dataTuple = new Tuple<string>(JsonConvert.SerializeObject(model));
+                    var jsonContent = new StringContent(JsonConvert.SerializeObject(dataTuple), Encoding.UTF8, "application/json");
+                    var responseTP = await helper.PostAsync(HttpContext, apiUrl, jsonContent);
+
+                    if (!responseTP.Success)
+                    {
+                        return Json(new
+                        {
+                            isSuccess = false,
+                            Messages = "Chuyển Màu Phiếu Cân BTP Xẻ Bướm thất bại: " + responseTP.Message
+                        });
+
+                    }
+                }
+
+                // Hoàn thành transaction nếu tất cả các update đều thành công
+                transactionScope.Complete();
+
+                return Json(new
+                {
+                    isSuccess = true,
+                    Messages = "Đã Chuyển Màu các phiếu  đã chọn!"
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    isSuccess = false,
+                    Messages = "Đã xảy ra lỗi: " + ex.Message
+                });
+            }
+        }
+        #endregion
+        #region TP Xe Buom
+
+        public async Task<IActionResult> CreatDefautNewTPXeBuom(DateTime dateTime, string xuongId)
+        {
+            try
+            {
+                var dataSource = await GetAllsWithDateAndXuongTPXeBuom(dateTime, xuongId);
+                if (dataSource != null)
+                {
+
+                    var maxstt = dataSource.Where(x => x.MaMayTinhCan == AppViewModels.AppViewModel.Instance.PCName)
+        .Where(x => x.Id != null)
+        .Select(x => Math.Abs(int.Parse(x.Id)))
+        .DefaultIfEmpty(0)
+        .Max();
+                    var stt = maxstt + 1;
+                    return Json(new
+                    {
+                        isSuccess = true,
+                        Id = stt,
+                        SuDung = true,
+                    });
+                }
+                else
+                {
+                    return Json(new
+                    {
+                        isSuccess = false,
+                        Mesages = "Lỗi!"
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        [CustomAuthorize(Fu = "Xử Lý Phiếu Cân / Phiếu Cân TP Xẻ Bướm", Func = "Thêm Xử Lý Phiếu Cân / Phiếu Cân TP Xẻ Bướm")]
+        public async Task<IActionResult> DoInsert_TPXeBuom(DateTime dateTime, string xuongId, TimeSpan gio, string maLo, string maLoaiCa, string maThanhPham, string maSize, string maMau, string maNhanVien, decimal trongLuong)
+        {
+            var userName = HttpContext.Session.GetString("Username");
+            var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/PhieuCanTPFillets/InsertTPXeBuom";
+            try
+            {
+                if (string.IsNullOrEmpty(xuongId) || string.IsNullOrEmpty(gio.ToString()) || string.IsNullOrEmpty(maLo) || string.IsNullOrEmpty(maThanhPham) || string.IsNullOrEmpty(maSize) || string.IsNullOrEmpty(maMau) || string.IsNullOrEmpty(maLoaiCa) || string.IsNullOrEmpty(maNhanVien) || string.IsNullOrEmpty(trongLuong.ToString()))
+                {
+                    return Json(new
+                    {
+                        isSuccess = false,
+                        Messages = "Vui lòng nhập đầy đủ thông tin."
+                    });
+                }
+                var model = new PhieuCanTPFillet
+                {
+                    MaMayTinhCan = AppViewModels.AppViewModel.Instance.PCName,
+                    MaUserCan = userName,
+                    ThoiGianCan = gio,
+                    Ngay = dateTime,
+                    MaXuongSanXuat = xuongId,
+                    MSL = maLo,
+                    MaLoaiCa = maLoaiCa,
+                    MaLoaiThanhPham = maThanhPham,
+                    MaSize = maSize,
+                    MaMau = maMau,
+                    MaNhanVien = maNhanVien,
+                    //HoVaTen = "",
+                    MaTheTu = "0",
+                    TrongLuong = trongLuong,
+                    //SuDung = true,
+                    GhiChu = $@"Người thực hiện: {userName}, trên máy: {AppViewModels.AppViewModel.Instance.PCName}, thời gian: {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}, loại: THÊM,",
+                    //MaNhanVienPhucVu = "",
+                    //LoaiCan = "",
+                    TrongLuongTare = 0,
+                    //Id = stt + dateTime.ToString("yyyyMMdd") + AppViewModels.AppViewModel.Instance.PCName + xuongId,
+                    Id = $@"{AppViewModels.AppViewModel.Instance.PCName}" + "." + $@"{DateTime.Now.ToString("yyyyMMddHHmmss")}",
+                };
+                var dataTuple = new Tuple<string>(JsonConvert.SerializeObject(model));
+                var jsonContent = new StringContent(JsonConvert.SerializeObject(dataTuple), Encoding.UTF8, "application/json");
+                using var helper = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+                var response = await helper.PostAsync(HttpContext, apiUrl, jsonContent);
+
+                if (response.Success)
+                {
+                    // Đăng ký thành công
+                    return Json(new
+                    {
+                        isSuccess = response.Success,
+                        Messages = response.Message
+                    });
+                }
+
+                return Json(new
+                {
+                    isSuccess = response.Success,
+                    Messages = response.Message
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    isSuccess = false,
+                    Messages = "Đã xảy ra lỗi: " + ex.Message.ToString()
+                });
+            }
+        }
+        public async Task<IActionResult> GetsByMaTPXeBuom(string listInfoPhieuCan, DateTime ngay)
+        {
+            string[] parts = listInfoPhieuCan.TrimEnd('|').Split(',');
+
+            // Gán tên cho từng phần tử
+            string maMayTinhCan = parts[0];
+            string maUserCan = parts[1];
+            TimeSpan thoiGianCan = TimeSpan.Parse(parts[2]);
+            decimal trongLuong = decimal.Parse(parts[3]);
+
+            if (trongLuong <= 0)
+            {
+                return Json(new
+                {
+                    isSuccess = false,
+                    Mesages = "Trong danh sách chọn có phiếu cân đã xóa! Vui lòng kiểm tra lại!."
+                });
+            }
+            if (string.IsNullOrEmpty(maMayTinhCan) || string.IsNullOrEmpty(maUserCan) || string.IsNullOrEmpty(thoiGianCan.ToString()))
+            {
+                return Json(new
+                {
+                    isSuccess = false,
+                    Mesages = "Chưa chọn thông tin!."
+                });
+            }
+            IEnumerable<object> dataSource = ViewBag.dataSource;
+            if (dataSource == null)
+            {
+                var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/PhieuCanTPFillets/GetsByMaTPXeBuom/{maMayTinhCan}/{maUserCan}/{thoiGianCan}/{ngay.ToString("yyyy-MM-dd")}";
+                using var helper = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+                var item = await helper.GetAsync<PhieuCanTPFillet>(HttpContext, apiUrl);
+                if (item != null)
+                {
+                    return Json(new
+                    {
+                        isSuccess = true,
+                        Mesages = "Thành Công",
+                        MaMayTinhCan = item.MaMayTinhCan,
+                        MaUserCan = item.MaUserCan,
+                        ThoiGianCan = item.ThoiGianCan,
+                        Ngay = item.Ngay,
+                        MaXuongSanXuat = item.MaXuongSanXuat,
+                        MSL = item.MSL,
+                        MaLoaiCa = item.MaLoaiCa,
+                        MaLoaiThanhPham = item.MaLoaiThanhPham,
+                        MaSize = item.MaSize,
+                        MaMau = item.MaMau,
+                        MaNhanVien = item.MaNhanVien,
+                        //HoVaTen = "",
+                        MaTheTu = item.MaTheTu,
+                        TrongLuong = item.TrongLuong,
+                        //SuDung = true,
+                        GhiChu = item.GhiChu,
+                        //MaNhanVienPhucVu = "",
+                        //LoaiCan = "",
+                        TrongLuongTare = item.TrongLuongTare,
+                        //Id = stt + dateTime.ToString("yyyyMMdd") + AppViewModels.AppViewModel.Instance.PCName + xuongId,
+                    });
+                }
+            }
+            return Json(new
+            {
+                isSuccess = false,
+                Mesages = "Lỗi!"
+            });
+        }
+        [CustomAuthorize(Fu = "Xử Lý Phiếu Cân / Phiếu Cân TP Xẻ Bướm", Func = "Sửa Xử Lý Phiếu Cân / Phiếu Cân TP Xẻ Bướm")]
+        public async Task<IActionResult> DoUpDateTPXeBuom(DateTime ngay, string maXuong, string maMayTinhCan, string maUserCan, TimeSpan gio, string maLo, string maLoaiCa, string maThanhPham, string maSize, string maMau, string maNhanVien, decimal trongLuong)
+        {
+            var userName = HttpContext.Session.GetString("Username");
+            var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/PhieuCanTPFillets/UpdateTPXeBuom/{maMayTinhCan}/{maUserCan}/{gio}/{ngay.ToString("yyyy-MM-dd")}";
+            try
+            {
+                // Kiểm tra dữ liệu đầu vào
+                if (string.IsNullOrEmpty(maXuong) || string.IsNullOrEmpty(maMayTinhCan) || string.IsNullOrEmpty(maUserCan) || string.IsNullOrEmpty(gio.ToString()) || string.IsNullOrEmpty(maLo) || string.IsNullOrEmpty(maLoaiCa) || string.IsNullOrEmpty(maThanhPham) || string.IsNullOrEmpty(maSize) || string.IsNullOrEmpty(maMau) || string.IsNullOrEmpty(trongLuong.ToString()))
+                {
+                    return Json(new
+                    {
+                        isSuccess = false,
+                        Messages = "Vui lòng nhập đầy đủ thông tin."
+                    });
+                }
+                var model = new PhieuCanTPFillet
+                {
+                    MSL = maLo,
+                    MaLoaiCa = maLoaiCa,
+                    MaLoaiThanhPham = maThanhPham,
+                    MaSize = maSize,
+                    MaMau = maMau,
+                    MaNhanVien = maNhanVien,
+                    GhiChu = $@"Người thực hiện: {userName}, trên máy: {AppViewModels.AppViewModel.Instance.PCName}, thời gian: {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}, loại: SỬA",
+                };
+                var dataTuple = new Tuple<string>(JsonConvert.SerializeObject(model));
+                var jsonContent = new StringContent(JsonConvert.SerializeObject(dataTuple), Encoding.UTF8, "application/json");
+                using var helper = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+                var rl = await helper.PostAsync(HttpContext, apiUrl, jsonContent);
+                if (rl.Success)
+                {
+                    return Json(new
+                    {
+                        isSuccess = rl.Success,
+                        Messages = rl.Message
+                    });
+                }
+                return Json(new
+                {
+                    isSuccess = rl.Success,
+                    Messages = rl.Message
+                });
+
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    isSuccess = false,
+                    Messages = "Đã xảy ra lỗi: " + ex.Message
+                });
+            }
+        }
+        [CustomAuthorize(Fu = "Xử Lý Phiếu Cân / Phiếu Cân TP Xẻ Bướm", Func = "Xoá Xử Lý Phiếu Cân / Phiếu Cân TP Xẻ Bướm")]
+        public async Task<IActionResult> DoDeleteTPXeBuom(string listInfoPhieuCan, DateTime ngay)
+        {
+            // Tách chuỗi thành các mảng con ngăn cách bởi dấu |
+            string[] subArrays = listInfoPhieuCan.Split('|', StringSplitOptions.RemoveEmptyEntries);
+
+            // Khởi tạo danh sách kết quả
+            List<string[]> result = new List<string[]>();
+
+            // Tách các phần tử trong từng mảng con ngăn cách bởi dấu ,
+            foreach (string subArray in subArrays)
+            {
+                string[] elements = subArray.Split(',');
+                result.Add(elements);
+            }
+
+            var userName = HttpContext.Session.GetString("Username");
+            try
+            {
+                using var helper = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+
+                foreach (var parts in result)
+                {
+
+                    string maMayTinhCan = parts[0];
+                    string maUserCan = parts[1];
+                    TimeSpan thoiGianCan = TimeSpan.Parse(parts[2]);
+                    decimal trongLuong = decimal.Parse(parts[3]);
+                    if (trongLuong <= 0)
+                    {
+                        return Json(new
+                        {
+                            isSuccess = false,
+                            Mesages = "Trong danh sách chọn có phiếu cân đã xóa! Vui lòng kiểm tra lại!."
+                        });
+                    }
+                    // Chuẩn bị dữ liệu cho PhieuCanTPDinhHinh
+                    var model = new PhieuCanTPFillet
+                    {
+                        TrongLuong = 0,
+                        TrongLuongTare = 0,
+                        GhiChu = $@"Người thực hiện: {userName}, trên máy: {AppViewModels.AppViewModel.Instance.PCName}, thời gian: {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}, loại: XOA",
+                    };
+
+                    // Chuẩn bị URL cho các API
+                    var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/PhieuCanTPFillets/DeleteBTPXeBuom/{maMayTinhCan}/{maUserCan}/{thoiGianCan}/{ngay.ToString("yyyy-MM-dd")}";
+
+                    // Thực hiện insert PhieuCanTPDinhHinh
+                    var dataTuple = new Tuple<string>(JsonConvert.SerializeObject(model));
+                    var jsonContent = new StringContent(JsonConvert.SerializeObject(dataTuple), Encoding.UTF8, "application/json");
+                    var responseTP = await helper.PostAsync(HttpContext, apiUrl, jsonContent);
+
+                    if (!responseTP.Success)
+                    {
+
+                        return Json(new
+                        {
+                            isSuccess = responseTP.Success,
+                            Messages = responseTP.Message
+                        });
+
+                    }
+                }
+                return Json(new
+                {
+                    isSuccess = true,
+                    Messages = "Đã xoá toàn bộ phiếu cân được chọn!"
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    isSuccess = false,
+                    Messages = "Đã xảy ra lỗi: " + ex.Message
+                });
+            }
+        }
+        public async Task<IActionResult> CheckQuyenTPXeBuom(string typeOption)
+        {
+            try
+            {
+                // Lấy danh sách roleid từ cookie
+                var roleIds = PMS.Middlewares.AuthenticationHelpers.GetRoleIdsFromCookie(HttpContext);
+
+                // Lấy danh sách role permissions từ list roleId
+                var rolePermistions = await PMS.Middlewares.AuthenticationHelpers.GetRolePermistionsAsync(HttpContext, roleIds);
+
+                // Kiểm tra quyền dựa trên typeOption
+                var permissionMapping = new Dictionary<string, string>
+                {
+                    { "CHUYENXUONG", "Chuyển Xưởng Xử Lý Phiếu Cân / Phiếu Cân TP Xẻ Bướm" },
+                    { "CHUYENSIZE", "Chuyển Size Xử Lý Phiếu Cân / Phiếu Cân TP Xẻ Bướm" },
+                    { "CHUYENTHANHPHAM", "Chuyển Thành Phẩm Xử Lý Phiếu Cân / Phiếu Cân TP Xẻ Bướm" },
+                    { "CHUYENLO", "Chuyển Lô Xử Lý Phiếu Cân / Phiếu Cân TP Xẻ Bướm" },
+                    { "CHUYENMAU", "Chuyển Màu Xử Lý Phiếu Cân / Phiếu Cân TP Xẻ Bướm" },
+                };
+
+                if (permissionMapping.TryGetValue(typeOption, out var func))
+                {
+                    var permission = rolePermistions
+                        .FirstOrDefault(x => x.Fu == "Xử Lý Phiếu Cân / Phiếu Cân BTP Xẻ Bướm" && x.Func == func && x.Status == 1);
+
+                    if (permission != null)
+                    {
+                        return Json(new
+                        {
+                            isSuccess = true,
+                        });
+                    }
+                    else
+                    {
+                        return Json(new
+                        {
+                            isSuccess = false,
+                            Messages = "Bạn không có quyền sử dụng chức năng này!"
+                        });
+                    }
+                }
+
+                return Json(new
+                {
+                    isSuccess = false,
+                    Messages = "Tùy chọn không hợp lệ!"
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    isSuccess = false,
+                    Messages = "Đã xảy ra lỗi: " + ex.Message
+                });
+            }
+        }
+        [CustomAuthorize(Fu = "Xử Lý Phiếu Cân / Phiếu Cân TP Xẻ Bướm", Func = "Chuyển Xưởng Xử Lý Phiếu Cân / Phiếu Cân TP Xẻ Bướm")]
+        public async Task<IActionResult> ChuyenXuong_TPXeBuom(string listInfoPhieuCan, DateTime ngay, string maXuongChange)
+        {
+            // Tách chuỗi thành các mảng con ngăn cách bởi dấu |
+            string[] subArrays = listInfoPhieuCan.Split('|', StringSplitOptions.RemoveEmptyEntries);
+
+            // Khởi tạo danh sách kết quả
+            List<string[]> result = new List<string[]>();
+
+            // Tách các phần tử trong từng mảng con ngăn cách bởi dấu ,
+            foreach (string subArray in subArrays)
+            {
+                string[] elements = subArray.Split(',');
+                result.Add(elements);
+            }
+
+            var userName = HttpContext.Session.GetString("Username");
+
+            using var transactionScope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+
+            try
+            {
+                using var helper = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+
+                foreach (var parts in result)
+                {
+                    string maMayTinhCan = parts[0];
+                    string maUserCan = parts[1];
+                    TimeSpan thoiGianCan = TimeSpan.Parse(parts[2]);
+                    decimal trongLuong = decimal.Parse(parts[3]);
+
+                    if (trongLuong <= 0)
+                    {
+                        return Json(new
+                        {
+                            isSuccess = false,
+                            Mesages = "Trong danh sách chọn có phiếu cân đã xóa! Vui lòng kiểm tra lại!."
+                        });
+                    }
+                    // Chuẩn bị dữ liệu cho PhieuCanTPDinhHinh
+                    var model = new PhieuCanTPFillet
+                    {
+                        MaXuongSanXuat = maXuongChange,
+                        GhiChu = $@"Người thực hiện: {userName}, trên máy: {AppViewModels.AppViewModel.Instance.PCName}, thời gian: {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}, loại: CHUYEN XUONG"
+                    };
+
+
+                    // Chuẩn bị URL cho các API
+                    var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/PhieuCanTPFillets/ChuyenXuong_TPXeBuom/{maMayTinhCan}/{maUserCan}/{thoiGianCan}/{ngay.ToString("yyyy-MM-dd")}";
+
+                    // Thực hiện insert PhieuCanTPDinhHinh
+                    var dataTuple = new Tuple<string>(JsonConvert.SerializeObject(model));
+                    var jsonContent = new StringContent(JsonConvert.SerializeObject(dataTuple), Encoding.UTF8, "application/json");
+                    var responseTP = await helper.PostAsync(HttpContext, apiUrl, jsonContent);
+
+                    if (!responseTP.Success)
+                    {
+                        return Json(new
+                        {
+                            isSuccess = false,
+                            Messages = "Chuyển Xưởng Phiếu Cân TP Xẻ Bướm thất bại: " + responseTP.Message
+                        });
+
+                    }
+                }
+
+                // Hoàn thành transaction nếu tất cả các update đều thành công
+                transactionScope.Complete();
+
+                return Json(new
+                {
+                    isSuccess = true,
+                    Messages = "Đã Chuyển Xưởng các phiếu  đã chọn! Vui lòng đổi xưởng để kiểm tra!"
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    isSuccess = false,
+                    Messages = "Đã xảy ra lỗi: " + ex.Message
+                });
+            }
+        }
+        [CustomAuthorize(Fu = "Xử Lý Phiếu Cân / Phiếu Cân TP Xẻ Bướm", Func = "Chuyển Size Xử Lý Phiếu Cân / Phiếu Cân TP Xẻ Bướm")]
+        public async Task<IActionResult> ChuyenSize_TPXeBuom(string listInfoPhieuCan, DateTime ngay, string maSizeChange)
+        {
+            // Tách chuỗi thành các mảng con ngăn cách bởi dấu |
+            string[] subArrays = listInfoPhieuCan.Split('|', StringSplitOptions.RemoveEmptyEntries);
+
+            // Khởi tạo danh sách kết quả
+            List<string[]> result = new List<string[]>();
+
+            // Tách các phần tử trong từng mảng con ngăn cách bởi dấu ,
+            foreach (string subArray in subArrays)
+            {
+                string[] elements = subArray.Split(',');
+                result.Add(elements);
+            }
+
+            var userName = HttpContext.Session.GetString("Username");
+
+            using var transactionScope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+
+            try
+            {
+                using var helper = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+
+                foreach (var parts in result)
+                {
+                    string maMayTinhCan = parts[0];
+                    string maUserCan = parts[1];
+                    TimeSpan thoiGianCan = TimeSpan.Parse(parts[2]);
+                    decimal trongLuong = decimal.Parse(parts[3]);
+
+                    if (trongLuong <= 0)
+                    {
+                        return Json(new
+                        {
+                            isSuccess = false,
+                            Mesages = "Trong danh sách chọn có phiếu cân đã xóa! Vui lòng kiểm tra lại!."
+                        });
+                    }
+                    // Chuẩn bị dữ liệu cho PhieuCanTPDinhHinh
+                    var model = new PhieuCanTPFillet
+                    {
+                        MaSize = maSizeChange,
+                        GhiChu = $@"Người thực hiện: {userName}, trên máy: {AppViewModels.AppViewModel.Instance.PCName}, thời gian: {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}, loại: CHUYEN SIZE"
+                    };
+
+
+                    // Chuẩn bị URL cho các API
+                    var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/PhieuCanTPFillets/ChuyenSize_TPXeBuom/{maMayTinhCan}/{maUserCan}/{thoiGianCan}/{ngay.ToString("yyyy-MM-dd")}";
+
+                    // Thực hiện insert PhieuCanTPDinhHinh
+                    var dataTuple = new Tuple<string>(JsonConvert.SerializeObject(model));
+                    var jsonContent = new StringContent(JsonConvert.SerializeObject(dataTuple), Encoding.UTF8, "application/json");
+                    var responseTP = await helper.PostAsync(HttpContext, apiUrl, jsonContent);
+
+                    if (!responseTP.Success)
+                    {
+                        return Json(new
+                        {
+                            isSuccess = false,
+                            Messages = "Chuyển Size Phiếu Cân TP Xẻ Bướm thất bại: " + responseTP.Message
+                        });
+
+                    }
+                }
+
+                // Hoàn thành transaction nếu tất cả các update đều thành công
+                transactionScope.Complete();
+
+                return Json(new
+                {
+                    isSuccess = true,
+                    Messages = "Đã Chuyển Size các phiếu  đã chọn! Vui lòng đổi Size để kiểm tra!"
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    isSuccess = false,
+                    Messages = "Đã xảy ra lỗi: " + ex.Message
+                });
+            }
+        }
+        [CustomAuthorize(Fu = "Xử Lý Phiếu Cân / Phiếu Cân TP Xẻ Bướm", Func = "Chuyển Thành Phẩm Xử Lý Phiếu Cân / Phiếu Cân TP Xẻ Bướm")]
+        public async Task<IActionResult> ChuyenThanhPham_TPXeBuom(string listInfoPhieuCan, DateTime ngay, string maThanhPhamChange)
+        {
+            // Tách chuỗi thành các mảng con ngăn cách bởi dấu |
+            string[] subArrays = listInfoPhieuCan.Split('|', StringSplitOptions.RemoveEmptyEntries);
+
+            // Khởi tạo danh sách kết quả
+            List<string[]> result = new List<string[]>();
+
+            // Tách các phần tử trong từng mảng con ngăn cách bởi dấu ,
+            foreach (string subArray in subArrays)
+            {
+                string[] elements = subArray.Split(',');
+                result.Add(elements);
+            }
+
+            var userName = HttpContext.Session.GetString("Username");
+
+            using var transactionScope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+
+            try
+            {
+                using var helper = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+
+                foreach (var parts in result)
+                {
+                    string maMayTinhCan = parts[0];
+                    string maUserCan = parts[1];
+                    TimeSpan thoiGianCan = TimeSpan.Parse(parts[2]);
+                    decimal trongLuong = decimal.Parse(parts[3]);
+
+                    if (trongLuong <= 0)
+                    {
+                        return Json(new
+                        {
+                            isSuccess = false,
+                            Mesages = "Trong danh sách chọn có phiếu cân đã xóa! Vui lòng kiểm tra lại!."
+                        });
+                    }
+                    // Chuẩn bị dữ liệu cho PhieuCanTPDinhHinh
+                    var model = new PhieuCanTPFillet
+                    {
+                        MaLoaiThanhPham = maThanhPhamChange,
+                        GhiChu = $@"Người thực hiện: {userName}, trên máy: {AppViewModels.AppViewModel.Instance.PCName}, thời gian: {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}, loại: CHUYEN THANH PHAM"
+                    };
+
+
+                    // Chuẩn bị URL cho các API
+                    var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/PhieuCanTPFillets/ChuyenThanhPham_TPXeBuom/{maMayTinhCan}/{maUserCan}/{thoiGianCan}/{ngay.ToString("yyyy-MM-dd")}";
+                    // Thực hiện insert PhieuCanTPDinhHinh
+                    var dataTuple = new Tuple<string>(JsonConvert.SerializeObject(model));
+                    var jsonContent = new StringContent(JsonConvert.SerializeObject(dataTuple), Encoding.UTF8, "application/json");
+                    var responseTP = await helper.PostAsync(HttpContext, apiUrl, jsonContent);
+
+                    if (!responseTP.Success)
+                    {
+                        return Json(new
+                        {
+                            isSuccess = false,
+                            Messages = "Chuyển Thành Phẩm Phiếu Cân TP Xẻ Bướm thất bại: " + responseTP.Message
+                        });
+
+                    }
+                }
+
+                // Hoàn thành transaction nếu tất cả các update đều thành công
+                transactionScope.Complete();
+
+                return Json(new
+                {
+                    isSuccess = true,
+                    Messages = "Đã Chuyển Thành Phẩm các phiếu  đã chọn!"
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    isSuccess = false,
+                    Messages = "Đã xảy ra lỗi: " + ex.Message
+                });
+            }
+        }
+        [CustomAuthorize(Fu = "Xử Lý Phiếu Cân / Phiếu Cân TP Xẻ Bướm", Func = "Chuyển Lô Xử Lý Phiếu Cân / Phiếu Cân TP Xẻ Bướm")]
+        public async Task<IActionResult> ChuyenLo_TPXeBuom(string listInfoPhieuCan, DateTime ngay, string maLoChange)
+        {
+            // Tách chuỗi thành các mảng con ngăn cách bởi dấu |
+            string[] subArrays = listInfoPhieuCan.Split('|', StringSplitOptions.RemoveEmptyEntries);
+
+            // Khởi tạo danh sách kết quả
+            List<string[]> result = new List<string[]>();
+
+            // Tách các phần tử trong từng mảng con ngăn cách bởi dấu ,
+            foreach (string subArray in subArrays)
+            {
+                string[] elements = subArray.Split(',');
+                result.Add(elements);
+            }
+
+            var userName = HttpContext.Session.GetString("Username");
+
+            using var transactionScope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+
+            try
+            {
+                using var helper = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+
+                foreach (var parts in result)
+                {
+                    string maMayTinhCan = parts[0];
+                    string maUserCan = parts[1];
+                    TimeSpan thoiGianCan = TimeSpan.Parse(parts[2]);
+                    decimal trongLuong = decimal.Parse(parts[3]);
+
+                    if (trongLuong <= 0)
+                    {
+                        return Json(new
+                        {
+                            isSuccess = false,
+                            Mesages = "Trong danh sách chọn có phiếu cân đã xóa! Vui lòng kiểm tra lại!."
+                        });
+                    }
+                    // Chuẩn bị dữ liệu cho PhieuCanTPDinhHinh
+                    var model = new PhieuCanTPFillet
+                    {
+                        MSL = maLoChange,
+                        GhiChu = $@"Người thực hiện: {userName}, trên máy: {AppViewModels.AppViewModel.Instance.PCName}, thời gian: {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}, loại: CHUYEN LO"
+                    };
+
+
+                    // Chuẩn bị URL cho các API
+                    var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/PhieuCanTPFillets/ChuyenLo_TPXeBuom/{maMayTinhCan}/{maUserCan}/{thoiGianCan}/{ngay.ToString("yyyy-MM-dd")}";
+                    // Thực hiện insert PhieuCanTPDinhHinh
+                    var dataTuple = new Tuple<string>(JsonConvert.SerializeObject(model));
+                    var jsonContent = new StringContent(JsonConvert.SerializeObject(dataTuple), Encoding.UTF8, "application/json");
+                    var responseTP = await helper.PostAsync(HttpContext, apiUrl, jsonContent);
+
+                    if (!responseTP.Success)
+                    {
+                        return Json(new
+                        {
+                            isSuccess = false,
+                            Messages = "Chuyển Lô Phiếu Cân TP Xẻ Bướm thất bại: " + responseTP.Message
+                        });
+
+                    }
+                }
+
+                // Hoàn thành transaction nếu tất cả các update đều thành công
+                transactionScope.Complete();
+
+                return Json(new
+                {
+                    isSuccess = true,
+                    Messages = "Đã Chuyển Lô các phiếu  đã chọn!"
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    isSuccess = false,
+                    Messages = "Đã xảy ra lỗi: " + ex.Message
+                });
+            }
+        }
+        [CustomAuthorize(Fu = "Xử Lý Phiếu Cân / Phiếu Cân TP Xẻ Bướm", Func = "Chuyển Màu Xử Lý Phiếu Cân / Phiếu Cân TP Xẻ Bướm")]
+        public async Task<IActionResult> ChuyenMau_TPXeBuom(string listInfoPhieuCan, DateTime ngay, string maMauChange)
+        {
+            // Tách chuỗi thành các mảng con ngăn cách bởi dấu |
+            string[] subArrays = listInfoPhieuCan.Split('|', StringSplitOptions.RemoveEmptyEntries);
+
+            // Khởi tạo danh sách kết quả
+            List<string[]> result = new List<string[]>();
+
+            // Tách các phần tử trong từng mảng con ngăn cách bởi dấu ,
+            foreach (string subArray in subArrays)
+            {
+                string[] elements = subArray.Split(',');
+                result.Add(elements);
+            }
+
+            var userName = HttpContext.Session.GetString("Username");
+
+            using var transactionScope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+
+            try
+            {
+                using var helper = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+
+                foreach (var parts in result)
+                {
+                    string maMayTinhCan = parts[0];
+                    string maUserCan = parts[1];
+                    TimeSpan thoiGianCan = TimeSpan.Parse(parts[2]);
+                    decimal trongLuong = decimal.Parse(parts[3]);
+
+                    if (trongLuong <= 0)
+                    {
+                        return Json(new
+                        {
+                            isSuccess = false,
+                            Mesages = "Trong danh sách chọn có phiếu cân đã xóa! Vui lòng kiểm tra lại!."
+                        });
+                    }
+                    // Chuẩn bị dữ liệu cho PhieuCanTPDinhHinh
+                    var model = new PhieuCanTPFillet
+                    {
+                        MaMau = maMauChange,
+                        GhiChu = $@"Người thực hiện: {userName}, trên máy: {AppViewModels.AppViewModel.Instance.PCName}, thời gian: {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}, loại: CHUYEN LO"
+                    };
+
+
+                    // Chuẩn bị URL cho các API
+                    var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/PhieuCanTPFillets/ChuyenMau_TPXeBuom/{maMayTinhCan}/{maUserCan}/{thoiGianCan}/{ngay.ToString("yyyy-MM-dd")}";
+                    // Thực hiện insert PhieuCanTPDinhHinh
+                    var dataTuple = new Tuple<string>(JsonConvert.SerializeObject(model));
+                    var jsonContent = new StringContent(JsonConvert.SerializeObject(dataTuple), Encoding.UTF8, "application/json");
+                    var responseTP = await helper.PostAsync(HttpContext, apiUrl, jsonContent);
+
+                    if (!responseTP.Success)
+                    {
+                        return Json(new
+                        {
+                            isSuccess = false,
+                            Messages = "Chuyển Màu Phiếu Cân BTP Xẻ Bướm thất bại: " + responseTP.Message
+                        });
+
+                    }
+                }
+
+                // Hoàn thành transaction nếu tất cả các update đều thành công
+                transactionScope.Complete();
+
+                return Json(new
+                {
+                    isSuccess = true,
+                    Messages = "Đã Chuyển Màu các phiếu  đã chọn!"
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    isSuccess = false,
+                    Messages = "Đã xảy ra lỗi: " + ex.Message
+                });
+            }
+        }
+
+        #endregion
+
         #endregion
         #region Định Hình
         [CustomAuthorize(Fu = "Xử Lý Phiếu Cân / Phiếu Cân Định Hình", Func = "Thêm Xử Lý Phiếu Cân / Phiếu Cân Định Hình")]
-        public async Task<IActionResult> DoInsert_DinhHinh(DateTime dateTime, string xuongId, TimeSpan gio, string maLo, string maLoaiCa, string maThanhPham, string maSize, string maMau, string maNhanVien, string maMayLangDa, decimal trongLuongNhan, decimal dinhMuc, bool caTra,string maNhanVienPV)
+        public async Task<IActionResult> DoInsert_DinhHinh(DateTime dateTime, string xuongId, TimeSpan gio, string maLo, string maLoaiCa, string maThanhPham, string maSize, string maMau, string maNhanVien, decimal trongLuongNhan, decimal dinhMuc)
         {
             var userName = HttpContext.Session.GetString("Username");
             var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/PhieuCanTPDinhHinhs/Insert_XLPC";
@@ -4906,7 +8790,7 @@ namespace PMS.Controllers
                     maLo = "LoTest";
                 }
                 // Kiểm tra và xác thực dữ liệu đầu vào
-                if (string.IsNullOrEmpty(gio.ToString()) || string.IsNullOrEmpty(maLo) || string.IsNullOrEmpty(maLoaiCa) || string.IsNullOrEmpty(maThanhPham) || string.IsNullOrEmpty(maSize) || string.IsNullOrEmpty(maMau) || string.IsNullOrEmpty(maNhanVien) || string.IsNullOrEmpty(trongLuongNhan.ToString()) || string.IsNullOrEmpty(dinhMuc.ToString()) || string.IsNullOrEmpty(caTra.ToString()))
+                if (string.IsNullOrEmpty(gio.ToString()) || string.IsNullOrEmpty(maLo) || string.IsNullOrEmpty(maLoaiCa) || string.IsNullOrEmpty(maThanhPham) || string.IsNullOrEmpty(maSize) || string.IsNullOrEmpty(maMau) || string.IsNullOrEmpty(maNhanVien) || string.IsNullOrEmpty(trongLuongNhan.ToString()) || string.IsNullOrEmpty(dinhMuc.ToString()))
                 {
                     return Json(new
                     {
@@ -4927,6 +8811,7 @@ namespace PMS.Controllers
                     .Select(x => x.STTBTP)
                     .DefaultIfEmpty(0)
                     .Max();
+                //var datetimenow = DateTime.Now;
                 var model = new PhieuCanTPDinhHinh
                 {
                     STT = stt + 1,
@@ -4953,7 +8838,9 @@ namespace PMS.Controllers
                     TrongLuongTare = 0,
                     TrongLuongBu = 0,
                     IsOffline = false,
-                    MaNhanVienPhucVu = maNhanVienPV,
+                    MaNhanVienPhucVu = "",
+                    Id = $@"{AppViewModels.AppViewModel.Instance.PCName}" + "." + $@"{DateTime.Now.ToString("yyyyMMddHHmmss")}",
+                    IdIn = $@"{AppViewModels.AppViewModel.Instance.PCName}" + "." + $@"{DateTime.Now.ToString("yyyyMMddHHmmss")}",
                     GhiChu = $@"Người thực hiện: {userName}, trên máy: {AppViewModels.AppViewModel.Instance.PCName}, thời gian: {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}, loại: THÊM,",
                 };
                 model.TrongLuongTra = model.TrongLuongNhan / model.DinhMucThucTe;
@@ -4973,16 +8860,18 @@ namespace PMS.Controllers
                     MaLo = maLo,
                     MaThe = "0",
                     MaNhanVien = maNhanVien,
-                    MaMayLangDa = maMayLangDa,
+                    MaMayLangDa = "",
                     TrongLuong = trongLuongNhan,
                     IsEnabled = true,
                     MaXuong = xuongId,
-                    CaTra = caTra,
+                    CaTra = false,
                     GhiChu = $@"Người thực hiện: {userName}, trên máy: {AppViewModels.AppViewModel.Instance.PCName}, thời gian: {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}, loại: THÊM,",
                     ChiSanLuong = false,
                     TrongLuongTare = 0,
                     TrongLuongBu = 0,
                     IsOffline = false,
+                    Id = $@"{AppViewModels.AppViewModel.Instance.PCName}" + "." + $@"{DateTime.Now.ToString("yyyyMMddHHmmss")}",
+
                 };
 
 
@@ -5122,7 +9011,7 @@ namespace PMS.Controllers
             });
         }
         [CustomAuthorize(Fu = "Xử Lý Phiếu Cân / Phiếu Cân Định Hình", Func = "Sửa Xử Lý Phiếu Cân / Phiếu Cân Định Hình")]
-        public async Task<IActionResult> DoUpDate_XLPC(int stt, int sttBTP, string maMayCan, string maMayCanBTP, DateTime ngay, string maXuong, TimeSpan gio, string maLo, string maLoaiCa, string maThanhPham, string maSize, string maMau, string maNhanVien, string maMayLangDa, decimal trongLuongNhan, decimal dinhMuc, bool caTra,string maNhanVienPV)
+        public async Task<IActionResult> DoUpDate_XLPC(int stt, int sttBTP, string maMayCan, string maMayCanBTP, DateTime ngay, string maXuong, TimeSpan gio, string maLo, string maLoaiCa, string maThanhPham, string maSize, string maMau, string maNhanVien, decimal trongLuongNhan, decimal dinhMuc)
         {
             var userName = HttpContext.Session.GetString("Username");
             var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/PhieuCanTPDinhHinhs/Update_XLPC/{stt}/{ngay.ToString("yyyy-MM-dd")}/{maMayCan}/{maXuong}";
@@ -5143,7 +9032,7 @@ namespace PMS.Controllers
                 }
                 // Kiểm tra dữ liệu đầu vào
                 // Kiểm tra và xác thực dữ liệu đầu vào
-                if (string.IsNullOrEmpty(gio.ToString()) || string.IsNullOrEmpty(maLo) || string.IsNullOrEmpty(maLoaiCa) || string.IsNullOrEmpty(maThanhPham) || string.IsNullOrEmpty(maSize) || string.IsNullOrEmpty(maMau) || string.IsNullOrEmpty(maNhanVien) || string.IsNullOrEmpty(trongLuongNhan.ToString()) || string.IsNullOrEmpty(dinhMuc.ToString()) || string.IsNullOrEmpty(caTra.ToString()))
+                if (string.IsNullOrEmpty(gio.ToString()) || string.IsNullOrEmpty(maLo) || string.IsNullOrEmpty(maLoaiCa) || string.IsNullOrEmpty(maThanhPham) || string.IsNullOrEmpty(maSize) || string.IsNullOrEmpty(maMau) || string.IsNullOrEmpty(maNhanVien) || string.IsNullOrEmpty(trongLuongNhan.ToString()) || string.IsNullOrEmpty(dinhMuc.ToString()))
                 {
                     return Json(new
                     {
@@ -5163,7 +9052,7 @@ namespace PMS.Controllers
                     TrongLuongNhan = trongLuongNhan,
                     MaThanhPham = maThanhPham,
                     MaNhanVien = maNhanVien,
-                    MaNhanVienPhucVu = maNhanVienPV,
+                    //MaNhanVienPhucVu = maNhanVienPV,
                     GhiChu = $@"Người thực hiện: {userName}, trên máy: {AppViewModels.AppViewModel.Instance.PCName}, thời gian: {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}, loại: SỬA",
                 };
                 model.TrongLuongTra = model.TrongLuongNhan / model.DinhMucThucTe;
@@ -5177,10 +9066,10 @@ namespace PMS.Controllers
                     MaThanhPham = maThanhPham,
                     MaLo = maLo,
                     MaNhanVien = maNhanVien,
-                    MaMayLangDa = maMayLangDa,
+                    // MaMayLangDa = maMayLangDa,
                     TrongLuong = trongLuongNhan,
                     MaXuong = maXuong,
-                    CaTra = caTra,
+                    //CaTra = caTra,
                     GhiChu = $@"Người thực hiện: {userName}, trên máy: {AppViewModels.AppViewModel.Instance.PCName}, thời gian: {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}, loại: SỬA",
                 };
 
@@ -5370,7 +9259,8 @@ namespace PMS.Controllers
                 {
                     { "CHUYENXUONG", "Chuyển Xưởng Xử Lý Phiếu Cân / Phiếu Cân Định Hình" },
                     { "CHUYENSIZE", "Chuyển Size Xử Lý Phiếu Cân / Phiếu Cân Định Hình" },
-                    { "CHUYENTHANHPHAM", "Chuyển Thành Phẩm Xử Lý Phiếu Cân / Phiếu Cân Định Hình" }
+                    { "CHUYENTHANHPHAM", "Chuyển Thành Phẩm Xử Lý Phiếu Cân / Phiếu Cân Định Hình" },
+                    { "CHUYENNHANVIEN", "Chuyển Nhân Viên Xử Lý Phiếu Cân / Phiếu Cân Định Hình" }
                 };
 
                 if (permissionMapping.TryGetValue(typeOption, out var func))
@@ -5562,13 +9452,13 @@ namespace PMS.Controllers
                     var model = new PhieuCanTPDinhHinh
                     {
                         MaSize = maSizeChange,
-                        GhiChu = $@"Người thực hiện: {userName}, trên máy: {AppViewModels.AppViewModel.Instance.PCName}, thời gian: {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}, loại: CHUYEN XUONG"
+                        GhiChu = $@"Người thực hiện: {userName}, trên máy: {AppViewModels.AppViewModel.Instance.PCName}, thời gian: {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}, loại: CHUYEN SIZE"
                     };
                     // Chuẩn bị dữ liệu cho PhieuCanBTPDinhHinh
                     var modelBTP = new PhieuCanBTPDinhHinh
                     {
                         MaSize = maSizeChange,
-                        GhiChu = $@"Người thực hiện: {userName}, trên máy: {AppViewModels.AppViewModel.Instance.PCName}, thời gian: {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}, loại: CHUYEN XUONG"
+                        GhiChu = $@"Người thực hiện: {userName}, trên máy: {AppViewModels.AppViewModel.Instance.PCName}, thời gian: {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}, loại: CHUYEN SIZE"
                     };
 
                     // Chuẩn bị URL cho các API
@@ -5675,7 +9565,7 @@ namespace PMS.Controllers
                     var modelBTP = new PhieuCanBTPDinhHinh
                     {
                         MaThanhPham = maThanhPhamChange,
-                        GhiChu = $@"Người thực hiện: {userName}, trên máy: {AppViewModels.AppViewModel.Instance.PCName}, thời gian: {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}, loại: CHUYEN XUONG"
+                        GhiChu = $@"Người thực hiện: {userName}, trên máy: {AppViewModels.AppViewModel.Instance.PCName}, thời gian: {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}, loại: CHUYEN THAH PHAM"
                     };
 
                     // Chuẩn bị URL cho các API
@@ -5731,6 +9621,115 @@ namespace PMS.Controllers
                 });
             }
         }
+
+        [CustomAuthorize(Fu = "Xử Lý Phiếu Cân / Phiếu Cân Định Hình", Func = "Chuyển Nhân Viên Xử Lý Phiếu Cân / Phiếu Cân Định Hình")]
+        public async Task<IActionResult> ChuyenNhanVien_DinhHinh(string listInfoPhieuCan, DateTime ngay, string maNhanVienChange)
+        {
+            // Tách chuỗi thành các mảng con ngăn cách bởi dấu |
+            string[] subArrays = listInfoPhieuCan.Split('|', StringSplitOptions.RemoveEmptyEntries);
+
+            // Khởi tạo danh sách kết quả
+            List<string[]> result = new List<string[]>();
+
+            // Tách các phần tử trong từng mảng con ngăn cách bởi dấu ,
+            foreach (string subArray in subArrays)
+            {
+                string[] elements = subArray.Split(',');
+                result.Add(elements);
+            }
+
+            var userName = HttpContext.Session.GetString("Username");
+
+            using var transactionScope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+
+            try
+            {
+                using var helper = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+
+                foreach (var parts in result)
+                {
+                    // Khởi tạo các biến từ mảng con
+                    string maNhanVien = parts[0];
+                    int stt = int.Parse(parts[1]);
+                    string maMayCan = parts[2];
+                    string maXuong = parts[3];
+                    int sttBTP = int.Parse(parts[4]);
+                    string maMayCanBTP = parts[5];
+                    if (stt <= 0 || sttBTP <= 0)
+                    {
+                        return Json(new
+                        {
+                            isSuccess = false,
+                            Mesages = "Trong danh sách chọn có phiếu cân đã xóa! Vui lòng kiểm tra lại!."
+                        });
+                    }
+                    // Chuẩn bị dữ liệu cho PhieuCanTPDinhHinh
+                    var model = new PhieuCanTPDinhHinh
+                    {
+                        MaNhanVien = maNhanVienChange,
+                        GhiChu = $@"Người thực hiện: {userName}, trên máy: {AppViewModels.AppViewModel.Instance.PCName}, thời gian: {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}, loại: CHUYEN NHAN VIEN"
+                    };
+                    //// Chuẩn bị dữ liệu cho PhieuCanBTPDinhHinh
+                    //var modelBTP = new PhieuCanBTPDinhHinh
+                    //{
+                    //    MaNhanVien = maNhanVienChange,
+                    //    GhiChu = $@"Người thực hiện: {userName}, trên máy: {AppViewModels.AppViewModel.Instance.PCName}, thời gian: {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}, loại: CHUYEN NHAN VIEN"
+                    //};
+
+                    // Chuẩn bị URL cho các API
+                    var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/PhieuCanTPDinhHinhs/ChuyenNhanVien_XLPC/{stt}/{ngay.ToString("yyyy-MM-dd")}/{maMayCan}/{maXuong}";
+                    //var apiBTPUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/PhieuCanBTPDinhHinhs/ChuyenNhanVien_XLPC/{sttBTP}/{ngay.ToString("yyyy-MM-dd")}/{maMayCanBTP}/{maXuong}";
+
+                    // Thực hiện insert PhieuCanTPDinhHinh
+                    var dataTuple = new Tuple<string>(JsonConvert.SerializeObject(model));
+                    var jsonContent = new StringContent(JsonConvert.SerializeObject(dataTuple), Encoding.UTF8, "application/json");
+                    var responseTP = await helper.PostAsync(HttpContext, apiUrl, jsonContent);
+
+                    if (!responseTP.Success)
+                    {
+                        //// Thực hiện insert PhieuCanBTPDinhHinh nếu insert PhieuCanTPDinhHinh thành công
+                        //var dataTupleBTP = new Tuple<string>(JsonConvert.SerializeObject(modelBTP));
+                        //var jsonContentBTP = new StringContent(JsonConvert.SerializeObject(dataTupleBTP), Encoding.UTF8, "application/json");
+                        //var responseBTP = await helper.PostAsync(HttpContext, apiBTPUrl, jsonContentBTP);
+
+                        //if (!responseBTP.Success)
+                        //{
+                        //    return Json(new
+                        //    {
+                        //        isSuccess = false,
+                        //        Messages = "Chuyển Nhân Viên Phiếu Cân BTP Định Hình thất bại: " + responseBTP.Message
+                        //    });
+                        //}
+                        return Json(new
+                        {
+                            isSuccess = false,
+                            Messages = "Chuyển Nhân Viên Phiếu Cân TP Định Hình thất bại: " + responseTP.Message
+                        });
+                    }
+                }
+
+                // Hoàn thành transaction nếu tất cả các update đều thành công
+                transactionScope.Complete();
+
+                return Json(new
+                {
+                    isSuccess = true,
+                    Messages = "Đã Chuyển Nhân Viên các phiếu  đã chọn ở TP Định Hình!"
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    isSuccess = false,
+                    Messages = "Đã xảy ra lỗi: " + ex.Message
+                });
+            }
+        }
+
+
+
+
         #endregion
         #region Phụ Xếp Khuôn
         public async Task<IActionResult> CreatDefautNewPhuXepKhuon(DateTime dateTime, string xuongId)
@@ -5768,13 +9767,13 @@ namespace PMS.Controllers
             }
         }
         [CustomAuthorize(Fu = "Xử Lý Phiếu Cân / Phiếu Cân Phụ Xếp Khuôn", Func = "Thêm Xử Lý Phiếu Cân / Phiếu Cân Phụ Xếp Khuôn")]
-        public async Task<IActionResult> DoInsert_PhuXepKhuon(DateTime dateTime, string xuongId, int stt, TimeSpan gio, string maLo, string maLoaiCa, string maThanhPham, string maSize, string maMau, string maKhuVuc, string maNhanVien, decimal trongLuong)
+        public async Task<IActionResult> DoInsert_PhuXepKhuon(DateTime dateTime, string xuongId, int stt, TimeSpan gio, string maLo, string maLoaiCa, string maThanhPham, string maSize, string maMau, string maKhuVuc, string maNhanVien, decimal trongLuong, string maChieuXa, string maChatLuong)
         {
             var userName = HttpContext.Session.GetString("Username");
             var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/PhieuCanPhuXepKhuons/Insert";
             try
             {
-                if (string.IsNullOrEmpty(stt.ToString()) || string.IsNullOrEmpty(xuongId) || string.IsNullOrEmpty(gio.ToString()) || string.IsNullOrEmpty(maLo.ToString()) || string.IsNullOrEmpty(maThanhPham.ToString()) || string.IsNullOrEmpty(maSize.ToString()) || string.IsNullOrEmpty(maNhanVien.ToString()) || string.IsNullOrEmpty(trongLuong.ToString()))
+                if (string.IsNullOrEmpty(stt.ToString()) || string.IsNullOrEmpty(xuongId) || string.IsNullOrEmpty(gio.ToString()) || string.IsNullOrEmpty(maLo.ToString()) || string.IsNullOrEmpty(maThanhPham) || string.IsNullOrEmpty(maSize) || string.IsNullOrEmpty(maNhanVien.ToString()) || string.IsNullOrEmpty(trongLuong.ToString()) || string.IsNullOrEmpty(maChieuXa) || string.IsNullOrEmpty(maChatLuong))
                 {
                     return Json(new
                     {
@@ -5799,6 +9798,9 @@ namespace PMS.Controllers
                     MaXuong = xuongId,
                     MaMayCan = AppViewModels.AppViewModel.Instance.PCName,
                     TrongLuong = trongLuong,
+                    MaChieuXa = maChieuXa,
+                    MaChatLuong = maChatLuong,
+                    Id = $@"{AppViewModels.AppViewModel.Instance.PCName}" + "." + $@"{DateTime.Now.ToString("yyyyMMddHHmmss")}",
                     GhiChu = $@"Người thực hiện: {userName}, trên máy: {AppViewModels.AppViewModel.Instance.PCName}, thời gian: {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}, loại: THÊM,",
                 };
                 var dataTuple = new Tuple<string>(JsonConvert.SerializeObject(model));
@@ -5883,6 +9885,8 @@ namespace PMS.Controllers
                         MaMayCan = item.MaMayCan,
                         TrongLuong = item.TrongLuong,
                         GhiChu = item.GhiChu,
+                        MaChieuXa = item.MaChieuXa,
+                        MaChatLuong = item.MaChatLuong
                     });
                 }
             }
@@ -5893,14 +9897,14 @@ namespace PMS.Controllers
             });
         }
         [CustomAuthorize(Fu = "Xử Lý Phiếu Cân / Phiếu Cân Phụ Xếp Khuôn", Func = "Sửa Xử Lý Phiếu Cân / Phiếu Cân Phụ Xếp Khuôn")]
-        public async Task<IActionResult> DoUpDate_PhuXepKhuon(DateTime ngay, string maXuong, int stt, TimeSpan gio, string maLo, string maLoaiCa, string maThanhPham, string maSize, string maMau, string maKhuVuc, string maNhanVien, decimal trongLuong, string maMayCan)
+        public async Task<IActionResult> DoUpDate_PhuXepKhuon(DateTime ngay, string maXuong, int stt, TimeSpan gio, string maLo, string maLoaiCa, string maThanhPham, string maSize, string maMau, string maKhuVuc, string maNhanVien, decimal trongLuong, string maMayCan, string maChieuXa, string maChatLuong)
         {
             var userName = HttpContext.Session.GetString("Username");
             var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/PhieuCanPhuXepKhuons/Update/{stt}/{ngay.ToString("yyyy-MM-dd")}/{maMayCan}/{maXuong}";
             try
             {
                 // Kiểm tra dữ liệu đầu vào
-                if (string.IsNullOrEmpty(stt.ToString()) || string.IsNullOrEmpty(maXuong) || string.IsNullOrEmpty(gio.ToString()) || string.IsNullOrEmpty(maLo.ToString()) || string.IsNullOrEmpty(maThanhPham.ToString()) || string.IsNullOrEmpty(maSize.ToString()) || string.IsNullOrEmpty(maNhanVien.ToString()) || string.IsNullOrEmpty(trongLuong.ToString()))
+                if (string.IsNullOrEmpty(stt.ToString()) || string.IsNullOrEmpty(maXuong) || string.IsNullOrEmpty(gio.ToString()) || string.IsNullOrEmpty(maLo.ToString()) || string.IsNullOrEmpty(maThanhPham.ToString()) || string.IsNullOrEmpty(maSize.ToString()) || string.IsNullOrEmpty(maNhanVien.ToString()) || string.IsNullOrEmpty(trongLuong.ToString()) || string.IsNullOrEmpty(maChieuXa) || string.IsNullOrEmpty(maChatLuong))
                 {
                     return Json(new
                     {
@@ -5917,6 +9921,8 @@ namespace PMS.Controllers
                     MaMau = maMau,
                     MaKhuVuc = maKhuVuc,
                     MaNhanVien = maNhanVien,
+                    MaChieuXa = maChieuXa,
+                    MaChatLuong = maChatLuong,
                     GhiChu = $@"Người thực hiện: {userName}, trên máy: {AppViewModels.AppViewModel.Instance.PCName}, thời gian: {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}, loại: SỬA",
                 };
                 var dataTuple = new Tuple<string>(JsonConvert.SerializeObject(model));
@@ -6040,7 +10046,9 @@ namespace PMS.Controllers
                 {
                     { "CHUYENXUONG", "Chuyển Xưởng Xử Lý Phiếu Cân / Phiếu Cân Phụ Xếp Khuôn" },
                     { "CHUYENSIZE", "Chuyển Size Xử Lý Phiếu Cân / Phiếu Cân Phụ Xếp Khuôn" },
-                    { "CHUYENTHANHPHAM", "Chuyển Thành Phẩm Xử Lý Phiếu Cân / Phiếu Cân Phụ Xếp Khuôn" }
+                    { "CHUYENTHANHPHAM", "Chuyển Thành Phẩm Xử Lý Phiếu Cân / Phiếu Cân Phụ Xếp Khuôn" },
+                    { "CHUYENCHIEUXA", "Chuyển Chiếu Xạ Xử Lý Phiếu Cân / Phiếu Cân Phụ Xếp Khuôn" },
+                    { "CHUYENCHATLUONG", "Chuyển Chất Lượng Xử Lý Phiếu Cân / Phiếu Cân Phụ Xếp Khuôn" }
                 };
 
                 if (permissionMapping.TryGetValue(typeOption, out var func))
@@ -6326,6 +10334,171 @@ namespace PMS.Controllers
                 });
             }
         }
+
+        [CustomAuthorize(Fu = "Xử Lý Phiếu Cân / Phiếu Cân Phụ Xếp Khuôn", Func = "Chuyển Chiếu Xạ Xử Lý Phiếu Cân / Phiếu Cân Phụ Xếp Khuôn")]
+        public async Task<IActionResult> ChuyenChieuXa_PhuXepKhuon(string listInfoPhieuCan, DateTime ngay, string maChieuXaChange)
+        {
+            // Tách chuỗi thành các mảng con ngăn cách bởi dấu |
+            string[] subArrays = listInfoPhieuCan.Split('|', StringSplitOptions.RemoveEmptyEntries);
+
+            // Khởi tạo danh sách kết quả
+            List<string[]> result = new List<string[]>();
+
+            // Tách các phần tử trong từng mảng con ngăn cách bởi dấu ,
+            foreach (string subArray in subArrays)
+            {
+                string[] elements = subArray.Split(',');
+                result.Add(elements);
+            }
+
+            var userName = HttpContext.Session.GetString("Username");
+
+            using var transactionScope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+
+            try
+            {
+                using var helper = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+
+                foreach (var parts in result)
+                {
+                    int stt = int.Parse(parts[0]);
+                    string maMayCan = parts[1];
+                    string maXuong = parts[2];
+
+                    if (stt <= 0)
+                    {
+                        return Json(new
+                        {
+                            isSuccess = false,
+                            Mesages = "Trong danh sách chọn có phiếu cân đã xóa! Vui lòng kiểm tra lại!."
+                        });
+                    }
+                    // Chuẩn bị dữ liệu cho PhieuCanTPDinhHinh
+                    var model = new PhieuCanPhuXepKhuon
+                    {
+                        MaChieuXa = maChieuXaChange,
+                        GhiChu = $@"Người thực hiện: {userName}, trên máy: {AppViewModels.AppViewModel.Instance.PCName}, thời gian: {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}, loại: CHUYEN CHIEU XA"
+                    };
+
+
+                    // Chuẩn bị URL cho các API
+                    var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/PhieuCanPhuXepKhuons/ChuyenChieuXa/{stt}/{ngay.ToString("yyyy-MM-dd")}/{maMayCan}/{maXuong}";
+                    // Thực hiện insert PhieuCanTPDinhHinh
+                    var dataTuple = new Tuple<string>(JsonConvert.SerializeObject(model));
+                    var jsonContent = new StringContent(JsonConvert.SerializeObject(dataTuple), Encoding.UTF8, "application/json");
+                    var responseTP = await helper.PostAsync(HttpContext, apiUrl, jsonContent);
+
+                    if (!responseTP.Success)
+                    {
+                        return Json(new
+                        {
+                            isSuccess = false,
+                            Messages = "Chuyển Chiếu Xạ Phiếu Cân thất bại: " + responseTP.Message
+                        });
+
+                    }
+                }
+
+                // Hoàn thành transaction nếu tất cả các update đều thành công
+                transactionScope.Complete();
+
+                return Json(new
+                {
+                    isSuccess = true,
+                    Messages = "Đã Chuyển Chiếu Xạ các phiếu  đã chọn!"
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    isSuccess = false,
+                    Messages = "Đã xảy ra lỗi: " + ex.Message
+                });
+            }
+        }
+        [CustomAuthorize(Fu = "Xử Lý Phiếu Cân / Phiếu Cân Phụ Xếp Khuôn", Func = "Chuyển Chất Lượng Xử Lý Phiếu Cân / Phiếu Cân Phụ Xếp Khuôn")]
+        public async Task<IActionResult> ChuyenChatLuong_PhuXepKhuon(string listInfoPhieuCan, DateTime ngay, string maChatLuongChange)
+        {
+            // Tách chuỗi thành các mảng con ngăn cách bởi dấu |
+            string[] subArrays = listInfoPhieuCan.Split('|', StringSplitOptions.RemoveEmptyEntries);
+
+            // Khởi tạo danh sách kết quả
+            List<string[]> result = new List<string[]>();
+
+            // Tách các phần tử trong từng mảng con ngăn cách bởi dấu ,
+            foreach (string subArray in subArrays)
+            {
+                string[] elements = subArray.Split(',');
+                result.Add(elements);
+            }
+
+            var userName = HttpContext.Session.GetString("Username");
+
+            using var transactionScope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+
+            try
+            {
+                using var helper = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+
+                foreach (var parts in result)
+                {
+                    int stt = int.Parse(parts[0]);
+                    string maMayCan = parts[1];
+                    string maXuong = parts[2];
+
+                    if (stt <= 0)
+                    {
+                        return Json(new
+                        {
+                            isSuccess = false,
+                            Mesages = "Trong danh sách chọn có phiếu cân đã xóa! Vui lòng kiểm tra lại!."
+                        });
+                    }
+                    // Chuẩn bị dữ liệu cho PhieuCanTPDinhHinh
+                    var model = new PhieuCanPhuXepKhuon
+                    {
+                        MaChatLuong = maChatLuongChange,
+                        GhiChu = $@"Người thực hiện: {userName}, trên máy: {AppViewModels.AppViewModel.Instance.PCName}, thời gian: {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}, loại: CHUYEN CHIEU XA"
+                    };
+
+
+                    // Chuẩn bị URL cho các API
+                    var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/PhieuCanPhuXepKhuons/ChuyenChatLuong/{stt}/{ngay.ToString("yyyy-MM-dd")}/{maMayCan}/{maXuong}";
+                    // Thực hiện insert PhieuCanTPDinhHinh
+                    var dataTuple = new Tuple<string>(JsonConvert.SerializeObject(model));
+                    var jsonContent = new StringContent(JsonConvert.SerializeObject(dataTuple), Encoding.UTF8, "application/json");
+                    var responseTP = await helper.PostAsync(HttpContext, apiUrl, jsonContent);
+
+                    if (!responseTP.Success)
+                    {
+                        return Json(new
+                        {
+                            isSuccess = false,
+                            Messages = "Chuyển Chất Lượng Phiếu Cân thất bại: " + responseTP.Message
+                        });
+
+                    }
+                }
+
+                // Hoàn thành transaction nếu tất cả các update đều thành công
+                transactionScope.Complete();
+
+                return Json(new
+                {
+                    isSuccess = true,
+                    Messages = "Đã Chuyển Chất Lượng các phiếu  đã chọn!"
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    isSuccess = false,
+                    Messages = "Đã xảy ra lỗi: " + ex.Message
+                });
+            }
+        }
         #endregion
         #region Chính Xếp Khuôn
         public async Task<IActionResult> CreatDefautNewChinhXepKhuon(DateTime dateTime, string xuongId)
@@ -6363,13 +10536,13 @@ namespace PMS.Controllers
             }
         }
         [CustomAuthorize(Fu = "Xử Lý Phiếu Cân / Phiếu Cân Chính Xếp Khuôn", Func = "Thêm Xử Lý Phiếu Cân / Phiếu Cân Chính Xếp Khuôn")]
-        public async Task<IActionResult> DoInsert_ChinhXepKhuon(DateTime dateTime, string xuongId, int stt, TimeSpan gio, string maLo, string maThanhPham, string maChieuXa, string maSize, string maMau, string maChatLuong, string maKhuVuc, string maCoiTam, string maCoiChinh, bool taiChe, bool chuyenXuong, int thoiGianQuay, decimal trongLuong, TimeSpan thoiGianBatDauQuay, TimeSpan thoiGianRaCoi, string maNhanVien, string maNhanVienPV)
+        public async Task<IActionResult> DoInsert_ChinhXepKhuon(DateTime dateTime, string xuongId, int stt, TimeSpan gio, string maLo, string maThanhPham, string maChieuXa, string maSize, string maMau, string maChatLuong, string maKhuVuc, string maCoiTam, string maCoiChinh, bool taiChe, bool chuyenXuong, int thoiGianQuay, decimal trongLuong, TimeSpan thoiGianBatDauQuay, TimeSpan thoiGianRaCoi, string maNhanVien)
         {
             var userName = HttpContext.Session.GetString("Username");
             var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/PhieuCanChinhXepKhuons/Insert";
             try
             {
-                if (string.IsNullOrEmpty(stt.ToString()) || string.IsNullOrEmpty(xuongId) || string.IsNullOrEmpty(gio.ToString()) || string.IsNullOrEmpty(maLo.ToString()) || string.IsNullOrEmpty(maThanhPham.ToString()) || string.IsNullOrEmpty(maSize.ToString()) || string.IsNullOrEmpty(maNhanVien.ToString()) || string.IsNullOrEmpty(trongLuong.ToString()))
+                if (stt <= 0 || string.IsNullOrEmpty(xuongId) || string.IsNullOrEmpty(gio.ToString()) || string.IsNullOrEmpty(maLo) || string.IsNullOrEmpty(maThanhPham) || string.IsNullOrEmpty(maSize) || trongLuong <= 0)
                 {
                     return Json(new
                     {
@@ -6382,34 +10555,39 @@ namespace PMS.Controllers
                     STT = stt,
                     Ngay = DateTime.Now,
                     Gio = gio,
-                    MaCoiTam = maCoiTam,
-                    MaCoiChinh = maCoiChinh,
+                    MaCoiTam = maCoiTam ?? "",
+                    MaCoiChinh = maCoiChinh ?? "",
                     DaQuay = false,
                     ThoiGianBatDauQuay = thoiGianBatDauQuay,
                     ThoiGianRaCoi = thoiGianRaCoi,
                     Forced = false,
                     ThoiGianQuay = thoiGianQuay,
                     TrongLuong = trongLuong,
-                    MaLo = maLo,
+                    MaLo = maLo ?? "",
                     MaLoaiCa = "A",
-                    MaSizeChinh = maSize,
-                    MaMau = maMau,
-                    MaChatLuong = maChatLuong,
-                    MaThanhPhamChinh = maThanhPham,
-                    MaKhuVuc = maKhuVuc,
-                    MaNhanVien = maNhanVien,
+                    MaSizeChinh = maSize ?? "",
+                    MaMau = maMau ?? "",
+                    MaChatLuong = maChatLuong ?? "",
+                    MaThanhPhamChinh = maThanhPham ?? "",
+                    MaKhuVuc = maKhuVuc ?? "",
+                    MaNhanVien = maNhanVien ?? "",
                     MaNhom = "0",
-                    MaChieuXa = maChieuXa,
+                    MaChieuXa = maChieuXa ?? "",
                     TaiChe = taiChe,
                     MaUserCan = "Xử Lý Phiếu Cân",
-                    MaXuong = xuongId,
-                    MaMayCan = AppViewModels.AppViewModel.Instance.PCName,
+                    MaXuong = xuongId ?? "",
+                    MaMayCan = AppViewModels.AppViewModel.Instance.PCName ?? "",
                     LuotQuay = 0,
                     ChuyenXuong = chuyenXuong,
-                    MaNhanVienPvPhanCo = maNhanVienPV,
+                    MaNhanVienPvPhanCo = "",
                     TrongLuongTare = 0,
                     NgayNguyenLieu = dateTime,
-                    GhiChu = $@"Người thực hiện: {userName}, trên máy: {AppViewModels.AppViewModel.Instance.PCName}, thời gian: {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}, loại: THÊM,",
+                    NgayRaCoi = null,
+                    NgayBatDauQuay = null,
+                    MayQuay = "",
+                    IdMonitor = "",
+                    Id = $@"{AppViewModels.AppViewModel.Instance.PCName}" + "." + $@"{DateTime.Now.ToString("yyyyMMddHHmmss")}",
+                    GhiChu = $@"Người thực hiện: {userName}, trên máy: {AppViewModels.AppViewModel.Instance.PCName}, thời gian: {DateTime.Now:yyyy-MM-dd HH:mm:ss}, loại: THÊM,"
                 };
                 var dataTuple = new Tuple<string>(JsonConvert.SerializeObject(model));
                 var jsonContent = new StringContent(JsonConvert.SerializeObject(dataTuple), Encoding.UTF8, "application/json");
@@ -6674,7 +10852,8 @@ namespace PMS.Controllers
                 {
                     { "CHUYENXUONG", "Chuyển Xưởng Xử Lý Phiếu Cân / Phiếu Cân Chính Xếp Khuôn" },
                     { "CHUYENSIZE", "Chuyển Size Xử Lý Phiếu Cân / Phiếu Cân Chính Xếp Khuôn" },
-                    { "CHUYENTHANHPHAM", "Chuyển Thành Phẩm Xử Lý Phiếu Cân / Phiếu Cân Chính Xếp Khuôn" }
+                    { "CHUYENTHANHPHAM", "Chuyển Thành Phẩm Xử Lý Phiếu Cân / Phiếu Cân Chính Xếp Khuôn" },
+                    { "CHUYENNGAYNGUYENLIEU", "Chuyển Ngày Nguyên Liệu Xử Lý Phiếu Cân / Phiếu Cân Chính Xếp Khuôn" }
                 };
 
                 if (permissionMapping.TryGetValue(typeOption, out var func))
@@ -6949,6 +11128,88 @@ namespace PMS.Controllers
                 {
                     isSuccess = true,
                     Messages = "Đã Chuyển Thành Phẩm các phiếu  đã chọn!"
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    isSuccess = false,
+                    Messages = "Đã xảy ra lỗi: " + ex.Message
+                });
+            }
+        }
+        [CustomAuthorize(Fu = "Xử Lý Phiếu Cân / Phiếu Cân Chính Xếp Khuôn", Func = "Chuyển Ngày Nguyên Liệu Xử Lý Phiếu Cân / Phiếu Cân Chính Xếp Khuôn")]
+        public async Task<IActionResult> ChuyenNgayNguyenLieu_ChinhXepKhuon(string listInfoPhieuCan, DateTime ngay, DateTime ngayNguyenLieuChange)
+        {
+            // Tách chuỗi thành các mảng con ngăn cách bởi dấu |
+            string[] subArrays = listInfoPhieuCan.Split('|', StringSplitOptions.RemoveEmptyEntries);
+
+            // Khởi tạo danh sách kết quả
+            List<string[]> result = new List<string[]>();
+
+            // Tách các phần tử trong từng mảng con ngăn cách bởi dấu ,
+            foreach (string subArray in subArrays)
+            {
+                string[] elements = subArray.Split(',');
+                result.Add(elements);
+            }
+
+            var userName = HttpContext.Session.GetString("Username");
+
+            using var transactionScope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+
+            try
+            {
+                using var helper = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+
+                foreach (var parts in result)
+                {
+                    int stt = int.Parse(parts[0]);
+                    string maMayCan = parts[1];
+                    string maXuong = parts[2];
+
+                    if (stt <= 0)
+                    {
+                        return Json(new
+                        {
+                            isSuccess = false,
+                            Mesages = "Trong danh sách chọn có phiếu cân đã xóa! Vui lòng kiểm tra lại!."
+                        });
+                    }
+                    // Chuẩn bị dữ liệu cho PhieuCanTPDinhHinh
+                    var model = new PhieuCanChinhXepKhuon
+                    {
+                        NgayNguyenLieu = ngayNguyenLieuChange,
+                        GhiChu = $@"Người thực hiện: {userName}, trên máy: {AppViewModels.AppViewModel.Instance.PCName}, thời gian: {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}, loại: CHUYEN NGAY NGUYEN LIEU"
+                    };
+
+
+                    // Chuẩn bị URL cho các API
+                    var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/PhieuCanChinhXepKhuons/ChuyenNgayNguyenLieu/{stt}/{ngay.ToString("yyyy-MM-dd")}/{maMayCan}/{maXuong}";
+                    // Thực hiện insert PhieuCanTPDinhHinh
+                    var dataTuple = new Tuple<string>(JsonConvert.SerializeObject(model));
+                    var jsonContent = new StringContent(JsonConvert.SerializeObject(dataTuple), Encoding.UTF8, "application/json");
+                    var responseTP = await helper.PostAsync(HttpContext, apiUrl, jsonContent);
+
+                    if (!responseTP.Success)
+                    {
+                        return Json(new
+                        {
+                            isSuccess = false,
+                            Messages = "Chuyển Ngày Nguyên Liệu Phiếu Cân thất bại: " + responseTP.Message
+                        });
+
+                    }
+                }
+
+                // Hoàn thành transaction nếu tất cả các update đều thành công
+                transactionScope.Complete();
+
+                return Json(new
+                {
+                    isSuccess = true,
+                    Messages = "Đã Chuyển Ngày Nguyên Liệu các phiếu  đã chọn!"
                 });
             }
             catch (Exception ex)
@@ -8732,6 +12993,1096 @@ namespace PMS.Controllers
 
                     // Chuẩn bị URL cho các API
                     var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/PhieuCanXepKhuonBlocks/ChuyenThanhPham/{stt}/{ngay.ToString("yyyy-MM-dd")}/{maMayCan}/{maXuong}";
+                    // Thực hiện insert PhieuCanTPDinhHinh
+                    var dataTuple = new Tuple<string>(JsonConvert.SerializeObject(model));
+                    var jsonContent = new StringContent(JsonConvert.SerializeObject(dataTuple), Encoding.UTF8, "application/json");
+                    var responseTP = await helper.PostAsync(HttpContext, apiUrl, jsonContent);
+
+                    if (!responseTP.Success)
+                    {
+                        return Json(new
+                        {
+                            isSuccess = false,
+                            Messages = "Chuyển Thành Phẩm Phiếu Cân thất bại: " + responseTP.Message
+                        });
+
+                    }
+                }
+
+                // Hoàn thành transaction nếu tất cả các update đều thành công
+                transactionScope.Complete();
+
+                return Json(new
+                {
+                    isSuccess = true,
+                    Messages = "Đã Chuyển Thành Phẩm các phiếu  đã chọn!"
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    isSuccess = false,
+                    Messages = "Đã xảy ra lỗi: " + ex.Message
+                });
+            }
+        }
+        #endregion
+        #region Ra Cối Xếp Khuôn
+        public async Task<IActionResult> CreatDefautNewRaCoiXepKhuon(DateTime dateTime, string xuongId)
+        {
+            try
+            {
+                var dataSource = await GetAllsWithDateAndXuongRaCoiXepKhuon(dateTime, xuongId);
+                if (dataSource != null)
+                {
+
+                    var maxstt = dataSource.Where(x => x.MayCan == AppViewModels.AppViewModel.Instance.PCName)
+                        .Where(x => x.STT != null)
+                        .Select(x => Math.Abs(x.STT))
+                        .DefaultIfEmpty(0)
+                        .Max();
+                    var stt = maxstt + 1;
+                    return Json(new
+                    {
+                        isSuccess = true,
+                        STT = stt,
+                    });
+                }
+                else
+                {
+                    return Json(new
+                    {
+                        isSuccess = false,
+                        Mesages = "Lỗi!"
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+        [CustomAuthorize(Fu = "Xử Lý Phiếu Cân / Phiếu Cân Ra Cối Xếp Khuôn", Func = "Thêm Xử Lý Phiếu Cân / Phiếu Cân Ra Cối Xếp Khuôn")]
+        public async Task<IActionResult> DoInsert_RaCoiXepKhuon(DateTime dateTime, string xuongId, int stt, TimeSpan gio, DateTime ngayNguyenLieu, string maLo, string maThanhPham, string maSize, string maChieuXa, string maChatLuong, string maCoi, string maNhanVien, decimal trongLuong, decimal thamSoTangTrong)
+        {
+            var userName = HttpContext.Session.GetString("Username");
+            var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/PhieuCanRaCois/Insert";
+            try
+            {
+                if (stt <= 0 || string.IsNullOrEmpty(xuongId) || string.IsNullOrEmpty(maLo) || string.IsNullOrEmpty(maThanhPham) || string.IsNullOrEmpty(maSize) || string.IsNullOrEmpty(maCoi) || string.IsNullOrEmpty(maChieuXa) || string.IsNullOrEmpty(maChatLuong) || trongLuong <= 0)
+                {
+                    return Json(new
+                    {
+                        isSuccess = false,
+                        Messages = "Vui lòng nhập đầy đủ thông tin."
+                    });
+                }
+                var model = new PhieuCanRaCoi
+                {
+                    Id = $@"{AppViewModels.AppViewModel.Instance.PCName}" + "." + $@"{DateTime.Now.ToString("yyyyMMddHHmmss")}",
+                    IdMonitor = "", // hoặc null nếu chấp nhận
+                    Ngay = dateTime,
+                    Gio = gio, // chắc chắn kiểu TimeSpan, không nullable
+                    MaXuong = xuongId ?? "",
+                    MayCan = AppViewModels.AppViewModel.Instance.PCName ?? "",
+                    NgayNguyenLieu = ngayNguyenLieu,
+                    TrongLuong = trongLuong,
+                    TrongLuongTare = 0,
+                    MaLo = maLo ?? "",
+                    MaThanhPham = maThanhPham ?? "",
+                    MaSize = maSize ?? "",
+                    MaChieuXa = maChieuXa ?? "",
+                    MaChatLuong = maChatLuong ?? "",
+                    MaNhanVien = maNhanVien ?? "",
+                    MaCoi = maCoi ?? "",
+                    MaThe = "",
+                    GhiChu = $@"Người thực hiện: {userName ?? "Không rõ"}, trên máy: {AppViewModels.AppViewModel.Instance.PCName ?? "Không rõ"}, thời gian: {DateTime.Now:yyyy-MM-dd HH:mm:ss}, loại: THÊM,",
+                    STT = stt,
+                    ThamSoTangTrong = thamSoTangTrong
+                };
+                var dataTuple = new Tuple<string>(JsonConvert.SerializeObject(model));
+                var jsonContent = new StringContent(JsonConvert.SerializeObject(dataTuple), Encoding.UTF8, "application/json");
+                using var helper = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+                var response = await helper.PostAsync(HttpContext, apiUrl, jsonContent);
+
+                if (response.Success)
+                {
+                    // Đăng ký thành công
+                    return Json(new
+                    {
+                        isSuccess = response.Success,
+                        Messages = response.Message
+                    });
+                }
+
+                return Json(new
+                {
+                    isSuccess = response.Success,
+                    Messages = response.Message
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    isSuccess = false,
+                    Messages = "Đã xảy ra lỗi: " + ex.Message.ToString()
+                });
+            }
+        }
+        public async Task<IActionResult> GetsByMa_RaCoiXepKhuon(string listInfoPhieuCan, DateTime ngay)
+        {
+            string[] parts = listInfoPhieuCan.TrimEnd('|').Split(',');
+
+
+            string id = parts[0];
+            int stt = int.Parse(parts[1]);
+
+            if (stt <= 0)
+            {
+                return Json(new
+                {
+                    isSuccess = false,
+                    Mesages = "Trong danh sách chọn có phiếu cân đã xóa! Vui lòng kiểm tra lại!."
+                });
+            }
+            if (string.IsNullOrEmpty(stt.ToString()) || string.IsNullOrEmpty(ngay.ToString()))
+            {
+                return Json(new
+                {
+                    isSuccess = false,
+                    Mesages = "Chưa chọn thông tin!."
+                });
+            }
+            IEnumerable<object> dataSource = ViewBag.dataSource;
+            if (dataSource == null)
+            {
+                var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/PhieuCanRaCois/GetsByMa/{id}";
+                using var helper = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+                var item = await helper.GetAsync<PhieuCanRaCoi>(HttpContext, apiUrl);
+                if (item != null)
+                {
+                    return Json(new
+                    {
+                        isSuccess = true,
+                        Mesages = "Thành Công",
+                        Id = item.Id,
+                        IdMonitor = item.IdMonitor,
+                        Ngay = item.Ngay,
+                        Gio = item.Gio,
+                        MaXuong = item.MaXuong,
+                        MayCan = item.MayCan,
+                        NgayNguyenLieu = item.NgayNguyenLieu,
+                        TrongLuong = item.TrongLuong,
+                        TrongLuongTare = item.TrongLuongTare,
+                        MaLo = item.MaLo,
+                        MaThanhPham = item.MaThanhPham,
+                        MaSize = item.MaSize,
+                        MaChieuXa = item.MaChieuXa,
+                        MaChatLuong = item.MaChatLuong,
+                        MaNhanVien = item.MaNhanVien,
+                        MaCoi = item.MaCoi,
+                        MaThe = item.MaThe,
+                        GhiChu = item.GhiChu,
+                        STT = item.STT,
+                        ThamSoTangTrog = item.ThamSoTangTrong
+                    });
+                }
+            }
+            return Json(new
+            {
+                isSuccess = false,
+                Mesages = "Lỗi!"
+            });
+        }
+        [CustomAuthorize(Fu = "Xử Lý Phiếu Cân / Phiếu Cân Ra Cối Xếp Khuôn", Func = "Sửa Xử Lý Phiếu Cân / Phiếu Cân Ra Cối Xếp Khuôn")]
+        public async Task<IActionResult> DoUpDate_RaCoiXepKhuon(DateTime dateTime, string xuongId, int stt, TimeSpan gio, DateTime ngayNguyenLieu, string maLo, string maThanhPham, string maSize, string maChieuXa, string maChatLuong, string maCoi, string maNhanVien, decimal trongLuong, string id, decimal thamSoTangTrong)
+        {
+            var userName = HttpContext.Session.GetString("Username");
+            var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/PhieuCanRaCois/Update/{id}";
+            try
+            {
+                if (string.IsNullOrEmpty(stt.ToString()) || string.IsNullOrEmpty(xuongId) || string.IsNullOrEmpty(gio.ToString()) || string.IsNullOrEmpty(maLo) || string.IsNullOrEmpty(maThanhPham) || string.IsNullOrEmpty(maSize) || string.IsNullOrEmpty(maCoi) || string.IsNullOrEmpty(maChieuXa) || string.IsNullOrEmpty(maChatLuong) || string.IsNullOrEmpty(maNhanVien) || string.IsNullOrEmpty(trongLuong.ToString()) || string.IsNullOrEmpty(id))
+                {
+                    return Json(new
+                    {
+                        isSuccess = false,
+                        Messages = "Vui lòng nhập đầy đủ thông tin."
+                    });
+                }
+                var model = new PhieuCanRaCoi
+                {
+                    NgayNguyenLieu = ngayNguyenLieu,
+                    MaLo = maLo,
+                    MaThanhPham = maThanhPham,
+                    MaSize = maSize,
+                    MaChieuXa = maChieuXa,
+                    MaChatLuong = maChatLuong,
+                    MaNhanVien = maNhanVien,
+                    MaCoi = maCoi,
+                    ThamSoTangTrong = thamSoTangTrong,
+                    GhiChu = $@"Người thực hiện: {userName}, trên máy: {AppViewModels.AppViewModel.Instance.PCName}, thời gian: {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}, loại: SỬA"
+                };
+                var dataTuple = new Tuple<string>(JsonConvert.SerializeObject(model));
+                var jsonContent = new StringContent(JsonConvert.SerializeObject(dataTuple), Encoding.UTF8, "application/json");
+                using var helper = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+                var rl = await helper.PostAsync(HttpContext, apiUrl, jsonContent);
+                if (rl.Success)
+                {
+                    return Json(new
+                    {
+                        isSuccess = rl.Success,
+                        Messages = rl.Message
+                    });
+                }
+                return Json(new
+                {
+                    isSuccess = rl.Success,
+                    Messages = rl.Message
+                });
+
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    isSuccess = false,
+                    Messages = "Đã xảy ra lỗi: " + ex.Message
+                });
+            }
+        }
+        [CustomAuthorize(Fu = "Xử Lý Phiếu Cân / Phiếu Cân Ra Cối Xếp Khuôn", Func = "Xoá Xử Lý Phiếu Cân / Phiếu Cân Ra Cối Xếp Khuôn")]
+        public async Task<IActionResult> DoDelete_RaCoiXepKhuon(string listInfoPhieuCan)
+        {
+            // Tách chuỗi thành các mảng con ngăn cách bởi dấu |
+            string[] subArrays = listInfoPhieuCan.Split('|', StringSplitOptions.RemoveEmptyEntries);
+
+            // Khởi tạo danh sách kết quả
+            List<string[]> result = new List<string[]>();
+
+            // Tách các phần tử trong từng mảng con ngăn cách bởi dấu ,
+            foreach (string subArray in subArrays)
+            {
+                string[] elements = subArray.Split(',');
+                result.Add(elements);
+            }
+
+            var userName = HttpContext.Session.GetString("Username");
+            try
+            {
+                using var helper = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+
+                foreach (var parts in result)
+                {
+                    string id = parts[0];
+                    int stt = int.Parse(parts[1]);
+                    if (stt <= 0)
+                    {
+                        return Json(new
+                        {
+                            isSuccess = false,
+                            Mesages = "Trong danh sách chọn có phiếu cân đã xóa! Vui lòng kiểm tra lại!."
+                        });
+                    }
+                    // Chuẩn bị dữ liệu cho PhieuCanTPDinhHinh
+                    var model = new PhieuCanRaCoi
+                    {
+                        STT = stt * -1,
+                        TrongLuong = 0,
+                        GhiChu = $@"Người thực hiện: {userName}, trên máy: {AppViewModels.AppViewModel.Instance.PCName}, thời gian: {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}, loại: XOA",
+                    };
+
+                    // Chuẩn bị URL cho các API
+                    var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/PhieuCanRaCois/Delete/{id}";
+
+                    // Thực hiện insert PhieuCanTPDinhHinh
+                    var dataTuple = new Tuple<string>(JsonConvert.SerializeObject(model));
+                    var jsonContent = new StringContent(JsonConvert.SerializeObject(dataTuple), Encoding.UTF8, "application/json");
+                    var responseTP = await helper.PostAsync(HttpContext, apiUrl, jsonContent);
+
+                    if (!responseTP.Success)
+                    {
+
+                        return Json(new
+                        {
+                            isSuccess = responseTP.Success,
+                            Messages = responseTP.Message
+                        });
+
+                    }
+                }
+                return Json(new
+                {
+                    isSuccess = true,
+                    Messages = "Đã xoá toàn bộ phiếu cân được chọn!"
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    isSuccess = false,
+                    Messages = "Đã xảy ra lỗi: " + ex.Message
+                });
+            }
+        }
+        public async Task<IActionResult> CheckQuyenRaCoiXepKhuon(string typeOption)
+        {
+            try
+            {
+                // Lấy danh sách roleid từ cookie
+                var roleIds = PMS.Middlewares.AuthenticationHelpers.GetRoleIdsFromCookie(HttpContext);
+
+                // Lấy danh sách role permissions từ list roleId
+                var rolePermistions = await PMS.Middlewares.AuthenticationHelpers.GetRolePermistionsAsync(HttpContext, roleIds);
+
+                // Kiểm tra quyền dựa trên typeOption
+                var permissionMapping = new Dictionary<string, string>
+                {
+                    { "CHUYENXUONG", "Chuyển Xưởng Xử Lý Phiếu Cân / Phiếu Cân Ra Cối Xếp Khuôn" },
+                    { "CHUYENSIZE", "Chuyển Size Xử Lý Phiếu Cân / Phiếu Cân Ra Cối Xếp Khuôn" },
+                    { "CHUYENTHANHPHAM", "Chuyển Thành Phẩm Xử Lý Phiếu Cân / Phiếu Cân Ra Cối Xếp Khuôn" },
+                    { "CHUYENCOI", "Chuyển Cối Xử Lý Phiếu Cân / Phiếu Cân Ra Cối Xếp Khuôn" },
+                    { "CHUYENCHIEUXA", "Chuyển Chiếu Xạ Xử Lý Phiếu Cân / Phiếu Cân Ra Cối Xếp Khuôn" },
+                    { "CHUYENCHATLUONG", "Chuyển Chất Lượng Xử Lý Phiếu Cân / Phiếu Cân Ra Cối Xếp Khuôn" },
+                    { "CHUYENLO", "Chuyển Lô Xử Lý Phiếu Cân / Phiếu Cân Ra Cối Xếp Khuôn" },
+                    { "CHUYENNGAYNGUYENLIEU", "Chuyển Ngày Nguyên Liệu Xử Lý Phiếu Cân / Phiếu Cân Ra Cối Xếp Khuôn" },
+                    { "CHUYENTHAMSOTANGTRONG", "Chuyển Tham Số Tăng Trọng Xử Lý Phiếu Cân / Phiếu Cân Ra Cối Xếp Khuôn" }
+                };
+
+                if (permissionMapping.TryGetValue(typeOption, out var func))
+                {
+                    var permission = rolePermistions
+                        .FirstOrDefault(x => x.Fu == "Xử Lý Phiếu Cân / Phiếu Cân Ra Cối Xếp Khuôn" && x.Func == func && x.Status == 1);
+
+                    if (permission != null)
+                    {
+                        return Json(new
+                        {
+                            isSuccess = true,
+                        });
+                    }
+                    else
+                    {
+                        return Json(new
+                        {
+                            isSuccess = false,
+                            Messages = "Bạn không có quyền sử dụng chức năng này!"
+                        });
+                    }
+                }
+
+                return Json(new
+                {
+                    isSuccess = false,
+                    Messages = "Tùy chọn không hợp lệ!"
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    isSuccess = false,
+                    Messages = "Đã xảy ra lỗi: " + ex.Message
+                });
+            }
+        }
+        [CustomAuthorize(Fu = "Xử Lý Phiếu Cân / Phiếu Cân Ra Cối Xếp Khuôn", Func = "Chuyển Xưởng Xử Lý Phiếu Cân / Phiếu Cân Ra Cối Xếp Khuôn")]
+        public async Task<IActionResult> ChuyenXuong_RaCoiXepKhuon(string listInfoPhieuCan, string maXuongChange)
+        {
+            // Tách chuỗi thành các mảng con ngăn cách bởi dấu |
+            string[] subArrays = listInfoPhieuCan.Split('|', StringSplitOptions.RemoveEmptyEntries);
+
+            // Khởi tạo danh sách kết quả
+            List<string[]> result = new List<string[]>();
+
+            // Tách các phần tử trong từng mảng con ngăn cách bởi dấu ,
+            foreach (string subArray in subArrays)
+            {
+                string[] elements = subArray.Split(',');
+                result.Add(elements);
+            }
+
+            var userName = HttpContext.Session.GetString("Username");
+
+            using var transactionScope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+
+            try
+            {
+                using var helper = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+
+                foreach (var parts in result)
+                {
+                    string id = parts[0];
+                    int stt = int.Parse(parts[1]);
+
+                    if (stt <= 0)
+                    {
+                        return Json(new
+                        {
+                            isSuccess = false,
+                            Mesages = "Trong danh sách chọn có phiếu cân đã xóa! Vui lòng kiểm tra lại!."
+                        });
+                    }
+                    // Chuẩn bị dữ liệu cho PhieuCanTPDinhHinh
+                    var model = new PhieuCanSauXepKhuon
+                    {
+                        MaXuong = maXuongChange,
+                        GhiChu = $@"Người thực hiện: {userName}, trên máy: {AppViewModels.AppViewModel.Instance.PCName}, thời gian: {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}, loại: CHUYEN XUONG"
+                    };
+
+
+                    // Chuẩn bị URL cho các API
+                    var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/PhieuCanRaCois/ChuyenXuong/{id}";
+                    // Thực hiện insert PhieuCanTPDinhHinh
+                    var dataTuple = new Tuple<string>(JsonConvert.SerializeObject(model));
+                    var jsonContent = new StringContent(JsonConvert.SerializeObject(dataTuple), Encoding.UTF8, "application/json");
+                    var responseTP = await helper.PostAsync(HttpContext, apiUrl, jsonContent);
+
+                    if (!responseTP.Success)
+                    {
+                        return Json(new
+                        {
+                            isSuccess = false,
+                            Messages = "Chuyển Xưởng Phiếu Cân thất bại: " + responseTP.Message
+                        });
+
+                    }
+                }
+
+                // Hoàn thành transaction nếu tất cả các update đều thành công
+                transactionScope.Complete();
+
+                return Json(new
+                {
+                    isSuccess = true,
+                    Messages = "Đã Chuyển Xưởng các phiếu  đã chọn! Vui lòng đổi xưởng để kiểm tra!"
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    isSuccess = false,
+                    Messages = "Đã xảy ra lỗi: " + ex.Message
+                });
+            }
+        }
+        [CustomAuthorize(Fu = "Xử Lý Phiếu Cân / Phiếu Cân Ra Cối Xếp Khuôn", Func = "Chuyển Size Xử Lý Phiếu Cân / Phiếu Cân Ra Cối Xếp Khuôn")]
+        public async Task<IActionResult> ChuyenSize_RaCoiXepKhuon(string listInfoPhieuCan, string maSizeChange)
+        {
+            // Tách chuỗi thành các mảng con ngăn cách bởi dấu |
+            string[] subArrays = listInfoPhieuCan.Split('|', StringSplitOptions.RemoveEmptyEntries);
+
+            // Khởi tạo danh sách kết quả
+            List<string[]> result = new List<string[]>();
+
+            // Tách các phần tử trong từng mảng con ngăn cách bởi dấu ,
+            foreach (string subArray in subArrays)
+            {
+                string[] elements = subArray.Split(',');
+                result.Add(elements);
+            }
+
+            var userName = HttpContext.Session.GetString("Username");
+
+            using var transactionScope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+
+            try
+            {
+                using var helper = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+
+                foreach (var parts in result)
+                {
+                    string id = parts[0];
+                    int stt = int.Parse(parts[1]);
+
+                    if (stt <= 0)
+                    {
+                        return Json(new
+                        {
+                            isSuccess = false,
+                            Mesages = "Trong danh sách chọn có phiếu cân đã xóa! Vui lòng kiểm tra lại!."
+                        });
+                    }
+                    // Chuẩn bị dữ liệu cho PhieuCanTPDinhHinh
+                    var model = new PhieuCanRaCoi
+                    {
+                        MaSize = maSizeChange,
+                        GhiChu = $@"Người thực hiện: {userName}, trên máy: {AppViewModels.AppViewModel.Instance.PCName}, thời gian: {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}, loại: CHUYEN SIZE"
+                    };
+
+
+                    // Chuẩn bị URL cho các API
+                    var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/PhieuCanRaCois/ChuyenSize/{id}";
+                    // Thực hiện insert PhieuCanTPDinhHinh
+                    var dataTuple = new Tuple<string>(JsonConvert.SerializeObject(model));
+                    var jsonContent = new StringContent(JsonConvert.SerializeObject(dataTuple), Encoding.UTF8, "application/json");
+                    var responseTP = await helper.PostAsync(HttpContext, apiUrl, jsonContent);
+
+                    if (!responseTP.Success)
+                    {
+                        return Json(new
+                        {
+                            isSuccess = false,
+                            Messages = "Chuyển Size Phiếu Cân thất bại: " + responseTP.Message
+                        });
+
+                    }
+                }
+
+                // Hoàn thành transaction nếu tất cả các update đều thành công
+                transactionScope.Complete();
+
+                return Json(new
+                {
+                    isSuccess = true,
+                    Messages = "Đã Chuyển Size các phiếu  đã chọn!"
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    isSuccess = false,
+                    Messages = "Đã xảy ra lỗi: " + ex.Message
+                });
+            }
+        }
+        [CustomAuthorize(Fu = "Xử Lý Phiếu Cân / Phiếu Cân Ra Cối Xếp Khuôn", Func = "Chuyển Thành Phẩm Xử Lý Phiếu Cân / Phiếu Cân Ra Cối Xếp Khuôn")]
+        public async Task<IActionResult> ChuyenThanhPham_RaCoiXepKhuon(string listInfoPhieuCan, string maThanhPhamChange)
+        {
+            // Tách chuỗi thành các mảng con ngăn cách bởi dấu |
+            string[] subArrays = listInfoPhieuCan.Split('|', StringSplitOptions.RemoveEmptyEntries);
+
+            // Khởi tạo danh sách kết quả
+            List<string[]> result = new List<string[]>();
+
+            // Tách các phần tử trong từng mảng con ngăn cách bởi dấu ,
+            foreach (string subArray in subArrays)
+            {
+                string[] elements = subArray.Split(',');
+                result.Add(elements);
+            }
+
+            var userName = HttpContext.Session.GetString("Username");
+
+            using var transactionScope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+
+            try
+            {
+                using var helper = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+
+                foreach (var parts in result)
+                {
+                    string id = parts[0];
+                    int stt = int.Parse(parts[1]);
+
+                    if (stt <= 0)
+                    {
+                        return Json(new
+                        {
+                            isSuccess = false,
+                            Mesages = "Trong danh sách chọn có phiếu cân đã xóa! Vui lòng kiểm tra lại!."
+                        });
+                    }
+                    // Chuẩn bị dữ liệu cho PhieuCanTPDinhHinh
+                    var model = new PhieuCanRaCoi
+                    {
+                        MaThanhPham = maThanhPhamChange,
+                        GhiChu = $@"Người thực hiện: {userName}, trên máy: {AppViewModels.AppViewModel.Instance.PCName}, thời gian: {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}, loại: CHUYEN THANH PHAM"
+                    };
+
+
+                    // Chuẩn bị URL cho các API
+                    var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/PhieuCanRaCois/ChuyenThanhPham/{id}";
+                    // Thực hiện insert PhieuCanTPDinhHinh
+                    var dataTuple = new Tuple<string>(JsonConvert.SerializeObject(model));
+                    var jsonContent = new StringContent(JsonConvert.SerializeObject(dataTuple), Encoding.UTF8, "application/json");
+                    var responseTP = await helper.PostAsync(HttpContext, apiUrl, jsonContent);
+
+                    if (!responseTP.Success)
+                    {
+                        return Json(new
+                        {
+                            isSuccess = false,
+                            Messages = "Chuyển Thành Phẩm Phiếu Cân thất bại: " + responseTP.Message
+                        });
+
+                    }
+                }
+
+                // Hoàn thành transaction nếu tất cả các update đều thành công
+                transactionScope.Complete();
+
+                return Json(new
+                {
+                    isSuccess = true,
+                    Messages = "Đã Chuyển Thành Phẩm các phiếu  đã chọn!"
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    isSuccess = false,
+                    Messages = "Đã xảy ra lỗi: " + ex.Message
+                });
+            }
+        }
+        [CustomAuthorize(Fu = "Xử Lý Phiếu Cân / Phiếu Cân Ra Cối Xếp Khuôn", Func = "Chuyển Cối Xử Lý Phiếu Cân / Phiếu Cân Ra Cối Xếp Khuôn")]
+        public async Task<IActionResult> ChuyenCoi_RaCoiXepKhuon(string listInfoPhieuCan, string maCoiChange)
+        {
+            // Tách chuỗi thành các mảng con ngăn cách bởi dấu |
+            string[] subArrays = listInfoPhieuCan.Split('|', StringSplitOptions.RemoveEmptyEntries);
+
+            // Khởi tạo danh sách kết quả
+            List<string[]> result = new List<string[]>();
+
+            // Tách các phần tử trong từng mảng con ngăn cách bởi dấu ,
+            foreach (string subArray in subArrays)
+            {
+                string[] elements = subArray.Split(',');
+                result.Add(elements);
+            }
+
+            var userName = HttpContext.Session.GetString("Username");
+
+            using var transactionScope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+
+            try
+            {
+                using var helper = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+
+                foreach (var parts in result)
+                {
+                    string id = parts[0];
+                    int stt = int.Parse(parts[1]);
+
+                    if (stt <= 0)
+                    {
+                        return Json(new
+                        {
+                            isSuccess = false,
+                            Mesages = "Trong danh sách chọn có phiếu cân đã xóa! Vui lòng kiểm tra lại!."
+                        });
+                    }
+                    // Chuẩn bị dữ liệu cho PhieuCanTPDinhHinh
+                    var model = new PhieuCanRaCoi
+                    {
+                        MaCoi = maCoiChange,
+                        GhiChu = $@"Người thực hiện: {userName}, trên máy: {AppViewModels.AppViewModel.Instance.PCName}, thời gian: {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}, loại: CHUYEN COI"
+                    };
+
+
+                    // Chuẩn bị URL cho các API
+                    var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/PhieuCanRaCois/ChuyenCoi/{id}";
+                    // Thực hiện insert PhieuCanTPDinhHinh
+                    var dataTuple = new Tuple<string>(JsonConvert.SerializeObject(model));
+                    var jsonContent = new StringContent(JsonConvert.SerializeObject(dataTuple), Encoding.UTF8, "application/json");
+                    var responseTP = await helper.PostAsync(HttpContext, apiUrl, jsonContent);
+
+                    if (!responseTP.Success)
+                    {
+                        return Json(new
+                        {
+                            isSuccess = false,
+                            Messages = "Chuyển Thành Phẩm Phiếu Cân thất bại: " + responseTP.Message
+                        });
+
+                    }
+                }
+
+                // Hoàn thành transaction nếu tất cả các update đều thành công
+                transactionScope.Complete();
+
+                return Json(new
+                {
+                    isSuccess = true,
+                    Messages = "Đã Chuyển Thành Phẩm các phiếu  đã chọn!"
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    isSuccess = false,
+                    Messages = "Đã xảy ra lỗi: " + ex.Message
+                });
+            }
+        }
+        [CustomAuthorize(Fu = "Xử Lý Phiếu Cân / Phiếu Cân Ra Cối Xếp Khuôn", Func = "Chuyển Chiếu Xạ Xử Lý Phiếu Cân / Phiếu Cân Ra Cối Xếp Khuôn")]
+        public async Task<IActionResult> ChuyenChieuXa_RaCoiXepKhuon(string listInfoPhieuCan, string maChieuXaChange)
+        {
+            // Tách chuỗi thành các mảng con ngăn cách bởi dấu |
+            string[] subArrays = listInfoPhieuCan.Split('|', StringSplitOptions.RemoveEmptyEntries);
+
+            // Khởi tạo danh sách kết quả
+            List<string[]> result = new List<string[]>();
+
+            // Tách các phần tử trong từng mảng con ngăn cách bởi dấu ,
+            foreach (string subArray in subArrays)
+            {
+                string[] elements = subArray.Split(',');
+                result.Add(elements);
+            }
+
+            var userName = HttpContext.Session.GetString("Username");
+
+            using var transactionScope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+
+            try
+            {
+                using var helper = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+
+                foreach (var parts in result)
+                {
+                    string id = parts[0];
+                    int stt = int.Parse(parts[1]);
+
+                    if (stt <= 0)
+                    {
+                        return Json(new
+                        {
+                            isSuccess = false,
+                            Mesages = "Trong danh sách chọn có phiếu cân đã xóa! Vui lòng kiểm tra lại!."
+                        });
+                    }
+                    // Chuẩn bị dữ liệu cho PhieuCanTPDinhHinh
+                    var model = new PhieuCanRaCoi
+                    {
+                        MaChieuXa = maChieuXaChange,
+                        GhiChu = $@"Người thực hiện: {userName}, trên máy: {AppViewModels.AppViewModel.Instance.PCName}, thời gian: {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}, loại: CHUYEN CHIEU XA"
+                    };
+
+
+                    // Chuẩn bị URL cho các API
+                    var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/PhieuCanRaCois/ChuyenChieuXa/{id}";
+                    // Thực hiện insert PhieuCanTPDinhHinh
+                    var dataTuple = new Tuple<string>(JsonConvert.SerializeObject(model));
+                    var jsonContent = new StringContent(JsonConvert.SerializeObject(dataTuple), Encoding.UTF8, "application/json");
+                    var responseTP = await helper.PostAsync(HttpContext, apiUrl, jsonContent);
+
+                    if (!responseTP.Success)
+                    {
+                        return Json(new
+                        {
+                            isSuccess = false,
+                            Messages = "Chuyển Thành Phẩm Phiếu Cân thất bại: " + responseTP.Message
+                        });
+
+                    }
+                }
+
+                // Hoàn thành transaction nếu tất cả các update đều thành công
+                transactionScope.Complete();
+
+                return Json(new
+                {
+                    isSuccess = true,
+                    Messages = "Đã Chuyển Thành Phẩm các phiếu  đã chọn!"
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    isSuccess = false,
+                    Messages = "Đã xảy ra lỗi: " + ex.Message
+                });
+            }
+        }
+        [CustomAuthorize(Fu = "Xử Lý Phiếu Cân / Phiếu Cân Ra Cối Xếp Khuôn", Func = "Chuyển Chất Lượng Xử Lý Phiếu Cân / Phiếu Cân Ra Cối Xếp Khuôn")]
+        public async Task<IActionResult> ChuyenChatLuong_RaCoiXepKhuon(string listInfoPhieuCan, string maChatLuongChange)
+        {
+            // Tách chuỗi thành các mảng con ngăn cách bởi dấu |
+            string[] subArrays = listInfoPhieuCan.Split('|', StringSplitOptions.RemoveEmptyEntries);
+
+            // Khởi tạo danh sách kết quả
+            List<string[]> result = new List<string[]>();
+
+            // Tách các phần tử trong từng mảng con ngăn cách bởi dấu ,
+            foreach (string subArray in subArrays)
+            {
+                string[] elements = subArray.Split(',');
+                result.Add(elements);
+            }
+
+            var userName = HttpContext.Session.GetString("Username");
+
+            using var transactionScope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+
+            try
+            {
+                using var helper = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+
+                foreach (var parts in result)
+                {
+                    string id = parts[0];
+                    int stt = int.Parse(parts[1]);
+
+                    if (stt <= 0)
+                    {
+                        return Json(new
+                        {
+                            isSuccess = false,
+                            Mesages = "Trong danh sách chọn có phiếu cân đã xóa! Vui lòng kiểm tra lại!."
+                        });
+                    }
+                    // Chuẩn bị dữ liệu cho PhieuCanTPDinhHinh
+                    var model = new PhieuCanRaCoi
+                    {
+                        MaChatLuong = maChatLuongChange,
+                        GhiChu = $@"Người thực hiện: {userName}, trên máy: {AppViewModels.AppViewModel.Instance.PCName}, thời gian: {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}, loại: CHUYEN CHAT LUONG"
+                    };
+
+
+                    // Chuẩn bị URL cho các API
+                    var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/PhieuCanRaCois/ChuyenChatLuong/{id}";
+                    // Thực hiện insert PhieuCanTPDinhHinh
+                    var dataTuple = new Tuple<string>(JsonConvert.SerializeObject(model));
+                    var jsonContent = new StringContent(JsonConvert.SerializeObject(dataTuple), Encoding.UTF8, "application/json");
+                    var responseTP = await helper.PostAsync(HttpContext, apiUrl, jsonContent);
+
+                    if (!responseTP.Success)
+                    {
+                        return Json(new
+                        {
+                            isSuccess = false,
+                            Messages = "Chuyển Thành Phẩm Phiếu Cân thất bại: " + responseTP.Message
+                        });
+
+                    }
+                }
+
+                // Hoàn thành transaction nếu tất cả các update đều thành công
+                transactionScope.Complete();
+
+                return Json(new
+                {
+                    isSuccess = true,
+                    Messages = "Đã Chuyển Thành Phẩm các phiếu  đã chọn!"
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    isSuccess = false,
+                    Messages = "Đã xảy ra lỗi: " + ex.Message
+                });
+            }
+        }
+        [CustomAuthorize(Fu = "Xử Lý Phiếu Cân / Phiếu Cân Ra Cối Xếp Khuôn", Func = "Chuyển Lô Xử Lý Phiếu Cân / Phiếu Cân Ra Cối Xếp Khuôn")]
+        public async Task<IActionResult> ChuyenLo_RaCoiXepKhuon(string listInfoPhieuCan, string maLoChange)
+        {
+            // Tách chuỗi thành các mảng con ngăn cách bởi dấu |
+            string[] subArrays = listInfoPhieuCan.Split('|', StringSplitOptions.RemoveEmptyEntries);
+
+            // Khởi tạo danh sách kết quả
+            List<string[]> result = new List<string[]>();
+
+            // Tách các phần tử trong từng mảng con ngăn cách bởi dấu ,
+            foreach (string subArray in subArrays)
+            {
+                string[] elements = subArray.Split(',');
+                result.Add(elements);
+            }
+
+            var userName = HttpContext.Session.GetString("Username");
+
+            using var transactionScope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+
+            try
+            {
+                using var helper = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+
+                foreach (var parts in result)
+                {
+                    string id = parts[0];
+                    int stt = int.Parse(parts[1]);
+
+                    if (stt <= 0)
+                    {
+                        return Json(new
+                        {
+                            isSuccess = false,
+                            Mesages = "Trong danh sách chọn có phiếu cân đã xóa! Vui lòng kiểm tra lại!."
+                        });
+                    }
+                    // Chuẩn bị dữ liệu cho PhieuCanTPDinhHinh
+                    var model = new PhieuCanRaCoi
+                    {
+                        MaLo = maLoChange,
+                        GhiChu = $@"Người thực hiện: {userName}, trên máy: {AppViewModels.AppViewModel.Instance.PCName}, thời gian: {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}, loại: CHUYEN LO"
+                    };
+
+
+                    // Chuẩn bị URL cho các API
+                    var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/PhieuCanRaCois/ChuyenLo/{id}";
+                    // Thực hiện insert PhieuCanTPDinhHinh
+                    var dataTuple = new Tuple<string>(JsonConvert.SerializeObject(model));
+                    var jsonContent = new StringContent(JsonConvert.SerializeObject(dataTuple), Encoding.UTF8, "application/json");
+                    var responseTP = await helper.PostAsync(HttpContext, apiUrl, jsonContent);
+
+                    if (!responseTP.Success)
+                    {
+                        return Json(new
+                        {
+                            isSuccess = false,
+                            Messages = "Chuyển Thành Phẩm Phiếu Cân thất bại: " + responseTP.Message
+                        });
+
+                    }
+                }
+
+                // Hoàn thành transaction nếu tất cả các update đều thành công
+                transactionScope.Complete();
+
+                return Json(new
+                {
+                    isSuccess = true,
+                    Messages = "Đã Chuyển Thành Phẩm các phiếu  đã chọn!"
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    isSuccess = false,
+                    Messages = "Đã xảy ra lỗi: " + ex.Message
+                });
+            }
+        }
+        [CustomAuthorize(Fu = "Xử Lý Phiếu Cân / Phiếu Cân Ra Cối Xếp Khuôn", Func = "Chuyển Ngày Nguyên Liệu Xử Lý Phiếu Cân / Phiếu Cân Ra Cối Xếp Khuôn")]
+        public async Task<IActionResult> ChuyenNgayNguyenLieu_RaCoiXepKhuon(string listInfoPhieuCan, DateTime ngayNguyenLieuChange)
+        {
+            // Tách chuỗi thành các mảng con ngăn cách bởi dấu |
+            string[] subArrays = listInfoPhieuCan.Split('|', StringSplitOptions.RemoveEmptyEntries);
+
+            // Khởi tạo danh sách kết quả
+            List<string[]> result = new List<string[]>();
+
+            // Tách các phần tử trong từng mảng con ngăn cách bởi dấu ,
+            foreach (string subArray in subArrays)
+            {
+                string[] elements = subArray.Split(',');
+                result.Add(elements);
+            }
+
+            var userName = HttpContext.Session.GetString("Username");
+
+            using var transactionScope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+
+            try
+            {
+                using var helper = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+
+                foreach (var parts in result)
+                {
+                    string id = parts[0];
+                    int stt = int.Parse(parts[1]);
+
+                    if (stt <= 0)
+                    {
+                        return Json(new
+                        {
+                            isSuccess = false,
+                            Mesages = "Trong danh sách chọn có phiếu cân đã xóa! Vui lòng kiểm tra lại!."
+                        });
+                    }
+                    // Chuẩn bị dữ liệu cho PhieuCanTPDinhHinh
+                    var model = new PhieuCanRaCoi
+                    {
+                        NgayNguyenLieu = ngayNguyenLieuChange,
+                        GhiChu = $@"Người thực hiện: {userName}, trên máy: {AppViewModels.AppViewModel.Instance.PCName}, thời gian: {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}, loại: CHUYEN LO"
+                    };
+
+
+                    // Chuẩn bị URL cho các API
+                    var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/PhieuCanRaCois/ChuyenNgayNguyenLieu/{id}";
+                    // Thực hiện insert PhieuCanTPDinhHinh
+                    var dataTuple = new Tuple<string>(JsonConvert.SerializeObject(model));
+                    var jsonContent = new StringContent(JsonConvert.SerializeObject(dataTuple), Encoding.UTF8, "application/json");
+                    var responseTP = await helper.PostAsync(HttpContext, apiUrl, jsonContent);
+
+                    if (!responseTP.Success)
+                    {
+                        return Json(new
+                        {
+                            isSuccess = false,
+                            Messages = "Chuyển Thành Phẩm Phiếu Cân thất bại: " + responseTP.Message
+                        });
+
+                    }
+                }
+
+                // Hoàn thành transaction nếu tất cả các update đều thành công
+                transactionScope.Complete();
+
+                return Json(new
+                {
+                    isSuccess = true,
+                    Messages = "Đã Chuyển Thành Phẩm các phiếu  đã chọn!"
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    isSuccess = false,
+                    Messages = "Đã xảy ra lỗi: " + ex.Message
+                });
+            }
+        }
+        [CustomAuthorize(Fu = "Xử Lý Phiếu Cân / Phiếu Cân Ra Cối Xếp Khuôn", Func = "Chuyển Tham Số Tăng Trọng Xử Lý Phiếu Cân / Phiếu Cân Ra Cối Xếp Khuôn")]
+        public async Task<IActionResult> ChuyenThamSoTangTrong_RaCoiXepKhuon(string listInfoPhieuCan, decimal thamSoTangTrongChange)
+        {
+            // Tách chuỗi thành các mảng con ngăn cách bởi dấu |
+            string[] subArrays = listInfoPhieuCan.Split('|', StringSplitOptions.RemoveEmptyEntries);
+
+            // Khởi tạo danh sách kết quả
+            List<string[]> result = new List<string[]>();
+
+            // Tách các phần tử trong từng mảng con ngăn cách bởi dấu ,
+            foreach (string subArray in subArrays)
+            {
+                string[] elements = subArray.Split(',');
+                result.Add(elements);
+            }
+
+            var userName = HttpContext.Session.GetString("Username");
+
+            using var transactionScope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+
+            try
+            {
+                using var helper = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+
+                foreach (var parts in result)
+                {
+                    string id = parts[0];
+                    int stt = int.Parse(parts[1]);
+
+                    if (stt <= 0)
+                    {
+                        return Json(new
+                        {
+                            isSuccess = false,
+                            Mesages = "Trong danh sách chọn có phiếu cân đã xóa! Vui lòng kiểm tra lại!."
+                        });
+                    }
+                    // Chuẩn bị dữ liệu cho PhieuCanTPDinhHinh
+                    var model = new PhieuCanRaCoi
+                    {
+                        ThamSoTangTrong = thamSoTangTrongChange,
+                        GhiChu = $@"Người thực hiện: {userName}, trên máy: {AppViewModels.AppViewModel.Instance.PCName}, thời gian: {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}, loại: CHUYEN LO"
+                    };
+
+
+                    // Chuẩn bị URL cho các API
+                    var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/PhieuCanRaCois/ChuyenThamSoTangTrong/{id}";
                     // Thực hiện insert PhieuCanTPDinhHinh
                     var dataTuple = new Tuple<string>(JsonConvert.SerializeObject(model));
                     var jsonContent = new StringContent(JsonConvert.SerializeObject(dataTuple), Encoding.UTF8, "application/json");
@@ -11695,7 +17046,7 @@ namespace PMS.Controllers
                         GhiChu = $@"Người thực hiện: {userName}, trên máy: {AppViewModels.AppViewModel.Instance.PCName}, thời gian: {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}, loại: CHUYEN THANH PHAM"
                     };
 
-                     var ngayCan = thoiGianCan.ToString("yyyy-MM-dd HH:mm:ss");
+                    var ngayCan = thoiGianCan.ToString("yyyy-MM-dd HH:mm:ss");
                     // Chuẩn bị URL cho các API
                     var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/PhieuCanPhuPhams/ChuyenThanhPham/{maMayTinhCan}/{maUserCan}/{thoiGianCan.ToString("yyyy-MM-dd HH:mm:ss")}/{ngayCan}";
                     // Thực hiện insert PhieuCanTPDinhHinh

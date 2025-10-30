@@ -125,7 +125,9 @@ namespace PMS.Controllers.DanhMuc.DinhHinh
                         BaoCaoDauRot = false,
                         IsSuDungThoiGianGiuaLoaiThanhPham = false,
                         MinOut = 0,
-                        MaxOut = 999
+                        MaxOut = 999,
+                        IsCaDa = false,
+                        ThoiGianHT = 0
                     });
                 }
                 else
@@ -143,7 +145,7 @@ namespace PMS.Controllers.DanhMuc.DinhHinh
             }
         }
         [CustomAuthorize(Fu = "Danh Mục / Định Hình / Thành Phẩm", Func = "Thêm Định Hình / Thành Phẩm")]
-        public async Task<IActionResult> DoInsert(string ma, string ten, double dinhMuc, double min, double max, double minOut, double maxOut, decimal tyLeDinhMucDau, decimal tyLeDinhMucRot, decimal trongLuongTare, string bravoId, decimal dinhMucKhongCanDauVao, decimal dinhMucCaTra, string codeId, bool isSuDungThoiGianGiuaLoaiThanhPham, bool isDauVaoBatBuoc, bool isBaoCaoDauRot, bool suDung)
+        public async Task<IActionResult> DoInsert(string ma, string ten, double dinhMuc, double min, double max, double minOut, double maxOut, decimal tyLeDinhMucDau, decimal tyLeDinhMucRot, decimal trongLuongTare, string bravoId, decimal dinhMucKhongCanDauVao, decimal dinhMucCaTra, string codeId, bool isSuDungThoiGianGiuaLoaiThanhPham, bool isDauVaoBatBuoc, bool isBaoCaoDauRot, bool suDung,bool isCaDa, decimal thoiGianHT)
         {
             var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/MaThanhPhamDinhHinhs/Insert";
             try
@@ -177,7 +179,9 @@ namespace PMS.Controllers.DanhMuc.DinhHinh
                     BaoCaoDauRot = isBaoCaoDauRot,
                     IsSuDungThoiGianGiuaLoaiThanhPham = isSuDungThoiGianGiuaLoaiThanhPham,
                     MinOut = minOut,
-                    MaxOut = maxOut
+                    MaxOut = maxOut,
+                    IsCaDa = isCaDa,
+                    ThoiGianHT = thoiGianHT
                 };
                 var jsonContent = new StringContent(JsonConvert.SerializeObject(model), Encoding.UTF8, "application/json");
                 using var helper = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
@@ -249,7 +253,9 @@ namespace PMS.Controllers.DanhMuc.DinhHinh
                         BaoCaoDauRot = item?.BaoCaoDauRot,
                         IsSuDungThoiGianGiuaLoaiThanhPham = item?.IsSuDungThoiGianGiuaLoaiThanhPham,
                         MinOut = item?.MinOut,
-                        MaxOut = item?.MaxOut
+                        MaxOut = item?.MaxOut,
+                        IsCaDa = item?.IsCaDa,
+                        ThoiGianHT = item?.ThoiGianHT
                     });
                 }
             }
@@ -260,7 +266,7 @@ namespace PMS.Controllers.DanhMuc.DinhHinh
             });
         }
         [CustomAuthorize(Fu = "Danh Mục / Định Hình / Thành Phẩm", Func = "Sửa Định Hình / Thành Phẩm")]
-        public async Task<IActionResult> DoUpDate(string ma,string ten, double dinhMuc, double min, double max, double minOut, double maxOut, decimal tyLeDinhMucDau, decimal tyLeDinhMucRot, decimal trongLuongTare, string bravoId, decimal dinhMucKhongCanDauVao, decimal dinhMucCaTra, string codeId, bool isSuDungThoiGianGiuaLoaiThanhPham, bool isDauVaoBatBuoc, bool isBaoCaoDauRot, bool suDung,string maCa)
+        public async Task<IActionResult> DoUpDate(string ma,string ten, double dinhMuc, double min, double max, double minOut, double maxOut, decimal tyLeDinhMucDau, decimal tyLeDinhMucRot, decimal trongLuongTare, string bravoId, decimal dinhMucKhongCanDauVao, decimal dinhMucCaTra, string codeId, bool isSuDungThoiGianGiuaLoaiThanhPham, bool isDauVaoBatBuoc, bool isBaoCaoDauRot, bool suDung,string maCa,bool isCaDa, decimal thoiGianHT)
         {
             var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/MaThanhPhamDinhHinhs/Update/{ma}/{maCa}";
             try
@@ -295,7 +301,9 @@ namespace PMS.Controllers.DanhMuc.DinhHinh
                     BaoCaoDauRot = isBaoCaoDauRot,
                     IsSuDungThoiGianGiuaLoaiThanhPham = isSuDungThoiGianGiuaLoaiThanhPham,
                     MinOut = minOut,
-                    MaxOut = maxOut
+                    MaxOut = maxOut,
+                    IsCaDa = isCaDa,
+                    ThoiGianHT = thoiGianHT
                 };
 
                 var jsonContent = new StringContent(JsonConvert.SerializeObject(model), Encoding.UTF8, "application/json");

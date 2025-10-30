@@ -13,6 +13,8 @@ using ObservableObject = CommunityToolkit.Mvvm.ComponentModel.ObservableObject;
 using System.Windows.Input;
 using Azure.Identity;
 using System.Collections.Specialized;
+using Models.Repos;
+using System.Globalization;
 
 namespace ViewModels.Repos.HQ
 {
@@ -115,7 +117,44 @@ namespace ViewModels.Repos.HQ
             var dao = new Dao.Repos.HQ.MaChieuXaXepKhuon();
             return dao.Gets<T>();
         }
+        public List<MaChieuXaXepKhuon_U> GetUs(string Ngay, int PageIndex, int PageSize)
+        {
+            var db = new dbPMScontext();
+            var date = new DateTime();
+            date = DateTime.ParseExact(Ngay, "yyyyMMddHHmmss", CultureInfo.InvariantCulture);
+            var latestDates = db.MaChieuXaXepKhuonUs
+                .Where(x => x.MNgay.Date >= date.Date)
+                .GroupBy(x => x.MaChieuXa)
+                .Select(g => new { MaChieuXa = g.Key, MaxId = g.Max(x => x.Id) });
 
+            var query = from s in db.MaChieuXaXepKhuonUs.Where(x => x.MNgay.Date >= date.Date)
+                        join latest in latestDates
+                        on new { s.MaChieuXa, s.Id }
+                        equals new { latest.MaChieuXa, Id = latest.MaxId }
+                        orderby s.MNgay descending
+                        select s;
+
+            var result = query.Skip((PageIndex - 1) * PageSize)
+                .Take(PageSize)
+                .ToList();
+            return result;
+        }
+        public List<MaChieuXaXepKhuon_D> GetDs(string Ngay, int PageIndex, int PageSize)
+        {
+            var db = new dbPMScontext();
+            var date = new DateTime();
+            try
+            {
+                date = DateTime.ParseExact(Ngay, "yyyyMMddHHmmss", CultureInfo.InvariantCulture);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+            return db.MaChieuXaXepKhuonDs.Where(x => x.MNgay.Date >= date.Date).OrderByDescending(x => x.MNgay)
+                .Skip((PageIndex - 1) * PageSize).Take(PageSize).ToList();
+        }
         private int Insert<T>(T item)
         {
             var dao = new Dao.Repos.HQ.MaChieuXaXepKhuon();

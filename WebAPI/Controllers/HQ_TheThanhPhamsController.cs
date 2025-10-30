@@ -77,12 +77,13 @@ namespace WebAPI.Controllers
                     Message = "Mã này đã tồn tại.",
                 });
             }
+            var MNgay = DateTime.Now;
             var newItem = new HQ_ThanhPham
             {
                 Id = model.Id,
                 Ten = model.Ten,
                 SuDung = model.SuDung,
-                MNgay = model.MNgay,
+                MNgay = MNgay,
                 Max = model.Max,
                 Min = model.Min,
             };
@@ -145,10 +146,11 @@ namespace WebAPI.Controllers
                     Errors = errors
                 });
             }
+            var MNgay = DateTime.Now;
             item.Id = model.Id;
             item.Ten = model.Ten;
             item.SuDung = model.SuDung;
-            //item.MNgay = model.MNgay;
+            item.MNgay = MNgay;
             item.Max = model.Max;
             item.Min = model.Min;
             try

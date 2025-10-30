@@ -30,7 +30,7 @@ namespace WebAPI.Controllers
         [Authorize]
         public IActionResult GetAlls()
         {
-            var items = _context.LineFilletv2.OrderByDescending(x => x.Ma).ToList();
+            var items = _context.LineFilletv2.OrderBy(x => x.Ma).ToList();
 
             return Ok(items);
         }

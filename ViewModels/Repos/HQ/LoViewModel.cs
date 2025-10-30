@@ -13,6 +13,9 @@ using ObservableObject = CommunityToolkit.Mvvm.ComponentModel.ObservableObject;
 using System.Windows.Input;
 using Azure.Identity;
 using System.Collections.Specialized;
+using Microsoft.Extensions.Localization;
+using Models.Repos;
+using Vars;
 
 namespace ViewModels.Repos.HQ
 {
@@ -82,6 +85,23 @@ namespace ViewModels.Repos.HQ
                 VmMessage.SetExceptionCommand.Execute(e);
             }
         }
+
+        public void Reload()
+        {
+            // Reload();
+            Items.Clear();
+            var items = new ObservableRangeCollection<string>(Gets(AppViewModel.Instance.XuongId, IsServer));
+            if (items != null && items.Any())
+            {
+                foreach (var item in items)
+                {
+                    Items.Add(item);
+         
+                }
+            }
+            ItemsWithSize = new ObservableRangeCollection<Tuple<DateTime?, string, string>>(
+                GetsWithSize(AppViewModel.Instance.XuongId, IsServer));
+        }
         public List<string> Gets(string xuongId, bool isServer = false)
         {
             try
@@ -102,6 +122,12 @@ namespace ViewModels.Repos.HQ
                 {
                     return dao.GetsMSLBTPFilletv2(xuongId);
                 }
+                else if (AppViewModel.Instance.LoKv == AppKV.Hq)
+                {
+                    dbPMScontext db = new dbPMScontext();
+                    var items = db.HqLos.Where(x => x.MNgay >= DateTime.Now.AddDays(-30)).Select(x => x.Id).ToList();
+                    return items;
+                }
                 else
                 {
                     return dao.GetsMSL(xuongId);
@@ -112,6 +138,9 @@ namespace ViewModels.Repos.HQ
                 throw;
             }
         }
+
+       
+
         public List<Tuple<DateTime?, string, string>> GetsLastWithSize(string xuongId, bool isServer = false)
         {
             try
@@ -180,6 +209,12 @@ namespace ViewModels.Repos.HQ
             {
                 throw;
             }
+        }
+
+        public HQ_Lo? GetHqLo(string id)
+        {
+            var dao = new Dao.Repos.HQ.HQ_Lo();
+            return dao.Get<HQ_Lo>(id);
         }
         public static LoViewModel Instance => instance ??= new LoViewModel();
 

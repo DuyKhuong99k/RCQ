@@ -25,7 +25,7 @@
 
 </style>
 
-<div class="card mb-4">
+<div class="card mb-4 minHeigh">
     <div class="card-body">
         <div class=" d-flex flex-column justify-content-between align-items-center mb-3">
             <div id="element2" class="position-relative"></div>
@@ -40,7 +40,7 @@
            data-bs-toggle="collapse"
            data-bs-target="#collapseExample2"
            aria-expanded="false"
-           aria-controls="collapseExample2">
+           aria-controls="collapseExample2" style="position:relative; z-index:1;">
             Xem chi tiết
         </a>
         <div class="collapse" id="collapseExample2">
@@ -73,6 +73,36 @@
 </script> *@
 <script src="~/js/adduserwaitview.js"></script>
 <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var detailLink = document.getElementById('detailLink2');
+        var collapseElement = document.getElementById('collapseExample2');
+
+        function setColor(defaultColor, hoverColor) {
+            detailLink.style.color = defaultColor;
+
+            detailLink.onmouseenter = function () {
+                detailLink.style.color = hoverColor;
+            };
+            detailLink.onmouseleave = function () {
+                detailLink.style.color = defaultColor;
+            };
+        }
+
+        detailLink.textContent = 'Xem chi tiết';
+        setColor('#75aaff', '#0056b3');
+
+        collapseElement.addEventListener('show.bs.collapse', function () {
+            detailLink.textContent = 'Thu gọn';
+            setColor('#6c757d', '#dc3545');
+        });
+
+        collapseElement.addEventListener('hide.bs.collapse', function () {
+            detailLink.textContent = 'Xem chi tiết';
+            setColor('#75aaff', '#0056b3');
+        });
+    });
+</script>
+<script>
     if(typeof detailLink === 'undefined'){
         var detailLink = document.getElementById('detailLink2');
     }
@@ -96,7 +126,7 @@
     });
     function loadData2() {
         var xuongId = @XuongId;
-        AddUserWaitView(xuongId);
+        //AddUserWaitView(xuongId);
         const parentElement = document.querySelector('.v');
         var fromDate = "@DateTime.Now.Date.AddDays(int.Parse((NumberDate ?? "0").ToString()) * -1).ToString("yyyy-MM-dd")";
         var toDate = "@DateTime.Now.Date.ToString("yyyy-MM-dd")";
@@ -158,6 +188,8 @@
             const newItem = document.createElement('tr');
             // newItem.classList.add('table-border-bottom-0');
             var item = data.datas[i];
+            const trongLuongTP = item.y;
+            const trongLuongTPFormat = trongLuongTP.toLocaleString('vi-VN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
             newItem.innerHTML = `
                                                                         <td>
                                                                             <div>
@@ -181,6 +213,13 @@
     function RefreshDBTHTPDH2() {
         loadData();
     }
-    var timeInterval = @AppViewModels.AppViewModel.Instance.TimeSetIntervalDashBoardView;
+   
+    var timeInterval = localStorage.getItem("timeInterval_dashboard_user");
+
+    // Nếu null thì ép thành 30p
+    if (isNaN(timeInterval) || timeInterval <= 0) {
+        timeInterval = 1800000;
+    }
+
     setInterval(loadData2, timeInterval);
 </script>

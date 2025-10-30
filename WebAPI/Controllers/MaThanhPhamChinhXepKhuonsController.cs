@@ -85,6 +85,9 @@ namespace WebAPI.Controllers
                 Max = model.Max,
                 BravoId = model.BravoId,
                 _type = model._type,
+                ThamSoTangTrong = model.ThamSoTangTrong,
+                DinhMucTangTrong = model.DinhMucTangTrong,
+                IsKhongThuc = model.IsKhongThuc,
             };
             _context.MaThanhPhamChinhXepKhuon.Add(newItem);
             try
@@ -152,8 +155,25 @@ namespace WebAPI.Controllers
             item.Max = model.Max;
             item.BravoId = model.BravoId;
             item._type = model._type;
+            item.ThamSoTangTrong = model.ThamSoTangTrong;
+            item.DinhMucTangTrong = model.DinhMucTangTrong;
+            item.IsKhongThuc = model.IsKhongThuc;
             try
             {
+                var newItemUs = new MaThanhPhamChinhXepKhuon_U
+                {
+                    MaThanhPham = item.Ma,
+                    Ten = item.Ten,
+                    SuDung = item.SuDung,
+                    Min = item.Min,
+                    Max = item.Max,
+                    BravoId = item.BravoId,
+                    _type = item._type,
+                    MNgay = DateTime.Now,
+                };
+
+                // Thêm vào bảng HqLoaiNguyenLieuUs
+                _context.MaThanhPhamChinhXepKhuonUs.Add(newItemUs);
                 await _context.SaveChangesAsync();
             }
             catch (Exception ex)
@@ -197,6 +217,21 @@ namespace WebAPI.Controllers
 
             try
             {
+                var MNgay = DateTime.Now;
+                var newItemUs = new MaThanhPhamChinhXepKhuon_D
+                {
+                    MaThanhPham = item.Ma,
+                    Ten = item.Ten,
+                    SuDung = item.SuDung,
+                    Min = item.Min,
+                    Max = item.Max,
+                    BravoId = item.BravoId,
+                    _type = item._type,
+                    MNgay = DateTime.Now,
+                    
+                };
+
+                _context.MaThanhPhamChinhXepKhuonDs.Add(newItemUs);
                 await _context.SaveChangesAsync();
             }
             catch (Exception ex)

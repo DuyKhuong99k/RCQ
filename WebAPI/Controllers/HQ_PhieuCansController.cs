@@ -31,37 +31,86 @@ namespace WebAPI.Controllers
         }
         private MainViewModel Vm => MainViewModel.Instance;
 
-        [HttpGet("{fromDate}/{toDate}")]
+        [HttpGet("{fromDate}/{toDate}/{xuongId}")]
         [Authorize]
-        public IActionResult GetChiTiets(string fromDate, string toDate)
+        public IActionResult GetChiTiets(string fromDate, string toDate,string xuongId)
+        {
+            DateTime from = DateTime.ParseExact(fromDate, "yyyy-MM-dd HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture);
+            DateTime to = DateTime.ParseExact(toDate, "yyyy-MM-dd HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture);
+
+            var items = Vm.VmHQ_PhieuCan.GetChiTiets<object>(from, to,xuongId, _context.Database.GetConnectionString());
+            return Ok(items);
+        }
+        [HttpGet("{fromDate}/{toDate}/{xuongId}")]
+        [Authorize]
+        public IActionResult GetTongHopNhanViens(string fromDate, string toDate,string xuongId)
+        {
+            DateTime from = DateTime.ParseExact(fromDate, "yyyy-MM-dd HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture);
+            DateTime to = DateTime.ParseExact(toDate, "yyyy-MM-dd HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture);
+
+            var items = Vm.VmHQ_PhieuCan.GetTongHopNhanViens<object>(from, to, xuongId,_context.Database.GetConnectionString());
+            return Ok(items);
+        }
+        [HttpGet("{fromDate}/{toDate}/{xuongId}")]
+        [Authorize]
+        public IActionResult GetTongHopThanhPhams(string fromDate, string toDate,string xuongId)
+        {
+            DateTime from = DateTime.ParseExact(fromDate, "yyyy-MM-dd HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture);
+            DateTime to = DateTime.ParseExact(toDate, "yyyy-MM-dd HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture);
+
+            var items = Vm.VmHQ_PhieuCan.GetTongHopThanhPhams<object>(from, to,xuongId, _context.Database.GetConnectionString());
+            return Ok(items);
+        }
+        [HttpGet("{fromDate}/{toDate}/{xuongId}")]
+        [Authorize]
+        public IActionResult GetTongHopNhanVienTheoCas(string fromDate, string toDate,string xuongId)
+        {
+            DateTime from = DateTime.ParseExact(fromDate, "yyyy-MM-dd HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture);
+            DateTime to = DateTime.ParseExact(toDate, "yyyy-MM-dd HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture);
+
+            var items = Vm.VmHQ_PhieuCan.GetTongHopNhanVienTheoCas<object>(from, to,xuongId, _context.Database.GetConnectionString());
+            return Ok(items);
+        }
+        [HttpGet("{fromDate}/{toDate}/{xuongId}")]
+        [Authorize]
+        public IActionResult GetTongHopTinhLuongs(string fromDate, string toDate,string xuongId)
+        {
+            DateTime from = DateTime.ParseExact(fromDate, "yyyy-MM-dd HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture);
+            DateTime to = DateTime.ParseExact(toDate, "yyyy-MM-dd HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture);
+
+            var items = Vm.VmHQ_PhieuCan.GetTongHopTinhLuongs(from, to,xuongId, _context.Database.GetConnectionString());
+            return Ok(items);
+        }
+        [HttpGet("{fromDate}/{toDate}/{xuongId}")]
+        [Authorize]
+        public IActionResult GetTongHopThongKeSanXuat(string fromDate, string toDate,string xuongId)
+        {
+            DateTime from = DateTime.ParseExact(fromDate, "yyyy-MM-dd HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture);
+            DateTime to = DateTime.ParseExact(toDate, "yyyy-MM-dd HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture);
+
+            var items = Vm.VmHQ_PhieuCan.GetTongHopThongKeSanXuat(from, to,xuongId, _context.Database.GetConnectionString());
+            return Ok(items);
+        }
+        [HttpGet("{fromDate}/{toDate}/{xuongId}")]
+        [Authorize]
+        public IActionResult GetTongHopThanhPhamDashboards(string fromDate, string toDate,string xuongId)
         {
             DateTime from = DateTime.ParseExact(fromDate, "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture);
             DateTime to = DateTime.ParseExact(toDate, "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture);
 
-            var items = Vm.VmHQ_PhieuCan.GetChiTiets<object>(from, to, _context.Database.GetConnectionString());
+            var items = Vm.VmDashBoard.ItemTongHopThanhPhamHQ.OfType<dynamic>().ToList();
             return Ok(items);
         }
-        [HttpGet("{fromDate}/{toDate}")]
+        [HttpGet("{fromDate}/{toDate}/{xuongId}")]
         [Authorize]
-        public IActionResult GetTongHopNhanViens(string fromDate, string toDate)
+        public IActionResult GetTongHopThanhPhamDashboardForGrids(string fromDate, string toDate,string xuongId)
         {
             DateTime from = DateTime.ParseExact(fromDate, "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture);
             DateTime to = DateTime.ParseExact(toDate, "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture);
 
-            var items = Vm.VmHQ_PhieuCan.GetTongHopNhanViens<object>(from, to, _context.Database.GetConnectionString());
+            var items = Vm.VmDashBoard.ItemTongHopThanhPhamHQGrid.OfType<dynamic>().ToList();
             return Ok(items);
         }
-        [HttpGet("{fromDate}/{toDate}")]
-        [Authorize]
-        public IActionResult GetTongHopThanhPhams(string fromDate, string toDate)
-        {
-            DateTime from = DateTime.ParseExact(fromDate, "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture);
-            DateTime to = DateTime.ParseExact(toDate, "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture);
-
-            var items = Vm.VmHQ_PhieuCan.GetTongHopThanhPhams<object>(from, to, _context.Database.GetConnectionString());
-            return Ok(items);
-        }
-
         #region xử lý phiếu cân
         [HttpGet("{dateTime}/{xuongId}")]
         [Authorize]
@@ -122,7 +171,7 @@ namespace WebAPI.Controllers
                 });
             }
             // ... kiểm tra mã nhân viên đã tồn tại chưa ...
-            if (_context.HqPhieuCans.Any(u => u.STT == model.STT))
+            if (_context.HqPhieuCans.Any(u => u.Id == model.Id))
             {
                 return BadRequest(new ApiResponse
                 {
@@ -350,7 +399,7 @@ namespace WebAPI.Controllers
             var newItem = new HQ_PhieuCan
             {
                 Id = model.Id,
-                STT = model.STT,
+                STT = -1,//model.STT,
                 Ngay = item.Ngay,
                 NgayGio = item.NgayGio,
                 MayCan = item.MayCan,
@@ -361,7 +410,7 @@ namespace WebAPI.Controllers
                 MaNhanVien = item.MaNhanVien,
                 MaNhanVienPhucVu = item.MaNhanVienPhucVu,
                 MaNhanVienBanKiem = item.MaNhanVienBanKiem,
-                TrongLuong = model.TrongLuong,
+                TrongLuong = 0,//model.TrongLuong,
                 TrongLuongTare = item.TrongLuongTare,
                 ChiSanLuong = item.ChiSanLuong,
                 Status = item.Status,

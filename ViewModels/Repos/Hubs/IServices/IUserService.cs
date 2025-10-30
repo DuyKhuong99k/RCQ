@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -12,7 +13,7 @@ namespace ViewModels.Repos.Hubs.IServices
 {
     public interface IUserService: INotifyPropertyChanged
     {
-        public HashSet<ClientInfo> Clients { get; }
+        public ConcurrentDictionary<string, ClientInfo> Clients { get; }
         public void RemoveByConnectedId(string connectedId);
 
         public ClientInfo? GetByConnectedId(string connectedId);

@@ -8,14 +8,14 @@
     var rolePermistions = await PMS.Middlewares.AuthenticationHelpers.GetRolePermistionsAsync(Context, roleIds);
 }
 
-<div class="container mt-4">
+<div class="container-fluid mt-4">
     <div class="row">
         <div class="col-12">
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h2 class="mb-0">Danh Sách Size</h2>
                     @{
-                        var themHQ_Size = rolePermistions.Where(x => x.Fu == "Danh Mục HQ / Size" && x.Func == "Thêm HQ / Size" && x.Status == 1).FirstOrDefault();
+                        var themHQ_Size = rolePermistions.Where(x => x.Fu == "Danh Mục / Size HQ" && x.Func == "Thêm Size HQ" && x.Status == 1).FirstOrDefault();
                         if (themHQ_Size != null)
                         {
                             <button onclick="showInsert()" type="button" class="btn btn-primary">Thêm</button>
@@ -27,26 +27,26 @@
                     <div id="Grid"></div>
                     <div style="margin-top:20px;">
                         @{
-                            var suaHQ_Size = rolePermistions.Where(x => x.Fu == "Danh Mục HQ / Size" && x.Func == "Sửa HQ / Size" && x.Status == 1).FirstOrDefault();
+                            var suaHQ_Size = rolePermistions.Where(x => x.Fu == "Danh Mục / Size HQ" && x.Func == "Sửa Size HQ" && x.Status == 1).FirstOrDefault();
                             if (suaHQ_Size != null)
                             {
                                 <button onclick="showUpdate()" style="margin-right:5px" class="btn btn-outline-warning"><i class='bx bx-edit-alt'></i>Sửa</button>
                             }
-                            var xoaHQ_Size = rolePermistions.Where(x => x.Fu == "Danh Mục HQ / Size" && x.Func == "Xóa HQ / Loại Nguyên Liệ" && x.Status == 1).FirstOrDefault();
+                            var xoaHQ_Size = rolePermistions.Where(x => x.Fu == "Danh Mục / Size HQ" && x.Func == "Xóa HQ / Loại Nguyên Liệu" && x.Status == 1).FirstOrDefault();
                             if (xoaHQ_Size != null)
                             {
                                 <button onclick="showDelete()" style="margin-right:5px" class="btn btn-outline-danger"><i class='bx bx-trash'></i>Xoá</button>
                             }
-                            var importHQ_Size = rolePermistions.Where(x => x.Fu == "Danh Mục HQ / Size" && x.Func == "Import HQ / Size" && x.Status == 1).FirstOrDefault();
+                            var importHQ_Size = rolePermistions.Where(x => x.Fu == "Danh Mục / Size HQ" && x.Func == "Import Size HQ" && x.Status == 1).FirstOrDefault();
                             if (importHQ_Size != null)
                             {
                                 <button onclick="import()" style="margin-right:5px" class="btn btn-outline-info"><i class='bx bx-import'></i>Import</button>
                             }
-                            var exportHQ_Size = rolePermistions.Where(x => x.Fu == "Danh Mục HQ / Size" && x.Func == "Export HQ / Size" && x.Status == 1).FirstOrDefault();
-                            if (exportHQ_Size != null)
-                            {
-                                <button onclick="export()" style="margin-right:5px" class="btn btn-outline-secondary"><i class='bx bx-export'></i>Export Excel</button>
-                            }
+                            // var exportHQ_Size = rolePermistions.Where(x => x.Fu == "Danh Mục / Size HQ" && x.Func == "Export Size HQ" && x.Status == 1).FirstOrDefault();
+                            // if (exportHQ_Size != null)
+                            // {
+                            //     <button onclick="export()" style="margin-right:5px" class="btn btn-outline-secondary"><i class='bx bx-export'></i>Export Excel</button>
+                            // }
                         }
                     </div>
                 </div>
@@ -164,7 +164,7 @@
         </div>
     </div>
 </div>
-<input type="hidden" id="maSHQRowSelected" />
+<input type="hidden" id="idSHQRowSelected" />
 <script>
     $(document).ready(function () {
         loadGridData();
@@ -187,13 +187,15 @@
                     grid = new ej.grids.Grid({
                         dataSource: dataManager,
                         allowPaging: true,
-                        pageSettings: { pageSize: 50 },
+                        pageSettings: { pageSize: 50, pageSizes: [50, 100, 200, 500] },
                         allowFiltering: true,
                         filterSettings: { type: 'Excel' },
                         allowSorting: true,
                         //frozenColumns: 3,
                         allowResizing: true,
                         rowSelected: onRowSelected,
+                        allowExcelExport: true,
+                        toolbar: ['ExcelExport'],
                         height: 400,
                         columns: [
                             { field: 'Id', headerText: 'Id', width: 150 },
@@ -203,10 +205,12 @@
                     });
                     // Hiển thị Grid trên trang web
                     grid.appendTo('#Grid');
+                    grid.toolbarClick = function (args) {
+                        if (args.item.id === 'Grid_excelexport') {
+                            grid.excelExport();
+                        }
+                    };
                 }
-            },
-            error: function (error) {
-                console.error(error);
             }
         });
     }

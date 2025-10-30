@@ -19,6 +19,9 @@ namespace Models.Repos.Models
         [StringLength(200)]
         public string Ten { get; set; }
         public bool SuDung { get; set; } = true;
-        public string GhiChu { get; set; }
+        public string? GhiChu { get; set; }
+        [StringLength(50)]
+        [Unicode(false)]
+        public string? MaSanPham { get; set; }
     }
 }

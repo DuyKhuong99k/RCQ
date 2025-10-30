@@ -34,7 +34,7 @@ namespace PMS.Controllers.DanhMucHQ
         {
             _httpClientFactory = httpClientFactory;
         }
-        [CustomAuthorize(Fu = "Danh Mục HQ / Nhóm", Func = "Xem HQ / Nhóm")]
+        [CustomAuthorize(Fu = "Danh Mục / Nhóm HQ", Func = "Xem Nhóm HQ")]
         public IActionResult Index()
         {
              var rl = Middlewares.AuthenticationHelpers.CheckAut(HttpContext, "HQ_Nhom");
@@ -43,6 +43,12 @@ namespace PMS.Controllers.DanhMucHQ
             {
                 return Redirect(AppViewModels.AppViewModel.Instance.RedirectLoginUrl);
             }
+
+            var apiMaSanPhamUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/DG_SanPhamTinhLuong/GetAlls";
+            using var helperMaSanPham = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+            var masanpham = helperMaSanPham.GetAsync<IEnumerable<DG_SanPhamTinhLuong>>(HttpContext, apiMaSanPhamUrl);
+            ViewBag.listMaSanPhamhq = masanpham.Result.ToList();
+
             ViewBag.TitlePage = "Nhóm";
             return View("~/Views/DanhMucHQ/HQ_Nhom/HQ_NhomView.cshtml");
         }
@@ -90,8 +96,8 @@ namespace PMS.Controllers.DanhMucHQ
                 throw;
             }
         }
-        [CustomAuthorize(Fu = "Danh Mục HQ / Nhóm", Func = "Thêm HQ / Nhóm")]
-        public async Task<IActionResult> DoInsert(string id, string ten, bool suDung,string ghiChu)
+        [CustomAuthorize(Fu = "Danh Mục / Nhóm HQ", Func = "Thêm Nhóm HQ")]
+        public async Task<IActionResult> DoInsert(string id, string ten, bool suDung,string ghiChu, string maSanPham)
         {
             var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/HQ_Nhoms/Insert";
             try
@@ -109,7 +115,8 @@ namespace PMS.Controllers.DanhMucHQ
                     Id = id,
                     Ten = ten,
                     SuDung = suDung,
-                    GhiChu = ghiChu
+                    GhiChu = ghiChu,
+                    MaSanPham = maSanPham
                 };
                 var jsonContent = new StringContent(JsonConvert.SerializeObject(model), Encoding.UTF8, "application/json");
                 using var helper = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
@@ -166,6 +173,7 @@ namespace PMS.Controllers.DanhMucHQ
                         Id = item?.Id,
                         Ten = item?.Ten,
                         GhiChu = item?.GhiChu,
+                        MaSanPham = item?.MaSanPham
                     });
                 }
             }
@@ -175,8 +183,8 @@ namespace PMS.Controllers.DanhMucHQ
                 Mesages = "Lỗi!"
             });
         }
-        [CustomAuthorize(Fu = "Danh Mục HQ / Nhóm", Func = "Sửa HQ / Nhóm")]
-        public async Task<IActionResult> DoUpDate(string id, string ten, bool suDung, string ghiChu)
+        [CustomAuthorize(Fu = "Danh Mục / Nhóm HQ", Func = "Sửa Nhóm HQ")]
+        public async Task<IActionResult> DoUpDate(string id, string ten, bool suDung, string ghiChu, string maSanPham)
         {
             var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/HQ_Nhoms/Update/{id}";
             try
@@ -195,7 +203,8 @@ namespace PMS.Controllers.DanhMucHQ
                     Id = id,
                     Ten = ten,
                     SuDung = suDung,
-                    GhiChu = ghiChu
+                    GhiChu = ghiChu,
+                    MaSanPham = maSanPham
                 };
 
                 var jsonContent = new StringContent(JsonConvert.SerializeObject(model), Encoding.UTF8, "application/json");
@@ -225,7 +234,7 @@ namespace PMS.Controllers.DanhMucHQ
                 });
             }
         }
-        [CustomAuthorize(Fu = "Danh Mục HQ / Nhóm", Func = "Xóa HQ / Nhóm")]
+        [CustomAuthorize(Fu = "Danh Mục / Nhóm HQ", Func = "Xóa Nhóm HQ")]
         public async Task<IActionResult> DoDelete(string id)
         {
             try

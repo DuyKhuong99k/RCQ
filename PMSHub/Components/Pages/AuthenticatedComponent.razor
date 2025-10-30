@@ -4,14 +4,14 @@
 
 @code {
     private bool isInitialized = false;
-
+    private string loginUrl = "/api/loginlocal";
     protected override async Task OnInitializedAsync()
     {
         if (!loginService.IsSessionCreated())
         {
             loginService.CreateDefaultSession();
         }
-
+        
         // Xác định `isInitialized` để kiểm tra lần đầu trong `OnAfterRenderAsync`
         isInitialized = true;
 
@@ -23,10 +23,13 @@
         // Chỉ điều hướng khi render lần đầu tiên để tránh vòng lặp
         if (firstRender && isInitialized)
         {
+            
             if (!loginService.IsUserAuthenticated())
             {
                 // Sử dụng forceLoad để đảm bảo điều hướng hoàn tất mà không bị lỗi state
-                NavigationManager.NavigateTo("/api/loginlocal", forceLoad: true);
+                //NavigationManager.NavigateTo(loginUrl, forceLoad: true);
+                var returnUrl = NavigationManager.Uri; // Lấy URL hiện tại
+                NavigationManager.NavigateTo($"{loginUrl}?returnUrl={Uri.EscapeDataString(returnUrl)}", forceLoad: true);
             }
             else
             {
@@ -38,4 +41,6 @@
     }
 
     protected virtual Task OnAuthenticatedAsync() => Task.CompletedTask;
+
+   
 }

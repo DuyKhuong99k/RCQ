@@ -331,5 +331,15 @@ namespace ViewModels.Repos.HQ
                 throw;
             }
         }
+        public List<T> GetsFullField<T>(DateTime ngay, string maLo)
+        {
+            var dao = new Dao.Repos.HQ.BoTriLoSizeThanhPham();
+            return dao.GetBoTriViTriLoSizeThanhPhams<T>(ngay,maLo);
+        }
+        public List<T> GetsFullFieldLastNew<T>(DateTime ngay,string maLo)
+        {
+            var dao = new Dao.Repos.HQ.BoTriLoSizeThanhPham();
+            return dao.GetBoTriViTriLoSizeThanhPhamsMoiNhat<T>(ngay, maLo);
+        }
     }
 }

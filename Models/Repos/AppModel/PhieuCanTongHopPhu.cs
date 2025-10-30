@@ -33,6 +33,12 @@ namespace Models.Repos.AppModel
         public string MaXuong { get; set; }
 
         public string ChieuXaName { get; set; }
+
+        public string ChatLuongName {get; set;}
+
+        public DateTime ThoiGianVao {get; set;}
+        public DateTime ThoiGianRa {get;set;}
+        public decimal TongThoiGian {get;set;}
     }
 
 }

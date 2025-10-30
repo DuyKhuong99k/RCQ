@@ -1,21 +1,21 @@
-﻿
-@{
+﻿@{
     ViewData["Title"] = "HQ_ThanhPhamView";
     Layout = "~/Views/Shared/_Layout.cshtml";
     //lấy danh sách roleid từ cookie
     var roleIds = PMS.Middlewares.AuthenticationHelpers.GetRoleIdsFromCookie(Context);
     // lấy danh sách fu func từ list roleId
     var rolePermistions = await PMS.Middlewares.AuthenticationHelpers.GetRolePermistionsAsync(Context, roleIds);
+    
 }
 
-<div class="container mt-4">
+<div class="container-fluid mt-4">
     <div class="row">
         <div class="col-12">
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h2 class="mb-0">Danh Sách Thành Phẩm</h2>
                     @{
-                        var themHQ_ThanhPham = rolePermistions.Where(x => x.Fu == "Danh Mục HQ / Thành Phẩm" && x.Func == "Thêm HQ / Thành Phẩm" && x.Status == 1).FirstOrDefault();
+                        var themHQ_ThanhPham = rolePermistions.Where(x => x.Fu == "Danh Mục / Thành Phẩm HQ" && x.Func == "Thêm Thành Phẩm HQ" && x.Status == 1).FirstOrDefault();
                         if (themHQ_ThanhPham != null)
                         {
                             <button onclick="showInsert()" type="button" class="btn btn-primary">Thêm</button>
@@ -27,26 +27,26 @@
                     <div id="Grid"></div>
                     <div style="margin-top:20px;">
                         @{
-                            var suaHQ_ThanhPham = rolePermistions.Where(x => x.Fu == "Danh Mục HQ / Thành Phẩm" && x.Func == "Sửa HQ / Thành Phẩm" && x.Status == 1).FirstOrDefault();
+                            var suaHQ_ThanhPham = rolePermistions.Where(x => x.Fu == "Danh Mục / Thành Phẩm HQ" && x.Func == "Sửa Thành Phẩm HQ" && x.Status == 1).FirstOrDefault();
                             if (suaHQ_ThanhPham != null)
                             {
                                 <button onclick="showUpdate()" style="margin-right:5px" class="btn btn-outline-warning"><i class='bx bx-edit-alt'></i>Sửa</button>
                             }
-                            var xoaHQ_ThanhPham = rolePermistions.Where(x => x.Fu == "Danh Mục HQ / Thành Phẩm" && x.Func == "Xóa HQ / Loại Nguyên Liệ" && x.Status == 1).FirstOrDefault();
+                            var xoaHQ_ThanhPham = rolePermistions.Where(x => x.Fu == "Danh Mục / Thành Phẩm HQ" && x.Func == "Xóa Thành Phẩm HQ" && x.Status == 1).FirstOrDefault();
                             if (xoaHQ_ThanhPham != null)
                             {
                                 <button onclick="showDelete()" style="margin-right:5px" class="btn btn-outline-danger"><i class='bx bx-trash'></i>Xoá</button>
                             }
-                            var importHQ_ThanhPham = rolePermistions.Where(x => x.Fu == "Danh Mục HQ / Thành Phẩm" && x.Func == "Import HQ / Thành Phẩm" && x.Status == 1).FirstOrDefault();
-                            if (importHQ_ThanhPham != null)
-                            {
-                                <button onclick="import()" style="margin-right:5px" class="btn btn-outline-info"><i class='bx bx-import'></i>Import</button>
-                            }
-                            var exportHQ_ThanhPham = rolePermistions.Where(x => x.Fu == "Danh Mục HQ / Thành Phẩm" && x.Func == "Export HQ / Thành Phẩm" && x.Status == 1).FirstOrDefault();
-                            if (exportHQ_ThanhPham != null)
-                            {
-                                <button onclick="export()" style="margin-right:5px" class="btn btn-outline-secondary"><i class='bx bx-export'></i>Export Excel</button>
-                            }
+                            // var importHQ_ThanhPham = rolePermistions.Where(x => x.Fu == "Danh Mục / Thành Phẩm HQ" && x.Func == "Import Thành Phẩm HQ" && x.Status == 1).FirstOrDefault();
+                            // if (importHQ_ThanhPham != null)
+                            // {
+                            //     <button onclick="import()" style="margin-right:5px" class="btn btn-outline-info"><i class='bx bx-import'></i>Import</button>
+                            // }
+                            // var exportHQ_ThanhPham = rolePermistions.Where(x => x.Fu == "Danh Mục / Thành Phẩm HQ" && x.Func == "Export Thành Phẩm HQ" && x.Status == 1).FirstOrDefault();
+                            // if (exportHQ_ThanhPham != null)
+                            // {
+                            //     <button onclick="export()" style="margin-right:5px" class="btn btn-outline-secondary"><i class='bx bx-export'></i>Export Excel</button>
+                            // }
                         }
                     </div>
                 </div>
@@ -219,13 +219,15 @@
                     grid = new ej.grids.Grid({
                         dataSource: dataManager,
                         allowPaging: true,
-                        pageSettings: { pageSize: 50 },
+                        pageSettings: { pageSize: 50, pageSizes: [50, 100, 200, 500] },
                         allowFiltering: true,
                         filterSettings: { type: 'Excel' },
                         allowSorting: true,
                         //frozenColumns: 3,
                         allowResizing: true,
                         rowSelected: onRowSelected,
+                        allowExcelExport: true,
+                        toolbar: ['ExcelExport'],
                         height: 400,
                         columns: [
                             { field: 'Id', headerText: 'Id', width: 150 },
@@ -237,10 +239,11 @@
                     });
                     // Hiển thị Grid trên trang web
                     grid.appendTo('#Grid');
-                }
-            },
-            error: function (error) {
-                console.error(error);
+                    grid.toolbarClick = function (args) {
+                        if (args.item.id === 'Grid_excelexport') {
+                            grid.excelExport();
+                        }};
+                    }
             }
         });
     }

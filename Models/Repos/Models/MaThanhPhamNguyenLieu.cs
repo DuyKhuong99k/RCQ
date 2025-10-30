@@ -53,6 +53,7 @@ public partial class MaThanhPhamNguyenLieu
     public bool IsNgopXePhuPham { get; set; }
 
     public bool IsManh { get; set; }
+    public bool IsTareThung { get; set; } = false;
 
     [Column(TypeName = "numeric(18, 4)")]
     public decimal TyLeNuoc { get; set; }
@@ -60,4 +61,8 @@ public partial class MaThanhPhamNguyenLieu
     public bool IsCaNgopGheTuoiBanNgoai { get; set; }
 
     public bool IsCaNgopGheAoBanNgoai { get; set; }
+    [Required]
+    [Column(TypeName = "datetime2(7)")]
+    public DateTime MNgay { get; set; } = DateTime.Now;
+    public string CTTYLE {get; set;} = "SL/NLFILLET";
 }

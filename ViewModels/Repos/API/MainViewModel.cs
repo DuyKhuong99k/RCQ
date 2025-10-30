@@ -15,7 +15,7 @@ public class MainViewModel : ObservableObject
         var dateTime = VmApp.DateTimeNow;
         try
         {
-            VmApp.ComName = VmXiNghiep.SelectedItem?.CodeId;
+            //VmApp.ComName = VmXiNghiep.SelectedItem?.CodeId;
             DbUpdateDatabase();
         }
         catch (Exception ex)
@@ -23,10 +23,10 @@ public class MainViewModel : ObservableObject
             Console.WriteLine(ex.ToString());
             //throw;
         }
-       
+
         VmMessage.MessageBoxShow = MessageBoxShow;
-        VmApp.CheckServerOnline = CheckServerOnline ;
-        
+        VmApp.CheckServerOnline = CheckServerOnline;
+
     }
 
     public static MainViewModel Instance => instance ??= new MainViewModel();
@@ -235,7 +235,7 @@ public class MainViewModel : ObservableObject
     public TrangThaiNhanVienTamThoiViewModel VmTrangThaiNhanVienTamThoi => TrangThaiNhanVienTamThoiViewModel.Instance;
     public TrongLuongBinhQuanCaChetViewModel VmTrongLuongBinhQuanCaChet => TrongLuongBinhQuanCaChetViewModel.Instance;
     public ViTriFilletViewModel VmViTriFillet => ViTriFilletViewModel.Instance;
-  
+
     //public XepHangViewModel VmXepHang => XepHangViewModel.
     public XiNghiepViewModel VmXiNghiep => XiNghiepViewModel.Instance;
     public RolePermistionViewModel VmRolePermistion => RolePermistionViewModel.Instance;
@@ -261,7 +261,7 @@ public class MainViewModel : ObservableObject
     public GioVaoRaViewModel VmGioRaVaoFillet => GioVaoRaViewModel.Instance;
     public BV_PhieuCanDinhHinhViewModel VmBV_PhieuCanDinhHinh => BV_PhieuCanDinhHinhViewModel.Instance;
     public BV_PhieuCanKiemDinhHinhViewModel VmBV_PhieuCanKiemDinhHinh => BV_PhieuCanKiemDinhHinhViewModel.Instance;
-    public BV_PhieuCanFilletViewModel VmBV_PhieuCanFillet=> BV_PhieuCanFilletViewModel.Instance;
+    public BV_PhieuCanFilletViewModel VmBV_PhieuCanFillet => BV_PhieuCanFilletViewModel.Instance;
     public CongViecTinhLuongTheoLoaiThanhPhamViewModel VmCongViecTinhLuongTheoLoaiThanhPham => CongViecTinhLuongTheoLoaiThanhPhamViewModel.Instance;
     public CongViecTinhLuongSanLuongViewModel VmCongViecTinhLuongSanLuong => CongViecTinhLuongSanLuongViewModel.Instance;
     public LoaiDuLieuViewModel VmLoaiDuLieu => LoaiDuLieuViewModel.Instance;
@@ -278,17 +278,35 @@ public class MainViewModel : ObservableObject
     public HQ_PhieuCanViewModel VmHQ_PhieuCan => HQ_PhieuCanViewModel.Instance;
     public HQ_NhomViewModel VmHQ_Nhom => HQ_NhomViewModel.Instance;
     public HQ_NhanVienTheoNhomViewModel VmHQ_NhanVienTheoNhom => HQ_NhanVienTheoNhomViewModel.Instance;
+    public HQ_CaViewModel VmHQ_Ca => HQ_CaViewModel.Instance;
+    public HQ_NhanVienTheoCaViewModel VmHQ_NhanVienTheoCa => HQ_NhanVienTheoCaViewModel.Instance;
+    public HQ_MapSanPhamTinhLuongViewModel VmHQ_MapSanPhamTinhLuong => HQ_MapSanPhamTinhLuongViewModel.Instance;
+    public HQ_PhieuThongKeSanXuatViewModel VmHQ_PhieuThongKeSanXuat => HQ_PhieuThongKeSanXuatViewModel.Instance;
+    public PhieuCanRaCoiViewModel VmPhieuCanRaCoi => PhieuCanRaCoiViewModel.Instance;
+    public TrongLuongCoiTheoThanhPhamViewModel VmTrongLuongCoiTheoThanhPham => TrongLuongCoiTheoThanhPhamViewModel.Instance;
+    public HQ_CodeGenViewModel VmHq_CodeGen => HQ_CodeGenViewModel.Instance;
+    public HQ_ThucDonViewModel VmHq_ThucDon => HQ_ThucDonViewModel.Instance;
+    public HQ_LoaiMonAnViewModel VmHq_LoaiMonAn => HQ_LoaiMonAnViewModel.Instance;
+    public HQ_MonAnViewModel VmHq_MonAn => HQ_MonAnViewModel.Instance;
+    public HQ_DuyetThucDonViewModel VmHq_DuyetThucDon => HQ_DuyetThucDonViewModel.Instance;
+    public HQ_HuyThucDonViewModel VmHq_HuyThucDon => HQ_HuyThucDonViewModel.Instance;
+    public HQ_NhatKyDangKyMonAnViewModel VmHq_NhatKyDangKyMonAn => HQ_NhatKyDangKyMonAnViewModel.Instance;
+    public HQ_NhatKyNhanMonAnViewModel VmHq_NhatKyNhanMonAn => HQ_NhatKyNhanMonAnViewModel.Instance;
+    public HQ_ThucDonChiTietViewModel VmHq_ThucDonChiTiet => HQ_ThucDonChiTietViewModel.Instance;
+    public CoiLeXepKhuonViewModel VmCoiLeXepKhuon => CoiLeXepKhuonViewModel.Instance;
+    public TrongLuongCoiTheoSanPhamViewModel VmTrongLuongCoiTheoSanPham => TrongLuongCoiTheoSanPhamViewModel.Instance;
+
     private int MessageBoxShow(string message, string title, int button)
     {
-       return 0;
+        return 0;
 
     }
-    private  bool CheckServerOnline()
+    private bool CheckServerOnline()
     {
         var dao = new Dao.Repos.Database();
         return dao.CheckServerOnline();
     }
-    
+
     private void DbUpdateDatabase()
     {
         var database = new Dao.Repos.Database();

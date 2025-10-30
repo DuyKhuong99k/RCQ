@@ -51,7 +51,6 @@ namespace ViewModels.Repos.HQ
                 Reload();
                 NhanViens = new ObservableCollection<NhanVienDaiThanh>(GetNhanViens());
 
-
             }
             catch (Exception e)
             {
@@ -174,6 +173,11 @@ namespace ViewModels.Repos.HQ
             var dao = new Dao.Repos.HQ.NhanVienDaiThanh();
             return dao.Gets<T>();
         }
+        public List<T> GetDanhSachNhanVienIsNhoms<T>()
+        {
+            var dao = new Dao.Repos.HQ.NhanVienDaiThanh();
+            return dao.GetDanhSachNhanVienIsNhoms<T>();
+        }
 
         private int Insert<T>(T item)
         {
@@ -266,9 +270,10 @@ namespace ViewModels.Repos.HQ
                             Items.Add(item);
                             //chắt thêm
                             NhanVienDaiThanhs.Add(item);
+                            
                         }
 
-
+                        GetNhoms(Items);
                     }
                     catch (NotSupportedException e)
                     {
@@ -276,7 +281,7 @@ namespace ViewModels.Repos.HQ
                     }
 
                 }
-            GetNhoms(Items);
+            
 
         }
 
@@ -1164,6 +1169,19 @@ namespace ViewModels.Repos.HQ
                 Console.WriteLine(ex);
                 // throw;
                 //MessageBox.Show(ex.Message);
+            }
+        }
+
+        public List<NhanVienDaiThanh> GetListNhanVienDaiThanhFilltered(string xuongId, string? connStr = null)
+        {
+            try
+            {
+                var dao = new Dao.Repos.HQ.NhanVienDaiThanh(connStr);
+                return dao.GetListNhanVienDaiThanhFilltered(xuongId);
+            }
+            catch (Exception)
+            {
+                throw;
             }
         }
         #region Sơ Chế
@@ -4678,6 +4696,7 @@ namespace ViewModels.Repos.HQ
         }
 
         #region Giờ vào ra
+        
         public List<NhanVienDaiThanh> GetByMaHoSo(string maHoSo, string? connStr = null)
         {
             try

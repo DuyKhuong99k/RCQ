@@ -64,4 +64,8 @@ public partial class MaThanhPhamDinhHinh
     public double? MinOut { get; set; }
 
     public double? MaxOut { get; set; }
+    public bool IsKhongDauRa { get; set; } = false;
+    public bool IsCaDa { get; set; } = false;
+    [Column(TypeName = "decimal(18, 2)")]
+    public decimal ThoiGianHT { get; set; } = 30M;
 }

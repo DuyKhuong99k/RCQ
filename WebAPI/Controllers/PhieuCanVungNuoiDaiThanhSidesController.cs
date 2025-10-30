@@ -48,7 +48,7 @@ namespace WebAPI.Controllers
         }
         [HttpGet("{fromDate}/{toDate}")]
         [Authorize]
-        public async Task<ActionResult<IEnumerable<object>>> GetTongHopGheDB(string fromDate, string toDate)
+        public async Task<ActionResult<IEnumerable<object>>> GetTongHopGheDB_St(string fromDate, string toDate)
         {
             if (_context.PhieuCanVungNuoiDaiThanhSide == null)
             {
@@ -57,6 +57,20 @@ namespace WebAPI.Controllers
             DateTime date1 = DateTime.ParseExact(fromDate, "yyyy-MM-dd", CultureInfo.InvariantCulture);
             DateTime date2 = DateTime.ParseExact(toDate, "yyyy-MM-dd", CultureInfo.InvariantCulture);
             var items = Vm.VmDashBoard.ItemTongHopGheVungNuoiDaiThanhSite.ToList();// Sử dụng dynamic để cast các object
+            return items;
+        }
+
+        [HttpGet("{fromDate}/{toDate}")]
+        [Authorize]
+        public async Task<ActionResult<IEnumerable<object>>> GetTongHopGheDB(string fromDate, string toDate)
+        {
+            if (_context.PhieuCanVungNuoiDaiThanhSide == null)
+            {
+                return NotFound();
+            }
+            DateTime date1 = DateTime.ParseExact(fromDate, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+            DateTime date2 = DateTime.ParseExact(toDate, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+            var items = Vm.VmPhieuCanVungNuoiDaiThanhSide.GetTongHopGhe<object>(date1, date2);
             return items;
         }
         [HttpGet("{fromDate}/{toDate}")]

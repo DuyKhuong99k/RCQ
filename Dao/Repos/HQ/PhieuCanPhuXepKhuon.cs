@@ -1,4 +1,5 @@
-﻿using Dapper;
+﻿using System.CodeDom;
+using Dapper;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 
@@ -43,6 +44,13 @@ WHERE RowNum <= @num";
                     .ToList();
                 return items;
             }
+        }
+        public T? Get<T>(string id)
+        {
+            using var connection = new SqlConnection(connectionString);
+            connection.Open();
+            var item = connection.QueryFirstOrDefault<T>($"Select * from {tableName} Where [STT]=@id", new { id });
+            return item;
         }
         public int Delete<T>(T item)
         {
@@ -627,8 +635,55 @@ group by p.CaId,p.Ngay,p.MaNhanVien,tp.BravoId,tp.Ten";
         {
             try
             {
+                //                var query =
+                //                    @"Select 
+                //p.MaNhanVien,
+                //n.MaHoSo,
+                //n.Name as NhanVienName,
+                //p.MaLo,la.Ten As LoaiCaName,
+                //tp.Ten as ThanhPhamName,
+                //s.Ten As SizeName,
+                //ma.Ten As MauName,
+                //SUM(p.TrongLuong) as TrongLuong,
+                //Count(*) As SoRo 
+                //from  
+                //PhieuCanPhuXepKhuon p,
+                //MaLoaiCaXepKhuon la,
+                //MaSizeXepKhuon s,
+                //MaThanhPhamXepKhuon tp,
+                //MaMauXepKhuon ma,
+                //NhanVienDaiThanh n 
+                //where 
+                //p.Ngay <=@toDate 
+                //and p.Ngay >=@fromDate
+                //and MaXuong=@xuongId 
+                //and p.MaLoaiCa = la.Ma 
+                //and p.MaSize = s.Ma 
+                //and p.MaThanhPham = tp.Ma 
+                //and p.MaMau = ma.Ma 
+                //and p.MaNhanVien= n.MaNhanVien 
+                //group by 
+                //p.MaNhanVien,
+                //n.MaHoSo,
+                //n.Name ,
+                //p.MaLo,
+                //tp.Ten ,
+                //s.Ten ,
+                //ma.Ten,
+                //la.Ten 
+                //order by 
+                //n.MaHoSo";
                 var query =
-                    @"Select 
+                    @";WITH CheckInOutData AS (
+    SELECT 
+        c.MaChamCong,
+        MIN(c.ThoiGian) AS ThoiGianVao,
+        MAX(c.ThoiGian) AS ThoiGianRa
+    FROM CheckInOut c 
+    WHERE c.ThoiGian >= @fromDate AND c.ThoiGian <= @toDate
+    GROUP BY c.MaChamCong
+)
+Select 
 p.MaNhanVien,
 n.MaHoSo,
 n.Name as NhanVienName,
@@ -637,23 +692,22 @@ tp.Ten as ThanhPhamName,
 s.Ten As SizeName,
 ma.Ten As MauName,
 SUM(p.TrongLuong) as TrongLuong,
-Count(*) As SoRo 
+Count(*) As SoRo ,
+ISNULL(c.ThoiGianVao, '1900-01-01') AS ThoiGianVao,
+ISNULL(c.ThoiGianRa, '1900-01-01') AS ThoiGianRa,
+DATEDIFF(hour, ISNULL(c.ThoiGianVao, '1900-01-01'), ISNULL(c.ThoiGianRa, '1900-01-01')) AS TongThoiGian
 from  
-PhieuCanPhuXepKhuon p,
-MaLoaiCaXepKhuon la,
-MaSizeXepKhuon s,
-MaThanhPhamXepKhuon tp,
-MaMauXepKhuon ma,
-NhanVienDaiThanh n 
+PhieuCanPhuXepKhuon p
+LEFT JOIN NhanVienDaiThanh n on p.MaNhanVien = n.MaNhanVien
+left join MaLoaiCaXepKhuon la on p.MaLoaiCa = la.Ma
+left join MaThanhPhamXepKhuon tp on p.MaThanhPham = tp.Ma
+left join MaSizeXepKhuon s on p.MaSize = s.Ma
+left join MaMauXepKhuon ma on p.MaMau = ma.Ma
+left join CheckInOutData c on n.MaChamCong = c.MaChamCong
 where 
 p.Ngay <=@toDate 
 and p.Ngay >=@fromDate
 and MaXuong=@xuongId 
-and p.MaLoaiCa = la.Ma 
-and p.MaSize = s.Ma 
-and p.MaThanhPham = tp.Ma 
-and p.MaMau = ma.Ma 
-and p.MaNhanVien= n.MaNhanVien 
 group by 
 p.MaNhanVien,
 n.MaHoSo,
@@ -662,7 +716,9 @@ p.MaLo,
 tp.Ten ,
 s.Ten ,
 ma.Ten,
-la.Ten 
+la.Ten ,
+c.ThoiGianVao,
+c.ThoiGianRa
 order by 
 n.MaHoSo";
                 using (var connection = new SqlConnection(connectionString))
@@ -893,18 +949,14 @@ from (
             ma.Ten As MauName,
             SUM(p.TrongLuong) as TrongLuong,
             p.MaXuong
-        from PhieuCanPhuXepKhuon p,
-            MaLoaiCaXepKhuon la,
-            MaSizeXepKhuon s,
-            MaThanhPhamXepKhuon tp,
-            MaMauXepKhuon ma
+        from PhieuCanPhuXepKhuon p
+			left join MaLoaiCaXepKhuon la on p.MaLoaiCa = la.Ma
+            left join MaSizeXepKhuon s on p.MaSize = s.Ma
+            left join MaThanhPhamXepKhuon tp on p.MaThanhPham = tp.Ma
+            left join MaMauXepKhuon ma on p.MaMau = ma.Ma
         where Ngay <= @toDate
             and Ngay >= @fromDate
             and MaXuong = @xuongId
-            and p.MaLoaiCa = la.Ma
-            and p.MaSize = s.Ma
-            and p.MaThanhPham = tp.Ma
-            and p.MaMau = ma.Ma
         group by p.MaLo,
             tp.Ten,
             s.Ten,

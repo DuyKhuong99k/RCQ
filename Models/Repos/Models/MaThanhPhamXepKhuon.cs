@@ -25,4 +25,7 @@ public partial class MaThanhPhamXepKhuon
     [StringLength(50)]
     [Unicode(false)]
     public string? BravoId { get; set; }
+    [Required]
+    [Column(TypeName = "datetime2(7)")]
+    public DateTime MNgay { get; set; } = DateTime.Now;
 }

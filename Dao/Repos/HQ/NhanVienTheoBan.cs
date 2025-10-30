@@ -192,6 +192,62 @@ where nvb.MaBan = @maBan and nvb.MaXuong =@xuongId";
                 throw;
             }
         }
+
+        public List<T> GetNhanVienTheoBansMoiNhat<T>(string maBan, string xuongId)
+        {
+            try
+            {
+                var query = @";WITH Ranked AS (
+    SELECT 
+        p.Id,
+        p.MaNhanVien,
+        nv.MaHoSo,
+		nv.Name,
+		nv.DeptName0,
+		p.MaBan,
+		b.Ten as BanName,
+		p.MaKhuVuc,
+		p.MaXuong,
+		x.Ten as XuongName,
+        p.NgayGio,
+		p.UserName as Creator,
+		p.PCName,
+        ROW_NUMBER() OVER (
+            PARTITION BY p.MaNhanVien
+            ORDER BY 
+                TRY_CONVERT(time(0), p.NgayGio) DESC,
+                p.Id DESC
+        ) AS rn
+    FROM NhanVienTheoBan p
+    
+    LEFT JOIN BanFillet b ON p.MaBan = b.Ma
+	left join NhanVienDaiThanh nv on p.MaNhanVien = nv.MaNhanVien
+	left join XiNghiep x on p.MaXuong = x.Ma
+    WHERE p.MaBan = @maBan
+      AND p.MaXuong = @xuongId
+
+)
+SELECT 
+    Id,MaNhanVien,MaHoSo, Name, DeptName0, MaBan,BanName,MaKhuVuc,MaXuong,XuongName, NgayGio, Creator, PCName
+FROM Ranked
+WHERE rn = 1
+ORDER BY TRY_CONVERT(time(0), NgayGio) DESC;";
+                using (var connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+                    var items = connection.QueryAsync<T>(query, new { maBan = maBan, xuongId = xuongId }).Result
+                        .ToList();
+                    return items;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                throw;
+            }
+        }
+
+
         public List<T> GetViTriHienTais<T>(DateTime dateTime, string xuongId)
         {
             try

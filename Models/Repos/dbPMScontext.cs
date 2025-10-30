@@ -706,6 +706,48 @@ public partial class dbPMScontext : DbContext
     public virtual DbSet<HQ_Ca> HqCas { get; set; }
     public virtual DbSet<HQ_NhanVienTheoCa> HqNhanVienTheoCas { get; set; }
     public virtual DbSet<HQ_MapSanPhamTinhLuong> HqMapSanPhamTinhLuongs { get; set; }
+    public virtual DbSet<HQ_PhieuThongKeSanXuat> HqPhieuThongKeSanXuats { get; set; }
+    public virtual DbSet<CheckInOut> CheckInOuts { get; set; }
+    public virtual DbSet<Ao> Aos { get; set; }
+    public virtual DbSet<Ao_D> AoDs { get; set; }
+    public virtual DbSet<Ao_U> AoUs { get; set; }
+    public virtual DbSet<MaChatLuongXepKhuon_D> MaChatLuongXepKhuonDs { get; set; }
+    public virtual DbSet<MaChatLuongXepKhuon_U> MaChatLuongXepKhuonUs { get; set; }
+    public virtual DbSet<MaChieuXaXepKhuon_D> MaChieuXaXepKhuonDs { get; set; }
+    public virtual DbSet<MaChieuXaXepKhuon_U> MaChieuXaXepKhuonUs { get; set; }
+    public virtual DbSet<MaCoiXepKhuon_D> MaCoiXepKhuonDs { get; set; }
+    public virtual DbSet<MaCoiXepKhuon_U> MaCoiXepKhuonUs { get; set; }
+    public virtual DbSet<MaSizeChinhXepKhuon_D> MaSizeChinhXepKhuonDs { get; set; }
+    public virtual DbSet<MaSizeChinhXepKhuon_U> MaSizeChinhXepKhuonUs { get; set; }
+    public virtual DbSet<MaSizeFillet_D> MaSizeFilletDs { get; set; }
+    public virtual DbSet<MaSizeFillet_U> MaSizeFilletUs { get; set; }
+    public virtual DbSet<MaSizeNguyenLieu_D> MaSizeNguyenLieuDs { get; set; }
+    public virtual DbSet<MaSizeNguyenLieu_U> MaSizeNguyenLieuUs { get; set; }
+    public virtual DbSet<MaSizeXepKhuon_D> MaSizeXepKhuonDs { get; set; }
+    public virtual DbSet<MaSizeXepKhuon_U> MaSizeXepKhuonUs { get; set; }
+    public virtual DbSet<MaThanhPhamChinhXepKhuon_D> MaThanhPhamChinhXepKhuonDs { get; set; }
+    public virtual DbSet<MaThanhPhamChinhXepKhuon_U> MaThanhPhamChinhXepKhuonUs { get; set; }
+    public virtual DbSet<MaThanhPhamFillet_D> MaThanhPhamFilletDs { get; set; }
+    public virtual DbSet<MaThanhPhamFillet_U> MaThanhPhamFilletUs { get; set; }
+    public virtual DbSet<MaThanhPhamNguyenLieu_D> MaThanhPhamNguyenLieuDs { get; set; }
+    public virtual DbSet<MaThanhPhamNguyenLieu_U> MaThanhPhamNguyenLieuUs { get; set; }
+    public virtual DbSet<MaThanhPhamXepKhuon_D> MaThanhPhamXepKhuonDs { get; set; }
+    public virtual DbSet<MaThanhPhamXepKhuon_U> MaThanhPhamXepKhuonUs { get; set; }
+    public virtual DbSet<PhuongTienChoNguyenLieu_D> PhuongTienChoNguyenLieuDs { get; set; }
+    public virtual DbSet<PhuongTienChoNguyenLieu_U> PhuongTienChoNguyenLieuUs { get; set; }
+    public virtual DbSet<TrongLuongCoiTheoThanhPham> TrongLuongCoiTheoThanhPhams { get; set; }
+    public virtual DbSet<HQ_CodeGen> HQCodeGens { get; set; }
+    public virtual DbSet<HQ_DuyetThucDon> HQDuyetThucDons { get; set; }
+    public virtual DbSet<HQ_HuyThucDon> HQHuyThucDons { get; set; }
+    public virtual DbSet<HQ_LoaiMonAn> HQLoaiMonAns { get; set; }
+    public virtual DbSet<HQ_MonAn> HQMonAns { get; set; }
+    public virtual DbSet<HQ_NhatKyDangKyMonAn> HQNhatKyDangKyMonAns { get; set; }
+    public virtual DbSet<HQ_NhatKyNhanMonAn> HQNhatKyNhanMonAns { get; set; }
+    public virtual DbSet<HQ_ThucDon> HQThucDons { get; set; }
+    public virtual DbSet<HQ_ThucDonChiTiet> HQThucDonChiTiets { get; set; }
+    public virtual DbSet<CoiLeXepKhuon> CoiLeXepKhuons { get; set; }
+    public virtual DbSet<TrongLuongCoiTheoSanPham> TrongLuongCoiTheoSanPhams { get; set; }
+
 #if DEBUG
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https: //go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
@@ -713,7 +755,7 @@ public partial class dbPMScontext : DbContext
     optionsBuilder.UseSqlServer(
         AppViewModels.Base.Ins.ConnectionString2, o => o.UseCompatibilityLevel(120));
     //optionsBuilder.UseSqlServer(
-    //    "server=data.pms-vn.com,4751;database=PMS_HQ;uid=pmsvn;pwd=Sql@123456789;TrustServerCertificate=True");//AppViewModels.Base.Ins.ConnectionString2, o => o.UseCompatibilityLevel(120));
+    //     "server=data.pms-vn.com,4751;database=PMS_HQ;uid=pmsvn;pwd=Sql@123456789;TrustServerCertificate=True");//AppViewModels.Base.Ins.ConnectionString2, o => o.UseCompatibilityLevel(120));
 #else
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https: //go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.

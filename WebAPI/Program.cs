@@ -212,18 +212,32 @@ builder.Services.AddDbContext<dbPMScontext>(options =>
     options.UseSqlServer(Base.Ins.ConnectionString2));
 
 
-builder.Services.AddCors(options =>
-    {
-        options.AddPolicy("AllowAll",
-            builder =>
-            {
+//builder.Services.AddCors(options =>
+//    {
+//        options.AddPolicy("AllowAll",
+//            builder =>
+//            {
 
-                builder.WithOrigins("https://*")
-                    .AllowAnyHeader()
-                    .AllowAnyMethod()
-                    .AllowCredentials(); // Cho phép truy cập có credentials
-            });
+//                builder.WithOrigins("https://*")
+//                    .AllowAnyHeader()
+//                    .AllowAnyMethod()
+//                    .AllowCredentials(); // Cho phép truy cập có credentials
+//            });
+//    });
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowSpecificOrigins", builder =>
+    {
+        builder.WithOrigins( 
+                "https://localhost:44339",   
+                vmApp.ApiHostUrl // Domain thực tế
+                //"https://staging.yourapp.com"
+            )
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials(); // Cho phép gửi cookie/token
     });
+});
 builder.Services.AddSignalR(options =>
 {
     options.ClientTimeoutInterval = TimeSpan.FromSeconds(30);
@@ -239,7 +253,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-app.UseCors("AllowAll");
+
+app.UseRouting();
+app.UseCors("AllowSpecificOrigins");
 
 app.UseCookiePolicy();
 app.UseSwagger();

@@ -1,13 +1,14 @@
-﻿using System.Text.Json;
+﻿using System.Collections.Concurrent;
+using System.Text.Json;
 using System.Timers;
 using AppViewModels;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.AspNetCore.SignalR;
 using Models.Repos.Models;
 using MvvmHelpers;
+using Vars;
 using Vars.Hubs;
 using ViewModels.Repos.Hubs.IServices;
-using MaCoiXepKhuon = Dao.Repos.HQ.MaCoiXepKhuon;
 using ObservableObject = CommunityToolkit.Mvvm.ComponentModel.ObservableObject;
 using Timer = System.Timers.Timer;
 
@@ -26,15 +27,23 @@ public partial class CoiService : ObservableObject, ICoiService
 
     [ObservableProperty] private List<PLCChiTiet> selectedItems;
 
-
+    [ObservableProperty] private ConcurrentDictionary<string, MaCoiXepKhuon> coiInfos = new();
     public CoiService(IMainService vmMain, IHubContext<ChatHub> hubContext)
     {
         this.vmMain = vmMain;
         this.hubContext = hubContext;
         try
         {
-            Load();
-            StartTimer();
+           
+            if (VmApp.ComName?.ToUpper() != nameof(ComNames.HL))
+            {
+                StartTimer();
+                Load();
+            }
+            else
+            {
+                LoadLatestWeightPerXuongAndCoi();
+            }
         }
         catch (Exception e)
         {
@@ -99,7 +108,9 @@ public partial class CoiService : ObservableObject, ICoiService
             {
                 Items.Clear();
                 Items.AddRange(items);
-                LoadData();
+               
+                if(VmApp.ComName?.ToUpper() != nameof(ComNames.HL))
+                    LoadData();
             }
         }
         catch (Exception e)
@@ -109,6 +120,42 @@ public partial class CoiService : ObservableObject, ICoiService
         }
     }
 
+    public void LoadLatestWeightPerXuongAndCoi()
+    {
+        try
+        {
+            var items = vmMain.VmCoi.Items;
+            var _items = vmMain.VmCoi.GetLatestWeightPerXuongAndCoi<MaCoiXepKhuon>();
+            var _itemsRa = vmMain.VmCoi.GetLatestWeightPerXuongAndCoiRa<MaCoiXepKhuon>();
+            for (int i = 0; i < items.Count; i++)
+            {
+                var item = items[i];
+                var _item = _items.FirstOrDefault(x => x.MaXuong == item.MaXuong && x.Ma == item.Ma);
+                var _itemRa = _itemsRa.FirstOrDefault(x => x.MaXuong == item.MaXuong && x.Ma == item.Ma);
+                if (_item != null)
+                {
+                    item.TrongLuongHienTai = _item.TrongLuongHienTai;
+                    item.ThoiGianPhieuGanNhat = _item.ThoiGianPhieuGanNhat;
+                    item.SoRo = _item.SoRo;
+                }
+
+                if (_itemRa != null)
+                {
+                    item.TrongLuongHienTaiRa = _itemRa.TrongLuongHienTaiRa;
+                    item.ThoiGianPhieuGanNhatRa = _itemRa.ThoiGianPhieuGanNhatRa;
+                    item.SoRoRa = _itemRa.SoRoRa;
+                }
+
+                CoiInfos.AddOrUpdate($"{item.Ma}_{item.MaXuong}", item, (key, oldValue) => item);
+            }
+           
+        }
+        catch (Exception exception)
+        {
+            Console.WriteLine(exception);
+            throw;
+        }
+    }
     public void Update(PLCChiTiet item)
     {
         //throw new NotImplementedException();

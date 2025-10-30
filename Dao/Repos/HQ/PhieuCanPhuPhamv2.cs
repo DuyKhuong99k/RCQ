@@ -77,6 +77,13 @@ WHERE RowNum <= @num";
                 return items;
             }
         }
+        public T? Get<T>(string id)
+        {
+            using var connection = new SqlConnection(connectionString);
+            connection.Open();
+            var rows = connection.Query<T>("select * from PhieuCanPhuPhamv2 where Id = @id", new {id}).FirstOrDefault();
+            return rows;
+        }
         public PhieuCanPhuPhamv2(string? _connectionString = null)
         {
             connectionString = _connectionString ?? AppViewModels.Base.Ins.ConnectionString;

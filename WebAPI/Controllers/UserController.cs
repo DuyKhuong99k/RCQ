@@ -120,10 +120,11 @@ public class UserController : ControllerBase
                 new Claim("UserName", nguoiDung.UserName),
                 new Claim(ClaimTypes.Name, nguoiDung.HoTen),
                 new Claim("ExpiresSec", secs.ToString()),
-                //new Claim(JwtRegisteredClaimNames.Email, nguoiDung.Email),
+                //new Claim(Jwt edClaimNames.Email, nguoiDung.Email),
                 //new Claim(JwtRegisteredClaimNames.Sub, nguoiDung.Email),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             }),
+
 
             Expires = utc60, // thời hạn hiệu lực của Token là 1h, sau 1h thì Token sẽ mất hiệu lực
 
@@ -137,11 +138,11 @@ public class UserController : ControllerBase
                 SecurityAlgorithms.HmacSha512Signature)
         };
 
-
         // Lấy danh sách vai trò của người dùng và thêm vào token
         var roles = await GetUserRoles(nguoiDung);
         foreach (var role in roles) tokenDescription.Subject.AddClaim(new Claim(ClaimTypes.Role, role));
-
+        //var roleIds = await GetUserRoleIds(nguoiDung);
+        //foreach (var roleId in roleIds) tokenDescription.Subject.AddClaim(new Claim(ClaimTypes.Role, roleId.ToString()));
         try
         {
             // Tạo token và refresh token, lưu thông tin refresh token vào cơ sở dữ liệu
@@ -297,6 +298,13 @@ public class UserController : ControllerBase
         var roles = await _context.UserRoles
             .Where(x => x.UserId == user.Id)
             .Join(_context.Roles, x => x.RoleId, r => r.Id, (x, r) => r.Name).ToListAsync();
+        return roles;
+    }
+    private async Task<List<int>> GetUserRoleIds(NguoiDung user)
+    {
+        var roles = await _context.UserRoles
+            .Where(x => x.UserId == user.Id)
+            .Join(_context.Roles, x => x.RoleId, r => r.Id, (x, r) => r.Id).ToListAsync();
         return roles;
     }
 
@@ -466,27 +474,27 @@ public class UserController : ControllerBase
         }
 
         // Tạo bản ghi UserRole để liên kết người dùng với vai trò "user"
-        var defaultUserRole = new UserRole
-        {
-            UserId = newUser.Id,
-            RoleId = _defaultRole // "Guest"
-        };
+        //var defaultUserRole = new UserRole
+        //{
+        //    UserId = newUser.Id,
+        //    RoleId = _defaultRole // "Guest"
+        //};
 
-        _context.UserRoles.Add(defaultUserRole);
-        try
-        {
-            await _context.SaveChangesAsync();
-        }
-        catch (Exception ex)
-        {
-            // Xử lý lỗi nếu có
-            return BadRequest(new ApiResponse
-            {
-                Success = false,
-                Message = "Đã xảy ra lỗi khi lưu dữ liệu.",
-                Errors = new List<string> { ex.Message }
-            });
-        }
+        //_context.UserRoles.Add(defaultUserRole);
+        //try
+        //{
+        //    await _context.SaveChangesAsync();
+        //}
+        //catch (Exception ex)
+        //{
+        //    // Xử lý lỗi nếu có
+        //    return BadRequest(new ApiResponse
+        //    {
+        //        Success = false,
+        //        Message = "Đã xảy ra lỗi khi lưu dữ liệu.",
+        //        Errors = new List<string> { ex.Message }
+        //    });
+        //}
 
         return Ok(new ApiResponse
         {

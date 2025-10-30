@@ -11,13 +11,186 @@
     var NumberDate = @Context.Session.GetString("NumberDate");
     var XuongId = @Context.Session.GetString("XuongId");
 }
+@* <!-- CSS -->
+<link href="https://cdn.jsdelivr.net/npm/gridstack@9.2.0/dist/gridstack.min.css" rel="stylesheet" />
+<!-- JS -->
+<script src="https://cdn.jsdelivr.net/npm/gridstack@9.2.0/dist/gridstack-all.min.js"></script> *@
+<link href="~/assets/vendor/libs/gridstack/gridstack.min.css" rel="stylesheet" />
+<script src="~/assets/vendor/libs/gridstack/gridstack-all.min.js"></script>
+<style>
+    .minHeigh {
+        min-height: 345px;
+    }
+    .marginGridjs{
+        margin: 0px 0px 0px 12px;
+    }
 
-<div class="container mt-4 sortable-container" id="dashBoardComputer" style="display:none">
+    .grid-stack-item-content {
+        background: #fff;
+        padding: 10px;
+        border-radius: 6px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+        height: 100%; /* luôn chiếm hết chiều cao widget */
+        overflow-y: auto; /* cuộn khi tràn */
+        box-sizing: border-box;
+    }
+
+    .card.marginGridjs {
+        transition: all 0.3s ease;
+    }
+
+        .card.marginGridjs:hover {
+            box-shadow: 0 0 12px rgba(31, 45, 61, 0.4); /* navy */
+            border: 1px solid #1f2d3d;
+            z-index: 10;
+        }
+
+</style>
+<div class="row align-items-end g-3 mb-2" style="margin-top: -20px;">
+    <!-- TOGGLE GẠT BÊN TRÁI -->
+    <div class="col-auto">
+        <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" id="toggle-drag" checked>
+            <label class="form-check-label ms-2" for="toggle-drag">Cho phép kéo</label>
+        </div>
+    </div>
+
+    <!-- PHẦN NGÀY THÁNG BÊN PHẢI -->
+    <div class="col-md-auto ms-auto">
+        <div class="input-group">
+            <span class="input-group-text">Chọn ngày</span>
+            <input type="date" class="form-control" id="fromDateDB" name="fromDate">
+            @* <input type="date" class="form-control" id="toDateDB" name="toDate"> *@
+        </div>
+    </div>
+
+    <!-- PHẦN SỐ PHÚT -->
+    <div class="col-md-auto" style="z-index:1">
+        <div class="input-group">
+            <span class="input-group-text">Số phút</span>
+            <input type="number" class="form-control" id="minuteInput" name="minuteInput" min="5" value="5">
+            <button id="applyBtn" class="btn btn-primary" type="button">
+                <i class='bx bx-refresh'></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+
+@* <div class="container mt-4 rotate-mobile"> *@
+    
+    <div class="row">
+        <div class="grid-stack">
+            @{
+                var widgets = new List<(string id, string viewPath, bool visible)>
+                {
+                    ("db1", "~/Views/Dashboard/DBTongQuanPartialView.cshtml",rolePermistions.Any(x => x.Fu == "Dashboard" && x.Func == "Tổng Quan" && x.Status == 1)),
+                    ("db2", "~/Views/Dashboard/DBTongHopDinhMucSanLuongTheoChuyenFilletPartialView.cshtml",rolePermistions.Any(x => x.Fu == "Dashboard" && x.Func == "Tổng Hợp Định Mức Sản Lượng Theo Chuyền Fillet" && x.Status == 1)),
+                    ("db3", "~/Views/Dashboard/DBTongHopDinhMucSanLuongTheoChuyenDinhHinhPartialView.cshtml",rolePermistions.Any(x => x.Fu == "Dashboard" && x.Func == "Tổng Hợp Định Mức Sản Lượng Theo Chuyền Định Hình" && x.Status == 1)),
+                    ("db4", "~/Views/Dashboard/DBTongHopTyLeThoiGianVaDinhMucFilletPartialView.cshtml",rolePermistions.Any(x => x.Fu == "Dashboard" && x.Func == "Tổng Hợp Tỷ Lệ Thời Gian Và Định Mức Fillet" && x.Status == 1)),
+                    ("db5", "~/Views/Dashboard/DBTongHopTyLeThoiGianVaDinhMucDinhHinhPartialView.cshtml",rolePermistions.Any(x => x.Fu == "Dashboard" && x.Func == "Tổng Hợp Tỷ Lệ Thời Gian Và Định Mức Định Hình" && x.Status == 1)),                  
+                    ("db6", "~/Views/Dashboard/DBDinhMucFilletTheoSanPhamPartialView.cshtml",rolePermistions.Any(x => x.Fu == "Dashboard" && x.Func == "Định Mức Fillet Theo Sản Phẩm" && x.Status == 1)),
+                    ("db7", "~/Views/Dashboard/DBDinhMucSuaCaTheoSanPhamPartialView.cshtml",rolePermistions.Any(x => x.Fu == "Dashboard" && x.Func == "Định Mức Sửa Cá Theo Sản Phẩm" && x.Status == 1)),
+                    ("db8", "~/Views/Dashboard/DBTongSanLuongThanhPhamXeBuomPartialView.cshtml",rolePermistions.Any(x => x.Fu == "Dashboard" && x.Func == "Tổng Hợp Sản Lượng Xẻ Bướm" && x.Status == 1)),
+                    ("db12", "~/Views/Dashboard/DBTyLeThuHoiThanhPham2PartialView.cshtml",rolePermistions.Any(x => x.Fu == "Dashboard" && x.Func == "Tỷ Lệ Thu Hồi Thành Phẩm 2" && x.Status == 1)),
+                    ("db11", "~/Views/Dashboard/DBTongHopSanLuongVaDinhMucThanhPhamTheoChuyenFilletPartialView.cshtml",rolePermistions.Any(x => x.Fu == "Dashboard" && x.Func == "Tổng Hợp Sản Lượng Và Định Mức TP Fillet Theo Chuyền" && x.Status == 1)),
+                    ("db10", "~/Views/Dashboard/DBTongHopSanLuongVaDinhMucThanhPhamTheoChuyenDinhHinhPartialView.cshtml",rolePermistions.Any(x => x.Fu == "Dashboard" && x.Func == "Tổng Hợp Sản Lượng Và Định Mức TP Định Hình Theo Chuyền" && x.Status == 1)),
+                    ("db9", "~/Views/Dashboard/DBTongHopTyLeThoiGianVaDinhMucTheoChuyenDinhHinhPartialView.cshtml",rolePermistions.Any(x => x.Fu == "Dashboard" && x.Func == "Tổng Hợp Tỷ Lệ Thời Gian Và Định Mức Định Hình Theo Chuyền" && x.Status == 1)),
+                    ("db13", "~/Views/Dashboard/DBTongHopTyLeTangTrongTheoThanhPhamRaCoiXepKhuonPartialView.cshtml",rolePermistions.Any(x => x.Fu == "Dashboard" && x.Func == "Tổng Hợp Tỷ Lệ Thời Gian Và Định Mức Định Hình Theo Chuyền" && x.Status == 1)),
+                    ("db14", "~/Views/Dashboard/DBTongHopHaoHutThanhPhamSuaCaPartialView.cshtml",rolePermistions.Any(x => x.Fu == "Dashboard" && x.Func == "Tổng Hợp Tỷ Lệ Thời Gian Và Định Mức Định Hình Theo Chuyền" && x.Status == 1)),
+                };
+            // style = "display:contents"
+                @foreach (var (id, viewPath, visible) in widgets)
+                {
+                    if (visible)
+                    {
+                        int width = id switch
+                        {
+                            "db9" or "db13" or "db14" => 12,
+                            "db10" or "db11" => 6,
+                            _ => 4
+                        };
+
+                        <div class="grid-stack-item" gs-w="@width" gs-h="1" gs-id="@id">
+                            <div class="grid-stack-item-content" style="display:contents">
+                                @await Html.PartialAsync(viewPath)
+                            </div>
+                        </div>
+                    }
+                }
+            }
+        </div>
+    </div>
+
+
+    @* Tổng quan biểu đồ cột *@
+    @* <div class="row">
+        <div class="col-12 mb-1">
+            @{
+                var dbtonghodmslchuyenfldt = rolePermistions.Where(x => x.Fu == "Dashboard" && x.Func == "Tổng Hợp Định Mức Sản Lượng Theo Chuyền Fillet" && x.Status == 1).FirstOrDefault();
+                if (dbtonghodmslchuyenfldt != null)
+                {
+                    <div class="">
+                        @await Html.PartialAsync("~/Views/Dashboard/DBTongHopDinhMucSanLuongTheoChuyenFilletPartialView.cshtml")
+                    </div>
+                }
+            }
+        </div>
+        <div class="col-12 mb-1">
+            @{
+                var dbtonghodmslchuyendhdt = rolePermistions.Where(x => x.Fu == "Dashboard" && x.Func == "Tổng Hợp Định Mức Sản Lượng Theo Chuyền Định Hình" && x.Status == 1).FirstOrDefault();
+                if (dbtonghodmslchuyendhdt != null)
+                {
+                    <div class="">
+                        @await Html.PartialAsync("~/Views/Dashboard/DBTongHopDinhMucSanLuongTheoChuyenDinhHinhPartialView.cshtml")
+                    </div>
+                }
+            }
+        </div>
+        <div class="col-12 col-md-6 mb-1">
+            @{
+                var dbtonghoptgdmfldt = rolePermistions.Where(x => x.Fu == "Dashboard" && x.Func == "Tổng Hợp Tỷ Lệ Thời Gian Và Định Mức Fillet" && x.Status == 1).FirstOrDefault();
+                if (dbtonghoptgdmfldt != null)
+                {
+                    <div class="">
+                        @await Html.PartialAsync("~/Views/Dashboard/DBTongHopTyLeThoiGianVaDinhMucFilletPartialView.cshtml")
+                    </div>
+                }
+            }
+        </div>
+        <div class="col-12 col-md-6 mb-1">
+            @{
+                var dbtonghoptgdmdhdt = rolePermistions.Where(x => x.Fu == "Dashboard" && x.Func == "Tổng Hợp Tỷ Lệ Thời Gian Và Định Mức Định Hình" && x.Status == 1).FirstOrDefault();
+                if (dbtonghoptgdmdhdt != null)
+                {
+                    <div class="">
+                        @await Html.PartialAsync("~/Views/Dashboard/DBTongHopTyLeThoiGianVaDinhMucDinhHinhPartialView.cshtml")
+                    </div>
+                }
+            }
+        </div>
+        <div class="col-12 mb-1">
+            @{
+                var dbtonghoptgdmtcdhdt = rolePermistions.Where(x => x.Fu == "Dashboard" && x.Func == "Tổng Hợp Tỷ Lệ Thời Gian Và Định Mức Định Hình Theo Chuyền" && x.Status == 1).FirstOrDefault();
+                if (dbtonghoptgdmtcdhdt != null)
+                {
+                    <div class="">
+                        @await Html.PartialAsync("~/Views/Dashboard/DBTongHopTyLeThoiGianVaDinhMucTheoChuyenDinhHinhPartialView.cshtml")
+                    </div>
+                }
+            }
+        </div>
+    </div> *@
+@* </div> *@
+<hr style="height:2px;border-width:0;color:gray;background-color:gray" />
+<div class="mt-4 sortable-container" id="dashBoardComputer" style="display:none">
     @* xem trên máy tính *@
+    @* Thành Phẩm biểu đồ tròn*@
     <div class="row">
         @* cột 1 *@
         <div class="col-md-4 mb-4">
             @{
+
                 var dbtonghopvungnuoidt = rolePermistions.Where(x => x.Fu == "Dashboard" && x.Func == "Tổng Hợp Ghe Vùng Nuôi" && x.Status == 1).FirstOrDefault();
                 if (dbtonghopvungnuoidt != null)
                 {
@@ -25,39 +198,6 @@
                         @await Html.PartialAsync("~/Views/Dashboard/DBTongHopGheVungNuoiDaiThanhSidePartialView.cshtml")
                     </div>
                 }
-                var dbtonghoptpfillet = rolePermistions.Where(x => x.Fu == "Dashboard" && x.Func == "Tổng Hợp Thành Phẩm Fillet" && x.Status == 1).FirstOrDefault();
-                if (dbtonghoptpfillet != null)
-                {
-                    <div class="draggable-item">
-                        @await Html.PartialAsync("~/Views/Dashboard/DBTongHopTPFilletPartialView.cshtml")
-                    </div>
-                }
-                var dbtonghoptpxp = rolePermistions.Where(x => x.Fu == "Dashboard" && x.Func == "Tổng Hợp Thành Phẩm Xếp Khuôn" && x.Status == 1).FirstOrDefault();
-                if (dbtonghoptpxp != null)
-                {
-                    <div class="draggable-item">
-                        @await Html.PartialAsync("~/Views/Dashboard/DBTongHopTPXepKhuonPartialView.cshtml")
-                    </div>
-                }
-                var dbtonghoptpscdh = rolePermistions.Where(x => x.Fu == "Dashboard" && x.Func == "Tổng Hợp Thành Phẩm Sơ Chế Định Hình" && x.Status == 1).FirstOrDefault();
-                if (dbtonghoptpscdh != null)
-                {
-                    <div class="draggable-item">
-                        @await Html.PartialAsync("~/Views/Dashboard/DBTongHopTPSoCheDinhHinhPartialView.cshtml")
-                    </div>
-                }
-                var dbtonghoptppp = rolePermistions.Where(x => x.Fu == "Dashboard" && x.Func == "Tổng Hợp Thành Phẩm Phụ Phẩm" && x.Status == 1).FirstOrDefault();
-                if (dbtonghoptppp != null)
-                {
-                    <div class="draggable-item">
-                        @await Html.PartialAsync("~/Views/Dashboard/DBTongHopTPPhuPhamPartialView.cshtml")
-                    </div>
-                }
-            }
-        </div>
-        @* cột 2 *@
-        <div class="col-md-4 mb-4 ">
-            @{
                 var dbtonghoptpnl = rolePermistions.Where(x => x.Fu == "Dashboard" && x.Func == "Tổng Hợp Thành Phẩm Nguyên Liệu" && x.Status == 1).FirstOrDefault();
                 if (dbtonghoptpnl != null)
                 {
@@ -72,24 +212,38 @@
                         @await Html.PartialAsync("~/Views/Dashboard/DBTongHopTPBTPDinhHinhPartialView.cshtml")
                     </div>
                 }
-                var dbtonghoptppxk = rolePermistions.Where(x => x.Fu == "Dashboard" && x.Func == "Tổng Hợp Thành Phẩm Phụ Xếp Khuôn" && x.Status == 1).FirstOrDefault();
-                if (dbtonghoptppxk != null)
+
+                var dbtonghoptpscdh = rolePermistions.Where(x => x.Fu == "Dashboard" && x.Func == "Tổng Hợp Thành Phẩm Sơ Chế Định Hình" && x.Status == 1).FirstOrDefault();
+                if (dbtonghoptpscdh != null)
                 {
                     <div class="draggable-item">
-                        @await Html.PartialAsync("~/Views/Dashboard/DBTongHopTPPhuXepKhuonPartialView.cshtml")
+                        @await Html.PartialAsync("~/Views/Dashboard/DBTongHopTPSoCheDinhHinhPartialView.cshtml")
                     </div>
                 }
-                var dbtonghoptptc = rolePermistions.Where(x => x.Fu == "Dashboard" && x.Func == "Tổng Hợp Thành Phẩm Tái Chế" && x.Status == 1).FirstOrDefault();
-                if (dbtonghoptptc != null)
+                var dbtonghoptppp = rolePermistions.Where(x => x.Fu == "Dashboard" && x.Func == "Tổng Hợp Thành Phẩm Phụ Phẩm" && x.Status == 1).FirstOrDefault();
+                if (dbtonghoptppp != null)
                 {
                     <div class="draggable-item">
-                        @await Html.PartialAsync("~/Views/Dashboard/DBTongHopTPTaiChePartialView.cshtml")
+                        @await Html.PartialAsync("~/Views/Dashboard/DBTongHopTPPhuPhamPartialView.cshtml")
+                    </div>
+                }
+                var dbtonghoptpracoi = rolePermistions.Where(x => x.Fu == "Dashboard" && x.Func == "Tổng Hợp Thành Phẩm Ra Cối" && x.Status == 1).FirstOrDefault();
+                if (dbtonghoptpracoi != null)
+                {
+                    <div class="draggable-item">
+                        @await Html.PartialAsync("~/Views/Dashboard/DBTongHopThanhPhamTPRaCoiPartialView.cshtml")
+                    </div>
+                }
+                var dbtonghoptptpxebuom = rolePermistions.Where(x => x.Fu == "Dashboard" && x.Func == "Tổng Hợp Thành Phẩm TP Xẻ Bướm" && x.Status == 1).FirstOrDefault();
+                if (dbtonghoptptpxebuom != null)
+                {
+                    <div class="draggable-item">
+                        @await Html.PartialAsync("~/Views/Dashboard/DBTongHopThanhPhamTPXeBuomPartialView.cshtml")
                     </div>
                 }
             }
-
         </div>
-        @* cột 3 *@
+        @* cột 2 *@
         <div class="col-md-4 mb-4 ">
             @{
                 var dbtonghoptpbtpf = rolePermistions.Where(x => x.Fu == "Dashboard" && x.Func == "Tổng Hợp Thành Phẩm Bán TP Fillet" && x.Status == 1).FirstOrDefault();
@@ -106,6 +260,49 @@
                         @await Html.PartialAsync("~/Views/Dashboard/DBTongHopTPDinhHinh2View.cshtml")
                     </div>
                 }
+                var dbtonghoptppxk = rolePermistions.Where(x => x.Fu == "Dashboard" && x.Func == "Tổng Hợp Thành Phẩm Phụ Xếp Khuôn" && x.Status == 1).FirstOrDefault();
+                if (dbtonghoptppxk != null)
+                {
+                    <div class="draggable-item">
+                        @await Html.PartialAsync("~/Views/Dashboard/DBTongHopTPPhuXepKhuonPartialView.cshtml")
+                    </div>
+                }
+                var dbtonghoptptc = rolePermistions.Where(x => x.Fu == "Dashboard" && x.Func == "Tổng Hợp Thành Phẩm Tái Chế" && x.Status == 1).FirstOrDefault();
+                if (dbtonghoptptc != null)
+                {
+                    <div class="draggable-item">
+                        @await Html.PartialAsync("~/Views/Dashboard/DBTongHopTPTaiChePartialView.cshtml")
+                    </div>
+                }
+                var dbtonghoptp2 = rolePermistions.Where(x => x.Fu == "Dashboard" && x.Func == "Tổng Hợp Sản Phẩm TP 2" && x.Status == 1).FirstOrDefault();
+                if (dbtonghoptp2 != null)
+                {
+                    <div class="draggable-item">
+                        @await Html.PartialAsync("~/Views/Dashboard/DBTongHopTP2PartialView.cshtml")
+                    </div>
+                }
+
+            }
+
+        </div>
+        @* cột 3 *@
+        <div class="col-md-4 mb-4 ">
+            @{
+                var dbtonghoptpfillet = rolePermistions.Where(x => x.Fu == "Dashboard" && x.Func == "Tổng Hợp Thành Phẩm Fillet" && x.Status == 1).FirstOrDefault();
+                if (dbtonghoptpfillet != null)
+                {
+                    <div class="draggable-item">
+                        @await Html.PartialAsync("~/Views/Dashboard/DBTongHopTPFilletPartialView.cshtml")
+                    </div>
+                }
+
+                var dbtonghoptpxp = rolePermistions.Where(x => x.Fu == "Dashboard" && x.Func == "Tổng Hợp Thành Phẩm Xếp Khuôn" && x.Status == 1).FirstOrDefault();
+                if (dbtonghoptpxp != null)
+                {
+                    <div class="draggable-item">
+                        @await Html.PartialAsync("~/Views/Dashboard/DBTongHopTPXepKhuonPartialView.cshtml")
+                    </div>
+                }
                 var dbtonghoptpxkbl = rolePermistions.Where(x => x.Fu == "Dashboard" && x.Func == "Tổng Hợp Thành Phẩm Xếp Khuôn Block" && x.Status == 1).FirstOrDefault();
                 if (dbtonghoptpxkbl != null)
                 {
@@ -120,16 +317,57 @@
                         @await Html.PartialAsync("~/Views/Dashboard/DBTongHopTPXepKhuonKHCPartialView.cshtml")
                     </div>
                 }
+
+                var dbtonghoptpbtpxebuom = rolePermistions.Where(x => x.Fu == "Dashboard" && x.Func == "Tổng Hợp Thành Phẩm BTP Xẻ Bướm" && x.Status == 1).FirstOrDefault();
+                if (dbtonghoptpbtpxebuom != null)
+                {
+                    <div class="draggable-item">
+                        @await Html.PartialAsync("~/Views/Dashboard/DBTongHopThanhPhamBTPXeBuomPartialView.cshtml")
+                    </div>
+                }
+
+
+
+
+
             }
 
         </div>
     </div>
 </div>
-<div class="container mt-4" id="dashBoardMobie" style="display:none">
+<div class="container mt-1" id="dashBoardMobie" style="display:none">
     @* Xem trên điện thoại *@
     <div class="row">
         <div class="col-12">
             @{
+                // var dbtonghodmslchuyenflmb = rolePermistions.Where(x => x.Fu == "Dashboard" && x.Func == "Tổng Hợp Định Mức Sản Lượng Theo Chuyền Fillet" && x.Status == 1).FirstOrDefault();
+                // if (dbtonghodmslchuyenflmb != null)
+                // {
+                //     <div class="">
+                //         @await Html.PartialAsync("~/Views/Dashboard/DBTongHopDinhMucSanLuongTheoChuyenFilletPartialView.cshtml")
+                //     </div>
+                // }
+                // var dbtonghodmslchuyendhmb = rolePermistions.Where(x => x.Fu == "Dashboard" && x.Func == "Tổng Hợp Định Mức Sản Lượng Theo Chuyền Định Hình" && x.Status == 1).FirstOrDefault();
+                // if (dbtonghodmslchuyendhmb != null)
+                // {
+                //     <div class="">
+                //         @await Html.PartialAsync("~/Views/Dashboard/DBTongHopDinhMucSanLuongTheoChuyenDinhHinhPartialView.cshtml")
+                //     </div>
+                // }
+                // var dbtonghoptgdmflmb = rolePermistions.Where(x => x.Fu == "Dashboard" && x.Func == "Tổng Hợp Tỷ Lệ Thời Gian Và Định Mức Fillet" && x.Status == 1).FirstOrDefault();
+                // if (dbtonghoptgdmflmb != null)
+                // {
+                //     <div class="">
+                //         @await Html.PartialAsync("~/Views/Dashboard/DBTongHopTyLeThoiGianVaDinhMucFilletPartialView.cshtml")
+                //     </div>
+                // }
+                // var dbtonghoptgdmdhmb = rolePermistions.Where(x => x.Fu == "Dashboard" && x.Func == "Tổng Hợp Tỷ Lệ Thời Gian Và Định Mức Định Hình" && x.Status == 1).FirstOrDefault();
+                // if (dbtonghoptgdmdhmb != null)
+                // {
+                //     <div class="">
+                //         @await Html.PartialAsync("~/Views/Dashboard/DBTongHopTyLeThoiGianVaDinhMucDinhHinhPartialView.cshtml")
+                //     </div>
+                // }
                 <!-- Dồn tất cả vào một cột trong trường hợp di động -->
                 var dbtonghopvungnuoidtMb = rolePermistions.Where(x => x.Fu == "Dashboard" && x.Func == "Tổng Hợp Ghe Vùng Nuôi" && x.Status == 1).FirstOrDefault();
                 if (dbtonghopvungnuoidtMb != null)
@@ -157,6 +395,21 @@
                 {
                     <div class="">
                         @await Html.PartialAsync("~/Views/Dashboard/DBTongHopTPFilletPartialView.cshtml")
+                    </div>
+                }
+                var dbtonghoptpbtpxebuomMb = rolePermistions.Where(x => x.Fu == "Dashboard" && x.Func == "Tổng Hợp Thành Phẩm BTP Xẻ Bướm" && x.Status == 1).FirstOrDefault();
+                if (dbtonghoptpbtpxebuomMb != null)
+                {
+                    <div class="draggable-item">
+                        @await Html.PartialAsync("~/Views/Dashboard/DBTongHopThanhPhamBTPXeBuomPartialView.cshtml")
+                    </div>
+                }
+
+                var dbtonghoptptpxebuomMb = rolePermistions.Where(x => x.Fu == "Dashboard" && x.Func == "Tổng Hợp Thành Phẩm TP Xẻ Bướm" && x.Status == 1).FirstOrDefault();
+                if (dbtonghoptptpxebuomMb != null)
+                {
+                    <div class="draggable-item">
+                        @await Html.PartialAsync("~/Views/Dashboard/DBTongHopThanhPhamTPXeBuomPartialView.cshtml")
                     </div>
                 }
                 var dbtonghoptpbtpdinhhinhMb = rolePermistions.Where(x => x.Fu == "Dashboard" && x.Func == "Tổng Hợp Thành Phẩm Bán TP Định Hình" && x.Status == 1).FirstOrDefault();
@@ -222,19 +475,145 @@
                         @await Html.PartialAsync("~/Views/Dashboard/DBTongHopTPXepKhuonKHCPartialView.cshtml")
                     </div>
                 }
+                
+
+                var dbtonghoptpracoiMb = rolePermistions.Where(x => x.Fu == "Dashboard" && x.Func == "Tổng Hợp Thành Phẩm Ra Cối" && x.Status == 1).FirstOrDefault();
+                if (dbtonghoptpracoiMb != null)
+                {
+                    <div class="draggable-item">
+                        @await Html.PartialAsync("~/Views/Dashboard/DBTongHopThanhPhamTPRaCoiPartialView.cshtml")
+                    </div>
+                }
+                var dbtonghoptp2Mb = rolePermistions.Where(x => x.Fu == "Dashboard" && x.Func == "Tổng Hợp Sản Phẩm TP 2" && x.Status == 1).FirstOrDefault();
+                if (dbtonghoptp2Mb != null)
+                {
+                    <div class="draggable-item">
+                        @await Html.PartialAsync("~/Views/Dashboard/DBTongHopTP2PartialView.cshtml")
+                    </div>
+                }
             }
 
 
         </div>
     </div>
 </div>
+<div class="d-flex justify-content-end mb-2">
+    <button class="btn btn-sm btn-outline-secondary" onclick="resetLayout()">
+        <i class="bi bi-arrow-counterclockwise"></i> Khôi phục mặc định
+    </button>
+</div>
+
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://code.jquery.com/ui/1.13.1/jquery-ui.min.js"></script>
 <script>
-    // $(document).ready(function () {
-    //     var xuongId = @XuongId;
-    //     AddUserWaitView(xuongId);
-    // });
+    function equalizeCardHeights() {
+        const cards = document.querySelectorAll('.marginGridjs');
+        let maxHeight = 0;
+
+        // Reset height trước để lấy đúng chiều cao thực
+        cards.forEach(card => {
+            card.style.height = 'auto';
+            maxHeight = Math.max(maxHeight, card.offsetHeight);
+        });
+
+        // Gán chiều cao lớn nhất cho tất cả
+        cards.forEach(card => {
+            card.style.height = maxHeight + 'px';
+        });
+    }
+
+    // Gọi khi DOM load xong
+    window.addEventListener('DOMContentLoaded', equalizeCardHeights);
+
+    // Gọi lại khi resize
+    window.addEventListener('resize', equalizeCardHeights);
+
+    // Gọi lại nếu bạn load partial view (tùy bạn chèn sau khi load xong)
+    // equalizeCardHeights();
+
+    // Optional: nếu muốn theo dõi thay đổi chiều cao tự động từng card (nâng cao)
+    const observer = new ResizeObserver(equalizeCardHeights);
+    document.querySelectorAll('.marginGridjs').forEach(el => observer.observe(el));
+</script>
+<script>
+    let grid;
+    // function getColumnByWidth() {
+    //     const width = window.innerWidth;
+    //     if (width < 768) return 1; // điện thoại
+    //     else if (width < 1024) return 4; // tablet
+    //     return 12; // desktop
+    // }
+    document.addEventListener("DOMContentLoaded", function () {
+        grid = GridStack.init({
+            float: false,
+            column: 12, 
+            marginTop: 10,
+            marginRight: 10,
+            marginBottom: 10,
+            marginLeft: 10,
+            cellHeight: 450, // CỐ ĐỊNH chiều cao widget
+            disableResize: true,
+            disableDrag: window.innerWidth < 768,
+            animate: true
+        });
+
+        const saved = localStorage.getItem("dashboard_layout");
+        if (saved) {
+            try {
+                const layout = JSON.parse(saved);
+                grid.load(layout);
+                grid.compact();
+            } catch (e) {
+                console.warn("Lỗi layout:", e);
+            }
+        }
+
+        grid.on("change", function () {
+            const layout = grid.save(true);
+            localStorage.setItem("dashboard_layout", JSON.stringify(layout));
+        });
+    });
+
+    function resetLayout() {
+        localStorage.removeItem("dashboard_layout");
+        location.reload();
+    }
+
+
+    function applyToggleDrag() {
+        const isMobile = window.innerWidth < 768;
+        const toggle = document.getElementById("toggle-drag");
+
+        if (isMobile) {
+            toggle.checked = false;
+            toggle.disabled = true;
+            grid.enableMove(false);
+            localStorage.setItem("enable_drag", "0");
+        } else {
+            const enable = localStorage.getItem("enable_drag") !== "0";
+            toggle.checked = enable;
+            toggle.disabled = false;
+            grid.enableMove(enable);
+        }
+    }
+
+    // Sự kiện thay đổi toggle (chỉ hoạt động khi không bị disable)
+    document.getElementById("toggle-drag").addEventListener("change", function (e) {
+        if (this.disabled) return;
+        const enable = this.checked;
+        grid.enableMove(enable);
+        localStorage.setItem("enable_drag", enable ? "1" : "0");
+    });
+
+    // Gọi khi DOM load
+    document.addEventListener("DOMContentLoaded", function () {
+        applyToggleDrag();
+    });
+
+    // Gọi lại khi resize màn hình
+    window.addEventListener("resize", function () {
+        applyToggleDrag();
+    });
 </script>
 <script>
     // // Hàm để kiểm tra kích thước màn hình và hiển thị phần thích hợp
@@ -314,3 +693,91 @@
     window.onload = checkScreenSize;
     window.onresize = checkScreenSize;
 </script>
+<script>
+
+    window.addEventListener("DOMContentLoaded", function () {
+        const today = new Date().toLocaleDateString('en-CA');
+        //const today = new Date('2023/10/05');
+        const fromInput = document.getElementById("fromDateDB");
+        //const toInput = document.getElementById("toDateDB");
+        const minuteInput = document.getElementById("minuteInput");
+
+        const savedFrom = localStorage.getItem("fromDate_dashboard_user");
+        const savedTo = localStorage.getItem("toDate_dashboard_user");
+        const savedInterval = localStorage.getItem("timeInterval_dashboard_user");
+        const isApplied = localStorage.getItem("dashboard_is_applied");
+
+        // nếu apply thì áp dung localstoge sau khi hoanf thành thì xóa cờ
+        if (isApplied === "true" && savedFrom && savedTo) {
+            fromInput.value = savedFrom;
+            fromInput.value = savedTo;
+            localStorage.removeItem("dashboard_is_applied"); // Xoá cờ khi đã dùng
+        } else {
+            fromInput.value = today;
+            //toInput.value = today;
+            localStorage.setItem("fromDate_dashboard_user", today);
+            localStorage.setItem("toDate_dashboard_user", today);
+        }
+
+        if (savedInterval) {
+            const minutes = parseInt(savedInterval, 10) / 60000;
+            minuteInput.value = Math.max(minutes, 5);
+        } else {
+            minuteInput.value = 30;
+            localStorage.setItem("timeInterval_dashboard_user", 1800000); // 30 phút mặc định
+        }
+    });
+
+    // window.addEventListener("DOMContentLoaded", function () {
+    //     const today = new Date().toLocaleDateString('en-CA');
+
+    //     const fromInput = document.getElementById("fromDateDB");
+    //     const toInput = document.getElementById("toDateDB");
+    //     const minuteInput = document.getElementById("minuteInput");
+
+    //     // Lấy từ localStorage
+    //     const savedFrom = localStorage.getItem("fromDate_dashboard_user");
+    //     const savedTo = localStorage.getItem("toDate_dashboard_user");
+    //     const savedInterval = localStorage.getItem("timeInterval_dashboard_user");
+    //     const isApplied = localStorage.getItem("dashboard_is_applied");
+
+    //     if (isApplied === "true" && savedFrom && savedTo) {
+    //         fromInput.value = savedFrom;
+    //         toInput.value = savedTo;
+    //     } else {
+    //         fromInput.value = today;
+    //         toInput.value = today;
+    //     }
+
+    //     if (savedInterval) {
+    //         const minutes = parseInt(savedInterval, 10) / 60000;
+    //         minuteInput.value = Math.max(minutes, 5);
+    //     } else {
+    //         minuteInput.value = 30;
+    //         localStorage.setItem("timeInterval_dashboard_user", 1800000); // 30 phút mặc định
+    //     }
+    // });
+
+
+    document.getElementById("applyBtn").addEventListener("click", function () {
+        const minuteValue = parseInt(document.getElementById("minuteInput").value);
+        const fromDate = document.getElementById("fromDateDB").value;
+        //const toDate = document.getElementById("toDateDB").value;
+
+        if (isNaN(minuteValue) || minuteValue < 5) {
+            alert("Nhỏ nhất là 5 phút");
+            document.getElementById("minuteInput").value = 5;
+            return;
+        }
+
+        const intervalMilliseconds = minuteValue * 60000;
+
+        localStorage.setItem("timeInterval_dashboard_user", intervalMilliseconds);
+        localStorage.setItem("fromDate_dashboard_user", fromDate);
+        localStorage.setItem("toDate_dashboard_user", fromDate);
+        localStorage.setItem("dashboard_is_applied", "true"); // Đặt cờ
+
+        location.reload();
+    });
+</script>
+

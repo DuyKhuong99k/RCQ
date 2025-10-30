@@ -1,131 +1,23 @@
-﻿@* <div class="top-row ps-3 navbar navbar-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="">
-            <img src="imgs/logopmsw.png" />
-        </a>
-    </div>
-</div>
-
-<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
-
-<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
-    <nav class="flex-column">
-        <div class="nav-item px-0">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> <span class="w-100">Home</span>
-            </NavLink>
-        </div>
-        <div class="nav-item px-0">
-            <NavLink class="nav-link" href="devices">
-                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> <span class="w-100">Thiết Bị</span>
-            </NavLink>
-        </div>
-        <div class="nav-item px-0">
-            <NavLink class="nav-link" href="coi-view">
-                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> <span class="w-100">Cối</span>
-            </NavLink>
-        </div>
-        <div class="nav-item px-0">
-            <NavLink class="nav-link" href="coi-tam-view">
-                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> <span class="w-100">Cối Tạm</span>
-            </NavLink>
-        </div>
-        <div class="nav-item px-0">
-            <NavLink class="nav-link" href="datmauthefillet">
-                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> <span class="w-100">Đặt Màu Thẻ - Fillet</span>
-            </NavLink>
-        </div>
-        <div class="nav-item px-0">
-            <NavLink class="nav-link" href="datmauthedinhhinh">
-                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> <span class="w-100">Đặt Màu Thẻ - Định Hình</span>
-            </NavLink>
-        </div>
-        <div class="nav-item px-0">
-            <NavLink class="nav-link" href="datmauthephuxepkhuon">
-                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> <span class="w-100">Đặt Màu Thẻ - Phụ Xếp Khuôn</span>
-            </NavLink>
-        </div>
-        <div class="nav-item px-0">
-            <NavLink class="nav-link" href="DatNhanVienCongCuXepKhuon">
-                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> <span class="w-100">Đặt Nhân Viên Công Cụ Xếp Khuôn</span>
-            </NavLink>
-        </div>
-        <div class="nav-item px-0">
-            <NavLink class="nav-link" href="TheNhanVien">
-                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> <span class="w-100">Thẻ Nhân Viên</span>
-            </NavLink>
-        </div>
-        <div class="nav-item px-0">
-            <NavLink class="nav-link" href="TheChucNang">
-                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> <span class="w-100">Thẻ Chức Năng</span>
-            </NavLink>
-        </div>
-        <div class="nav-item px-0">
-            <NavLink class="nav-link" href="TheRo">
-                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> <span class="w-100">Thẻ Rổ</span>
-            </NavLink>
-        </div> *@
-
-@*  <div class="nav-item px-0">
-        <NavLink class="nav-link" href="counter">
-        <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> <span class="w-100">Counter</span>
-        </NavLink>
-        </div>
-
-        <div class="nav-item px-0">
-        <NavLink class="nav-link" href="weather">
-        <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> <span class="w-100">Weather</span>
-        </NavLink>
-        </div> *@
-@*     </nav>
-</div> *@
-
+﻿@using Vars
+@using ViewModels.Repos.Hubs.IServices
 
 @inject NavigationManager Navigation
-@* 
-<style>
-    .app-brand {
-    display: flex;
-    justify-content: center; /* Canh giữa theo chiều ngang */
-    align-items: center; /* Canh giữa theo chiều dọc */
-    height: 100px; /* Điều chỉnh độ cao tùy theo thiết kế */
-    background-color: #f5f5f5; /* Màu nền cho phần chứa logo */
-}
-
-.app-brand-logo {
-    display: inline-block; /* Đảm bảo logo không chiếm toàn bộ chiều ngang */
-}
-
-    .app-brand-logo img {
-        max-width: 100%; /* Đảm bảo logo không vượt quá kích thước của phần tử chứa */
-    }
-
-
-.fixed-navbar {
-    will-change: transform;
-    position: -webkit-sticky; /* Safari */
-    position: sticky;
-    top: 9px;
-    z-index: 1000;
-    background-color: rgba(255, 255, 255, 0); /* Màu trắng có độ trong suốt 0.8 */
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    transition: background-color 0.3s ease-in-out;
-}
-
-/* Kiểu dáng cho màn hình nhỏ hơn 768px (điện thoại và máy tính bảng) */
-@@media (max-width: 768px) {
-    .fixed-navbar {
-        background-color: rgba(255, 255, 255, 0); /* Cần phải đặt lại màu nền vì một số trình duyệt không hỗ trợ position: sticky cùng với transform */
-    }
-}
-</style> *@
-<aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme" data-bg-class="bg-menu-theme">
+@inject IMainService MainService
+<aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme" data-bg-class="bg-menu-theme" >
 
 
     <div class="app-brand demo">
         <a href="/" class="app-brand-link">
             <span class="app-brand-logo demo">
-                <img style="width:120px" src="Imgs/PMSLogo.png" />
+                @if (AppViewModels.AppViewModel.Instance.Company == "PhanBach")
+                {
+                    <img style="width:180px" src="Imgs/PhanBachLogo.png" />
+                }
+                else
+                {
+                    <img style="width:120px" src="Imgs/PMSLogo.png" />
+                }
+                
             </span>
         </a>
         <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto d-block d-xl-none ">
@@ -144,72 +36,130 @@
                 <div data-i18n="Analytics">Trang Chủ</div>
             </NavLink>
         </li>
-        <li class="menu-item @(IsActive("devices") ? "active" : "")">
-            <NavLink href="devices" class="menu-link">
-                <i class="menu-icon tf-icons bx bx-devices"></i>
-                <div data-i18n="Analytics">Thiết Bị</div>
-            </NavLink>
-        </li>
-        <li class="menu-item @(IsActive("coi-view") ? "active" : "")">
-            <NavLink href="coi-view" class="menu-link">
-                <i class="menu-icon tf-icons bx bx-analyse"></i>
-                <div data-i18n="Analytics">Cối</div>
-            </NavLink>
-        </li>
-        <li class="menu-item @(IsActive("coi-tam-view") ? "active" : "")">
-            <NavLink href="coi-tam-view" class="menu-link">
-                <i class="menu-icon tf-icons bx bx-layer-plus"></i>
-                <div data-i18n="Analytics">Cối Tạm</div>
-            </NavLink>
-        </li>
-        <li class="menu-item @(IsActive("datmauthefillet") ? "active" : "")">
-            <NavLink href="datmauthefillet" class="menu-link">
-                <i class="menu-icon tf-icons bx bx-color-fill"></i>
-                <div data-i18n="Analytics">Đặt Màu Thẻ-Fillet</div>
-            </NavLink>
-        </li>
-        <li class="menu-item @(IsActive("datmauthedinhhinh") ? "active" : "")">
-            <NavLink href="datmauthedinhhinh" class="menu-link">
-                <i class="menu-icon tf-icons bx bx-color-fill"></i>
-                <div data-i18n="Analytics">Đặt Màu Thẻ-Định Hình</div>
-            </NavLink>
-        </li>
-        <li class="menu-item @(IsActive("datmauthephuxepkhuon") ? "active" : "")">
-            <NavLink href="datmauthephuxepkhuon" class="menu-link">
-                <i class="menu-icon tf-icons bx bx-color-fill"></i>
-                <div data-i18n="Analytics">Đặt Màu Thẻ-Phụ Xếp Khuôn</div>
-            </NavLink>
-        </li>
-        <li class="menu-item @(IsActive("DatNhanVienCongCuXepKhuon") ? "active" : "")">
-            <NavLink href="DatNhanVienCongCuXepKhuon" class="menu-link">
-                <i class="menu-icon tf-icons bx bx-street-view"></i>
-                <div data-i18n="Analytics">Đặt Nhân Viên Công Cụ Xếp Khuôn</div>
-            </NavLink>
-        </li>
-        <li class="menu-item @(IsActive("TheNhanVien") ? "active" : "")">
-            <NavLink href="TheNhanVien" class="menu-link">
-                <i class="menu-icon tf-icons bx bx-id-card"></i>
-                <div data-i18n="Analytics">Thẻ Nhân Viên</div>
-            </NavLink>
-        </li>
-        <li class="menu-item @(IsActive("TheChucNang") ? "active" : "")">
-            <NavLink href="TheChucNang" class="menu-link">
-                <i class="menu-icon tf-icons bx bx-card"></i>
-                <div data-i18n="Analytics">Thẻ Chức Năng</div>
-            </NavLink>
-        </li>
-        <li class="menu-item @(IsActive("TheRo") ? "active" : "")">
-            <NavLink href="TheRo" class="menu-link">
-                <i class="menu-icon tf-icons bx bx-card"></i>
-                <div data-i18n="Analytics">Thẻ Rổ</div>
-            </NavLink>
-        </li>
+        @* <li class="menu-item @(IsActive("TheRo") ? "active" : "")"> *@
+        @*     <NavLink href="TheRo" class="menu-link"> *@
+        @*         <i class="menu-icon tf-icons bx bx-card"></i> *@
+        @*         <div data-i18n="Analytics">Thẻ Rổ</div> *@
+        @*     </NavLink> *@
+        @* </li> *@
+        @if (MainService.VmApp.ComName?.ToUpper() == nameof(ComNames.RCQTG) || MainService.VmApp.ComName?.ToUpper() == nameof(ComNames.NV))
+        {
+            <li class="menu-item @(IsActive("devices") ? "active" : "")">
+                <NavLink href="devices" class="menu-link">
+                    <i class="menu-icon tf-icons bx bx-devices"></i>
+                    <div data-i18n="Analytics">Thiết Bị</div>
+                </NavLink>
+            </li>
+            <li class="menu-item @(IsActive("TheNhanVien") ? "active" : "")">
+                <NavLink href="TheNhanVien" class="menu-link">
+                    <i class="menu-icon tf-icons bx bx-id-card"></i>
+                    <div data-i18n="Analytics">Thẻ Nhân Viên</div>
+                </NavLink>
+            </li>
+            <li class="menu-item @(IsActive("TheChucNang") ? "active" : "")">
+                <NavLink href="TheChucNang" class="menu-link">
+                    <i class="menu-icon tf-icons bx bx-card"></i>
+                    <div data-i18n="Analytics">Thẻ Chức Năng</div>
+                </NavLink>
+            </li>
+        }
+        else if (MainService.VmApp.ComName?.ToUpper() == nameof(ComNames.HL))
+        {
+            <li class="menu-item @(IsActive("devices") ? "active" : "")">
+                <NavLink href="devices" class="menu-link">
+                    <i class="menu-icon tf-icons bx bx-devices"></i>
+                    <div data-i18n="Analytics">Thiết Bị</div>
+                </NavLink>
+            </li>
+            <li class="menu-item @(IsActive("TheNhanVien") ? "active" : "")">
+                <NavLink href="TheNhanVien" class="menu-link">
+                    <i class="menu-icon tf-icons bx bx-id-card"></i>
+                    <div data-i18n="Analytics">Thẻ Nhân Viên</div>
+                </NavLink>
+            </li>
+            <li class="menu-item @(IsActive("TheChucNang") ? "active" : "")">
+                <NavLink href="TheChucNang" class="menu-link">
+                    <i class="menu-icon tf-icons bx bx-card"></i>
+                    <div data-i18n="Analytics">Thẻ Chức Năng</div>
+                </NavLink>
+            </li>
+            <li class="menu-item @(IsActive("TheRo") ? "active" : "")">
+                <NavLink href="TheRo" class="menu-link">
+                    <i class="menu-icon tf-icons bx bx-card"></i>
+                    <div data-i18n="Analytics">Thẻ Rổ</div>
+                </NavLink>
+            </li>
+        }
+        else if (MainService.VmApp.ComName?.ToUpper() != "")
+        {
+            <li class="menu-item @(IsActive("devices") ? "active" : "")">
+                <NavLink href="devices" class="menu-link">
+                    <i class="menu-icon tf-icons bx bx-devices"></i>
+                    <div data-i18n="Analytics">Thiết Bị</div>
+                </NavLink>
+            </li>
+            <li class="menu-item @(IsActive("coi-view") ? "active" : "")">
+                <NavLink href="coi-view" class="menu-link">
+                    <i class="menu-icon tf-icons bx bx-analyse"></i>
+                    <div data-i18n="Analytics">Cối</div>
+                </NavLink>
+            </li>
+            <li class="menu-item @(IsActive("coi-tam-view") ? "active" : "")">
+                <NavLink href="coi-tam-view" class="menu-link">
+                    <i class="menu-icon tf-icons bx bx-layer-plus"></i>
+                    <div data-i18n="Analytics">Cối Tạm</div>
+                </NavLink>
+            </li>
+            <li class="menu-item @(IsActive("datmauthefillet") ? "active" : "")">
+                <NavLink href="datmauthefillet" class="menu-link">
+                    <i class="menu-icon tf-icons bx bx-color-fill"></i>
+                    <div data-i18n="Analytics">Đặt Màu Thẻ-Fillet</div>
+                </NavLink>
+            </li>
+            <li class="menu-item @(IsActive("datmauthedinhhinh") ? "active" : "")">
+                <NavLink href="datmauthedinhhinh" class="menu-link">
+                    <i class="menu-icon tf-icons bx bx-color-fill"></i>
+                    <div data-i18n="Analytics">Đặt Màu Thẻ-Định Hình</div>
+                </NavLink>
+            </li>
+            <li class="menu-item @(IsActive("datmauthephuxepkhuon") ? "active" : "")">
+                <NavLink href="datmauthephuxepkhuon" class="menu-link">
+                    <i class="menu-icon tf-icons bx bx-color-fill"></i>
+                    <div data-i18n="Analytics">Đặt Màu Thẻ-Phụ Xếp Khuôn</div>
+                </NavLink>
+            </li>
+            <li class="menu-item @(IsActive("DatNhanVienCongCuXepKhuon") ? "active" : "")">
+                <NavLink href="DatNhanVienCongCuXepKhuon" class="menu-link">
+                    <i class="menu-icon tf-icons bx bx-street-view"></i>
+                    <div data-i18n="Analytics">Đặt Nhân Viên Công Cụ Xếp Khuôn</div>
+                </NavLink>
+            </li>
+            <li class="menu-item @(IsActive("TheNhanVien") ? "active" : "")">
+                <NavLink href="TheNhanVien" class="menu-link">
+                    <i class="menu-icon tf-icons bx bx-id-card"></i>
+                    <div data-i18n="Analytics">Thẻ Nhân Viên</div>
+                </NavLink>
+            </li>
+            <li class="menu-item @(IsActive("TheChucNang") ? "active" : "")">
+                <NavLink href="TheChucNang" class="menu-link">
+                    <i class="menu-icon tf-icons bx bx-card"></i>
+                    <div data-i18n="Analytics">Thẻ Chức Năng</div>
+                </NavLink>
+            </li>
+            <li class="menu-item @(IsActive("TheRo") ? "active" : "")">
+                <NavLink href="TheRo" class="menu-link">
+                    <i class="menu-icon tf-icons bx bx-card"></i>
+                    <div data-i18n="Analytics">Thẻ Rổ</div>
+                </NavLink>
+            </li>
+        }
     </ul>
 </aside>
 
 @code {
     private bool IsActive(string pathSegment)
     {
+        var comname = MainService.VmApp.ComName;
         var currentPath = Navigation.ToBaseRelativePath(Navigation.Uri);
         return currentPath.StartsWith(pathSegment, StringComparison.OrdinalIgnoreCase);
     }

@@ -1,17 +1,24 @@
-﻿using System.Timers;
+﻿using System;
+using System.Threading;
+using System.Timers;
 using AppViewModels;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Models.Repos.A_Model;
 using MvvmHelpers;
+using Vars;
 using ObservableObject = CommunityToolkit.Mvvm.ComponentModel.ObservableObject;
 using Timer = System.Timers.Timer;
 
+
 namespace ViewModels.Repos.HQ;
 
-public partial class DashboardViewModel : ObservableObject
+public partial class DashboardViewModel : ObservableObject, IDisposable
 {
     private static DashboardViewModel instance;
     private readonly Timer _timer;
+    private SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
+    private bool _isDisposed;
+
     [ObservableProperty] public ObservableRangeCollection<object> itemTongHopGheVungNuoiDaiThanhSite = new();
     [ObservableProperty] public ObservableRangeCollection<object> itemTongHopThanhPhamBlockXepKhuon = new();
     [ObservableProperty] public ObservableRangeCollection<object> itemTongHopThanhPhamBTPDinhHinh = new();
@@ -25,6 +32,20 @@ public partial class DashboardViewModel : ObservableObject
     [ObservableProperty] public ObservableRangeCollection<object> itemTongHopThanhPhamTaiChe = new();
     [ObservableProperty] public ObservableRangeCollection<object> itemTongHopThanhPhamTPDinhHinh = new();
     [ObservableProperty] public ObservableRangeCollection<object> itemTongHopThanhPhamTPFilletv2 = new();
+
+    [ObservableProperty] public ObservableRangeCollection<object> itemTongHopThanhPhamBTPXeBuom = new();
+    [ObservableProperty] public ObservableRangeCollection<object> itemTongHopThanhPhamTPXeBuom = new();
+    [ObservableProperty] public ObservableRangeCollection<object> itemTongHopThanhPhamRaCoi = new();
+    [ObservableProperty] public ObservableRangeCollection<object> itemTongHopDinhMucSanLuongTheoChuyenDinhHinh = new();
+    [ObservableProperty] public ObservableRangeCollection<object> itemTongHopDinhMucSanLuongTheoThanhPhamDinhHinh = new();
+    [ObservableProperty] public ObservableRangeCollection<object> itemTongHopDinhMucSanLuongTheoChuyenFillet = new();
+    [ObservableProperty] public ObservableRangeCollection<object> itemTongHopTyLeThoiGianVaDinhMucDinhHinh = new();
+    [ObservableProperty] public ObservableRangeCollection<object> itemTongHopTyLeThoiGianVaDinhMucDinhHinhTheoNhom = new();
+    [ObservableProperty] public ObservableRangeCollection<object> itemTongHopTyLeThoiGianVaDinhMucFillet = new();
+    //HQ
+    [ObservableProperty] public ObservableRangeCollection<object> itemTongHopThanhPhamHQ = new();
+    [ObservableProperty] public ObservableRangeCollection<object> itemTongHopThanhPhamHQGrid = new();
+
     [ObservableProperty] public ObservableRangeCollection<ListUserWaitView> userList = new();
 
     private DashboardViewModel()
@@ -36,19 +57,34 @@ public partial class DashboardViewModel : ObservableObject
             //var toDate = AppViewModels.AppViewModel.Instance.DateTimeNow;
             //var xuongId = AppViewModels.AppViewModel.Instance.XuongId;
             //TongHopThanhPhamBTPFilletv2(fromDate, toDate, xuongId);
+
+
             // Khởi tạo và bắt đầu timer
-            _timer = new Timer { Interval = 1000, AutoReset = true }; // 90 giây
-            _timer.Elapsed += _timer_Elapsed;
+            //_timer = new Timer { Interval = 1000, AutoReset = true }; // 90 giây
+            //_timer.Elapsed += _timer_Elapsed;
+            //_timer.Start();
+            // sửa 21/05/2025 do không hiển thị dữ liệu dashboard mặc dù lúc sáng có
+            _timer = new Timer { Interval = 3000, AutoReset = true };
+            _timer.Elapsed += async (s, e) => await TimerElapsedAsync();
             _timer.Start();
+
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
-            Console.WriteLine(e);
+            //Console.WriteLine(ex);
+            //LogError("Initialization failed", ex);
             //throw;
             //VmMessage.SetExceptionCommand.Execute(e);
         }
     }
-
+    public void Dispose()
+    {
+        if (_isDisposed) return;
+        _timer?.Stop();
+        _timer?.Dispose();
+        _semaphore?.Dispose();
+        _isDisposed = true;
+    }
     public static DashboardViewModel Instance => instance ??= new DashboardViewModel();
     private AppViewModel vmApp => AppViewModel.Instance;
 
@@ -74,6 +110,12 @@ public partial class DashboardViewModel : ObservableObject
                 ItemTongHopThanhPhamPhuPham.Clear();
                 ItemTongHopThanhPhamBTPDinhHinh.Clear();
                 ItemTongHopThanhPhamTPDinhHinh.Clear();
+                ItemTongHopThanhPhamBTPXeBuom.Clear();
+                ItemTongHopThanhPhamTPXeBuom.Clear();
+                ItemTongHopThanhPhamRaCoi.Clear();
+                //HQ
+                ItemTongHopThanhPhamHQ.Clear();
+                ItemTongHopThanhPhamHQGrid.Clear();
                 _timer.Interval = 3000;
             }
             else
@@ -152,7 +194,28 @@ public partial class DashboardViewModel : ObservableObject
                     {
                         ItemTongHopThanhPhamTPDinhHinh.Clear();
                     }
-                   
+                    lock (ItemTongHopThanhPhamBTPXeBuom)
+                    {
+                        ItemTongHopThanhPhamBTPXeBuom.Clear();
+                    }
+                    lock (ItemTongHopThanhPhamTPXeBuom)
+                    {
+                        ItemTongHopThanhPhamTPXeBuom.Clear();
+                    }
+                    lock (ItemTongHopThanhPhamRaCoi)
+                    {
+                        ItemTongHopThanhPhamRaCoi.Clear();
+                    }
+                    //HQ
+                    lock (ItemTongHopThanhPhamHQ)
+                    {
+                        ItemTongHopThanhPhamHQ.Clear();
+                    }
+                    lock (ItemTongHopThanhPhamHQGrid)
+                    {
+                        ItemTongHopThanhPhamHQGrid.Clear();
+                    }
+
                 }
                 catch (Exception exception)
                 {
@@ -167,7 +230,8 @@ public partial class DashboardViewModel : ObservableObject
 
                     var fromDate = vmApp.DateTimeNow;
                     var toDate = vmApp.DateTimeNow;
-
+                    //var fromDate = new DateTime(2025, 02, 22, 0, 0, 0);
+                    //var toDate = new DateTime(2025, 02, 22, 23, 59, 59);
                     // Thực hiện lấy dữ liệu cho từng xưởng trong danh sách
                     foreach (var xuongId in xuongIds)
                     {
@@ -181,7 +245,7 @@ public partial class DashboardViewModel : ObservableObject
                             Console.WriteLine(exception);
                             //throw;
                         }
-                       
+
                         await Task.Delay(100);
                         try
                         {
@@ -192,7 +256,7 @@ public partial class DashboardViewModel : ObservableObject
                             //Console.WriteLine(exception);
                             //throw;
                         }
-                        
+
                         await Task.Delay(100);
                         try
                         {
@@ -203,7 +267,7 @@ public partial class DashboardViewModel : ObservableObject
                             //Console.WriteLine(exception);
                             //throw;
                         }
-                        
+
                         await Task.Delay(100);
                         try
                         {
@@ -214,7 +278,7 @@ public partial class DashboardViewModel : ObservableObject
                             //Console.WriteLine(exception);
                             //throw;
                         }
-                       
+
                         await Task.Delay(100);
                         try
                         {
@@ -225,7 +289,7 @@ public partial class DashboardViewModel : ObservableObject
                             //Console.WriteLine(exception);
                             //throw;
                         }
-                      
+
                         await Task.Delay(100);
                         try
                         {
@@ -236,7 +300,7 @@ public partial class DashboardViewModel : ObservableObject
                             //Console.WriteLine(exception);
                             //throw;
                         }
-                        
+
                         await Task.Delay(100);
                         try
                         {
@@ -247,7 +311,7 @@ public partial class DashboardViewModel : ObservableObject
                             //Console.WriteLine(exception);
                             //throw;
                         }
-                        
+
                         await Task.Delay(100);
                         try
                         {
@@ -258,7 +322,7 @@ public partial class DashboardViewModel : ObservableObject
                             //Console.WriteLine(exception);
                             //throw;
                         }
-                        
+
                         await Task.Delay(100);
                         try
                         {
@@ -269,7 +333,7 @@ public partial class DashboardViewModel : ObservableObject
                             //Console.WriteLine(exception);
                             //throw;
                         }
-                       
+
                         await Task.Delay(100);
                         try
                         {
@@ -280,7 +344,7 @@ public partial class DashboardViewModel : ObservableObject
                             //Console.WriteLine(exception);
                             //throw;
                         }
-                        
+
                         await Task.Delay(100);
                         try
                         {
@@ -291,7 +355,7 @@ public partial class DashboardViewModel : ObservableObject
                             //Console.WriteLine(exception);
                             //throw;
                         }
-                       
+
                         await Task.Delay(100);
                         try
                         {
@@ -302,8 +366,60 @@ public partial class DashboardViewModel : ObservableObject
                             //Console.WriteLine(exception);
                             //throw;
                         }
-                        
-                        
+                        await Task.Delay(100);
+                        try
+                        {
+                            TongHopThanhPhamBTPXeBuom(fromDate, toDate, xuongId);
+                        }
+                        catch (Exception exception)
+                        {
+                            //Console.WriteLine(exception);
+                            //throw;
+                        }
+                        await Task.Delay(100);
+                        try
+                        {
+                            TongHopThanhPhamTPXeBuom(fromDate, toDate, xuongId);
+                        }
+                        catch (Exception exception)
+                        {
+                            //Console.WriteLine(exception);
+                            //throw;
+                        }
+                        await Task.Delay(100);
+                        try
+                        {
+                            TongHopThanhPhamRaCois(fromDate, toDate, xuongId);
+                        }
+                        catch (Exception exception)
+                        {
+                            //Console.WriteLine(exception);
+                            //throw;
+                        }
+
+                        //HQ
+                        await Task.Delay(100);
+                        try
+                        {
+                            TongHopThanhPhamHQ(fromDate, toDate, xuongId);
+                        }
+                        catch (Exception exception)
+                        {
+                            //Console.WriteLine(exception);
+                            //throw;
+                        }
+                        await Task.Delay(100);
+                        try
+                        {
+                            TongHopThanhPhamHQGrid(fromDate, toDate, xuongId);
+                        }
+                        catch (Exception exception)
+                        {
+                            //Console.WriteLine(exception);
+                            //throw;
+                        }
+
+
                     }
                     await Task.Delay(100);
                     try
@@ -315,7 +431,7 @@ public partial class DashboardViewModel : ObservableObject
                         //Console.WriteLine(exception);
                         //throw;
                     }
-                   
+
                 }
                 else
                 {
@@ -332,6 +448,139 @@ public partial class DashboardViewModel : ObservableObject
             _timer.Start();
         }
     }
+    private async Task TimerElapsedAsync()
+    {
+        if (!_semaphore.Wait(0)) return; // Nếu đang chạy thì bỏ qua
+        try
+        {
+            if (UserList == null || !UserList.Any())
+            {
+                Console.WriteLine("Danh sách hàng đợi không có dữ liệu. Dừng lấy dữ liệu.");
+                ClearAllCollections();
+                _timer.Interval = 3000;
+                return;
+            }
+
+            _timer.Interval = vmApp.IntervalDashBoard;
+            ClearAllCollections();
+            List<ListUserWaitView> userListCopy;
+            lock (UserList)
+            {
+                userListCopy = UserList.ToList();
+            }
+
+            var keepUsers = GetKeepListUserWaitView(userListCopy);
+            if (!keepUsers.Any())
+            {
+                Console.WriteLine("No valid users in keep list. Skipping data fetch.");
+                return;
+            }
+
+            var fromDate = vmApp.DateTimeNow;
+            var toDate = vmApp.DateTimeNow;
+            var xuongIds = XiNghiepViewModel.Instance.Items.Select(x => x.Ma).ToList();
+            var comName = vmApp.ComName;
+
+            foreach (var xuongId in xuongIds)
+            {
+                
+                //if (comName == nameof(ComNames.DAITHANH) || comName == nameof(ComNames.HL))
+                //{
+                //    await Task.Delay(100); try { TongHopThanhPhamBTPFilletv2(fromDate, toDate, xuongId); } catch (Exception exception) { Console.WriteLine(exception); }
+                //    await Task.Delay(100); try { TongHopThanhPhamTPFilletv2(fromDate, toDate, xuongId); } catch (Exception exception) { Console.WriteLine(exception); }
+                //    await Task.Delay(100); try { TongHopThanhPhamNguyenLieu(fromDate, toDate, xuongId); } catch (Exception exception) { Console.WriteLine(exception); }
+                //    await Task.Delay(100); try { TongHopThanhPhamSoCheDinhHinh(fromDate, toDate, xuongId); } catch (Exception exception) { Console.WriteLine(exception); }
+                //    await Task.Delay(100); try { TongHopThanhPhamBTPDinhHinh(fromDate, toDate, xuongId); } catch (Exception exception) { Console.WriteLine(exception); }
+                //    await Task.Delay(100); try { TongHopThanhPhamTPDinhHinh(fromDate, toDate, xuongId); } catch (Exception exception) { Console.WriteLine(exception); }
+                //    await Task.Delay(100); try { TongHopThanhPhamBTPXeBuom(fromDate, toDate, xuongId); } catch (Exception exception) { Console.WriteLine(exception); }
+                //    await Task.Delay(100); try { TongHopThanhPhamTPXeBuom(fromDate, toDate, xuongId); } catch (Exception exception) { Console.WriteLine(exception); }
+                //    await Task.Delay(100); try { TongHopThanhPhamChinhXepKhuon(fromDate, toDate, xuongId); } catch (Exception exception) { Console.WriteLine(exception); }
+                //    await Task.Delay(100); try { TongHopThanhPhamRaCois(fromDate, toDate, xuongId); } catch (Exception exception) { Console.WriteLine(exception); }
+                //    await Task.Delay(100); try { TongHopDinhMucSanSanLuongTheoChuyenDinhHinh(toDate,toDate, xuongId); } catch (Exception exception) { Console.WriteLine(exception); }
+                //    await Task.Delay(100); try { TongHopDinhMucSanSanLuongTheoThanhPhamDinhHinh(toDate, xuongId); } catch (Exception exception) { Console.WriteLine(exception); }
+                //    await Task.Delay(100); try { TongHopDinhMucSanSanLuongTheoChuyenFillet(toDate,toDate, xuongId); } catch (Exception exception) { Console.WriteLine(exception); }
+                //    await Task.Delay(100); try { TongHopTyLeThoiGianVaDinhMucDinhHinh(toDate,toDate, xuongId); } catch (Exception exception) { Console.WriteLine(exception); }
+                //    await Task.Delay(100); try { TongHopTyLeThoiGianVaDinhMucDinhHinhTheoNhom(toDate,toDate, xuongId); } catch (Exception exception) { Console.WriteLine(exception); }
+                //    await Task.Delay(100); try { TongHopTyLeThoiGianVaDinhMucFillet(toDate,toDate, xuongId); } catch (Exception exception) { Console.WriteLine(exception); }
+                //}
+
+                
+                //if (comName == nameof(ComNames.DAITHANH))
+                //{
+                    
+                //    await Task.Delay(100); try { TongHopThanhPhamPhuXepKhuon(fromDate, toDate, xuongId); } catch (Exception exception) { Console.WriteLine(exception); }
+                //    await Task.Delay(100); try { TongHopThanhPhamBlockXepKhuon(fromDate, toDate, xuongId); } catch (Exception exception) { Console.WriteLine(exception); }
+                //    await Task.Delay(100); try { TongHopThanhPhamKHCXepKhuon(fromDate, toDate, xuongId); } catch (Exception exception) { Console.WriteLine(exception); }
+                //    await Task.Delay(100); try { TongHopThanhPhamTaiChe(fromDate, toDate, xuongId); } catch (Exception exception) { Console.WriteLine(exception); }
+                //    await Task.Delay(100); try { TongHopThanhPhamPhuPham(fromDate, toDate, xuongId); } catch (Exception exception) { Console.WriteLine(exception); }
+                //}
+
+                
+                //if (comName == nameof(ComNames.RCQTG))
+                //{
+                    await Task.Delay(100); try { TongHopThanhPhamHQ(fromDate, toDate, xuongId); } catch (Exception exception) { Console.WriteLine(exception); }
+                    await Task.Delay(100); try { TongHopThanhPhamHQGrid(fromDate, toDate, xuongId); } catch (Exception exception) { Console.WriteLine(exception); }
+                //}
+            }
+
+            
+            //if (comName == nameof(ComNames.DAITHANH))
+            //{
+            //    await Task.Delay(100);
+            //    try { TongHopGheVungNuoiDaiThanhSite(fromDate, toDate); } catch { }
+            //}
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Timer Error: {ex}");
+        }
+        finally
+        {
+            _semaphore.Release();
+        }
+    }
+
+    private void ClearAllCollections()
+    {
+        var collections = new[]
+        {
+                //ItemTongHopThanhPhamBTPFilletv2,
+                //ItemTongHopThanhPhamTPFilletv2,
+                //ItemTongHopThanhPhamNguyenLieu,
+                //ItemTongHopThanhPhamChinhXepKhuon,
+                //ItemTongHopGheVungNuoiDaiThanhSite,
+                //ItemTongHopThanhPhamSoCheDinhHinh,
+                //ItemTongHopThanhPhamPhuXepKhuon,
+                //ItemTongHopThanhPhamBlockXepKhuon,
+                //ItemTongHopThanhPhamKHCXepKhuon,
+                //ItemTongHopThanhPhamTaiChe,
+                //ItemTongHopThanhPhamPhuPham,
+                //ItemTongHopThanhPhamBTPDinhHinh,
+                //ItemTongHopThanhPhamTPDinhHinh,
+                //ItemTongHopThanhPhamBTPXeBuom,
+                //ItemTongHopThanhPhamTPXeBuom,
+                //ItemTongHopThanhPhamRaCoi,
+                //ItemTongHopDinhMucSanLuongTheoChuyenDinhHinh,
+                //ItemTongHopDinhMucSanLuongTheoThanhPhamDinhHinh,
+                //ItemTongHopDinhMucSanLuongTheoChuyenFillet,
+                //ItemTongHopTyLeThoiGianVaDinhMucDinhHinh,
+                //ItemTongHopTyLeThoiGianVaDinhMucDinhHinhTheoNhom,
+                //ItemTongHopTyLeThoiGianVaDinhMucFillet,
+                //HQ
+                ItemTongHopThanhPhamHQ,
+                ItemTongHopThanhPhamHQGrid
+        };
+
+        foreach (var collection in collections)
+        {
+            lock (collection)
+            {
+                collection.Clear();
+            }
+        }
+    }
+
+
 
     //public class ListUserWaitView
     //{
@@ -348,7 +597,11 @@ public partial class DashboardViewModel : ObservableObject
             XuongId = xuongId
         };
 
-        UserList.Add(newUser);
+        lock (UserList)
+        {
+            UserList.Add(newUser);
+            //Console.WriteLine($"Added UserWaitView: Id={id}, XuongId={xuongId}, Time={thoiGian}");
+        }
     }
 
     private List<ListUserWaitView> GetKeepListUserWaitView(List<ListUserWaitView> userList)
@@ -359,12 +612,12 @@ public partial class DashboardViewModel : ObservableObject
 
         //var list = userList.Where(x => x != null).ToList();
         //var filteredUsers = list.Where(x => (currentTime - x.ThoiGian).Milliseconds < vmApp.IntervalDashBoard).ToList();
- 
+
         var filteredUsers = userList.Where(x => x != null && (currentTime - x.ThoiGian).Milliseconds < vmApp.IntervalDashBoard)
             .GroupBy(x => x.XuongId)
-            .Select(g => new ListUserWaitView { XuongId = g.Key, ThoiGian = g.Max(x => x.ThoiGian) , Id = ""})
+            .Select(g => new ListUserWaitView { XuongId = g.Key, ThoiGian = g.Max(x => x.ThoiGian), Id = "" })
             .ToList();
-   
+
         // Lấy danh sách các phần tử cần giữ lại
         //var keepUsers = filteredUsers
         //    .Where(user => user.ThoiGian == filteredUsers
@@ -383,7 +636,11 @@ public partial class DashboardViewModel : ObservableObject
 
         return filteredUsers;
     }
-
+    private void LogError(string message, Exception ex)
+    {
+        Console.WriteLine($"{message}: {ex.Message}\n{ex.StackTrace}");
+        // Optionally, use a proper logging framework like Serilog or NLog
+    }
     /// <summary>
     ///     Đang không phân biệt xưởng
     /// </summary>
@@ -663,4 +920,203 @@ public partial class DashboardViewModel : ObservableObject
                 }
             }
     }
+
+    public void TongHopThanhPhamBTPXeBuom(DateTime fromDate, DateTime toDate, string xuongId)
+    {
+
+        var items = PhieuCanTPFilletViewModel.Instance.GetTongHopThanhPhamBTPXeBuoms<object>(fromDate, toDate, xuongId);
+        if (items.Any())
+            lock (ItemTongHopThanhPhamBTPXeBuom)
+            {
+                try
+                {
+                    foreach (var item in items) ItemTongHopThanhPhamBTPXeBuom.Add(item);
+                }
+                catch (NotSupportedException e)
+                {
+                }
+            }
+    }
+    public void TongHopThanhPhamTPXeBuom(DateTime fromDate, DateTime toDate, string xuongId)
+    {
+
+        var items = PhieuCanTPFilletViewModel.Instance.GetTongHopThanhPhamTPXeBuoms<object>(fromDate, toDate, xuongId);
+        if (items.Any())
+            lock (ItemTongHopThanhPhamTPXeBuom)
+            {
+                try
+                {
+                    foreach (var item in items) ItemTongHopThanhPhamTPXeBuom.Add(item);
+                }
+                catch (NotSupportedException e)
+                {
+                }
+            }
+    }
+    public void TongHopThanhPhamRaCois(DateTime fromDate, DateTime toDate, string xuongId)
+    {
+
+        var items = PhieuCanRaCoiViewModel.Instance.GetTongHopThanhPhamRaCois<object>(fromDate, toDate, xuongId);
+        if (items.Any())
+            lock (ItemTongHopThanhPhamRaCoi)
+            {
+                try
+                {
+                    foreach (var item in items) ItemTongHopThanhPhamRaCoi.Add(item);
+                }
+                catch (NotSupportedException e)
+                {
+                }
+            }
+    }
+
+    public void TongHopDinhMucSanSanLuongTheoChuyenDinhHinh(DateTime dateTime,DateTime dateTime2, string xuongId)
+    {
+
+        var items = PhieuCanTPDinhHinhViewModel.Instance.GetTongHopDinhMucSanLuongTheoNhom<object>(dateTime,dateTime2, xuongId);
+        if (items.Any())
+            lock (ItemTongHopDinhMucSanLuongTheoChuyenDinhHinh)
+            {
+                try
+                {
+                    foreach (var item in items) ItemTongHopDinhMucSanLuongTheoChuyenDinhHinh.Add(item);
+                }
+                catch (NotSupportedException e)
+                {
+                }
+            }
+    }
+
+    public void TongHopDinhMucSanSanLuongTheoChuyenFillet(DateTime dateTime,DateTime dateTime2, string xuongId)
+    {
+
+        var items = PhieuCanTPFilletv2ViewModel.Instance.GetTongHopDinhMucSanLuongTheoNhom<object>(dateTime,dateTime2, xuongId);
+        if (items.Any())
+            lock (ItemTongHopDinhMucSanLuongTheoChuyenFillet)
+            {
+                try
+                {
+                    foreach (var item in items) ItemTongHopDinhMucSanLuongTheoChuyenFillet.Add(item);
+                }
+                catch (NotSupportedException e)
+                {
+                }
+            }
+    }
+
+    public void TongHopDinhMucSanSanLuongTheoThanhPhamDinhHinh(DateTime dateTime, string xuongId)
+    {
+
+        var items = PhieuCanTPDinhHinhViewModel.Instance.GetTongHopDinhMucSanLuongTheoThanhPham<object>(dateTime, xuongId);
+        if (items.Any())
+            lock (ItemTongHopDinhMucSanLuongTheoThanhPhamDinhHinh)
+            {
+                try
+                {
+                    foreach (var item in items) ItemTongHopDinhMucSanLuongTheoThanhPhamDinhHinh.Add(item);
+                }
+                catch (NotSupportedException e)
+                {
+                }
+            }
+    }
+    public void TongHopTyLeThoiGianVaDinhMucFillet(DateTime dateTime,DateTime dateTime2, string xuongId)
+    {
+
+        var items = PhieuCanTPFilletv2ViewModel.Instance.GetTongHopTyLeThoiGianVaDinhMuc<object>(dateTime, dateTime2, xuongId,15);
+        if (items.Any())
+            lock (ItemTongHopTyLeThoiGianVaDinhMucFillet)
+            {
+                try
+                {
+                    foreach (var item in items) ItemTongHopTyLeThoiGianVaDinhMucFillet.Add(item);
+                }
+                catch (NotSupportedException e)
+                {
+                }
+            }
+    }
+    public void TongHopTyLeThoiGianVaDinhMucDinhHinh(DateTime dateTime,DateTime dateTime2, string xuongId)
+    {
+        int mocThoiGian = AppViewModel.Instance.MocThoiGian1;
+        var items = PhieuCanTPDinhHinhViewModel.Instance.GetTongHopTyLeThoiGianVaDinhMuc<object>(dateTime, dateTime2, xuongId, mocThoiGian);
+        if (items.Any())
+            lock (ItemTongHopTyLeThoiGianVaDinhMucDinhHinh)
+            {
+                try
+                {
+                    foreach (var item in items) ItemTongHopTyLeThoiGianVaDinhMucDinhHinh.Add(item);
+                }
+                catch (NotSupportedException e)
+                {
+                }
+            }
+    }
+
+    public void TongHopTyLeThoiGianVaDinhMucDinhHinhTheoNhom(DateTime dateTime,DateTime dateTime2, string xuongId)
+    {
+        int mocThoiGian1 = AppViewModels.AppViewModel.Instance.MocThoiGian1;
+        int mocThoiGian2 = AppViewModels.AppViewModel.Instance.MocThoiGian2;
+
+        var items = PhieuCanTPDinhHinhViewModel.Instance.GetTongHopTyLeThoiGianVaDinhMucTheoNhom<object>(dateTime, dateTime2, xuongId, mocThoiGian1, mocThoiGian2);
+        if (items.Any())
+            lock (ItemTongHopTyLeThoiGianVaDinhMucDinhHinhTheoNhom)
+            {
+                try
+                {
+                    foreach (var item in items) ItemTongHopTyLeThoiGianVaDinhMucDinhHinhTheoNhom.Add(item);
+                }
+                catch (NotSupportedException e)
+                {
+                }
+            }
+    }
+
+    #region HQ
+    public void TongHopThanhPhamHQ(DateTime fromDate, DateTime toDate, string xuongId)
+    {
+        //lock (ItemTongHopThanhPhamTPFilletv2)
+        //{
+        //    ItemTongHopThanhPhamTPFilletv2.Clear();
+        //}
+
+        var items = HQ_PhieuCanViewModel.Instance.GetTongHopThanhPhamDashboards<object>(fromDate, toDate, xuongId);
+        if (items.Any())
+            lock (ItemTongHopThanhPhamHQ)
+            {
+                try
+                {
+                    foreach (var item in items) ItemTongHopThanhPhamHQ.Add(item);
+                }
+                catch (NotSupportedException e)
+                {
+                }
+            }
+    }
+    public void TongHopThanhPhamHQGrid(DateTime fromDate, DateTime toDate, string xuongId)
+    {
+        //lock (ItemTongHopThanhPhamTPFilletv2)
+        //{
+        //    ItemTongHopThanhPhamTPFilletv2.Clear();
+        //}
+
+        var items = HQ_PhieuCanViewModel.Instance.GetTongHopThanhPhams<object>(fromDate, toDate, xuongId);
+        if (items.Any())
+            lock (ItemTongHopThanhPhamHQGrid)
+            {
+                try
+                {
+                    foreach (var item in items) ItemTongHopThanhPhamHQGrid.Add(item);
+                }
+                catch (NotSupportedException e)
+                {
+                }
+            }
+    }
+    #endregion
 }
+
+
+
+
+

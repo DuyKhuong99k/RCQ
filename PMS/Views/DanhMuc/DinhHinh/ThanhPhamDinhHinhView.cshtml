@@ -10,7 +10,13 @@
 
 }
 <style>
+    #modalThem .modal-dialog {
+        max-width: 1000px; /* Thiết lập kích thước tùy chỉnh cho modal */
+    }
 
+    #modalSua .modal-dialog {
+        max-width: 1000px; /* Thiết lập kích thước tùy chỉnh cho modal */
+    }
     /* CSS cho headerTemplate */
     .head {
         display: flex;
@@ -41,18 +47,14 @@
             text-align: center; /* Căn giữa nội dung của các cột */
         }
 </style>
-<div class="container mt-4">
+
     <div class="row">
         <div class="col-12">
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h2 class="mb-0">Danh Sách Thành Phẩm Định Hình</h2>
                     @{
-                        var themThanhPhamDinhHinh = rolePermistions.Where(x => x.Fu == "Danh Mục / Định Hình / Thành Phẩm" && x.Func == "Thêm Định Hình / Thành Phẩm" && x.Status == 1).FirstOrDefault();
-                        if (themThanhPhamDinhHinh != null)
-                        {
-                            <button onclick="showInsert()" type="button" class="btn btn-primary">Thêm</button>
-                        }
+                        
                     }
 
                 </div>
@@ -60,6 +62,11 @@
                     <div id="Grid"></div>
                     <div style="margin-top:20px;">
                         @{
+                            var themThanhPhamDinhHinh = rolePermistions.Where(x => x.Fu == "Danh Mục / Định Hình / Thành Phẩm" && x.Func == "Thêm Định Hình / Thành Phẩm" && x.Status == 1).FirstOrDefault();
+                            if (themThanhPhamDinhHinh != null)
+                            {
+                                <button onclick="showInsert()" type="button" class="btn btn-primary">Thêm</button>
+                            }
                             var suaThanhPhamDinhHinh = rolePermistions.Where(x => x.Fu == "Danh Mục / Định Hình / Thành Phẩm" && x.Func == "Sửa Định Hình / Thành Phẩm" && x.Status == 1).FirstOrDefault();
                             if (suaThanhPhamDinhHinh != null)
                             {
@@ -70,23 +77,14 @@
                             {
                                 <button onclick="showDelete()" style="margin-right:5px" class="btn btn-outline-danger"><i class='bx bx-trash'></i>Xoá</button>
                             }
-                            var importThanhPhamDinhHinh = rolePermistions.Where(x => x.Fu == "Danh Mục / Định Hình / Thành Phẩm" && x.Func == "Import Định Hình / Thành Phẩm" && x.Status == 1).FirstOrDefault();
-                            if (importThanhPhamDinhHinh != null)
-                            {
-                                <button onclick="import()" style="margin-right:5px" class="btn btn-outline-info"><i class='bx bx-import'></i>Import</button>
-                            }
-                            var exportThanhPhamDinhHinh = rolePermistions.Where(x => x.Fu == "Danh Mục / Định Hình / Thành Phẩm" && x.Func == "Export Định Hình / Thành Phẩm" && x.Status == 1).FirstOrDefault();
-                            if (exportThanhPhamDinhHinh != null)
-                            {
-                                <button onclick="export()" style="margin-right:5px" class="btn btn-outline-secondary"><i class='bx bx-export'></i>Export Excel</button>
-                            }
+                            
                         }
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
+
 <div class="modal fade" id="modalThem" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -220,12 +218,21 @@
                                     </div>
                                 </div>
 
+                                <div class="row">
+                                    <div class="col-md-12 mb-12 ">
+                                        <div class="form-outline">
+                                            <label class="form-label">Thời Gian Hoàn Thành</label>
+                                            <input type="number" min="0" step="0.001" id="thoiGianHTTPDH" class="form-control form-control-lg" autocomplete="off" placeholder="0,000" />
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <div class="row" style="margin-top:10px">
                                     <div class="col-md-12 mb-12">
                                         <div class="list-group form-outline">
                                             <label class="">
                                                 <input class="form-check-input me-1" type="checkbox" value="" id="isSuDungThoiGianGiuaLoaiThanhPhamTPDH" />
-                                                Đặt thời gian các trả (2p)
+                                                Đặt thời gian cá trả (2p)
                                             </label>
                                             <label class="">
                                                 <input class="form-check-input me-1" type="checkbox" value="" id="isDauVaoBatBuocTPDH" />
@@ -234,6 +241,10 @@
                                             <label class="">
                                                 <input class="form-check-input me-1" type="checkbox" value="" id="isBaoCaoDauRotTPDH" />
                                                 Báo cáo đậu rớt
+                                            </label>
+                                            <label class="">
+                                                <input class="form-check-input me-1" type="checkbox" value="" id="isCaDaTPDH" />
+                                                Cá Da
                                             </label>
                                             <label class="">
                                                 <input class="form-check-input me-1" type="checkbox" value="" id="suDungTPDH" />
@@ -396,13 +407,20 @@
                                         </div>
                                     </div>
                                 </div>
-
+                                <div class="row">
+                                    <div class="col-md-12 mb-12 ">
+                                        <div class="form-outline">
+                                            <label class="form-label">Thời Gian Hoàn Thành</label>
+                                            <input type="number" min="0" step="0.001" id="thoiGianHTTPDHSua" class="form-control form-control-lg" autocomplete="off" placeholder="0,000" />
+                                        </div>
+                                    </div>
+                                </div>
                                 <div class="row" style="margin-top:10px">
                                     <div class="col-md-12 mb-12">
                                         <div class="list-group form-outline">
                                             <label class="">
                                                 <input class="form-check-input me-1" type="checkbox" value="" id="isSuDungThoiGianGiuaLoaiThanhPhamTPDHSua" />
-                                                Đặt thời gian các trả (2p)
+                                                Đặt thời gian cá trả (2p)
                                             </label>
                                             <label class="">
                                                 <input class="form-check-input me-1" type="checkbox" value="" id="isDauVaoBatBuocTPDHSua" />
@@ -411,6 +429,10 @@
                                             <label class="">
                                                 <input class="form-check-input me-1" type="checkbox" value="" id="isBaoCaoDauRotTPDHSua" />
                                                 Báo cáo đậu rớt
+                                            </label>
+                                            <label class="">
+                                                <input class="form-check-input me-1" type="checkbox" value="" id="isCaDaTPDHSua" />
+                                                Cá Da
                                             </label>
                                             <label class="">
                                                 <input class="form-check-input me-1" type="checkbox" value="" id="suDungTPDHSua" />
@@ -465,12 +487,14 @@
                     grid = new ej.grids.Grid({
                         dataSource: dataManager,
                         allowPaging: true,
-                        pageSettings: { pageSize: 500 },
+                        pageSettings: { pageSize: 50, pageSizes: [50, 100, 200, 500] },
                         allowFiltering: true,
                         filterSettings: { type: 'Excel' },
                         allowSorting: true,
                         //frozenColumns: 3,
                         allowResizing: true,
+                        allowExcelExport: true,
+                        toolbar: ['ExcelExport'],
                         rowSelected: onRowSelected,
                         height: 400,
                         columns: [
@@ -490,12 +514,18 @@
                             { field: 'DinhMucCaTra', headerText: 'Định Mức Cá Trả', type: 'number', width: 150 },
                             { field: 'IsSuDungThoiGianGiuaLoaiThanhPham', headerText: 'Thời Gian Cá Trả (2p)', width: 100, displayAsCheckBox: 'true', textAlign: 'Center' },
                             { field: 'BaoCaoDauRot', headerText: 'Báo Cáo Đậu Rớt', width: 100, displayAsCheckBox: 'true', textAlign: 'Center' },
+                            { field: 'IsCaDa', headerText: 'Cá Da', width: 100, displayAsCheckBox: 'true', textAlign: 'Center' },
+                            { field: 'ThoiGianHT', headerText: 'Thời Gian Hoàn Thành', type: 'number', width: 150 },
                             { field: 'SuDung', headerText: 'Sử Dụng', width: 100, displayAsCheckBox: 'true', textAlign: 'Center' },
                             { field: 'XuongName', headerText: 'Xưởng', type: 'number', width: 150 },
                         ]
                     });
                     // Hiển thị Grid trên trang web
                     grid.appendTo('#Grid');
+                    grid.toolbarClick = function (args) {
+             if (args.item.id === 'Grid_excelexport') {
+                grid.excelExport();
+             }};
                 }
             },
             error: function (error) {
@@ -606,7 +636,9 @@
                     $('#isSuDungThoiGianGiuaLoaiThanhPhamTPDH').prop('checked', rs.IsSuDungThoiGianGiuaLoaiThanhPham);
                     $('#isDauVaoBatBuocTPDH').prop('checked', rs.IsDauVaoBatBuoc);
                     $('#isBaoCaoDauRotTPDH').prop('checked', rs.BaoCaoDauRot);
+                    $('#isCaDaTPDH').prop('checked', rs.IsCaDa);
                     $('#suDungTPDH').prop('checked', rs.SuDung);
+                    $('#thoiGianHTTPDH').val(rs.ThoiGianHT);
                     $('#modalThem').modal('show');
                 }
                 else {
@@ -638,7 +670,9 @@
         var isSuDungThoiGianGiuaLoaiThanhPham = $('#isSuDungThoiGianGiuaLoaiThanhPhamTPDH').prop('checked');
         var isDauVaoBatBuoc = $('#isDauVaoBatBuocTPDH').prop('checked');
         var isBaoCaoDauRot = $('#isBaoCaoDauRotTPDH').prop('checked');
+        var isCaDa = $('#isCaDaTPDH').prop('checked');
         var suDung = $('#suDungTPDH').prop('checked');
+        var thoiGianHT = $('#thoiGianHTTPDH').val();
         document.getElementById("txtThem").style.visibility = "hidden";
         document.getElementById("loadingIndicator").style.display = "block";
         $.ajax({
@@ -662,7 +696,9 @@
                 isSuDungThoiGianGiuaLoaiThanhPham: isSuDungThoiGianGiuaLoaiThanhPham,
                 isDauVaoBatBuoc: isDauVaoBatBuoc,
                 isBaoCaoDauRot: isBaoCaoDauRot,
-                suDung: suDung
+                suDung: suDung,
+                isCaDa: isCaDa,
+                thoiGianHT: thoiGianHT
             },
             success: function (rs) {
                 if (rs.isSuccess === true) {
@@ -725,7 +761,9 @@
                     $('#isSuDungThoiGianGiuaLoaiThanhPhamTPDHSua').prop('checked', rs.IsSuDungThoiGianGiuaLoaiThanhPham);
                     $('#isDauVaoBatBuocTPDHSua').prop('checked', rs.IsDauVaoBatBuoc);
                     $('#isBaoCaoDauRotTPDHSua').prop('checked', rs.BaoCaoDauRot);
+                    $('#isCaDaTPDHSua').prop('checked', rs.IsCaDa);
                     $('#suDungTPDHSua').prop('checked', rs.SuDung);
+                    $('#thoiGianHTTPDHSua').val(rs.ThoiGianHT);
                     $('#modalSua').modal('show');
                 }
                 else {
@@ -758,7 +796,9 @@
         var isSuDungThoiGianGiuaLoaiThanhPham = $('#isSuDungThoiGianGiuaLoaiThanhPhamTPDHSua').prop('checked');
         var isDauVaoBatBuoc = $('#isDauVaoBatBuocTPDHSua').prop('checked');
         var isBaoCaoDauRot = $('#isBaoCaoDauRotTPDHSua').prop('checked');
+        var isCaDa = $('#isCaDaTPDHSua').prop('checked');
         var suDung = $('#suDungTPDHSua').prop('checked');
+        var thoiGianHT = $('#thoiGianHTTPDHSua').val();
         document.getElementById("txtSua").style.visibility = "hidden";
         document.getElementById("loadingIndicatorSua").style.display = "block";
         $.ajax({
@@ -782,7 +822,9 @@
                 isDauVaoBatBuoc: isDauVaoBatBuoc,
                 isBaoCaoDauRot: isBaoCaoDauRot,
                 suDung: suDung,
-                maCa: maCa
+                maCa: maCa,
+                isCaDa: isCaDa,
+                thoiGianHT: thoiGianHT
             },
             type: 'POST',
             dataType: 'json',

@@ -9,7 +9,9 @@ namespace Models.Repos.AppModel
     public class PhieuCanTongHopCoi
     {
         public string MaCoiChinh { get; set; }
-
+        public string CoiChinhName { get; set; }
+        public string MaMau { get; set; }
+        public string MauName { get; set; }
         public string MaLo { get; set; }
 
         public string LoaiCaName { get; set; }

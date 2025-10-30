@@ -180,6 +180,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="ClosedXML" Version="0.104.2" />
     <PackageReference Include="GroupDocs.Viewer" Version="24.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Components.QuickGrid.EntityFrameworkAdapter" Version="8.0.3" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="8.0.3" />
@@ -189,7 +190,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.19.6" />
-    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="8.0.6" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="8.0.7" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="Syncfusion.EJ2.AspNet.Core" Version="25.1.41" />
     <PackageReference Include="Syncfusion.XlsIO.Net.Core" Version="25.1.41" />
@@ -206,7 +207,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="FilePrivate\" />
+    <Folder Include="FilePrivate\HDSD HQ\" />
     <Folder Include="Views\DanhMucHQ\HQ_LoaiNguyenLieu\" />
     <Folder Include="Views\DanhMucHQ\HQ_LoChiTiet\" />
     <Folder Include="Views\DanhMucHQ\HQ_ColorCor\" />
@@ -222,7 +223,16 @@
     <Content Update="wwwroot\Authentication\images\Avatar\anhbuichat.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Update="wwwroot\HuongDanFile\HSDPHAMMEMPMS.pdf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\HuongDanFile\HSDPHAMMEMPMS.pdf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Update="wwwroot\HuongDanFile\HuongDanSuDung2.pdf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\JsonFuFunc\FuFuncHL.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

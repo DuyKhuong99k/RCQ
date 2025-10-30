@@ -12,9 +12,11 @@ using ViewModels.Repos.Hubs.IServices;
 using Services;
 using Dapper;
 using PMSHub.Components.Pages;
+using ToolsEx;
 
 var builder = WebApplication.CreateBuilder(args);
-
+// Đăng ký HttpClient factory
+builder.Services.AddHttpClient();
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
@@ -32,7 +34,12 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
 {
+#if DEBUG
+    options.IdleTimeout = TimeSpan.FromSeconds(3);
+#else
     options.IdleTimeout = TimeSpan.FromMinutes(30);
+#endif
+    
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
 });
@@ -48,21 +55,34 @@ builder.Services.AddControllers().AddNewtonsoftJson(o =>
         }
     };
 });
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll",
+        builder =>
+        {
+
+            builder.WithOrigins("https://*")
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+                .AllowCredentials(); // Cho phép truy cập có credentials
+        });
+});
 builder.Services.AddSyncfusionBlazor();
 builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddSignalR(options =>
 {
+    options.KeepAliveInterval = TimeSpan.FromSeconds(15);         // Server gửi ping mỗi 15s
     options.ClientTimeoutInterval = TimeSpan.FromSeconds(30);
-    options.KeepAliveInterval = TimeSpan.FromSeconds(15);
 });
 builder.Services.AddSingleton<MainViewModel>();
 builder.Services.AddSingleton<IMainService, MainViewModel>();
 builder.Services.AddSingleton<ICoiService, CoiService>();
 builder.Services.AddSingleton<IMayCansService, MayCansService>();
-builder.Services.AddSingleton<IUserService, UserService>();
+builder.Services.AddSingleton(typeof(HighThroughputQueue<>));
+
 builder.Services.AddSingleton<ICommunicationService, CommunicationService>();
 builder.Services.AddSingleton<ICommitService, CommitService>();
-
+builder.Services.AddSingleton<IUserService, UserService>();
 
 builder.Services.AddScoped<IDeviceViewService, DeviceViewService>();
 builder.Services.AddScoped<ICoiViewService, CoiViewService>();
@@ -70,6 +90,7 @@ builder.Services.AddScoped<ILoginService, LoginService>();
 builder.Services.AddScoped<ISessionService, SesssionService>();
 builder.Services.AddScoped<ICardService, CardService>();
 builder.Services.AddScoped<IMessageService, MessageService>();
+builder.Services.AddScoped<IToastService,ToastService>();
 
 builder.Services.AddTransient<IConverterService, ConverterService>();
 builder.Services.AddTransient<IPLCService, PLCService>();
@@ -114,6 +135,7 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
+app.UseWebSockets();
 app.UseRouting();
 //app.UseResponseCompression();
 
@@ -121,9 +143,10 @@ app.UseRouting();
 
 app.UseStaticFiles();
 app.UseAntiforgery();
+app.UseSession(); 
 app.UseAuthorization();
 
-app.UseSession(); // Th�m middleware session v�o pipeline
+// Th�m middleware session v�o pipeline
 app.MapControllers();
 app.MapHub<ChatHub>("chathub");
 

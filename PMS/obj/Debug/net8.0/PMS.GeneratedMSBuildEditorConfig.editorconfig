@@ -76,6 +76,14 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQmFvQ2FvL0JUUERpbmhIaW5oL0NoaVRpZXRCVFBEaW5oSGluaC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/BaoCao/BTPDinhHinh/ChiTietPhieuCanChuaSuaView.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQmFvQ2FvL0JUUERpbmhIaW5oL0NoaVRpZXRQaGlldUNhbkNodWFTdWFWaWV3LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/BaoCao/BTPDinhHinh/TongHopLoBTPDinhHinhView.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQmFvQ2FvL0JUUERpbmhIaW5oL1RvbmdIb3BMb0JUUERpbmhIaW5oVmlldy5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
 [/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/BaoCao/BTPDinhHinh/TongHopNhanVienBTPDinhHinhView.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQmFvQ2FvL0JUUERpbmhIaW5oL1RvbmdIb3BOaGFuVmllbkJUUERpbmhIaW5oVmlldy5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
@@ -136,8 +144,16 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQmFvQ2FvL0RpbmhIaW5oL1RvbmdIb3BMb2FpVGhhbmhQaGFtVFBEaW5oSGluaFZpZXcuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/BaoCao/DinhHinh/TongHopLoTPDinhHinhView.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQmFvQ2FvL0RpbmhIaW5oL1RvbmdIb3BMb1RQRGluaEhpbmhWaWV3LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
 [/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/BaoCao/DinhHinh/TongHopNhanVienBanKiemView.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQmFvQ2FvL0RpbmhIaW5oL1RvbmdIb3BOaGFuVmllbkJhbktpZW1WaWV3LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/BaoCao/DinhHinh/TongHopNhanVienKhongLamViecTPDinhHinhView.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQmFvQ2FvL0RpbmhIaW5oL1RvbmdIb3BOaGFuVmllbktob25nTGFtVmllY1RQRGluaEhpbmhWaWV3LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
 [/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/BaoCao/DinhHinh/TongHopNhanVienPhucVuView.cshtml]
@@ -152,6 +168,14 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQmFvQ2FvL0ZpbGxldC9DaGlUaWV0QlRQRmlsbGV0djJWaWV3LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/BaoCao/Fillet/ChiTietBTPXeBuomView.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQmFvQ2FvL0ZpbGxldC9DaGlUaWV0QlRQWGVCdW9tVmlldy5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/BaoCao/Fillet/chitietphieucanchuasuaview.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQmFvQ2FvL0ZpbGxldC9jaGl0aWV0cGhpZXVjYW5jaHVhc3Vhdmlldy5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
 [/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/BaoCao/Fillet/ChiTietTPFilletv2View.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQmFvQ2FvL0ZpbGxldC9DaGlUaWV0VFBGaWxsZXR2MlZpZXcuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
@@ -160,12 +184,44 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQmFvQ2FvL0ZpbGxldC9DaGlUaWV0VFBGaWxsZXRWaWV3LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/BaoCao/Fillet/ChiTietTPXeBuomView.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQmFvQ2FvL0ZpbGxldC9DaGlUaWV0VFBYZUJ1b21WaWV3LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
 [/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/BaoCao/Fillet/GetTongHopGioLamViecTPFilletv2View.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQmFvQ2FvL0ZpbGxldC9HZXRUb25nSG9wR2lvTGFtVmllY1RQRmlsbGV0djJWaWV3LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/BaoCao/Fillet/TongHopDinhMucTPXeBuomView.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQmFvQ2FvL0ZpbGxldC9Ub25nSG9wRGluaE11Y1RQWGVCdW9tVmlldy5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/BaoCao/Fillet/TongHopLoBTPFilletv2View.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQmFvQ2FvL0ZpbGxldC9Ub25nSG9wTG9CVFBGaWxsZXR2MlZpZXcuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/BaoCao/Fillet/TongHopLoThanhPhamSizeBTPXeBuomView.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQmFvQ2FvL0ZpbGxldC9Ub25nSG9wTG9UaGFuaFBoYW1TaXplQlRQWGVCdW9tVmlldy5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/BaoCao/Fillet/TongHopLoThanhPhamSizeTPXeBuomView.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQmFvQ2FvL0ZpbGxldC9Ub25nSG9wTG9UaGFuaFBoYW1TaXplVFBYZUJ1b21WaWV3LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/BaoCao/Fillet/TongHopLoTPFilletv2View.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQmFvQ2FvL0ZpbGxldC9Ub25nSG9wTG9UUEZpbGxldHYyVmlldy5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/BaoCao/Fillet/TongHopNhanVien2TPFilletv2View.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQmFvQ2FvL0ZpbGxldC9Ub25nSG9wTmhhblZpZW4yVFBGaWxsZXR2MlZpZXcuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
 [/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/BaoCao/Fillet/TongHopNhanVienBTPFilletv2View.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQmFvQ2FvL0ZpbGxldC9Ub25nSG9wTmhhblZpZW5CVFBGaWxsZXR2MlZpZXcuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/BaoCao/Fillet/TongHopNhanVienBTPXeBuomView.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQmFvQ2FvL0ZpbGxldC9Ub25nSG9wTmhhblZpZW5CVFBYZUJ1b21WaWV3LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
 [/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/BaoCao/Fillet/TongHopNhanVienPhucVuBTPFilletv2View.cshtml]
@@ -184,8 +240,16 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQmFvQ2FvL0ZpbGxldC9Ub25nSG9wTmhhblZpZW5UUEZpbGxldFZpZXcuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/BaoCao/Fillet/TongHopNhanVienTPXeBuomView.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQmFvQ2FvL0ZpbGxldC9Ub25nSG9wTmhhblZpZW5UUFhlQnVvbVZpZXcuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
 [/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/BaoCao/Fillet/TongHopThanhPhamBTPFilletv2View.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQmFvQ2FvL0ZpbGxldC9Ub25nSG9wVGhhbmhQaGFtQlRQRmlsbGV0djJWaWV3LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/BaoCao/Fillet/TongHopThanhPhamBTPXeBuomView.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQmFvQ2FvL0ZpbGxldC9Ub25nSG9wVGhhbmhQaGFtQlRQWGVCdW9tVmlldy5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
 [/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/BaoCao/Fillet/TongHopthanhPhamTPFilletv2View.cshtml]
@@ -194,6 +258,10 @@ build_metadata.AdditionalFiles.CssScope =
 
 [/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/BaoCao/Fillet/TongHopThanhPhamTPFilletView.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQmFvQ2FvL0ZpbGxldC9Ub25nSG9wVGhhbmhQaGFtVFBGaWxsZXRWaWV3LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/BaoCao/Fillet/TongHopThanhPhamTPXeBuomView.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQmFvQ2FvL0ZpbGxldC9Ub25nSG9wVGhhbmhQaGFtVFBYZUJ1b21WaWV3LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
 [/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/BaoCao/LangDa/ChiTietLangDaView.cshtml]
@@ -208,12 +276,20 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQmFvQ2FvL05ndXllbkxpZXUvQ2hpVGlldE5ndXllbkxpZXVWaWV3LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/BaoCao/NguyenLieu/ChiTietPhieuCanKhongGhiNhanDuLieuView.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQmFvQ2FvL05ndXllbkxpZXUvQ2hpVGlldFBoaWV1Q2FuS2hvbmdHaGlOaGFuRHVMaWV1Vmlldy5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
 [/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/BaoCao/NguyenLieu/TongHopBanCatTietNguyenLieuView.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQmFvQ2FvL05ndXllbkxpZXUvVG9uZ0hvcEJhbkNhdFRpZXROZ3V5ZW5MaWV1Vmlldy5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
 [/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/BaoCao/NguyenLieu/TongHopKeToanNguyenLieuView.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQmFvQ2FvL05ndXllbkxpZXUvVG9uZ0hvcEtlVG9hbk5ndXllbkxpZXVWaWV3LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/BaoCao/NguyenLieu/TongHopLoView.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQmFvQ2FvL05ndXllbkxpZXUvVG9uZ0hvcExvVmlldy5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
 [/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/BaoCao/NguyenLieu/TongHopNhaCCNguyenLieuView.cshtml]
@@ -320,6 +396,18 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQmFvQ2FvL1RvbS9CYW9DYW9Ub25nSG9wTmhhblZpZW5Ub21WaWV3LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/BaoCao/TP2/Chitiettp2.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQmFvQ2FvL1RQMi9DaGl0aWV0dHAyLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/BaoCao/TP2/tonghopsptp2.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQmFvQ2FvL1RQMi90b25naG9wc3B0cDIuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/BaoCao/TP2/tonghoptylethuhoitp2.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQmFvQ2FvL1RQMi90b25naG9wdHlsZXRodWhvaXRwMi5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
 [/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/BaoCao/XepKhuon/Block/ChiTietBlockXepKhuonView.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQmFvQ2FvL1hlcEtodW9uL0Jsb2NrL0NoaVRpZXRCbG9ja1hlcEtodW9uVmlldy5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
@@ -372,6 +460,10 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQmFvQ2FvL1hlcEtodW9uL0NoaW5oL1RvbmdIb3BUaG9pR2lhblNhcFJhQ29pWHVvbmdDaGluaFhlcEtodW9uVmlldy5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/BaoCao/XepKhuon/Chinh/TongHopTyLeTangTrongCoiXepKhuonView.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQmFvQ2FvL1hlcEtodW9uL0NoaW5oL1RvbmdIb3BUeUxlVGFuZ1Ryb25nQ29pWGVwS2h1b25WaWV3LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
 [/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/BaoCao/XepKhuon/KXL/ChiTietKXLXepKhuonView.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQmFvQ2FvL1hlcEtodW9uL0tYTC9DaGlUaWV0S1hMWGVwS2h1b25WaWV3LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
@@ -404,6 +496,22 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQmFvQ2FvL1hlcEtodW9uL1BodUdpYS9Ub25nSG9wUGh1R2lhWGVwS2h1b25WaWV3LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/BaoCao/XepKhuon/RaCoi/ChiTietRaCoiXepKhuonView.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQmFvQ2FvL1hlcEtodW9uL1JhQ29pL0NoaVRpZXRSYUNvaVhlcEtodW9uVmlldy5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/BaoCao/XepKhuon/RaCoi/TongHopCoiRaCoiXepKhuonView.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQmFvQ2FvL1hlcEtodW9uL1JhQ29pL1RvbmdIb3BDb2lSYUNvaVhlcEtodW9uVmlldy5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/BaoCao/XepKhuon/RaCoi/TongHopNhanVienCoiXepKhuonView.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQmFvQ2FvL1hlcEtodW9uL1JhQ29pL1RvbmdIb3BOaGFuVmllbkNvaVhlcEtodW9uVmlldy5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/BaoCao/XepKhuon/RaCoi/TongHopTyLeTangTrongCoiXepKhuonView.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQmFvQ2FvL1hlcEtodW9uL1JhQ29pL1RvbmdIb3BUeUxlVGFuZ1Ryb25nQ29pWGVwS2h1b25WaWV3LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
 [/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/BaoCao/XepKhuon/TaiChe/ChiTietRaDongTaiCheXepKhuonView.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQmFvQ2FvL1hlcEtodW9uL1RhaUNoZS9DaGlUaWV0UmFEb25nVGFpQ2hlWGVwS2h1b25WaWV3LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
@@ -420,12 +528,24 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQmFvQ2FvSFEvQ2hpVGlldEhRVmlldy5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/BaoCaoHQ/ThongKeSanXuatHQView.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQmFvQ2FvSFEvVGhvbmdLZVNhblh1YXRIUVZpZXcuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
 [/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/BaoCaoHQ/TongHopNhanVienHQView.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQmFvQ2FvSFEvVG9uZ0hvcE5oYW5WaWVuSFFWaWV3LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/BaoCaoHQ/TongHopNhanVienTheoCaHQView.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQmFvQ2FvSFEvVG9uZ0hvcE5oYW5WaWVuVGhlb0NhSFFWaWV3LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
 [/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/BaoCaoHQ/TongHopThanhPhamHQView.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQmFvQ2FvSFEvVG9uZ0hvcFRoYW5oUGhhbUhRVmlldy5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/BaoCaoHQ/TongHopTinhLuongHQView.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQmFvQ2FvSFEvVG9uZ0hvcFRpbmhMdW9uZ0hRVmlldy5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
 [/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/BaoCaoNhanh/Index.cshtml]
@@ -484,8 +604,20 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvRGFuaE11Yy9GaWxsZXQvQmFuRmlsbGV0Vmlldy5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/DanhMuc/Fillet/BoTriLoTheoLineView.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvRGFuaE11Yy9GaWxsZXQvQm9UcmlMb1RoZW9MaW5lVmlldy5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/DanhMuc/Fillet/BoTriNhanVienTheoChuyenViTriView.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvRGFuaE11Yy9GaWxsZXQvQm9UcmlOaGFuVmllblRoZW9DaHV5ZW5WaVRyaVZpZXcuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
 [/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/DanhMuc/Fillet/BoTriNVTheoSizeView.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvRGFuaE11Yy9GaWxsZXQvQm9UcmlOVlRoZW9TaXplVmlldy5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/DanhMuc/Fillet/BoTriViTriLoSizeThanhPhamView.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvRGFuaE11Yy9GaWxsZXQvQm9UcmlWaVRyaUxvU2l6ZVRoYW5oUGhhbVZpZXcuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
 [/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/DanhMuc/Fillet/DinhMucFilletView.cshtml]
@@ -546,6 +678,10 @@ build_metadata.AdditionalFiles.CssScope =
 
 [/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/DanhMuc/LangDa/ThanhPhamLangDaView.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvRGFuaE11Yy9MYW5nRGEvVGhhbmhQaGFtTGFuZ0RhVmlldy5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/DanhMuc/NguyenLieu/AoView.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvRGFuaE11Yy9OZ3V5ZW5MaWV1L0FvVmlldy5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
 [/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/DanhMuc/NguyenLieu/BanCatTietView.cshtml]
@@ -796,12 +932,24 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvRGFuaE11Yy9YZXBLaHVvbi9DaGluaC9Db2lDaGluaFhlcEtodW9uVmlldy5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/DanhMuc/XepKhuon/Chinh/CoiLeXepKhuonView.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvRGFuaE11Yy9YZXBLaHVvbi9DaGluaC9Db2lMZVhlcEtodW9uVmlldy5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
 [/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/DanhMuc/XepKhuon/Chinh/SizeChinhXepKhuonView.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvRGFuaE11Yy9YZXBLaHVvbi9DaGluaC9TaXplQ2hpbmhYZXBLaHVvblZpZXcuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
 [/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/DanhMuc/XepKhuon/Chinh/ThanhPhamChinhXepKhuonView.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvRGFuaE11Yy9YZXBLaHVvbi9DaGluaC9UaGFuaFBoYW1DaGluaFhlcEtodW9uVmlldy5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/DanhMuc/XepKhuon/Chinh/TrongLuongCoiTheoSanPhamView.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvRGFuaE11Yy9YZXBLaHVvbi9DaGluaC9Ucm9uZ0x1b25nQ29pVGhlb1NhblBoYW1WaWV3LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/DanhMuc/XepKhuon/Chinh/TrongLuongCoiTheoThanhPhamView.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvRGFuaE11Yy9YZXBLaHVvbi9DaGluaC9Ucm9uZ0x1b25nQ29pVGhlb1RoYW5oUGhhbVZpZXcuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
 [/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/DanhMuc/XepKhuon/KXL/SizeKXLXepKhuonView.cshtml]
@@ -860,6 +1008,10 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvRGFuaE11Yy9YZXBLaHVvbi9UYWlDaGUvVGhhbmhQaGFtVGFpQ2hlWGVwS2h1b25WaWV3LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/DanhMucHQ/HQ_Ca/HQ_CaView.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvRGFuaE11Y0hRL0hRX0NhL0hRX0NhVmlldy5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
 [/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/DanhMucHQ/HQ_Lo/HQ_LoView.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvRGFuaE11Y0hRL0hRX0xvL0hRX0xvVmlldy5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
@@ -870,6 +1022,14 @@ build_metadata.AdditionalFiles.CssScope =
 
 [/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/DanhMucHQ/HQ_LoChiTiet/HQ_LoChiTietView.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvRGFuaE11Y0hRL0hRX0xvQ2hpVGlldC9IUV9Mb0NoaVRpZXRWaWV3LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/DanhMucHQ/HQ_MapSanPhamTinhLuong/HQ_MapSanPhamTinhLuongView.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvRGFuaE11Y0hRL0hRX01hcFNhblBoYW1UaW5oTHVvbmcvSFFfTWFwU2FuUGhhbVRpbmhMdW9uZ1ZpZXcuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/DanhMucHQ/HQ_NhanVienTheoCa/HQ_NhanVienTheoCaView.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvRGFuaE11Y0hRL0hRX05oYW5WaWVuVGhlb0NhL0hRX05oYW5WaWVuVGhlb0NhVmlldy5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
 [/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/DanhMucHQ/HQ_NhanVienTheoNhom/HQ_NhanVienTheoNhomView.cshtml]
@@ -888,6 +1048,22 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvRGFuaE11Y0hRL0hRX1RoYW5oUGhhbS9IUV9UaGFuaFBoYW1WaWV3LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/Dashboard/DBDinhMucFilletTheoSanPhamAdvanceView.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvRGFzaGJvYXJkL0RCRGluaE11Y0ZpbGxldFRoZW9TYW5QaGFtQWR2YW5jZVZpZXcuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/Dashboard/DBDinhMucFilletTheoSanPhamPartialView.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvRGFzaGJvYXJkL0RCRGluaE11Y0ZpbGxldFRoZW9TYW5QaGFtUGFydGlhbFZpZXcuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/Dashboard/DBDinhMucSuaCaTheoSanPhamAdvanceView.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvRGFzaGJvYXJkL0RCRGluaE11Y1N1YUNhVGhlb1NhblBoYW1BZHZhbmNlVmlldy5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/Dashboard/DBDinhMucSuaCaTheoSanPhamPartialView.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvRGFzaGJvYXJkL0RCRGluaE11Y1N1YUNhVGhlb1NhblBoYW1QYXJ0aWFsVmlldy5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
 [/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/Dashboard/DBTest.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvRGFzaGJvYXJkL0RCVGVzdC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
@@ -896,8 +1072,64 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvRGFzaGJvYXJkL0RCVG9uZ0hvcEJUUEZpbGxldFBhcnRpYWxWaWV3LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/Dashboard/DBTongHopDinhMucSanLuongTheoChuyenDinhHinhAdvanceView.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvRGFzaGJvYXJkL0RCVG9uZ0hvcERpbmhNdWNTYW5MdW9uZ1RoZW9DaHV5ZW5EaW5oSGluaEFkdmFuY2VWaWV3LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/Dashboard/DBTongHopDinhMucSanLuongTheoChuyenDinhHinhPartialView.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvRGFzaGJvYXJkL0RCVG9uZ0hvcERpbmhNdWNTYW5MdW9uZ1RoZW9DaHV5ZW5EaW5oSGluaFBhcnRpYWxWaWV3LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/Dashboard/DBTongHopDinhMucSanLuongTheoChuyenFilletAdvanceView.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvRGFzaGJvYXJkL0RCVG9uZ0hvcERpbmhNdWNTYW5MdW9uZ1RoZW9DaHV5ZW5GaWxsZXRBZHZhbmNlVmlldy5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/Dashboard/DBTongHopDinhMucSanLuongTheoChuyenFilletPartialView.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvRGFzaGJvYXJkL0RCVG9uZ0hvcERpbmhNdWNTYW5MdW9uZ1RoZW9DaHV5ZW5GaWxsZXRQYXJ0aWFsVmlldy5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
 [/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/Dashboard/DBTongHopGheVungNuoiDaiThanhSidePartialView.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvRGFzaGJvYXJkL0RCVG9uZ0hvcEdoZVZ1bmdOdW9pRGFpVGhhbmhTaWRlUGFydGlhbFZpZXcuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/Dashboard/DBTongHopHaoHutThanhPhamSuaCaAdvanceView.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvRGFzaGJvYXJkL0RCVG9uZ0hvcEhhb0h1dFRoYW5oUGhhbVN1YUNhQWR2YW5jZVZpZXcuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/Dashboard/DBTongHopHaoHutThanhPhamSuaCaPartialView.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvRGFzaGJvYXJkL0RCVG9uZ0hvcEhhb0h1dFRoYW5oUGhhbVN1YUNhUGFydGlhbFZpZXcuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/Dashboard/DBTongHopSanLuongVaDinhMucThanhPhamTheoChuyenDinhHinhAdvanceView.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvRGFzaGJvYXJkL0RCVG9uZ0hvcFNhbkx1b25nVmFEaW5oTXVjVGhhbmhQaGFtVGhlb0NodXllbkRpbmhIaW5oQWR2YW5jZVZpZXcuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/Dashboard/DBTongHopSanLuongVaDinhMucThanhPhamTheoChuyenDinhHinhPartialView.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvRGFzaGJvYXJkL0RCVG9uZ0hvcFNhbkx1b25nVmFEaW5oTXVjVGhhbmhQaGFtVGhlb0NodXllbkRpbmhIaW5oUGFydGlhbFZpZXcuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/Dashboard/DBTongHopSanLuongVaDinhMucThanhPhamTheoChuyenFilletAdvanceView.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvRGFzaGJvYXJkL0RCVG9uZ0hvcFNhbkx1b25nVmFEaW5oTXVjVGhhbmhQaGFtVGhlb0NodXllbkZpbGxldEFkdmFuY2VWaWV3LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/Dashboard/DBTongHopSanLuongVaDinhMucThanhPhamTheoChuyenFilletPartialView.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvRGFzaGJvYXJkL0RCVG9uZ0hvcFNhbkx1b25nVmFEaW5oTXVjVGhhbmhQaGFtVGhlb0NodXllbkZpbGxldFBhcnRpYWxWaWV3LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/Dashboard/DBTongHopThanhPhamBTPXeBuomPartialView.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvRGFzaGJvYXJkL0RCVG9uZ0hvcFRoYW5oUGhhbUJUUFhlQnVvbVBhcnRpYWxWaWV3LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/Dashboard/DBTongHopThanhPhamTPRaCoiPartialView.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvRGFzaGJvYXJkL0RCVG9uZ0hvcFRoYW5oUGhhbVRQUmFDb2lQYXJ0aWFsVmlldy5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/Dashboard/DBTongHopThanhPhamTPXeBuomPartialView.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvRGFzaGJvYXJkL0RCVG9uZ0hvcFRoYW5oUGhhbVRQWGVCdW9tUGFydGlhbFZpZXcuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/Dashboard/DBTongHopTP2PartialView.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvRGFzaGJvYXJkL0RCVG9uZ0hvcFRQMlBhcnRpYWxWaWV3LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
 [/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/Dashboard/DBTongHopTPBTPDinhHinhPartialView.cshtml]
@@ -948,6 +1180,62 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvRGFzaGJvYXJkL0RCVG9uZ0hvcFRQWGVwS2h1b25QYXJ0aWFsVmlldy5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/Dashboard/DBTongHopTyLeTangTrongTheoThanhPhamRaCoiXepKhuonAdvanceView.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvRGFzaGJvYXJkL0RCVG9uZ0hvcFR5TGVUYW5nVHJvbmdUaGVvVGhhbmhQaGFtUmFDb2lYZXBLaHVvbkFkdmFuY2VWaWV3LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/Dashboard/DBTongHopTyLeTangTrongTheoThanhPhamRaCoiXepKhuonPartialView.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvRGFzaGJvYXJkL0RCVG9uZ0hvcFR5TGVUYW5nVHJvbmdUaGVvVGhhbmhQaGFtUmFDb2lYZXBLaHVvblBhcnRpYWxWaWV3LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/Dashboard/DBTongHopTyLeThoiGianVaDinhMucDinhHinhAdvanceView.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvRGFzaGJvYXJkL0RCVG9uZ0hvcFR5TGVUaG9pR2lhblZhRGluaE11Y0RpbmhIaW5oQWR2YW5jZVZpZXcuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/Dashboard/DBTongHopTyLeThoiGianVaDinhMucDinhHinhPartialView.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvRGFzaGJvYXJkL0RCVG9uZ0hvcFR5TGVUaG9pR2lhblZhRGluaE11Y0RpbmhIaW5oUGFydGlhbFZpZXcuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/Dashboard/DBTongHopTyLeThoiGianVaDinhMucFilletAdvanceView.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvRGFzaGJvYXJkL0RCVG9uZ0hvcFR5TGVUaG9pR2lhblZhRGluaE11Y0ZpbGxldEFkdmFuY2VWaWV3LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/Dashboard/DBTongHopTyLeThoiGianVaDinhMucFilletPartialView.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvRGFzaGJvYXJkL0RCVG9uZ0hvcFR5TGVUaG9pR2lhblZhRGluaE11Y0ZpbGxldFBhcnRpYWxWaWV3LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/Dashboard/DBTongHopTyLeThoiGianVaDinhMucTheoChuyenDinhHinhPartialView.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvRGFzaGJvYXJkL0RCVG9uZ0hvcFR5TGVUaG9pR2lhblZhRGluaE11Y1RoZW9DaHV5ZW5EaW5oSGluaFBhcnRpYWxWaWV3LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/Dashboard/DBTongQuanAdvanceView.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvRGFzaGJvYXJkL0RCVG9uZ1F1YW5BZHZhbmNlVmlldy5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/Dashboard/DBTongQuanPartialView.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvRGFzaGJvYXJkL0RCVG9uZ1F1YW5QYXJ0aWFsVmlldy5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/Dashboard/DBTongSanLuongThanhPhamXeBuomAdvanceView.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvRGFzaGJvYXJkL0RCVG9uZ1Nhbkx1b25nVGhhbmhQaGFtWGVCdW9tQWR2YW5jZVZpZXcuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/Dashboard/DBTongSanLuongThanhPhamXeBuomPartialView.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvRGFzaGJvYXJkL0RCVG9uZ1Nhbkx1b25nVGhhbmhQaGFtWGVCdW9tUGFydGlhbFZpZXcuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/Dashboard/DBTyLeThuHoiThanhPham2AdvanceView.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvRGFzaGJvYXJkL0RCVHlMZVRodUhvaVRoYW5oUGhhbTJBZHZhbmNlVmlldy5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/Dashboard/DBTyLeThuHoiThanhPham2PartialView.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvRGFzaGJvYXJkL0RCVHlMZVRodUhvaVRoYW5oUGhhbTJQYXJ0aWFsVmlldy5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/DashboardHQ/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvRGFzaGJvYXJkSFEvSW5kZXguY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
 [/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/DatabaseManagement/DatabaseManagementView.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvRGF0YWJhc2VNYW5hZ2VtZW50L0RhdGFiYXNlTWFuYWdlbWVudFZpZXcuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
@@ -976,6 +1264,18 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvSG9tZS9Qcml2YWN5LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/NhaAn/DanhMucNhaAn/HQ_LoaiMonAn/LoaiMonAnView.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvTmhhQW4vRGFuaE11Y05oYUFuL0hRX0xvYWlNb25Bbi9Mb2FpTW9uQW5WaWV3LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/NhaAn/DanhMucNhaAn/HQ_MonAn/MonAnView.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvTmhhQW4vRGFuaE11Y05oYUFuL0hRX01vbkFuL01vbkFuVmlldy5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/NhaAn/DanhMucNhaAn/HQ_ThucDon/ThucDonView.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvTmhhQW4vRGFuaE11Y05oYUFuL0hRX1RodWNEb24vVGh1Y0RvblZpZXcuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
 [/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/SettingWebApp/Account.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvU2V0dGluZ1dlYkFwcC9BY2NvdW50LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
@@ -1002,6 +1302,22 @@ build_metadata.AdditionalFiles.CssScope =
 
 [/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/Shared/Error.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvU2hhcmVkL0Vycm9yLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/Shared/_MenuDaiThanh.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvU2hhcmVkL19NZW51RGFpVGhhbmguY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/Shared/_MenuHoangLong.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvU2hhcmVkL19NZW51SG9hbmdMb25nLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/Shared/_MenuNamViet.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvU2hhcmVkL19NZW51TmFtVmlldC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/Shared/_MenuRauQuaTienGiang.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvU2hhcmVkL19NZW51UmF1UXVhVGllbkdpYW5nLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
 [/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/Shared/_ValidationScriptsPartial.cshtml]
@@ -1152,6 +1468,10 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvWHVMeVBoaWV1Q2FuL1h1THlQaGlldUNhbkJUUEZpbGxldFZpZXcuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/XuLyPhieuCan/XuLyPhieuCanBTPXeBuomView.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvWHVMeVBoaWV1Q2FuL1h1THlQaGlldUNhbkJUUFhlQnVvbVZpZXcuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
 [/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/XuLyPhieuCan/XuLyPhieuCanCaChetDaiThanhSideView.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvWHVMeVBoaWV1Q2FuL1h1THlQaGlldUNhbkNhQ2hldERhaVRoYW5oU2lkZVZpZXcuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
@@ -1196,6 +1516,10 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvWHVMeVBoaWV1Q2FuL1h1THlQaGlldUNhblBodVhlcEtodW9uVmlldy5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/XuLyPhieuCan/XuLyPhieuCanRaCoiXepKhuonView.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvWHVMeVBoaWV1Q2FuL1h1THlQaGlldUNhblJhQ29pWGVwS2h1b25WaWV3LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
 [/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/XuLyPhieuCan/XuLyPhieuCanSauXepKhuonView.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvWHVMeVBoaWV1Q2FuL1h1THlQaGlldUNhblNhdVhlcEtodW9uVmlldy5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
@@ -1212,8 +1536,20 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvWHVMeVBoaWV1Q2FuL1h1THlQaGlldUNhblRvbVZpZXcuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/XuLyPhieuCan/XuLyPhieuCanTPFilletv1View.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvWHVMeVBoaWV1Q2FuL1h1THlQaGlldUNhblRQRmlsbGV0djFWaWV3LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/XuLyPhieuCan/XuLyPhieuCanTPFilletv2View.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvWHVMeVBoaWV1Q2FuL1h1THlQaGlldUNhblRQRmlsbGV0djJWaWV3LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
 [/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/XuLyPhieuCan/XuLyPhieuCanTPFilletView.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvWHVMeVBoaWV1Q2FuL1h1THlQaGlldUNhblRQRmlsbGV0Vmlldy5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/XuLyPhieuCan/XuLyPhieuCanTPXeBuomView.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvWHVMeVBoaWV1Q2FuL1h1THlQaGlldUNhblRQWGVCdW9tVmlldy5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
 [/Volumes/LocalData/PhanBachProject/PMSSoft/PMS/Views/XuLyPhieuCan/XuLyPhieuCanVungNuoiDaiThanhSideView.cshtml]

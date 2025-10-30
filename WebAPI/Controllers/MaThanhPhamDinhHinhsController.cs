@@ -115,7 +115,9 @@ namespace WebAPI.Controllers
                 BaoCaoDauRot = model.BaoCaoDauRot,
                 IsSuDungThoiGianGiuaLoaiThanhPham = model.IsSuDungThoiGianGiuaLoaiThanhPham,
                 MinOut = model.MinOut,
-                MaxOut = model.MaxOut
+                MaxOut = model.MaxOut,
+                IsCaDa = model.IsCaDa,
+                ThoiGianHT = model.ThoiGianHT,
             };
             _context.MaThanhPhamDinhHinh.Add(newItem);
             try
@@ -196,6 +198,8 @@ namespace WebAPI.Controllers
             item.IsSuDungThoiGianGiuaLoaiThanhPham = model.IsSuDungThoiGianGiuaLoaiThanhPham;
             item.MinOut = model.MinOut;
             item.MaxOut = model.MaxOut;
+            item.IsCaDa = model.IsCaDa;
+            item.ThoiGianHT = model.ThoiGianHT;
             try
             {
                 await _context.SaveChangesAsync();

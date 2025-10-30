@@ -41,7 +41,7 @@ namespace WebAPI.Controllers
         [Authorize]
         public async Task<ActionResult<IEnumerable<object>>> GetChiTiets2HN(DateTime fromDate, DateTime toDate, string xuongId)
         {
-            if (_context.PhieuCanTPDinhHinh == null)
+            if (_context.PhieuCanTPFilletv2 == null)
             {
                 return NotFound();
             }
@@ -52,7 +52,7 @@ namespace WebAPI.Controllers
         [Authorize]
         public async Task<ActionResult<IEnumerable<object>>> GetTongHopLoaiThanhPhamsHN(DateTime fromDate, DateTime toDate, string xuongId)
         {
-            if (_context.PhieuCanTPDinhHinh == null)
+            if (_context.PhieuCanTPFilletv2 == null)
             {
                 return NotFound();
             }
@@ -63,18 +63,29 @@ namespace WebAPI.Controllers
         [Authorize]
         public async Task<ActionResult<IEnumerable<object>>> GetTongHopNhanViensHN(DateTime fromDate, DateTime toDate, string xuongId)
         {
-            if (_context.PhieuCanTPDinhHinh == null)
+            if (_context.PhieuCanTPFilletv2 == null)
             {
                 return NotFound();
             }
-            var items = Vm.VmPhieuCanTPFilletv2.GetTongHopNhanViensHN<object>(fromDate, toDate, xuongId);
+            var items = Vm.VmPhieuCanTPFilletv2.GetTongHopNhanViensHN2<object>(fromDate, toDate, xuongId);
+            return items;
+        }
+        [HttpGet("{fromDate},{toDate},{xuongId}")]
+        [Authorize]
+        public async Task<ActionResult<IEnumerable<object>>> GetTongHopNhanVien2HoangLong(DateTime fromDate, DateTime toDate, string xuongId)
+        {
+            if (_context.PhieuCanTPFilletv2 == null)
+            {
+                return NotFound();
+            }
+            var items = Vm.VmPhieuCanTPFilletv2.GetTongHopNhanVien2HoangLong<object>(fromDate, toDate, xuongId);
             return items;
         }
         [HttpGet("{fromDate},{toDate},{xuongId}")]
         [Authorize]
         public async Task<ActionResult<IEnumerable<object>>> GetTongHopNhanViens2(DateTime fromDate, DateTime toDate, string xuongId)
         {
-            if (_context.PhieuCanTPDinhHinh == null)
+            if (_context.PhieuCanTPFilletv2 == null)
             {
                 return NotFound();
             }
@@ -85,7 +96,7 @@ namespace WebAPI.Controllers
         [Authorize]
         public async Task<ActionResult<IEnumerable<object>>> GetTongHopNhanViens(DateTime fromDate, DateTime toDate, string xuongId)
         {
-            if (_context.PhieuCanTPDinhHinh == null)
+            if (_context.PhieuCanTPFilletv2 == null)
             {
                 return NotFound();
             }
@@ -107,7 +118,20 @@ namespace WebAPI.Controllers
         }
         [HttpGet("{fromDate}/{toDate}/{xuongId}")]
         [Authorize]
-        public async Task<ActionResult<IEnumerable<object>>> GetTongHopLoaiThanhPhamFilletDB(string fromDate, string toDate, string xuongId)
+        public async Task<ActionResult<IEnumerable<object>>> GetTongHopLo(string fromDate, string toDate, string xuongId)
+        {
+            if (_context.PhieuCanTPFilletv2 == null)
+            {
+                return NotFound();
+            }
+            DateTime date1 = DateTime.ParseExact(fromDate, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+            DateTime date2 = DateTime.ParseExact(toDate, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+            var items = Vm.VmPhieuCanTPFilletv2.GetTongHopLo<object>(date1, date2, xuongId);
+            return items;
+        }
+        [HttpGet("{fromDate}/{toDate}/{xuongId}")]
+        [Authorize]
+        public async Task<ActionResult<IEnumerable<object>>> GetTongHopLoaiThanhPhamFilletDB_St(string fromDate, string toDate, string xuongId)
         {
             if (_context.PhieuCanTPFilletv2 == null)
             {
@@ -119,6 +143,146 @@ namespace WebAPI.Controllers
 
             return items;
         }
+
+        [HttpGet("{fromDate}/{toDate}/{xuongId}")]
+        [Authorize]
+        public async Task<ActionResult<IEnumerable<object>>> GetTongHopLoaiThanhPhamFilletDB(string fromDate, string toDate, string xuongId)
+        {
+            if (_context.PhieuCanTPFilletv2 == null)
+            {
+                return NotFound();
+            }
+            DateTime date1 = DateTime.ParseExact(fromDate, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+            DateTime date2 = DateTime.ParseExact(toDate, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+            var items = Vm.VmPhieuCanTPFilletv2.GetTongHopThanhPhamFillet<object>(date1, date2, xuongId);
+
+            return items;
+        }
+
+        [HttpGet("{fromDate}/{toDate}/{xuongId}")]
+        [Authorize]
+        public async Task<ActionResult<IEnumerable<object>>> GetTongHopDinhMucSanLuongTheoChuyenFilletDB_St(string fromDate, string toDate, string xuongId)
+        {
+            if (_context.PhieuCanTPFilletv2 == null)
+            {
+                return NotFound();
+            }
+            DateTime date1 = DateTime.ParseExact(fromDate, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+            DateTime date2 = DateTime.ParseExact(toDate, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+            var items = Vm.VmDashBoard.ItemTongHopDinhMucSanLuongTheoChuyenFillet.OfType<dynamic>().ToList();// Sử dụng dynamic để cast các object
+            return items;
+        }
+        [HttpGet("{fromDate}/{toDate}/{xuongId}")]
+        [Authorize]
+        public async Task<ActionResult<IEnumerable<object>>> GetTongHopDinhMucSanLuongTheoChuyenFilletDB(string fromDate, string toDate, string xuongId)
+        {
+            if (_context.PhieuCanTPFilletv2 == null)
+            {
+                return NotFound();
+            }
+            DateTime date1 = DateTime.ParseExact(fromDate, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+            DateTime date2 = DateTime.ParseExact(toDate, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+            var items = Vm.VmPhieuCanTPFilletv2.GetTongHopDinhMucSanLuongTheoNhom<object>(date1,date2, xuongId);
+            return items;
+        }
+        [HttpGet("{fromDate}/{toDate}/{xuongId}")]
+        [Authorize]
+        public async Task<ActionResult<IEnumerable<object>>> GetTongHopTyLeThoiGianVaDinhMucFilletDB_St(string fromDate, string toDate, string xuongId)
+        {
+            if (_context.PhieuCanTPFilletv2 == null)
+            {
+                return NotFound();
+            }
+            DateTime date1 = DateTime.ParseExact(fromDate, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+            DateTime date2 = DateTime.ParseExact(toDate, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+            var items = Vm.VmDashBoard.ItemTongHopTyLeThoiGianVaDinhMucFillet.OfType<dynamic>().ToList();// Sử dụng dynamic để cast các object
+            return items;
+        }
+        [HttpGet("{fromDate}/{toDate}/{xuongId}")]
+        [Authorize]
+        public async Task<ActionResult<IEnumerable<object>>> GetTongHopTyLeThoiGianVaDinhMucFilletDB(string fromDate, string toDate, string xuongId)
+        {
+            if (_context.PhieuCanTPFilletv2 == null)
+            {
+                return NotFound();
+            }
+            DateTime date1 = DateTime.ParseExact(fromDate, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+            DateTime date2 = DateTime.ParseExact(toDate, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+            var MocThoiGian = AppViewModel.Instance.MocThoiGianFL;
+            var items = Vm.VmPhieuCanTPFilletv2.GetTongHopTyLeThoiGianVaDinhMuc<object>(date1,date2, xuongId,MocThoiGian);
+            return items;
+        }
+        [HttpGet("{fromDate}/{toDate}/{xuongId}")]
+        [Authorize]
+        public async Task<ActionResult<IEnumerable<object>>> GetTongHopTyLeThoiGianVaDinhMucForGridFilletDB(string fromDate, string toDate, string xuongId)
+        {
+            if (_context.PhieuCanTPFilletv2 == null)
+            {
+                return NotFound();
+            }
+            DateTime date1 = DateTime.ParseExact(fromDate, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+            DateTime date2 = DateTime.ParseExact(toDate, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+            var MocThoiGian = AppViewModel.Instance.MocThoiGianFL;
+            var items = Vm.VmPhieuCanTPFilletv2.GetTongHopTyLeThoiGianVaDinhMucForGrid<object>(date1,date2, xuongId,MocThoiGian);
+            return items;
+        }
+        [HttpGet("{fromDate}/{toDate}/{xuongId}")]
+        [Authorize]
+        public async Task<ActionResult<IEnumerable<object>>> GetTongHopNangSuatNhom(string fromDate, string toDate, string xuongId)
+        {
+            DateTime date1 = DateTime.ParseExact(fromDate, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+            DateTime date2 = DateTime.ParseExact(toDate, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+            var items = Vm.VmPhieuCanTPFilletv2.GetTongHopNangSuatNhom<object>(date1, date2, xuongId);
+            return items;
+        }
+        [HttpGet("{fromDate}/{toDate}/{xuongId}")]
+        [Authorize]
+        public async Task<ActionResult<IEnumerable<object>>> GetTongHopDinhMucTheoSanPham(string fromDate, string toDate, string xuongId)
+        {
+            DateTime date1 = DateTime.ParseExact(fromDate, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+            DateTime date2 = DateTime.ParseExact(toDate, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+            var items = Vm.VmPhieuCanTPFilletv2.GetTongHopDinhMucTheoSanPham<object>(date1, date2, xuongId);
+            return items;
+        }
+        [HttpGet("{fromDate}/{toDate}/{xuongId}")]
+        [Authorize]
+        public async Task<ActionResult<IEnumerable<object>>> GetTongSanLuongTP(string fromDate, string toDate, string xuongId)
+        {
+            DateTime date1 = DateTime.ParseExact(fromDate, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+            DateTime date2 = DateTime.ParseExact(toDate, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+            var items = Vm.VmPhieuCanTPFilletv2.GetTongSanLuongTP<object>(date1, date2, xuongId);
+            return items;
+        }
+
+        [HttpGet("{fromDate}/{toDate}/{xuongId}")]
+        [Authorize]
+        public async Task<ActionResult<IEnumerable<object>>> GetTongHopSanLuongAndDinhMucThanhPhamTheoChuyen(string fromDate, string toDate, string xuongId)
+        {
+            DateTime date1 = DateTime.ParseExact(fromDate, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+            DateTime date2 = DateTime.ParseExact(toDate, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+            var items = Vm.VmPhieuCanTPFilletv2.GetTongHopSanLuongAndDinhMucThanhPhamTheoChuyen<object>(date1,date2, xuongId);
+            return items;
+        }
+        [HttpGet("{fromDate}/{toDate}/{xuongId}")]
+        [Authorize]
+        public async Task<ActionResult<IEnumerable<object>>> GetSanLuongTBTPFillet(string fromDate, string toDate, string xuongId)
+        {
+            DateTime date1 = DateTime.ParseExact(fromDate, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+            DateTime date2 = DateTime.ParseExact(toDate, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+            var items = Vm.VmPhieuCanTPFilletv2.GetSanLuongTBTPFillet<object>(date1, date2, xuongId);
+            return items;
+        }
+
+        [HttpGet("{fromDate}/{toDate}/{xuongId}")]
+        [Authorize]
+        public async Task<ActionResult<IEnumerable<object>>> GetDinhMucLangDa(string fromDate, string toDate, string xuongId)
+        {
+            DateTime date1 = DateTime.ParseExact(fromDate, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+            DateTime date2 = DateTime.ParseExact(toDate, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+            var items = Vm.VmPhieuCanTPFilletv2.GetDinhMucLangDa<object>(date1, date2, xuongId);
+            return items;
+        }
+
         [HttpGet("{fromDate}/{toDate}/{xuongId}")]
         [Authorize]
         public async Task<ActionResult<IEnumerable<object>>> GetTongHopNhanVienPhucVu(string fromDate, string toDate, string xuongId)
@@ -147,6 +311,566 @@ namespace WebAPI.Controllers
         }
 
         #region Xử Lý Phiếu Cân
+        #region XLPC Filletv2
+        [HttpGet("{dateTime}/{xuongId}")]
+        [Authorize]
+        public IActionResult GetAllsWithDateAndXuong(DateTime dateTime, string xuongId)
+        {
+            var items = _context.PhieuCanTPFilletv2.Where(x => x.Ngay == dateTime && x.MaXuong == xuongId).OrderByDescending(x => x.Ngay).ToList();
+
+            return Ok(items);
+        }
+        [HttpGet("{dateTime}/{xuongId}")]
+        public async Task<ActionResult<IEnumerable<object>>> GetPhieuCanTPFilletv2_XLPC(string dateTime, string xuongId)
+        {
+            if (_context.PhieuCanTPFilletv2 == null)
+            {
+                return NotFound();
+            }
+            // DateTime date1 = DateTime.ParseExact(dateTime, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+            DateTime date1 = DateTime.ParseExact(dateTime, "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture);
+            var items = Vm.VmPhieuCanTPFilletv2.GetPhieuCanTPFilletv2_XLPC<object>(date1, xuongId);
+            return items;
+        }
+        [HttpPost("{stt}/{ngay}/{maMayCan}/{maXuong}")]
+        [Authorize]
+        public async Task<IActionResult> Update_Filletv2(int stt, string ngay, string maMayCan, string maXuong, Tuple<string> dataT)
+        {
+            var model = JsonSerializer.Deserialize<PhieuCanTPFilletv2>(dataT.Item1);
+            // Kiểm tra xem ID người dùng được cập nhật có hợp lệ không
+            if (string.IsNullOrEmpty(stt.ToString()) || string.IsNullOrEmpty(ngay) || string.IsNullOrEmpty(maMayCan) || string.IsNullOrEmpty(maXuong))
+            {
+                return BadRequest(new ApiResponse
+                {
+                    Success = false,
+                    Message = "Mã này không hợp lệ."
+                });
+            }
+            DateTime ngayConvert = DateTime.ParseExact(ngay, "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture);
+            var item = await _context.PhieuCanTPFilletv2.FirstOrDefaultAsync(x => x.STT == stt && x.Ngay == ngayConvert && x.MaMayCan == maMayCan && x.MaXuong == maXuong);
+
+            if (item == null)
+            {
+                return BadRequest(new ApiResponse
+                {
+                    Success = false,
+                    Message = "Mục không tồn tại."
+                });
+            }
+
+            // Kiểm tra xem dữ liệu đầu vào có hợp lệ không và trả về danh sách lỗi nếu có.
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState.Values.SelectMany(v => v.Errors)
+                                              .Select(e => e.ErrorMessage)
+                                              .ToList();
+
+                return BadRequest(new ApiResponse
+                {
+                    Success = false,
+                    Message = "Dữ liệu không hợp lệ.",
+                    Errors = errors
+                });
+            }
+            var options = new JsonSerializerOptions
+            {
+                WriteIndented = true
+            };
+            // Lưu trạng thái cũ của đối tượng trước khi thay đổi
+            var oldData = JsonSerializer.Serialize(new
+            {
+                item.MaLo,
+                item.MaLoaiCa,
+                item.MaMau,
+                item.MaThanhPham,
+                item.MaSize,
+                item.MaNhanVien,
+            }, options);
+
+            item.MaLo = model.MaLo;
+            item.MaLoaiCa = model.MaLoaiCa;
+            item.MaMau = model.MaMau;
+            item.MaThanhPham = model.MaThanhPham;
+            item.MaSize = model.MaSize;
+            item.MaNhanVien = model.MaNhanVien;
+            item.GhiChu = item.GhiChu + "," + oldData.ToString() + "," + model.GhiChu;
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new ApiResponse
+                {
+                    Success = false,
+                    Message = "Đã xảy ra lỗi khi cập nhật dữ liệu.",
+                    Errors = new List<string> { ex.Message
+}
+                });
+            }
+            return Ok(new ApiResponse
+            {
+                Success = true,
+                Message = "Cập nhật thông tin thành công!"
+            });
+        }
+
+        [HttpPost("{stt}/{ngay}/{maMayCan}/{maXuong}")]
+        [Authorize]
+        public async Task<IActionResult> ChuyenXuong_Filletv2(int stt, string ngay, string maMayCan, string maXuong,  Tuple<string> dataT)
+        {
+            var model = JsonSerializer.Deserialize<PhieuCanTPFilletv2>(dataT.Item1);
+            if (string.IsNullOrEmpty(stt.ToString()) || string.IsNullOrEmpty(ngay) || string.IsNullOrEmpty(maMayCan) || string.IsNullOrEmpty(maXuong))
+            {
+                return BadRequest(new ApiResponse
+                {
+                    Success = false,
+                    Message = "Vui lòng cung cấp đủ thông tin!."
+                });
+            }
+            DateTime ngayConvert = DateTime.ParseExact(ngay, "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture);
+            var item = await _context.PhieuCanTPFilletv2.FirstOrDefaultAsync(x => x.STT == stt && x.Ngay == ngayConvert && x.MaMayCan == maMayCan && x.MaXuong == maXuong);
+
+            if (item == null)
+            {
+                return BadRequest(new ApiResponse
+                {
+                    Success = false,
+                    Message = "Mục không tồn tại."
+                });
+            }
+
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState.Values.SelectMany(v => v.Errors)
+                                              .Select(e => e.ErrorMessage)
+                                              .ToList();
+
+                return BadRequest(new ApiResponse
+                {
+                    Success = false,
+                    Message = "Dữ liệu không hợp lệ.",
+                    Errors = errors
+                });
+            }
+
+            var options = new JsonSerializerOptions
+            {
+                WriteIndented = true
+            };
+
+            var oldData = JsonSerializer.Serialize(new
+            {
+                item.MaXuong,
+            }, options);
+
+            var newItem = new PhieuCanTPFilletv2
+            {
+                STT = item.STT,
+                CaTra = item.CaTra,
+                Gio = item.Gio,
+                MaLo = item.MaLo,
+                MaLoaiCa = item.MaLoaiCa,
+                MaMau = item.MaMau,
+                MaMayCan = item.MaMayCan,
+                MaSize = item.MaSize,
+                MaThanhPham = item.MaThanhPham,
+                MaThe = item.MaThe,
+                MaUserCan = item.MaUserCan,
+                MaXuong = model.MaXuong,
+                Ngay = item.Ngay,
+                TrongLuongTare = item.TrongLuongTare,
+                TrongLuongTra = item.TrongLuongTra,
+                STTBTP = item.STTBTP,
+                DinhMucThucTe = item.DinhMucThucTe,
+                DinhMucYeuCau = item.DinhMucThucTe,
+                MaMayCanBTP = item.MaMayCanBTP,
+                TrongLuongNhan = item.TrongLuongNhan,
+                MaNhanVien = item.MaNhanVien,
+                MaBan = item.MaBan,
+                ThePhieuSanLuongId = item.ThePhieuSanLuongId,
+                GhiChu = item.GhiChu + "," + oldData + "," + model.GhiChu,
+                MaNhanVienPhucVu = item.MaNhanVienPhucVu
+            };
+
+            using (var transaction = await _context.Database.BeginTransactionAsync())
+            {
+                try
+                {
+                    _context.PhieuCanTPFilletv2.Remove(item);
+                    _context.PhieuCanTPFilletv2.Add(newItem);
+                    await _context.SaveChangesAsync();
+                    await transaction.CommitAsync();
+                }
+                catch (Exception ex)
+                {
+                    await transaction.RollbackAsync();
+                    return BadRequest(new ApiResponse
+                    {
+                        Success = false,
+                        Message = "Đã xảy ra lỗi khi cập nhật dữ liệu.",
+                        Errors = new List<string> { ex.Message }
+                    });
+                }
+            }
+
+            return Ok(new ApiResponse
+            {
+                Success = true,
+                Message = "Cập nhật thông tin thành công!"
+            });
+        }
+        [HttpPost("{stt}/{ngay}/{maMayCan}/{maXuong}")]
+        [Authorize]
+        public async Task<IActionResult> ChuyenSize_Fillet(int stt, string ngay, string maMayCan, string maXuong,Tuple<string> dataT)
+        {
+            var model = JsonSerializer.Deserialize<PhieuCanTPFilletv2>(dataT.Item1);
+            // Kiểm tra xem ID người dùng được cập nhật có hợp lệ không
+            if (string.IsNullOrEmpty(stt.ToString()) || string.IsNullOrEmpty(ngay) || string.IsNullOrEmpty(maMayCan) || string.IsNullOrEmpty(maXuong))
+            {
+                return BadRequest(new ApiResponse
+                {
+                    Success = false,
+                    Message = "Vui lòng cung cấp đủ thông tin!."
+                });
+            }
+            DateTime ngayConvert = DateTime.ParseExact(ngay, "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture);
+            var item = await _context.PhieuCanTPFilletv2.FirstOrDefaultAsync(x => x.STT == stt && x.Ngay == ngayConvert && x.MaMayCan == maMayCan && x.MaXuong == maXuong);
+
+            if (item == null)
+            {
+                return BadRequest(new ApiResponse
+                {
+                    Success = false,
+                    Message = "Mục không tồn tại."
+                });
+            }
+
+            // Kiểm tra xem dữ liệu đầu vào có hợp lệ không và trả về danh sách lỗi nếu có.
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState.Values.SelectMany(v => v.Errors)
+                                              .Select(e => e.ErrorMessage)
+                                              .ToList();
+
+                return BadRequest(new ApiResponse
+                {
+                    Success = false,
+                    Message = "Dữ liệu không hợp lệ.",
+                    Errors = errors
+                });
+            }
+            var options = new JsonSerializerOptions
+            {
+                WriteIndented = true
+            };
+            // Lưu trạng thái cũ của đối tượng trước khi thay đổi
+            var oldData = JsonSerializer.Serialize(new
+            {
+                item.MaSize
+            }, options);
+            item.MaSize = model.MaSize;
+            item.GhiChu = item.GhiChu + "," + oldData.ToString() + "," + model.GhiChu;
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new ApiResponse
+                {
+                    Success = false,
+                    Message = "Đã xảy ra lỗi khi cập nhật dữ liệu.",
+                    Errors = new List<string> { ex.Message }
+                });
+            }
+            return Ok(new ApiResponse
+            {
+                Success = true,
+                Message = "Cập nhật thông tin thành công!"
+            });
+        }
+        [HttpPost("{stt}/{ngay}/{maMayCan}/{maXuong}")]
+        [Authorize]
+        public async Task<IActionResult> ChuyenThanhPham_Fillet(int stt, string ngay, string maMayCan, string maXuong,Tuple<string> dataT)
+        {
+            var model = JsonSerializer.Deserialize<PhieuCanTPFilletv2>(dataT.Item1);
+            // Kiểm tra xem ID người dùng được cập nhật có hợp lệ không
+            if (string.IsNullOrEmpty(stt.ToString()) || string.IsNullOrEmpty(ngay) || string.IsNullOrEmpty(maMayCan) || string.IsNullOrEmpty(maXuong))
+            {
+                return BadRequest(new ApiResponse
+                {
+                    Success = false,
+                    Message = "Vui lòng cung cấp đủ thông tin!."
+                });
+            }
+            DateTime ngayConvert = DateTime.ParseExact(ngay, "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture);
+            var item = await _context.PhieuCanTPFilletv2.FirstOrDefaultAsync(x => x.STT == stt && x.Ngay == ngayConvert && x.MaMayCan == maMayCan && x.MaXuong == maXuong);
+
+            if (item == null)
+            {
+                return BadRequest(new ApiResponse
+                {
+                    Success = false,
+                    Message = "Mục không tồn tại."
+                });
+            }
+
+            // Kiểm tra xem dữ liệu đầu vào có hợp lệ không và trả về danh sách lỗi nếu có.
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState.Values.SelectMany(v => v.Errors)
+                                              .Select(e => e.ErrorMessage)
+                                              .ToList();
+
+                return BadRequest(new ApiResponse
+                {
+                    Success = false,
+                    Message = "Dữ liệu không hợp lệ.",
+                    Errors = errors
+                });
+            }
+            var options = new JsonSerializerOptions
+            {
+                WriteIndented = true
+            };
+            // Lưu trạng thái cũ của đối tượng trước khi thay đổi
+            var oldData = JsonSerializer.Serialize(new
+            {
+                item.MaThanhPham
+            }, options);
+            item.MaThanhPham = model.MaThanhPham;
+            item.GhiChu = item.GhiChu + "," + oldData.ToString() + "," + model.GhiChu;
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new ApiResponse
+                {
+                    Success = false,
+                    Message = "Đã xảy ra lỗi khi cập nhật dữ liệu.",
+                    Errors = new List<string> { ex.Message }
+                });
+            }
+            return Ok(new ApiResponse
+            {
+                Success = true,
+                Message = "Cập nhật thông tin thành công!"
+            });
+        }
+        [HttpPost("{stt}/{ngay}/{maMayCan}/{maXuong}")]
+        [Authorize]
+        public async Task<IActionResult> ChuyenLo_Fillet(int stt, string ngay, string maMayCan, string maXuong,Tuple<string> dataT)
+        {
+            var model = JsonSerializer.Deserialize<PhieuCanTPFilletv2>(dataT.Item1);
+            // Kiểm tra xem ID người dùng được cập nhật có hợp lệ không
+            if (string.IsNullOrEmpty(stt.ToString()) || string.IsNullOrEmpty(ngay) || string.IsNullOrEmpty(maMayCan) || string.IsNullOrEmpty(maXuong))
+            {
+                return BadRequest(new ApiResponse
+                {
+                    Success = false,
+                    Message = "Vui lòng cung cấp đủ thông tin!."
+                });
+            }
+            DateTime ngayConvert = DateTime.ParseExact(ngay, "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture);
+            var item = await _context.PhieuCanTPFilletv2.FirstOrDefaultAsync(x => x.STT == stt && x.Ngay == ngayConvert && x.MaMayCan == maMayCan && x.MaXuong == maXuong);
+
+            if (item == null)
+            {
+                return BadRequest(new ApiResponse
+                {
+                    Success = false,
+                    Message = "Mục không tồn tại."
+                });
+            }
+
+            // Kiểm tra xem dữ liệu đầu vào có hợp lệ không và trả về danh sách lỗi nếu có.
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState.Values.SelectMany(v => v.Errors)
+                                              .Select(e => e.ErrorMessage)
+                                              .ToList();
+
+                return BadRequest(new ApiResponse
+                {
+                    Success = false,
+                    Message = "Dữ liệu không hợp lệ.",
+                    Errors = errors
+                });
+            }
+            var options = new JsonSerializerOptions
+            {
+                WriteIndented = true
+            };
+            // Lưu trạng thái cũ của đối tượng trước khi thay đổi
+            var oldData = JsonSerializer.Serialize(new
+            {
+                item.MaLo
+            }, options);
+            item.MaLo = model.MaLo;
+            item.GhiChu = item.GhiChu + "," + oldData.ToString() + "," + model.GhiChu;
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new ApiResponse
+                {
+                    Success = false,
+                    Message = "Đã xảy ra lỗi khi cập nhật dữ liệu.",
+                    Errors = new List<string> { ex.Message }
+                });
+            }
+            return Ok(new ApiResponse
+            {
+                Success = true,
+                Message = "Cập nhật thông tin thành công!"
+            });
+        }
+        [HttpPost("{stt}/{ngay}/{maMayCan}/{maXuong}")]
+        [Authorize]
+        public async Task<IActionResult> ChuyenMau_Fillet(int stt, string ngay, string maMayCan, string maXuong,Tuple<string> dataT)
+        {
+            var model = JsonSerializer.Deserialize<PhieuCanTPFilletv2>(dataT.Item1);
+            // Kiểm tra xem ID người dùng được cập nhật có hợp lệ không
+            if (string.IsNullOrEmpty(stt.ToString()) || string.IsNullOrEmpty(ngay) || string.IsNullOrEmpty(maMayCan) || string.IsNullOrEmpty(maXuong))
+            {
+                return BadRequest(new ApiResponse
+                {
+                    Success = false,
+                    Message = "Vui lòng cung cấp đủ thông tin!."
+                });
+            }
+            DateTime ngayConvert = DateTime.ParseExact(ngay, "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture);
+            var item = await _context.PhieuCanTPFilletv2.FirstOrDefaultAsync(x => x.STT == stt && x.Ngay == ngayConvert && x.MaMayCan == maMayCan && x.MaXuong == maXuong);
+
+            if (item == null)
+            {
+                return BadRequest(new ApiResponse
+                {
+                    Success = false,
+                    Message = "Mục không tồn tại."
+                });
+            }
+
+            // Kiểm tra xem dữ liệu đầu vào có hợp lệ không và trả về danh sách lỗi nếu có.
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState.Values.SelectMany(v => v.Errors)
+                                              .Select(e => e.ErrorMessage)
+                                              .ToList();
+
+                return BadRequest(new ApiResponse
+                {
+                    Success = false,
+                    Message = "Dữ liệu không hợp lệ.",
+                    Errors = errors
+                });
+            }
+            var options = new JsonSerializerOptions
+            {
+                WriteIndented = true
+            };
+            // Lưu trạng thái cũ của đối tượng trước khi thay đổi
+            var oldData = JsonSerializer.Serialize(new
+            {
+                item.MaMau
+            }, options);
+            item.MaMau = model.MaMau;
+            item.GhiChu = item.GhiChu + "," + oldData.ToString() + "," + model.GhiChu;
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new ApiResponse
+                {
+                    Success = false,
+                    Message = "Đã xảy ra lỗi khi cập nhật dữ liệu.",
+                    Errors = new List<string> { ex.Message }
+                });
+            }
+            return Ok(new ApiResponse
+            {
+                Success = true,
+                Message = "Cập nhật thông tin thành công!"
+            });
+        }
+        [HttpPost("{stt}/{ngay}/{maMayCan}/{maXuong}")]
+        [Authorize]
+        public async Task<IActionResult> ChuyenNhanVien_Fillet(int stt, string ngay, string maMayCan, string maXuong,Tuple<string> dataT)
+        {
+            var model = JsonSerializer.Deserialize<PhieuCanTPFilletv2>(dataT.Item1);
+            // Kiểm tra xem ID người dùng được cập nhật có hợp lệ không
+            if (string.IsNullOrEmpty(stt.ToString()) || string.IsNullOrEmpty(ngay) || string.IsNullOrEmpty(maMayCan) || string.IsNullOrEmpty(maXuong))
+            {
+                return BadRequest(new ApiResponse
+                {
+                    Success = false,
+                    Message = "Vui lòng cung cấp đủ thông tin!."
+                });
+            }
+            DateTime ngayConvert = DateTime.ParseExact(ngay, "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture);
+            var item = await _context.PhieuCanTPFilletv2.FirstOrDefaultAsync(x => x.STT == stt && x.Ngay == ngayConvert && x.MaMayCan == maMayCan && x.MaXuong == maXuong);
+
+            if (item == null)
+            {
+                return BadRequest(new ApiResponse
+                {
+                    Success = false,
+                    Message = "Mục không tồn tại."
+                });
+            }
+
+            // Kiểm tra xem dữ liệu đầu vào có hợp lệ không và trả về danh sách lỗi nếu có.
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState.Values.SelectMany(v => v.Errors)
+                                              .Select(e => e.ErrorMessage)
+                                              .ToList();
+
+                return BadRequest(new ApiResponse
+                {
+                    Success = false,
+                    Message = "Dữ liệu không hợp lệ.",
+                    Errors = errors
+                });
+            }
+            var options = new JsonSerializerOptions
+            {
+                WriteIndented = true
+            };
+            // Lưu trạng thái cũ của đối tượng trước khi thay đổi
+            var oldData = JsonSerializer.Serialize(new
+            {
+                item.MaNhanVien
+            }, options);
+            item.MaNhanVien = model.MaNhanVien;
+            item.GhiChu = item.GhiChu + "," + oldData.ToString() + "," + model.GhiChu;
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new ApiResponse
+                {
+                    Success = false,
+                    Message = "Đã xảy ra lỗi khi cập nhật dữ liệu.",
+                    Errors = new List<string> { ex.Message }
+                });
+            }
+            return Ok(new ApiResponse
+            {
+                Success = true,
+                Message = "Cập nhật thông tin thành công!"
+            });
+        }
+        #endregion
         [HttpGet("{dateTime}/{xuongId}")]
         public async Task<ActionResult<IEnumerable<object>>> GetPhieuCanTPFillet_XLPC(string dateTime, string xuongId)
         {
@@ -269,8 +993,7 @@ namespace WebAPI.Controllers
                     Errors = errors
                 });
             }
-            // ... kiểm tra mã nhân viên đã tồn tại chưa ...
-            if (_context.PhieuCanTPFilletv2.Any(u => u.STT == model.STT && u.Ngay == model.Ngay && u.MaXuong == model.MaXuong))
+            if (_context.PhieuCanTPFilletv2.Any(u => u.STT == model.STT && u.Ngay == model.Ngay && u.MaMayCan == model.MaMayCan && u.MaXuong == model.MaXuong))
             {
                 return BadRequest(new ApiResponse
                 {
@@ -304,7 +1027,9 @@ namespace WebAPI.Controllers
                 MaBan = model.MaBan,
                 ThePhieuSanLuongId = model.ThePhieuSanLuongId,
                 GhiChu = model.GhiChu,
-                MaNhanVienPhucVu = model.MaNhanVienPhucVu
+                MaNhanVienPhucVu = model.MaNhanVienPhucVu,
+                Id = model.Id,
+                IdIn = model.IdIn,
             };
             _context.PhieuCanTPFilletv2.Add(newItem);
             try
@@ -482,8 +1207,11 @@ namespace WebAPI.Controllers
             var oldData = JsonSerializer.Serialize(new
             {
                 item.STT,
+                item.STTBTP,
+                item.TrongLuongNhan,
                 item.TrongLuongTra,
-                item.TrongLuongTare
+                item.TrongLuongTare,
+                item.DinhMucThucTe
             }, options);
 
             var newItem = new PhieuCanTPFilletv2
@@ -501,17 +1229,19 @@ namespace WebAPI.Controllers
                 MaUserCan = item.MaUserCan,
                 MaXuong = item.MaXuong,
                 Ngay = item.Ngay,
-                TrongLuongTare = item.TrongLuongTare,
-                TrongLuongTra = item.TrongLuongTra,
-                STTBTP = item.STTBTP,
-                DinhMucThucTe = item.DinhMucThucTe,
+                TrongLuongTare = model.TrongLuongTare,
+                TrongLuongTra = model.TrongLuongTra,
+                STTBTP = model.STTBTP,
+                DinhMucThucTe = model.DinhMucThucTe,
                 DinhMucYeuCau = item.DinhMucThucTe,
                 MaMayCanBTP = item.MaMayCanBTP,
-                TrongLuongNhan = item.TrongLuongNhan,
+                TrongLuongNhan = model.TrongLuongNhan,
                 MaNhanVien = item.MaNhanVien,
                 MaBan = item.MaBan,
                 ThePhieuSanLuongId = item.ThePhieuSanLuongId,
                 MaNhanVienPhucVu = item.MaNhanVienPhucVu,
+                Id = item.Id,
+                IdIn = item.IdIn,
                 GhiChu = item.GhiChu + "," + oldData + "," + model.GhiChu
             };
 
@@ -620,7 +1350,7 @@ namespace WebAPI.Controllers
                         await Task.Run(
                             () =>
                             {
-                                rows = Vm.VmPhieuCanTPDinhHinh.Insert(phieuCans);
+                                rows = Vm.VmPhieuCanTPFilletv2.Insert(phieuCans);
                                 foreach (var item in ids)
                                 {
                                     Vm.VmLogKetChuyen.Insert(

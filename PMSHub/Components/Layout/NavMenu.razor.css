@@ -3,7 +3,7 @@
     display: flex !important;
     justify-content: center !important; /* Canh giữa theo chiều ngang */
     align-items: center !important; /* Canh giữa theo chiều dọc */
-    height: 100px !important; /* Điều chỉnh độ cao tùy theo thiết kế */
+    height: 64px !important; /* Điều chỉnh độ cao tùy theo thiết kế */
     background-color: #f5f5f5 !important; /* Màu nền cho phần chứa logo */
 }
 

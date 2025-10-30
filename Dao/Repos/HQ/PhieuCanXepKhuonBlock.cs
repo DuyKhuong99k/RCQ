@@ -11,12 +11,34 @@ namespace Dao.Repos.HQ
         private readonly string qrDelete = "Delete [dbo].[PhieuCanXepKhuonBlock] WHERE [STT] = @STT and [Ngay] =@Ngay and [MaXuong] = @MaXuong and [MaMayCan] = @MaMayCan";
 
         private readonly string qrInsert = @"
-INSERT INTO[dbo].[PhieuCanXepKhuonBlock] ([STT] ,[Ngay] ,[MaXuong] ,[MaMayCan] ,[Gio] ,[MaUserCan] ,[GhiChu] ,[MaLo] ,[MaThanhPham] ,[MaSize] ,[MaChatLuong] ,[MaNet] ,[MaChieuXa] ,[MaKhachHang] ,[MaMau] ,[MaCongDoan] ,[MaNhanVien] ,[TrongLuong]) VALUES (@STT,@Ngay,@MaXuong,@MaMayCan,@Gio,@MaUserCan,@GhiChu,@MaLo,@MaThanhPham, @MaSize,@MaChatLuong,@MaNet,@MaChieuXa,@MaKhachHang,@MaMau,@MaCongDoan,@MaNhanVien,@TrongLuong)";
+INSERT INTO[dbo].[PhieuCanXepKhuonBlock] ([STT] ,[Ngay] ,[MaXuong] ,[MaMayCan] ,[Gio] ,[MaUserCan] ,[GhiChu] ,[MaLo] ,[MaThanhPham] ,[MaSize] ,[MaChatLuong] ,[MaNet] ,[MaChieuXa] ,[MaKhachHang] ,[MaMau] ,[MaCongDoan] ,[MaNhanVien] ,[TrongLuong],[Id]) VALUES (@STT,@Ngay,@MaXuong,@MaMayCan,@Gio,@MaUserCan,@GhiChu,@MaLo,@MaThanhPham, @MaSize,@MaChatLuong,@MaNet,@MaChieuXa,@MaKhachHang,@MaMau,@MaCongDoan,@MaNhanVien,@TrongLuong,@Id)";
 
         private readonly string qrUpdate = @"UPDATE [dbo].[PhieuCanXepKhuonBlock] SET  [Gio] = @Gio, [MaUserCan] = @MaUserCan, [GhiChu] = @GhiChu, [MaLo] = @MaLo,  [MaThanhPham] = @MaThanhPham, [MaSize] = @MaSize, [MaChatLuong] =@MaChatLuong, [MaNet] = @MaNet, [MaChieuXa] = @MaChieuXa, [MaKhachHang] = @MaKhachHang, [MaMau] = @MaMau, [MaCongDoan] = @MaCongDoan, [MaNhanVien] = @MaNhanVien, [TrongLuong] = @TrongLuong WHERE [STT] = @STT and [Ngay] =@Ngay and [MaXuong] = @MaXuong and [MaMayCan] = @MaMayCan";
 
         private readonly string qrGetAll = "Select * from PhieuCanXepKhuonBlock";
+        private readonly string qrGetsLastByNumAndMayCan = @"WITH RankedPhieu AS (
+    SELECT *,
+           ROW_NUMBER() OVER(PARTITION BY MaMayCan ORDER BY Ngay DESC, Gio DESC) AS RowNum
+    FROM PhieuCanXepKhuonBlock where Ngay =@ngay
+)
 
+SELECT *
+FROM RankedPhieu
+WHERE RowNum <= @num";
+        public List<T> GetsLast<T>(DateTime dateTime, int num)
+        {
+            var query = qrGetsLastByNumAndMayCan;
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+                var items = connection.QueryAsync<T>(
+                        query,
+                        new { ngay = dateTime.Date, num })
+                    .Result
+                    .ToList();
+                return items;
+            }
+        }
         public PhieuCanXepKhuonBlock(string? _connectionString = null)
         {
             connectionString = _connectionString ?? AppViewModels.Base.Ins.ConnectionString;
@@ -626,7 +648,58 @@ and t.MaTheTu = @maThe";
         {
             try
             {
-                var query =
+//                var query =
+//                    @"Select
+//p.MaLo,
+//p.MaNhanVien,
+//n.[Name] as NhanVienName,
+//n.MaHoSo,
+//tp.Ten as ThanhPhamName, 
+//s.Ten as SizeName,
+//cl.Ten as ChatLuongName,
+//net.Ten as NetName,
+//cx.Ten as ChieuXaName,
+//kh.Ten as KhachHangName,
+//ma.Ten as MauName,
+//cd.Ten as CongDoanName,
+//SUM(p.TrongLuong) as TrongLuong,
+//COUNT(*) as SoRo 
+//from PhieuCanXepKhuonBlock p,
+//NhanVienDaiThanh n,MaThanhPhamXepKhuonBlock tp,
+//MaSizeXepKhuonBlock s,
+//MaChatLuongXepKhuonBlock cl,
+//MaNetXepKhuon net,
+//MaChieuXaXepKhuon cx,
+//MaKhachHangXepKhuon kh,
+//MaMauXepKhuonBlock ma,
+//MaCongDoanXepKhuon cd 
+//where p.Ngay <= @toDate
+//and p.Ngay >= @fromDate
+//and p.MaXuong = @xuongId 
+//and p.MaNhanVien = n.MaNhanVien
+//and p.MaThanhPham = tp.Ma 
+//and p.MaSize = s.Ma 
+//and p.MaChatLuong = cl.Ma 
+//and p.MaNet = net.Ma 
+//and p.MaChieuXa = cx.Ma 
+//and p.MaKhachHang = kh.Ma 
+//and p.MaMau = ma.Ma 
+//and p.MaCongDoan = cd.Ma 
+//group by 
+//p.MaLo,
+//p.MaNhanVien,
+//n.[Name],
+//n.MaHoSo,
+//tp.Ten, 
+//s.Ten,
+//cl.Ten,
+//net.Ten, 
+//cx.Ten,
+//kh.Ten,
+//ma.Ten,
+//cd.Ten 
+//order by MaHoSo";
+var query =
                     @"Select
 p.MaLo,
 p.MaNhanVien,
@@ -641,7 +714,10 @@ kh.Ten as KhachHangName,
 ma.Ten as MauName,
 cd.Ten as CongDoanName,
 SUM(p.TrongLuong) as TrongLuong,
-COUNT(*) as SoRo 
+COUNT(*) as SoRo ,
+MIN(c.ThoiGian) OVER(PARTITION BY n.MaChamCong, p.Ngay) as ThoiGianVao,
+MAX(c.ThoiGian) OVER(PARTITION BY n.MaChamCong, p.Ngay) as ThoiGianRa,
+DATEDIFF(hour, MIN(c.ThoiGian) OVER(PARTITION BY n.MaChamCong, p.Ngay), MAX(c.ThoiGian) OVER(PARTITION BY n.MaChamCong, p.Ngay)) as TongThoiGian
 from PhieuCanXepKhuonBlock p,
 NhanVienDaiThanh n,MaThanhPhamXepKhuonBlock tp,
 MaSizeXepKhuonBlock s,
@@ -650,7 +726,8 @@ MaNetXepKhuon net,
 MaChieuXaXepKhuon cx,
 MaKhachHangXepKhuon kh,
 MaMauXepKhuonBlock ma,
-MaCongDoanXepKhuon cd 
+MaCongDoanXepKhuon cd ,
+CheckInOut c
 where p.Ngay <= @toDate
 and p.Ngay >= @fromDate
 and p.MaXuong = @xuongId 
@@ -663,6 +740,7 @@ and p.MaChieuXa = cx.Ma
 and p.MaKhachHang = kh.Ma 
 and p.MaMau = ma.Ma 
 and p.MaCongDoan = cd.Ma 
+AND n.MaChamCong = c.MaChamCong AND c.ThoiGian = p.Ngay AND c.ThoiGian >= @fromDate AND c.ThoiGian <= @toDate 
 group by 
 p.MaLo,
 p.MaNhanVien,
@@ -675,7 +753,10 @@ net.Ten,
 cx.Ten,
 kh.Ten,
 ma.Ten,
-cd.Ten 
+cd.Ten ,
+p.Ngay,
+n.MaChamCong,
+c.ThoiGian
 order by MaHoSo";
                 using (var connection = new SqlConnection(connectionString))
                 {

@@ -34,7 +34,7 @@ namespace PMS.Controllers.DanhMucHQ
             _httpClientFactory = httpClientFactory;
         }
 
-        [CustomAuthorize(Fu = "Danh Mục HQ / Lô Chi Tiết", Func = "Xem HQ / Lô Chi Tiết")]
+        [CustomAuthorize(Fu = "Danh Mục / Lô Chi Tiết HQ", Func = "Xem Lô Chi Tiết HQ")]
         public IActionResult Index()
         {
             var rl = Middlewares.AuthenticationHelpers.CheckAut(HttpContext, "LoaiCaDinhHinhView");
@@ -94,7 +94,7 @@ namespace PMS.Controllers.DanhMucHQ
                 throw;
             }
         }
-        [CustomAuthorize(Fu = "Danh Mục HQ / Lô Chi Tiết", Func = "Thêm HQ / Lô Chi Tiết")]
+        [CustomAuthorize(Fu = "Danh Mục / Lô Chi Tiết HQ", Func = "Thêm Lô Chi Tiết HQ")]
         public async Task<IActionResult> DoInsert(string id, string ten, string loId, DateOnly mNgay, decimal tyLe)
         {
             var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/HQ_LoChiTiets/Insert";
@@ -181,7 +181,7 @@ namespace PMS.Controllers.DanhMucHQ
                 Mesages = "Lỗi!"
             });
         }
-        [CustomAuthorize(Fu = "Danh Mục HQ / Lô Chi Tiết", Func = "Sửa HQ / Lô Chi Tiết")]
+        [CustomAuthorize(Fu = "Danh Mục / Lô Chi Tiết HQ", Func = "Sửa Lô Chi Tiết HQ")]
         public async Task<IActionResult> DoUpDate(string id, string ten, string loId, DateTime mNgay,decimal tyLe)
         {
             var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/HQ_LoChiTiets/Update/{id}";
@@ -232,7 +232,7 @@ namespace PMS.Controllers.DanhMucHQ
                 });
             }
         }
-        [CustomAuthorize(Fu = "Danh Mục HQ / Lô Chi Tiết", Func = "Xoá HQ / Lô Chi Tiết")]
+        [CustomAuthorize(Fu = "Danh Mục / Lô Chi Tiết HQ", Func = "Xoá Lô Chi Tiết HQ")]
         public async Task<IActionResult> DoDelete(string id)
         {
             try

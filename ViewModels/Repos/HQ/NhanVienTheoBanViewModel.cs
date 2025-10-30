@@ -354,5 +354,10 @@ namespace ViewModels.Repos.HQ
             var dao = new Dao.Repos.HQ.NhanVienTheoBan(connStr);
             return dao.GetNhanVienTheoBanFullFileds<T>(maBan,xuong);
         }
+        public List<T> GetNhanVienTheoBansMoiNhat<T>(string maBan,string xuong,string? connStr = null)
+        {
+            var dao = new Dao.Repos.HQ.NhanVienTheoBan(connStr);
+            return dao.GetNhanVienTheoBansMoiNhat<T>(maBan,xuong);
+        }
     }
 }

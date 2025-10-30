@@ -70,5 +70,83 @@ namespace Dao.Repos.HQ
             var rows = connection.Execute(qrUpdate, item);
             return rows;
         }
+
+        public List<T> GetLoTheoLines<T>(DateTime ngay,string maLo)
+        {
+            try
+            {
+                var query = @"
+                select
+                p.Id,
+                p.CodeId,
+                p.MaLo,
+                p.MaLine,
+                l.Ten as LineName,
+                p.Ngay,
+                p.Gio
+                from LoTheoLine p
+                left join LineFilletv2 l on p.MaLine = l.Ma
+                where p.Ngay = @ngay and p.MaLo = @maLo";
+                using (var connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+                    var items = connection.QueryAsync<T>(query, new { ngay = ngay.Date, maLo = maLo }).Result
+                        .ToList();
+                    return items;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                throw;
+            }
+        }
+
+        public List<T> GetLoTheoLinesMoiNhat<T>(DateTime ngay,string maLo)
+        {
+            try
+            {
+                var query = @"
+                ;WITH Ranked AS (
+                    SELECT 
+                        p.Id,
+                        p.CodeId,
+                        p.Ngay,
+                        p.Gio,
+		                p.MaLo,
+                        p.MaLine,
+                        l.Ten AS LineName,
+                        ROW_NUMBER() OVER (
+                            PARTITION BY p.MaLine
+                            ORDER BY 
+                                TRY_CONVERT(time(0), p.Gio) DESC,
+                                p.Id DESC
+                        ) AS rn
+                    FROM LoTheoLine p
+    
+                    LEFT JOIN LineFilletv2 l ON p.MaLine = l.Ma
+                    WHERE p.Ngay = @ngay
+                      AND p.MaLo = @maLo
+
+                )
+                SELECT 
+                    Id,MaLo,MaLine, LineName, Ngay, Gio,CodeId
+                FROM Ranked
+                WHERE rn = 1
+                ORDER BY TRY_CONVERT(time(0), Gio) DESC;";
+                using (var connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+                    var items = connection.QueryAsync<T>(query, new { ngay = ngay.Date, maLo =maLo}).Result
+                        .ToList();
+                    return items;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                throw;
+            }
+        }
     }
 }

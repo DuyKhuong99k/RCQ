@@ -57,11 +57,66 @@ namespace WebAPI.Controllers
             }
             return Ok(item);
         }
+        //[HttpPost]
+        //[Authorize]
+        //public async Task<IActionResult> Insert(HQ_NhanVienTheoNhom model)
+        //{
+        //    //kiểm tra xem dữ liệu đầu vào có hợp lệ không và trả về danh sách lỗi nếu có.
+        //    if (!ModelState.IsValid)
+        //    {
+        //        var errors = ModelState.Values.SelectMany(v => v.Errors)
+        //                                      .Select(e => e.ErrorMessage)
+        //                                      .ToList();
+
+        //        return BadRequest(new ApiResponse
+        //        {
+        //            Success = false,
+        //            Message = "Dữ liệu không hợp lệ.",
+        //            Errors = errors
+        //        });
+        //    }
+        //    // ... kiểm tra mã nhân viên đã tồn tại chưa ...
+        //    if (_context.HqNhanVienTheoNhoms.Any(u => u.Id == model.Id))
+        //    {
+        //        return BadRequest(new ApiResponse
+        //        {
+        //            Success = false,
+        //            Message = "Mã này đã tồn tại.",
+        //        });
+        //    }
+        //    var newItem = new HQ_NhanVienTheoNhom
+        //    {
+        //       MaNhanVien = model.MaNhanVien,
+        //       MaNhom = model.MaNhom,
+        //       NgayGioBatDau = model.NgayGioBatDau,
+        //       HeSo = model.HeSo,
+        //    };
+        //    _context.HqNhanVienTheoNhoms.Add(newItem);
+        //    try
+        //    {
+        //        await _context.SaveChangesAsync();
+        //        //Vm.VmHQ_NhanVienTheoNhom.Insert(model);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return BadRequest(new ApiResponse
+        //        {
+        //            Success = false,
+        //            Message = "Đã xảy ra lỗi khi lưu dữ liệu." + ex.Message.ToString(),
+        //            Errors = new List<string> { ex.Message.ToString() }
+        //        });
+        //    }
+        //    return Ok(new ApiResponse
+        //    {
+        //        Success = true,
+        //        Message = "Thêm thành công!"
+        //    });
+        //}
         [HttpPost]
         [Authorize]
         public async Task<IActionResult> Insert(HQ_NhanVienTheoNhom model)
         {
-            //kiểm tra xem dữ liệu đầu vào có hợp lệ không và trả về danh sách lỗi nếu có.
+            // 1️⃣ Kiểm tra dữ liệu đầu vào
             if (!ModelState.IsValid)
             {
                 var errors = ModelState.Values.SelectMany(v => v.Errors)
@@ -75,37 +130,70 @@ namespace WebAPI.Controllers
                     Errors = errors
                 });
             }
-            // ... kiểm tra mã nhân viên đã tồn tại chưa ...
-            if (_context.HqNhanVienTheoNhoms.Any(u => u.Id == model.Id))
+
+            // Làm tròn thời gian đến phút
+            var ngayGioPhut = new DateTime(
+                model.NgayGioBatDau.Year,
+                model.NgayGioBatDau.Month,
+                model.NgayGioBatDau.Day,
+                model.NgayGioBatDau.Hour,
+                model.NgayGioBatDau.Minute,
+                0
+            );
+
+            // Tìm bản ghi trùng theo MaNhanVien + thời điểm
+            var duplicateRecord = await (
+                from nv in _context.HqNhanVienTheoNhoms
+                join nhom in _context.HqNhoms on nv.MaNhom equals nhom.Id into gj
+                from nhom in gj.DefaultIfEmpty()
+                where nv.MaNhanVien == model.MaNhanVien
+                   && nv.NgayGioBatDau.Year == ngayGioPhut.Year
+                   && nv.NgayGioBatDau.Month == ngayGioPhut.Month
+                   && nv.NgayGioBatDau.Day == ngayGioPhut.Day
+                   && nv.NgayGioBatDau.Hour == ngayGioPhut.Hour
+                   && nv.NgayGioBatDau.Minute == ngayGioPhut.Minute
+                select new
+                {
+                    nv.MaNhom,
+                    TenNhom = nhom != null ? nhom.Ten : null,
+                    nv.NgayGioBatDau
+                }
+            ).FirstOrDefaultAsync();
+
+            if (duplicateRecord != null)
             {
-                return BadRequest(new ApiResponse
+                return Ok(new ApiResponse
                 {
                     Success = false,
-                    Message = "Mã này đã tồn tại.",
+                    Message = $"Nhân viên này tồn tại trong nhóm: {duplicateRecord.MaNhom}" +(string.IsNullOrEmpty(duplicateRecord.TenNhom) ? "" : $" ({duplicateRecord.TenNhom})") +$" lúc {duplicateRecord.NgayGioBatDau:HH:mm dd/MM/yyyy}"
+                    
                 });
             }
+
             var newItem = new HQ_NhanVienTheoNhom
             {
-               MaNhanVien = model.MaNhanVien,
-               MaNhom = model.MaNhom,
-               NgayGioBatDau = model.NgayGioBatDau,
-               HeSo = model.HeSo,
+                MaNhanVien = model.MaNhanVien,
+                MaNhom = model.MaNhom,
+                NgayGioBatDau = model.NgayGioBatDau,
+                HeSo = model.HeSo,
             };
+
             _context.HqNhanVienTheoNhoms.Add(newItem);
+
             try
             {
                 await _context.SaveChangesAsync();
-                //Vm.VmHQ_NhanVienTheoNhom.Insert(model);
             }
             catch (Exception ex)
             {
                 return BadRequest(new ApiResponse
                 {
                     Success = false,
-                    Message = "Đã xảy ra lỗi khi lưu dữ liệu." + ex.Message.ToString(),
-                    Errors = new List<string> { ex.Message.ToString() }
+                    Message = "Đã xảy ra lỗi khi lưu dữ liệu: " + ex.Message,
+                    Errors = new List<string> { ex.Message }
                 });
             }
+
             return Ok(new ApiResponse
             {
                 Success = true,
@@ -114,10 +202,10 @@ namespace WebAPI.Controllers
         }
         [HttpPost("{id}")]
         [Authorize]
-        public async Task<IActionResult> Update(string id, [FromBody] HQ_NhanVienTheoNhom model)
+        public async Task<IActionResult> Update(long id, [FromBody] HQ_NhanVienTheoNhom model)
         {
             // Kiểm tra xem ID người dùng được cập nhật có hợp lệ không
-            if (string.IsNullOrEmpty(id))
+            if (string.IsNullOrEmpty(id.ToString()))
             {
                 return BadRequest(new ApiResponse
                 {
@@ -126,8 +214,10 @@ namespace WebAPI.Controllers
                 });
             }
 
+
             // Kiểm tra xem nhân viên có tồn tại trong cơ sở dữ liệu không
-            var item = await _context.HqNhanVienTheoNhoms.FindAsync(id);
+            //var item = await _context.HqNhanVienTheoNhoms.FindAsync(id);
+            var item = Vm.VmHQ_NhanVienTheoNhom.GetByMa(id);
             if (item == null)
             {
                 return BadRequest(new ApiResponse

@@ -1,35 +1,28 @@
 ﻿@page "/api/loginlocal/"
+@using Blazored.LocalStorage
+@using Models.Repos.Models
+@using PMSHub.Components.Layout
+@using Syncfusion.Blazor.DropDowns
+@using Syncfusion.Blazor.Inputs
+@using Vars.Hubs
+@using ViewModels.Repos.Hubs.IServices
 @layout ErrorLayout
 @rendermode InteractiveServer
 @inject IMainService MainService
 @inject IJSRuntime jsRuntime
-@using ViewModels.Repos.Hubs.IServices
-@using PMSHub.Components.Layout
 @inject ILoginService loginService
 @inject NavigationManager Navigation
 @inject ISessionService SessionService
 @inject IMessageService MessageService
 @inject ILocalStorageService LocalStorage
-@using System.Globalization
-@using System.Text.Json
-@using Blazored.LocalStorage
-@using Models.Repos.Models
-@using Syncfusion.Blazor.Buttons
-@using Syncfusion.Blazor.Cards
-@using Syncfusion.Blazor.DropDowns
-@using Syncfusion.Blazor.Grids
-@using Syncfusion.Blazor.Inputs
-@using Syncfusion.Blazor.Navigations
-@using Syncfusion.Blazor.Popups
-@using ViewModels.Repos.Hubs.IServices
-@using ChangeEventArgs = Microsoft.AspNetCore.Components.ChangeEventArgs
-@using EventArgs = EventArgs
-@using FilterType = Syncfusion.Blazor.DropDowns.FilterType
-@using OpenEventArgs = Syncfusion.Blazor.Popups.OpenEventArgs
+@inject IDeviceViewService DeviceViewService ;
 @inject IJSRuntime JsRuntime
+@inject IToastService ToastService
+@inherits AuthenticatedComponent
 
 
 <PageTitle>Đăng Nhập</PageTitle>
+
 <div class="container-xxl">
     <div class="authentication-wrapper authentication-basic container-p-y">
         <div class="authentication-inner">
@@ -40,25 +33,20 @@
                     <div class="app-brand justify-content-center">
                         <a href="index.html" class="app-brand-link gap-2">
                             <span class="app-brand-logo demo">
-                                <img style="width:120px" src="imgs/PMSLogo.png" />
+                                <img style="width: 180px" src="imgs/PhanBachLogo.png"/>
                             </span>
                         </a>
                     </div>
                     <!-- /Logo -->
-                    <h4 class="mb-2">Chào mừng đến với PMSHub</h4>
+                    <h4 class="mb-2">Chào mừng đến với PMHub</h4>
                     <p class="mb-4">Vui lòng đăng nhập để bất đầu!</p>
                     <div class="mb-3">
                         <div class="d-flex justify-content-between">
                             <label class="form-label" for="password">Xưởng</label>
                         </div>
                         <div class="input-group input-group-merge">
-
-                           @*  <SfDropDownList TValue="XiNghiep" Placeholder="Xí Nghiệp" FloatLabelType="FloatLabelType.Auto" TItem="XiNghiep" @bind-Value="@MainService.VmXiNghiep.SelectedItem" DataSource="@MainService.VmXiNghiep.Items">
-                                <DropDownListEvents TItem="XiNghiep" TValue="XiNghiep" ValueChange="xiNghiepValueChange" />
-                                <DropDownListFieldSettings Value="Ma" Text="Ten"></DropDownListFieldSettings>
-                            </SfDropDownList> *@
                             <SfDropDownList TValue="XiNghiep" Placeholder="Xí Nghiệp" FloatLabelType="FloatLabelType.Auto" TItem="XiNghiep" @bind-Value="@MainService.VmXiNghiep.SelectedItem" DataSource="@MainService.VmXiNghiep.Items">
-                                <DropDownListEvents TItem="XiNghiep" TValue="XiNghiep" ValueChange="xiNghiepValueChange" />
+                                <DropDownListEvents TItem="XiNghiep" TValue="XiNghiep" ValueChange="xiNghiepValueChange"/>
                                 <DropDownListFieldSettings Value="Ma" Text="Ten"></DropDownListFieldSettings>
                             </SfDropDownList>
                         </div>
@@ -66,13 +54,13 @@
                     <div class="mb-3">
                         <label class="form-label">Tài khoản</label>
                         <input type="text"
-                               class="form-control"
-                               id="txtUsername"
-                               @bind="userName"
-                               name="username"
-                               placeholder="Nhập tài khoản"
-                               autofocus
-                               autocomplete="off" />
+                        class="form-control"
+                        id="txtUsername"
+                        @bind="userName"
+                        name="username"
+                        placeholder="Nhập tài khoản"
+                        autofocus
+                        autocomplete="off" @onkeyup="keyUpEvent" />
                     </div>
                     <div class="mb-3 form-password-toggle">
                         <div class="d-flex justify-content-between">
@@ -80,16 +68,18 @@
                         </div>
                         <div class="input-group input-group-merge">
                             <input type="password"
-                                   id="txtPassword"
-                                   @bind="passWord"
-                                   class="form-control"
-                                   name="password"
-                                   placeholder="*****"
-                                   aria-describedby="password" autocomplete="off" />
-                            <span class="input-group-text cursor-pointer"><i class="bx bx-hide"></i></span>
+                            id="txtPassword"
+                            @bind="passWord"
+                            class="form-control"
+                            name="password"
+                            placeholder="*****"
+                            aria-describedby="password" autocomplete="off" @onkeyup="keyUpEvent"/>
+                            <span class="input-group-text cursor-pointer">
+                                <i class="bx bx-hide"></i>
+                            </span>
                         </div>
                     </div>
-@* 
+                    @* 
                     <div class="mb-3">
                         <div class="form-check">
                             <input class="form-check-input" type="checkbox" id="remember-me" />
@@ -113,9 +103,52 @@
         </div>
     </div>
 </div>
+<style>
+    #toast_default .e-meeting::before {
+    content: "\e705";
+    font-size: 17px;
+    }
+
+
+</style>
 
 @code {
+    SfToast ToastObj;
+    private string ToastPosition = "Center";
+    private string ToastContent = "Tên đăng nhập hoặc mật khẩu không chính xác.";
+    private string userName { get; set; }
+    private string passWord { get; set; }
+    private string returnUrl;
+    
+    // protected override void OnInitialized()
+    // {
+    //     // Lấy query string từ URL
+    //     // var uri = new Uri(Navigation.Uri);
+    //     // var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
+    //     //
+    //     // // Kiểm tra và lấy giá trị của `returnUrl`
+    //     // if (query.TryGetValue("returnUrl", out var url))
+    //     // {
+    //     //     returnUrl = url;
+    //     // }
+    // }
+    protected override async Task OnInitializedAsync()
+    {
+        var uri = new Uri(Navigation.Uri);
+        var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
 
+        // Kiểm tra và lấy giá trị của `returnUrl`
+        if (query.TryGetValue("returnUrl", out var url))
+        {
+            returnUrl = url;
+        }
+        if (loginService.IsUserAuthenticated())
+        {
+            Navigation.NavigateTo(returnUrl ?? "/", forceLoad: true);
+        }
+        
+        await base.OnInitializedAsync();
+    }
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
@@ -126,21 +159,22 @@
             if (!string.IsNullOrEmpty(xuongId))
             {
                 // Gán giá trị vào SelectedItem trong ViewModel
-                MainService.VmXiNghiep.SelectedItem = MainService.VmXiNghiep.Items.FirstOrDefault(x => x.Ma == xuongId);
+              var xiNghiep =  MainService.VmXiNghiep.Items.FirstOrDefault(x => x.Ma == xuongId);
+              MainService.VmXiNghiep.SelectedItem = xiNghiep;
             }
         }
     }
 
-    private string userName { get; set; }
-    private string passWord { get; set; }
+
+
     private async void xiNghiepValueChange(ChangeEventArgs<XiNghiep, XiNghiep> obj)
     {
+
         try
         {
             //await JsRuntime.InvokeVoidAsync("SetXuongId", obj.Value.Ma);
             SessionService.Set("XuongId", obj.Value.Ma);
             await LocalStorage.SetItemAsync("XuongId", obj.Value.Ma);
-            
         }
         catch (Exception e)
         {
@@ -148,20 +182,81 @@
             //throw;
         }
     }
-    private void ReloadPage()
-    {
-        // Lấy URL hiện tại và buộc tải lại trang
-        Navigation.NavigateTo(Navigation.Uri, forceLoad: true);
-    }
+
+
     private async Task DoLogin()
     {
         try
         {
-            if (loginService.LoginLocal(userName, passWord))
+            
+            var loginResult = loginService.LoginLocal(userName, passWord);
+            if (loginResult)
             {
+                // MainService.VmApp.ComName = "RCQTG";
+                //MainService.VmApp.ComName = MainService.VmXiNghiep.SelectedItem?.CodeId??"";
                 await LocalStorage.SetItemAsync("PageReloadKey", "false");
-                Navigation.NavigateTo("/Home", true);
+                // try
+                // {
+                //     var xuongId = await LocalStorage.GetItemAsync<string>("XuongId");
+                //     if (xuongId != null)
+                //     {
+                //         SessionService.Set("XuongId", xuongId);
+                //     }
+                //     else
+                //     {
+                //         var xiNghiep = MainService.VmXiNghiep.SelectedItem;
+                //         if (xiNghiep != null)
+                //         {
+                //             SessionService.Set("XuongId", xiNghiep.Ma);
+                //             await LocalStorage.SetItemAsync("XuongId", xiNghiep.Ma);
+                //         }
+                //     }
+                // }
+                // catch (Exception e)
+                // {
+                //     // Console.WriteLine(e);
+                //     // throw;
+                // }
                 
+                
+                //Navigation.NavigateTo("/", true);
+                var userId = loginService.GetSessionVal("Username");
+                var o = new ToastOption
+                {
+                    Title = "Thông Báo",
+                    Content = $"User: {userId} - Đăng Nhập Thành Công",
+                };
+                o.SetType(ToastType.Success);
+
+                ToastService.ShowToast(o);
+                await Task.Delay(2000);
+                Navigation.NavigateTo(returnUrl ?? "/", forceLoad: true);
+            }
+            else
+            {
+                
+
+                // await ToastService.ShowConfirmationToast("Are you sure you want to proceed?", "Confirmation", (result) =>
+                // {
+                //     if (result)
+                //     {
+                //         Console.WriteLine("User clicked Yes");
+                //     }
+                //     else
+                //     {
+                //         Console.WriteLine("User clicked No");
+                //     }
+
+                //     return Task.CompletedTask;
+                // });
+                var o = new ToastOption
+                    {
+                        Title = "Thông Báo",
+                        Content = $"Tên đăng nhập hoặc mật khẩu không chính xác.-{returnUrl} - {loginResult}" 
+                    };
+                o.SetType(ToastType.Error);
+
+                ToastService.ShowToast(o);
             }
         }
         catch (Exception e)
@@ -169,29 +264,14 @@
             Console.WriteLine(e);
         }
     }
-    private async Task HandleEnterKey(KeyboardEventArgs e)
+
+    private async void keyUpEvent(KeyboardEventArgs obj)
     {
-        if (e.Key == "Enter")
+        if (obj.Code == "Enter" || obj.Code == "NumpadEnter")
         {
-            await DoLogin(); // Gọi hàm DoLogin khi nhấn Enter
+            await InvokeAsync(StateHasChanged);
+            await DoLogin();
         }
     }
-    // private void DoLogin()
-    // {
-    //     try
-    //     {
-    //         if (loginService.LoginLocal(userName, passWord) == true)
-    //         {
-    //             Navigation.NavigateTo("/", true);
-    //         }
-
-    //     }
-    //     catch (Exception e)
-    //     {
-    //         Console.WriteLine(e);
-    //         // throw;
-    //     }
-    //}
 
 }
-

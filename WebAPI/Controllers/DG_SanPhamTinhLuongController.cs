@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Models.Repos;
 using Models.Repos.Models;
+using ToolsEx;
 using ViewModels.Repos.API;
 using WebAPI.Models;
 
@@ -48,6 +49,24 @@ namespace WebAPI.Controllers
                 });
             }
             return Ok(item);
+        }
+        [HttpGet("{tenSanPham}")]
+        [Authorize]
+        public IActionResult GetsByTen(string tenSanPham)
+        {
+            var item =_context.DG_SanPhamTinhLuong
+                .Where(x => x.Ten.Trim() == tenSanPham)
+                .Select(x => x.Ma.ToString())
+                .FirstOrDefault();
+            if (item == null)
+            {
+                return NotFound(new ApiResponse
+                {
+                    Success = false,
+                    Message = "Tên Sản Phẩm này không tồn tại!."
+                });
+            }
+           return Ok(new { Ma = item });
         }
         [HttpPost]
         [Authorize]
@@ -208,5 +227,7 @@ namespace WebAPI.Controllers
                 Message = "Đã xoá!"
             });
         }
+
+
     }
 }

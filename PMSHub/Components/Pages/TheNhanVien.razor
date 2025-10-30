@@ -1,4 +1,5 @@
 ﻿@page "/TheNhanVien"
+@using Handlers
 @using Models.Repos.Models
 @using Syncfusion.Blazor.Buttons
 @using Syncfusion.Blazor.Data
@@ -7,13 +8,14 @@
 @using Syncfusion.Blazor.Inputs
 @using Syncfusion.Blazor.Navigations
 @using Syncfusion.Blazor.Popups
+@using Vars
+@using Vars.Hubs
 @using ViewModels.Repos.Hubs.IServices
 @using EventArgs = EventArgs
 @using FilteringEventArgs = Syncfusion.Blazor.DropDowns.FilteringEventArgs
 @using FilterType = Syncfusion.Blazor.Grids.FilterType
 @using SelectionMode = Syncfusion.Blazor.Grids.SelectionMode
 @using SelectionType = Syncfusion.Blazor.Grids.SelectionType
-@using PMSHub.Components.Layout
 @rendermode InteractiveServer
 @inherits AuthenticatedComponent
 @attribute [StreamRendering]
@@ -23,180 +25,109 @@
 @inject ICardService cardService
 @inject IDeviceViewService DeviceViewService
 @inject IJSRuntime JsRuntime
-<link rel="stylesheet" href="styles/grid.css" />
+@inject IToastService ToastService
+<link rel="stylesheet" href="styles/grid.css"/>
 <PageTitle>Thẻ Nhân Viên</PageTitle>
 <!-- Navbar -->
-<TopLayout />
+@* <TopLayout /> *@
 <!-- / Navbar -->
 <!-- Content wrapper -->
-<div class="content-wrapper">
-    <!-- Content -->
+@* <div class="content-wrapper"> *@
+@*     <!-- Content --> *@
 
-    <div class="container-xxl flex-grow-1 container-p-y">
-        <h3>Thẻ Nhân Viên</h3>
-        <SfGrid DataSource="MainService.VmThe.Items" Height="500" @ref="Grid" AllowSorting="true" AllowMultiSorting="true" TValue="TheTu" AllowFiltering="true" AllowPaging="true" AllowSelection="true">
-            <GridPageSettings PageCount="10" PageSize="10" PageSizes="@(new[] { "5", "10", "15", "20", "100", "200", "500" })"></GridPageSettings>
-            <GridTemplates>
-                <ToolbarTemplate>
-                    <SfToolbar>
-                        <ToolbarEvents Clicked="ToolbarClickHandler"></ToolbarEvents>
-                        <ToolbarItems>
-                            <ToolbarItem Type="@ItemType.Button" PrefixIcon="e-refresh icon" Id="refresh" Text="Tải Lại"></ToolbarItem>
-                            <ToolbarItem Type="@ItemType.Button" PrefixIcon="e-expand icon" Id="add" Text="Thêm"></ToolbarItem>
-                            <ToolbarItem Type="@ItemType.Button" PrefixIcon="e-edit icon" Id="edit" Text="Sửa"></ToolbarItem>
-                            @* <ToolbarItem Type="@ItemType.Button" PrefixIcon="e-export-excel icon" Id="ExcelExport" Text="Xuất Excel"></ToolbarItem> *@
-                            <ToolbarItem Type="@ItemType.Button" PrefixIcon="e-circle-remove icon" Id="delete" Text="Xóa"></ToolbarItem>
-                        </ToolbarItems>
-                    </SfToolbar>
-                </ToolbarTemplate>
-            </GridTemplates>
-            <GridSortSettings>
-                <GridSortColumns>
-                    <GridSortColumn Field="@nameof(TheTu.NgayGio)" Direction="SortDirection.Descending"></GridSortColumn>
-                </GridSortColumns>
-            </GridSortSettings>
-            <GridFilterSettings Type="FilterType.Excel"></GridFilterSettings>
-            <GridSelectionSettings AllowDragSelection="true" Mode="SelectionMode.Row" Type="SelectionType.Multiple" EnableSimpleMultiRowSelection="true" CheckboxOnly="true" PersistSelection="true"></GridSelectionSettings>
-            <GridColumns>
-                <GridColumn Type="ColumnType.CheckBox" Width="50"></GridColumn>
-                <GridColumn Field="@nameof(TheTu.MaTheTu)" HeaderText="Id" Type="ColumnType.String" TextAlign="TextAlign.Center" Width="130"></GridColumn>
-                <GridColumn Field="@nameof(TheTu.MaNhanVien)" HeaderText="Mã Nhân Viên" Type="ColumnType.String" TextAlign="TextAlign.Center" Width="130" />
-                <GridColumn Field="@nameof(TheTu.MaSo)" HeaderText="Mã Số" Type="ColumnType.String" TextAlign="TextAlign.Center" Width="150" />
-                <GridColumn Field="@nameof(TheTu.NhanVienName)" HeaderText="Họ Tên" Type="ColumnType.String" TextAlign="TextAlign.Center" Width="150" />
-                <GridColumn Field="@nameof(TheTu.NgayGio)" HeaderText="Ngày Giờ" Type="ColumnType.DateTime" Format="dd/MM/yyyy HH:mm:ss" TextAlign="TextAlign.Center" Width="130"></GridColumn>
-                <GridColumn Field="@nameof(TheTu.PCName)" HeaderText="PC Name" Type="ColumnType.String" TextAlign="TextAlign.Center" Width="130"></GridColumn>
+@*     <div class="container-xxl flex-grow-1 container-p-y"> *@
+<h3>Thẻ Nhân Viên</h3>
+<SfGrid DataSource="MainService.VmThe.Items" Height="500" @ref="Grid" AllowExcelExport="true" AllowSorting="true" AllowMultiSorting="true" TValue="TheTu" AllowFiltering="true" AllowPaging="true" AllowSelection="true">
+    <GridPageSettings PageCount="10" PageSize="10" PageSizes="@(new[] { "5", "10", "15", "20", "100", "200", "500" })"></GridPageSettings>
+    <GridTemplates>
+        <ToolbarTemplate>
+            <SfToolbar>
+                <ToolbarEvents Clicked="ToolbarClickHandler"></ToolbarEvents>
+                <ToolbarItems>
+                    <ToolbarItem Type="@ItemType.Button" PrefixIcon="e-refresh icon" Id="refresh" Text="Tải Lại"></ToolbarItem>
+                    <ToolbarItem Type="@ItemType.Button" PrefixIcon="e-expand icon" Id="add" Text="Thêm"></ToolbarItem>
+                    <ToolbarItem Type="@ItemType.Button" PrefixIcon="e-edit icon" Id="edit" Text="Sửa"></ToolbarItem>
+                    <ToolbarItem Type="@ItemType.Button" PrefixIcon="e-circle-remove icon" Id="delete" Text="Xóa"></ToolbarItem>
+                    <ToolbarItem Type="@ItemType.Button" PrefixIcon="e-export-excel icon" Id="ExcelExport" Text="Xuất Excel"></ToolbarItem>
+                </ToolbarItems>
+            </SfToolbar>
+        </ToolbarTemplate>
+    </GridTemplates>
+    <GridSortSettings>
+        <GridSortColumns>
+            <GridSortColumn Field="@nameof(TheTu.NgayGio)" Direction="SortDirection.Descending"></GridSortColumn>
+        </GridSortColumns>
+    </GridSortSettings>
+    <GridFilterSettings Type="FilterType.Excel"></GridFilterSettings>
+    <GridSelectionSettings AllowDragSelection="true" Mode="SelectionMode.Row" Type="SelectionType.Multiple" EnableSimpleMultiRowSelection="true" CheckboxOnly="true" PersistSelection="true"></GridSelectionSettings>
+    <GridColumns>
+        <GridColumn Type="ColumnType.CheckBox" Width="50"></GridColumn>
+        <GridColumn Field="@nameof(TheTu.MaTheTu)" HeaderText="Id" Type="ColumnType.String" TextAlign="TextAlign.Center" Width="130"></GridColumn>
+        <GridColumn Field="@nameof(TheTu.MaNhanVien)" HeaderText="Mã Nhân Viên" Type="ColumnType.String" TextAlign="TextAlign.Center" Width="130"/>
+        <GridColumn Field="@nameof(TheTu.MaSo)" HeaderText="Mã Số" Type="ColumnType.String" TextAlign="TextAlign.Center" Width="150"/>
+        <GridColumn Field="@nameof(TheTu.NhanVienName)" HeaderText="Họ Tên" Type="ColumnType.String" TextAlign="TextAlign.Center" Width="150"/>
+        <GridColumn Field="@nameof(TheTu.NgayGio)" HeaderText="Ngày Giờ" Type="ColumnType.DateTime" Format="dd/MM/yyyy HH:mm:ss" TextAlign="TextAlign.Center" Width="130"></GridColumn>
+        <GridColumn Field="@nameof(TheTu.PCName)" HeaderText="PC Name" Type="ColumnType.String" TextAlign="TextAlign.Center" Width="130"></GridColumn>
 
-            </GridColumns>
-        </SfGrid>
-        <SfDialog Width="500px" Height="600px" ShowCloseIcon="true" IsModal="true" CloseOnEscape="true" @bind-Visible="@IsVisibleAdd">
-            <DialogEvents OnOverlayModalClick="@OverlayClick" Closed="Closed"></DialogEvents>
-            <DialogTemplates>
-                <Header>
-                    <div>@(isXoa == false ? "Thêm" : "Xóa")</div>
-                </Header>
-                <Content>
-                    @if (isXoa == false)
-                    {
-                        <SfDropDownList EnableVirtualization="true" @ref="DropNhanVien" Query="@LocalDataQuery" TValue="string" Placeholder="Nhân Viên" FloatLabelType="FloatLabelType.Auto" AllowFiltering="true" CssClass="e-multi-column" TItem="NhanVienDaiThanh" @bind-Value="@cardService.ItemNhanVien.MaNhanVien" DataSource="@MainService.VmNhanVien.Items">
-                            <DropDownListFieldSettings Value="MaNhanVien" Text="Name"></DropDownListFieldSettings>
-                            <DropDownListEvents TValue="string" TItem="NhanVienDaiThanh" Filtering="OnFiltering_NhanVien" ValueChange="ChangeNhanVien"></DropDownListEvents>
-                            <DropDownListTemplates TItem="NhanVienDaiThanh">
+    </GridColumns>
+</SfGrid>
+<SfDialog Width="500px" Height="600px" ShowCloseIcon="true" IsModal="true" CloseOnEscape="true" @bind-Visible="@IsVisibleAdd">
+    <DialogEvents OnOverlayModalClick="@OverlayClick" Closed="Closed"></DialogEvents>
+    <DialogTemplates>
+        <Header>
+            <div>@(isXoa == false ? "Thêm" : "Xóa")</div>
+        </Header>
+        <Content>
+            @if (isXoa == false)
+            {
+                <SfDropDownList EnableVirtualization="true" @ref="DropNhanVien" Query="@LocalDataQuery" TValue="string" Placeholder="Nhân Viên" FloatLabelType="FloatLabelType.Auto" AllowFiltering="true" CssClass="e-multi-column" TItem="NhanVienDaiThanh" @bind-Value="@cardService.ItemNhanVien.MaNhanVien" DataSource="@MainService.VmNhanVien.Items">
+                    <DropDownListFieldSettings Value="MaNhanVien" Text="Name"></DropDownListFieldSettings>
+                    <DropDownListEvents TValue="string" TItem="NhanVienDaiThanh" Filtering="OnFiltering_NhanVien" ValueChange="ChangeNhanVien"></DropDownListEvents>
+                    <DropDownListTemplates TItem="NhanVienDaiThanh">
 
-                                <HeaderTemplate>
+                        <HeaderTemplate>
 
-                                    <table>
-                                        <tr>
-                                            <th>Mã</th>
-                                            <th>Mã Hồ Sơ</th>
-                                            <th>Tên</th>
-                                        </tr>
-                                    </table>
+                            <table>
+                                <tr>
+                                    <th>Mã</th>
+                                    <th>Mã Hồ Sơ</th>
+                                    <th>Tên</th>
+                                </tr>
+                            </table>
 
-                                </HeaderTemplate>
+                        </HeaderTemplate>
 
-                                <ItemTemplate>
+                        <ItemTemplate>
 
-                                    <table>
-                                        <tbody>
-                                            <tr>
+                            <table>
+                                <tbody>
+                                <tr>
 
-                                                <td>@context.MaNhanVien</td>
-                                                <td>@context.MaHoSo</td>
-                                                <td>@context.Name</td>
+                                    <td>@context.MaNhanVien</td>
+                                    <td>@context.MaHoSo</td>
+                                    <td>@context.Name</td>
 
-                                            </tr>
-                                        </tbody>
-                                    </table>
+                                </tr>
+                                </tbody>
+                            </table>
 
-                                </ItemTemplate>
+                        </ItemTemplate>
 
-                            </DropDownListTemplates>
+                    </DropDownListTemplates>
 
 
-                        </SfDropDownList>
-                    }
-
-                    <div class="grid-container">
-                        <div class="grid-item">
-                            <SfDropDownList EnableVirtualization="true" TValue="string" Placeholder="Máy Cân" FloatLabelType="FloatLabelType.Auto" AllowFiltering="true" CssClass="e-multi-column" TItem="MayCan" DataSource="@MayCansService.Items" @bind-Value="DeviceViewService.DeviceSelectedId">
-                                <DropDownListFieldSettings Value="Id" Text="SubTitle"></DropDownListFieldSettings>
-                                <DropDownListTemplates TItem="MayCan">
-
-                                    <HeaderTemplate>
-
-                                        <table>
-                                            <tr>
-                                                <th>Tên</th>
-                                            </tr>
-                                        </table>
-
-                                    </HeaderTemplate>
-
-                                    <ItemTemplate>
-
-                                        <table>
-                                            <tbody>
-                                                <tr>
-                                                    <td>@context.SubTitle</td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-
-                                    </ItemTemplate>
-
-                                </DropDownListTemplates>
-
-                            </SfDropDownList>
-                        </div>
-                        <div class="grid-item">
-                            <SfButton style="margin: 2px; width: 100%;" Disabled="@(DeviceViewService.DeviceCard == null ? false : DeviceViewService.DeviceCard.IsNapThe)" @onclick="() => MayCanStartStop(DeviceViewService.DeviceSelectedId)" CssClass="e-primary">Bắt Đầu</SfButton>
-                        </div>
-                        <div class="grid-item">
-                            <SfButton style="margin: 2px; width: 100%;" Disabled="@(DeviceViewService.DeviceCard == null ? true : !DeviceViewService.DeviceCard.IsNapThe)" @onclick="() => MayCanStartStop(DeviceViewService.DeviceSelectedId)" CssClass="e-primary">Dừng</SfButton>
-                        </div>
-                    </div>
-                    <SfTextBox Placeholder="Thẻ Id" Value="@TheId" ValueChange="@ValueChangeHandler"></SfTextBox>
-                    <SfTextBox Placeholder="Thông Báo" Value="@ThongBao"></SfTextBox>
-                    <SfGrid DataSource="cardService.ItemsByNhanVien" Height="250px" AllowSorting="true" AllowMultiSorting="true" TValue="TheTu" AllowPaging="true" AllowSelection="true">
-                        <GridPageSettings PageCount="10" PageSize="10" PageSizes="@(new[] { "5", "10", "15", "20", "100", "200", "500" })"></GridPageSettings>
-                        <GridSortSettings>
-                            <GridSortColumns>
-                                <GridSortColumn Field="@nameof(TheTu.NgayGio)" Direction="SortDirection.Descending"></GridSortColumn>
-                            </GridSortColumns>
-                        </GridSortSettings>
-                        <GridColumns>
-                            <GridColumn Field="@nameof(TheTu.MaTheTu)" HeaderText="Id" Type="ColumnType.String" TextAlign="TextAlign.Center" Width="100"></GridColumn>
-
-                            <GridColumn Field="@nameof(TheTu.NgayGio)" HeaderText="Ngày Giờ" Type="ColumnType.DateTime" Format="dd/MM/yyyy HH:mm:ss" TextAlign="TextAlign.Center" Width="150"></GridColumn>
-                            <GridColumn Field="@nameof(TheTu.PCName)" HeaderText="PC Name" Type="ColumnType.String" TextAlign="TextAlign.Center"></GridColumn>
-
-                        </GridColumns>
-                    </SfGrid>
-
-                </Content>
-            </DialogTemplates>
-            @* <DialogButtons>
-            <DialogButton Content="Close" IsPrimary="true" OnClick="@CloseDialogAdd"/>
-            </DialogButtons> *@
-        </SfDialog>
-        <SfDialog Width="500px" ShowCloseIcon="true" IsModal="true" CloseOnEscape="true" @bind-Visible="@IsVisibleEdit">
-            <DialogEvents OnOverlayModalClick="@OverlayClick"></DialogEvents>
-            <DialogTemplates>
-                <Header>
-                    <div>Chọn Nhân Viên</div>
-                </Header>
-                <Content>
-                    <SfDropDownList EnableVirtualization="true" @ref="DropNhanVien" Query="@LocalDataQuery" TValue="string" Placeholder="Nhân Viên" FloatLabelType="FloatLabelType.Auto" AllowFiltering="true" CssClass="e-multi-column" TItem="NhanVienDaiThanh" @bind-Value="@cardService.ItemNhanVien.MaNhanVien" DataSource="@MainService.VmNhanVien.Items">
-                        <DropDownListFieldSettings Value="MaNhanVien" Text="Name"></DropDownListFieldSettings>
-                        <DropDownListEvents TValue="string" TItem="NhanVienDaiThanh" Filtering="OnFiltering_NhanVien" ValueChange="ChangeNhanVien"></DropDownListEvents>
-                        <DropDownListTemplates TItem="NhanVienDaiThanh">
+                </SfDropDownList>
+            }
+            <div class="grid-container">
+                <div class="grid-item">
+                    <SfDropDownList EnableVirtualization="true" TValue="string" Placeholder="Máy Cân" FloatLabelType="FloatLabelType.Auto" AllowFiltering="true" CssClass="e-multi-column" TItem="MayCan" DataSource="@filteredItems" @bind-Value="DeviceViewService.DeviceSelectedId">
+                        <DropDownListFieldSettings Value="Id" Text="SubTitle"></DropDownListFieldSettings>
+                        <DropDownListTemplates TItem="MayCan">
 
                             <HeaderTemplate>
 
                                 <table>
                                     <tr>
-                                        <th>Mã</th>
-                                        <th>Mã Hồ Sơ</th>
                                         <th>Tên</th>
                                     </tr>
                                 </table>
@@ -207,13 +138,9 @@
 
                                 <table>
                                     <tbody>
-                                        <tr>
-
-                                            <td>@context.MaNhanVien</td>
-                                            <td>@context.MaHoSo</td>
-                                            <td>@context.Name</td>
-
-                                        </tr>
+                                    <tr>
+                                        <td>@context.SubTitle</td>
+                                    </tr>
                                     </tbody>
                                 </table>
 
@@ -221,26 +148,101 @@
 
                         </DropDownListTemplates>
 
-
                     </SfDropDownList>
+                </div>
+                <div class="grid-item">
+                    <SfButton style="margin: 2px; width: 100%;" Disabled="@(DeviceViewService.DeviceCard == null ? false : DeviceViewService.DeviceCard.IsNapThe)" @onclick="() => MayCanStartStop(DeviceViewService.DeviceSelectedId)" CssClass="e-primary">Bắt Đầu</SfButton>
+                </div>
+                <div class="grid-item">
+                    <SfButton style="margin: 2px; width: 100%;" Disabled="@(DeviceViewService.DeviceCard == null ? true : !DeviceViewService.DeviceCard.IsNapThe)" @onclick="() => MayCanStartStop(DeviceViewService.DeviceSelectedId)" CssClass="e-primary">Dừng</SfButton>
+                </div>
+            </div>
+            <SfTextBox Placeholder="Thẻ Id" Value="@TheId" ValueChange="@ValueChangeHandler"></SfTextBox>
+            <SfTextBox Placeholder="Thông Báo" Value="@ThongBao"></SfTextBox>
+            <SfGrid DataSource="cardService.ItemsByNhanVien" Height="250px" AllowSorting="true" AllowMultiSorting="true" TValue="TheTu" AllowPaging="true" AllowSelection="true">
+                <GridPageSettings PageCount="10" PageSize="10" PageSizes="@(new[] { "5", "10", "15", "20", "100", "200", "500" })"></GridPageSettings>
+                <GridSortSettings>
+                    <GridSortColumns>
+                        <GridSortColumn Field="@nameof(TheTu.NgayGio)" Direction="SortDirection.Descending"></GridSortColumn>
+                    </GridSortColumns>
+                </GridSortSettings>
+                <GridColumns>
+                    <GridColumn Field="@nameof(TheTu.MaTheTu)" HeaderText="Id" Type="ColumnType.String" TextAlign="TextAlign.Center" Width="100"></GridColumn>
+
+                    <GridColumn Field="@nameof(TheTu.NgayGio)" HeaderText="Ngày Giờ" Type="ColumnType.DateTime" Format="dd/MM/yyyy HH:mm:ss" TextAlign="TextAlign.Center" Width="150"></GridColumn>
+                    <GridColumn Field="@nameof(TheTu.PCName)" HeaderText="PC Name" Type="ColumnType.String" TextAlign="TextAlign.Center"></GridColumn>
+
+                </GridColumns>
+            </SfGrid>
+
+        </Content>
+    </DialogTemplates>
+    @* <DialogButtons>
+            <DialogButton Content="Close" IsPrimary="true" OnClick="@CloseDialogAdd"/>
+            </DialogButtons> *@
+</SfDialog>
+<SfDialog Width="500px" ShowCloseIcon="true" IsModal="true" CloseOnEscape="true" @bind-Visible="@IsVisibleEdit">
+    <DialogEvents OnOverlayModalClick="@OverlayClick"></DialogEvents>
+    <DialogTemplates>
+        <Header>
+            <div>Chọn Nhân Viên</div>
+        </Header>
+        <Content>
+            <SfDropDownList EnableVirtualization="true" @ref="DropNhanVien" Query="@LocalDataQuery" TValue="string" Placeholder="Nhân Viên" FloatLabelType="FloatLabelType.Auto" AllowFiltering="true" CssClass="e-multi-column" TItem="NhanVienDaiThanh" @bind-Value="@cardService.ItemNhanVien.MaNhanVien" DataSource="@MainService.VmNhanVien.Items">
+                <DropDownListFieldSettings Value="MaNhanVien" Text="Name"></DropDownListFieldSettings>
+                <DropDownListEvents TValue="string" TItem="NhanVienDaiThanh" Filtering="OnFiltering_NhanVien" ValueChange="ChangeNhanVien"></DropDownListEvents>
+                <DropDownListTemplates TItem="NhanVienDaiThanh">
+
+                    <HeaderTemplate>
+
+                        <table>
+                            <tr>
+                                <th>Mã</th>
+                                <th>Mã Hồ Sơ</th>
+                                <th>Tên</th>
+                            </tr>
+                        </table>
+
+                    </HeaderTemplate>
+
+                    <ItemTemplate>
+
+                        <table>
+                            <tbody>
+                            <tr>
+
+                                <td>@context.MaNhanVien</td>
+                                <td>@context.MaHoSo</td>
+                                <td>@context.Name</td>
+
+                            </tr>
+                            </tbody>
+                        </table>
+
+                    </ItemTemplate>
+
+                </DropDownListTemplates>
 
 
-                </Content>
-            </DialogTemplates>
-            <DialogButtons>
-                <DialogButton Content="OK" IsPrimary="true" OnClick="@Edit" />
-                <DialogButton Content="Close" IsPrimary="true" OnClick="@CloseDialogAdd" />
-            </DialogButtons>
-        </SfDialog>
+            </SfDropDownList>
 
-    </div>
 
-    <!-- / Content -->
-    <!-- Footer -->
-    <FooterLayout />
-    <!-- / Footer -->
-    <div class="content-backdrop fade"></div>
-</div>
+        </Content>
+    </DialogTemplates>
+    <DialogButtons>
+        <DialogButton Content="OK" IsPrimary="true" OnClick="@Edit"/>
+        <DialogButton Content="Close" IsPrimary="true" OnClick="@CloseDialogAdd"/>
+    </DialogButtons>
+</SfDialog>
+
+@*     </div> *@
+
+@*     <!-- / Content --> *@
+@*     <!-- Footer --> *@
+@*     <FooterLayout /> *@
+@*     <!-- / Footer --> *@
+@*     <div class="content-backdrop fade"></div> *@
+@* </div> *@
 <!-- Content wrapper -->
 
 
@@ -253,7 +255,7 @@
     private readonly Query LocalDataQuery = new Query().Take(10);
     private string TheId = "";
     private string ThongBao = "";
-
+    private IEnumerable<MayCan> filteredItems => MayCansService.Items.Values.Where(x => x.AType != AppType._type5);
     private async void Edit()
     {
         var edit = async () =>
@@ -295,36 +297,43 @@
                             }
                             else
                             {
-                                await JsRuntime.InvokeVoidAsync("alert", "Không Thể Cập Nhật!"); // Alert
+                                // await JsRuntime.InvokeVoidAsync("alert", "Không Thể Cập Nhật!"); Alert
+                                ToastService.ShowToast("Không Thể Cập Nhật!", ToastType.Warning);
                             }
                         }
                         catch (Exception e)
                         {
                             Console.WriteLine(e);
-                            await JsRuntime.InvokeVoidAsync("alert", e.ToString()); // Alert
+                            // await JsRuntime.InvokeVoidAsync("alert", e.ToString()); Alert
+                            ToastService.ShowToast(e.ToString(), ToastType.Error);
                         }
                     }
                     else
                     {
-                        await JsRuntime.InvokeVoidAsync("alert", "Nhân Viên Không Tồn Tại!"); // Alert
+                        // await JsRuntime.InvokeVoidAsync("alert", "Nhân Viên Không Tồn Tại!"); Alert
+                        ToastService.ShowToast("Nhân Viên Không Tồn Tại!", ToastType.Warning);
                     }
                 }
                 else
                 {
-                    await JsRuntime.InvokeVoidAsync("alert", "Chưa chọn nhân viên!"); // Alert
+                    // await JsRuntime.InvokeVoidAsync("alert", "Chưa chọn nhân viên!"); Alert
+                    ToastService.ShowToast("Chưa chọn nhân viên!", ToastType.Warning);
                 }
             }
             else
             {
-                await JsRuntime.InvokeVoidAsync("alert", "Không có dữ liệu được chọn!"); // Alert
+                // await JsRuntime.InvokeVoidAsync("alert", "Không có dữ liệu được chọn!"); Alert
+                ToastService.ShowToast("Không có dữ liệu được chọn!", ToastType.Warning);
             }
         };
-        var result = await Handlers.ErrorHandler.HandleAsync(edit);
+        var result = await ErrorHandler.HandleAsync(edit);
+        await Grid.ClearSelectionAsync();
         if (!result.IsSuccess)
         {
             var e = result.Error;
             Console.WriteLine(e);
-            await JsRuntime.InvokeVoidAsync("alert", e?.ToString()); // Alert
+            // await JsRuntime.InvokeVoidAsync("alert", e?.ToString()); Alert
+            ToastService.ShowToast(e?.ToString(), ToastType.Error);
         }
     }
 
@@ -347,11 +356,12 @@
     {
         if (cardService.ItemNhanVien.MaNhanVien == null && isXoa == false)
         {
-            await JsRuntime.InvokeVoidAsync("alert", "Chưa chọn nhân viên!"); // Alert
+            // await JsRuntime.InvokeVoidAsync("alert", "Chưa chọn nhân viên!"); Alert
+            ToastService.ShowToast("Chưa chọn nhân viên!", ToastType.Warning);
             return;
         }
 
-        DeviceViewService.DeviceCard = MayCansService.Items.FirstOrDefault(x => x.Id == id);
+        DeviceViewService.DeviceCard = MayCansService.Find(id);//MayCansService.Items.FirstOrDefault(x => x.Id == id);
         DeviceViewService.DeviceSelectedId = id;
 
         if (DeviceViewService.DeviceCard != null)
@@ -359,18 +369,18 @@
             DeviceViewService.DeviceCard.IsNapThe = !DeviceViewService.DeviceCard.IsNapThe;
             if (DeviceViewService.DeviceCard.IsNapThe)
             {
-                MayCansService.ItemChanged -= MayCanChangedHandler;
-                MayCansService.ItemChanged += MayCanChangedHandler;
+                // MayCansService.ItemChanged -= MayCanChangedHandler;
+                // MayCansService.ItemChanged += MayCanChangedHandler;
                 await MayCansService.CommandSendMess(DeviceViewService.DeviceCard.Id, "Nạp Thẻ");
             }
             else
             {
-                MayCansService.ItemChanged -= MayCanChangedHandler;
+                // MayCansService.ItemChanged -= MayCanChangedHandler;
                 await MayCansService.CommandSendMess(DeviceViewService.DeviceCard.Id, "");
             }
 
 
-            MayCansService.NotifyItemChanged();
+            MayCansService.NotifyItemChanged(DeviceViewService.DeviceCard);
         }
     }
 
@@ -382,14 +392,14 @@
             //JsRuntime.InvokeVoidAsync("alert", args.Value); // Alert
             var nv = MainService.VmNhanVien.Items.FirstOrDefault(x => x.MaNhanVien == cardService.ItemNhanVien.MaNhanVien);
             var the = new TheTu
-                {
-                    MaTheTu = args.Value,
-                    NgayGio = DateTime.Now,
-                    PCName = MainService.VmApp.PCName,
-                    MaNhanVien = cardService.ItemNhanVien.MaNhanVien,
-                    MaSo = nv?.MaHoSo,
-                    NhanVienName = nv?.Name
-                };
+            {
+                MaTheTu = args.Value,
+                NgayGio = DateTime.Now,
+                PCName = MainService.VmApp.PCName,
+                MaNhanVien = cardService.ItemNhanVien.MaNhanVien,
+                MaSo = nv?.MaHoSo,
+                NhanVienName = nv?.Name
+            };
             var mes = cardService.Find(args.Value);
             if (mes == "")
             {
@@ -421,6 +431,7 @@
                 {
                     if (MainService.VmThe.Delete(the) > 0)
                     {
+                        
                         cardService.ItemsByNhanVien.Insert(0, the);
                         var item = MainService.VmThe.Items.FirstOrDefault(x => x.MaTheTu == the.MaTheTu);
                         if (item != null)
@@ -449,7 +460,8 @@
         {
             MainService.VmThe.Reload();
             await Grid.Refresh();
-            await JsRuntime.InvokeVoidAsync("alert", "Thực hiện xong!"); // Alert
+            // await JsRuntime.InvokeVoidAsync("alert", "Thực hiện xong!"); Alert
+            ToastService.ShowToast("Thực hiện xong!", ToastType.Success);
         }
 
         if (args.Item.Id == "add")
@@ -459,7 +471,8 @@
             cardService.ItemNhanVien = new TheTu();
             if (DeviceViewService.DeviceCard != null && DeviceViewService.DeviceSelectedId != "")
             {
-                var mayCan = MayCansService.Items.FirstOrDefault(x => x.Id == DeviceViewService.DeviceCard.Id);
+                //var mayCan = MayCansService.Items.FirstOrDefault(x => x.Id == DeviceViewService.DeviceCard.Id);
+                var mayCan = MayCansService.Find(DeviceViewService.DeviceCard.Id);
                 DeviceViewService.DeviceCard.IsNapThe = mayCan.IsNapThe;
             }
 
@@ -476,7 +489,8 @@
             }
             else
             {
-                await JsRuntime.InvokeVoidAsync("alert", "Không có dữ liệu được chọn!"); // Alert
+                // await JsRuntime.InvokeVoidAsync("alert", "Không có dữ liệu được chọn!"); Alert
+                ToastService.ShowToast("Không có dữ liệu được chọn!", ToastType.Warning);
             }
         }
 
@@ -490,7 +504,6 @@
                 {
                     if (MainService.VmThe.Delete(value) > 0)
                     {
-
                         foreach (var val in value)
                         {
                             var item = MainService.VmThe.Items.FirstOrDefault(x => x.MaTheTu == val.MaTheTu);
@@ -500,10 +513,13 @@
                                 MainService.VmThe.Items.RemoveAt(index);
                             }
                         }
+                        // Xóa số lượng select record
+                        await Grid.ClearSelectionAsync();
+                        
                     }
                     else
                     {
-                        ThongBao = $"Không Thể Xóa Thẻ!";
+                        ThongBao = "Không Thể Xóa Thẻ!";
                     }
                 }
             }
@@ -514,13 +530,23 @@
                 cardService.ItemNhanVien = new TheTu();
                 if (DeviceViewService.DeviceCard != null && DeviceViewService.DeviceSelectedId != "")
                 {
-                    var mayCan = MayCansService.Items.FirstOrDefault(x => x.Id == DeviceViewService.DeviceCard.Id);
+                    //var mayCan = MayCansService.Items.FirstOrDefault(x => x.Id == DeviceViewService.DeviceCard.Id);
+                    var mayCan = MayCansService.Find(DeviceViewService.DeviceCard.Id);
                     DeviceViewService.DeviceCard.IsNapThe = mayCan.IsNapThe;
                 }
+
                 cardService.ItemsByNhanVien.Clear();
                 IsVisibleAdd = true;
                 //await JsRuntime.InvokeVoidAsync("alert", "Không có dữ liệu được chọn!"); // Alert
             }
+        }
+
+        if (args.Item.Id == "ExcelExport") //Id is combination of Grid's ID and itemname
+        {
+            var ExportProperties = new ExcelExportProperties();
+            ExportProperties.ExportType = ExportType.AllPages;
+            ExportProperties.IncludeTemplateColumn = true;
+            await Grid.ExportToExcelAsync(ExportProperties);
         }
     }
 
@@ -528,12 +554,12 @@
     {
         IsVisibleAdd = false;
         IsVisibleEdit = false;
-        MayCansService.ItemChanged -= MayCanChangedHandler;
+        // MayCansService.ItemChanged -= MayCanChangedHandler;
 
         if (DeviceViewService.DeviceCard != null)
         {
             DeviceViewService.DeviceCard.IsNapThe = false;
-            MayCansService.NotifyItemChanged();
+            MayCansService.NotifyItemChanged(DeviceViewService.DeviceCard);
         }
     }
 
@@ -558,28 +584,28 @@
 
     public async void ChangeNhanVien(ChangeEventArgs<string, NhanVienDaiThanh> args)
     {
-        var result = Handlers.ErrorHandler.Handle(() =>
-        {
-            cardService.LoadByNhanVien(args.Value);
-        });
+        var result = ErrorHandler.Handle(() => { cardService.LoadByNhanVien(args.Value); });
         if (!result.IsSuccess)
         {
             var e = result.Error;
             Console.WriteLine(e);
-            await JsRuntime.InvokeVoidAsync("alert", e?.ToString()); // Alert
-        };
+            // await JsRuntime.InvokeVoidAsync("alert", e?.ToString()); Alert
+            ToastService.ShowToast(e?.ToString(), ToastType.Error);
+        }
+
+        ;
     }
 
     private void Closed(CloseEventArgs obj)
     {
         IsVisibleAdd = false;
         IsVisibleEdit = false;
-        MayCansService.ItemChanged -= MayCanChangedHandler;
+        // MayCansService.ItemChanged -= MayCanChangedHandler;
 
         if (DeviceViewService.DeviceCard != null)
         {
             DeviceViewService.DeviceCard.IsNapThe = false;
-            MayCansService.NotifyItemChanged();
+            MayCansService.NotifyItemChanged(DeviceViewService.DeviceCard);
         }
     }
 

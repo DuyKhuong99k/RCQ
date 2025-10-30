@@ -15,17 +15,17 @@ namespace Dao.Repos.HQ
 INSERT INTO [dbo].[HQ_Nhom]
            ([Id]
            ,[Ten]
-           ,[SuDung],[GhiChu])
+           ,[SuDung],[GhiChu],[MaSanPham])
      VALUES
            (@Id
            ,@Ten
-           ,@SuDung,@GhiChu)
+           ,@SuDung,@GhiChu,@MaSanPham)
 ";
 
         private readonly string qrUpdate = @"
 UPDATE [dbo].[HQ_Nhom]
    SET [Ten] = @Ten
-      ,[SuDung] = @SuDung,[GhiChu] = @GhiChu
+      ,[SuDung] = @SuDung,[GhiChu] = @GhiChu, [MaSanPham] = @MaSanPham
  WHERE [Id] = @Id
 ";
 

@@ -88,6 +88,14 @@ namespace Vars
         /// Phụ Phẩm V2
         /// </summary>
         PhuPhamv2,
-        
+        /// <summary>
+        /// HQ
+        /// </summary>
+        Hq,
+        /// <summary>
+        /// Xếp Khuôn Block
+        /// </summary>
+        XepKhuonBlock
+
     }
 }

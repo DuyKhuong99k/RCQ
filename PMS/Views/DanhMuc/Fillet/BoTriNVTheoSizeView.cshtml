@@ -47,7 +47,6 @@
         margin-right: 10px; /* Adjust the spacing between the input field and select dropdown */
     }
 </style>
-<div class="container mt-4">
     <div class="row">
         <div class="col-12">
             <div class="card">
@@ -63,10 +62,10 @@
                                 <label class="form-label">Chọn lô: </label>
                                 <select id="listMaLo" class="form-control">
                                     <option disabled selected>Chọn mã lô</option>
-                                    @foreach (var item in listMaLos)
-                                    {
-                                        <option value="@item.Item2">@item.Item2</option>
-                                    }
+                                @foreach (var item in listMaLos)
+                                {
+                                            <option value="@item.Item2">@item.Item2</option>
+                                }
                                 </select>
                             </div>
                         </div>
@@ -97,7 +96,7 @@
                                         </div>
                                     </div>
                                 </button>
-                                <button onclick="showUpdate()" class="btn btn-primary w-100 position-relative" type="submit" id="" style="display:none">
+                                <button onclick="showUpdate()" class="btn btn-primary w-100 position-relative" type="submit" id="">
                                     <div class=" align-items-center">
                                         <span id="txtSua"><i class='bx bx-rotate-left'></i></span>
                                         <div id="loadingIndicatorSua" class=" spinner-border text-secondary position-absolute" role="status" style="left: 0;right: 0;top: 0;bottom: 0;margin: auto;  display:none">
@@ -114,21 +113,13 @@
                                 </div>
                             </div>
                             <div id="GridSizeStaff"></div>
-                            @*  <div style="margin-top:5px">
-                            <label class="">
-                            <input class="form-check-input me-1" type="checkbox" value="" id="suDungBFL" />
-                            Xem nhân viên bàn hiện tại
-                            </label>
-                            <button onclick="" style="margin-right:5px" class="btn btn-outline-info"><i class='bx bx-loader'></i></i>Tải Lại</button>
-                            <button onclick="" style="margin-right:5px" class="btn btn-outline-secondary"><i class='bx bx-export'></i>Export Excel</button>
-                            </div> *@
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
+
 <div class="modal fade" id="modalThem" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -146,7 +137,7 @@
                                         <option disabled>Chọn Size</option>
                                         @foreach (var item in listSFLs)
                                         {
-                                            <option value="@item.Ma">@item.Ten</option>
+                                                <option value="@item.Ma">@item.Ten</option>
                                         }
                                     </select>
                                 </div>
@@ -178,52 +169,52 @@
     </div>
 </div>
 <div class="modal fade" id="modalSua" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div class="card">
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-6 mb-12 ">
-                                <div class="form-outline">
-                                    <label class="form-label" for="x1">Size</label>
-                                    <select id="listMaSizeSua" class="form-control">
-                                        <option disabled>Chọn Size</option>
-                                        @foreach (var item in listSFLs)
-                                        {
-                                            <option value="@item.Ma">@item.Ten</option>
-                                        }
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-md-6 mb-12 ">
-                                <div class="form-outline">
-                                    <label class="form-label" for="x1">Thời Gian Bất Đầu</label>
-                                    <input id="timepickerNVSSua" type="text" />
-                                </div>
+<div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+        <div class="modal-header">
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-12 ">
+                            <div class="form-outline">
+                                <label class="form-label" for="x1">Size</label>
+                                <select id="listMaSizeSua" class="form-control">
+                                    <option disabled>Chọn Size</option>
+                                    @foreach (var item in listSFLs)
+                                    {
+                                        <option value="@item.Ma">@item.Ten</option>
+                                    }
+                                </select>
                             </div>
                         </div>
-                        <div class="row mt-4 pt-2">
-                            <div class="col-12">
-                                <button onclick="update()" class="btn btn-primary w-100 position-relative" type="submit" id="">
-                                    <div class=" align-items-center">
-                                        <span id="txtSua">Sửa</span>
-                                        <div id="loadingIndicatorSua" class=" spinner-border text-secondary position-absolute" role="status" style="left: 0;right: 0;top: 0;bottom: 0;margin: auto; display:none">
-                                            <span class="visually-hidden">Đang tải...</span>
-                                        </div>
-                                    </div>
-                                </button>
+                        <div class="col-md-6 mb-12 ">
+                            <div class="form-outline">
+                                <label class="form-label" for="x1">Thời Gian Bất Đầu</label>
+                                <input id="timepickerNVSSua" type="text" />
                             </div>
                         </div>
-
                     </div>
+                    <div class="row mt-4 pt-2">
+                        <div class="col-12">
+                            <button onclick="update()" class="btn btn-primary w-100 position-relative" type="submit" id="">
+                                <div class=" align-items-center">
+                                    <span id="txtSua">Sửa</span>
+                                    <div id="loadingIndicatorSua" class=" spinner-border text-secondary position-absolute" role="status" style="left: 0;right: 0;top: 0;bottom: 0;margin: auto;">
+                                        <span class="visually-hidden">Đang tải...</span>
+                                    </div>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+
                 </div>
             </div>
         </div>
     </div>
+</div>
 </div>
 <input type="hidden" id="maNhanVienRowSelected" />
 <input type="hidden" id="ngayString" />
@@ -237,10 +228,15 @@
         loadGridData();
     });
     var grid;
+
     function loadGridData() {
+        var xuongId = @XuongId;
         $.ajax({
-            url: '/Staff/GetAllNhanViens',
+            url: '/Staff/GetListNhanVienDaiThanhFilltered',
             type: 'GET',
+                data: {
+                    xuongId : xuongId
+                },
             dataType: 'json',
             success: function (data) {
                 // Khởi tạo DataManager và gán dữ liệu từ API vào dataSource
@@ -258,15 +254,14 @@
                     grid = new ej.grids.Grid({
                         dataSource: dataManager,
                         allowPaging: true,
-                        pageSettings: { pageSize: 500 },
-                        allowSelection: true,
+                        pageSettings: { pageSize: 500, pageSizes: [50, 100, 200, 500] },
                         allowFiltering: true,
                         allowSorting: true,
+                        filterSettings: { type: 'Excel' },
                         allowResizing: true,
-                        enableVirtualization: true,
-                        loadingIndicator: { indicatorType: 'Shimmer' },
-                        filterSettings: { type: 'Menu' },
-                        //selectionSettings: { persistSelection: true, type: "Multiple", checkboxOnly: true },
+                        allowExcelExport: true,
+                        toolbar: ['ExcelExport'],
+                        //rowSelected: onRowSelected,
                         selectionSettings: { persistSelection: true },
                         rowSelected: selectionChanged,
                         rowDeselected: unSelectionChanged,
@@ -452,12 +447,13 @@
         var ngay = $('#datepicker').val();
         var maLo = $('#maLoId').val();
         var maXuong = $('#maXuongId').val();
-        loadGridDataSizeStaff(ngay, maLo, maXuong);
+        reloadGridSizeStaff(ngay, maLo, maXuong);
     }
     var gridSizeStaff;
 
-    function loadGridDataSizeStaff(ngay, maLo, maXuong) {
-        $.ajax({
+    function reloadGridSizeStaff(ngay, maLo, maXuong){
+          //var isCheckNow = $('#checkNow').prop('checked');
+          $.ajax({
             url: '/BoTriNVTheoSize/GetAllsFullField',
             type: 'GET',
             data: {
@@ -465,30 +461,53 @@
                 maLo: maLo,
                 maXuong: maXuong
             },
-            success: function (data) {
-                // Khởi tạo DataManager và gán dữ liệu từ API vào dataSource
-                var dataManager = new ej.data.DataManager({
+            dataType: 'json',
+            success: function (rs) {
+                if (rs != null) {
+                    loadGridDataSizeStaff(rs);
+                } else {
+                    toastOptionNotyfi();
+                    toastr["warning"](rs.Mesages, "Thông báo");
+                }
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error, "Thông báo");
+            }
+        });
+      }
+      function loadGridDataSizeStaff(data) {
+        if (gridSizeStaff) {
+            gridSizeStaff.dataSource = [];
+            gridSizeStaff.dataBind();
+            if (data && data.length > 0) {
+                gridSizeStaff.dataSource = new ej.data.DataManager({
                     json: data,
                     adaptor: new ej.data.JsonAdaptor()
                 });
-                // Kiểm tra xem Grid đã được tạo chưa
-                if (gridSizeStaff) {
-                    // Nếu Grid đã được tạo, chỉ cập nhật dữ liệu mới
-                    gridSizeStaff.dataSource = dataManager;
-                    gridSizeStaff.refresh();
-                } else {
-                    // Nếu Grid chưa được tạo, tạo mới Grid
-                    gridSizeStaff = new ej.grids.Grid({
+                gridSizeStaff.dataBind();
+            }
+        } else {
+            initializeGrid(data);
+        }
+    }
+    loadGridDataSizeStaff();
+    function initializeGrid(data){
+        var dataManager = new ej.data.DataManager({
+            json: data,
+            adaptor: new ej.data.JsonAdaptor()
+        });
+        gridSizeStaff = new ej.grids.Grid({
                         dataSource: dataManager,
                         allowPaging: true,
-                        pageSettings: { pageSize: 500 },
-                        allowSelection: true,
+                        pageSettings: { pageSize: 500, pageSizes: [50, 100, 200, 500] },
                         allowFiltering: true,
                         allowSorting: true,
+                        filterSettings: { type: 'Excel' },
                         allowResizing: true,
-                        enableVirtualization: true,
-                        loadingIndicator: { indicatorType: 'Shimmer' },
-                        filterSettings: { type: 'Menu' },
+                        allowExcelExport: true,
+                        toolbar: ['ExcelExport'],
+                        //rowSelected: onRowSelected,
                         selectionSettings: { persistSelection: true },
                         rowSelected: selectionNhanVienTheoSize,
                         rowDeselected: unSelectionNhanVienTheoSize,
@@ -506,17 +525,15 @@
                     });
 
                     gridSizeStaff.appendTo('#GridSizeStaff');
-                }
-            },
-            error: function (error) {
-                console.error(error);
-            }
-        });
-    }
-    loadGridDataSizeStaff();
-    function reloadDataSizeStaff() {
-        loadData();
-    }
+        gridSizeStaff.toolbarClick = function (args) {
+        if (args.item.id === 'Grid_excelexport') {
+            gridSizeStaff.excelExport();
+        }};
+
+      }
+
+
+    
 
     let selectedIdNhanVienSizes = ""; // Khai báo một chuỗi để lưu trữ Id đã chọn
     let selectedCount = 0; // Biến để đếm số phần tử được chọn
@@ -526,6 +543,7 @@
         if (deselectedRecords.length == 0) {
             selectedIdNhanVienSizes = "";
             selectedCount = 0; // Reset số lượng phần tử được chọn
+            //alert(selectedIdNhanVienSizes);
             return;
         }
 
@@ -536,6 +554,7 @@
             selectedIdNhanVienSizes = selectedIdNhanVienSizes.replace(deselectedId + ",", ""); // Loại bỏ Id khỏi chuỗi
             selectedCount--; // Giảm số lượng phần tử được chọn
         }
+        //alert(selectedIdNhanVienSizes);
     }
 
     function selectionNhanVienTheoSize(args) {
@@ -550,6 +569,7 @@
             filteredRecords.forEach(record => {
                 selectedIdNhanVienSizes += record.MaNhanVien + ","; // Thêm Mã Nhân viên vào chuỗi, phân tách bằng dấu phẩy
             });
+            //alert(selectedIdNhanVienSizes);
             return;
         }
         let selectedId = selectedRecords.MaNhanVien;
@@ -558,6 +578,7 @@
             selectedIdNhanVienSizes += selectedId + ","; // Thêm MaNhanVien mới vào chuỗi, phân tách bằng dấu phẩy
             selectedCount++; // Tăng số lượng phần tử được chọn
         }
+        //alert(selectedIdNhanVienSizes);
     }
 
     function showInsert() {

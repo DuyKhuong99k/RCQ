@@ -230,7 +230,7 @@ namespace PMS.Controllers
                         sanitizedCode = encryptedCode;
                     }
 
-                    var url = $@"{hubMayCanList.HubsMayCanUrl}/{userName}/{sanitizedCode}";
+                    var url = $@"{hubMayCanList.HubsMayCanUrl}";
 
                     return Json(new
                     {
@@ -257,6 +257,28 @@ namespace PMS.Controllers
 
         }
         //test push trên máy tính ở nhà của chắt
+
+        //public async Task<IActionResult> AutoAlertExpityNotice()
+        //{
+        //    try
+        //    {
+        //        return Json(new
+        //        {
+        //            isSuccess = true,
+        //            Messages = $@"HẾT HẠN SỬ DỤNG!"
+        //        });
+        //    }
+        //    catch (Exception ex)
+        //    {
+
+        //        return Json(new
+        //        {
+        //            isSuccess = false,
+        //            Messages = "Đã xảy ra lỗi: " + ex.Message.ToString()
+        //        });
+        //    }
+        //}
+
 
     }
 }

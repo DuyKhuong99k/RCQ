@@ -101,7 +101,9 @@ namespace WebAPI.Controllers
                 IsManh = model.IsManh,
                 TyLeNuoc = model.TyLeNuoc,
                 IsCaNgopGheTuoiBanNgoai = model.IsCaNgopGheTuoiBanNgoai,
-                IsCaNgopGheAoBanNgoai = model.IsCaNgopGheAoBanNgoai
+                IsCaNgopGheAoBanNgoai = model.IsCaNgopGheAoBanNgoai,
+                IsTareThung = model.IsTareThung,
+                CTTYLE = model.CTTYLE,
 
             };
             _context.MaThanhPhamNguyenLieu.Add(newItem);
@@ -185,8 +187,39 @@ namespace WebAPI.Controllers
                 item.TyLeNuoc = model.TyLeNuoc;
                 item.IsCaNgopGheTuoiBanNgoai = model.IsCaNgopGheTuoiBanNgoai;
                 item.IsCaNgopGheAoBanNgoai = model.IsCaNgopGheAoBanNgoai;
+                item.IsTareThung = model.IsTareThung;
+                item.CTTYLE = model.CTTYLE;
             try
             {
+                var newItemUs = new MaThanhPhamNguyenLieu_U
+                {
+                    MaThanhPham = item.Ma,
+                    MaLoaiCa = item.MaCa,
+                    Ten = item.Ten,
+                    SuDung = item.SuDung,
+                    Min = item.Min,
+                    Max = item.Max,
+                    IsSNL = item.IsSNL,
+                    IsNgopGhe = item.IsNgopGhe,
+                    IsNgopGheMuoi = item.IsNgopGheMuoi,
+                    IsMuoiGhePhuPham = item.IsMuoiGhePhuPham,
+                    IsNgopAoMuoi = item.IsNgopAoMuoi,
+                    IsNgopAoPhuPham = item.IsNgopAoPhuPham,
+                    IsDatNho = item.IsDatNho,
+                    IsPhuPhamCaTap = item.IsPhuPhamCaTap,
+                    IsCaCanTin = item.IsCaCanTin,
+                    IsCaNgopXeMuoi = item.IsCaNgopXeMuoi,
+                    IsNgopGhePhuPham = item.IsNgopGhePhuPham,
+                    IsManh = item.IsManh,
+                    TyLeNuoc = item.TyLeNuoc,
+                    IsCaNgopGheAoBanNgoai = item.IsCaNgopGheAoBanNgoai,
+                    IsCaNgopGheTuoiBanNgoai = item.IsCaNgopGheTuoiBanNgoai,
+                    MNgay = DateTime.Now,
+                    IsNgopXePhuPham = item.IsNgopXePhuPham,
+                };
+
+                // Thêm vào bảng HqLoaiNguyenLieuUs
+                _context.MaThanhPhamNguyenLieuUs.Add(newItemUs);
                 await _context.SaveChangesAsync();
             }
             catch (Exception ex)
@@ -230,6 +263,35 @@ namespace WebAPI.Controllers
 
             try
             {
+                var newItemUs = new MaThanhPhamNguyenLieu_D
+                {
+                    MaThanhPham = item.Ma,
+                    MaLoaiCa = item.MaCa,
+                    Ten = item.Ten,
+                    SuDung = item.SuDung,
+                    Min = item.Min,
+                    Max = item.Max,
+                    IsSNL = item.IsSNL,
+                    IsNgopGhe = item.IsNgopGhe,
+                    IsNgopGheMuoi = item.IsNgopGheMuoi,
+                    IsMuoiGhePhuPham = item.IsMuoiGhePhuPham,
+                    IsNgopAoMuoi = item.IsNgopAoMuoi,
+                    IsNgopAoPhuPham = item.IsNgopAoPhuPham,
+                    IsDatNho = item.IsDatNho,
+                    IsPhuPhamCaTap = item.IsPhuPhamCaTap,
+                    IsCaCanTin = item.IsCaCanTin,
+                    IsCaNgopXeMuoi = item.IsCaNgopXeMuoi,
+                    IsNgopGhePhuPham = item.IsNgopGhePhuPham,
+                    IsManh = item.IsManh,
+                    TyLeNuoc = item.TyLeNuoc,
+                    IsCaNgopGheAoBanNgoai = item.IsCaNgopGheAoBanNgoai,
+                    IsCaNgopGheTuoiBanNgoai = item.IsCaNgopGheTuoiBanNgoai,
+                    MNgay = DateTime.Now,
+                    IsNgopXePhuPham = item.IsNgopXePhuPham,
+                };
+
+                // Thêm vào bảng HqLoaiNguyenLieuUs
+                _context.MaThanhPhamNguyenLieuDs.Add(newItemUs);
                 await _context.SaveChangesAsync();
             }
             catch (Exception ex)

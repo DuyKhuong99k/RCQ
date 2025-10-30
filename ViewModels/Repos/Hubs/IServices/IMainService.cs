@@ -15,6 +15,9 @@ public interface IMainService
     public BanCatTietViewModel VmBanCatTiet { get; }
 
     public ChatLuongXepKhuonViewModel VmChatLuong { get; }
+    //public MaChatLuongXepKhuonViewModel VmChatLuong { get; }
+    public NETXepKhuonViewModel VmNETXepKhuon { get; }
+    public CongDoanXepKhuonViewModel VmCongDoanXepKhuon { get; }
 
     public MaChieuXaXepKhuonViewModel VmChieuXaXepKhuon { get; }
 
@@ -47,6 +50,7 @@ public interface IMainService
     public MauNguyenLieuViewModel VmMauNguyenLieu { get; }
 
     public MauPhuPhamViewModel VmMauPhuPham { get; }
+    public MauBlockXepKhuonViewModel VmMauBlockXepKhuon { get; }
 
     public MessageViewModel VmMessage { get; }
 
@@ -85,6 +89,7 @@ public interface IMainService
     public PhieuCanTPFilletv2ViewModel VmPhieuCanTpFilletv2 { get; }
 
     public PhieuCanXepKhuonKHCViewModel VmPhieuCanXepKhuonKXL { get; }
+    public PhieuCanXepKhuonBlockViewModel VmPhieuCanXepKhuonBlock { get; }
 
     public PhuongTienVanChuyenNguyenLieuViewModel VmPhuongTienNguyenLieu { get; }
 
@@ -113,6 +118,7 @@ public interface IMainService
     public ThanhPhamDinhHinhViewModel VmThanhPhamDinhHinh { get; }
 
     public ThanhPhamDinhHinh_ColorViewModel VmThanhPhamDinhHinhColor { get; }
+    public ThanhPhamDinhHinh_TyLeViewModel VmThanhPhamDinhHinhTyLe { get; }
 
     public ThanhPhamFilletViewModel VmThanhPhamFillet { get; }
 
@@ -131,7 +137,7 @@ public interface IMainService
     public ThanhPhamSoCheDinhHinhViewModel VmThanhPhamSoCheDinhHinh { get; }
 
     public TheViewModel VmThe { get; }
-
+    
     public ThePhieuSanLuongFilletViewModel VmThePhieuSanLuongFillet { get; }
 
     public TheRoViewModel VmTheRo { get; }
@@ -151,4 +157,7 @@ public interface IMainService
     public HQ_PhieuCanViewModel VmPhieuCanHq {get; }
     public event Action<string> AlertRequested;
     public CoiViewModel VmCoi {get;}
+    public AoViewModel VmAoNguyenLieu { get; }
+    public TrongLuongCoiTheoThanhPhamViewModel VmTrongLuongCoiTheoThanhPham { get; }
+    public LoaiCaXepKhuonViewModel VmLoaiCaXepKhuon { get; }
 }

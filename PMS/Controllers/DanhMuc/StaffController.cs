@@ -156,7 +156,7 @@ namespace PMS.Controllers.DanhMuc
                     JobPositionName0 = null,
                     AC = 0,
                     IsNhanVienCat = false,
-                    IsNhom = false
+                    IsNhom = false,
                     // Tiếp tục xử lý với giá trị maxMaNhanVien
                 };
                 return Json(new
@@ -200,7 +200,7 @@ namespace PMS.Controllers.DanhMuc
 
         }
         [CustomAuthorize(Fu = "Danh Mục / Nhân Viên", Func = "Thêm Nhân Viên")]
-        public async Task<IActionResult> DoInsert(string maNhanVien, string maHoSo, string tenNhanVien, int loaiSL, string nhomName, string xuongId, bool isContracting, bool isHuman, bool isPhucVu, bool isGiaCong, bool isBanKiem, bool isChucNang, bool isNhom, bool isShowDinhMuc)
+        public async Task<IActionResult> DoInsert(string maNhanVien, string maHoSo, string tenNhanVien, int loaiSL, string nhomName, string xuongId, bool isContracting, bool isHuman, bool isPhucVu, bool isGiaCong, bool isBanKiem, bool isChucNang, bool isNhom, bool isShowDinhMuc,string maChamCong)
         {
             var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/NhanVienDaiThanhs/InsertNhanVien";
             var accessToken = HttpContext.Session.GetString("JWTToken");
@@ -230,6 +230,7 @@ namespace PMS.Controllers.DanhMuc
                     IsChucNang = isChucNang,
                     IsNhom = isNhom,
                     IsShowDinhMuc = isShowDinhMuc,
+                    MaChamCong =  maChamCong
                 };
                 var jsonContent = new StringContent(JsonConvert.SerializeObject(nhanVienModel), Encoding.UTF8, "application/json");
                 using var helper = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
@@ -246,6 +247,14 @@ namespace PMS.Controllers.DanhMuc
                             Messages = response.Message,
                         });
                     }
+                }
+                else
+                {
+                    return Json(new
+                    {
+                        isSuccess = response.Success,
+                        Messages = response.Message,
+                    });
                 }
                 return Json(new
                 {
@@ -299,6 +308,7 @@ namespace PMS.Controllers.DanhMuc
                         IsChucNang = item?.IsChucNang,
                         IsNhom = item?.IsNhom,
                         IsShowDinhMuc = item?.IsShowDinhMuc,
+                        MaChamCong = item?.MaChamCong
                     });
                 }
             }
@@ -346,6 +356,7 @@ namespace PMS.Controllers.DanhMuc
                             IsChucNang = item?.IsChucNang,
                             IsNhom = item?.IsNhom,
                             IsShowDinhMuc = item?.IsShowDinhMuc,
+                            MaChamCong = item?.MaChamCong
                         }
                     });
                 }
@@ -392,6 +403,7 @@ namespace PMS.Controllers.DanhMuc
                         IsChucNang = item?.IsChucNang,
                         IsNhom = item?.IsNhom,
                         IsShowDinhMuc = item?.IsShowDinhMuc,
+                        MaChamCong = item?.MaChamCong
                     });
                 }
             }
@@ -402,13 +414,13 @@ namespace PMS.Controllers.DanhMuc
             });
         }
         [CustomAuthorize(Fu = "Danh Mục / Nhân Viên", Func = "Sửa Nhân Viên")]
-        public async Task<IActionResult> DoUpDate(string maNhanVien, string maHoSo, string tenNhanVien, int loaiSL, string nhomName, string xuongId, bool isContracting, bool isHuman, bool isPhucVu, bool isGiaCong, bool isBanKiem, bool isChucNang, bool isNhom, bool isShowDinhMuc)
+        public async Task<IActionResult> DoUpDate(string maNhanVien, string maHoSo, string tenNhanVien, int loaiSL, string nhomName, string xuongId, bool isContracting, bool isHuman, bool isPhucVu, bool isGiaCong, bool isBanKiem, bool isChucNang, bool isNhom, bool isShowDinhMuc,string maChamCong)
         {
             var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/NhanVienDaiThanhs/UpdateNhanVien/{maNhanVien}";
             try
             {
                 // Kiểm tra dữ liệu đầu vào
-                if (string.IsNullOrEmpty(maNhanVien) || string.IsNullOrEmpty(maHoSo) || string.IsNullOrEmpty(tenNhanVien) || string.IsNullOrEmpty(xuongId))
+                if (string.IsNullOrEmpty(maNhanVien) || string.IsNullOrEmpty(maHoSo) || string.IsNullOrEmpty(tenNhanVien) || string.IsNullOrEmpty(xuongId)|| string.IsNullOrEmpty(maChamCong))
                 {
                     return Json(new
                     {
@@ -432,6 +444,7 @@ namespace PMS.Controllers.DanhMuc
                     IsChucNang = isChucNang,
                     IsNhom = isNhom,
                     IsShowDinhMuc = isShowDinhMuc,
+                    MaChamCong = maChamCong
                 };
 
                 var jsonContent = new StringContent(JsonConvert.SerializeObject(updateModel), Encoding.UTF8, "application/json");
@@ -545,6 +558,20 @@ namespace PMS.Controllers.DanhMuc
                 ViewBag.dataSource = await helper.GetAsync<object>(HttpContext, apiUrl);
                 dataSource = ViewBag.dataSource;
             }
+            return dataSource;
+        }
+
+        public async Task<IEnumerable<NhanVienDaiThanh>> GetListNhanVienDaiThanhFilltered(string xuongId)
+        {
+            IEnumerable<NhanVienDaiThanh> dataSource = ViewBag.dataSource;
+            if (dataSource == null)
+            {
+                var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/NhanVienDaiThanhs/GetListNhanVienDaiThanhFilltered/{xuongId}";
+                using var helper = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+                ViewBag.dataSource = await helper.GetAsync<IEnumerable<NhanVienDaiThanh>>(HttpContext, apiUrl);
+                dataSource = ViewBag.dataSource;
+            }
+
             return dataSource;
         }
 

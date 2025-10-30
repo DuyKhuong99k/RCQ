@@ -69,4 +69,17 @@ public partial class PhieuCanPhuXepKhuon
     public decimal TrongLuong { get; set; }
 
     public string? GhiChu { get; set; }
+    
+    [StringLength(50)]
+    [Unicode(false)]
+    public string? Id { get; set; }
+
+    [Column(TypeName = "decimal(18, 2)")] 
+    public decimal TrongLuongTare { get; set; } = 0;
+    [StringLength(50)]
+    [Unicode(false)]
+    public string? MaChieuXa { get; set; }
+    [StringLength(50)]
+    [Unicode(false)]
+    public string? MaChatLuong { get; set; }
 }

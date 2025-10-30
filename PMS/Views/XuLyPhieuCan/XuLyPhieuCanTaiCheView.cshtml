@@ -634,7 +634,7 @@
             json: data,
             adaptor: new ej.data.JsonAdaptor()
         });
-        if (grid) {
+        if (grid!= null) {
             grid.dataSource = dataManager;
             grid.refresh();
         } else {
@@ -907,7 +907,18 @@
         // Hiển thị số dòng đã chọn nếu cần
         //alert(numRowSelect);
     }
+    function ClearData(GridId) {
+        try {
+            var gridObj = document.getElementById(GridId).ej2_instances[0];
+            if(gridObj)
+                gridObj.dataSource = [];
+        } catch (e) {
+            Console.log(e);
+        }
+
+    }
     function reloadDataXLPCTC() {
+        ClearData("Grid");
         var btn = document.getElementById('RefreshButtonXLPC').ej2_instances[0];
         var content = btn.content;
         btn.content = "Đang Tải ...";
@@ -922,7 +933,7 @@
                 if (response.Success) {
                     creatTable(response.Data);
                 } else {
-                    creatTable(response.Data);
+                    creatTable();
                     console.error(response.Messages);
                     toastOptionNotyfi();
                     toastr["error"](response.Messages, "Không có dữ liệu!");

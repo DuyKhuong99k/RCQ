@@ -21,4 +21,7 @@ public partial class MaSizeChinhXepKhuon
     public int _type { get; set; }
 
     public int Idx { get; set; }
+    [Required]
+    [Column(TypeName = "datetime2(7)")]
+    public DateTime MNgay { get; set; } = DateTime.Now;
 }

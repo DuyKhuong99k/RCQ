@@ -48,11 +48,7 @@
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h2 class="mb-0">Danh Sách Chi Tiết Ra Cối  Xếp Khuôn</h2>
                     @{
-                        var themChiTietRaCoiXepKhuon = rolePermistions.Where(x => x.Fu == "Danh Mục / Xếp Khuôn / Chi Tiết Ra Cối" && x.Func == "Thêm Xếp Khuôn / Chi Tiết Ra Cối" && x.Status == 1).FirstOrDefault();
-                        if (themChiTietRaCoiXepKhuon != null)
-                        {
-                            <button onclick="showInsert()" type="button" class="btn btn-primary">Thêm</button>
-                        }
+                        
                     }
 
                 </div>
@@ -60,6 +56,11 @@
                     <div id="Grid"></div>
                     <div style="margin-top:20px;">
                         @{
+                            var themChiTietRaCoiXepKhuon = rolePermistions.Where(x => x.Fu == "Danh Mục / Xếp Khuôn / Chi Tiết Ra Cối" && x.Func == "Thêm Xếp Khuôn / Chi Tiết Ra Cối" && x.Status == 1).FirstOrDefault();
+                            if (themChiTietRaCoiXepKhuon != null)
+                            {
+                                <button onclick="showInsert()" type="button" class="btn btn-primary">Thêm</button>
+                            }
                             var suaChiTietRaCoiXepKhuon = rolePermistions.Where(x => x.Fu == "Danh Mục / Xếp Khuôn / Chi Tiết Ra Cối" && x.Func == "Sửa Xếp Khuôn / Chi Tiết Ra Cối" && x.Status == 1).FirstOrDefault();
                             if (suaChiTietRaCoiXepKhuon != null)
                             {
@@ -487,26 +488,32 @@
                     grid = new ej.grids.Grid({
                         dataSource: dataManager,
                         allowPaging: true,
-                        pageSettings: { pageSize: 50 },
+                        pageSettings: { pageSize: 50, pageSizes: [50, 100, 200, 500] },
                         allowFiltering: true,
                         filterSettings: { type: 'Excel' },
                         allowSorting: true,
                         //frozenColumns: 3,
                         allowResizing: true,
+                        allowExcelExport: true,
+                        toolbar: ['ExcelExport'],
                         rowSelected: onRowSelected,
                         height: 400,
                         columns: [
                             { field: 'Id', headerText: 'Id', width: 150 },
-                            { field: 'Ngay', headerText: 'Ngày', width: 150 },
+                            { field: 'Ngay', headerText: 'Ngày', width: 150 , type: 'date', format: 'dd-MM-yyyy' },
                             { field: 'Gio', headerText: 'Giờ', width: 150 },
                             { field: 'CoiName', headerText: 'Cối', width: 150 },
                             { field: 'Luot', headerText: 'Lượt', type: 'number', width: 150 },
                             { field: 'IsDone', headerText: 'Hoàn Thành', width: 100, displayAsCheckBox: 'true', textAlign: 'Center' },
-                            { field: 'NgayNguyenLieu', headerText: 'Ngày Nguyên Liệu', width: 150 },
+                            { field: 'NgayNguyenLieu', headerText: 'Ngày Nguyên Liệu', width: 150 , type: 'date', format: 'dd-MM-yyyy'  },
                         ]
                     });
                     // Hiển thị Grid trên trang web
                     grid.appendTo('#Grid');
+                    grid.toolbarClick = function (args) {
+             if (args.item.id === 'Grid_excelexport') {
+                grid.excelExport();
+             }};
                 }
             },
             error: function (error) {

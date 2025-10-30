@@ -39,6 +39,123 @@ namespace Dao.Repos.HQ
             ) c
             LEFT join XiNghiep xn on 1 = 1";
 
+        private readonly string qrGetLatestWeightPerXuongAndCoi = @"WITH NgayGanNhat AS (
+    SELECT TOP 4 CAST(Ngay AS date) AS NgayCan
+    FROM PhieuCanChinhXepKhuon
+    WHERE ISNULL(MaCoiChinh, '') != ''
+    GROUP BY CAST(Ngay AS date)
+    ORDER BY CAST(Ngay AS date) DESC
+),
+PhieuCan_CTE AS (
+    SELECT 
+        MaXuong,
+        MaCoiChinh AS MaCoi,
+        CAST(Ngay AS datetime) + CAST(Gio AS datetime) AS ThoiGianCan,
+        TrongLuong
+    FROM PhieuCanChinhXepKhuon
+    WHERE 
+        ISNULL(MaCoiChinh, '') != ''
+        AND CAST(Ngay AS date) IN (SELECT NgayCan FROM NgayGanNhat)
+),
+PhieuCan_Lag AS (
+    SELECT 
+        *,
+        LAG(ThoiGianCan) OVER (PARTITION BY MaXuong, MaCoi ORDER BY ThoiGianCan) AS ThoiGianTruoc
+    FROM PhieuCan_CTE
+),
+PhieuCan_DanhDau AS (
+    SELECT *,
+        CASE 
+            WHEN DATEDIFF(MINUTE, ThoiGianTruoc, ThoiGianCan) > 30 OR ThoiGianTruoc IS NULL THEN 1 
+            ELSE 0 
+        END AS NhomMoi
+    FROM PhieuCan_Lag
+),
+PhieuCan_DanhSoNhom AS (
+    SELECT *,
+        SUM(NhomMoi) OVER (PARTITION BY MaXuong, MaCoi ORDER BY ThoiGianCan ROWS UNBOUNDED PRECEDING) AS NhomSo
+    FROM PhieuCan_DanhDau
+),
+PhieuCan_NhomGanNhat AS (
+    SELECT 
+        MaXuong,
+        MaCoi,
+        NhomSo,
+        MAX(ThoiGianCan) AS ThoiGianGanNhat,
+        SUM(TrongLuong) AS TongTrongLuong,
+		COUNT(*) AS SoRo
+    FROM PhieuCan_DanhSoNhom
+    GROUP BY MaXuong, MaCoi, NhomSo
+),
+PhieuCan_ChonMoiNhat AS (
+    SELECT *,
+        ROW_NUMBER() OVER (PARTITION BY MaXuong, MaCoi ORDER BY ThoiGianGanNhat DESC) AS rn
+    FROM PhieuCan_NhomGanNhat
+)
+SELECT MaXuong, MaCoi as Ma, ThoiGianGanNhat as ThoiGianPhieuGanNhat, TongTrongLuong as TrongLuongHienTai,SoRo
+FROM PhieuCan_ChonMoiNhat
+WHERE rn = 1
+ORDER BY MaXuong, MaCoi;
+";
+        private readonly string qrGetLatestWeightPerXuongAndCoiRa = @"WITH NgayGanNhat AS (
+    SELECT TOP 4 CAST(Ngay AS date) AS NgayCan
+    FROM PhieuCanRaCoi
+    WHERE ISNULL(MaCoi, '') != ''
+    GROUP BY CAST(Ngay AS date)
+    ORDER BY CAST(Ngay AS date) DESC
+),
+PhieuCan_CTE AS (
+    SELECT 
+        MaXuong,
+         MaCoi,
+        CAST(Ngay AS datetime) + CAST(Gio AS datetime) AS ThoiGianCan,
+        TrongLuong
+    FROM PhieuCanRaCoi
+    WHERE 
+        ISNULL(MaCoi, '') != ''
+        AND CAST(Ngay AS date) IN (SELECT NgayCan FROM NgayGanNhat)
+),
+PhieuCan_Lag AS (
+    SELECT 
+        *,
+        LAG(ThoiGianCan) OVER (PARTITION BY MaXuong, MaCoi ORDER BY ThoiGianCan) AS ThoiGianTruoc
+    FROM PhieuCan_CTE
+),
+PhieuCan_DanhDau AS (
+    SELECT *,
+        CASE 
+            WHEN DATEDIFF(MINUTE, ThoiGianTruoc, ThoiGianCan) > 30 OR ThoiGianTruoc IS NULL THEN 1 
+            ELSE 0 
+        END AS NhomMoi
+    FROM PhieuCan_Lag
+),
+PhieuCan_DanhSoNhom AS (
+    SELECT *,
+        SUM(NhomMoi) OVER (PARTITION BY MaXuong, MaCoi ORDER BY ThoiGianCan ROWS UNBOUNDED PRECEDING) AS NhomSo
+    FROM PhieuCan_DanhDau
+),
+PhieuCan_NhomGanNhat AS (
+    SELECT 
+        MaXuong,
+        MaCoi,
+        NhomSo,
+        MAX(ThoiGianCan) AS ThoiGianGanNhat,
+        SUM(TrongLuong) AS TongTrongLuong,
+		COUNT(*) AS SoRo
+    FROM PhieuCan_DanhSoNhom
+    GROUP BY MaXuong, MaCoi, NhomSo
+),
+PhieuCan_ChonMoiNhat AS (
+    SELECT *,
+        ROW_NUMBER() OVER (PARTITION BY MaXuong, MaCoi ORDER BY ThoiGianGanNhat DESC) AS rn
+    FROM PhieuCan_NhomGanNhat
+)
+SELECT MaXuong, MaCoi as Ma, ThoiGianGanNhat as ThoiGianPhieuGanNhat, TongTrongLuong as TrongLuongHienTai,SoRo
+FROM PhieuCan_ChonMoiNhat
+WHERE rn = 1
+ORDER BY MaXuong, MaCoi
+";
+
         public MaCoiXepKhuon()
         {
             connectionString = AppViewModels.Base.Ins.ConnectionString;
@@ -66,7 +183,19 @@ namespace Dao.Repos.HQ
             var rows = connection.Query<T>(qrGetAll).ToList();
             return rows;
         }
-
+        public List<T> GetLatestWeightPerXuongAndCoi<T>()
+        {
+            using var connection = new SqlConnection(connectionString);
+            connection.Open();
+            var rows = connection.Query<T>(qrGetLatestWeightPerXuongAndCoi).ToList();
+            return rows;
+        }public List<T> GetLatestWeightPerXuongAndCoiRa<T>()
+        {
+            using var connection = new SqlConnection(connectionString);
+            connection.Open();
+            var rows = connection.Query<T>(qrGetLatestWeightPerXuongAndCoiRa).ToList();
+            return rows;
+        }
         public int Insert<T>(T item)
         {
             using var connection = new SqlConnection(connectionString);

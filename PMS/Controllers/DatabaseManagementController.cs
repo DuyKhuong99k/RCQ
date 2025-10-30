@@ -36,6 +36,7 @@ namespace PMS.Controllers
         [CustomAuthorize(Fu = "Cài Đặt", Func = "Quản Lý Dữ Liệu")]
         public IActionResult Index()
         {
+            ViewBag.TitlePage = "Quản Lý CSDL";
             return View("~/Views/DatabaseManagement/DatabaseManagementView.cshtml");
         }
         //public class TableName

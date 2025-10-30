@@ -101,4 +101,8 @@ public partial class PhieuCanTPFilletv2
     [StringLength(100)]
     [Unicode(false)]
     public string? IdIn { get; set; }
+
+    [NotMapped] public decimal ThoiGianHT { get; set; } = 0;
+    [NotMapped] public bool DanhGia { get; set; } = true;
+    [NotMapped] public decimal DinhMucChuan { get; set; } = 0;
 }

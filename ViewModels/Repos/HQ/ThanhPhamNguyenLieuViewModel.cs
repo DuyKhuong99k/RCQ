@@ -13,6 +13,8 @@ using ObservableObject = CommunityToolkit.Mvvm.ComponentModel.ObservableObject;
 using System.Windows.Input;
 using Azure.Identity;
 using System.Collections.Specialized;
+using System.Globalization;
+using Models.Repos;
 
 namespace ViewModels.Repos.HQ
 {
@@ -27,6 +29,7 @@ namespace ViewModels.Repos.HQ
 
         [ObservableProperty][NotifyPropertyChangedFor(nameof(IsVailSelectedItem))] private MaThanhPhamNguyenLieu? selectedItem;
         [ObservableProperty] private ObservableRangeCollection<object> selectedItems = new();
+        [ObservableProperty] private ObservableRangeCollection<MaThanhPhamNguyenLieu> usedItems = new();
         [ObservableProperty] private ICommand _closeItemWindowCommand;
         [ObservableProperty] private bool _isWindowItemShown = false;
         private readonly SynchronizationContext synchronizationContext;
@@ -74,7 +77,12 @@ namespace ViewModels.Repos.HQ
                 IsManh = item.IsManh,
                 IsMuoiGhePhuPham = item.IsMuoiGhePhuPham,
                 IsNgopAoMuoi = item.IsNgopAoMuoi,
-                IsNgopAoPhuPham = item.IsNgopAoPhuPham
+                IsNgopAoPhuPham = item.IsNgopAoPhuPham,
+                IsCaNgopGheAoBanNgoai = item.IsCaNgopGheAoBanNgoai,
+                IsCaNgopGheTuoiBanNgoai = item.IsCaNgopGheTuoiBanNgoai,
+                IsTareThung = item.IsTareThung,
+                MNgay = item.MNgay,
+                CTTYLE = item.CTTYLE,
             };
         }
         public MaThanhPhamNguyenLieu CopySelectedItem()
@@ -107,7 +115,12 @@ namespace ViewModels.Repos.HQ
                 IsNgopXePhuPham = false,
                 IsPhuPhamCaTap = false,
                 IsSNL = false,
-                TyLeNuoc = 0
+                TyLeNuoc = 0,
+                IsTareThung = false,
+                IsCaNgopGheTuoiBanNgoai = false,
+                IsCaNgopGheAoBanNgoai = false,
+                MNgay = DateTime.Now,
+                CTTYLE = "SL/NLFILLET"
             };
         }
 
@@ -147,7 +160,50 @@ namespace ViewModels.Repos.HQ
             var dao = new Dao.Repos.HQ.MaThanhPhamNguyenLieu();
             return dao.Gets<T>();
         }
+        public List<MaThanhPhamNguyenLieu_U> GetUs(string Ngay, int PageIndex, int PageSize)
+        {
+            var db = new dbPMScontext();
+            var date = new DateTime();
+            date = DateTime.ParseExact(Ngay, "yyyyMMddHHmmss", CultureInfo.InvariantCulture);
+            var latestDates = db.MaThanhPhamNguyenLieuUs
+                .Where(x => x.MNgay.Date >= date.Date)
+                .GroupBy(x => x.MaThanhPham)
+                .Select(g => new { MaThanhPham = g.Key, MaxId = g.Max(x => x.Id) });
 
+            var query = from hq in db.MaThanhPhamNguyenLieuUs.Where(x => x.MNgay.Date >= date.Date) 
+                join latest in latestDates
+                    on new { hq.MaThanhPham, hq.Id } 
+                    equals new { latest.MaThanhPham, Id = latest.MaxId }
+                orderby hq.MNgay descending
+                select hq;
+
+            var result = query.Skip((PageIndex - 1) * PageSize)
+                .Take(PageSize)
+                .ToList();
+            return result;
+        }
+        public List<MaThanhPhamNguyenLieu_D> GetDs(string Ngay, int PageIndex, int PageSize)
+        {
+            var db = new dbPMScontext();
+            var date = new DateTime();
+            date = DateTime.ParseExact(Ngay, "yyyyMMddHHmmss", CultureInfo.InvariantCulture);
+            var latestDates = db.MaThanhPhamNguyenLieuDs
+                .Where(x => x.MNgay.Date >= date.Date)
+                .GroupBy(x => x.MaThanhPham)
+                .Select(g => new { MaThanhPham = g.Key, MaxId = g.Max(x => x.Id) });
+
+            var query = from hq in db.MaThanhPhamNguyenLieuDs.Where(x => x.MNgay.Date >= date.Date) 
+                join latest in latestDates
+                    on new { hq.MaThanhPham, hq.Id } 
+                    equals new { latest.MaThanhPham, Id = latest.MaxId }
+                orderby hq.MNgay descending
+                select hq;
+
+            var result = query.Skip((PageIndex - 1) * PageSize)
+                .Take(PageSize)
+                .ToList();
+            return result;
+        }
         private int Insert<T>(T item)
         {
             var dao = new Dao.Repos.HQ.MaThanhPhamNguyenLieu();
@@ -225,6 +281,7 @@ namespace ViewModels.Repos.HQ
             lock (Items)
             {
                 Items.Clear();
+                UsedItems.Clear();
             }
 
             var items = Gets<MaThanhPhamNguyenLieu>();
@@ -237,6 +294,10 @@ namespace ViewModels.Repos.HQ
                         foreach (var item in items)
                         {
                             Items.Add(item);
+                            if (item.SuDung == true)
+                            {
+                                UsedItems.Add(item);
+                            }
                         }
 
                     }

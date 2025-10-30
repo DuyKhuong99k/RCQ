@@ -7,6 +7,7 @@
     var roleIds = PMS.Middlewares.AuthenticationHelpers.GetRoleIdsFromCookie(Context);
     // lấy danh sách fu func từ list roleId
     var rolePermistions = await PMS.Middlewares.AuthenticationHelpers.GetRolePermistionsAsync(Context, roleIds);
+    var XuongId = @Context.Session.GetString("XuongId");
 }
 <style>
     .vertical-buttons {
@@ -36,7 +37,7 @@
         width: 30% !important;
     }
 </style>
-<div class="container mt-4">
+
     <div class="row">
         <div class="col-12">
             <div class="card">
@@ -82,23 +83,22 @@
                                             <option value="@item.Ma">@item.Ten</option>
                                         }
                                     </select>
-                                    <select id="listXuong" class="form-control-sm">
+                                   @*  <select id="listXuong" class="form-control-sm">
                                         <option disabled>Chọn xưởng</option>
                                         @foreach (var item in listXuongs)
                                         {
                                             <option value="@item.Ma">@item.Ten</option>
                                         }
-                                    </select>
+                                    </select> *@
                                 </div>
                             </div>
                             <div id="GridDeskStaff"></div>
                             <div style="margin-top:5px">
                                 <label class="">
-                                    <input class="form-check-input me-1" type="checkbox" value="" id="suDungBFL" />
-                                    Xem nhân viên bàn hiện tại
+                                <input class="form-check-input me-1" type="checkbox" value="" id="checkNow" />
+                                    Mới Nhất
                                 </label>
-                                <button onclick="" style="margin-right:5px" class="btn btn-outline-info"><i class='bx bx-loader'></i>Tải Lại</button>
-                                <button onclick="" style="margin-right:5px" class="btn btn-outline-secondary"><i class='bx bx-export'></i>Export Excel</button>
+                            <button onclick="loadData()" style="margin-right:5px" class="btn btn-outline-info"><i class='bx bx-loader'></i>Tải Lại</button>
                             </div>
                         </div>
                     </div>
@@ -106,11 +106,11 @@
             </div>
         </div>
     </div>
-</div>
+
 
 <input type="hidden" id="maNhanVienRowSelected" />
 <input type="hidden" id="maBanId" />
-<input type="hidden" id="maXuongId" />
+@* <input type="hidden" id="maXuongId" /> *@
 
 <script>
     $(document).ready(function () {
@@ -118,9 +118,13 @@
     });
     var grid;
     function loadGridData() {
+        var xuongId = @XuongId;
         $.ajax({
-            url: '/Staff/GetAllNhanViens',
+            url: '/Staff/GetListNhanVienDaiThanhFilltered',
             type: 'GET',
+             data: {
+                xuongId : xuongId
+            },
             dataType: 'json',
             success: function (data) {
                 // Khởi tạo DataManager và gán dữ liệu từ API vào dataSource
@@ -138,15 +142,14 @@
                     grid = new ej.grids.Grid({
                         dataSource: dataManager,
                         allowPaging: true,
-                        pageSettings: { pageSize: 500 },
-                        allowSelection: true,
+                        pageSettings: { pageSize: 500, pageSizes: [50, 100, 200, 500] },
                         allowFiltering: true,
                         allowSorting: true,
-                        allowResizing: true,
-                        enableVirtualization: true,
-                        loadingIndicator: { indicatorType: 'Shimmer' },
                         filterSettings: { type: 'Excel' },
-                        //selectionSettings: { persistSelection: true, type: "Multiple", checkboxOnly: true },
+                        allowResizing: true,
+                        allowExcelExport: true,
+                        toolbar: ['ExcelExport'],
+                        //rowSelected: onRowSelected,
                         selectionSettings: { persistSelection: true },
                         rowSelected: selectionChanged,
                         rowDeselected: unSelectionChanged,
@@ -219,7 +222,7 @@
 <script>
     $(document).ready(function () {
         creatListBan();
-        creatListXuong();
+        //creatListXuong();
     });
     function creatListBan() {
         // initialize ComboBox component
@@ -243,68 +246,95 @@
             loadData();
         }
     };
-    function creatListXuong() {
-        // initialize ComboBox component
-        var comboBoxObj = new ej.dropdowns.ComboBox({
-            // set the height of the popup element
-            popupHeight: '230px',
-            index: 0,
-            // set the placeholder to ComboBox input element
-            placeholder: 'Chọn xưởng',
-            // bind the change event
-            change: function () { valueChangeXuong(); }
-        });
-        comboBoxObj.appendTo('#listXuong');
-        // call the change event's function after initialized the component.
-        valueChangeXuong();
+    // function creatListXuong() {
+    //     // initialize ComboBox component
+    //     var comboBoxObj = new ej.dropdowns.ComboBox({
+    //         // set the height of the popup element
+    //         popupHeight: '230px',
+    //         index: 0,
+    //         // set the placeholder to ComboBox input element
+    //         placeholder: 'Chọn xưởng',
+    //         // bind the change event
+    //         change: function () { valueChangeXuong(); }
+    //     });
+    //     comboBoxObj.appendTo('#listXuong');
+    //     // call the change event's function after initialized the component.
+    //     valueChangeXuong();
 
-        function valueChangeXuong() {
-            var maXuong = comboBoxObj.value === null ? 'null' : comboBoxObj.value.toString();
-            var tenXuong = comboBoxObj.text === null ? 'null' : comboBoxObj.text.toString();
-            $('#maXuongId').val(maXuong);
-            loadData();
-        }
-    };
+    //     function valueChangeXuong() {
+    //         var maXuong = comboBoxObj.value === null ? 'null' : comboBoxObj.value.toString();
+    //         var tenXuong = comboBoxObj.text === null ? 'null' : comboBoxObj.text.toString();
+    //         $('#maXuongId').val(maXuong);
+    //         loadData();
+    //     }
+    // };
 
     function loadData() {
         var maBan = $('#maBanId').val();
-        var maXuong = $('#maXuongId').val();
-        loadGridDataDeskStaff(maBan, maXuong);
+        var maXuong = @XuongId;
+        reloadGridDeskStaff(maBan, maXuong);
     }
     var gridDeskStaff;
 
-    function loadGridDataDeskStaff(maBan, maXuong) {
-        $.ajax({
+    function reloadGridDeskStaff(maBan, maXuong){
+          var isCheckNow = $('#checkNow').prop('checked');
+          $.ajax({
             url: '/NhanVienTheoBanFillet/GetAllsFullField',
             type: 'GET',
             data: {
                 maBan: maBan,
-                maXuong: maXuong
+                maXuong: maXuong,
+                isCheckNow:isCheckNow
             },
-            success: function (data) {
-                // Khởi tạo DataManager và gán dữ liệu từ API vào dataSource
-                var dataManager = new ej.data.DataManager({
+            dataType: 'json',
+            success: function (rs) {
+                if (rs != null) {
+                    loadGridDataDeskStaff(rs);
+                } else {
+                    toastOptionNotyfi();
+                    toastr["warning"](rs.Mesages, "Thông báo");
+                }
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error, "Thông báo");
+            }
+        });
+      }
+
+
+      function loadGridDataDeskStaff(data) {
+        if (gridDeskStaff) {
+            gridDeskStaff.dataSource = [];
+            gridDeskStaff.dataBind();
+            if (data && data.length > 0) {
+                gridDeskStaff.dataSource = new ej.data.DataManager({
                     json: data,
                     adaptor: new ej.data.JsonAdaptor()
                 });
-                // Kiểm tra xem Grid đã được tạo chưa
-                if (gridDeskStaff) {
-                    // Nếu Grid đã được tạo, chỉ cập nhật dữ liệu mới
-                    gridDeskStaff.dataSource = dataManager;
-                    gridDeskStaff.refresh();
-                } else {
-                    // Nếu Grid chưa được tạo, tạo mới Grid
-                    gridDeskStaff = new ej.grids.Grid({
+                gridDeskStaff.dataBind();
+            }
+        } else {
+            initializeGrid(data);
+        }
+    }
+    loadGridDataDeskStaff();
+    function initializeGrid(data){
+        var dataManager = new ej.data.DataManager({
+            json: data,
+            adaptor: new ej.data.JsonAdaptor()
+        });
+        gridDeskStaff = new ej.grids.Grid({
                         dataSource: dataManager,
                         allowPaging: true,
-                        pageSettings: { pageSize: 500 },
-                        allowSelection: true,
+                        pageSettings: { pageSize: 500, pageSizes: [50, 100, 200, 500] },
                         allowFiltering: true,
                         allowSorting: true,
-                        allowResizing: true,
-                        enableVirtualization: true,
-                        loadingIndicator: { indicatorType: 'Shimmer' },
                         filterSettings: { type: 'Excel' },
+                        allowResizing: true,
+                        allowExcelExport: true,
+                        toolbar: ['ExcelExport'],
+                        //rowSelected: onRowSelected,
                         selectionSettings: { persistSelection: true },
                         rowSelected: selectionNhanVienTheoBan,
                         rowDeselected: unSelectionNhanVienTheoBan,
@@ -326,17 +356,76 @@
                     });
 
                     gridDeskStaff.appendTo('#GridDeskStaff');
-                }
-            },
-            error: function (error) {
-                console.error(error);
-            }
-        });
-    }
-    loadGridDataDeskStaff();
-    function reloadDataDeskStaff() {
-        loadData();
-    }
+        gridDeskStaff.toolbarClick = function (args) {
+        if (args.item.id === 'Grid_excelexport') {
+            gridDeskStaff.excelExport();
+        }};
+
+      }
+
+
+    // function loadGridDataDeskStaff(maBan, maXuong) {
+    //     $.ajax({
+    //         url: '/NhanVienTheoBanFillet/GetAllsFullField',
+    //         type: 'GET',
+    //         data: {
+    //             maBan: maBan,
+    //             maXuong: maXuong
+    //         },
+    //         success: function (data) {
+    //             // Khởi tạo DataManager và gán dữ liệu từ API vào dataSource
+    //             var dataManager = new ej.data.DataManager({
+    //                 json: data,
+    //                 adaptor: new ej.data.JsonAdaptor()
+    //             });
+    //             // Kiểm tra xem Grid đã được tạo chưa
+    //             if (gridDeskStaff) {
+    //                 // Nếu Grid đã được tạo, chỉ cập nhật dữ liệu mới
+    //                 gridDeskStaff.dataSource = dataManager;
+    //                 gridDeskStaff.refresh();
+    //             } else {
+    //                 // Nếu Grid chưa được tạo, tạo mới Grid
+    //                 gridDeskStaff = new ej.grids.Grid({
+    //                     dataSource: dataManager,
+    //                     allowPaging: true,
+    //                     pageSettings: { pageSize: 500 },
+    //                     allowSelection: true,
+    //                     allowFiltering: true,
+    //                     allowSorting: true,
+    //                     allowResizing: true,
+    //                     enableVirtualization: true,
+    //                     loadingIndicator: { indicatorType: 'Shimmer' },
+    //                     filterSettings: { type: 'Excel' },
+    //                     selectionSettings: { persistSelection: true },
+    //                     rowSelected: selectionNhanVienTheoBan,
+    //                     rowDeselected: unSelectionNhanVienTheoBan,
+    //                     height: 400,
+    //                     columns: [
+    //                         { type: "checkbox", field: "", allowFiltering: false, allowSorting: false, width: '50' },
+    //                         { field: 'Id', headerText: 'Id', width: 150 },
+    //                         { field: 'MaNhanVien', headerText: 'Mã Nhân Viên', width: 150 },
+    //                         { field: 'MaHoSo', headerText: 'Mã Số', width: 150 },
+    //                         { field: 'Name', headerText: 'Tên Nhân Viên', width: 150 },
+    //                         { field: 'DeptName0', headerText: 'Tên Nhóm', width: 150 },
+    //                         { field: 'BanName', headerText: 'Bàn', width: 150 },
+    //                         { field: 'MaKhuVuc', headerText: 'Khu Vực', width: 150 },
+    //                         { field: 'XuongName', headerText: 'Xưởng', width: 150 },
+    //                         { field: 'NgayGio', headerText: 'Ngày Thêm', width: 150 },
+    //                         { field: 'Creator', headerText: 'Người Thêm', width: 150 },
+    //                         { field: 'PCName', headerText: 'Máy Thêm', width: 150 },
+    //                     ]
+    //                 });
+
+    //                 gridDeskStaff.appendTo('#GridDeskStaff');
+    //             }
+    //         },
+    //         error: function (error) {
+    //             console.error(error);
+    //         }
+    //     });
+    // }
+    // loadGridDataDeskStaff();
+
 
     let selectedIdNhanVienBans = ""; // Khai báo một chuỗi để lưu trữ Id đã chọn
     let selectedCount = 0; // Biến để đếm số phần tử được chọn
@@ -383,7 +472,7 @@
 
     function insert() {
         var maBan = $('#maBanId').val();
-        var maXuong = $('#maXuongId').val();
+        var maXuong = @XuongId;
         document.getElementById("txtThem").style.visibility = "hidden";
         document.getElementById("loadingIndicator").style.display = "block";
         $.ajax({

@@ -17,4 +17,7 @@ public partial class MaChatLuongXepKhuon
     public string Ten { get; set; } = null!;
 
     public bool SuDung { get; set; }
+    [Required]
+    [Column(TypeName = "datetime2(7)")]
+    public DateTime MNgay { get; set; } = DateTime.Now;
 }

@@ -9,14 +9,14 @@
 }
 
 
-<div class="container mt-4">
+<div class="container-fluid mt-4">
     <div class="row">
         <div class="col-12">
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h2 class="mb-0">Danh Sách Loại Nguyên Liệu</h2>
                     @{
-                        var themHQ_LoaiNguyenLieu = rolePermistions.Where(x => x.Fu == "Danh Mục HQ / Loại Nguyên Liệu" && x.Func == "Thêm HQ / Loại Nguyên Liệu" && x.Status == 1).FirstOrDefault();
+                        var themHQ_LoaiNguyenLieu = rolePermistions.Where(x => x.Fu == "Danh Mục / Loại Nguyên Liệu HQ" && x.Func == "Thêm Loại Nguyên Liệu HQ" && x.Status == 1).FirstOrDefault();
                         if (themHQ_LoaiNguyenLieu != null)
                         {
                             <button onclick="showInsert()" type="button" class="btn btn-primary">Thêm</button>
@@ -28,26 +28,26 @@
                     <div id="Grid"></div>
                     <div style="margin-top:20px;">
                         @{
-                            var suaHQ_LoaiNguyenLieu = rolePermistions.Where(x => x.Fu == "Danh Mục HQ / Loại Nguyên Liệu" && x.Func == "Sửa HQ / Loại Nguyên Liệu" && x.Status == 1).FirstOrDefault();
+                            var suaHQ_LoaiNguyenLieu = rolePermistions.Where(x => x.Fu == "Danh Mục / Loại Nguyên Liệu HQ" && x.Func == "Sửa Loại Nguyên Liệu HQ" && x.Status == 1).FirstOrDefault();
                             if (suaHQ_LoaiNguyenLieu != null)
                             {
                                 <button onclick="showUpdate()" style="margin-right:5px" class="btn btn-outline-warning"><i class='bx bx-edit-alt'></i>Sửa</button>
                             }
-                            var xoaHQ_LoaiNguyenLieu = rolePermistions.Where(x => x.Fu == "Danh Mục HQ / Loại Nguyên Liệu" && x.Func == "Xóa HQ / Loại Nguyên Liệ" && x.Status == 1).FirstOrDefault();
+                            var xoaHQ_LoaiNguyenLieu = rolePermistions.Where(x => x.Fu == "Danh Mục / Loại Nguyên Liệu HQ" && x.Func == "Xóa Loại Nguyên Liệu HQ" && x.Status == 1).FirstOrDefault();
                             if (xoaHQ_LoaiNguyenLieu != null)
                             {
                                 <button onclick="showDelete()" style="margin-right:5px" class="btn btn-outline-danger"><i class='bx bx-trash'></i>Xoá</button>
                             }
-                            var importHQ_LoaiNguyenLieu = rolePermistions.Where(x => x.Fu == "Danh Mục HQ / Loại Nguyên Liệu" && x.Func == "Import HQ / Loại Nguyên Liệu" && x.Status == 1).FirstOrDefault();
+                            var importHQ_LoaiNguyenLieu = rolePermistions.Where(x => x.Fu == "Danh Mục / Loại Nguyên Liệu HQ" && x.Func == "Import Loại Nguyên Liệu HQ" && x.Status == 1).FirstOrDefault();
                             if (importHQ_LoaiNguyenLieu != null)
                             {
                                 <button onclick="import()" style="margin-right:5px" class="btn btn-outline-info"><i class='bx bx-import'></i>Import</button>
                             }
-                            var exportHQ_LoaiNguyenLieu = rolePermistions.Where(x => x.Fu == "Danh Mục HQ / Loại Nguyên Liệu" && x.Func == "Export HQ / Loại Nguyên Liệu" && x.Status == 1).FirstOrDefault();
-                            if (exportHQ_LoaiNguyenLieu != null)
-                            {
-                                <button onclick="export()" style="margin-right:5px" class="btn btn-outline-secondary"><i class='bx bx-export'></i>Export Excel</button>
-                            }
+                            // var exportHQ_LoaiNguyenLieu = rolePermistions.Where(x => x.Fu == "Danh Mục / Loại Nguyên Liệu HQ" && x.Func == "Export Loại Nguyên Liệu HQ" && x.Status == 1).FirstOrDefault();
+                            // if (exportHQ_LoaiNguyenLieu != null)
+                            // {
+                            //     <button onclick="export()" style="margin-right:5px" class="btn btn-outline-secondary"><i class='bx bx-export'></i>Export Excel</button>
+                            // }
                         }
                     </div>
                 </div>
@@ -188,13 +188,15 @@
                     grid = new ej.grids.Grid({
                         dataSource: dataManager,
                         allowPaging: true,
-                        pageSettings: { pageSize: 50 },
+                        pageSettings: { pageSize: 50, pageSizes: [50, 100, 200, 500] },
                         allowFiltering: true,
                         filterSettings: { type: 'Excel' },
                         allowSorting: true,
                         //frozenColumns: 3,
                         allowResizing: true,
                         rowSelected: onRowSelected,
+                        allowExcelExport: true,
+                        toolbar: ['ExcelExport'],
                         height: 400,
                         columns: [
                             { field: 'Id', headerText: 'Id', width: 150 },
@@ -204,7 +206,12 @@
                     });
                     // Hiển thị Grid trên trang web
                     grid.appendTo('#Grid');
-                }
+                    grid.toolbarClick = function (args) {
+                        if (args.item.id === 'Grid_excelexport') {
+                            grid.excelExport();
+                        }
+                    };
+               }
             },
             error: function (error) {
                 console.error(error);

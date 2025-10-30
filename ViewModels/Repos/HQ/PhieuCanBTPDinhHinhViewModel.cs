@@ -168,6 +168,19 @@ namespace ViewModels.Repos.HQ
             }
         }
 
+        public List<T> GetChiTietPhieuCanChuaSuas<T>(DateTime fromDate, DateTime toDate, string xuongId)
+        {
+            try
+            {
+                var dao = new Dao.Repos.HQ.PhieuCanBTPDinhHinh();
+                return dao.GetChiTietPhieuCanChuaSuas<T>(fromDate, toDate, xuongId);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public List<T> GetChiTietByMaNhanViens<T>(DateTime fromDate, DateTime toDate,string maNhanVien, string xuongId)
         {
             try
@@ -301,6 +314,12 @@ namespace ViewModels.Repos.HQ
                 throw;
             }
         }
+
+        public List<T> GetsLastMinutes<T>(int minu)
+        {
+            var dao = new Dao.Repos.HQ.PhieuCanBTPDinhHinh();
+            return dao.GetsLastMinutes<T>(minu);
+        }
         public List<T> Gets<T>(DateTime dateTime)
         {
             try
@@ -349,6 +368,18 @@ namespace ViewModels.Repos.HQ
                 throw;
             }
         }
+        public List<T> Gets<T>(DateTime dateTime, string theId,bool isEnabled = false)
+        {
+            try
+            {
+                var dao = new Dao.Repos.HQ.PhieuCanBTPDinhHinh();
+                return dao.Gets<T>(dateTime, theId, isEnabled);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
         public List<PhieuCanBTPDinhHinh> Gets(DateTime dateTime, string xuongId, string mayCanId)
         {
             try
@@ -370,6 +401,20 @@ namespace ViewModels.Repos.HQ
             }
             catch (Exception)
             {
+                throw;
+            }
+        }
+
+        public Tuple<int, decimal> GetSoRoTongTrongLuongByNhanVienId(DateTime dateTime, string nhanVienId)
+        {
+            try
+            {
+                var dao = new Dao.Repos.HQ.PhieuCanBTPDinhHinh();
+                return dao.GetSoRoTongTrongLuongByNhanVienId(dateTime, nhanVienId);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
                 throw;
             }
         }
@@ -534,6 +579,18 @@ namespace ViewModels.Repos.HQ
                 throw;
             }
         }
+        public List<T> GetTongHopLos<T>(DateTime fromDate, DateTime toDate, string xuongId)
+        {
+            try
+            {
+                var dao = new Dao.Repos.HQ.PhieuCanBTPDinhHinh();
+                return dao.GetTongHopLos<T>(fromDate, toDate, xuongId);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
         public List<T> GetTongHopThanhPhamByMaNhanViens<T>(DateTime fromDate, DateTime toDate, string maNhanVien,string xuongId)
         {
             try
@@ -673,6 +730,20 @@ namespace ViewModels.Repos.HQ
                 throw;
             }
         }
+        public int Update<T>(List<T> items)
+        {
+            try
+            {
+
+                var dao = new Dao.Repos.HQ.PhieuCanBTPDinhHinh();
+
+                return dao.Update(items);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
         public List<T> GetsLast<T>(DateTime dateTime, int num)
         {
             var dao = new Dao.Repos.HQ.PhieuCanBTPDinhHinh();
@@ -692,6 +763,36 @@ namespace ViewModels.Repos.HQ
                 throw;
             }
         }
+        public int Update(int stt,DateTime ngay,string mayCanId,string maXuong, bool isEnabled)
+        {
+            try
+            {
+
+                var dao = new Dao.Repos.HQ.PhieuCanBTPDinhHinh();
+
+                return dao.Update(stt,ngay,mayCanId,maXuong, isEnabled);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public int Update(int STT, DateTime ngay, string mayCanId, string xuongId, string thanhPhamId, bool isEnabled)
+        {
+            try
+            {
+                var dao = new Dao.Repos.HQ.PhieuCanBTPDinhHinh();
+
+                return dao.Update(STT,ngay,mayCanId,xuongId,thanhPhamId, isEnabled);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
+        }
+       
         public int Insert<T>(List<T> items)
         {
             try
@@ -729,7 +830,11 @@ namespace ViewModels.Repos.HQ
                 ChiSanLuong = item.ChiSanLuong,
                 TrongLuongBu = item.TrongLuongBu,
                 TrongLuongTare = item.TrongLuongTare,
-                IsOffline = item.IsOffline
+                IsOffline = item.IsOffline,
+                Id = item.Id,
+                MaNhanVienPhucVu = item.MaNhanVienPhucVu,
+                
+                
             };
         }
         public PhieuCanBTPDinhHinh CopySelectedItem()

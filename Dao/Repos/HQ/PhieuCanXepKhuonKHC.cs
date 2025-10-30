@@ -321,17 +321,12 @@ and t.MaTheTu = @maThe";
             {
                 var query =
                     @"Select 
-p.MaNhanVien,
-n.MaHoSo,
-n.[Name] as NhanVienName,
-p.MaLo,
 tp.Ten as ThanhPhamName,
 s.Ten as SizeName,
 kh.Ten as KhachHangName,
 Sum( p.TrongLuong) as TrongLuong,
 COUNT(*) As SoRo
 from PhieuCanXepKhuonKHC p, 
-NhanVienDaiThanh n,
 MaThanhPhamXepKhuonKHC tp,
 MaSizeXepKhuonKHC s,
 MaKhachHangXepKhuon kh
@@ -339,20 +334,16 @@ where
 p.Ngay <= @toDate
 and p.Ngay >= @fromDate
 and p.MaXuong =@xuongId 
-and p.MaNhanVien = n.MaNhanVien 
 and p.MaThanhPham = tp.Ma 
 and p.MaSize = s.Ma 
 and p.MaKhachHang = kh.Ma 
 group by 
-p.MaNhanVien,
-n.MaHoSo,
-n.[Name] ,
+
 p.MaLo,
 tp.Ten ,
 s.Ten ,
 kh.Ten 
 order by 
-n.MaHoSo,
 p.MaLo,
 kh.Ten,
 tp.Ten,
@@ -688,7 +679,42 @@ group by p.CaId,p.Ngay,p.MaNhanVien,tp.BravoId,tp.Ten";
         {
             try
             {
-                var query =
+//                var query =
+//                    @"Select
+//p.MaNhanVien,
+//n.MaHoSo,
+//n.[Name] as NhanVienName,
+//tp.Ten as ThanhPhamName,
+//s.Ten as SizeName,
+//kh.Ten as KhachHangName,
+//Sum( p.TrongLuong) as TrongLuong, 
+//COUNT(*) As SoRo 
+//from PhieuCanXepKhuonKHC p,
+//NhanVienDaiThanh n,
+//MaThanhPhamXepKhuonKHC tp,
+//MaSizeXepKhuonKHC s, 
+//MaKhachHangXepKhuon kh
+//where 
+//p.Ngay <= @toDate
+//and p.Ngay >= @fromDate
+//and p.MaXuong =@xuongId 
+//and p.MaNhanVien = n.MaNhanVien 
+//and p.MaThanhPham = tp.Ma 
+//and p.MaSize = s.Ma 
+//and p.MaKhachHang = kh.Ma 
+//group by 
+//p.MaNhanVien,
+//n.MaHoSo,
+//n.[Name] ,
+//tp.Ten ,
+//s.Ten ,
+//kh.Ten 
+//order by 
+//n.MaHoSo,
+//tp.Ten,
+//s.Ten,
+//kh.Ten";
+var query =
                     @"Select
 p.MaNhanVien,
 n.MaHoSo,
@@ -697,12 +723,16 @@ tp.Ten as ThanhPhamName,
 s.Ten as SizeName,
 kh.Ten as KhachHangName,
 Sum( p.TrongLuong) as TrongLuong, 
-COUNT(*) As SoRo 
+COUNT(*) As SoRo ,
+MIN(c.ThoiGian) OVER(PARTITION BY n.MaChamCong, p.Ngay) as ThoiGianVao,
+MAX(c.ThoiGian) OVER(PARTITION BY n.MaChamCong, p.Ngay) as ThoiGianRa,
+DATEDIFF(hour, MIN(c.ThoiGian) OVER(PARTITION BY n.MaChamCong, p.Ngay), MAX(c.ThoiGian) OVER(PARTITION BY n.MaChamCong, p.Ngay)) as TongThoiGian
 from PhieuCanXepKhuonKHC p,
 NhanVienDaiThanh n,
 MaThanhPhamXepKhuonKHC tp,
 MaSizeXepKhuonKHC s, 
-MaKhachHangXepKhuon kh
+MaKhachHangXepKhuon kh,
+CheckInOut c
 where 
 p.Ngay <= @toDate
 and p.Ngay >= @fromDate
@@ -711,13 +741,17 @@ and p.MaNhanVien = n.MaNhanVien
 and p.MaThanhPham = tp.Ma 
 and p.MaSize = s.Ma 
 and p.MaKhachHang = kh.Ma 
+AND n.MaChamCong = c.MaChamCong AND c.ThoiGian = p.Ngay AND c.ThoiGian >= @fromDate AND c.ThoiGian <= @toDate 
 group by 
 p.MaNhanVien,
 n.MaHoSo,
 n.[Name] ,
 tp.Ten ,
 s.Ten ,
-kh.Ten 
+kh.Ten ,
+p.Ngay,
+n.MaChamCong,
+c.ThoiGian
 order by 
 n.MaHoSo,
 tp.Ten,

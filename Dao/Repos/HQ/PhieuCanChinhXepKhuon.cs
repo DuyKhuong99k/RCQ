@@ -13,7 +13,7 @@ namespace Dao.Repos.HQ
         private readonly string qrDelete = @"Delete PhieuCanChinhXepKhuon Where [STT]=@STT and [NgayNguyenLieu]=@NgayNguyenLieu and [MaXuong]= @MaXuong and [MaMayCan]=@MaMayCan";
 
         private readonly string qrInsert = @"
-Insert Into PhieuCanChinhXepKhuon ([STT],[Ngay],[Gio],[MaCoiTam],[MaCoiChinh],[DaQuay],[ThoiGianBatDauQuay],[ThoiGianQuay],[TrongLuong],[MaLo],[MaLoaiCa],[MaSizeChinh],[MaMau],[MaThanhPhamChinh],[MaChatLuong],[MaKhuVuc],[MaNhanVien],[MaNhom],[MaUserCan],[MaXuong],[MaMayCan],[GhiChu],[ThoiGianRaCoi],[Forced],[MaChieuXa],[TaiChe],[ChuyenXuong],[MaNhanVienPvPhanCo],[TrongLuongTare],[NgayNguyenLieu],[NgayRaCoi],[NgayBatDauQuay],[MayQuay],[IdMonitor]) Values (@STT,@Ngay,@Gio,@MaCoiTam,@MaCoiChinh,@DaQuay,@ThoiGianBatDauQuay,@ThoiGianQuay,@TrongLuong,@MaLo,@MaLoaiCa,@MaSizeChinh,@MaMau,@MaThanhPhamChinh,@MaChatLuong,@MaKhuVuc,@MaNhanVien,@MaNhom,@MaUserCan,@MaXuong,@MaMayCan,@GhiChu,@ThoiGianRaCoi,@Forced,@MaChieuXa,@TaiChe,@ChuyenXuong,@MaNhanVienPvPhanCo,@TrongLuongTare,@NgayNguyenLieu,@NgayRaCoi,@NgayBatDauQuay,@MayQuay,@IdMonitor)";
+Insert Into PhieuCanChinhXepKhuon ([STT],[Ngay],[Gio],[MaCoiTam],[MaCoiChinh],[DaQuay],[ThoiGianBatDauQuay],[ThoiGianQuay],[TrongLuong],[MaLo],[MaLoaiCa],[MaSizeChinh],[MaMau],[MaThanhPhamChinh],[MaChatLuong],[MaKhuVuc],[MaNhanVien],[MaNhom],[MaUserCan],[MaXuong],[MaMayCan],[GhiChu],[ThoiGianRaCoi],[Forced],[MaChieuXa],[TaiChe],[ChuyenXuong],[MaNhanVienPvPhanCo],[TrongLuongTare],[NgayNguyenLieu],[NgayRaCoi],[NgayBatDauQuay],[MayQuay],[IdMonitor],[LuotQuay], [Id]) Values (@STT,@Ngay,@Gio,@MaCoiTam,@MaCoiChinh,@DaQuay,@ThoiGianBatDauQuay,@ThoiGianQuay,@TrongLuong,@MaLo,@MaLoaiCa,@MaSizeChinh,@MaMau,@MaThanhPhamChinh,@MaChatLuong,@MaKhuVuc,@MaNhanVien,@MaNhom,@MaUserCan,@MaXuong,@MaMayCan,@GhiChu,@ThoiGianRaCoi,@Forced,@MaChieuXa,@TaiChe,@ChuyenXuong,@MaNhanVienPvPhanCo,@TrongLuongTare,@NgayNguyenLieu,@NgayRaCoi,@NgayBatDauQuay,@MayQuay,@IdMonitor,@LuotQuay,@Id)";
 
         private readonly string qrUpdate = @"UPDATE[dbo].[PhieuCanChinhXepKhuon]
                 SET[Gio] = @Gio 
@@ -286,6 +286,24 @@ order BY coi.MaXuong,
                 throw;
             }
         }
+        public T? Get<T>(string id)
+        {
+            try
+            {
+                var query = "Select * from PhieuCanChinhXepKhuon Where Id=@id";
+                using (var connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+                    var item = connection.QueryFirstOrDefault<T>(query, new { id });
+                    return item;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                throw;
+            }
+        }
         public List<T> GetPhieuCanChinhXepKhuonCoTheQuay<T>(DateTime dateTime, string xuongId, string coiChinhId)
         {
             var query =
@@ -526,7 +544,7 @@ left join MaCoiXepKhuon ct on ct.Ma = p.MaCoiTam
 left join MaCoiXepKhuon c on c.Ma = p.MaCoiChinh
 left join MaLoaiCaXepKhuon lc on lc.Ma = p.MaLoaiCa
 left join MaSizeChinhXepKhuon s on s.Ma = p.MaSizeChinh
-left join MaMauDinhHinh m on m.Ma = p.MaMau
+left join MaMauXepKhuon m on m.Ma = p.MaMau
 left join MaChatLuongXepKhuon cl on cl.Ma = p.MaChatLuong
 left join MaThanhPhamChinhXepKhuon tp on tp.Ma = p.MaThanhPhamChinh
 left join MaKhuVucXepKhuon kv on kv.Ma = p.MaKhuVuc
@@ -537,8 +555,8 @@ left join MaChatLuongTaiChe tc on tc.Ma = p.TaiChe
 left join NhanVienDaiThanh nvpv on nvpv.MaNhanVien = p.MaNhanVienPvPhanCo
 left join XiNghiep x on x.Ma = p.MaXuong
 Where 
-p.Ngay<=@toDate 
-and Ngay >=@fromDate 
+p.NgayNguyenLieu<=@toDate 
+and NgayNguyenLieu >=@fromDate 
 and p.MaXuong = @xuongId
 and ((p.MaXuong = @xuongId and ChuyenXuong =0) or (ChuyenXuong = 1 and p.MaXuong <> @xuongId)) 
 order by
@@ -1372,7 +1390,58 @@ order by
             try
             {
                 var query =
-                    @"Select p.MaXuong,p.ChuyenXuong, p.MaCoiChinh,p.MaLo,cx.Ten as ChieuXaName,p.TaiChe,la.Ten as LoaiCaName,tp.Ten as ThanhPhamName,s.Ten as SizeName,c.Ten As ChatLuongName,Sum(p.TrongLuong) as TrongLuong, Count(*) as SoRo from PhieuCanChinhXepKhuon p,MaLoaiCaXepKhuon la,MaThanhPhamChinhXepKhuon tp,MaSizeChinhXepKhuon s, MaChatLuongXepKhuon c,MaChieuXaXepKhuon cx where p.MaChieuXa = cx.Ma and Ngay<=@toDate and Ngay>=@fromDate and ((MaXuong = @xuongId and ChuyenXuong =0) or (ChuyenXuong = 1 and MaXuong <> @xuongId))  and p.MaThanhPhamChinh = tp.Ma and p.MaLoaiCa = la.Ma and p.MaSizeChinh = s.Ma and p.MaChatLuong = c.Ma Group by p.MaCoiChinh,p.MaLo,la.Ten,tp.Ten,s.Ten,c.Ten,p.TaiChe,cx.Ten,p.MaXuong,p.ChuyenXuong  order by p.MaCoiChinh,p.MaLo,tp.Ten";
+                    @"Select 
+p.MaXuong,
+p.ChuyenXuong,
+p.MaCoiChinh,
+coi.Ten as CoiChinhName,
+p.MaLo,cx.Ten as ChieuXaName,
+p.TaiChe,la.Ten as LoaiCaName,
+tp.Ten as ThanhPhamName,
+s.Ten as SizeName,
+c.Ten As ChatLuongName,
+Sum(p.TrongLuong) as TrongLuong,
+Count(*) as SoRo ,
+p.MaMau,
+m.Ten as MauName
+from PhieuCanChinhXepKhuon p,
+MaLoaiCaXepKhuon la,
+MaThanhPhamChinhXepKhuon tp,
+MaSizeChinhXepKhuon s,
+MaChatLuongXepKhuon c,
+MaChieuXaXepKhuon cx ,
+MaCoiXepKhuon coi,
+MaMauXepKhuon m
+where 
+p.MaChieuXa = cx.Ma 
+and Ngay<=@toDate 
+and Ngay>=@fromDate 
+and ((MaXuong = @xuongId and ChuyenXuong =0) or (ChuyenXuong = 1 and MaXuong <> @xuongId))  
+and p.MaThanhPhamChinh = tp.Ma 
+and p.MaLoaiCa = la.Ma 
+and p.MaSizeChinh = s.Ma 
+and p.MaChatLuong = c.Ma 
+and p.MaCoiChinh = coi.Ma
+and p.MaMau = m.Ma
+Group by
+p.MaCoiChinh,
+p.MaLo,
+la.Ten,
+tp.Ten,
+s.Ten,
+c.Ten,
+p.TaiChe,
+cx.Ten,
+p.MaXuong,
+p.ChuyenXuong  ,
+coi.Ten,
+p.MaMau,
+m.Ten
+
+order by
+p.MaCoiChinh,
+p.MaLo,
+tp.Ten";
                 using (var connection = new SqlConnection(connectionString))
                 {
                     connection.Open();
@@ -1415,7 +1484,39 @@ order by
             try
             {
                 var query =
-                    "Select p.ChuyenXuong,p.MaXuong, p.MaLo,la.Ten as LoaiCaName,tp.Ten as ThanhPhamName,cx.Ten as ChieuXaName,p.TaiChe,s.Ten as SizeName,c.Ten As ChatLuongName,Sum(p.TrongLuong) as TrongLuong, Count(*) as SoRo from PhieuCanChinhXepKhuon p,MaLoaiCaXepKhuon la,MaThanhPhamChinhXepKhuon tp,MaSizeChinhXepKhuon s, MaChatLuongXepKhuon c, MaChieuXaXepKhuon cx where  Ngay<=@toDate and Ngay>=@fromDate and ((MaXuong = @xuongId and ChuyenXuong =0) or (ChuyenXuong = 1 and MaXuong <> @xuongId))  and p.MaThanhPhamChinh = tp.Ma and p.MaLoaiCa = la.Ma and p.MaSizeChinh = s.Ma and p.MaChatLuong = c.Ma and p.MaChieuXa = cx.Ma Group by p.MaLo,la.Ten,tp.Ten,s.Ten,c.Ten ,cx.Ten,p.ChuyenXuong,p.MaXuong,p.TaiChe order by p.MaLo,tp.Ten";
+                    @"Select 
+p.ChuyenXuong,
+p.MaXuong, 
+p.MaLo,
+p.MaCoiChinh,
+coi.Ten as CoiChinhName,
+la.Ten as LoaiCaName,
+tp.Ten as ThanhPhamName,
+cx.Ten as ChieuXaName,
+m.Ten as MauName,
+p.TaiChe,
+s.Ten as SizeName,
+c.Ten As ChatLuongName,
+Sum(p.TrongLuong) as TrongLuong,
+Count(*) as SoRo 
+from 
+PhieuCanChinhXepKhuon p
+left join MaCoiXepKhuon coi on p.MaCoiChinh = coi.Ma
+left join MaLoaiCaXepKhuon la on p.MaLoaiCa = la.Ma 
+left join MaSizeChinhXepKhuon s on  p.MaSizeChinh = s.Ma 
+left join MaThanhPhamChinhXepKhuon tp on p.MaThanhPhamChinh = tp.Ma 
+left join MaMauXepKhuon m on p.MaMau = m.Ma
+left join MaChieuXaXepKhuon cx on p.MaChieuXa = cx.Ma
+left join MaChatLuongXepKhuon c on p.MaChatLuong = c.Ma
+where  
+NgayNguyenLieu<=@toDate and NgayNguyenLieu>=@fromDate 
+and ((MaXuong = @xuongId and ChuyenXuong =0) or (ChuyenXuong = 1 and MaXuong <> @xuongId))  
+
+Group by p.MaLo,
+la.Ten,tp.Ten,s.Ten,c.Ten ,
+cx.Ten,p.ChuyenXuong,p.MaXuong,
+p.TaiChe ,m.Ten ,coi.Ten, p.MaCoiChinh
+order by p.MaLo,tp.Ten";
                 using (var connection = new SqlConnection(connectionString))
                 {
                     connection.Open();
@@ -1501,7 +1602,60 @@ Select p.ChuyenXuong,p.MaXuong, p.MaCoiChinh,p.MaLo,la.Ten as LoaiCaName,cx.Ten 
             try
             {
                 var query =
-                    "Select p.ChuyenXuong,p.MaXuong, p.MaNhanVien,n.MaHoSo,n.Name as TenNhanVien,cx.Ten as ChieuXaName,p.TaiChe,p.MaLo,la.Ten As LoaiCaName,tp.Ten as ThanhPhamName,s.Ten As SizeName,ma.Ten As MauName, SUM(p.TrongLuong) as TrongLuong ,Count(*) As SoRo from  PhieuCanChinhXepKhuon p, MaLoaiCaXepKhuon la,MaSizeChinhXepKhuon s, MaThanhPhamChinhXepKhuon tp, MaMauXepKhuon ma,NhanVienDaiThanh n, MaChieuXaXepKhuon cx where p.Ngay <=@toDate and p.Ngay>=@fromDate and ((MaXuong = @xuongId and ChuyenXuong =0) or (ChuyenXuong = 1 and MaXuong <> @xuongId))  and p.MaLoaiCa = la.Ma and p.MaSizeChinh = s.Ma and p.MaThanhPhamChinh = tp.Ma and p.MaMau = ma.Ma and p.MaNhanVien= n.MaNhanVien and p.MaChieuXa = cx.Ma group by p.MaNhanVien,n.MaHoSo,n.Name ,p.MaLo,tp.Ten ,s.Ten ,ma.Ten,la.Ten,cx.Ten,p.TaiChe, p.ChuyenXuong,p.MaXuong order by n.MaHoSo";
+                    @"Select 
+p.ChuyenXuong,
+p.MaXuong,
+p.MaNhanVien,
+n.MaHoSo,
+n.Name as TenNhanVien,
+cx.Ten as ChieuXaName,
+p.MaChatLuong,
+cl.Ten as ChatLuongName,
+p.TaiChe,
+p.MaLo,
+la.Ten As LoaiCaName,
+tp.Ten as ThanhPhamName,
+s.Ten As SizeName,
+ma.Ten As MauName,
+SUM(p.TrongLuong) as TrongLuong ,
+Count(*) As SoRo 
+from  
+PhieuCanChinhXepKhuon p,
+MaLoaiCaXepKhuon la,
+MaSizeChinhXepKhuon s,
+MaThanhPhamChinhXepKhuon tp,
+MaMauXepKhuon ma,
+NhanVienDaiThanh n,
+MaChieuXaXepKhuon cx ,
+MaChatLuongXepKhuon cl
+where 
+p.Ngay <=@toDate
+and p.Ngay>=@fromDate
+and ((MaXuong = @xuongId and ChuyenXuong =0) or (ChuyenXuong = 1 and MaXuong <> @xuongId)) 
+and p.MaLoaiCa = la.Ma 
+and p.MaSizeChinh = s.Ma
+and p.MaThanhPhamChinh = tp.Ma 
+and p.MaMau = ma.Ma 
+and p.MaNhanVien= n.MaNhanVien 
+and p.MaChieuXa = cx.Ma 
+and p.MaChatLuong = cl.Ma
+group by 
+p.MaNhanVien,
+n.MaHoSo,
+n.Name,
+p.MaLo,
+tp.Ten,
+s.Ten ,
+ma.Ten,
+la.Ten,
+cx.Ten,
+p.TaiChe,
+p.ChuyenXuong,
+p.MaXuong ,
+p.MaChatLuong,
+cl.Ten
+order by
+n.MaHoSo";
                 using (var connection = new SqlConnection(connectionString))
                 {
                     connection.Open();
@@ -1542,8 +1696,108 @@ Select p.ChuyenXuong,p.MaXuong, p.MaCoiChinh,p.MaLo,la.Ten as LoaiCaName,cx.Ten 
         {
             try
             {
+                //                var query =
+                //                    @"Select 
+                //p.ChuyenXuong,
+                //p.MaXuong,
+                //p.MaNhanVien,
+                //n.MaHoSo,
+                //n.Name as TenNhanVien,
+                //cx.Ten as ChieuXaName,
+                //p.TaiChe,
+                //la.Ten As LoaiCaName,
+                //tp.Ten as ThanhPhamName,
+                //SUM(p.TrongLuong) as TrongLuong,
+                //Count(*) As SoRo ,
+                //p.MaMau,
+                //m.Ten as MauName
+                //from  
+                //PhieuCanChinhXepKhuon p,
+                //MaLoaiCaXepKhuon la,
+                //MaThanhPhamChinhXepKhuon tp,
+                //NhanVienDaiThanh n,
+                //MaChieuXaXepKhuon cx,
+                //MaMauXepKhuon m
+                //where 
+                //p.Ngay <=@toDate 
+                //and p.Ngay>=@fromDate 
+                //and ((MaXuong = @xuongId and ChuyenXuong =0) or (ChuyenXuong = 1 and MaXuong <> @xuongId)) 
+                //and p.MaLoaiCa = la.Ma 
+                //and p.MaThanhPhamChinh = tp.Ma 
+                //and p.MaNhanVien= n.MaNhanVien 
+                //and p.MaChieuXa = cx.Ma
+                //and p.MaMau = m.Ma
+                //group by 
+                //p.MaNhanVien,
+                //n.MaHoSo,
+                //n.Name ,
+                //tp.Ten,
+                //la.Ten,
+                //cx.Ten,
+                //p.TaiChe,
+                //p.ChuyenXuong,
+                //p.MaXuong ,
+                //p.MaMau,
+                //m.Ten
+                //order by n.MaHoSo";
                 var query =
-                    "Select p.ChuyenXuong,p.MaXuong, p.MaNhanVien,n.MaHoSo,n.Name as TenNhanVien,cx.Ten as ChieuXaName,p.TaiChe,la.Ten As LoaiCaName,tp.Ten as ThanhPhamName, SUM(p.TrongLuong) as TrongLuong,Count(*) As SoRo from  PhieuCanChinhXepKhuon p, MaLoaiCaXepKhuon la, MaThanhPhamChinhXepKhuon tp,NhanVienDaiThanh n,MaChieuXaXepKhuon cx where p.Ngay <=@toDate and p.Ngay>=@fromDate and ((MaXuong = @xuongId and ChuyenXuong =0) or (ChuyenXuong = 1 and MaXuong <> @xuongId))  and p.MaLoaiCa = la.Ma and p.MaThanhPhamChinh = tp.Ma and p.MaNhanVien= n.MaNhanVien and p.MaChieuXa = cx.Ma group by p.MaNhanVien,n.MaHoSo,n.Name ,tp.Ten,la.Ten,cx.Ten,p.TaiChe,p.ChuyenXuong,p.MaXuong order by n.MaHoSo";
+                    @";WITH CheckInOutData AS (
+    SELECT 
+        c.MaChamCong,
+        MIN(c.ThoiGian) AS ThoiGianVao,
+        MAX(c.ThoiGian) AS ThoiGianRa
+    FROM CheckInOut c 
+    WHERE c.ThoiGian >= @fromDate AND c.ThoiGian <= @toDate
+    GROUP BY c.MaChamCong
+)
+Select 
+p.ChuyenXuong,
+p.MaXuong,
+p.MaNhanVien,
+n.MaHoSo,
+n.Name as TenNhanVien,
+cx.Ten as ChieuXaName,
+cl.Ten as ChatLuongName,
+p.TaiChe,
+la.Ten As LoaiCaName,
+tp.Ten as ThanhPhamName,
+SUM(p.TrongLuong) as TrongLuong,
+Count(*) As SoRo ,
+p.MaMau,
+m.Ten as MauName,
+ISNULL(c.ThoiGianVao, '1900-01-01') AS ThoiGianVao,
+ISNULL(c.ThoiGianRa, '1900-01-01') AS ThoiGianRa,
+DATEDIFF(hour, ISNULL(c.ThoiGianVao, '1900-01-01'), ISNULL(c.ThoiGianRa, '1900-01-01')) AS TongThoiGian
+from  
+PhieuCanChinhXepKhuon p
+left join MaLoaiCaXepKhuon la on p.MaLoaiCa = la.Ma
+left join MaThanhPhamChinhXepKhuon tp on p.MaThanhPhamChinh = tp.Ma
+left join NhanVienDaiThanh n on p.MaNhanVien = n.MaNhanVien
+left join MaChieuXaXepKhuon cx on p.MaChieuXa = cx.Ma
+left join MaChatLuongXepKhuon cl on p.MaChatLuong = cl.Ma
+left join MaMauXepKhuon m on p.MaMau = m.Ma
+left join CheckInOutData c on n.MaChamCong = c.MaChamCong
+where 
+p.NgayNguyenLieu <=@toDate 
+and p.NgayNguyenLieu>=@fromDate 
+and ((MaXuong = @xuongId and ChuyenXuong =0) or (ChuyenXuong = 1 and MaXuong <> @xuongId)) 
+
+group by 
+p.MaNhanVien,
+n.MaHoSo,
+n.Name ,
+tp.Ten,
+la.Ten,
+cx.Ten,
+p.TaiChe,
+p.ChuyenXuong,
+p.MaXuong ,
+p.MaMau,
+m.Ten,
+c.ThoiGianVao,
+c.ThoiGianRa,
+cl.Ten
+order by n.MaHoSo";
                 using (var connection = new SqlConnection(connectionString))
                 {
                     connection.Open();
@@ -1587,7 +1841,43 @@ Select p.ChuyenXuong,p.MaXuong, p.MaCoiChinh,p.MaLo,la.Ten as LoaiCaName,cx.Ten 
             try
             {
                 var query =
-                    "Select p.ChuyenXuong,p.MaXuong, p.MaLo,la.Ten As LoaiCaName,cx.Ten as ChieuXaName,p.TaiChe,tp.Ten as ThanhPhamName,s.Ten As SizeName,ma.Ten As MauName, SUM(p.TrongLuong) as TrongLuong from  PhieuCanChinhXepKhuon p, MaLoaiCaXepKhuon la,MaSizeChinhXepKhuon s, MaThanhPhamChinhXepKhuon tp, MaMauXepKhuon ma,MaChieuXaXepKhuon cx where p.Ngay <=@toDate and p.Ngay >= @fromDate  and ((MaXuong = @xuongId and ChuyenXuong =0) or (ChuyenXuong = 1 and MaXuong <> @xuongId))  and p.MaLoaiCa = la.Ma and p.MaSizeChinh = s.Ma and p.MaThanhPhamChinh = tp.Ma and p.MaMau = ma.Ma and p.MaChieuXa = cx.Ma group by p.MaLo,tp.Ten ,s.Ten ,ma.Ten,la.Ten,cx.Ten,p.TaiChe,p.ChuyenXuong,p.MaXuong order by p.MaLo,tp.ten,s.Ten";
+                    @"Select 
+p.ChuyenXuong,
+p.MaXuong,
+p.MaLo,
+la.Ten As LoaiCaName,
+cx.Ten as ChieuXaName,
+cl.Ten as ChatLuongName,
+p.TaiChe,
+tp.Ten as ThanhPhamName,
+s.Ten As SizeName,
+ma.Ten As MauName,
+SUM(p.TrongLuong) as TrongLuong
+from  
+PhieuCanChinhXepKhuon p
+left join MaLoaiCaXepKhuon la on p.MaLoaiCa = la.Ma 
+left join MaSizeChinhXepKhuon s on  p.MaSizeChinh = s.Ma 
+left join MaThanhPhamChinhXepKhuon tp on p.MaThanhPhamChinh = tp.Ma 
+left join MaMauXepKhuon ma on p.MaMau = ma.Ma
+left join MaChieuXaXepKhuon cx on p.MaChieuXa = cx.Ma
+left join MaChatLuongXepKhuon cl on p.MaChatLuong = cl.Ma
+where 
+p.NgayNguyenLieu <=@toDate 
+and p.NgayNguyenLieu >= @fromDate  
+and ((MaXuong = @xuongId and ChuyenXuong =0) or (ChuyenXuong = 1 and MaXuong <> @xuongId)) 
+group by 
+p.MaLo,tp.Ten ,
+s.Ten ,
+ma.Ten,
+la.Ten,
+cx.Ten,
+p.TaiChe,
+p.ChuyenXuong,
+p.MaXuong ,cl.Ten
+order by
+p.MaLo,
+tp.ten,
+s.Ten";
                 using (var connection = new SqlConnection(connectionString))
                 {
                     connection.Open();
@@ -4666,7 +4956,50 @@ order by Gio DESC
             try
             {
                 var query =
-                    "Select ROW_NUMBER() OVER (ORDER BY p.Ngay) as STT, p.Ngay,p.ChuyenXuong,p.MaXuong, p.MaLo,la.Ten As LoaiCaName,cx.Ten as ChieuXaName,p.TaiChe,p.MaThanhPhamChinh as MaThanhPham,tp.Ten as ThanhPhamName,s.Ten As SizeName,ma.Ten As MauName, SUM(p.TrongLuong) as TrongLuong from  PhieuCanChinhXepKhuon p, MaLoaiCaXepKhuon la,MaSizeChinhXepKhuon s, MaThanhPhamChinhXepKhuon tp, MaMauXepKhuon ma,MaChieuXaXepKhuon cx where p.NgayNguyenLieu <= @ngay and p.NgayNguyenLieu >= @fromDate  and ((MaXuong = @xuongId and ChuyenXuong =0) or (ChuyenXuong = 1 and MaXuong <> @xuongId))  and p.MaLoaiCa = la.Ma and p.MaSizeChinh = s.Ma and p.MaThanhPhamChinh = tp.Ma and p.MaMau = ma.Ma and p.MaChieuXa = cx.Ma group by p.Ngay, p.MaLo,tp.Ten ,s.Ten ,ma.Ten,la.Ten,cx.Ten,p.TaiChe,p.ChuyenXuong,p.MaXuong,p.MaThanhPhamChinh order by p.MaLo,tp.ten,s.Ten";
+                    @"Select ROW_NUMBER() OVER (ORDER BY p.Ngay) as STT,
+p.Ngay,
+p.ChuyenXuong,
+p.MaXuong, 
+p.MaLo,
+la.Ten As LoaiCaName,
+cx.Ten as ChieuXaName,
+p.TaiChe,
+p.MaThanhPhamChinh as MaThanhPham,
+tp.Ten as ThanhPhamName,
+s.Ten As SizeName,
+ma.Ten As MauName,
+p.MaChatLuong,
+cl.Ten as ChatLuongName,
+SUM(p.TrongLuong) as TrongLuong
+from  PhieuCanChinhXepKhuon p
+left join MaLoaiCaXepKhuon la on p.MaLoaiCa = la.Ma 
+left join MaSizeChinhXepKhuon s on  p.MaSizeChinh = s.Ma 
+left join MaThanhPhamChinhXepKhuon tp on p.MaThanhPhamChinh = tp.Ma 
+left join MaMauXepKhuon ma on p.MaMau = ma.Ma
+left join MaChieuXaXepKhuon cx on p.MaChieuXa = cx.Ma
+left join MaChatLuongXepKhuon cl on p.MaChatLuong = cl.Ma 
+where 
+p.NgayNguyenLieu <= @ngay 
+and p.NgayNguyenLieu >= @fromDate  
+and ((MaXuong = @xuongId and ChuyenXuong =0) or (ChuyenXuong = 1 and MaXuong <> @xuongId))   
+group by 
+p.Ngay,
+p.MaLo,
+tp.Ten ,
+s.Ten ,
+ma.Ten,
+la.Ten,
+cx.Ten,
+p.TaiChe,
+p.ChuyenXuong,
+p.MaXuong,
+p.MaThanhPhamChinh ,
+p.MaChatLuong,
+cl.Ten
+order by 
+p.MaLo,
+tp.ten,
+s.Ten";
                 using (var connection = new SqlConnection(connectionString))
                 {
                     connection.Open();

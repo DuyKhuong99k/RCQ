@@ -9,25 +9,24 @@
     var rolePermistions = await PMS.Middlewares.AuthenticationHelpers.GetRolePermistionsAsync(Context, roleIds);
 }
 
-<div class="container mt-4">
+
     <div class="row">
         <div class="col-12">
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h2 class="mb-0">Danh Sách Vị Trí Fillet</h2>
-                    @{
-                        var themViTriFillet = rolePermistions.Where(x => x.Fu == "Danh Mục / Fillet / Vị Trí Fillet" && x.Func == "Thêm Fillet / Vị Trí Fillet" && x.Status == 1).FirstOrDefault();
-                        if (themViTriFillet != null)
-                        {
-                            <button onclick="showInsert()" type="button" class="btn btn-primary">Thêm</button>
-                        }
-                    }
+
 
                 </div>
                 <div class="card-body">
                     <div id="Grid"></div>
                     <div style="margin-top:20px;">
                         @{
+                        var themViTriFillet = rolePermistions.Where(x => x.Fu == "Danh Mục / Fillet / Vị Trí Fillet" && x.Func == "Thêm Fillet / Vị Trí Fillet" && x.Status == 1).FirstOrDefault();
+                        if (themViTriFillet != null)
+                        {
+                            <button onclick="showInsert()" type="button" style="margin-right:5px" class="btn btn-primary">Thêm</button>
+                        }
                             var suaViTriFillet = rolePermistions.Where(x => x.Fu == "Danh Mục / Fillet / Vị Trí Fillet" && x.Func == "Sửa Fillet / Vị Trí Fillet" && x.Status == 1).FirstOrDefault();
                             if (suaViTriFillet != null)
                             {
@@ -54,7 +53,7 @@
             </div>
         </div>
     </div>
-</div>
+
 <div class="modal fade" id="modalThem" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -236,11 +235,14 @@
                     grid = new ej.grids.Grid({
                         dataSource: dataManager,
                         allowPaging: true,
-                        pageSettings: { pageSize: 50 },
+                        pageSettings: { pageSize: 50, pageSizes: [50, 100, 200, 500] },
                         allowFiltering: true,
+                        filterSettings: { type: 'Excel' },
                         allowSorting: true,
                         //frozenColumns: 3,
                         allowResizing: true,
+                        allowExcelExport: true,
+                        toolbar: ['ExcelExport'],
                         rowSelected: onRowSelected,
                         height: 400,
                         columns: [

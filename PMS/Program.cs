@@ -10,6 +10,9 @@ using PMS.Attrs;
 using Syncfusion.Licensing;
 using System.Configuration;
 using Microsoft.AspNetCore.Mvc;
+using PMS.Controllers.NhaAn.DanhMucNhaAn;
+using Microsoft.AspNetCore.SignalR;
+using PMS.BackgroundServices;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -32,7 +35,7 @@ builder.Services.AddMvc().AddSessionStateTempDataProvider();
 
 builder.Services.AddSession(options =>
 {
-    options.IdleTimeout = TimeSpan.FromDays(1);
+    options.IdleTimeout = TimeSpan.FromDays(30);
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
 });
@@ -82,6 +85,9 @@ builder.Services.AddDbContext<dbPMScontext>(options =>
 //    });
 //});
 //
+//builder.Services.AddHostedService<AutoApproveMenuService>(); // background service tự động phê duyệt menu
+builder.Services.AddHostedService<AutoAlertExpityNoticeServices>(); 
+builder.Services.AddScoped<HQ_ThucDonController>(); // cần thêm dòng này để DI controller background service
 builder.Services.AddSignalR();
 var app = builder.Build();
 // Lấy IHttpClientFactory từ services
@@ -114,7 +120,7 @@ app.UseRouting();
 app.UseCookiePolicy();
 app.UseAuthentication();
 app.UseAuthorization();
-
+app.MapHub<PMS.Hubs.ProgressHub>("/progressHub");
 app.UseDeveloperExceptionPage();
 app.UseSession();
 //cho phép trang web truy cập các nguồn khác như API,...
@@ -126,7 +132,7 @@ app.UseSession();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
-app.MapHub<PMS.Hubs.ProgressHub>("/progressHub"); // Định tuyến SignalR hub
+//app.MapHub<PMS.Hubs.ProgressHub>("/progressHub"); // Định tuyến SignalR hub
 app.UseEndpoints(endpoints =>
 {
     // Thêm CORS cho API endpoint
@@ -327,9 +333,21 @@ app.UseEndpoints(endpoints =>
 
 
 
-
-
-
+   endpoints.MapControllerRoute(
+       "DanhMucBoTriViTriLoSizeThanhPhamFillet",
+       "DanhMuc/Fillet/BoTriViTriLoSizeThanhPhamFillet/{action}/{id?}",
+       new { controller = "BoTriViTriLoSizeThanhPhamFillet" }
+   );
+   endpoints.MapControllerRoute(
+       "DanhMucBoTriLoTheoLineFillet",
+       "DanhMuc/Fillet/BoTriLoTheoLineFillet/{action}/{id?}",
+       new { controller = "BoTriLoTheoLineFillet" }
+   );
+   endpoints.MapControllerRoute(
+       "DanhMucBoTriNVTheoChuyenViTriFillet",
+       "DanhMuc/Fillet/BoTriNVTheoChuyenViTriFillet/{action}/{id?}",
+       new { controller = "BoTriNVTheoChuyenViTriFillet" }
+   );
     endpoints.MapControllerRoute(
        "DanhMucBoTriNVTheoSize",
        "DanhMuc/Fillet/BoTriNVTheoSize/{action}/{id?}",
@@ -457,6 +475,11 @@ app.UseEndpoints(endpoints =>
         new { controller = "BanCatTiet" }
     );
     endpoints.MapControllerRoute(
+        "DanhMucAo",
+        "DanhMuc/NguyenLieu/Ao/{action}/{id?}",
+        new { controller = "Ao" }
+    );
+    endpoints.MapControllerRoute(
         "DanhMucStaff",
         "DanhMuc/Staff/{action}/{id?}",
         new { controller = "Staff" }
@@ -541,6 +564,11 @@ app.UseEndpoints(endpoints =>
        new { controller = "CoiChinhXepKhuon" }
    );
     endpoints.MapControllerRoute(
+       "CoiLeXepKhuon",
+       "DanhMuc/XepKhuon/Chinh/CoiLeXepKhuon/{action}/{id?}",
+       new { controller = "CoiLeXepKhuon" }
+   );
+    endpoints.MapControllerRoute(
        "ChiTietRaCoiXepKhuon",
        "DanhMuc/XepKhuon/Chinh/ChiTietRaCoiXepKhuon/{action}/{id?}",
        new { controller = "ChiTietRaCoiXepKhuon" }
@@ -554,6 +582,16 @@ app.UseEndpoints(endpoints =>
        "ThanhPhamChinhXepKhuon",
        "DanhMuc/XepKhuon/Chinh/ThanhPhamChinhXepKhuon/{action}/{id?}",
        new { controller = "ThanhPhamChinhXepKhuon" }
+   );
+    endpoints.MapControllerRoute(
+       "TrongLuongCoiTheoThanhPham",
+       "DanhMuc/XepKhuon/Chinh/TrongLuongCoiTheoThanhPham/{action}/{id?}",
+       new { controller = "TrongLuongCoiTheoThanhPham" }
+   );
+     endpoints.MapControllerRoute(
+       "TrongLuongCoiTheoSanPham",
+       "DanhMuc/XepKhuon/Chinh/TrongLuongCoiTheoSanPham/{action}/{id?}",
+       new { controller = "TrongLuongCoiTheoSanPham" }
    );
     endpoints.MapControllerRoute(
        "SizePhuXepKhuon",
@@ -882,10 +920,16 @@ app.UseEndpoints(endpoints =>
       new { controller = "BaoCaoPhuGiaXepKhuon" }
   );
     endpoints.MapControllerRoute(
+      "BaoCaoRaCoiXepKhuon",
+      "BaoCao/XepKhuon/BaoCaoRaCoiXepKhuon/{action}/{id?}",
+      new { controller = "BaoCaoRaCoiXepKhuon" }
+  );
+    endpoints.MapControllerRoute(
       "BaoCaoBaoTu",
       "BaoCao/BaoTu/BaoCaoBaoTu/{action}/{id?}",
       new { controller = "BaoCaoBaoTu" }
   );
+    
     endpoints.MapControllerRoute(
       "BaoCaoNhanSu_KeToan",
       "BaoCao/NhanSu-KeToan/BaoCaoNhanSu_KeToan/{action}/{id?}",
@@ -941,6 +985,47 @@ app.UseEndpoints(endpoints =>
         "DanhMucHQ/HQ_NhanVienTheoNhom/{action}/{id?}",
         new { controller = "HQ_NhanVienTheoNhom" }
     );
+    endpoints.MapControllerRoute(
+        "DanhMucHQ_Ca",
+        "DanhMucHQ/HQ_Ca/{action}/{id?}",
+        new { controller = "HQ_Ca" }
+    );
+    endpoints.MapControllerRoute(
+        "DanhMucHQ_NhanVienTheoCa",
+        "DanhMucHQ/HQ_NhanVienTheoCa/{action}/{id?}",
+        new { controller = "HQ_NhanVienTheoCa" }
+    );
+    endpoints.MapControllerRoute(
+        "DanhMucHQ_MapSanPhamTinhLuong",
+        "DanhMucHQ/HQ_MapSanPhamTinhLuong/{action}/{id?}",
+        new { controller = "HQ_MapSanPhamTinhLuong" }
+    );
+    endpoints.MapControllerRoute(
+        "HQ_LoaiMonAn",
+        "NhaAn/DanhMucNhaAn/HQ_LoaiMonAn/{action}/{id?}",
+        new { controller = "HQ_LoaiMonAn" }
+    );
+    endpoints.MapControllerRoute(
+        "HQ_MonAn",
+        "NhaAn/DanhMucNhaAn/HQ_MonAn/{action}/{id?}",
+        new { controller = "HQ_MonAn" }
+    );
+    endpoints.MapControllerRoute(
+        "HQ_ThucDon",
+        "NhaAn/DanhMucNhaAn/HQ_ThucDon/{action}/{id?}",
+        new { controller = "HQ_ThucDon" }
+    );
+    //endpoints.MapControllerRoute(
+    //    "DuyetThucDon",
+    //    "NhaAn/DanhMuc/HQ_ThucDon/DuyetThucDon{action}/{id?}",
+    //    new { controller = "DuyetThucDon" }
+    //);
+    //endpoints.MapControllerRoute(
+    //    "HuyThucDon",
+    //    "NhaAn/DanhMuc/HQ_ThucDon/HuyThucDon{action}/{id?}",
+    //    new { controller = "HuyThucDon" }
+    //);
+    
 
 
 

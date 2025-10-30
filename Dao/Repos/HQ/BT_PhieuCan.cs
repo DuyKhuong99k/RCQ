@@ -400,7 +400,53 @@ and t.MaTheTu = @maThe";
         }
         public List<T> GetTongHops<T>(DateTime fromDate, DateTime toDate, string xuongId)
         {
-            var query =
+//            var query =
+//                @"Select 
+//n.MaHoSo,
+//p.Ngay,
+//p.MaXuong,
+//x.Ten as XuongName,
+//p.MaMayCan,
+//p.MaLoaiCa,
+//la.Ten as LoaiCaName,
+//p.MaThanhPham,
+//tp.Ten as ThanhPhamName,
+//p.MaKhachHang,
+//kh.Ten as KhachHangName,
+//p.MaNhanVien,
+//n.Name as NhanVienName,
+//Count(*) as SoRo,
+//Sum(p.TrongLuong) as TrongLuong 
+//from BT_PhieuCan p,
+//BT_MaLoaica la,
+//BT_MaThanhPham tp,
+//BT_KhachHang kh,
+//NhanVienDaiThanh n,
+//XiNghiep x
+//where 
+//Ngay >= @fromDate 
+//and Ngay <= @toDate 
+//and MaXuong = @xuongId 
+//and p.MaKhachHang=kh.Ma 
+//and p.MaLoaiCa= la.Ma 
+//and p.MaThanhPham = tp.Ma 
+//and p.MaNhanVien = n.MaNhanVien 
+//and p.MaXuong = x.Ma
+//group by 
+//p.Ngay,
+//p.MaXuong,
+//p.MaMayCan,
+//p.MaLoaiCa,
+//la.Ten ,
+//p.MaThanhPham,
+//tp.Ten ,
+//p.MaKhachHang,
+//kh.Ten ,
+//p.MaNhanVien,
+//n.Name ,
+//n.MaHoSo,
+//x.Ten ";
+var query =
                 @"Select 
 n.MaHoSo,
 p.Ngay,
@@ -416,13 +462,17 @@ kh.Ten as KhachHangName,
 p.MaNhanVien,
 n.Name as NhanVienName,
 Count(*) as SoRo,
-Sum(p.TrongLuong) as TrongLuong 
+Sum(p.TrongLuong) as TrongLuong ,
+MIN(c.ThoiGian) OVER(PARTITION BY n.MaChamCong, p.Ngay) as ThoiGianVao,
+MAX(c.ThoiGian) OVER(PARTITION BY n.MaChamCong, p.Ngay) as ThoiGianRa,
+DATEDIFF(hour, MIN(c.ThoiGian) OVER(PARTITION BY n.MaChamCong, p.Ngay), MAX(c.ThoiGian) OVER(PARTITION BY n.MaChamCong, p.Ngay)) as TongThoiGian
 from BT_PhieuCan p,
 BT_MaLoaica la,
 BT_MaThanhPham tp,
 BT_KhachHang kh,
 NhanVienDaiThanh n,
-XiNghiep x
+XiNghiep x,
+CheckInOut c
 where 
 Ngay >= @fromDate 
 and Ngay <= @toDate 
@@ -432,6 +482,7 @@ and p.MaLoaiCa= la.Ma
 and p.MaThanhPham = tp.Ma 
 and p.MaNhanVien = n.MaNhanVien 
 and p.MaXuong = x.Ma
+AND n.MaChamCong = c.MaChamCong AND c.ThoiGian = p.Ngay AND c.ThoiGian >= @fromDate AND c.ThoiGian <= @toDate 
 group by 
 p.Ngay,
 p.MaXuong,
@@ -445,7 +496,10 @@ kh.Ten ,
 p.MaNhanVien,
 n.Name ,
 n.MaHoSo,
-x.Ten ";
+x.Ten ,
+p.Ngay,
+n.MaChamCong,
+c.ThoiGian";
             using (var connection = new SqlConnection(connectionString))
             {
                 connection.Open();

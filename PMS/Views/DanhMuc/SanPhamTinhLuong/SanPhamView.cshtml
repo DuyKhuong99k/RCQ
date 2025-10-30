@@ -6,19 +6,37 @@
     // lấy danh sách fu func từ list roleId
     var rolePermistions = await PMS.Middlewares.AuthenticationHelpers.GetRolePermistionsAsync(Context, roleIds);
 }
+<style>
+    .custom-table {
+        border-collapse: collapse;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    }
 
-<div class="container mt-4">
+        .custom-table th, .custom-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .custom-table th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+        }
+
+        .custom-table tr:hover {
+            background-color: #f1f1f1;
+        }
+</style>
+
     <div class="row">
         <div class="col-12">
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h2 class="mb-0">Danh Sách Sản Phẩm Sản Phẩm Tính Lương</h2>
                     @{
-                        var themsanphamSPTL = rolePermistions.Where(x => x.Fu == "Danh Mục / Sản Phẩm Tính Lương / Sản Phẩm" && x.Func == "Thêm Sản Phẩm Tính Lương / Sản Phẩm" && x.Status == 1).FirstOrDefault();
-                        if (themsanphamSPTL != null)
-                        {
-                            <button onclick="showInsert()" type="button" class="btn btn-primary">Thêm</button>
-                        }
+                        
                     }
 
                 </div>
@@ -26,6 +44,11 @@
                     <div id="Grid"></div>
                     <div style="margin-top:20px;">
                         @{
+                            var themsanphamSPTL = rolePermistions.Where(x => x.Fu == "Danh Mục / Sản Phẩm Tính Lương / Sản Phẩm" && x.Func == "Thêm Sản Phẩm Tính Lương / Sản Phẩm" && x.Status == 1).FirstOrDefault();
+                            if (themsanphamSPTL != null)
+                            {
+                                <button onclick="showInsert()" type="button" class="btn btn-primary">Thêm</button>
+                            }
                             var suasanphamSPTL = rolePermistions.Where(x => x.Fu == "Danh Mục / Sản Phẩm Tính Lương / Sản Phẩm" && x.Func == "Sửa Sản Phẩm Tính Lương / Sản Phẩm" && x.Status == 1).FirstOrDefault();
                             if (suasanphamSPTL != null)
                             {
@@ -39,14 +62,66 @@
                             var importsanphamSPTL = rolePermistions.Where(x => x.Fu == "Danh Mục / Sản Phẩm Tính Lương / Sản Phẩm" && x.Func == "Import Sản Phẩm Tính Lương / Sản Phẩm" && x.Status == 1).FirstOrDefault();
                             if (importsanphamSPTL != null)
                             {
-                                <button onclick="import()" style="margin-right:5px" class="btn btn-outline-info"><i class='bx bx-import'></i>Import</button>
+                                <button onclick="importPopup()" style="margin-right:5px" class="btn btn-outline-info"><i class='bx bx-import'></i>Import</button>
+
                             }
-                            var exportsanphamSPTL = rolePermistions.Where(x => x.Fu == "Danh Mục / Sản Phẩm Tính Lương / Sản Phẩm" && x.Func == "Export Sản Phẩm Tính Lương / Sản Phẩm" && x.Status == 1).FirstOrDefault();
-                            if (exportsanphamSPTL != null)
-                            {
-                                <button onclick="export()" style="margin-right:5px" class="btn btn-outline-secondary"><i class='bx bx-export'></i>Export Excel</button>
-                            }
+
+                            // var exportsanphamSPTL = rolePermistions.Where(x => x.Fu == "Danh Mục / Sản Phẩm Tính Lương / Sản Phẩm" && x.Func == "Export Sản Phẩm Tính Lương / Sản Phẩm" && x.Status == 1).FirstOrDefault();
+                            // if (exportsanphamSPTL != null)
+                            // {
+                            //     <button onclick="export()" style="margin-right:5px" class="btn btn-outline-secondary"><i class='bx bx-export'></i>Export Excel</button>
+                            // }
                         }
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+<div class="modal fade" id="importPopup" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Import Sản Phẩm Tính Lương</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <form method="post" enctype="multipart/form-data" id="importForm">
+                            <div class="mb-3">
+                                <p>Tạo file Excel đúng với cấu trúc sau:</p>
+                                <div class="container mt-4">
+                                    <div class="table-responsive">
+                                        <table class="table custom-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Mã</th>
+                                                    <th>Tên</th>
+                                                    <th>Ghi Chú</th>
+                                                </tr>
+                                            </thead>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="fileInput" class="form-label fw-bold">Chọn file Excel:</label>
+                                <input type="file" id="fileInput" name="file" class="form-control" accept=".xlsx, .xls" required />
+                            </div>
+                            <div class="d-grid">
+                                <button onclick="startImport()" class="btn btn-primary w-100 position-relative" type="submit" id="importButton">
+                                    <div class=" align-items-center">
+                                        <span id="txtImport">Xác nhận</span>
+                                        <div id="loadingIndicatorIm" class=" spinner-border text-secondary position-absolute" role="status" style="left: 0;right: 0;top: 0;bottom: 0;margin: auto; display:none">
+                                            <span class="visually-hidden">Đang tải...</span>
+                                        </div>
+                                    </div>
+                                </button>
+                            </div>
+                        </form>
+                        <div id="result" class="mt-3"></div>
                     </div>
                 </div>
             </div>
@@ -182,13 +257,15 @@
                     grid = new ej.grids.Grid({
                         dataSource: dataManager,
                         allowPaging: true,
-                        pageSettings: { pageSize: 50 },
+                        pageSettings: { pageSize: 50, pageSizes: [50, 100, 200, 500] },
                         allowFiltering: true,
                         filterSettings: { type: 'Excel' },
                         allowSorting: true,
                         //frozenColumns: 3,
                         allowResizing: true,
                         rowSelected: onRowSelected,
+                        allowExcelExport: true,
+                        toolbar: ['ExcelExport'],
                         height: 400,
                         columns: [
                             { field: 'Ma', headerText: 'Mã', width: 150 },
@@ -198,6 +275,11 @@
                     });
                     // Hiển thị Grid trên trang web
                     grid.appendTo('#Grid');
+                    grid.toolbarClick = function (args) {
+                        if (args.item.id === 'Grid_excelexport') {
+                            grid.excelExport();
+                        }
+                    };
                 }
             },
             error: function (error) {
@@ -397,4 +479,51 @@
         });
 
     }
+</script>
+<script>
+    function importPopup(){
+        $('#importPopup').modal('show');
+    }
+
+    function startImport() {
+        document.getElementById("txtImport").style.display = "none";
+        document.getElementById("loadingIndicatorIm").style.display = "block";
+    }
+
+    function endImport() {
+        document.getElementById("txtImport").style.display = "block";
+        document.getElementById("loadingIndicatorIm").style.display = "none";
+    }
+
+    document.getElementById("importForm").onsubmit = async function (e) {
+        e.preventDefault();
+        startImport();
+        let formData = new FormData(this);
+        let response = await fetch("/SanPhamSPTL/ImportExcel", {
+            method: "POST",
+            body: formData
+        });
+
+        let result = await response.json();
+        let output = `<p>${result.Messages}: <span style="color:green">${result.successCount} Thành Công</span>, <span style="color:red">${result.failCount} Thất Bại.</span></p>`;
+
+        if (result.Errors && result.Errors.length > 0) {
+            output += "<ul>";
+            result.Errors.forEach(err => output += `<li>${err}</li>`);
+            output += "</ul>";
+        }
+
+        document.getElementById("result").innerHTML = output;
+        endImport();
+    };
+
+    document.addEventListener("DOMContentLoaded", function () {
+        var importPopup = document.getElementById("importPopup");
+
+        importPopup.addEventListener("hidden.bs.modal", function () {
+            reloadData();
+            document.getElementById("importForm").reset();
+            document.getElementById("result").innerHTML = "";
+        });
+    });
 </script>

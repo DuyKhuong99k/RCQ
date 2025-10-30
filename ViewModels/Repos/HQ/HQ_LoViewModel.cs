@@ -15,6 +15,7 @@ using Azure.Identity;
 using System.Collections.Specialized;
 using Models.Repos;
 using System.Globalization;
+using Vars;
 
 namespace ViewModels.Repos.HQ
 {
@@ -85,6 +86,30 @@ namespace ViewModels.Repos.HQ
                 VmMessage.SetExceptionCommand.Execute(e);
             }
         }
+        public void Reload()
+        {
+            // Reload();
+            Items.Clear();
+            var items = new ObservableRangeCollection<string>(Gets(AppViewModel.Instance.XuongId, IsServer));
+            if (items != null && items.Any())
+            {
+                foreach (var item in items)
+                {
+                    Items.Add(item);
+         
+                }
+            }
+            ItemsWithSize = new ObservableRangeCollection<Tuple<DateTime?, string, string>>(
+                GetsWithSize(AppViewModel.Instance.XuongId, IsServer));
+        }
+       public string GetByLevel(DateTime ngay, int level)
+        {
+            dbPMScontext db = new dbPMScontext();
+            var items = db.HqLos.Where(x => x.NgayNguyenLieu == DateOnly.FromDateTime(ngay)).Select(x => x.Id).OrderByDescending(x=>x).ToList();
+            if (items.Count >= level)
+                return items[level -1];
+            return "";
+        }
         public List<string> Gets(string xuongId, bool isServer = false)
         {
             try
@@ -104,6 +129,17 @@ namespace ViewModels.Repos.HQ
                 else if (AppViewModel.Instance.LoKv == Vars.AppKV.BTPFilletv2)
                 {
                     return dao.GetsMSLBTPFilletv2(xuongId);
+                }
+                else if (AppViewModel.Instance.LoKv == Vars.AppKV.Hq)
+                {
+                    dbPMScontext db = new dbPMScontext();
+#if  DEBUG
+                    var items = db.HqLos.Where(x => x.MNgay >= DateTime.Now.AddDays(-365)).Select(x => x.Id).OrderByDescending(x=>x).ToList();
+          #else
+         var items = db.HqLos.Where(x => x.MNgay >= DateTime.Now.AddDays(-30)).Select(x => x.Id).OrderByDescending(x=>x).ToList();   
+#endif
+                  
+                    return items;
                 }
                 else
                 {
@@ -204,13 +240,13 @@ namespace ViewModels.Repos.HQ
             DateTime date = new DateTime();
             try
             {
-                date = DateTime.ParseExact(Ngay, "yyyyMMddHHmmss", CultureInfo.InvariantCulture);
+                date = DateTime.ParseExact(Ngay, "yyyyMMdd", CultureInfo.InvariantCulture);
             }
             catch (Exception ex)
             {
                 throw ex;
             }
-            return db.HqLoDs.Where(x => x.MNgay > date).OrderByDescending(x => x.MNgay).Skip((PageIndex - 1) * PageSize).Take(PageSize).ToList();
+            return db.HqLoDs.Where(x => x.MNgay.Date >= date.Date).OrderByDescending(x => x.MNgay).Skip((PageIndex - 1) * PageSize).Take(PageSize).ToList();
         }
 
         public List<HQ_Lo_U> GetUs(string Ngay, int PageIndex, int PageSize)
@@ -219,13 +255,37 @@ namespace ViewModels.Repos.HQ
             DateTime date = new DateTime();
             try
             {
-                date = DateTime.ParseExact(Ngay, "yyyyMMddHHmmss", CultureInfo.InvariantCulture);
+                date = DateTime.ParseExact(Ngay, "yyyyMMdd", CultureInfo.InvariantCulture);
             }
             catch (Exception ex)
             {
                 throw ex;
             }
-            return db.HqLoUs.Where(x => x.MNgay > date).OrderByDescending(x => x.MNgay).Skip((PageIndex - 1) * PageSize).Take(PageSize).ToList();
+            ////return db.HqLoUs.Where(x => x.MNgay.Date >= date.Date).OrderByDescending(x => x.MNgay).Skip((PageIndex - 1) * PageSize).Take(PageSize).ToList();
+            //return db.HqLoUs .Where(x => x.MNgay.Date >= date.Date)
+            //    .GroupBy(x => x.LoId)
+            //    .Select(g => g.OrderByDescending(x => x.MNgay).FirstOrDefault())
+            //    .Where(x => x != null) 
+            //    .OrderByDescending(x => x!.MNgay)
+            //    .Skip((PageIndex - 1) * PageSize)
+            //    .Take(PageSize)
+            //    .ToList();
+            var latestDates = db.HqLoUs
+                .Where(x => x.MNgay.Date >= date.Date)
+                .GroupBy(x => x.LoId)
+                .Select(g => new { LoId = g.Key, MaxId = g.Max(x => x.Id) });
+
+            var query = from hq in db.HqLoUs.Where(x => x.MNgay.Date >= date.Date) 
+                join latest in latestDates
+                    on new { hq.LoId, hq.Id } 
+                    equals new { latest.LoId, Id = latest.MaxId }
+                orderby hq.MNgay descending
+                select hq;
+
+            var result = query.Skip((PageIndex - 1) * PageSize)
+                .Take(PageSize)
+                .ToList();
+            return result;
         }
         public List<HQ_Lo> Gets(string Ngay, int PageIndex, int PageSize)
         {
@@ -233,13 +293,19 @@ namespace ViewModels.Repos.HQ
             DateTime date = new DateTime();
             try
             {
-                date = DateTime.ParseExact(Ngay, "yyyyMMddHHmmss", CultureInfo.InvariantCulture);
+                date = DateTime.ParseExact(Ngay, "yyyyMMdd", CultureInfo.InvariantCulture);
             }
             catch (Exception ex)
             {
                 throw ex;
             }
-            return db.HqLos.Where(x => x.MNgay > date).OrderByDescending(x => x.MNgay).Skip((PageIndex - 1) * PageSize).Take(PageSize).ToList();
+            return db.HqLos.Where(x => x.MNgay.Date >= date.Date).OrderByDescending(x => x.MNgay).Skip((PageIndex - 1) * PageSize).Take(PageSize).ToList();
+        }
+        public int Insert(HQ_Lo item)
+        {
+            dbPMScontext db = new dbPMScontext();
+            db.HqLos.Add(item);
+            return db.SaveChanges();
         }
         //public MaLo CopySelectedItem()
         //{

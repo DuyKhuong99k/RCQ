@@ -1,13 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
+using System.Runtime.InteropServices;
+using System.Text.Json;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Models.Repos;
 using Models.Repos.Models;
 using ViewModels.Repos.API;
+using WebAPI.Models;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace WebAPI.Controllers
 {
@@ -22,93 +30,148 @@ namespace WebAPI.Controllers
             _context = context;
         }
         private MainViewModel Vm => MainViewModel.Instance;
-        // GET: api/LoTheoLines
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<LoTheoLine>>> Gets()
+        [Authorize]
+        public IActionResult GetAlls()
         {
-          if (_context.LoTheoLine == null)
-          {
-              return NotFound();
-          }
-            return Vm.VmLoTheoLine.Items;
+            var items = _context.LoTheoLine.ToList();
+
+            return Ok(items);
         }
 
-        // GET: api/LoTheoLines/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<LoTheoLine>> Get(int id)
+        [HttpGet]
+        [Authorize]
+        public IActionResult GetDefaultLos()
         {
-          if (_context.LoTheoLine == null)
-          {
-              return NotFound();
-          }
-            var loTheoLine = Vm.VmLoTheoLine.Find(id);
-
-            if (loTheoLine == null)
-            {
-                return NotFound();
-            }
-
-            return loTheoLine;
+            var items = Vm.VmLoTheoLine.GetDefaultLos();
+            return Ok(items);
+        }
+        [HttpGet("{ngay}")]
+        [Authorize]
+        public IActionResult GetLosWithDate(string ngay)
+        {
+            DateTime date = DateTime.ParseExact(ngay, "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture);
+            var items = Vm.VmLoTheoLine.GetLosWithDate(date);
+            return Ok(items);
         }
 
-        // PUT: api/LoTheoLines/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Put(int id, LoTheoLine loTheoLine)
-        {
-            if (id != loTheoLine.Id)
-            {
-                return BadRequest();
-            }
 
-            if (!Vm.VmLoTheoLine.Exists(loTheoLine))
-            {
-                return NotFound();
-            }
-            Vm.VmLoTheoLine.Update_Command.Execute(loTheoLine);
-            return NoContent();
+        [HttpGet("{ngay}/{maLo}")]
+        [Authorize]
+        public IActionResult GetAllsFullField(string ngay, string maLo)
+        {
+            DateTime date = DateTime.ParseExact(ngay, "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture);
+            var items = Vm.VmLoTheoLine.GetsFullField<object>(date, maLo);
+            return Ok(items);
+        }
+        [HttpGet("{ngay}/{maLo}")]
+        [Authorize]
+        public IActionResult GetsFullFieldLastNew(string ngay, string maLo)
+        {
+            DateTime date = DateTime.ParseExact(ngay, "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture);
+            var items = Vm.VmLoTheoLine.GetsFullFieldLastNew<object>(date, maLo);
+            return Ok(items);
         }
 
-        // POST: api/LoTheoLines
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<LoTheoLine>> Post(LoTheoLine loTheoLine)
+        [Authorize]
+        public async Task<IActionResult> Insert(Tuple<string> dataT)
         {
-          if (_context.LoTheoLine == null)
-          {
-              return Problem("Entity set 'dbPMScontext.LoTheoLine'  is null.");
-          }
-            if (Vm.VmLoTheoLine.Exists(loTheoLine))
+            var model = JsonSerializer.Deserialize<LoTheoLine>(dataT.Item1);
+            if (!ModelState.IsValid)
             {
-                return Conflict();
-            }
-            Vm.VmLoTheoLine.Insert_Command.Execute(loTheoLine);
+                var errors = ModelState.Values.SelectMany(v => v.Errors)
+                                              .Select(e => e.ErrorMessage)
+                                              .ToList();
 
-            return CreatedAtAction("GetLoTheoLine", new { id = loTheoLine.Id }, loTheoLine);
+                return BadRequest(new ApiResponse
+                {
+                    Success = false,
+                    Message = "Dữ liệu không hợp lệ.",
+                    Errors = errors
+                });
+            }
+            if (_context.LoTheoLine.Any(x => x.Id == model.Id))
+            {
+                return BadRequest(new ApiResponse
+                {
+                    Success = false,
+                    Message = "Mã này đã tồn tại.",
+                });
+            }
+            var newItem = new LoTheoLine
+            {
+                Id = model.Id,
+                MaLine = model.MaLine,
+                MaLo = model.MaLo,
+                Ngay = model.Ngay,
+                Gio = model.Gio,
+                CodeId = model.CodeId
+            };
+            
+            _context.LoTheoLine.Add(newItem);
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new ApiResponse
+                {
+                    Success = false,
+                    Message = "Đã xảy ra lỗi khi lưu dữ liệu." + ex.Message.ToString(),
+                    Errors = new List<string> { ex.Message.ToString() }
+                });
+            }
+            return Ok(new ApiResponse
+            {
+                Success = true,
+                Message = "Thêm thành công!"
+            });
         }
 
-        // DELETE: api/LoTheoLines/5
-        [HttpDelete("{id}")]
+        [HttpPost("{id}")]
+        [Authorize]
         public async Task<IActionResult> Delete(int id)
         {
-            if (_context.LoTheoLine == null)
+            if (id == null || id <= 0)
             {
-                return NotFound();
+                return BadRequest(new ApiResponse
+                {
+                    Success = false,
+                    Message = "Bạn chưa chọn thông tin!."
+                });
             }
-            var loTheoLine = Vm.VmLoTheoLine.Find(id);
-            if (loTheoLine == null)
+            var item = await _context.LoTheoLine.Where(x => x.Id == id).FirstAsync();
+            if (item == null)
             {
-                return NotFound();
+                return NotFound(new ApiResponse
+                {
+                    Success = false,
+                    Message = "Không tồn tại."
+                });
+            }
+            _context.LoTheoLine.Remove(item);
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                // Xử lý lỗi nếu có
+                return BadRequest(new ApiResponse
+                {
+                    Success = false,
+                    Message = "Đã xảy ra lỗi khi xóa.",
+                    Errors = new List<string> { ex.Message }
+                });
             }
 
-            Vm.VmLoTheoLine.Delete_Command.Execute(loTheoLine);
-
-            return NoContent();
-        }
-
-        private bool LoTheoLineExists(int id)
-        {
-            return (_context.LoTheoLine?.Any(e => e.Id == id)).GetValueOrDefault();
+            return Ok(new ApiResponse
+            {
+                Success = true,
+                Message = "Đã xoá!"
+            });
         }
     }
 }

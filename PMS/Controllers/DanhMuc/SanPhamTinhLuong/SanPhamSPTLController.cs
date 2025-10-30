@@ -22,6 +22,10 @@ using Models.Repos;
 using System;
 using Microsoft.AspNetCore.Authorization;
 using PMS.Attrs;
+using SkiaSharp;
+using Syncfusion.XlsIO;
+using ClosedXML.Excel;
+using DocumentFormat.OpenXml.Spreadsheet;
 
 namespace PMS.Controllers.DanhMuc.SanPhamTinhLuong
 {
@@ -250,6 +254,67 @@ namespace PMS.Controllers.DanhMuc.SanPhamTinhLuong
                     isSuccess = false,
                     Messages = "Đã xảy ra lỗi: " + ex.Message
                 });
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ImportExcel(IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+            {
+                return Json(new { isSuccess = false, Messages = "Vui lòng chọn file Excel hợp lệ!" });
+            }
+
+            try
+            {
+                using (var stream = new MemoryStream())
+                {
+                    await file.CopyToAsync(stream);
+                    using (var workbook = new XLWorkbook(stream))
+                    {
+                        var worksheet = workbook.Worksheet(1);
+                        var lastRow = worksheet.LastRowUsed().RowNumber();
+                        int successCount = 0;
+                        int failCount = 0;
+                        List<string> errorMessages = new List<string>();
+
+                        for (int row = 2; row <= lastRow; row++)
+                        {
+                            var ma = worksheet.Cell(row, 1).GetValue<string>()?.Trim();
+                            var ten = worksheet.Cell(row, 2).GetValue<string>()?.Trim();
+                            var ghiChu = worksheet.Cell(row, 3).GetValue<string>()?.Trim();
+
+                            if (!string.IsNullOrEmpty(ma) && !string.IsNullOrEmpty(ten))
+                            {
+                                var jsonResult = await DoInsert(ma, ten, ghiChu) as JsonResult;
+                                dynamic resultObject = jsonResult?.Value;
+
+                                if (resultObject != null && resultObject.isSuccess == true)
+                                {
+                                    successCount++;
+                                }
+                                else
+                                {
+                                    failCount++;
+                                    errorMessages.Add($"Dòng {row}: {resultObject?.Messages}");
+                                }
+                            }
+                        }
+
+                        return Json(new
+                        {
+                            isSuccess = true,
+                            Messages = $"Import hoàn tất",
+                            successCount = successCount,
+                            failCount = failCount,
+                            Errors = errorMessages
+                        });
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new { isSuccess = false, Messages = $"Lỗi khi import: {ex.Message}" });
             }
         }
     }

@@ -60,6 +60,28 @@ namespace WebAPI.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, "Lỗi server: " + ex.Message);
             }
         }
+
+        [HttpGet("{fromDate},{toDate},{xuongId}")]
+        public async Task<ActionResult<IEnumerable<object>>> GetChiTietPhieuCanChuaSuas(DateTime fromDate, DateTime toDate, string xuongId)
+        {
+            try
+            {
+                var items = Vm.VmPhieuCanBTPDinhHinh.GetChiTietPhieuCanChuaSuas<object>(fromDate, toDate, xuongId);
+
+                if (items == null)
+                {
+                    return NotFound("Không có dữ liệu phù hợp.");
+                }
+
+                return Ok(items);
+            }
+            catch (Exception ex)
+            {
+                // Xử lý các ngoại lệ và ghi log nếu cần
+                return StatusCode(StatusCodes.Status500InternalServerError, "Lỗi server: " + ex.Message);
+            }
+        }
+
         [HttpGet("{fromDate},{toDate},{xuongId}")]
         public async Task<ActionResult<IEnumerable<object>>> GetTongHopNhanViens(DateTime fromDate, DateTime toDate, string xuongId)
         {
@@ -91,7 +113,17 @@ namespace WebAPI.Controllers
             return items;
         }
         [HttpGet("{fromDate},{toDate},{xuongId}")]
-        public async Task<ActionResult<IEnumerable<object>>> GetTongHopThanhPhamsDB(DateTime fromDate, DateTime toDate, string xuongId)
+        public async Task<ActionResult<IEnumerable<object>>> GetTongHopLos(DateTime fromDate, DateTime toDate, string xuongId)
+        {
+            if (_context.PhieuCanBTPDinhHinh == null)
+            {
+                return NotFound();
+            }
+            var items = Vm.VmPhieuCanBTPDinhHinh.GetTongHopLos<object>(fromDate, toDate, xuongId);
+            return items;
+        }
+        [HttpGet("{fromDate},{toDate},{xuongId}")]
+        public async Task<ActionResult<IEnumerable<object>>> GetTongHopThanhPhamsDB_St(DateTime fromDate, DateTime toDate, string xuongId)
         {
             if (_context.PhieuCanBTPDinhHinh == null)
             {
@@ -100,7 +132,16 @@ namespace WebAPI.Controllers
             var items = Vm.VmDashBoard.ItemTongHopThanhPhamBTPDinhHinh.OfType<dynamic>().Where(x => x.MaXuong == xuongId).ToList();// Sử dụng dynamic để cast các object
             return items;
         }
-
+        [HttpGet("{fromDate},{toDate},{xuongId}")]
+        public async Task<ActionResult<IEnumerable<object>>> GetTongHopThanhPhamsDB(DateTime fromDate, DateTime toDate, string xuongId)
+        {
+            if (_context.PhieuCanBTPDinhHinh == null)
+            {
+                return NotFound();
+            }
+            var items = Vm.VmPhieuCanBTPDinhHinh.GetTongHopThanhPhams<object>(fromDate, toDate, xuongId);
+            return items;
+        }
 
 
 
@@ -128,7 +169,7 @@ namespace WebAPI.Controllers
                 });
             }
             // ... kiểm tra mã nhân viên đã tồn tại chưa ...
-            if (_context.PhieuCanBTPDinhHinh.Any(u => u.STT == model.STT && u.Ngay == model.Ngay && u.MaXuong == model.MaXuong))
+            if (_context.PhieuCanBTPDinhHinh.Any(u => u.STT == model.STT && u.Ngay == model.Ngay && u.MaXuong == model.MaXuong && u.MaMayCan == model.MaMayCan))
             {
                 return BadRequest(new ApiResponse
                 {
@@ -159,7 +200,8 @@ namespace WebAPI.Controllers
                 ChiSanLuong = model.ChiSanLuong,
                 TrongLuongTare = model.TrongLuongTare,
                 TrongLuongBu = model.TrongLuongBu,
-                IsOffline = model.IsOffline
+                IsOffline = model.IsOffline,
+                Id = model.Id
             };
             _context.PhieuCanBTPDinhHinh.Add(newItem);
             try
@@ -250,10 +292,10 @@ namespace WebAPI.Controllers
                 item.MaThanhPham,
                 item.MaLo,
                 item.MaNhanVien,
-                item.MaMayLangDa,
+                //item.MaMayLangDa,
                 item.TrongLuong,
                 item.MaXuong,
-                item.CaTra,
+                //item.CaTra,
                 item.GhiChu
             }, options);
 
@@ -264,10 +306,10 @@ namespace WebAPI.Controllers
             item.MaThanhPham = model.MaThanhPham;
             item.MaLo = model.MaLo;
             item.MaNhanVien = model.MaNhanVien;
-            item.MaMayLangDa = model.MaMayLangDa;
+            //item.MaMayLangDa = model.MaMayLangDa;
             item.TrongLuong = model.TrongLuong;
             item.MaXuong = model.MaXuong;
-            item.CaTra = model.CaTra;
+            //item.CaTra = model.CaTra;
             item.GhiChu = item.GhiChu + "," + oldData.ToString() + "," + model.GhiChu;
             try
             {
@@ -373,6 +415,7 @@ namespace WebAPI.Controllers
                 TrongLuongTare = item.TrongLuongTare,
                 TrongLuongBu = item.TrongLuongBu,
                 IsOffline = item.IsOffline,
+                Id = model.Id,
                 GhiChu = item.GhiChu + "," + oldData + "," + model.GhiChu
 
             };

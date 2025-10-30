@@ -27,4 +27,12 @@ public partial class MaThanhPhamChinhXepKhuon
     public string? BravoId { get; set; }
 
     public int _type { get; set; }
+    [Required]
+    [Column(TypeName = "datetime2(7)")]
+    public DateTime MNgay { get; set; } = DateTime.Now;
+    [Column(TypeName = "decimal(18, 2)")]
+    public decimal ThamSoTangTrong { get; set; } = 1M;
+
+    [Column(TypeName = "decimal(18, 2)")] public decimal DinhMucTangTrong { get; set; } = 0M;
+    public bool IsKhongThuc { get; set; }
 }

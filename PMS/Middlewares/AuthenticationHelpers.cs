@@ -27,6 +27,7 @@ using System.Data;
 using System;
 using System.Linq;
 using Models.Repos.A_Model;
+using DocumentFormat.OpenXml.Spreadsheet;
 namespace PMS.Middlewares
 {
     public static class AuthenticationHelpers
@@ -86,28 +87,61 @@ namespace PMS.Middlewares
             }
             return true;
         }
+        //public static List<int> GetRoleIdsFromCookie(HttpContext httpContext)
+        //{
+        //    var userClaims = httpContext.User.Claims;
+        //    var roleClaims = userClaims.Where(c => c.Type == "RoleId").ToList();
+        //    return roleClaims.Select(c => int.Parse(c.Value)).ToList();
+        //}
         public static List<int> GetRoleIdsFromCookie(HttpContext httpContext)
         {
-            var userClaims = httpContext.User.Claims;
-            var roleClaims = userClaims.Where(c => c.Type == "RoleId").ToList();
-            return roleClaims.Select(c => int.Parse(c.Value)).ToList();
+            var userClaims = httpContext.User?.Claims ?? Enumerable.Empty<Claim>();
+
+            var roleIds = userClaims
+                .Where(c => c.Type == "RoleId" && int.TryParse(c.Value, out _))
+                .Select(c => int.Parse(c.Value))
+                .ToList();
+
+            if (roleIds.Count == 0)
+            {
+                // Có thể log lỗi hoặc gán mặc định
+                // Logger.Warn("Không tìm thấy RoleId trong claims.");
+                // return new List<int> { 0 }; // Nếu bạn muốn tránh API lỗi
+            }
+
+            return roleIds;
         }
         public static async Task<List<RolePermistion>> GetRolePermistionsAsync(HttpContext httpContext, List<int> roleIds)
         {
-            // Chuyển danh sách roleIds thành một chuỗi query parameters
             var roleIdsQueryParam = string.Join("&", roleIds.Select(id => $"roleIds={id}"));
-
-            // Tạo URL API với các query parameters
             var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/RolePermistion/GetRolePermistions?{roleIdsQueryParam}";
 
             using var helper = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
 
-            // Gọi API sử dụng helper
-            var rolePermistions = await helper.GetAsync2<RolePermistion>(httpContext, apiUrl);
+            var rolePermistions = await helper.GetAsync2<RolePermistion>(httpContext, apiUrl)
+                                   ?? new List<RolePermistion>(); // <- Thêm dòng này
+
             string jsonString = JsonConvert.SerializeObject(rolePermistions);
-            httpContext.Session.SetString("ListRolePermistionByRoleId", jsonString.ToString());
+            httpContext.Session.SetString("ListRolePermistionByRoleId", jsonString);
+
             return rolePermistions;
         }
+        //public static async Task<List<RolePermistion>> GetRolePermistionsAsync(HttpContext httpContext, List<int> roleIds)
+        //{
+        //    // Chuyển danh sách roleIds thành một chuỗi query parameters
+        //    var roleIdsQueryParam = string.Join("&", roleIds.Select(id => $"roleIds={id}"));
+
+        //    // Tạo URL API với các query parameters
+        //    var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/RolePermistion/GetRolePermistions?{roleIdsQueryParam}";
+
+        //    using var helper = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+
+        //    // Gọi API sử dụng helper
+        //    var rolePermistions = await helper.GetAsync2<RolePermistion>(httpContext, apiUrl);
+        //    string jsonString = JsonConvert.SerializeObject(rolePermistions);
+        //    httpContext.Session.SetString("ListRolePermistionByRoleId", jsonString.ToString());
+        //    return rolePermistions;
+        //}
         public static async Task<IEnumerable<KhuVuc>> GetKhuVucs(HttpContext httpContext)
         {
             IEnumerable<KhuVuc> dataSource = null;

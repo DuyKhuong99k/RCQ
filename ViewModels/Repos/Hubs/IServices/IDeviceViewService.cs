@@ -15,6 +15,7 @@ namespace ViewModels.Repos.Hubs.IServices
         public ObservableRangeCollection<MayCan> Items { get; set; }
         
         public List<MayCan> SelectedItems { get; set; }
+        public XiNghiep? XiNghiep { get; set; }
         public void Load(int userId);
         public void Clear();
         public event EventHandler? DevicesChanged;

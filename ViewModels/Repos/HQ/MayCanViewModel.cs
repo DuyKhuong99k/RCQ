@@ -46,6 +46,7 @@ namespace ViewModels.Repos.HQ
                 throw;
             }
         }
+        
         public static MayCanViewModel Instance => instance ??= new MayCanViewModel();
         private AppViewModel VmApp => AppViewModel.Instance;
         private MessageViewModel VmMessage => MessageViewModel.Instance;

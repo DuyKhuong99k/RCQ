@@ -51,6 +51,18 @@ namespace ViewModels.Repos.HQ
         private AppViewModel VmApp => AppViewModel.Instance;
         private MessageViewModel VmMessage => MessageViewModel.Instance;
 
+        public List<T> GetsFullField<T>(DateTime ngay, string maLine, string maViTri)
+        {
+            var dao = new Dao.Repos.HQ.NhanVienTheoLine();
+            return dao.GetNhanVienTheoLineViTri<T>(ngay, maLine, maViTri);
+        }
+        public List<T> GetsFullFieldLastNew<T>(DateTime ngay, string maLine, string maViTri)
+        {
+            var dao = new Dao.Repos.HQ.NhanVienTheoLine();
+            return dao.GetNhanVienTheoLineViTriMoiNhat<T>(ngay, maLine, maViTri);
+        }
+
+
         public NhanVienTheoLine CopyItem(NhanVienTheoLine item)
         {
             return new NhanVienTheoLine

@@ -38,7 +38,7 @@ namespace ViewModels.Repos.HQ
             {
                 throw ex;
             }
-            return db.HqNhanVienDs.Where(x=>x.MNgay > date).OrderByDescending(x=>x.MNgay).Skip((PageIndex -1)*PageSize).Take(PageSize).ToList();
+            return db.HqNhanVienDs.Where(x=>x.MNgay.Date >= date.Date).OrderByDescending(x=>x.MNgay).Skip((PageIndex -1)*PageSize).Take(PageSize).ToList();
         }
 
         public List<HQ_NhanVien_U> GetUs(string Ngay,int PageIndex,int PageSize)
@@ -53,7 +53,22 @@ namespace ViewModels.Repos.HQ
             {
                 throw ex;
             }
-            return db.HqNhanVienUs.Where(x=>x.MNgay > date).OrderByDescending(x=>x.MNgay).Skip((PageIndex -1)*PageSize).Take(PageSize).ToList();
+            var latestDates = db.HqNhanVienUs
+                .Where(x => x.MNgay.Date >= date.Date)
+                .GroupBy(x => x.MaNhanVien)
+                .Select(g => new { MaNhanVien = g.Key, MaxId = g.Max(x => x.Id) });
+
+            var query = from hq in db.HqNhanVienUs.Where(x => x.MNgay.Date >= date.Date) 
+                join latest in latestDates
+                    on new { hq.MaNhanVien, hq.Id } 
+                    equals new { latest.MaNhanVien, Id = latest.MaxId }
+                orderby hq.MNgay descending
+                select hq;
+
+            var result = query.Skip((PageIndex - 1) * PageSize)
+                .Take(PageSize)
+                .ToList();
+            return result;
         }
     }
 }
