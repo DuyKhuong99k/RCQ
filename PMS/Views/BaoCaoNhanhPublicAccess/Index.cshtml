@@ -1,0 +1,2543 @@
+﻿@using Syncfusion.EJ2
+@{
+    Layout = null;
+    var listKhau = ViewBag.listKhau;
+    var listXuong = ViewBag.listXuong;
+    //var XuongId = @Context.Session.GetString("XuongId");
+}
+<!DOCTYPE html>
+
+<html lang="en"
+      class="light-style customizer-hide"
+      dir="ltr"
+      data-theme="theme-default"
+      data-assets-path="../assets/"
+      data-template="vertical-menu-template-free">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
+
+    <title>PMSoft | Báo Cáo Nhanh</title>
+
+    <meta name="description" content="" />
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="~/assets/img/favicon/PMS.ico">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap"
+          rel="stylesheet" />
+
+    <!-- Icons. Uncomment required icon fonts -->
+    <link rel="stylesheet" href="../assets/vendor/fonts/boxicons.css" />
+
+    <!-- Core CSS -->
+    <link rel="stylesheet" href="../assets/vendor/css/core.css" class="template-customizer-core-css" />
+    <link rel="stylesheet" href="../assets/vendor/css/theme-default.css" class="template-customizer-theme-css" />
+    <link rel="stylesheet" href="../assets/css/demo.css" />
+
+    <!-- Vendors CSS -->
+    <link rel="stylesheet" href="../assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
+
+    <!-- Page CSS -->
+    <!-- Page -->
+    <link rel="stylesheet" href="../assets/vendor/css/pages/page-auth.css" />
+    <!-- Helpers -->
+    <script src="../assets/vendor/js/helpers.js"></script>
+
+    <!--! Template customizer & Theme config files MUST be included after core stylesheets and helpers.js in the <head> section -->
+    <!--? Config:  Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file.  -->
+    <script src="../assets/js/config.js"></script>
+    <link rel="stylesheet" href="https://cdn.syncfusion.com/ej2/25.1.41/fluent.css" />
+    <script src="https://cdn.syncfusion.com/ej2/25.1.41/dist/ej2.min.js"></script>
+    <script>
+        ej.base.registerLicense('Ngo9BigBOggjHTQxAR8/V1NBaF5cXmZCf1FpRmJGdld5fUVHYVZUTXxaS00DNHVRdkdnWXlfeXRTRWBcUUB1WEY=');
+        // document.onkeydown = function (event) {
+        //     if (event.keyCode == 123) { // 123 là mã phím cho F12
+        //         return false;
+        //     }
+        // }
+    </script>
+    <style>
+        /* CSS để làm cho option bị vô hiệu hóa mờ đi */
+        option:disabled {
+            background-color: #eceef1; /* Màu mờ */
+        }
+
+
+        .weight-container {
+            display: flex; /* Sử dụng Flexbox để bố trí */
+            align-items: center; /* Căn giữa theo chiều dọc */
+            justify-content: center; /* Căn giữa theo chiều ngang */
+        }
+
+        .weight-display {
+            font-size: 24px; /* Kích thước chữ lớn hơn */
+            font-weight: bold; /* Đậm */
+            color: #4CAF50; /* Màu sắc đẹp */
+            background-color: #f0f0f0; /* Nền nhẹ */
+            padding: 10px; /* Khoảng cách xung quanh chữ */
+            border-radius: 5px; /* Bo tròn các góc */
+            margin-left: 10px; /* Khoảng cách giữa h3 và p */
+        }
+
+    </style>
+</head>
+
+<body>
+    <div class="content-wrapper">
+        <!-- Content -->
+        <div class="container-fluid">
+            <div class="container-fluid mt-4">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header d-flex align-items-center">
+                                <div class="row">
+                                    <div class="col-sm-8 mb-2">
+                                        <h2 class="mb-0">Báo Cáo Nhanh - Thành Phẩm Nhân Viên</h2>
+                                    </div>
+                                    <div class="col-sm-4 mb-2">
+                                        <div class="input-group ">
+                                            <label class="input-group-text" for="khauBCN" style="display: flex; align-items: center; padding: 5px 10px;">Xưởng<p style="color: red; margin: 0 0 0 5px; font-size: 1.2em;">*</p></label>
+                                            <select class="form-select" id="XuongBCN">
+                                                <option selected>Chọn...</option>
+                                                @foreach (var item in listXuong)
+                                                {
+                                                    <option value="@item.Ma">@item.Ten</option>
+                                                }
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-sm-2 mb-2" hidden>
+                                        <div class="input-group">
+                                            <span class="input-group-text" id="fromDateBCNSpan">Từ</span>
+                                            <input type="date"
+                                                   class="form-control"
+                                                   aria-describedby="fromDateBCNSpan" id="fromDateBCN" disabled />
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-2 mb-2">
+                                        <div class="input-group">
+                                            <span class="input-group-text" id="toDateBCNSpan" style="display: flex; align-items: center; padding: 5px 10px;">
+                                                Ngày
+                                                <p style="color: red; margin: 0 0 0 5px; font-size: 1.2em;">*</p>
+                                            </span>
+                                            <input type="date"
+                                                   class="form-control"
+                                                   aria-describedby="toDateBCNSpan" id="toDateBCN" />
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-3 mb-2">
+                                        <div class="input-group ">
+                                            <label class="input-group-text" for="khauBCN" style="display: flex; align-items: center; padding: 5px 10px;">Khâu<p style="color: red; margin: 0 0 0 5px; font-size: 1.2em;">*</p></label>
+                                            <select class="form-select" id="khauBCN">
+                                                <option selected>Chọn...</option>
+                                                @foreach (var item in listKhau)
+                                                {
+                                                    <option value="@item.TableName">@item.NameView</option>
+                                                }
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-7 mb-2">
+                                        <div class="input-group">
+                                            <input type="text" class="form-control" id="inputTimKiem" placeholder="Nhập từ khóa..." />
+                                            <select class="form-select" id="loaiTimKiem">
+                                                <option value="" selected>Tìm kiếm theo...</option>
+                                                <option value="0">Mã Nhân Viên</option>
+                                                <option value="1">Mã Hồ Sơ</option>
+                                                <option value="2">Mã Thẻ</option>
+                                            </select>
+                                            <button onclick="taiBaoCao()" id="taiBaoCaoBtn" type="button" class="btn btn-primary">Tải Báo Cáo</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row" id="khauContent">
+                                    <div class="row" id="PhieuCanPhuPhamv2" hidden>
+                                        <div class="col-sm-7 mb-2">
+                                            <div id="Grid-PhieuCanPhuPhamv2"></div>
+                                        </div>
+                                        <div class="col-sm-5 mb-2">
+                                            <div class="control-section">
+                                                <div id="column-container-PhieuCanPhuPhamv2" align="center"></div>
+                                                <div class="weight-container">
+                                                    <h3>Tổng trọng lượng:</h3>
+                                                    <p class="weight-display">0 kg</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row" id="PhieuCanBTPFilletv2" hidden>
+                                        <div class="col-sm-7 mb-2">
+                                            <div id="Grid-PhieuCanBTPFilletv2"></div>
+                                        </div>
+                                        <div class="col-sm-5 mb-2">
+                                            <div class="control-section">
+                                                <div id="column-container-PhieuCanBTPFilletv2" align="center"></div>
+                                                <div class="weight-container">
+                                                    <h3>Tổng trọng lượng:</h3>
+                                                    <p class="weight-display">0 kg</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row" id="PhieuCanLangDa" hidden>
+                                        <div class="col-sm-7 mb-2">
+                                            <div id="Grid-PhieuCanLangDa"></div>
+                                        </div>
+                                        <div class="col-sm-5 mb-2">
+                                            <div class="control-section">
+                                                <div id="column-container-PhieuCanLangDa" align="center"></div>
+                                                <div class="weight-container">
+                                                    <h3>Tổng trọng lượng:</h3>
+                                                    <p class="weight-display">0 kg</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row" id="PhieuCanTPFillet" hidden>
+                                        <div class="col-sm-7 mb-2">
+                                            <div id="Grid-PhieuCanTPFillet"></div>
+                                        </div>
+                                        <div class="col-sm-5 mb-2">
+                                            <div class="control-section">
+                                                <div id="column-container-PhieuCanTPFillet" align="center"></div>
+                                                <div class="weight-container">
+                                                    <h3>Tổng trọng lượng:</h3>
+                                                    <p class="weight-display">0 kg</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row" id="PhieuCanTPFilletv2" hidden>
+                                        <div class="col-sm-7 mb-2">
+                                            <div id="Grid-PhieuCanTPFilletv2"></div>
+                                        </div>
+                                        <div class="col-sm-5 mb-2">
+                                            <div class="control-section">
+                                                <div id="column-container-PhieuCanTPFilletv2" align="center"></div>
+                                                <div class="weight-container">
+                                                    <h3>Tổng trọng lượng:</h3>
+                                                    <p class="weight-display">0 kg</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row" id="PhieuCanSoCheDinhHinh" hidden>
+                                        <div class="col-sm-7 mb-2">
+                                            <div id="Grid-PhieuCanSoCheDinhHinh"></div>
+                                        </div>
+                                        <div class="col-sm-5 mb-2">
+                                            <div class="control-section">
+                                                <div id="column-container-PhieuCanSoCheDinhHinh" align="center"></div>
+                                                <div class="weight-container">
+                                                    <h3>Tổng trọng lượng:</h3>
+                                                    <p class="weight-display">0 kg</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row" id="PhieuCanBTPDinhHinh" hidden>
+                                        <div class="col-sm-7 mb-2">
+                                            <div id="Grid-PhieuCanBTPDinhHinh"></div>
+                                        </div>
+                                        <div class="col-sm-5 mb-2">
+                                            <div class="control-section">
+                                                <div id="column-container-PhieuCanBTPDinhHinh" align="center"></div>
+                                                <div class="weight-container">
+                                                    <h3>Tổng trọng lượng:</h3>
+                                                    <p class="weight-display">0 kg</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row" id="PhieuCanTPDinhHinh" hidden>
+                                        <div class="col-sm-7 mb-2">
+                                            <div id="Grid-PhieuCanTPDinhHinh"></div>
+                                        </div>
+                                        <div class="col-sm-5 mb-2">
+                                            <div class="control-section">
+                                                <div id="column-container-PhieuCanTPDinhHinh" align="center"></div>
+                                                <div class="weight-container">
+                                                    <h3>Tổng trọng lượng:</h3>
+                                                    <p class="weight-display">0 kg</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row" id="PhieuCanChinhXepKhuon" hidden>
+                                        <div class="col-sm-7 mb-2">
+                                            <div id="Grid-PhieuCanChinhXepKhuon"></div>
+                                        </div>
+                                        <div class="col-sm-5 mb-2">
+                                            <div class="control-section">
+                                                <div id="column-container-PhieuCanChinhXepKhuon" align="center"></div>
+                                                <div class="weight-container">
+                                                    <h3>Tổng trọng lượng:</h3>
+                                                    <p class="weight-display">0 kg</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row" id="PhieuCanPhuXepKhuon" hidden>
+                                        <div class="col-sm-7 mb-2">
+                                            <div id="Grid-PhieuCanPhuXepKhuon"></div>
+                                        </div>
+                                        <div class="col-sm-5 mb-2">
+                                            <div class="control-section">
+                                                <div id="column-container-PhieuCanPhuXepKhuon" align="center"></div>
+                                                <div class="weight-container">
+                                                    <h3>Tổng trọng lượng:</h3>
+                                                    <p class="weight-display">0 kg</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row" id="PhieuCanXepKhuonBlock" hidden>
+                                        <div class="col-sm-7 mb-2">
+                                            <div id="Grid-PhieuCanXepKhuonBlock"></div>
+                                        </div>
+                                        <div class="col-sm-5 mb-2">
+                                            <div class="control-section">
+                                                <div id="column-container-PhieuCanXepKhuonBlock" align="center"></div>
+                                                <div class="weight-container">
+                                                    <h3>Tổng trọng lượng:</h3>
+                                                    <p class="weight-display">0 kg</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row" id="PhieuCanXepKhuonKHC" hidden>
+                                        <div class="col-sm-7 mb-2">
+                                            <div id="Grid-PhieuCanXepKhuonKHC"></div>
+                                        </div>
+                                        <div class="col-sm-5 mb-2">
+                                            <div class="control-section">
+                                                <div id="column-container-PhieuCanXepKhuonKHC" align="center"></div>
+                                                <div class="weight-container">
+                                                    <h3>Tổng trọng lượng:</h3>
+                                                    <p class="weight-display">0 kg</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row" id="PhieuCanTaiChe" hidden>
+                                        <div class="col-sm-7 mb-2">
+                                            <div id="Grid-PhieuCanTaiChe"></div>
+                                        </div>
+                                        <div class="col-sm-5 mb-2">
+                                            <div class="control-section">
+                                                <div id="column-container-PhieuCanTaiChe" align="center"></div>
+                                                <div class="weight-container">
+                                                    <h3>Tổng trọng lượng:</h3>
+                                                    <p class="weight-display">0 kg</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row" id="BT_PhieuCan" hidden>
+                                        <div class="col-sm-7 mb-2">
+                                            <div id="Grid-BT_PhieuCan"></div>
+                                        </div>
+                                        <div class="col-sm-5 mb-2">
+                                            <div class="control-section">
+                                                <div id="column-container-BT_PhieuCan" align="center"></div>
+                                                <div class="weight-container">
+                                                    <h3>Tổng trọng lượng:</h3>
+                                                    <p class="weight-display">0 kg</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Core JS -->
+    <!-- build:js assets/vendor/js/core.js -->
+    <script src="../assets/vendor/libs/jquery/jquery.js"></script>
+    <script src="../assets/vendor/libs/popper/popper.js"></script>
+    <script src="../assets/vendor/js/bootstrap.js"></script>
+    <script src="../assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
+
+    <script src="../assets/vendor/js/menu.js"></script>
+    <!-- endbuild -->
+    <!-- Vendors JS -->
+    <!-- Main JS -->
+    <script src="../assets/js/main.js"></script>
+
+    <!-- Page JS -->
+    <!-- Place this tag in your head or just before your close body tag. -->
+    @* <script async defer src="https://buttons.github.io/buttons.js"></script> *@
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" rel="stylesheet" />
+    <script src="~/js/toastoptionnotyfi.js"></script>
+    <script>
+    $(document).ready(function () {
+        var today = new Date();
+
+        // Định dạng ngày thành yyyy-MM-dd (định dạng của trường input date)
+        var formattedDate = today.toISOString().substr(0, 10);
+        // Gán giá trị vào trường input
+        document.getElementById("toDateBCN").value = formattedDate;
+        document.getElementById("fromDateBCN").value = formattedDate;
+
+
+    });
+</script>
+    <script>
+        var currentViewChartData;
+    var grid_PhieuCanPhuPhamv2;
+    function loadGridData_PhieuCanPhuPhamv2(data) {
+        var dataManager = new ej.data.DataManager({
+            json: data,
+            adaptor: new ej.data.JsonAdaptor()
+        });
+        if (grid_PhieuCanPhuPhamv2 && data != null && data != "") {
+            grid_PhieuCanPhuPhamv2.dataSource = dataManager;
+            grid_PhieuCanPhuPhamv2.refresh();
+        } else {
+            if (grid_PhieuCanPhuPhamv2) {
+                grid_PhieuCanPhuPhamv2.destroy();
+                document.getElementById('Grid-PhieuCanPhuPhamv2').innerHTML = '';
+            }
+            grid_PhieuCanPhuPhamv2 = new ej.grids.Grid({
+                dataSource: dataManager,
+                allowPaging: true,
+                pageSettings: { pageSize: 50 },
+                allowFiltering: true,
+                allowSorting: true,
+                filterSettings: { type: 'Excel' },
+                selectionSettings: { persistSelection: true },
+                allowResizing: true,
+                height: 400,
+                columns: [
+                    { field: 'MaNhanVien', headerText: 'Mã Nhân Viên', width: 150 },
+                    { field: 'MaHoSo', headerText: 'Mã Hồ Sơ', width: 150 },
+                    { field: 'NhanVienName', headerText: 'Tên Nhân Viên', width: 150 },
+                    { field: 'ThanhPhamName', headerText: 'Thành Phẩm', width: 150 },
+                    { field: 'TrongLuong', headerText: 'Trọng Lượng', type: 'number', width: 150 },
+                    { field: 'SoRo', headerText: 'Số Rổ', type: 'number', width: 150 },
+                ],
+                aggregates: [{
+                    columns: [
+                        {
+                            type: 'Sum',
+                            field: 'TrongLuong',
+                            footerTemplate: 'Tổng Trọng Lượng: ${Sum} Kg'
+                        },
+                        {
+                            type: 'Sum',
+                            field: 'SoRo',
+                            footerTemplate: 'Tổng Số Rổ: ${Sum}'
+                        }
+                    ]
+                }]
+            });
+            grid_PhieuCanPhuPhamv2.appendTo('#Grid-PhieuCanPhuPhamv2');
+        }
+    }
+
+    var chart_PhieuCanPhuPhamv2;
+    function loadChart_PhieuCanPhuPhamv2(data) {
+        var dataManager = new ej.data.DataManager({
+            json: data,
+            adaptor: new ej.data.JsonAdaptor()
+        });
+        var maxYValue = 100;
+        if (data && Array.isArray(data) && data.length > 0) {
+            // Tìm giá trị lớn nhất của y trong dữ liệu (double)
+            maxYValue = Math.max(...data.map(item => item.y));
+        }
+        var dynamicMaximum = Math.ceil(maxYValue);
+
+        if (chart_PhieuCanPhuPhamv2 && data && data.length > 0) {
+            chart_PhieuCanPhuPhamv2.dataSource = dataManager;
+            chart_PhieuCanPhuPhamv2.primaryYAxis.maximum = dynamicMaximum; // Cập nhật giá trị maximum
+            chart_PhieuCanPhuPhamv2.primaryYAxis.interval = dynamicMaximum > 0 ? Math.round(dynamicMaximum / 3) : 1; // Cập nhật interval
+            chart_PhieuCanPhuPhamv2.refresh();
+        } else {
+            if (chart_PhieuCanPhuPhamv2) {
+                chart_PhieuCanPhuPhamv2.destroy();
+                document.getElementById('column-container-PhieuCanPhuPhamv2').innerHTML = '';
+            }
+            chart_PhieuCanPhuPhamv2 = new ej.charts.Chart({
+                primaryXAxis: {
+                    valueType: 'Category', interval: 1, majorGridLines: { width: 0 }, majorTickLines: { width: 0 },
+                    labelIntersectAction: 'None', labelRotation: 270, minorTickLines: { width: 0 },
+                    labelStyle: {
+                        fontWeight: 'bold',  // Đặt chữ in đậm
+                        size: '14px',        // Tăng kích thước chữ
+                        color: '#333333'     // Đặt màu sắc chữ dễ nhìn (màu tối hơn)
+                    }
+                },
+                chartArea: { border: { width: 0 } },
+                primaryYAxis: {
+                    title: 'Trọng Lượng',
+                    majorTickLines: { width: 0 }, lineStyle: { width: 0 },
+                    maximum: dynamicMaximum,
+                    interval: dynamicMaximum > 0 ? Math.round(dynamicMaximum / 3) : 1
+                },
+                series: [
+                    {
+                        type: 'Column', xName: 'x', width: 2, yName: 'y', name: "Trọng Lượng",// name: (dataManager != "" || dataManager != null) ? data[0].x : "Thành Phẩm",
+                        columnSpacing: 0.1,
+                        dataSource: data,
+                        marker: {
+                            dataLabel:
+                            {
+                                visible: true,
+                                font: {
+                                    fontWeight: '600',
+                                    color: '#000000'
+                                }
+
+                            }
+                        }
+                    }
+                ],
+                title: 'Biểu Đồ Năng Suất',
+                width: ej.base.Browser.isDevice ? '100%' : '75%',
+                tooltip: { enable: true },
+
+            });
+            chart_PhieuCanPhuPhamv2.appendTo('#column-container-PhieuCanPhuPhamv2');
+        }
+    }
+
+    var grid_PhieuCanBTPFilletv2;
+    function loadGridData_PhieuCanBTPFilletv2(data) {
+        var dataManager = new ej.data.DataManager({
+            json: data,
+            adaptor: new ej.data.JsonAdaptor()
+        });
+        if (grid_PhieuCanBTPFilletv2 && data != null && data != "") {
+            grid_PhieuCanBTPFilletv2.dataSource = dataManager;
+            grid_PhieuCanBTPFilletv2.refresh();
+        } else {
+            if (grid_PhieuCanBTPFilletv2) {
+                grid_PhieuCanBTPFilletv2.destroy();
+                document.getElementById('Grid-PhieuCanBTPFilletv2').innerHTML = '';
+            }
+            grid_PhieuCanBTPFilletv2 = new ej.grids.Grid({
+                dataSource: dataManager,
+                allowPaging: true,
+                pageSettings: { pageSize: 50 },
+                allowFiltering: true,
+                allowSorting: true,
+                filterSettings: { type: 'Excel' },
+                selectionSettings: { persistSelection: true },
+                allowResizing: true,
+                height: 400,
+                columns: [
+                    { field: 'MaNhanVien', headerText: 'Mã Nhân Viên', width: 150 },
+                    { field: 'MaHoSo', headerText: 'Mã Hồ Sơ', width: 150 },
+                    { field: 'NhanVienName', headerText: 'Tên Nhân Viên', width: 150 },
+                    { field: 'ThanhPhamName', headerText: 'Thành Phẩm', width: 150 },
+                    { field: 'TrongLuong', headerText: 'Trọng Lượng', type: 'number', width: 150 },
+                    { field: 'SoRo', headerText: 'Số Rổ', type: 'number', width: 150 },
+                ],
+                aggregates: [{
+                    columns: [
+                        {
+                            type: 'Sum',
+                            field: 'TrongLuong',
+                            footerTemplate: 'Tổng Trọng Lượng: ${Sum} Kg'
+                        },
+                        {
+                            type: 'Sum',
+                            field: 'SoRo',
+                            footerTemplate: 'Tổng Số Rổ: ${Sum}'
+                        }
+                    ]
+                }]
+            });
+            grid_PhieuCanBTPFilletv2.appendTo('#Grid-PhieuCanBTPFilletv2');
+        }
+    }
+
+    var chart_PhieuCanBTPFilletv2;
+    function loadChart_PhieuCanBTPFilletv2(data) {
+        var dataManager = new ej.data.DataManager({
+            json: data,
+            adaptor: new ej.data.JsonAdaptor()
+        });
+        var maxYValue = 100;
+        if (data && Array.isArray(data) && data.length > 0) {
+            // Tìm giá trị lớn nhất của y trong dữ liệu (double)
+            maxYValue = Math.max(...data.map(item => item.y));
+        }
+        var dynamicMaximum = Math.ceil(maxYValue);
+        if (chart_PhieuCanBTPFilletv2 && data != null && data != "") {
+            chart_PhieuCanBTPFilletv2.dataSource = dataManager;
+            chart_PhieuCanBTPFilletv2.primaryYAxis.maximum = dynamicMaximum; // Cập nhật giá trị maximum
+            chart_PhieuCanBTPFilletv2.primaryYAxis.interval = dynamicMaximum > 0 ? Math.round(dynamicMaximum / 3) : 1; // Cập nhật interval
+            chart_PhieuCanBTPFilletv2.refresh();
+        } else {
+            if (chart_PhieuCanBTPFilletv2) {
+                chart_PhieuCanBTPFilletv2.destroy();
+                document.getElementById('column-container-PhieuCanBTPFilletv2').innerHTML = '';
+            }
+            chart_PhieuCanBTPFilletv2 = new ej.charts.Chart({
+                primaryXAxis: {
+                    valueType: 'Category', interval: 1, majorGridLines: { width: 0 }, majorTickLines: { width: 0 },
+                    labelIntersectAction: 'None', labelRotation: 270, minorTickLines: { width: 0 },
+                    labelStyle: {
+                        fontWeight: 'bold',  // Đặt chữ in đậm
+                        size: '14px',        // Tăng kích thước chữ
+                        color: '#333333'     // Đặt màu sắc chữ dễ nhìn (màu tối hơn)
+                    }
+                },
+                chartArea: { border: { width: 0 } },
+                primaryYAxis: {
+                    title: 'Trọng Lượng',
+                    majorTickLines: { width: 0 }, lineStyle: { width: 0 },
+                    maximum: dynamicMaximum,
+                    interval: dynamicMaximum > 0 ? Math.round(dynamicMaximum / 3) : 1
+                },
+                series: [
+                    {
+                        type: 'Column', xName: 'x', width: 2, yName: 'y', name: "Trọng Lượng",// name: (dataManager != "" || dataManager != null) ? data[0].x : "Thành Phẩm",
+                        columnSpacing: 0.1,
+                        dataSource: data,
+                        marker: {
+                            dataLabel:
+                            {
+                                visible: true,
+                                font: {
+                                    fontWeight: '600',
+                                    color: '#000000'
+                                }
+
+                            }
+                        }
+                    }
+                ],
+                title: 'Biểu Đồ Năng Suất',
+                width: ej.base.Browser.isDevice ? '100%' : '75%',
+                tooltip: { enable: true },
+            });
+            chart_PhieuCanBTPFilletv2.appendTo('#column-container-PhieuCanBTPFilletv2');
+        }
+    }
+
+    var grid_PhieuCanLangDa;
+    function loadGridData_PhieuCanLangDa(data) {
+        var dataManager = new ej.data.DataManager({
+            json: data,
+            adaptor: new ej.data.JsonAdaptor()
+        });
+        if (grid_PhieuCanLangDa && data != null && data != "") {
+            grid_PhieuCanLangDa.dataSource = dataManager;
+            grid_PhieuCanLangDa.refresh();
+        } else {
+            if (grid_PhieuCanLangDa) {
+                grid_PhieuCanLangDa.destroy();
+                document.getElementById('Grid-PhieuCanLangDa').innerHTML = '';
+            }
+            grid_PhieuCanLangDa = new ej.grids.Grid({
+                dataSource: dataManager,
+                allowPaging: true,
+                pageSettings: { pageSize: 50 },
+                allowFiltering: true,
+                allowSorting: true,
+                filterSettings: { type: 'Excel' },
+                selectionSettings: { persistSelection: true },
+                allowResizing: true,
+                height: 400,
+                columns: [
+                    { field: 'MaNhanVien', headerText: 'Mã Nhân Viên', width: 150 },
+                    { field: 'MaHoSo', headerText: 'Mã Hồ Sơ', width: 150 },
+                    { field: 'NhanVienName', headerText: 'Tên Nhân Viên', width: 150 },
+                    { field: 'ThanhPhamName', headerText: 'Thành Phẩm', width: 150 },
+                    { field: 'TrongLuong', headerText: 'Trọng Lượng', type: 'number', width: 150 },
+                    { field: 'SoRo', headerText: 'Số Rổ', type: 'number', width: 150 },
+                ],
+                aggregates: [{
+                    columns: [
+                        {
+                            type: 'Sum',
+                            field: 'TrongLuong',
+                            footerTemplate: 'Tổng Trọng Lượng: ${Sum} Kg'
+                        },
+                        {
+                            type: 'Sum',
+                            field: 'SoRo',
+                            footerTemplate: 'Tổng Số Rổ: ${Sum}'
+                        }
+                    ]
+                }]
+            });
+            grid_PhieuCanLangDa.appendTo('#Grid-PhieuCanLangDa');
+        }
+    }
+
+    var chart_PhieuCanLangDa;
+    function loadChart_PhieuCanLangDa(data) {
+        var dataManager = new ej.data.DataManager({
+            json: data,
+            adaptor: new ej.data.JsonAdaptor()
+        });
+        var maxYValue = 100;
+        if (data && Array.isArray(data) && data.length > 0) {
+            // Tìm giá trị lớn nhất của y trong dữ liệu (double)
+            maxYValue = Math.max(...data.map(item => item.y));
+        }
+        var dynamicMaximum = Math.ceil(maxYValue);
+        if (chart_PhieuCanLangDa && data != null && data != "") {
+            chart_PhieuCanLangDa.dataSource = dataManager;
+            chart_PhieuCanLangDa.primaryYAxis.maximum = dynamicMaximum; // Cập nhật giá trị maximum
+            chart_PhieuCanLangDa.primaryYAxis.interval = dynamicMaximum > 0 ? Math.round(dynamicMaximum / 3) : 1; // Cập nhật interval
+            chart_PhieuCanLangDa.refresh();
+        } else {
+            if (chart_PhieuCanLangDa) {
+                chart_PhieuCanLangDa.destroy();
+                document.getElementById('column-container-PhieuCanLangDa').innerHTML = '';
+            }
+            chart_PhieuCanLangDa = new ej.charts.Chart({
+                primaryXAxis: {
+                    valueType: 'Category', interval: 1, majorGridLines: { width: 0 }, majorTickLines: { width: 0 },
+                    labelIntersectAction: 'None', labelRotation: 270, minorTickLines: { width: 0 },
+                    labelStyle: {
+                        fontWeight: 'bold',  // Đặt chữ in đậm
+                        size: '14px',        // Tăng kích thước chữ
+                        color: '#333333'     // Đặt màu sắc chữ dễ nhìn (màu tối hơn)
+                    }
+                },
+                chartArea: { border: { width: 0 } },
+                primaryYAxis: {
+                    title: 'Trọng Lượng',
+                    majorTickLines: { width: 0 }, lineStyle: { width: 0 },
+                    maximum: dynamicMaximum,
+                    interval: dynamicMaximum > 0 ? Math.round(dynamicMaximum / 3) : 1
+                },
+                series: [
+                    {
+                        type: 'Column', xName: 'x', width: 2, yName: 'y', name: "Trọng Lượng",// name: (dataManager != "" || dataManager != null) ? data[0].x : "Thành Phẩm",
+                        columnSpacing: 0.1,
+                        dataSource: data,
+                        marker: {
+                            dataLabel:
+                            {
+                                visible: true,
+                                font: {
+                                    fontWeight: '600',
+                                    color: '#000000'
+                                }
+
+                            }
+                        }
+                    }
+                ],
+                title: 'Biểu Đồ Năng Suất',
+                width: ej.base.Browser.isDevice ? '100%' : '75%',
+                tooltip: { enable: true },
+            });
+            chart_PhieuCanLangDa.appendTo('#column-container-PhieuCanLangDa');
+        }
+    }
+
+    var grid_PhieuCanTPFillet;
+    function loadGridData_PhieuCanTPFillet(data) {
+        var dataManager = new ej.data.DataManager({
+            json: data,
+            adaptor: new ej.data.JsonAdaptor()
+        });
+        if (grid_PhieuCanTPFillet && data != null && data != "") {
+            grid_PhieuCanTPFillet.dataSource = dataManager;
+            grid_PhieuCanTPFillet.refresh();
+        } else {
+            if (grid_PhieuCanTPFillet) {
+                grid_PhieuCanTPFillet.destroy();
+                document.getElementById('Grid-PhieuCanTPFillet').innerHTML = '';
+            }
+            grid_PhieuCanTPFillet = new ej.grids.Grid({
+                dataSource: dataManager,
+                allowPaging: true,
+                pageSettings: { pageSize: 50 },
+                allowFiltering: true,
+                allowSorting: true,
+                filterSettings: { type: 'Excel' },
+                selectionSettings: { persistSelection: true },
+                allowResizing: true,
+                height: 400,
+                columns: [
+                    { field: 'MaNhanVien', headerText: 'Mã Nhân Viên', width: 150 },
+                    { field: 'MaHoSo', headerText: 'Mã Hồ Sơ', width: 150 },
+                    { field: 'NhanVienName', headerText: 'Tên Nhân Viên', width: 150 },
+                    { field: 'ThanhPhamName', headerText: 'Thành Phẩm', width: 150 },
+                    { field: 'SizeName', headerText: 'Size', width: 150 },
+                    { field: 'MauName', headerText: 'Màu', width: 150 },
+                    { field: 'TrongLuong', headerText: 'Trọng Lượng', type: 'number', width: 150 },
+                    { field: 'SoRo', headerText: 'Số Rổ', type: 'number', width: 150 },
+                ],
+                aggregates: [{
+                    columns: [
+                        {
+                            type: 'Sum',
+                            field: 'TrongLuong',
+                            footerTemplate: 'Tổng Trọng Lượng: ${Sum} Kg'
+                        },
+                        {
+                            type: 'Sum',
+                            field: 'SoRo',
+                            footerTemplate: 'Tổng Số Rổ: ${Sum}'
+                        }
+                    ]
+                }]
+            });
+            grid_PhieuCanTPFillet.appendTo('#Grid-PhieuCanTPFillet');
+        }
+    }
+
+    var chart_PhieuCanTPFillet;
+    function loadChart_PhieuCanTPFillet(data) {
+        var dataManager = new ej.data.DataManager({
+            json: data,
+            adaptor: new ej.data.JsonAdaptor()
+        });
+        if (chart_PhieuCanTPFillet && data != null && data != "") {
+            chart_PhieuCanTPFillet.dataSource = dataManager;
+            chart_PhieuCanTPFillet.refresh();
+        } else {
+            if (chart_PhieuCanTPFillet) {
+                chart_PhieuCanTPFillet.destroy();
+                document.getElementById('column-container-PhieuCanTPFillet').innerHTML = '';
+            }
+            chart_PhieuCanTPFillet = new ej.charts.Chart({
+                primaryXAxis: {
+                    valueType: 'Category', interval: 1, majorGridLines: { width: 0 }, majorTickLines: { width: 0 }, labelIntersectAction: 'None', labelRotation: ej.base.Browser.isDevice ? -45 : 0, minorTickLines: { width: 0 }
+                },
+                chartArea: { border: { width: 0 } },
+                primaryYAxis: {
+                    title: 'Trọng Lượng',
+                    majorTickLines: { width: 0 }, lineStyle: { width: 0 }, maximum: 300, interval: 100,
+                },
+                series: [
+                    {
+                        type: 'Column', xName: 'x', width: 2, yName: 'y', name: 'Thành Phẩm', columnSpacing: 0.1, tooltipMappingName: 'tooltipMappingName',
+                        dataSource: data,
+                    }
+                ],
+                title: 'Biểu Đồ Năng Suất',
+                width: ej.base.Browser.isDevice ? '100%' : '75%',
+                tooltip: { enable: true, header: "<b>${point.tooltip}</b>", shared: true },
+                legendSettings: { enableHighlight: true },
+            });
+            chart_PhieuCanTPFillet.appendTo('#column-container-PhieuCanTPFillet');
+        }
+    }
+
+    var grid_PhieuCanTPFilletv2;
+    function loadGridData_PhieuCanTPFilletv2(data) {
+        var dataManager = new ej.data.DataManager({
+            json: data,
+            adaptor: new ej.data.JsonAdaptor()
+        });
+        if (grid_PhieuCanTPFilletv2 && data != null && data != "") {
+            grid_PhieuCanTPFilletv2.dataSource = dataManager;
+            grid_PhieuCanTPFilletv2.refresh();
+        } else {
+            if (grid_PhieuCanTPFillet) {
+                grid_PhieuCanTPFillet.destroy();
+                document.getElementById('Grid-PhieuCanTPFilletv2').innerHTML = '';
+            }
+            grid_PhieuCanTPFilletv2 = new ej.grids.Grid({
+                dataSource: dataManager,
+                allowPaging: true,
+                pageSettings: { pageSize: 50 },
+                allowFiltering: true,
+                allowSorting: true,
+                filterSettings: { type: 'Excel' },
+                selectionSettings: { persistSelection: true },
+                allowResizing: true,
+                height: 400,
+                columns: [
+                    { field: 'MaNhanVien', headerText: 'Mã Nhân Viên', width: 150 },
+                    { field: 'MaHoSo', headerText: 'Mã Hồ Sơ', width: 150 },
+                    { field: 'NhanVienName', headerText: 'Tên Nhân Viên', width: 150 },
+                    { field: 'ThanhPhamName', headerText: 'Thành Phẩm', width: 150 },
+                    { field: 'SizeName', headerText: 'Size', width: 150 },
+                    { field: 'MauName', headerText: 'Màu', width: 150 },
+                    { field: 'TrongLuongNhan', headerText: 'Trọng Lượng Nhận', type: 'number', width: 150 },
+                    { field: 'TrongLuongTra', headerText: 'Trọng Lượng Trả', type: 'number', width: 150 },
+                    { field: 'DinhMuc', headerText: 'Định Mức', type: 'number', width: 150 },
+                    { field: 'DinhMucChuan', headerText: 'Định Mức Chuẩn', type: 'number', width: 150 },
+                    { field: 'SoRo', headerText: 'Số Rổ', type: 'number', width: 150 },
+                ],
+                aggregates: [{
+                    columns: [
+                        {
+                            type: 'Sum',
+                            field: 'TrongLuongNhan',
+                            footerTemplate: 'Tổng Trọng Lượng Nhận: ${Sum} Kg'
+                        },
+                        {
+                            type: 'Sum',
+                            field: 'TrongLuongTra',
+                            footerTemplate: 'Tổng Trọng Lượng Trả: ${Sum} Kg'
+                        },
+                        {
+                            type: 'Sum',
+                            field: 'SoRo',
+                            footerTemplate: 'Tổng Số Rổ: ${Sum}'
+                        }
+                    ]
+                }]
+            });
+            grid_PhieuCanTPFilletv2.appendTo('#Grid-PhieuCanTPFilletv2');
+        }
+    }
+    var chart_PhieuCanTPFilletv2;
+    function loadChart_PhieuCanTPFilletv2(data) {
+        var dataManager = new ej.data.DataManager({
+            json: data,
+            adaptor: new ej.data.JsonAdaptor()
+        });
+        currentViewChartData = undefined;
+        var maxYValue = 100;
+        if (data && Array.isArray(data) && data.length > 0) {
+            // Tìm giá trị lớn nhất của y trong dữ liệu (double)
+            maxYValue = Math.max(...data.map(item => item.y));
+        }
+        var dynamicMaximum = Math.ceil(maxYValue);
+        if (chart_PhieuCanTPFilletv2 && data && data.length > 0) {
+            chart_PhieuCanTPFilletv2.series[0].dataSource = dataManager;
+            chart_PhieuCanTPFilletv2.series[1].dataSource = dataManager;
+            chart_PhieuCanTPFilletv2.primaryYAxis.maximum = dynamicMaximum; // Cập nhật giá trị maximum
+            chart_PhieuCanTPFilletv2.primaryYAxis.interval = dynamicMaximum > 0 ? Math.round(dynamicMaximum / 3) : 1; // Cập nhật interval
+            chart_PhieuCanTPFilletv2.refresh();// Refresh biểu đồ
+        } else {
+            if (chart_PhieuCanTPFilletv2) {
+                chart_PhieuCanTPFilletv2.destroy();
+                document.getElementById('column-container-PhieuCanTPFilletv2').innerHTML = '';
+            }
+            chart_PhieuCanTPFilletv2 = new ej.charts.Chart({
+                primaryXAxis: {
+                    valueType: 'Category', interval: 1, majorGridLines: { width: 0 }, majorTickLines: { width: 0 },
+                    labelIntersectAction: 'None', labelRotation: 270, minorTickLines: { width: 0 },
+                    labelStyle: {
+                        fontWeight: 'bold',  // Đặt chữ in đậm
+                        size: '14px',        // Tăng kích thước chữ
+                        color: '#333333'     // Đặt màu sắc chữ dễ nhìn (màu tối hơn)
+                    }
+                },
+                chartArea: { border: { width: 0 } },
+                primaryYAxis: {
+                    title: 'Trọng Lượng ( kg )',
+                    majorTickLines: { width: 0 }, lineStyle: { width: 0 },
+                    maximum: dynamicMaximum,
+                    interval: dynamicMaximum > 0 ? Math.round(dynamicMaximum / 3) : 1
+                },
+                // Initializing multiple axis
+                axes: [
+                    {
+                        majorGridLines: { width: 0 },
+                        opposedPosition: true,
+                        name: 'yAxis',
+                        lineStyle: { width: 0 },
+                        maximum: 10,
+                        interval: Math.round(10 / 3),
+                        title: 'Định Mức',
+                    }
+                ],
+                series: [
+                    {
+                        type: 'Column', xName: 'x', width: 2, yName: 'y', name: "Trọng Lượng",// name: (dataManager != "" || dataManager != null) ? data[0].x : "Thành Phẩm",
+                        columnSpacing: 0.1,
+                        dataSource: data,
+                        marker: {
+                            dataLabel:
+                            {
+                                visible: true,
+                                font: {
+                                    fontWeight: '600',
+                                    color: '#000000'
+                                }
+
+                            }
+                        }
+
+                    },
+                    {
+                        type: 'Column',
+                        xName: 'x',
+                        yName: 'dm', // Tên đúng của dữ liệu
+                        yAxisName: 'yAxis', // Đảm bảo trùng khớp
+                        name: 'Định Mức',
+                        dataSource: data,
+                        marker: {
+                            dataLabel: {
+                                visible: true,
+                                font: { fontWeight: '600', color: '#000000' }
+                            }
+                        }
+                    }
+                ],
+                title: 'Biểu Đồ Năng Suất',
+                width: ej.base.Browser.isDevice ? '100%' : '75%',
+                tooltip: { enable: true },
+                textRender: (args) => {
+                    if (args.point.series.yName === 'dm') {
+                        var xName = args.point.x;
+                        if(!currentViewChartData) {
+                            currentViewChartData = args.series.currentViewData;
+                        }
+                        var d = currentViewChartData
+                            .find(x => x.x === xName);
+                        if (d) {
+                            if (d.dm > d.dmc) {
+                                args.color = 'red';
+                                args.font.color = 'white';
+                            }
+                        }
+
+                    }
+                }
+            });
+            chart_PhieuCanTPFilletv2.appendTo('#column-container-PhieuCanTPFilletv2');
+        }
+    }
+
+    var grid_PhieuCanSoCheDinhHinh;
+    function loadGridData_PhieuCanSoCheDinhHinh(data) {
+        var dataManager = new ej.data.DataManager({
+            json: data,
+            adaptor: new ej.data.JsonAdaptor()
+        });
+        if (grid_PhieuCanSoCheDinhHinh && data != null && data != "") {
+            grid_PhieuCanSoCheDinhHinh.dataSource = dataManager;
+            grid_PhieuCanSoCheDinhHinh.refresh();
+        } else {
+            if (grid_PhieuCanSoCheDinhHinh) {
+                grid_PhieuCanSoCheDinhHinh.destroy();
+                document.getElementById('Grid-PhieuCanSoCheDinhHinh').innerHTML = '';
+            }
+            grid_PhieuCanSoCheDinhHinh = new ej.grids.Grid({
+                dataSource: dataManager,
+                allowPaging: true,
+                pageSettings: { pageSize: 50 },
+                allowFiltering: true,
+                allowSorting: true,
+                filterSettings: { type: 'Excel' },
+                selectionSettings: { persistSelection: true },
+                allowResizing: true,
+                height: 400,
+                columns: [
+                    { field: 'MaNhanVien', headerText: 'Mã Nhân Viên', width: 150 },
+                    { field: 'MaHoSo', headerText: 'Mã Hồ Sơ', width: 150 },
+                    { field: 'NhanVienName', headerText: 'Tên Nhân Viên', width: 150 },
+                    { field: 'ThanhPhamName', headerText: 'Thành Phẩm', width: 150 },
+                    { field: 'TrongLuong', headerText: 'Trọng Lượng', type: 'number', width: 150 },
+                    { field: 'SoRo', headerText: 'Số Rổ', type: 'number', width: 150 },
+                ],
+                aggregates: [{
+                    columns: [
+                        {
+                            type: 'Sum',
+                            field: 'TrongLuong',
+                            footerTemplate: 'Tổng Trọng Lượng: ${Sum} Kg'
+                        },
+                        {
+                            type: 'Sum',
+                            field: 'SoRo',
+                            footerTemplate: 'Tổng Số Rổ: ${Sum}'
+                        }
+                    ]
+                }]
+            });
+            grid_PhieuCanSoCheDinhHinh.appendTo('#Grid-PhieuCanSoCheDinhHinh');
+        }
+    }
+
+    var chart_PhieuCanSoCheDinhHinh;
+    function loadChart_PhieuCanSoCheDinhHinh(data) {
+        var dataManager = new ej.data.DataManager({
+            json: data,
+            adaptor: new ej.data.JsonAdaptor()
+        });
+        var maxYValue = 100;
+        if (data && Array.isArray(data) && data.length > 0) {
+            // Tìm giá trị lớn nhất của y trong dữ liệu (double)
+            maxYValue = Math.max(...data.map(item => item.y));
+        }
+        var dynamicMaximum = Math.ceil(maxYValue);
+        if (chart_PhieuCanSoCheDinhHinh && data != null && data != "") {
+            chart_PhieuCanSoCheDinhHinh.dataSource = dataManager;
+            chart_PhieuCanSoCheDinhHinh.primaryYAxis.maximum = dynamicMaximum; // Cập nhật giá trị maximum
+            chart_PhieuCanSoCheDinhHinh.primaryYAxis.interval = dynamicMaximum > 0 ? Math.round(dynamicMaximum / 3) : 1; // Cập nhật interval
+            chart_PhieuCanSoCheDinhHinh.refresh();
+        } else {
+            if (chart_PhieuCanSoCheDinhHinh) {
+                chart_PhieuCanSoCheDinhHinh.destroy();
+                document.getElementById('column-container-PhieuCanSoCheDinhHinh').innerHTML = '';
+            }
+            chart_PhieuCanSoCheDinhHinh = new ej.charts.Chart({
+                primaryXAxis: {
+                    valueType: 'Category', interval: 1, majorGridLines: { width: 0 }, majorTickLines: { width: 0 },
+                    labelIntersectAction: 'None', labelRotation: 270, minorTickLines: { width: 0 },
+                    labelStyle: {
+                        fontWeight: 'bold',  // Đặt chữ in đậm
+                        size: '14px',        // Tăng kích thước chữ
+                        color: '#333333'     // Đặt màu sắc chữ dễ nhìn (màu tối hơn)
+                    }
+                },
+                chartArea: { border: { width: 0 } },
+                primaryYAxis: {
+                    title: 'Trọng Lượng',
+                    majorTickLines: { width: 0 }, lineStyle: { width: 0 },
+                    maximum: dynamicMaximum,
+                    interval: dynamicMaximum > 0 ? Math.round(dynamicMaximum / 3) : 1
+                },
+                series: [
+                    {
+                        type: 'Column', xName: 'x', width: 2, yName: 'y', name: "Trọng Lượng",// name: (dataManager != "" || dataManager != null) ? data[0].x : "Thành Phẩm",
+                        columnSpacing: 0.1,
+                        dataSource: data,
+                        marker: {
+                            dataLabel:
+                            {
+                                visible: true,
+                                font: {
+                                    fontWeight: '600',
+                                    color: '#000000'
+                                }
+
+                            }
+                        }
+                    }
+                ],
+                title: 'Biểu Đồ Năng Suất',
+                width: ej.base.Browser.isDevice ? '100%' : '75%',
+                tooltip: { enable: true },
+            });
+            chart_PhieuCanSoCheDinhHinh.appendTo('#column-container-PhieuCanSoCheDinhHinh');
+        }
+    }
+
+    var grid_PhieuCanBTPDinhHinh;
+    function loadGridData_PhieuCanBTPDinhHinh(data) {
+        var dataManager = new ej.data.DataManager({
+            json: data,
+            adaptor: new ej.data.JsonAdaptor()
+        });
+        if (grid_PhieuCanBTPDinhHinh && data != null && data != "") {
+            grid_PhieuCanBTPDinhHinh.dataSource = dataManager;
+            grid_PhieuCanBTPDinhHinh.refresh();
+        } else {
+            if (grid_PhieuCanBTPDinhHinh) {
+                grid_PhieuCanBTPDinhHinh.destroy();
+                document.getElementById('Grid-PhieuCanBTPDinhHinh').innerHTML = '';
+            }
+            grid_PhieuCanBTPDinhHinh = new ej.grids.Grid({
+                dataSource: dataManager,
+                allowPaging: true,
+                pageSettings: { pageSize: 50 },
+                allowFiltering: true,
+                allowSorting: true,
+                filterSettings: { type: 'Excel' },
+                selectionSettings: { persistSelection: true },
+                allowResizing: true,
+                height: 400,
+                columns: [
+                    { field: 'MaNhanVien', headerText: 'Mã Nhân Viên', width: 150 },
+                    { field: 'MaHoSo', headerText: 'Mã Hồ Sơ', width: 150 },
+                    { field: 'NhanVienName', headerText: 'Tên Nhân Viên', width: 150 },
+                    { field: 'ThanhPhamName', headerText: 'Thành Phẩm', width: 150 },
+                    { field: 'TrongLuong', headerText: 'Trọng Lượng', type: 'number', width: 150 },
+                    { field: 'SoRo', headerText: 'Số Rổ', type: 'number', width: 150 },
+                ],
+                aggregates: [{
+                    columns: [
+                        {
+                            type: 'Sum',
+                            field: 'TrongLuong',
+                            footerTemplate: 'Tổng Trọng Lượng: ${Sum} Kg'
+                        },
+                        {
+                            type: 'Sum',
+                            field: 'SoRo',
+                            footerTemplate: 'Tổng Số Rổ: ${Sum}'
+                        }
+                    ]
+                }]
+            });
+            grid_PhieuCanBTPDinhHinh.appendTo('#Grid-PhieuCanBTPDinhHinh');
+        }
+    }
+
+    var chart_PhieuCanBTPDinhHinh;
+    function loadChart_PhieuCanBTPDinhHinh(data) {
+        var dataManager = new ej.data.DataManager({
+            json: data,
+            adaptor: new ej.data.JsonAdaptor()
+        });
+        var maxYValue = 100;
+        if (data && Array.isArray(data) && data.length > 0) {
+            // Tìm giá trị lớn nhất của y trong dữ liệu (double)
+            maxYValue = Math.max(...data.map(item => item.y));
+        }
+        var dynamicMaximum = Math.ceil(maxYValue);
+        if (chart_PhieuCanBTPDinhHinh && data != null && data != "") {
+            chart_PhieuCanBTPDinhHinh.dataSource = dataManager;
+            chart_PhieuCanBTPDinhHinh.primaryYAxis.maximum = dynamicMaximum; // Cập nhật giá trị maximum
+            chart_PhieuCanBTPDinhHinh.primaryYAxis.interval = dynamicMaximum > 0 ? Math.round(dynamicMaximum / 3) : 1; // Cập nhật interval
+            chart_PhieuCanBTPDinhHinh.refresh();
+        } else {
+            if (chart_PhieuCanBTPDinhHinh) {
+                chart_PhieuCanBTPDinhHinh.destroy();
+                document.getElementById('column-container-PhieuCanBTPDinhHinh').innerHTML = '';
+            }
+            chart_PhieuCanBTPDinhHinh = new ej.charts.Chart({
+                primaryXAxis: {
+                    valueType: 'Category', interval: 1, majorGridLines: { width: 0 }, majorTickLines: { width: 0 },
+                    labelIntersectAction: 'None', labelRotation: 270, minorTickLines: { width: 0 },
+                    labelStyle: {
+                        fontWeight: 'bold',  // Đặt chữ in đậm
+                        size: '14px',        // Tăng kích thước chữ
+                        color: '#333333'     // Đặt màu sắc chữ dễ nhìn (màu tối hơn)
+                    }
+                },
+                chartArea: { border: { width: 0 } },
+                primaryYAxis: {
+                    title: 'Trọng Lượng',
+                    majorTickLines: { width: 0 }, lineStyle: { width: 0 },
+                    maximum: dynamicMaximum,
+                    interval: dynamicMaximum > 0 ? Math.round(dynamicMaximum / 3) : 1
+                },
+                series: [
+                    {
+                        type: 'Column', xName: 'x', width: 2, yName: 'y', name: "Trọng Lượng",// name: (dataManager != "" || dataManager != null) ? data[0].x : "Thành Phẩm",
+                        columnSpacing: 0.1,
+                        dataSource: data,
+                        marker: {
+                            dataLabel:
+                            {
+                                visible: true,
+                                font: {
+                                    fontWeight: '600',
+                                    color: '#000000'
+                                }
+
+                            }
+                        }
+                    }
+                ],
+                title: 'Biểu Đồ Năng Suất',
+                width: ej.base.Browser.isDevice ? '100%' : '75%',
+                tooltip: { enable: true },
+            });
+            chart_PhieuCanBTPDinhHinh.appendTo('#column-container-PhieuCanBTPDinhHinh');
+        }
+    }
+
+
+
+
+
+
+    var grid_PhieuCanTPDinhHinh;
+    function loadGridData_PhieuCanTPDinhHinh(data) {
+        var dataManager = new ej.data.DataManager({
+            json: data,
+            adaptor: new ej.data.JsonAdaptor()
+        });
+        if (grid_PhieuCanTPDinhHinh && data != null && data != "") {
+            grid_PhieuCanTPDinhHinh.dataSource = dataManager;
+            grid_PhieuCanTPDinhHinh.refresh();
+        } else {
+            if (grid_PhieuCanTPDinhHinh) {
+                grid_PhieuCanTPDinhHinh.destroy();
+                document.getElementById('Grid-PhieuCanTPDinhHinh').innerHTML = '';
+            }
+            grid_PhieuCanTPDinhHinh = new ej.grids.Grid({
+                dataSource: dataManager,
+                allowPaging: true,
+                pageSettings: { pageSize: 50 },
+                allowFiltering: true,
+                allowSorting: true,
+                filterSettings: { type: 'Excel' },
+                selectionSettings: { persistSelection: true },
+                allowResizing: true,
+                height: 400,
+                columns: [
+                    { field: 'MaNhanVien', headerText: 'Mã Nhân Viên', width: 150 },
+                    { field: 'MaHoSo', headerText: 'Mã Hồ Sơ', width: 150 },
+                    { field: 'NhanVienName', headerText: 'Tên Nhân Viên', width: 150 },
+                    { field: 'ThanhPhamName', headerText: 'Thành Phẩm', width: 150 },
+                    { field: 'SizeName', headerText: 'Size', width: 150 },
+                    { field: 'MauName', headerText: 'Màu', width: 150 },
+                    { field: 'TrongLuongNhan', headerText: 'Trọng Lượng Nhận', type: 'number', width: 150 },
+                    { field: 'TrongLuongTra', headerText: 'Trọng Lượng Trả', type: 'number', width: 150 },
+                    { field: 'DinhMuc', headerText: 'Định Mức', type: 'number', width: 150 },
+                    { field: 'DinhMucChuan', headerText: 'Định Mức Chuẩn', type: 'number', width: 150 },
+                    { field: 'SoRo', headerText: 'Số Rổ', type: 'number', width: 150 },
+                ],
+                aggregates: [{
+                    columns: [
+                        {
+                            type: 'Sum',
+                            field: 'TrongLuongNhan',
+                            footerTemplate: 'Tổng Trọng Lượng Nhận: ${Sum} Kg'
+                        },
+                        {
+                            type: 'Sum',
+                            field: 'TrongLuongTra',
+                            footerTemplate: 'Tổng Trọng Lượng Trả: ${Sum} Kg'
+                        },
+                        {
+                            type: 'Sum',
+                            field: 'SoRo',
+                            footerTemplate: 'Tổng Số Rổ: ${Sum}'
+                        }
+                    ]
+                }]
+            });
+            grid_PhieuCanTPDinhHinh.appendTo('#Grid-PhieuCanTPDinhHinh');
+        }
+    }
+
+    var chart_PhieuCanTPDinhHinh;
+    function loadChart_PhieuCanTPDinhHinh(data) {
+        var dataManager = new ej.data.DataManager({
+            json: data,
+            adaptor: new ej.data.JsonAdaptor()
+        });
+        currentViewChartData = undefined;
+        var maxYValue = 100;
+        if (data && Array.isArray(data) && data.length > 0) {
+            // Tìm giá trị lớn nhất của y trong dữ liệu (double)
+            maxYValue = Math.max(...data.map(item => item.y));
+        }
+        var dynamicMaximum = Math.ceil(maxYValue);
+        if (chart_PhieuCanTPDinhHinh && data && data.length > 0) {
+            chart_PhieuCanTPDinhHinh.series[0].dataSource = dataManager;
+            chart_PhieuCanTPDinhHinh.series[1].dataSource = dataManager;
+            chart_PhieuCanTPDinhHinh.primaryYAxis.maximum = dynamicMaximum; // Cập nhật giá trị maximum
+            chart_PhieuCanTPDinhHinh.primaryYAxis.interval = dynamicMaximum > 0 ? Math.round(dynamicMaximum / 3) : 1; // Cập nhật interval
+            chart_PhieuCanTPDinhHinh.refresh();// Refresh biểu đồ
+        } else {
+            if (chart_PhieuCanTPDinhHinh) {
+                chart_PhieuCanTPDinhHinh.destroy();
+                document.getElementById('column-container-PhieuCanTPDinhHinh').innerHTML = '';
+            }
+            chart_PhieuCanTPDinhHinh = new ej.charts.Chart({
+                primaryXAxis: {
+                    valueType: 'Category', interval: 1, majorGridLines: { width: 0 }, majorTickLines: { width: 0 },
+                    labelIntersectAction: 'None', labelRotation: 270, minorTickLines: { width: 0 },
+                    labelStyle: {
+                        fontWeight: 'bold',  // Đặt chữ in đậm
+                        size: '14px',        // Tăng kích thước chữ
+                        color: '#333333'     // Đặt màu sắc chữ dễ nhìn (màu tối hơn)
+                    }
+                },
+                chartArea: { border: { width: 0 } },
+                primaryYAxis: {
+                    title: 'Trọng Lượng ( kg )',
+                    majorTickLines: { width: 0 }, lineStyle: { width: 0 },
+                    maximum: dynamicMaximum,
+                    interval: dynamicMaximum > 0 ? Math.round(dynamicMaximum / 3) : 1
+                },
+                // Initializing multiple axis
+                axes: [
+                    {
+                        majorGridLines: { width: 0 },
+                        opposedPosition: true,
+                        name: 'yAxis',
+                        lineStyle: { width: 0 },
+                        maximum: 3,
+                        interval: Math.round(3 / 3),
+                        title: 'Định Mức',
+                    }
+                ],
+                series: [
+                    {
+                        type: 'Column', xName: 'x', width: 2, yName: 'y', name: "Trọng Lượng",// name: (dataManager != "" || dataManager != null) ? data[0].x : "Thành Phẩm",
+                        columnSpacing: 0.1,
+                        dataSource: data,
+                        marker: {
+                            dataLabel:
+                            {
+                                visible: true,
+                                font: {
+                                    fontWeight: '600',
+                                    color: '#000000'
+                                }
+
+                            }
+                        }
+
+                    },
+                    {
+                        type: 'Column',
+                        xName: 'x',
+                        yName: 'dm', // Tên đúng của dữ liệu
+                        yAxisName: 'yAxis', // Đảm bảo trùng khớp
+                        name: 'Định Mức',
+                        dataSource: data,
+                        marker: {
+                            dataLabel: {
+                                visible: true,
+                                font: { fontWeight: '600', color: '#000000' }
+                            }
+                        }
+                    }
+                ],
+                title: 'Biểu Đồ Năng Suất',
+                width: ej.base.Browser.isDevice ? '100%' : '75%',
+                tooltip: { enable: true },
+                textRender: (args) => {
+                    if (args.point.series.yName === 'dm') {
+                        var xName = args.point.x;
+                        if(!currentViewChartData) {
+                            currentViewChartData = args.series.currentViewData;
+                        }
+                        var d = currentViewChartData
+                            .find(x => x.x === xName);
+                        if (d) {
+                            if (d.dm > d.dmc) {
+                                args.color = 'red';
+                                args.font.color = 'white';
+                            }
+                        }
+
+                    }
+                }
+            });
+            chart_PhieuCanTPDinhHinh.appendTo('#column-container-PhieuCanTPDinhHinh');
+        }
+    }
+
+
+    var grid_PhieuCanChinhXepKhuon;
+    function loadGridData_PhieuCanChinhXepKhuon(data) {
+        var dataManager = new ej.data.DataManager({
+            json: data,
+            adaptor: new ej.data.JsonAdaptor()
+        });
+        if (grid_PhieuCanChinhXepKhuon && data != null && data != "") {
+            grid_PhieuCanChinhXepKhuon.dataSource = dataManager;
+            grid_PhieuCanChinhXepKhuon.refresh();
+        } else {
+            if (grid_PhieuCanChinhXepKhuon) {
+                grid_PhieuCanChinhXepKhuon.destroy();
+                document.getElementById('Grid-PhieuCanChinhXepKhuon').innerHTML = '';
+            }
+            grid_PhieuCanChinhXepKhuon = new ej.grids.Grid({
+                dataSource: dataManager,
+                allowPaging: true,
+                pageSettings: { pageSize: 50 },
+                allowFiltering: true,
+                allowSorting: true,
+                filterSettings: { type: 'Excel' },
+                selectionSettings: { persistSelection: true },
+                allowResizing: true,
+                height: 400,
+                columns: [
+                    { field: 'MaNhanVien', headerText: 'Mã Nhân Viên', width: 150 },
+                    { field: 'MaHoSo', headerText: 'Mã Hồ Sơ', width: 150 },
+                    { field: 'NhanVienName', headerText: 'Tên Nhân Viên', width: 150 },
+                    { field: 'ChieuXaName', headerText: 'Chiếu Xạ', width: 150 },
+                    { field: 'ThanhPhamName', headerText: 'Thành Phẩm', width: 150 },
+                    { field: 'SizeName', headerText: 'Size', width: 150 },
+                    { field: 'MauName', headerText: 'Màu', width: 150 },
+                    { field: 'TrongLuong', headerText: 'Trọng Lượng', type: 'number', width: 150 },
+
+                ],
+                aggregates: [{
+                    columns: [
+                        {
+                            type: 'Sum',
+                            field: 'TrongLuong',
+                            footerTemplate: 'Tổng Trọng Lượng: ${Sum} Kg'
+                        }
+                    ]
+                }]
+            });
+            grid_PhieuCanChinhXepKhuon.appendTo('#Grid-PhieuCanChinhXepKhuon');
+        }
+    }
+
+    var chart_PhieuCanChinhXepKhuon;
+    function loadChart_PhieuCanChinhXepKhuon(data) {
+        var dataManager = new ej.data.DataManager({
+            json: data,
+            adaptor: new ej.data.JsonAdaptor()
+        });
+        var maxYValue = 100;
+        if (data && Array.isArray(data) && data.length > 0) {
+            // Tìm giá trị lớn nhất của y trong dữ liệu (double)
+            maxYValue = Math.max(...data.map(item => item.y));
+        }
+        var dynamicMaximum = Math.ceil(maxYValue);
+        if (chart_PhieuCanChinhXepKhuon && data != null && data != "") {
+            chart_PhieuCanChinhXepKhuon.dataSource = dataManager;
+            chart_PhieuCanChinhXepKhuon.primaryYAxis.maximum = dynamicMaximum; // Cập nhật giá trị maximum
+            chart_PhieuCanChinhXepKhuon.primaryYAxis.interval = dynamicMaximum > 0 ? Math.round(dynamicMaximum / 3) : 1; // Cập nhật interval
+            chart_PhieuCanChinhXepKhuon.refresh();
+        } else {
+            if (chart_PhieuCanChinhXepKhuon) {
+                chart_PhieuCanChinhXepKhuon.destroy();
+                document.getElementById('column-container-PhieuCanChinhXepKhuon').innerHTML = '';
+            }
+            chart_PhieuCanChinhXepKhuon = new ej.charts.Chart({
+                primaryXAxis: {
+                    valueType: 'Category', interval: 1, majorGridLines: { width: 0 }, majorTickLines: { width: 0 },
+                    labelIntersectAction: 'None', labelRotation: 270, minorTickLines: { width: 0 },
+                    labelStyle: {
+                        fontWeight: 'bold',  // Đặt chữ in đậm
+                        size: '14px',        // Tăng kích thước chữ
+                        color: '#333333'     // Đặt màu sắc chữ dễ nhìn (màu tối hơn)
+                    }
+                },
+                chartArea: { border: { width: 0 } },
+                primaryYAxis: {
+                    title: 'Trọng Lượng',
+                    majorTickLines: { width: 0 }, lineStyle: { width: 0 },
+                    maximum: dynamicMaximum,
+                    interval: dynamicMaximum > 0 ? Math.round(dynamicMaximum / 3) : 1
+                },
+                series: [
+                    {
+                        type: 'Column', xName: 'x', width: 2, yName: 'y', name: "Trọng Lượng",// name: (dataManager != "" || dataManager != null) ? data[0].x : "Thành Phẩm",
+                        columnSpacing: 0.1,
+                        dataSource: data,
+                        marker: {
+                            dataLabel:
+                            {
+                                visible: true,
+                                font: {
+                                    fontWeight: '600',
+                                    color: '#000000'
+                                }
+
+                            }
+                        }
+                    }
+                ],
+                title: 'Biểu Đồ Năng Suất',
+                width: ej.base.Browser.isDevice ? '100%' : '75%',
+                tooltip: { enable: true },
+            });
+            chart_PhieuCanChinhXepKhuon.appendTo('#column-container-PhieuCanChinhXepKhuon');
+        }
+    }
+
+
+
+
+    var grid_PhieuCanPhuXepKhuon;
+    function loadGridData_PhieuCanPhuXepKhuon(data) {
+        var dataManager = new ej.data.DataManager({
+            json: data,
+            adaptor: new ej.data.JsonAdaptor()
+        });
+        if (grid_PhieuCanPhuXepKhuon && data != null && data != "") {
+            grid_PhieuCanPhuXepKhuon.dataSource = dataManager;
+            grid_PhieuCanPhuXepKhuon.refresh();
+        } else {
+            if (grid_PhieuCanPhuXepKhuon) {
+                grid_PhieuCanPhuXepKhuon.destroy();
+                document.getElementById('Grid-PhieuCanPhuXepKhuon').innerHTML = '';
+            }
+            grid_PhieuCanPhuXepKhuon = new ej.grids.Grid({
+                dataSource: dataManager,
+                allowPaging: true,
+                pageSettings: { pageSize: 50 },
+                allowFiltering: true,
+                allowSorting: true,
+                filterSettings: { type: 'Excel' },
+                selectionSettings: { persistSelection: true },
+                allowResizing: true,
+                height: 400,
+                columns: [
+                    { field: 'MaNhanVien', headerText: 'Mã Nhân Viên', width: 150 },
+                    { field: 'MaHoSo', headerText: 'Mã Hồ Sơ', width: 150 },
+                    { field: 'NhanVienName', headerText: 'Tên Nhân Viên', width: 150 },
+                    { field: 'ChieuXaName', headerText: 'Chiếu Xạ', width: 150 },
+                    { field: 'ThanhPhamName', headerText: 'Thành Phẩm', width: 150 },
+                    { field: 'SizeName', headerText: 'Size', width: 150 },
+                    { field: 'MauName', headerText: 'Màu', width: 150 },
+                    { field: 'TrongLuong', headerText: 'Trọng Lượng', type: 'number', width: 150 },
+                    { field: 'SoRo', headerText: 'Số Rổ', type: 'number', width: 150 },
+
+                ],
+                aggregates: [{
+                    columns: [
+                        {
+                            type: 'Sum',
+                            field: 'TrongLuong',
+                            footerTemplate: 'Tổng Trọng Lượng: ${Sum} Kg'
+                        },
+                        {
+                            type: 'Sum',
+                            field: 'SoRo',
+                            footerTemplate: 'Tổng Số Rổ: ${Sum} Kg'
+                        }
+                    ]
+                }]
+            });
+            grid_PhieuCanPhuXepKhuon.appendTo('#Grid-PhieuCanPhuXepKhuon');
+        }
+    }
+
+    var chart_PhieuCanPhuXepKhuon;
+    function loadChart_PhieuCanPhuXepKhuon(data) {
+        var dataManager = new ej.data.DataManager({
+            json: data,
+            adaptor: new ej.data.JsonAdaptor()
+        });
+        var maxYValue = 100;
+        if (data && Array.isArray(data) && data.length > 0) {
+            // Tìm giá trị lớn nhất của y trong dữ liệu (double)
+            maxYValue = Math.max(...data.map(item => item.y));
+        }
+        var dynamicMaximum = Math.ceil(maxYValue);
+        if (chart_PhieuCanPhuXepKhuon && data != null && data != "") {
+            chart_PhieuCanPhuXepKhuon.dataSource = dataManager;
+            chart_PhieuCanPhuXepKhuon.primaryYAxis.maximum = dynamicMaximum; // Cập nhật giá trị maximum
+            chart_PhieuCanPhuXepKhuon.primaryYAxis.interval = dynamicMaximum > 0 ? Math.round(dynamicMaximum / 3) : 1; // Cập nhật interval
+            chart_PhieuCanPhuXepKhuon.refresh();
+        } else {
+            if (chart_PhieuCanPhuXepKhuon) {
+                chart_PhieuCanPhuXepKhuon.destroy();
+                document.getElementById('column-container-PhieuCanPhuXepKhuon').innerHTML = '';
+            }
+            chart_PhieuCanPhuXepKhuon = new ej.charts.Chart({
+                primaryXAxis: {
+                    valueType: 'Category', interval: 1, majorGridLines: { width: 0 }, majorTickLines: { width: 0 },
+                    labelIntersectAction: 'None', labelRotation: 270, minorTickLines: { width: 0 },
+                    labelStyle: {
+                        fontWeight: 'bold',  // Đặt chữ in đậm
+                        size: '14px',        // Tăng kích thước chữ
+                        color: '#333333'     // Đặt màu sắc chữ dễ nhìn (màu tối hơn)
+                    }
+                },
+                chartArea: { border: { width: 0 } },
+                primaryYAxis: {
+                    title: 'Trọng Lượng',
+                    majorTickLines: { width: 0 }, lineStyle: { width: 0 },
+                    maximum: dynamicMaximum,
+                    interval: dynamicMaximum > 0 ? Math.round(dynamicMaximum / 3) : 1
+                },
+                series: [
+                    {
+                        type: 'Column', xName: 'x', width: 2, yName: 'y', name: "Trọng Lượng",// name: (dataManager != "" || dataManager != null) ? data[0].x : "Thành Phẩm",
+                        columnSpacing: 0.1,
+                        dataSource: data,
+                        marker: {
+                            dataLabel:
+                            {
+                                visible: true,
+                                font: {
+                                    fontWeight: '600',
+                                    color: '#000000'
+                                }
+
+                            }
+                        }
+                    }
+                ],
+                title: 'Biểu Đồ Năng Suất',
+                width: ej.base.Browser.isDevice ? '100%' : '75%',
+                tooltip: { enable: true },
+            });
+            chart_PhieuCanPhuXepKhuon.appendTo('#column-container-PhieuCanPhuXepKhuon');
+        }
+    }
+
+
+
+    var grid_PhieuCanXepKhuonBlock;
+    function loadGridData_PhieuCanXepKhuonBlock(data) {
+        var dataManager = new ej.data.DataManager({
+            json: data,
+            adaptor: new ej.data.JsonAdaptor()
+        });
+        if (grid_PhieuCanXepKhuonBlock && data != null && data != "") {
+            grid_PhieuCanXepKhuonBlock.dataSource = dataManager;
+            grid_PhieuCanXepKhuonBlock.refresh();
+        } else {
+            if (grid_PhieuCanXepKhuonBlock) {
+                grid_PhieuCanXepKhuonBlock.destroy();
+                document.getElementById('Grid-PhieuCanXepKhuonBlock').innerHTML = '';
+            }
+            grid_PhieuCanXepKhuonBlock = new ej.grids.Grid({
+                dataSource: dataManager,
+                allowPaging: true,
+                pageSettings: { pageSize: 50 },
+                allowFiltering: true,
+                allowSorting: true,
+                filterSettings: { type: 'Excel' },
+                selectionSettings: { persistSelection: true },
+                allowResizing: true,
+                height: 400,
+                columns: [
+                    { field: 'MaNhanVien', headerText: 'Mã Nhân Viên', width: 150 },
+                    { field: 'MaHoSo', headerText: 'Mã Hồ Sơ', width: 150 },
+                    { field: 'NhanVienName', headerText: 'Tên Nhân Viên', width: 150 },
+                    { field: 'ThanhPhamName', headerText: 'Thành Phẩm', width: 150 },
+                    { field: 'SizeName', headerText: 'Size', width: 150 },
+                    { field: 'ChatLuongName', headerText: 'Chất Lượng', width: 150 },
+                    { field: 'NetName', headerText: 'NET', width: 150 },
+                    { field: 'ChieuXaName', headerText: 'Chiếu Xạ', width: 150 },
+                    { field: 'KhachHangName', headerText: 'Khách Hàng', width: 150 },
+                    { field: 'MauName', headerText: 'Màu', width: 150 },
+                    { field: 'CongDoanName', headerText: 'Công Đoạn', width: 150 },
+                    { field: 'TrongLuong', headerText: 'Trọng Lượng', type: 'number', width: 150 },
+                    { field: 'SoRo', headerText: 'Số Rổ', type: 'number', width: 150 },
+
+                ],
+                aggregates: [{
+                    columns: [
+                        {
+                            type: 'Sum',
+                            field: 'TrongLuong',
+                            footerTemplate: 'Tổng Trọng Lượng: ${Sum} Kg'
+                        },
+                        {
+                            type: 'Sum',
+                            field: 'SoRo',
+                            footerTemplate: 'Tổng Số Rổ: ${Sum} Kg'
+                        }
+                    ]
+                }]
+            });
+            grid_PhieuCanXepKhuonBlock.appendTo('#Grid-PhieuCanXepKhuonBlock');
+        }
+    }
+
+
+    var chart_PhieuCanXepKhuonBlock;
+    function loadChart_PhieuCanXepKhuonBlock(data) {
+        var dataManager = new ej.data.DataManager({
+            json: data,
+            adaptor: new ej.data.JsonAdaptor()
+        });
+        var maxYValue = 100;
+        if (data && Array.isArray(data) && data.length > 0) {
+            // Tìm giá trị lớn nhất của y trong dữ liệu (double)
+            maxYValue = Math.max(...data.map(item => item.y));
+        }
+        var dynamicMaximum = Math.ceil(maxYValue);
+        if (chart_PhieuCanXepKhuonBlock && data != null && data != "") {
+            chart_PhieuCanXepKhuonBlock.dataSource = dataManager;
+            chart_PhieuCanXepKhuonBlock.primaryYAxis.maximum = dynamicMaximum; // Cập nhật giá trị maximum
+            chart_PhieuCanXepKhuonBlock.primaryYAxis.interval = dynamicMaximum > 0 ? Math.round(dynamicMaximum / 3) : 1; // Cập nhật interval
+            chart_PhieuCanXepKhuonBlock.refresh();
+        } else {
+            if (chart_PhieuCanXepKhuonBlock) {
+                chart_PhieuCanXepKhuonBlock.destroy();
+                document.getElementById('column-container-PhieuCanXepKhuonBlock').innerHTML = '';
+            }
+            chart_PhieuCanXepKhuonBlock = new ej.charts.Chart({
+                primaryXAxis: {
+                    valueType: 'Category', interval: 1, majorGridLines: { width: 0 }, majorTickLines: { width: 0 },
+                    labelIntersectAction: 'None', labelRotation: 270, minorTickLines: { width: 0 },
+                    labelStyle: {
+                        fontWeight: 'bold',  // Đặt chữ in đậm
+                        size: '14px',        // Tăng kích thước chữ
+                        color: '#333333'     // Đặt màu sắc chữ dễ nhìn (màu tối hơn)
+                    }
+                },
+                chartArea: { border: { width: 0 } },
+                primaryYAxis: {
+                    title: 'Trọng Lượng',
+                    majorTickLines: { width: 0 }, lineStyle: { width: 0 },
+                    maximum: dynamicMaximum,
+                    interval: dynamicMaximum > 0 ? Math.round(dynamicMaximum / 3) : 1
+                },
+                series: [
+                    {
+                        type: 'Column', xName: 'x', width: 2, yName: 'y', name: "Trọng Lượng",// name: (dataManager != "" || dataManager != null) ? data[0].x : "Thành Phẩm",
+                        columnSpacing: 0.1,
+                        dataSource: data,
+                        marker: {
+                            dataLabel:
+                            {
+                                visible: true,
+                                font: {
+                                    fontWeight: '600',
+                                    color: '#000000'
+                                }
+
+                            }
+                        }
+                    }
+                ],
+                title: 'Biểu Đồ Năng Suất',
+                width: ej.base.Browser.isDevice ? '100%' : '75%',
+                tooltip: { enable: true },
+            });
+            chart_PhieuCanXepKhuonBlock.appendTo('#column-container-PhieuCanXepKhuonBlock');
+        }
+    }
+
+    var grid_PhieuCanXepKhuonKHC;
+    function loadGridData_PhieuCanXepKhuonKHC(data) {
+        var dataManager = new ej.data.DataManager({
+            json: data,
+            adaptor: new ej.data.JsonAdaptor()
+        });
+        if (grid_PhieuCanXepKhuonKHC && data != null && data != "") {
+            grid_PhieuCanXepKhuonKHC.dataSource = dataManager;
+            grid_PhieuCanXepKhuonKHC.refresh();
+        } else {
+            if (grid_PhieuCanXepKhuonKHC) {
+                grid_PhieuCanXepKhuonKHC.destroy();
+                document.getElementById('Grid-PhieuCanXepKhuonKHC').innerHTML = '';
+            }
+            grid_PhieuCanXepKhuonKHC = new ej.grids.Grid({
+                dataSource: dataManager,
+                allowPaging: true,
+                pageSettings: { pageSize: 50 },
+                allowFiltering: true,
+                allowSorting: true,
+                filterSettings: { type: 'Excel' },
+                selectionSettings: { persistSelection: true },
+                allowResizing: true,
+                height: 400,
+                columns: [
+                    { field: 'MaNhanVien', headerText: 'Mã Nhân Viên', width: 150 },
+                    { field: 'MaHoSo', headerText: 'Mã Hồ Sơ', width: 150 },
+                    { field: 'NhanVienName', headerText: 'Tên Nhân Viên', width: 150 },
+                    { field: 'ThanhPhamName', headerText: 'Thành Phẩm', width: 150 },
+                    { field: 'SizeName', headerText: 'Size', width: 150 },
+                    //{ field: 'ChatLuongName', headerText: 'Chất Lượng', width: 150 },
+                    //{ field: 'NetName', headerText: 'NET', width: 150 },
+                    //{ field: 'ChieuXaName', headerText: 'Chiếu Xạ', width: 150 },
+                    { field: 'KhachHangName', headerText: 'Khách Hàng', width: 150 },
+                    //{ field: 'MauName', headerText: 'Màu', width: 150 },
+                    //{ field: 'CongDoanName', headerText: 'Công Đoạn', width: 150 },
+                    { field: 'TrongLuong', headerText: 'Trọng Lượng', type: 'number', width: 150 },
+                    { field: 'SoRo', headerText: 'Số Rổ', type: 'number', width: 150 },
+
+                ],
+                aggregates: [{
+                    columns: [
+                        {
+                            type: 'Sum',
+                            field: 'TrongLuong',
+                            footerTemplate: 'Tổng Trọng Lượng: ${Sum} Kg'
+                        },
+                        {
+                            type: 'Sum',
+                            field: 'SoRo',
+                            footerTemplate: 'Tổng Số Rổ: ${Sum} Kg'
+                        }
+                    ]
+                }]
+            });
+            grid_PhieuCanXepKhuonKHC.appendTo('#Grid-PhieuCanXepKhuonKHC');
+        }
+    }
+
+
+    var chart_PhieuCanXepKhuonKHC;
+    function loadChart_PhieuCanXepKhuonKHC(data) {
+        var dataManager = new ej.data.DataManager({
+            json: data,
+            adaptor: new ej.data.JsonAdaptor()
+        });
+        var maxYValue = 100;
+        if (data && Array.isArray(data) && data.length > 0) {
+            // Tìm giá trị lớn nhất của y trong dữ liệu (double)
+            maxYValue = Math.max(...data.map(item => item.y));
+        }
+        var dynamicMaximum = Math.ceil(maxYValue);
+        if (chart_PhieuCanXepKhuonKHC && data != null && data != "") {
+            chart_PhieuCanXepKhuonKHC.dataSource = dataManager;
+            chart_PhieuCanXepKhuonKHC.primaryYAxis.maximum = dynamicMaximum; // Cập nhật giá trị maximum
+            chart_PhieuCanXepKhuonKHC.primaryYAxis.interval = dynamicMaximum > 0 ? Math.round(dynamicMaximum / 3) : 1; // Cập nhật interval
+            chart_PhieuCanXepKhuonKHC.refresh();
+        } else {
+            if (chart_PhieuCanXepKhuonKHC) {
+                chart_PhieuCanXepKhuonKHC.destroy();
+                document.getElementById('column-container-PhieuCanXepKhuonKHC').innerHTML = '';
+            }
+            chart_PhieuCanXepKhuonKHC = new ej.charts.Chart({
+                primaryXAxis: {
+                    valueType: 'Category', interval: 1, majorGridLines: { width: 0 }, majorTickLines: { width: 0 },
+                    labelIntersectAction: 'None', labelRotation: 270, minorTickLines: { width: 0 },
+                    labelStyle: {
+                        fontWeight: 'bold',  // Đặt chữ in đậm
+                        size: '14px',        // Tăng kích thước chữ
+                        color: '#333333'     // Đặt màu sắc chữ dễ nhìn (màu tối hơn)
+                    }
+                },
+                chartArea: { border: { width: 0 } },
+                primaryYAxis: {
+                    title: 'Trọng Lượng',
+                    majorTickLines: { width: 0 }, lineStyle: { width: 0 },
+                    maximum: dynamicMaximum,
+                    interval: dynamicMaximum > 0 ? Math.round(dynamicMaximum / 3) : 1
+                },
+                series: [
+                    {
+                        type: 'Column', xName: 'x', width: 2, yName: 'y', name: "Trọng Lượng",// name: (dataManager != "" || dataManager != null) ? data[0].x : "Thành Phẩm",
+                        columnSpacing: 0.1,
+                        dataSource: data,
+                        marker: {
+                            dataLabel:
+                            {
+                                visible: true,
+                                font: {
+                                    fontWeight: '600',
+                                    color: '#000000'
+                                }
+
+                            }
+                        }
+                    }
+                ],
+                title: 'Biểu Đồ Năng Suất',
+                width: ej.base.Browser.isDevice ? '100%' : '75%',
+                tooltip: { enable: true },
+            });
+            chart_PhieuCanXepKhuonKHC.appendTo('#column-container-PhieuCanXepKhuonKHC');
+        }
+    }
+
+    var grid_PhieuCanTaiChe;
+    function loadGridData_PhieuCanTaiChe(data) {
+        var dataManager = new ej.data.DataManager({
+            json: data,
+            adaptor: new ej.data.JsonAdaptor()
+        });
+        if (grid_PhieuCanTaiChe && data != null && data != "") {
+            grid_PhieuCanTaiChe.dataSource = dataManager;
+            grid_PhieuCanTaiChe.refresh();
+        } else {
+            if (grid_PhieuCanTaiChe) {
+                grid_PhieuCanTaiChe.destroy();
+                document.getElementById('Grid-PhieuCanTaiChe').innerHTML = '';
+            }
+            grid_PhieuCanTaiChe = new ej.grids.Grid({
+                dataSource: dataManager,
+                allowPaging: true,
+                pageSettings: { pageSize: 50 },
+                allowFiltering: true,
+                allowSorting: true,
+                filterSettings: { type: 'Excel' },
+                selectionSettings: { persistSelection: true },
+                allowResizing: true,
+                height: 400,
+                columns: [
+                    { field: 'MaNhanVien', headerText: 'Mã Nhân Viên', width: 150 },
+                    { field: 'MaHoSo', headerText: 'Mã Hồ Sơ', width: 150 },
+                    { field: 'NhanVienName', headerText: 'Tên Nhân Viên', width: 150 },
+                    { field: 'CongViecName', headerText: 'Công Việc', width: 150 },
+                    { field: 'ThanhPhamName', headerText: 'Thành Phẩm', width: 150 },
+                    { field: 'SizeName', headerText: 'Size', width: 150 },
+                    { field: 'ChatLuongName', headerText: 'Chất Lượng', width: 150 },
+                    //{ field: 'NetName', headerText: 'NET', width: 150 },
+                    //{ field: 'ChieuXaName', headerText: 'Chiếu Xạ', width: 150 },
+                    //{ field: 'KhachHangName', headerText: 'Khách Hàng', width: 150 },
+                    { field: 'MauName', headerText: 'Màu', width: 150 },
+                    //{ field: 'CongDoanName', headerText: 'Công Đoạn', width: 150 },
+                    { field: 'TrongLuong', headerText: 'Trọng Lượng', type: 'number', width: 150 },
+                    { field: 'SoRo', headerText: 'Số Rổ', type: 'number', width: 150 },
+
+                ],
+                aggregates: [{
+                    columns: [
+                        {
+                            type: 'Sum',
+                            field: 'TrongLuong',
+                            footerTemplate: 'Tổng Trọng Lượng: ${Sum} Kg'
+                        },
+                        {
+                            type: 'Sum',
+                            field: 'SoRo',
+                            footerTemplate: 'Tổng Số Rổ: ${Sum} Kg'
+                        }
+                    ]
+                }]
+            });
+            grid_PhieuCanTaiChe.appendTo('#Grid-PhieuCanTaiChe');
+        }
+    }
+
+
+    var chart_PhieuCanTaiChe;
+    function loadChart_PhieuCanTaiChe(data) {
+        var dataManager = new ej.data.DataManager({
+            json: data,
+            adaptor: new ej.data.JsonAdaptor()
+        });
+        var maxYValue = 100;
+        if (data && Array.isArray(data) && data.length > 0) {
+            // Tìm giá trị lớn nhất của y trong dữ liệu (double)
+            maxYValue = Math.max(...data.map(item => item.y));
+        }
+        var dynamicMaximum = Math.ceil(maxYValue);
+        if (chart_PhieuCanTaiChe && data != null && data != "") {
+            chart_PhieuCanTaiChe.dataSource = dataManager;
+            chart_PhieuCanTaiChe.primaryYAxis.maximum = dynamicMaximum; // Cập nhật giá trị maximum
+            chart_PhieuCanTaiChe.primaryYAxis.interval = dynamicMaximum > 0 ? Math.round(dynamicMaximum / 3) : 1; // Cập nhật interval
+            chart_PhieuCanTaiChe.refresh();
+        } else {
+            if (chart_PhieuCanTaiChe) {
+                chart_PhieuCanTaiChe.destroy();
+                document.getElementById('column-container-PhieuCanTaiChe').innerHTML = '';
+            }
+            chart_PhieuCanTaiChe = new ej.charts.Chart({
+                primaryXAxis: {
+                    valueType: 'Category', interval: 1, majorGridLines: { width: 0 }, majorTickLines: { width: 0 },
+                    labelIntersectAction: 'None', labelRotation: 270, minorTickLines: { width: 0 },
+                    labelStyle: {
+                        fontWeight: 'bold',  // Đặt chữ in đậm
+                        size: '14px',        // Tăng kích thước chữ
+                        color: '#333333'     // Đặt màu sắc chữ dễ nhìn (màu tối hơn)
+                    }
+                },
+                chartArea: { border: { width: 0 } },
+                primaryYAxis: {
+                    title: 'Trọng Lượng',
+                    majorTickLines: { width: 0 }, lineStyle: { width: 0 },
+                    maximum: dynamicMaximum,
+                    interval: dynamicMaximum > 0 ? Math.round(dynamicMaximum / 3) : 1
+                },
+                series: [
+                    {
+                        type: 'Column', xName: 'x', width: 2, yName: 'y', name: "Trọng Lượng",// name: (dataManager != "" || dataManager != null) ? data[0].x : "Thành Phẩm",
+                        columnSpacing: 0.1,
+                        dataSource: data,
+                        marker: {
+                            dataLabel:
+                            {
+                                visible: true,
+                                font: {
+                                    fontWeight: '600',
+                                    color: '#000000'
+                                }
+
+                            }
+                        }
+                    }
+                ],
+                title: 'Biểu Đồ Năng Suất',
+                width: ej.base.Browser.isDevice ? '100%' : '75%',
+                tooltip: { enable: true },
+            });
+            chart_PhieuCanTaiChe.appendTo('#column-container-PhieuCanTaiChe');
+        }
+    }
+
+
+    var grid_BT_PhieuCan;
+    function loadGridData_BT_PhieuCan(data) {
+        var dataManager = new ej.data.DataManager({
+            json: data,
+            adaptor: new ej.data.JsonAdaptor()
+        });
+        if (grid_BT_PhieuCan && data != null && data != "") {
+            grid_BT_PhieuCan.dataSource = dataManager;
+            grid_BT_PhieuCan.refresh();
+        } else {
+            if (grid_BT_PhieuCan) {
+                grid_BT_PhieuCan.destroy();
+                document.getElementById('Grid-BT_PhieuCan').innerHTML = '';
+            }
+            grid_BT_PhieuCan = new ej.grids.Grid({
+                dataSource: dataManager,
+                allowPaging: true,
+                pageSettings: { pageSize: 50 },
+                allowFiltering: true,
+                allowSorting: true,
+                filterSettings: { type: 'Excel' },
+                selectionSettings: { persistSelection: true },
+                allowResizing: true,
+                height: 400,
+                columns: [
+                    { field: 'MaNhanVien', headerText: 'Mã Nhân Viên', width: 150 },
+                    { field: 'MaHoSo', headerText: 'Mã Hồ Sơ', width: 150 },
+                    { field: 'NhanVienName', headerText: 'Tên Nhân Viên', width: 150 },
+                    //{ field: 'CongViecName', headerText: 'Công Việc', width: 150 },
+                    { field: 'ThanhPhamName', headerText: 'Thành Phẩm', width: 150 },
+                    //{ field: 'SizeName', headerText: 'Size', width: 150 },
+                    //{ field: 'ChatLuongName', headerText: 'Chất Lượng', width: 150 },
+                    //{ field: 'NetName', headerText: 'NET', width: 150 },
+                    //{ field: 'ChieuXaName', headerText: 'Chiếu Xạ', width: 150 },
+                    { field: 'KhachHangName', headerText: 'Khách Hàng', width: 150 },
+                    //{ field: 'MauName', headerText: 'Màu', width: 150 },
+                    //{ field: 'CongDoanName', headerText: 'Công Đoạn', width: 150 },
+                    { field: 'TrongLuong', headerText: 'Trọng Lượng', type: 'number', width: 150 },
+                    { field: 'SoRo', headerText: 'Số Rổ', type: 'number', width: 150 },
+
+                ],
+                aggregates: [{
+                    columns: [
+                        {
+                            type: 'Sum',
+                            field: 'TrongLuong',
+                            footerTemplate: 'Tổng Trọng Lượng: ${Sum} Kg'
+                        },
+                        {
+                            type: 'Sum',
+                            field: 'SoRo',
+                            footerTemplate: 'Tổng Số Rổ: ${Sum} Kg'
+                        }
+                    ]
+                }]
+            });
+            grid_BT_PhieuCan.appendTo('#Grid-BT_PhieuCan');
+        }
+    }
+
+
+
+    var chart_BT_PhieuCan;
+    function loadChart_BT_PhieuCan(data) {
+        var dataManager = new ej.data.DataManager({
+            json: data,
+            adaptor: new ej.data.JsonAdaptor()
+        });
+        var maxYValue = 100;
+        if (data && Array.isArray(data) && data.length > 0) {
+            // Tìm giá trị lớn nhất của y trong dữ liệu (double)
+            maxYValue = Math.max(...data.map(item => item.y));
+        }
+        var dynamicMaximum = Math.ceil(maxYValue);
+        if (chart_BT_PhieuCan && data != null && data != "") {
+            chart_BT_PhieuCan.dataSource = dataManager;
+            chart_BT_PhieuCan.primaryYAxis.maximum = dynamicMaximum; // Cập nhật giá trị maximum
+            chart_BT_PhieuCan.primaryYAxis.interval = dynamicMaximum > 0 ? Math.round(dynamicMaximum / 3) : 1; // Cập nhật interval
+            chart_BT_PhieuCan.refresh();
+        } else {
+            if (chart_BT_PhieuCan) {
+                chart_BT_PhieuCan.destroy();
+                document.getElementById('column-container-BT_PhieuCan').innerHTML = '';
+            }
+            chart_BT_PhieuCan = new ej.charts.Chart({
+                primaryXAxis: {
+                    valueType: 'Category', interval: 1, majorGridLines: { width: 0 }, majorTickLines: { width: 0 },
+                    labelIntersectAction: 'None', labelRotation: 270, minorTickLines: { width: 0 },
+                    labelStyle: {
+                        fontWeight: 'bold',  // Đặt chữ in đậm
+                        size: '14px',        // Tăng kích thước chữ
+                        color: '#333333'     // Đặt màu sắc chữ dễ nhìn (màu tối hơn)
+                    }
+                },
+                chartArea: { border: { width: 0 } },
+                primaryYAxis: {
+                    title: 'Trọng Lượng',
+                    majorTickLines: { width: 0 }, lineStyle: { width: 0 },
+                    maximum: dynamicMaximum,
+                    interval: dynamicMaximum > 0 ? Math.round(dynamicMaximum / 3) : 1
+                },
+                series: [
+                    {
+                        type: 'Column', xName: 'x', width: 2, yName: 'y', name: "Trọng Lượng",// name: (dataManager != "" || dataManager != null) ? data[0].x : "Thành Phẩm",
+                        columnSpacing: 0.1,
+                        dataSource: data,
+                        marker: {
+                            dataLabel:
+                            {
+                                visible: true,
+                                font: {
+                                    fontWeight: '600',
+                                    color: '#000000'
+                                }
+
+                            }
+                        }
+                    }
+                ],
+                title: 'Biểu Đồ Năng Suất',
+                width: ej.base.Browser.isDevice ? '100%' : '75%',
+                tooltip: { enable: true },
+            });
+            chart_BT_PhieuCan.appendTo('#column-container-BT_PhieuCan');
+        }
+    }
+
+    document.getElementById("khauBCN").addEventListener("change", function () {
+        document.querySelector('.weight-container').hidden = false;
+        var selectedValue = this.value;
+
+        // Ẩn tất cả các div trong khauContent trước
+        document.querySelectorAll("#khauContent > .row").forEach(function (row) {
+            row.hidden = true;
+        });
+
+        // Kiểm tra giá trị đã chọn và hiển thị div tương ứng
+        switch (selectedValue) {
+        case "PhieuCanPhuPhamv2":
+            document.getElementById("PhieuCanPhuPhamv2").hidden = false;
+            loadGridData_PhieuCanPhuPhamv2();
+            loadChart_PhieuCanPhuPhamv2();
+            break;
+        case "PhieuCanBTPFilletv2":
+            document.getElementById("PhieuCanBTPFilletv2").hidden = false;
+            loadGridData_PhieuCanBTPFilletv2();
+            loadChart_PhieuCanBTPFilletv2();
+            break;
+        case "PhieuCanLangDa":
+            document.getElementById("PhieuCanLangDa").hidden = false;
+            loadGridData_PhieuCanLangDa();
+            loadChart_PhieuCanLangDa();
+            break;
+        case "PhieuCanTPFillet":
+            document.getElementById("PhieuCanTPFillet").hidden = false;
+            loadGridData_PhieuCanTPFillet();
+            loadChart_PhieuCanTPFillet();
+            break;
+        case "PhieuCanTPFilletv2":
+            document.getElementById("PhieuCanTPFilletv2").hidden = false;
+            loadGridData_PhieuCanTPFilletv2();
+            loadChart_PhieuCanTPFilletv2();
+            break;
+        case "PhieuCanSoCheDinhHinh":
+            document.getElementById("PhieuCanSoCheDinhHinh").hidden = false;
+            loadGridData_PhieuCanSoCheDinhHinh();
+            loadChart_PhieuCanSoCheDinhHinh();
+            break;
+        case "PhieuCanBTPDinhHinh":
+            document.getElementById("PhieuCanBTPDinhHinh").hidden = false;
+            loadGridData_PhieuCanBTPDinhHinh();
+            loadChart_PhieuCanBTPDinhHinh();
+            break;
+        case "PhieuCanTPDinhHinh":
+            document.getElementById("PhieuCanTPDinhHinh").hidden = false;
+            loadGridData_PhieuCanTPDinhHinh();
+            loadChart_PhieuCanTPDinhHinh();
+            break;
+        case "PhieuCanChinhXepKhuon":
+            document.getElementById("PhieuCanChinhXepKhuon").hidden = false;
+            loadGridData_PhieuCanChinhXepKhuon();
+            loadChart_PhieuCanChinhXepKhuon();
+            break;
+        case "PhieuCanPhuXepKhuon":
+            document.getElementById("PhieuCanPhuXepKhuon").hidden = false;
+            loadGridData_PhieuCanPhuXepKhuon();
+            loadChart_PhieuCanPhuXepKhuon();
+            break;
+        case "PhieuCanXepKhuonBlock":
+            document.getElementById("PhieuCanXepKhuonBlock").hidden = false;
+            loadGridData_PhieuCanXepKhuonBlock();
+            loadChart_PhieuCanXepKhuonBlock();
+            break;
+        case "PhieuCanXepKhuonKHC":
+            document.getElementById("PhieuCanXepKhuonKHC").hidden = false;
+            loadGridData_PhieuCanXepKhuonKHC();
+            loadChart_PhieuCanXepKhuonKHC();
+            break;
+        case "PhieuCanTaiChe":
+            document.getElementById("PhieuCanTaiChe").hidden = false;
+            loadGridData_PhieuCanTaiChe();
+            loadChart_PhieuCanTaiChe();
+            break;
+        case "BT_PhieuCan":
+            document.getElementById("BT_PhieuCan").hidden = false;
+            loadGridData_BT_PhieuCan();
+            loadChart_BT_PhieuCan();
+            break;
+        default:
+            document.getElementById("khauContent").innerHTML = '<p>Vui lòng chọn khâu báo cáo.</p>';
+            break;
+        }
+    });
+
+
+    function getDataForGrid(fromDate, toDate, keyWord, typeSearch, khauBCN, xuongId) {
+        var jsonData = null;
+
+        $.ajax({
+            url: '/bao-cao-nhanh-public-access/reload',
+            type: 'GET',
+            data: {
+                fromDate: fromDate,
+                toDate: toDate,
+                keyWord: keyWord,
+                typeSearch: typeSearch,
+                khauValues: khauBCN,
+                xuongId: xuongId
+            },
+            async: false, // Để đảm bảo dữ liệu được trả về trước khi tiếp tục xử lý
+            success: function (response) {
+                if (response.Success) {
+                    jsonData = response.Data;
+                    // Chọn tất cả các phần tử có class 'weight-display'
+                    var weightDisplays = document.querySelectorAll('.weight-display');
+
+                    // Clear nội dung trước cho tất cả các phần tử
+                    weightDisplays.forEach(function (weightDisplay) {
+                        weightDisplay.textContent = '0 kg';
+                    });
+
+                    // Sau đó cập nhật dữ liệu mới
+                    var totalWeight = response.TotalTrongLuong;
+                    weightDisplays.forEach(function (weightDisplay) {
+                        weightDisplay.textContent = `${totalWeight} kg`;
+                    });
+                } else {
+                    toastOptionNotyfi();
+                    toastr["warning"](response.Messages, "Không Có Dữ Liệu");
+                }
+            },
+            error: function (error) {
+                console.log('Error:', error);
+            }
+        });
+
+        return jsonData;
+    }
+
+    function getDataForChart(fromDate, toDate, keyWord, typeSearch, khauBCN, xuongId) {
+        var chartData = null;
+
+        $.ajax({
+            url: '/bao-cao-nhanh-public-access/reload',
+            type: 'GET',
+            data: {
+                fromDate: fromDate,
+                toDate: toDate,
+                keyWord: keyWord,
+                typeSearch: typeSearch,
+                khauValues: khauBCN,
+                xuongId: xuongId
+            },
+            async: false, // Để đảm bảo dữ liệu được trả về trước khi tiếp tục xử lý
+            success: function (response) {
+                if (response.Success) {
+                    chartData = response.DataChart;
+                } else {
+                    // toastOptionNotyfi();
+                    // toastr["warning"](response.Messages, "Không Có Dữ Liệu Biểu Đồ");
+                }
+            },
+            error: function (error) {
+                console.log('Error:', error);
+            }
+        });
+
+        return chartData;
+    }
+
+    function taiBaoCao() {
+        var fromDate = document.getElementById("fromDateBCN").value;
+        var toDate = document.getElementById("toDateBCN").value;
+        var keyWord = document.getElementById("inputTimKiem").value;
+        var typeSearch = document.getElementById("loaiTimKiem").value;
+        var khauBCN = document.getElementById("khauBCN").value;
+        var xuongId = document.getElementById("XuongBCN").value;
+
+        // Khởi tạo danh sách lỗi
+        var errors = [];
+
+        if (!fromDate) {
+            errors.push("Vui lòng nhập 'Từ ngày'");
+        }
+        if (!toDate) {
+            errors.push("Vui lòng nhập 'Đến ngày'");
+        }
+        if (!keyWord) {
+            errors.push("Vui lòng nhập 'Từ khóa'");
+        }
+        if (!typeSearch) {
+            errors.push("Vui lòng chọn 'Loại tìm kiếm'");
+        }
+        if (!khauBCN) {
+            errors.push("Vui lòng chọn 'Khâu'");
+        }
+        if (!xuongId) {
+            errors.push("Vui lòng chọn 'Xưởng'");
+        }
+
+        // Nếu có lỗi, hiển thị thông báo và vô hiệu hóa nút
+        if (errors.length > 0) {
+            toastOptionNotyfi();
+            toastr["warning"](errors.join("\n"), "Không Có Dữ Liệu Biểu Đồ");
+            return;
+            // document.getElementById("taiBaoCaoBtn").disabled = true;
+        } else {
+            // Nếu không có lỗi
+            // Gọi AJAX để lấy dữ liệu jsonData và chartData
+            var jsonData = getDataForGrid(fromDate, toDate, keyWord, typeSearch, khauBCN, xuongId);
+            var chartData = getDataForChart(fromDate, toDate, keyWord, typeSearch, khauBCN, xuongId);
+
+            switch (khauBCN) {
+            case "PhieuCanPhuPhamv2":
+                loadGridData_PhieuCanPhuPhamv2(jsonData);
+                loadChart_PhieuCanPhuPhamv2(chartData);
+                break;
+
+            case "PhieuCanBTPFilletv2":
+                loadGridData_PhieuCanBTPFilletv2(jsonData);
+                loadChart_PhieuCanBTPFilletv2(chartData);
+                break;
+
+            case "PhieuCanLangDa":
+                loadGridData_PhieuCanLangDa(jsonData);
+                loadChart_PhieuCanLangDa(chartData);
+                break;
+
+            case "PhieuCanTPFillet":
+                loadGridData_PhieuCanTPFillet(jsonData);
+                loadChart_PhieuCanTPFillet(chartData);
+                break;
+            case "PhieuCanTPFilletv2":
+                loadGridData_PhieuCanTPFilletv2(jsonData);
+                loadChart_PhieuCanTPFilletv2(chartData);
+                break;
+            case "PhieuCanSoCheDinhHinh":
+                loadGridData_PhieuCanSoCheDinhHinh(jsonData);
+                loadChart_PhieuCanSoCheDinhHinh(chartData);
+                break;
+            case "PhieuCanBTPDinhHinh":
+                loadGridData_PhieuCanBTPDinhHinh(jsonData);
+                loadChart_PhieuCanBTPDinhHinh(chartData);
+                break;
+            case "PhieuCanTPDinhHinh":
+                loadGridData_PhieuCanTPDinhHinh(jsonData);
+                loadChart_PhieuCanTPDinhHinh(chartData);
+                break;
+            case "PhieuCanChinhXepKhuon":
+                loadGridData_PhieuCanChinhXepKhuon(jsonData);
+                loadChart_PhieuCanChinhXepKhuon(chartData);
+                break;
+            case "PhieuCanPhuXepKhuon":
+                loadGridData_PhieuCanPhuXepKhuon(jsonData);
+                loadChart_PhieuCanPhuXepKhuon(chartData);
+                break;
+            case "PhieuCanXepKhuonBlock":
+                loadGridData_PhieuCanXepKhuonBlock(jsonData);
+                loadChart_PhieuCanXepKhuonBlock(chartData);
+                break;
+            case "PhieuCanXepKhuonKHC":
+                loadGridData_PhieuCanXepKhuonKHC(jsonData);
+                loadChart_PhieuCanXepKhuonKHC(chartData);
+                break;
+            case "PhieuCanTaiChe":
+                loadGridData_PhieuCanTaiChe(jsonData);
+                loadChart_PhieuCanTaiChe(chartData);
+                break;
+            case "BT_PhieuCan":
+                loadGridData_BT_PhieuCan(jsonData);
+                loadChart_BT_PhieuCan(chartData);
+                break;
+
+            // Thêm các case khác tương tự
+            default:
+                console.log("Giá trị không hợp lệ");
+                break;
+            }
+        }
+
+    }
+
+
+</script>
+    <script>
+
+    // kiểm tra thẻ input tìm kiếm => 10 thì tự động chuyển sang loại Mã Thẻ
+    // document.getElementById('inputTimKiem').addEventListener('input', function () {
+    //     const input = this.value;
+    //     const select = document.getElementById('loaiTimKiem');
+
+    //     // Nếu nhập vào có 10 ký tự hoặc hơn thì chuyển sang "Mã Thẻ"
+    //     if (input.length >= 10) {
+    //         select.value = "2"; // Chọn "Mã Thẻ"
+    //     }
+    // });
+    document.getElementById("inputTimKiem").addEventListener("input", function () {
+        const loaiTimKiem = document.getElementById("loaiTimKiem").value;
+        const inputTimKiem = document.getElementById("inputTimKiem").value;
+
+        // Kiểm tra nếu 'loaiTimKiem' là '2' và độ dài chuỗi nhập vào lớn hơn 10 ký tự
+        if (loaiTimKiem === "2" && inputTimKiem.length >= 10) {
+            taiBaoCao(); // Gọi hàm taiBaoCao
+        }
+    });
+    // cập nhập thời gian fromDate = thời gian toDate
+    document.getElementById('toDateBCN').addEventListener('change', function () {
+        const toDate = this.value; // Lấy giá trị của "toDateBCN"
+        const fromDateInput = document.getElementById('fromDateBCN');
+
+        // Cập nhật "fromDateBCN" với giá trị của "toDateBCN"
+        fromDateInput.value = toDate;
+    });
+
+    // disable MaThe nếu khau là PhieuCanSoCheDinhHinh
+    // function updateSelectStates() {
+    //     const loaiTimKiem = document.getElementById("loaiTimKiem");
+    //     const khauBCN = document.getElementById("khauBCN");
+
+    //     if (loaiTimKiem.value === "2") {
+    //         khauBCN.querySelector('option[value="PhieuCanSoCheDinhHinh"]').disabled = true;
+    //         khauBCN.querySelector('option[value="PhieuCanChinhXepKhuon"]').disabled = true;
+    //         khauBCN.querySelector('option[value="PhieuCanPhuXepKhuon"]').disabled = true;
+    //         khauBCN.querySelector('option[value="PhieuCanXepKhuonBlock"]').disabled = true;
+    //         khauBCN.querySelector('option[value="PhieuCanXepKhuonKHC"]').disabled = true;
+    //         khauBCN.querySelector('option[value="PhieuCanTaiChe"]').disabled = true;
+    //         khauBCN.querySelector('option[value="BT_PhieuCan"]').disabled = true;
+    //     } else {
+    //         khauBCN.querySelector('option[value="PhieuCanSoCheDinhHinh"]').disabled = false;
+    //         khauBCN.querySelector('option[value="PhieuCanChinhXepKhuon"]').disabled = false;
+    //         khauBCN.querySelector('option[value="PhieuCanPhuXepKhuon"]').disabled = false;
+    //         khauBCN.querySelector('option[value="PhieuCanXepKhuonBlock"]').disabled = false;
+    //         khauBCN.querySelector('option[value="PhieuCanXepKhuonKHC"]').disabled = false;
+    //         khauBCN.querySelector('option[value="PhieuCanTaiChe"]').disabled = false;
+    //         khauBCN.querySelector('option[value="BT_PhieuCan"]').disabled = false;
+    //     }
+    //     if (khauBCN.value === "PhieuCanSoCheDinhHinh" || khauBCN.value === "PhieuCanChinhXepKhuon" || khauBCN.value === "PhieuCanPhuXepKhuon" || khauBCN.value === "PhieuCanXepKhuonBlock" || khauBCN.value === "PhieuCanXepKhuonKHC" || khauBCN.value === "PhieuCanTaiChe" || khauBCN.value === "BT_PhieuCan") {
+    //         loaiTimKiem.querySelector('option[value="2"]').disabled = true;
+    //     } else {
+    //         loaiTimKiem.querySelector('option[value="2"]').disabled = false;
+    //     }
+    // }
+
+    // // Lắng nghe sự thay đổi của khauBCN và loaiTimKiem
+    // document.getElementById("khauBCN").addEventListener("change", updateSelectStates);
+    // document.getElementById("loaiTimKiem").addEventListener("change", updateSelectStates);
+</script>
+    <script>
+
+
+    // document.getElementById("khauBCN").addEventListener("change", function () {
+    //     var selectedValue = this.value;
+    //     if (selectedValue !== "Chọn...") {
+    //         // Gửi yêu cầu AJAX để lấy partial view
+    //         fetch(`/BaoCaoNhanh/GetViewByTableName?tableName=` + selectedValue)
+    //             .then(response => response.text()) // Nhận nội dung partial view dưới dạng text
+    //             .then(data => {
+    //                 document.getElementById("khauContent").innerHTML = data; // Chèn partial view vào DOM
+    //                 // Đảm bảo gọi các hàm JavaScript sau khi nội dung được chèn vào DOM
+    //                 setTimeout(() => {
+    //                     var jsonData = getDataForGrid();
+    //                     loadGridData(jsonData);
+
+    //                     var chartData = getDataForChart();
+    //                     loadChart(chartData);
+    //                 }, 1000); // Thay đổi thời gian nếu cần
+    //             })
+    //             .catch(error => {
+    //                 console.error('Error:', error);
+    //                 document.getElementById("khauContent").innerHTML = '<p>Không thể tải dữ liệu, vui lòng thử lại sau.</p>';
+    //             });
+    //     }
+    // });
+</script>
+    <ejs-scripts></ejs-scripts>
+</body>
+</html>
+
+

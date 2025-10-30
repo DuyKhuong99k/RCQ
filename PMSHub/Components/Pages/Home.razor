@@ -1,0 +1,295 @@
+﻿@page "/Home"
+@using PMSHub.Components.Layout
+@using Syncfusion.Blazor.Buttons
+@using Syncfusion.Blazor.Cards
+@using ViewModels.Repos.Hubs.IServices
+@rendermode InteractiveServer
+@inject NavigationManager Navigation
+@inject ILoginService loginService
+ @inherits AuthenticatedComponent
+@* @implements IAsyncDisposable *@
+
+<link rel="stylesheet" href="styles/card.css"/>
+<PageTitle>Home</PageTitle>
+<TopLayout />
+<div class="content-wrapper">
+    <!-- Content -->
+
+    <div class="container-xxl flex-grow-1 container-p-y">
+        @* content owe đây*@
+        <h3>Đây là trang chủ</h3>
+        
+    </div>
+
+    <!-- / Content -->
+    <!-- Footer -->
+    <FooterLayout />
+    <!-- / Footer -->
+    <div class="content-backdrop fade"></div>
+</div>
+@* @if (loginService.IsUserAuthenticated())
+{
+    <p>Xin chào</p>
+    <SfButton style="margin: 2px;" CssClass="e-primary" @onclick="Logout">Đăng xuất</SfButton>
+    
+}
+else
+{
+    <p>Vui lòng đăng nhập</p>
+    @* <SfButton style="margin: 2px;" CssClass="e-primary" @onclick="Login">Đăng nhập</SfButton> 
+} *@
+
+@code{
+
+    // string username;
+    // string password;
+    // private async Task Login()
+    // {
+    //     loginService.Login("username","");
+    //     StateHasChanged();
+    // }
+
+    private async Task Logout()
+    {
+        loginService.Logout();
+        Navigation.NavigateTo("/", true);
+        //StateHasChanged();
+    }
+    // protected override void OnInitialized()
+    // {
+        
+    //     // var uri = new Uri(NavigationManager.Uri);
+    //     // var queryString = System.Web.HttpUtility.ParseQueryString(uri.Query);
+    //     // if (queryString.AllKeys.Contains("username"))
+    //     // {
+    //     //     username = queryString["username"];
+    //     // }
+    //     // if (queryString.AllKeys.Contains("password"))
+    //     // {
+    //     //     password = queryString["password"];
+    //     // }
+    // }
+    protected override void OnInitialized()
+    {
+        // if (!loginService.IsSessionCreated())
+        // {
+        //     loginService.CreateDefaultSession();
+        // }
+        // if (!loginService.IsUserAuthenticated())
+        // {
+        //     Navigation.NavigateTo($"/api/loginlocal");
+        //     loginService.Login("username", "");
+        //     StateHasChanged();
+        // }
+        
+    }
+    // protected override async Task OnAfterRenderAsync(bool firstRender)
+    // {
+    //     if (firstRender)
+    //     {
+    //         loginService.Login("username", "");
+    //     }
+
+    //     await base.OnAfterRenderAsync(firstRender);
+    // }
+    // Hàm xử lý sự kiện khi người dùng ấn nút login
+    void HandleLogin()
+    {
+        // Xử lý việc đăng nhập ở đây
+        // Sử dụng username và password đã lấy được từ URL
+    }
+}
+@* <div class="control-section">
+    <div class="row e-card-layout">
+
+        @for (var i = 0; i < MayCanService.Items.Count; i++)
+        {
+            
+            var mayCan = MayCanService.Items[i];
+            var index = i;
+            <div class="col-lg-2">
+                <SfCard class="sf-card">
+                    <CardHeader Title="@mayCan.Id" SubTitle="@mayCan.SubTitle"/>
+                    <CardContent>
+                        <table style="margin-bottom: 10px;">
+                            <tr>
+                                <td>
+                                    <div class="TempClass">23°C</div>
+                                </td>
+                                <td>
+                                    <div style="color: @(mayCan.IsConnected ? "yellowgreen" : "grey") !important; font-size: 24px;">&#9728;</div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <span class="RainImage"></span>
+                                    <span class="RainText">2% precipitation</span>
+                                </td>
+                            </tr>
+                        </table>
+                        @if (buttonRefs[index].Content == "Collapse")
+                        {
+                            <table>
+                                <tr class="DayContent" tabindex="0">
+                                    <td>
+                                        <div class="WeekDay">Monday</div>
+                                    </td>
+                                    <td>
+                                        <div class="CloudyImage TextCenter"></div>
+                                    </td>
+                                    <td>
+                                        <div class="MinMaxClass TextCenter"><b>23°C</b> / 12°C</div>
+                                    </td>
+                                </tr>
+                                <tr class="DayContent" tabindex="0">
+                                    <td>
+                                        <div class="WeekDay">Tuesday</div>
+                                    </td>
+                                    <td>
+                                        <div class="SunnyImage TextCenter"></div>
+                                    </td>
+                                    <td>
+                                        <div class="MinMaxClass TextCenter"><b>28°C</b> / 15°C</div>
+                                    </td>
+                                </tr>
+                                <tr class="DayContent" tabindex="0">
+                                    <td>
+                                        <div class="WeekDay">Wednesday</div>
+                                    </td>
+                                    <td>
+                                        <div class="SunnyImage TextCenter"></div>
+                                    </td>
+                                    <td>
+                                        <div class="MinMaxClass TextCenter"><b>25°C</b> / 20°C</div>
+                                    </td>
+                                </tr>
+                                <tr class="DayContent" tabindex="0">
+                                    <td>
+                                        <div class="WeekDay">Thursday</div>
+                                    </td>
+                                    <td>
+                                        <div class="CloudyImage TextCenter"></div>
+                                    </td>
+                                    <td>
+                                        <div class="MinMaxClass TextCenter"><b>20°C</b> / 12°C</div>
+                                    </td>
+                                </tr>
+                                <tr class="DayContent" tabindex="0">
+                                    <td>
+                                        <div class="WeekDay">Friday</div>
+                                    </td>
+                                    <td>
+                                        <div class="SunnyImage TextCenter"></div>
+                                    </td>
+                                    <td>
+                                        <div class="MinMaxClass TextCenter"><b>23°C</b> / 15°C</div>
+                                    </td>
+                                </tr>
+                            </table>
+                        }
+                    </CardContent>
+                    <CardContent EnableSeparator="true"></CardContent>
+                    <CardFooter>
+                        <CardFooterContent>
+                            <SfButton  CssClass="e-outline" @onclick="() => ExpandHandler(index)">Expand</SfButton> 
+                        </CardFooterContent>
+                    </CardFooter>
+                </SfCard>
+            </div>
+        }
+
+    </div>
+
+</div>
+
+@code {
+    private List<SfButton> buttonRefs;
+
+    protected override void OnInitialized()
+    {
+        buttonRefs = new List<SfButton>();
+        for (var i = 0; i < MayCanService.Items.Count; i++)
+        {
+            buttonRefs.Add(new SfButton() { Content = "Expand" });
+        }
+    }
+
+    void ExpandHandler(int index)
+    {
+        var button = buttonRefs[index];
+        var content = button.Content;
+        button.Content = "";
+        button.Content = content == "Expand" ? "Collapse" : "Expand";
+    }
+
+} *@
+@* <div class="form-group">
+    <label>
+        User:
+        <input @bind="userInput" />
+    </label>
+</div>
+<div class="form-group">
+    <label>
+        Message:
+        <input @bind="messageInput" size="50" />
+    </label>
+</div>
+<button @onclick="Send" disabled="@(!IsConnected)">Send</button>
+
+<hr>
+
+<ul id="messagesList">
+    @foreach (var message in messages)
+    {
+        <li>@message</li>
+    }
+</ul> *@
+
+@* @code {
+    private HubConnection? hubConnection;
+    private List<string> messages = new List<string>();
+    private string? userInput;
+    private string? messageInput;
+
+    protected override async Task OnInitializedAsync()
+    {
+        hubConnection = new HubConnectionBuilder()
+            .WithUrl(Navigation.ToAbsoluteUri("/chathub"))
+            .Build();
+
+        hubConnection.On<string, string>("ReceiveMessage", (user, message) =>
+        {
+            var encodedMsg = $"{user}: {message}";
+            messages.Add(encodedMsg);
+            InvokeAsync(StateHasChanged);
+        });
+        
+        hubConnection.On<string>("ReceiveMessage", ( message) =>
+        {
+            var encodedMsg = $"{message}";
+            messages.Add(encodedMsg);
+            InvokeAsync(StateHasChanged);
+        });
+        await hubConnection.StartAsync();
+    }
+
+    private async Task Send()
+    {
+        if (hubConnection is not null)
+        {
+            await hubConnection.SendAsync("SendMessage", userInput, messageInput);
+        }
+    }
+
+    public bool IsConnected =>
+        hubConnection?.State == HubConnectionState.Connected;
+
+    public async ValueTask DisposeAsync()
+    {
+        if (hubConnection is not null)
+        {
+            await hubConnection.DisposeAsync();
+        }
+    }
+} *@

@@ -1,0 +1,316 @@
+﻿@using Microsoft.AspNetCore.Mvc
+@using Microsoft.AspNetCore.Mvc.Rendering
+@{
+    ViewData["Title"] = "Home Page";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    //lấy danh sách roleid từ cookie
+    var roleIds = PMS.Middlewares.AuthenticationHelpers.GetRoleIdsFromCookie(Context);
+    // lấy danh sách fu func từ list roleId
+    var rolePermistions = await PMS.Middlewares.AuthenticationHelpers.GetRolePermistionsAsync(Context, roleIds);
+    var tptl = ViewBag.listTPTLModel;
+    var NumberDate = @Context.Session.GetString("NumberDate");
+    var XuongId = @Context.Session.GetString("XuongId");
+}
+
+<div class="container mt-4 sortable-container" id="dashBoardComputer" style="display:none">
+    @* xem trên máy tính *@
+    <div class="row">
+        @* cột 1 *@
+        <div class="col-md-4 mb-4">
+            @{
+                var dbtonghopvungnuoidt = rolePermistions.Where(x => x.Fu == "Dashboard" && x.Func == "Tổng Hợp Ghe Vùng Nuôi" && x.Status == 1).FirstOrDefault();
+                if (dbtonghopvungnuoidt != null)
+                {
+                    <div class="draggable-item">
+                        @await Html.PartialAsync("~/Views/Dashboard/DBTongHopGheVungNuoiDaiThanhSidePartialView.cshtml")
+                    </div>
+                }
+                var dbtonghoptpfillet = rolePermistions.Where(x => x.Fu == "Dashboard" && x.Func == "Tổng Hợp Thành Phẩm Fillet" && x.Status == 1).FirstOrDefault();
+                if (dbtonghoptpfillet != null)
+                {
+                    <div class="draggable-item">
+                        @await Html.PartialAsync("~/Views/Dashboard/DBTongHopTPFilletPartialView.cshtml")
+                    </div>
+                }
+                var dbtonghoptpxp = rolePermistions.Where(x => x.Fu == "Dashboard" && x.Func == "Tổng Hợp Thành Phẩm Xếp Khuôn" && x.Status == 1).FirstOrDefault();
+                if (dbtonghoptpxp != null)
+                {
+                    <div class="draggable-item">
+                        @await Html.PartialAsync("~/Views/Dashboard/DBTongHopTPXepKhuonPartialView.cshtml")
+                    </div>
+                }
+                var dbtonghoptpscdh = rolePermistions.Where(x => x.Fu == "Dashboard" && x.Func == "Tổng Hợp Thành Phẩm Sơ Chế Định Hình" && x.Status == 1).FirstOrDefault();
+                if (dbtonghoptpscdh != null)
+                {
+                    <div class="draggable-item">
+                        @await Html.PartialAsync("~/Views/Dashboard/DBTongHopTPSoCheDinhHinhPartialView.cshtml")
+                    </div>
+                }
+                var dbtonghoptppp = rolePermistions.Where(x => x.Fu == "Dashboard" && x.Func == "Tổng Hợp Thành Phẩm Phụ Phẩm" && x.Status == 1).FirstOrDefault();
+                if (dbtonghoptppp != null)
+                {
+                    <div class="draggable-item">
+                        @await Html.PartialAsync("~/Views/Dashboard/DBTongHopTPPhuPhamPartialView.cshtml")
+                    </div>
+                }
+            }
+        </div>
+        @* cột 2 *@
+        <div class="col-md-4 mb-4 ">
+            @{
+                var dbtonghoptpnl = rolePermistions.Where(x => x.Fu == "Dashboard" && x.Func == "Tổng Hợp Thành Phẩm Nguyên Liệu" && x.Status == 1).FirstOrDefault();
+                if (dbtonghoptpnl != null)
+                {
+                    <div class="draggable-item">
+                        @await Html.PartialAsync("~/Views/Dashboard/DBTongHopTPNguyenLieuPartialView.cshtml")
+                    </div>
+                }
+                var dbtonghoptpbtpdinhhinh = rolePermistions.Where(x => x.Fu == "Dashboard" && x.Func == "Tổng Hợp Thành Phẩm Bán TP Định Hình" && x.Status == 1).FirstOrDefault();
+                if (dbtonghoptpbtpdinhhinh != null)
+                {
+                    <div class="draggable-item">
+                        @await Html.PartialAsync("~/Views/Dashboard/DBTongHopTPBTPDinhHinhPartialView.cshtml")
+                    </div>
+                }
+                var dbtonghoptppxk = rolePermistions.Where(x => x.Fu == "Dashboard" && x.Func == "Tổng Hợp Thành Phẩm Phụ Xếp Khuôn" && x.Status == 1).FirstOrDefault();
+                if (dbtonghoptppxk != null)
+                {
+                    <div class="draggable-item">
+                        @await Html.PartialAsync("~/Views/Dashboard/DBTongHopTPPhuXepKhuonPartialView.cshtml")
+                    </div>
+                }
+                var dbtonghoptptc = rolePermistions.Where(x => x.Fu == "Dashboard" && x.Func == "Tổng Hợp Thành Phẩm Tái Chế" && x.Status == 1).FirstOrDefault();
+                if (dbtonghoptptc != null)
+                {
+                    <div class="draggable-item">
+                        @await Html.PartialAsync("~/Views/Dashboard/DBTongHopTPTaiChePartialView.cshtml")
+                    </div>
+                }
+            }
+
+        </div>
+        @* cột 3 *@
+        <div class="col-md-4 mb-4 ">
+            @{
+                var dbtonghoptpbtpf = rolePermistions.Where(x => x.Fu == "Dashboard" && x.Func == "Tổng Hợp Thành Phẩm Bán TP Fillet" && x.Status == 1).FirstOrDefault();
+                if (dbtonghoptpbtpf != null)
+                {
+                    <div class="draggable-item">
+                        @await Html.PartialAsync("~/Views/Dashboard/DBTongHopBTPFilletPartialView.cshtml")
+                    </div>
+                }
+                var dbtonghoptpdh = rolePermistions.Where(x => x.Fu == "Dashboard" && x.Func == "Tổng Hợp Thành Phẩm Định Hình" && x.Status == 1).FirstOrDefault();
+                if (dbtonghoptpdh != null)
+                {
+                    <div class="draggable-item">
+                        @await Html.PartialAsync("~/Views/Dashboard/DBTongHopTPDinhHinh2View.cshtml")
+                    </div>
+                }
+                var dbtonghoptpxkbl = rolePermistions.Where(x => x.Fu == "Dashboard" && x.Func == "Tổng Hợp Thành Phẩm Xếp Khuôn Block" && x.Status == 1).FirstOrDefault();
+                if (dbtonghoptpxkbl != null)
+                {
+                    <div class="draggable-item">
+                        @await Html.PartialAsync("~/Views/Dashboard/DBTongHopTPXepKhuonBlockPartialView.cshtml")
+                    </div>
+                }
+                var dbtonghoptpxkkhc = rolePermistions.Where(x => x.Fu == "Dashboard" && x.Func == "Tổng Hợp Thành Phẩm Xếp Khuôn KHC" && x.Status == 1).FirstOrDefault();
+                if (dbtonghoptpxkkhc != null)
+                {
+                    <div class="draggable-item">
+                        @await Html.PartialAsync("~/Views/Dashboard/DBTongHopTPXepKhuonKHCPartialView.cshtml")
+                    </div>
+                }
+            }
+
+        </div>
+    </div>
+</div>
+<div class="container mt-4" id="dashBoardMobie" style="display:none">
+    @* Xem trên điện thoại *@
+    <div class="row">
+        <div class="col-12">
+            @{
+                <!-- Dồn tất cả vào một cột trong trường hợp di động -->
+                var dbtonghopvungnuoidtMb = rolePermistions.Where(x => x.Fu == "Dashboard" && x.Func == "Tổng Hợp Ghe Vùng Nuôi" && x.Status == 1).FirstOrDefault();
+                if (dbtonghopvungnuoidtMb != null)
+                {
+                    <div class="">
+                        @await Html.PartialAsync("~/Views/Dashboard/DBTongHopGheVungNuoiDaiThanhSidePartialView.cshtml")
+                    </div>
+                }
+                var dbtonghoptpnlMb = rolePermistions.Where(x => x.Fu == "Dashboard" && x.Func == "Tổng Hợp Thành Phẩm Nguyên Liệu" && x.Status == 1).FirstOrDefault();
+                if (dbtonghoptpnlMb != null)
+                {
+                    <div class="">
+                        @await Html.PartialAsync("~/Views/Dashboard/DBTongHopTPNguyenLieuPartialView.cshtml")
+                    </div>
+                }
+                var dbtonghoptpbtpfMb = rolePermistions.Where(x => x.Fu == "Dashboard" && x.Func == "Tổng Hợp Thành Phẩm Bán TP Fillet" && x.Status == 1).FirstOrDefault();
+                if (dbtonghoptpbtpfMb != null)
+                {
+                    <div class="">
+                        @await Html.PartialAsync("~/Views/Dashboard/DBTongHopBTPFilletPartialView.cshtml")
+                    </div>
+                }
+                var dbtonghoptpfilletMb = rolePermistions.Where(x => x.Fu == "Dashboard" && x.Func == "Tổng Hợp Thành Phẩm Fillet" && x.Status == 1).FirstOrDefault();
+                if (dbtonghoptpfilletMb != null)
+                {
+                    <div class="">
+                        @await Html.PartialAsync("~/Views/Dashboard/DBTongHopTPFilletPartialView.cshtml")
+                    </div>
+                }
+                var dbtonghoptpbtpdinhhinhMb = rolePermistions.Where(x => x.Fu == "Dashboard" && x.Func == "Tổng Hợp Thành Phẩm Bán TP Định Hình" && x.Status == 1).FirstOrDefault();
+                if (dbtonghoptpbtpdinhhinhMb != null)
+                {
+                    <div class="">
+                        @await Html.PartialAsync("~/Views/Dashboard/DBTongHopTPBTPDinhHinhPartialView.cshtml")
+                    </div>
+                }
+                var dbtonghoptpdhMb = rolePermistions.Where(x => x.Fu == "Dashboard" && x.Func == "Tổng Hợp Thành Phẩm Định Hình" && x.Status == 1).FirstOrDefault();
+                if (dbtonghoptpdhMb != null)
+                {
+                    <div class="">
+                        @await Html.PartialAsync("~/Views/Dashboard/DBTongHopTPDinhHinh2View.cshtml")
+                    </div>
+                }
+                var dbtonghoptpxpMb = rolePermistions.Where(x => x.Fu == "Dashboard" && x.Func == "Tổng Hợp Thành Phẩm Xếp Khuôn" && x.Status == 1).FirstOrDefault();
+                if (dbtonghoptpxpMb != null)
+                {
+                    <div class="">
+                        @await Html.PartialAsync("~/Views/Dashboard/DBTongHopTPXepKhuonPartialView.cshtml")
+                    </div>
+                }
+                var dbtonghoptppxkMb = rolePermistions.Where(x => x.Fu == "Dashboard" && x.Func == "Tổng Hợp Thành Phẩm Phụ Xếp Khuôn" && x.Status == 1).FirstOrDefault();
+                if (dbtonghoptppxkMb != null)
+                {
+                    <div class="">
+                        @await Html.PartialAsync("~/Views/Dashboard/DBTongHopTPPhuXepKhuonPartialView.cshtml")
+                    </div>
+                }
+                var dbtonghoptpxkblMb = rolePermistions.Where(x => x.Fu == "Dashboard" && x.Func == "Tổng Hợp Thành Phẩm Xếp Khuôn Block" && x.Status == 1).FirstOrDefault();
+                if (dbtonghoptpxkblMb != null)
+                {
+                    <div class="">
+                        @await Html.PartialAsync("~/Views/Dashboard/DBTongHopTPXepKhuonBlockPartialView.cshtml")
+                    </div>
+                }
+                var dbtonghoptpscdhMb = rolePermistions.Where(x => x.Fu == "Dashboard" && x.Func == "Tổng Hợp Thành Phẩm Sơ Chế Định Hình" && x.Status == 1).FirstOrDefault();
+                if (dbtonghoptpscdhMb != null)
+                {
+                    <div class="">
+                        @await Html.PartialAsync("~/Views/Dashboard/DBTongHopTPSoCheDinhHinhPartialView.cshtml")
+                    </div>
+                }
+                var dbtonghoptptcMb = rolePermistions.Where(x => x.Fu == "Dashboard" && x.Func == "Tổng Hợp Thành Phẩm Tái Chế" && x.Status == 1).FirstOrDefault();
+                if (dbtonghoptptcMb != null)
+                {
+                    <div class="">
+                        @await Html.PartialAsync("~/Views/Dashboard/DBTongHopTPTaiChePartialView.cshtml")
+                    </div>
+                }
+                var dbtonghoptpppMb = rolePermistions.Where(x => x.Fu == "Dashboard" && x.Func == "Tổng Hợp Thành Phẩm Phụ Phẩm" && x.Status == 1).FirstOrDefault();
+                if (dbtonghoptpppMb != null)
+                {
+                    <div class="">
+                        @await Html.PartialAsync("~/Views/Dashboard/DBTongHopTPPhuPhamPartialView.cshtml")
+                    </div>
+                }
+                var dbtonghoptpxkkhcMb = rolePermistions.Where(x => x.Fu == "Dashboard" && x.Func == "Tổng Hợp Thành Phẩm Xếp Khuôn KHC" && x.Status == 1).FirstOrDefault();
+                if (dbtonghoptpxkkhcMb != null)
+                {
+                    <div class="">
+                        @await Html.PartialAsync("~/Views/Dashboard/DBTongHopTPXepKhuonKHCPartialView.cshtml")
+                    </div>
+                }
+            }
+
+
+        </div>
+    </div>
+</div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://code.jquery.com/ui/1.13.1/jquery-ui.min.js"></script>
+<script>
+    // $(document).ready(function () {
+    //     var xuongId = @XuongId;
+    //     AddUserWaitView(xuongId);
+    // });
+</script>
+<script>
+    // // Hàm để kiểm tra kích thước màn hình và hiển thị phần thích hợp
+    // function checkScreenSize() {
+    //     var isMobile = window.innerWidth < 768; // Kiểm tra nếu kích thước màn hình nhỏ hơn 768px (xs hoặc sm)
+    //     if (isMobile) {
+    //         document.getElementById('dashBoardMobie').style.display = 'block'; // Hiển thị phần dành cho điện thoại di động
+    //         document.getElementById('dashBoardComputer').style.display = 'none'; // Ẩn phần dành cho máy tính
+    //     } else {
+    //         document.getElementById('dashBoardMobie').style.display = 'none'; // Ẩn phần dành cho điện thoại di động
+    //         document.getElementById('dashBoardComputer').style.display = 'block'; // Hiển thị phần dành cho máy tính
+    //     }
+    // }
+
+    // // Gọi hàm khi trang web được tải và cũng khi cửa sổ thay đổi kích thước
+    // window.onload = checkScreenSize;
+    // window.onresize = checkScreenSize;
+
+    $(function () {
+        $(".sortable-container").sortable({
+            items: ".draggable-item"
+        });
+        $(".sortable-container").disableSelection();
+
+        $(".draggable-item").resizable({
+            handles: 'e', // Chỉ cho phép thay đổi kích thước bên phải
+            stop: function (event, ui) {
+                var resizedElement = ui.element;
+                var siblings = resizedElement.siblings('.resizable-item');
+                var totalWidth = resizedElement.width();
+                var numSiblings = siblings.length + 1;
+                var newWidth = totalWidth / numSiblings;
+
+                // Cập nhật kích thước của các phần tử cùng hàng
+                siblings.width(newWidth);
+            }
+        });
+    });
+</script>
+<script>
+    // Hàm để kiểm tra kích thước màn hình và hiển thị phần thích hợp
+    function checkScreenSize() {
+        var isMobile = window.innerWidth < 768; // Kiểm tra nếu kích thước màn hình nhỏ hơn 768px (xs hoặc sm)
+
+        // Nếu đang xem trên điện thoại
+        if (isMobile) {
+            // Kiểm tra xem phần dành cho điện thoại đã hiển thị chưa trước khi hiển thị
+
+
+            if (document.getElementById('dashBoardMobie') && document.getElementById('dashBoardMobie').style.display !== 'block') {
+                document.getElementById('dashBoardMobie').style.display = 'block'; // Hiển thị phần dành cho điện thoại di động
+            }
+            if (document.getElementById('dashBoardComputer')) {
+                document.getElementById('dashBoardComputer').style.display = 'none'; // Ẩn phần dành cho máy tính
+                document.getElementById('dashBoardComputer').remove(); // Ẩn phần dành cho máy tính bằng cách loại bỏ nó khỏi DOM
+            }
+        }
+        // Nếu không phải là điện thoại (tức là xem trên máy tính)
+        else {
+            // Kiểm tra xem phần dành cho máy tính đã hiển thị chưa trước khi hiển thị
+            if (document.getElementById('dashBoardComputer') && document.getElementById('dashBoardComputer').style.display !== 'block') {
+                document.getElementById('dashBoardComputer').style.display = 'block'; // Hiển thị phần dành cho máy tính
+
+            }
+
+            var dashboard = document.getElementById('dashBoardMobie');
+            if (dashboard) {
+                dashboard.style.display = 'none'; // Ẩn phần dành cho điện thoại di động
+                dashboard.remove();
+            }
+            // Ẩn phần dành cho điện thoại bằng cách loại bỏ nó khỏi DOM
+            // document.getElementById('dashBoardMobie').remove();
+        }
+    }
+
+    // Gọi hàm khi trang web được tải và cũng khi cửa sổ thay đổi kích thước
+    window.onload = checkScreenSize;
+    window.onresize = checkScreenSize;
+</script>

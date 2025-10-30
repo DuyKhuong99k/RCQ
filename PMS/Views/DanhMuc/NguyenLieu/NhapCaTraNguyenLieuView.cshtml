@@ -1,0 +1,303 @@
+﻿@{
+    ViewData["Title"] = "NhapCaTraNguyenLieuView";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var XuongId = @Context.Session.GetString("XuongId");
+
+    var listNhaCCs = ViewBag.listNhaCCs;
+    var listMaLoaiCas = ViewBag.listMaLoaiCas;
+    var listThanhPhams = ViewBag.listThanhPhams;
+    var listPhuongTiens = ViewBag.listPhuongTiens;
+    var listMaLos = ViewBag.listMaLos;
+    var listSFLs = ViewBag.listSFLs;
+    var listMaAos = ViewBag.listMaAos;
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h2 class="mb-0">Cân Nguyên Liệu - Nhập Cá Trả</h2>
+                    <div class="d-flex align-items-center">
+                        <label class="form-label text-center mb-0 me-2">Ngày:</label>
+                        <input type="date" id="dateTimeNhapCaTra" class="form-control" style="width: auto;" disabled/>
+                        <button onclick="insert()" style="margin-left:5px" class="btn btn-primary position-relative">
+                            <div class=" align-items-center">
+                                <span id="txtThem">Lưu</span>
+                                <div id="loadingIndicator" class=" spinner-border text-secondary position-absolute" role="status" style="left: 0;right: 0;top: 0;bottom: 0;margin: auto; display:none">
+                                    <span class="visually-hidden">Đang tải...</span>
+                                </div>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 mb-1">
+                            <div class="input-group">
+                                <label class="input-group-text" for="nccnhapcatra">NCC</label>
+                                <select class="form-select" id="nccnhapcatra">
+                                    <option selected>Chọn...</option>
+                                    @foreach (var item in listNhaCCs)
+                                    {
+                                        <option value="@item.Ma">@item.Ten</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-1">
+                            <input class="form-control" placeholder="Chọn Ghe..." id="ghenhapcatra" />
+                            @* <div class="input-group">
+                                <span class="input-group-text" id="spanghenhapcatra">Ghe</span>
+                                <input 
+                                       class="form-control"
+                                       placeholder="Chọn..."
+                                       aria-describedby="spanghenhapcatra"
+                                       id="ghenhapcatra" />
+                            </div> *@
+                        </div>
+                        <div class="col-md-2 mb-1">
+                            <div class="input-group">
+                                <label class="input-group-text" for="mslnhapcatra">MSL</label>
+                                <select class="form-select" id="mslnhapcatra">
+                                    <option selected>Chọn...</option>
+                                    @foreach (var item in listMaLos)
+                                    {
+                                        <option value="@item.Item2">@item.Item2</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-2 mb-1">
+                            <div class="input-group">
+                                <label class="input-group-text" for="aonhapcatra">Ao</label>
+                                <select class="form-select" id="aonhapcatra">
+                                    <option selected>Chọn...</option>
+                                    @foreach (var item in listMaAos)
+                                    {
+                                        <option value="@item.Item1">@item.Item1</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-2 mb-1">
+                            <div class="input-group">
+                                <label class="input-group-text" for="canhapcatra">Cá</label>
+                                <select class="form-select" id="canhapcatra">
+                                    <option selected>Chọn...</option>
+                                    @foreach (var item in listMaLoaiCas)
+                                    {
+                                        <option value="@item.Ma">@item.Ten</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-2 mb-1">
+                            <div class="input-group">
+                                <span class="input-group-text" id="basic-addon11">TL</span>
+                                <input type="text"
+                                       class="form-control"
+                                       placeholder="0.00"
+                                       aria-label="Username"
+                                       aria-describedby="basic-addon11"
+                                       id="trongluongnhapcatra"/>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-1">
+                            <div class="input-group">
+                                <label class="input-group-text" for="tpnhapcatra">TP</label>
+                                <select class="form-select" id="tpnhapcatra">
+                                    <option selected>Chọn...</option>
+                                    @foreach (var item in listThanhPhams)
+                                    {
+                                        <option value="@item.Ma">@item.Ten</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-1">
+                            <div class="input-group">
+                                <label class="input-group-text" for="sizenhapcatra">Size</label>
+                                <select class="form-select" id="sizenhapcatra">
+                                    <option selected>Chọn...</option>
+                                    @foreach (var item in listSFLs)
+                                    {
+                                        <option value="@item.Ma">@item.Ten</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                        
+                    </div>
+                    <div id="Grid"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
+<script src="~/assets/vendor/libs/inputpicker/jquery.inputpicker.js?v3"></script>
+<script>
+    // Lấy ngày hiện tại
+    var today = new Date();
+
+    // Định dạng ngày thành yyyy-MM-dd (định dạng của trường input date)
+    var formattedDate = today.toISOString().substr(0, 10);
+
+    // Gán giá trị vào trường input
+    document.getElementById("dateTimeNhapCaTra").value = formattedDate;
+</script>
+<script>
+    $(document).ready(function () {
+        loadGridData();
+        $.ajax({
+            type: "GET",
+            url: "/PhuongTienNguyenLieu/GetAlls",
+            success: function (rs) {
+                if (rs != null) {
+                    $('#ghenhapcatra').inputpicker({
+                        data: rs,
+                        fields: [
+                            { name: 'Ma', text: 'Mã' },
+                            { name: 'Ten', text: 'Tên' },
+                            { name: 'VungNuoiId', text: 'Vùng Nuôi' },
+                            { name: 'SoGhe', text: 'Số Ghê' },
+
+                        ],
+                        headShow: true,
+                        fieldText: 'Ten',
+                        fieldValue: 'Ma',
+                        filterOpen: true
+                    });
+                }
+                else {
+                    toastOptionNotyfi();
+                    toastr["warning"](rs.Mesages, "Thông báo");
+                }
+            },
+            error: function () {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error, "Thông báo");
+            }
+        });
+    });
+</script>
+<script>
+    var grid;
+    function loadGridData() {
+        var dateTime = $('#dateTimeNhapCaTra').val();
+        var xuongId = @XuongId;
+        $.ajax({
+            url: '/NhapCaTraNguyenLieu/GetsCaTra',
+            type: 'GET',
+            data: {
+                dateTime: dateTime,
+                xuongId: xuongId
+            },
+            dataType: 'json',
+            success: function (data) {
+                var dataManager = new ej.data.DataManager({
+                    json: data,
+                    adaptor: new ej.data.JsonAdaptor()
+                });
+                if (grid) {
+                    grid.dataSource = dataManager;
+                    grid.refresh();
+                } else {
+                    grid = new ej.grids.Grid({
+                        dataSource: dataManager,
+                        allowPaging: true,
+                        pageSettings: { pageSize: 50 },
+                        allowFiltering: true,
+                        filterSettings: { type: 'Excel' },
+                        allowSorting: true,
+                        //frozenColumns: 3,
+                        allowResizing: true,
+                        //rowSelected: onRowSelected,
+                        height: 400,
+                        columns: [
+                            //{ field: 'STT', headerText: 'STT', width: 150 },
+                            { field: 'Ngay', headerText: 'Ngày', width: 150 },
+                            { field: 'ThoiGian', headerText: 'Thời Gian', width: 150 },
+                            { field: 'NhaCungCapName', headerText: 'Nhà Cung Cấp', width: 150 },
+                            { field: 'MaLo', headerText: 'Lô', width: 150 },
+                            { field: 'MaAo', headerText: 'Mã Ao', width: 150 },
+                            { field: 'MaPhuongTien', headerText: 'Mã Phương Tiện', width: 150 },
+                            { field: 'PhuongTienName', headerText: 'Tên Phương Tiện', width: 150 },
+                            { field: 'LoaiCaName', headerText: 'Loại Cá', width: 150 },
+                            { field: 'ThanhPhamName', headerText: 'Thành Phẩm', width: 150 },
+                            { field: 'SizeName', headerText: 'Size', width: 150 },
+                            { field: 'MauName', headerText: 'Màu', width: 150 },
+                            { field: 'MaBanCatTiet', headerText: 'Mã BCT', width: 150 },
+                            { field: 'BanCatTietName', headerText: 'Tên BCT', width: 150 },
+                            { field: 'TrongLuong', headerText: 'Trọng Lượng', type: 'number', width: 150 },
+
+                        ]
+                    });
+                    // Hiển thị Grid trên trang web
+                    grid.appendTo('#Grid');
+                }
+            },
+            error: function (error) {
+                console.error(error);
+            }
+        });
+    }
+    loadGridData();
+    function reloadData() {
+        loadGridData();
+    }
+
+
+    function insert() {
+        var nccnhapcatra = $('#nccnhapcatra').val();
+        var ghenhapcatra = $('#ghenhapcatra').val();
+        var mslnhapcatra = $('#mslnhapcatra').val();
+        var aonhapcatra = $('#aonhapcatra').val();
+        var canhapcatra = $('#canhapcatra').val();
+        var trongluongnhapcatra = $('#trongluongnhapcatra').val();
+        var tpnhapcatra = $('#tpnhapcatra').val();
+        var sizenhapcatra = $('#sizenhapcatra').val();
+        var xuongId = @XuongId;
+        document.getElementById("txtThem").style.visibility = "hidden";
+        document.getElementById("loadingIndicator").style.display = "block";
+        $.ajax({
+            type: 'POST',
+            url: '/NhapCaTraNguyenLieu/DoInsert',
+            data: {
+                nccnhapcatra: nccnhapcatra,
+                ghenhapcatra: ghenhapcatra,
+                mslnhapcatra: mslnhapcatra,
+                aonhapcatra: aonhapcatra,
+                canhapcatra: canhapcatra,
+                trongluongnhapcatra: trongluongnhapcatra,
+                tpnhapcatra: tpnhapcatra,
+                sizenhapcatra: sizenhapcatra,
+                xuongId: xuongId
+            },
+            success: function (rs) {
+                if (rs.isSuccess === true) {
+                    toastOptionNotyfi();
+                    toastr["success"](rs.Messages, "Thông báo");
+                    $('#modalThem').modal('hide');
+                    reloadData();
+                } else {
+                    toastOptionNotyfi();
+                    toastr["warning"](rs.Messages, "Thông báo");
+                }
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error, "Thông báo");
+            },
+            complete: function () {
+                document.getElementById("loadingIndicator").style.display = "none";
+                document.getElementById("txtThem").style.visibility = "visible";
+            }
+        });
+    }
+</script>
+

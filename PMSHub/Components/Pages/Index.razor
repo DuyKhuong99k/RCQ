@@ -1,0 +1,28 @@
+﻿@page "/"
+@rendermode InteractiveServer
+@inject NavigationManager Navigation
+
+@inherits AuthenticatedComponent
+@code {
+    private bool isInitialized = false;
+    protected override async Task OnInitializedAsync()
+    {
+        
+        isInitialized = true;
+
+        await base.OnInitializedAsync();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        // Chỉ điều hướng khi render lần đầu tiên để tránh vòng lặp
+        if (firstRender && isInitialized)
+        {
+            
+            Navigation.NavigateTo("/Home", forceLoad: true);
+        }
+
+        await base.OnAfterRenderAsync(firstRender);
+    }
+
+}

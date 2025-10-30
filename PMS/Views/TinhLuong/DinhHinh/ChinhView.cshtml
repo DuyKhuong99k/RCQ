@@ -1,0 +1,911 @@
+﻿@using Newtonsoft.Json
+@{
+    ViewData["Title"] = "ChinhView";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    //lấy danh sách roleid từ cookie
+    var roleIds = PMS.Middlewares.AuthenticationHelpers.GetRoleIdsFromCookie(Context);
+    // lấy danh sách fu func từ list roleId
+    var rolePermistions = await PMS.Middlewares.AuthenticationHelpers.GetRolePermistionsAsync(Context, roleIds);
+    var XuongId = @Context.Session.GetString("XuongId");
+    var listKhuVucs = ViewBag.listKhuVucs;
+    var listThanhPhams = ViewBag.listThanhPhams;
+    var listThanhPhamFLs = ViewBag.listThanhPhamFLs;
+    var listMaLos = ViewBag.listMaLos;
+
+    var token = @Context.Session.GetString("JWTTokenEncry");
+    var url = AppViewModels.AppViewModel.Instance.ApiWssHostUrl + "/progressHub";
+    var encryptedUrl = Security.Crypt.ED.EncryptString(url);
+    //var tokenDecry = Security.Crypt.ED.DecryptString(token);
+    //var token = @Context.Session.GetString("JWTToken");
+}
+<style>
+    /* CSS */
+    #modalPhanBoSL .modal-dialog {
+        max-width: 1000px; /* Thiết lập kích thước tùy chỉnh cho modal */
+    }
+</style>
+<input type="hidden" id="TokenTL" value="@token" />
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h2 class="mb-0">Tính Lương Chính</h2>
+                </div>
+                <div class="card-body">
+                    <div id="Grid"></div>
+                    <div id="progressStatus">Initializing...</div>
+                    <div style="margin-top:20px;">
+                        @{
+                            var xemChinhTLDH = rolePermistions.Where(x => x.Fu == "Tính Lương / Định Hình / Chính" && x.Func == "Xem / Tính Lương / Định Hình / Chính" && x.Status == 1).FirstOrDefault();
+                            if (xemChinhTLDH != null)
+                            {
+                                <button onclick="reloadData()" style="margin-right:5px" class="btn btn-outline-secondary"><i class='bx bx-cloud'></i>Tải dữ liệu</button>
+                            }
+                            var phanBoSLChinhTLDH = rolePermistions.Where(x => x.Fu == "Tính Lương / Định Hình / Chính" && x.Func == "Phân Bổ Sản Lượng / Tính Lương / Định Hình / Chính" && x.Status == 1).FirstOrDefault();
+                            if (phanBoSLChinhTLDH != null)
+                            {
+                                <button onclick="phanBoSLShow()" style="margin-right:5px" class="btn btn-outline-secondary">Phân Bổ SL</button>
+                            }
+                            var dongBoDLTPSChinhTLDH = rolePermistions.Where(x => x.Fu == "Tính Lương / Định Hình / Chính" && x.Func == "Đồng Bộ Dữ Liệu TPSoft / Tính Lương / Định Hình / Chính" && x.Status == 1).FirstOrDefault();
+                            if (dongBoDLTPSChinhTLDH != null)
+                            {
+                                <button onclick="tpSoftAction()" style="margin-right:5px" class="btn btn-outline-secondary">TPSoft</button>
+                            }
+                            var ketChuyenDLChinhTLDH = rolePermistions.Where(x => x.Fu == "Tính Lương / Định Hình / Chính" && x.Func == "Kết Chuyển Dữ Liệu / Tính Lương / Định Hình / Chính" && x.Status == 1).FirstOrDefault();
+                            if (ketChuyenDLChinhTLDH != null)
+                            {
+                                <button onclick="ketChuyen()" style="margin-right:5px" class="btn btn-outline-secondary">Kết Chuyển</button>
+                            }
+                            var exportChinhTLDH = rolePermistions.Where(x => x.Fu == "Tính Lương / Định Hình / Chính" && x.Func == "Xuất Excel / Tính Lương / Định Hình / Chính" && x.Status == 1).FirstOrDefault();
+                            if (exportChinhTLDH != null)
+                            {
+                                <button onclick="exportExcelTLDH()" style="margin-right:5px" class="btn btn-outline-secondary"><i class='bx bx-export'></i>Xuất Excel</button>
+                            }
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="modalPhanBoSL" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Phân Bố Sản Lượng</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="card">
+                    <div class="card-body">
+                        <div id="GridPhanBoSL"></div>
+
+                        <div style="margin-top: 20px; display: flex; align-items: center;">
+                            <select id="maKhuVucPhanBoSL" class="form-control form-control-lg" style="margin-right: 10px;">
+                                <option value="">Chọn khu vực</option>
+                                @foreach (var item in listKhuVucs)
+                                {
+                                    <option value="@item.Id">@item.Name</option>
+                                }
+                            </select>
+                            <button onclick="showInsertPhanBoSL()" style="margin-right: 5px;" class="btn btn-primary">
+                                <i class='bx bx-plus'></i> Thêm
+                            </button>
+                            <button onclick="showUpdatePhanBoSL()" style="margin-right: 5px;" class="btn btn-outline-warning">
+                                <i class='bx bx-edit-alt'></i> Sửa
+                            </button>
+                            <button onclick="showDeletePhanBoSL()" style="margin-right: 5px;" class="btn btn-outline-danger">
+                                <i class='bx bx-trash'></i> Xoá
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="modalThemPhanBoSL" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Thêm Phân Bố Sản Lượng</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row dhTppbsl">
+                            <div class="col-md-12 mb-12 ">
+                                <div class="form-outline">
+                                    <label class="form-label">DH Thành Phẩm Org</label>
+                                    <select id="maThanhPhamOrgPhanBoSL" class="form-control form-control-lg">
+                                        <option value="">Chọn thành phẩm org</option>
+                                        @foreach (var item in listThanhPhams)
+                                        {
+                                            <option value="@item.Ma">@item.Ten</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row dhTppbsl">
+                            <div class="col-md-12 mb-12 ">
+                                <div class="form-outline">
+                                    <label class="form-label">DH Thành Phẩm Des</label>
+                                    <select id="maThanhPhamDesPhanBoSL" class="form-control form-control-lg">
+                                        <option value="">Chọn thành phẩm org</option>
+                                        @foreach (var item in listThanhPhams)
+                                        {
+                                            <option value="@item.Ma">@item.Ten</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row flTppbsl">
+                            <div class="col-md-12 mb-12 ">
+                                <div class="form-outline">
+                                    <label class="form-label">FL Thành Phẩm Org</label>
+                                    <select id="maThanhPhamFLOrgPhanBoSL" class="form-control form-control-lg">
+                                        <option value="">Chọn thành phẩm org</option>
+                                        @foreach (var item in listThanhPhamFLs)
+                                        {
+                                            <option value="@item.Ma">@item.Ten</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row flTppbsl">
+                            <div class="col-md-12 mb-12 ">
+                                <div class="form-outline">
+                                    <label class="form-label">FL Thành Phẩm Des</label>
+                                    <select id="maThanhPhamFLDesPhanBoSL" class="form-control form-control-lg">
+                                        <option value="">Chọn thành phẩm org</option>
+                                        @foreach (var item in listThanhPhamFLs)
+                                        {
+                                            <option value="@item.Ma">@item.Ten</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 mb-12 ">
+                                <div class="form-outline">
+                                    <label class="form-label">Lô</label>
+                                    <select id="maLoPhanBoSL" class="form-control form-control-lg">
+                                        <option value="">Chọn lô</option>
+                                        @foreach (var item in listMaLos)
+                                        {
+                                            <option value="@item.Item2">@item.Item2</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 mb-12 ">
+                                <div class="form-outline">
+                                    <label class="form-label">Tỷ Lệ</label>
+                                    <input type="number" min="0" step=".001" class="form-control form-control-lg" id="tyLePhanBoSL" placeholder="0.000" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-4 pt-2">
+                            <div class="col-12">
+                                <button onclick="insertPhanBoSL()" class="btn btn-primary w-100 position-relative" type="submit" id="">
+                                    <div class=" align-items-center">
+                                        <span id="txtThemPhanBoSL">Thêm</span>
+                                        <div id="loadingIndicatorPhanBoSL" class=" spinner-border text-secondary position-absolute" role="status" style="left: 0;right: 0;top: 0;bottom: 0;margin: auto; display:none">
+                                            <span class="visually-hidden">Đang tải...</span>
+                                        </div>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="modalSuaPhanBoSL" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Sửa Phân Bố Sản Lượng</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row dhTppbsl">
+                            <div class="col-md-12 mb-12 ">
+                                <div class="form-outline">
+                                    <label class="form-label">DH Thành Phẩm Org</label>
+                                    <select id="maThanhPhamOrgPhanBoSLSua" class="form-control form-control-lg" disabled>
+                                        <option value="">Chọn thành phẩm org</option>
+                                        @foreach (var item in listThanhPhams)
+                                        {
+                                            <option value="@item.Ma">@item.Ten</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row dhTppbsl">
+                            <div class="col-md-12 mb-12 ">
+                                <div class="form-outline">
+                                    <label class="form-label">DH Thành Phẩm Des</label>
+                                    <select id="maThanhPhamDesPhanBoSLSua" class="form-control form-control-lg" disabled>
+                                        <option value="">Chọn thành phẩm org</option>
+                                        @foreach (var item in listThanhPhams)
+                                        {
+                                            <option value="@item.Ma">@item.Ten</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row flTppbsl">
+                            <div class="col-md-12 mb-12 ">
+                                <div class="form-outline">
+                                    <label class="form-label">FL Thành Phẩm Org</label>
+                                    <select id="maThanhPhamFLOrgPhanBoSLSua" class="form-control form-control-lg" disabled>
+                                        <option value="">Chọn thành phẩm org</option>
+                                        @foreach (var item in listThanhPhamFLs)
+                                        {
+                                            <option value="@item.Ma">@item.Ten</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row flTppbsl">
+                            <div class="col-md-12 mb-12 ">
+                                <div class="form-outline">
+                                    <label class="form-label">FL Thành Phẩm Des</label>
+                                    <select id="maThanhPhamFLDesPhanBoSLSua" class="form-control form-control-lg" disabled>
+                                        <option value="">Chọn thành phẩm org</option>
+                                        @foreach (var item in listThanhPhamFLs)
+                                        {
+                                            <option value="@item.Ma">@item.Ten</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 mb-12 ">
+                                <div class="form-outline">
+                                    <label class="form-label">Lô</label>
+                                    <select id="maLoPhanBoSLSua" class="form-control form-control-lg" disabled>
+                                        <option value="">Chọn lô</option>
+                                        @foreach (var item in listMaLos)
+                                        {
+                                            <option value="@item.Item2">@item.Item2</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 mb-12 ">
+                                <div class="form-outline">
+                                    <label class="form-label">Tỷ Lệ</label>
+                                    <input type="number" min="0" step=".001" class="form-control form-control-lg" id="tyLePhanBoSLSua" placeholder="0.000" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-4 pt-2">
+                            <div class="col-12">
+                                <button onclick="updatePhanBoSL()" class="btn btn-primary w-100 position-relative" type="submit" id="">
+                                    <div class=" align-items-center">
+                                        <span id="txtSuaPhanBoSL">Sửa</span>
+                                        <div id="loadingIndicatorSuaPhanBoSL" class=" spinner-border text-secondary position-absolute" role="status" style="left: 0;right: 0;top: 0;bottom: 0;margin: auto; display:none">
+                                            <span class="visually-hidden">Đang tải...</span>
+                                        </div>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<input id="rowSelectedPhanBoSL" hidden />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js" integrity="sha512-7rhBJh1om/W5Ztx7WiYOR9h2wlSaTmPyQMoHFtbT/FVNIA12y6S6I8HY9mrBS1uJ3dSU/R3qaSAXsGYuRjMDxg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script>
+    $(document).ready(function () {
+        $('#khuVucTL').val("DH");
+    });
+    var grid;
+    function loadGridData(data) {
+        var dataManager = new ej.data.DataManager({
+            json: data,
+            adaptor: new ej.data.JsonAdaptor()
+        });
+        if (grid && data != null && data != "") {
+            grid.dataSource = dataManager;
+            grid.refresh();
+        } else {
+            grid = new ej.grids.Grid({
+                dataSource: dataManager,
+                allowPaging: true,
+                pageSettings: { pageSize: 50 },
+                allowFiltering: true,
+                allowSorting: true,
+                filterSettings: { type: 'Excel' },
+                selectionSettings: { persistSelection: true },
+                //frozenColumns: 3,
+                allowResizing: true,
+                //rowSelected: onRowSelected,
+                rowSelected: selectionChanged,
+                rowDeselected: unSelectionChanged,
+                //toolbar: ['ExcelExport'],
+                height: 400,
+                columns: [
+                    { type: "checkbox", field: "", allowFiltering: false, allowSorting: false, width: '50' },
+                    { field: 'MaNhanVien', headerText: 'Mã Nhân Viên', width: 150 },
+                    { field: 'MaHoSo', headerText: 'Mã Số', width: 150 },
+                    { field: 'TenNhanVien', headerText: 'Tên Nhân Viên', width: 150 },
+                    { field: 'IsChamCong', headerText: 'Chấm Công', width: 100, displayAsCheckBox: 'true', textAlign: 'Center' },
+                    { field: 'LoaiCaName', headerText: 'Loại Cá', width: 150 },
+                    { field: 'SizeName', headerText: 'Size', width: 150 },
+                    { field: 'ThanhPhamNameOrg', headerText: 'Thành Phẩm Org', width: 150 },
+                    { field: 'ThanhPhamName', headerText: 'Thành Phẩm', width: 150 },
+                    { field: 'TyLe', headerText: 'Tỷ Lệ', type: 'number', width: 150 },
+                    { field: 'TrongLuongNhanOrg', headerText: 'TL Nhận Org', type: 'number', width: 150 },
+                    { field: 'TrongLuongNhan', headerText: 'TL Nhận', type: 'number', width: 150 },
+                    { field: 'TrongLuongTraOrg', headerText: 'TL Trả Org', type: 'number', width: 150 },
+                    { field: 'TrongLuongTra', headerText: 'TL Trả', type: 'number', width: 150 },
+                    { field: 'DinhMucThucTeOrg', headerText: 'ĐMThực Org', type: 'number', width: 150 },
+                    { field: 'DinhMucThucTe', headerText: 'ĐM Thực', type: 'number', width: 150 },
+                    { field: 'DinhMucYeuCau', headerText: 'ĐM Chuẩn', type: 'number', width: 150 },
+                    { field: 'DanhGia', headerText: 'Đơn Giá', width: 100, displayAsCheckBox: 'true', textAlign: 'Center' },
+                    { field: 'ThanhTien', headerText: 'Thành Tiền', type: 'number', width: 150 },
+                    { field: 'DinhMucYeuCau', headerText: 'ĐM Chuẩn', type: 'number', width: 150 },
+                ]
+            });
+            // Hiển thị Grid trên trang web
+            grid.appendTo('#Grid');
+        }
+    }
+    loadGridData();
+
+    let selectedIdsString = "";
+    let numRowSelect = 0;
+    function unSelectionChanged(args) {
+        let deselectedRecords = args.data ? args.data : []; // Lấy các bản ghi được bỏ chọn
+
+        // Kiểm tra xem deselectedRecords có phải là một mảng không
+        if (Array.isArray(deselectedRecords)) {
+            // Nếu là một mảng rỗng hoặc không tồn tại
+            if (deselectedRecords.length === 0) {
+                selectedIdsString = "";
+                numRowSelect = 0; // Reset số dòng đã chọn
+                return;
+            }
+            // Lặp qua từng bản ghi được bỏ chọn
+            for (let i = 0; i < deselectedRecords.length; i++) {
+                let deselected = deselectedRecords[i];
+                let deselectedString = JSON.stringify(deselected);
+
+                // Kiểm tra xem bản ghi đã có trong chuỗi chưa trước khi loại bỏ
+                if (selectedIdsString.includes(deselectedString)) {
+                    // Loại bỏ chuỗi JSON của bản ghi và dấu " | " theo sau
+                    selectedIdsString = selectedIdsString.replace(deselectedString + "|", "");
+                    numRowSelect--; // Giảm số dòng đã chọn
+                }
+            }
+            // Loại bỏ dấu ' | ' cuối cùng nếu có
+            // if (selectedIdsString.endsWith("|")) {
+            //     selectedIdsString = selectedIdsString.slice(0, -3);
+            // }
+        } else {
+            // Trường hợp chỉ có một bản ghi được bỏ chọn
+            let deselectedString = JSON.stringify(deselectedRecords);
+
+            // Kiểm tra xem bản ghi đã có trong chuỗi chưa trước khi loại bỏ
+            if (selectedIdsString.includes(deselectedString)) {
+                // Loại bỏ chuỗi JSON của bản ghi và dấu " | " theo sau
+                selectedIdsString = selectedIdsString.replace(deselectedString + "|", "");
+                numRowSelect--; // Giảm số dòng đã chọn
+            }
+            // Loại bỏ dấu ' | ' cuối cùng nếu có
+            // if (selectedIdsString.endsWith("|")) {
+            //     selectedIdsString = selectedIdsString.slice(0, -3);
+            // }
+        }
+    }
+    function selectionChanged(args) {
+        let selectedRecords = args.data ? args.data : []; // Lấy các bản ghi được chọn
+
+        if (selectedRecords.length === 0) {
+            // Lấy toàn bộ danh sách từ grid vào selectedIdsString
+            let allDataRecords = grid.dataSource instanceof ej.data.DataManager ? grid.dataSource.dataSource.json : grid.dataSource; // Lấy toàn bộ dữ liệu
+            selectedIdsString = ""; // Reset selectedIdsString trước khi thêm dữ liệu mới
+            numRowSelect = allDataRecords.length; // Cập nhật số dòng đã chọn
+            allDataRecords.forEach(record => {
+                // Chuyển đổi đối tượng thành chuỗi JSON
+                selectedIdsString += JSON.stringify(record) + "|";
+            });
+            // Loại bỏ dấu ' | ' cuối cùng
+            selectedIdsString = selectedIdsString.slice(0, -1);
+            return;
+        }
+
+        selectedRecords.forEach(record => {
+            // Chuyển đổi đối tượng thành chuỗi JSON và kiểm tra xem đã tồn tại chưa
+            let recordString = JSON.stringify(record);
+            if (!selectedIdsString.includes(recordString)) {
+                selectedIdsString += recordString + "|";
+                numRowSelect++; // Tăng số dòng đã chọn
+            }
+        });
+
+        // Loại bỏ dấu ' | ' cuối cùng
+        selectedIdsString = selectedIdsString.slice(0, -1);
+    }
+    // function selectionChanged(args) {
+    //     let selectedRecords = args.data ? args.data : []; // Lấy các bản ghi được chọn
+
+    //     if (selectedRecords.length == 0) {
+    //         // Lấy toàn bộ danh sách từ grid vào selectedIdsString
+    //         let filteredRecords = grid.getCurrentViewRecords(); // Lấy các bản ghi đã được lọc
+    //         selectedIdsString = ""; // Reset selectedIdsString trước khi thêm dữ liệu mới
+    //         numRowSelect = filteredRecords.length; // Cập nhật số dòng đã chọn
+    //         filteredRecords.forEach(record => {
+    //             // Chuyển đổi đối tượng thành chuỗi JSON
+    //             selectedIdsString += JSON.stringify(record) + "|";
+    //         });
+    //         // Loại bỏ dấu ' | ' cuối cùng
+    //         //selectedIdsString = selectedIdsString.slice(0, -3);
+    //         return;
+    //     }
+
+    //     selectedRecords.forEach(record => {
+    //         // Chuyển đổi đối tượng thành chuỗi JSON và kiểm tra xem đã tồn tại chưa
+    //         let recordString = JSON.stringify(record);
+    //         if (!selectedIdsString.includes(recordString)) {
+    //             selectedIdsString += recordString + "|";
+    //             numRowSelect++; // Tăng số dòng đã chọn
+    //         }
+    //     });
+
+    //     // Loại bỏ dấu ' | ' cuối cùng
+    //     //selectedIdsString = selectedIdsString.slice(0, -3);
+    // }
+    function exportExcelTLDH() {
+
+        grid.showSpinner();
+        grid.excelExport();
+
+        grid.excelExportComplete = () => {
+            grid.hideSpinner();
+        }
+    }
+    function onRowSelected(args) {
+        // Lấy dữ liệu của hàng được chọn
+        var selectedRecord = args.data;
+        // Lấy giá trị Id từ dữ liệu của hàng được chọn
+        alert(selectedRecord);
+
+    }
+    function reloadData() {
+        grid.showSpinner();
+        var dateTime = $('#dateTimeTL').val();
+        var xuongId = @XuongId;
+        var khuVucId = $('#khuVucTL').val();
+        $.ajax({
+            url: "@Url.Action("Reload", "Chinh")",
+            type: "GET",
+            data: { dateTime: dateTime, xuongId: xuongId, khuVucId: khuVucId },
+            success: function (response) {
+                if (response.Success) {
+                    grid.hideSpinner();
+                    loadGridData(response.Data);
+                } else {
+                    grid.hideSpinner();
+                    toastOptionNotyfi();
+                    toastr["error"](response.Messages, "Không có dữ liệu!");
+                }
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"](error, "Thông báo");
+            }
+        });
+    }
+</script>
+<script>
+    var dateTime2 = $('#dateTimeTL').val();
+    var gridPhanBoSL;
+    function loadGridDataPhanBoSL(dateTime, maKhuVuc) {
+        $.ajax({
+            url: '/Chinh/GetAllWithKhuVucThanhPhamPhoiTrons',
+            data: { dateTime: dateTime, maKhuVuc: maKhuVuc },
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                var dataManager = new ej.data.DataManager({
+                    json: data,
+                    adaptor: new ej.data.JsonAdaptor()
+                });
+                if (gridPhanBoSL) {
+                    gridPhanBoSL.dataSource = dataManager;
+                    gridPhanBoSL.refresh();
+                } else {
+                    gridPhanBoSL = new ej.grids.Grid({
+                        dataSource: dataManager,
+                        allowPaging: true,
+                        pageSettings: { pageSize: 50 },
+                        allowFiltering: true,
+                        allowSorting: true,
+                        //frozenColumns: 3,
+                        allowResizing: true,
+                        rowSelected: onRowSelectedPhanBoSL,
+                        //height: 400,
+                        columns: [
+                            { field: 'Ngay', headerText: 'Ngày', width: 150 },
+                            { field: 'ThanhPhamOrgName', headerText: maKhuVuc + ' Thành Phẩm Org', width: 150 },
+                            { field: 'ThanhPhamDesName', headerText: maKhuVuc + ' Thành Phẩm Des', width: 150 },
+                            { field: 'MaKhuVuc', headerText: 'Mã Khu Vực', width: 150 },
+                            { field: 'XuongName', headerText: 'Xưởng', width: 150 },
+                            { field: 'MaLo', headerText: 'Lô', width: 150 },
+                            { field: 'TyLe', headerText: 'Tỷ Lệ', type: 'number', width: 150 },
+                        ]
+                    });
+                    gridPhanBoSL.appendTo('#GridPhanBoSL');
+
+
+                    // Hiển thị Grid trên trang web
+
+                }
+            },
+            error: function (error) {
+                console.error(error);
+            }
+        });
+    }
+    loadGridDataPhanBoSL(dateTime2, "DH");
+    function reloadDataPhanBoSL(dateTime, maKhuVuc) {
+        loadGridDataPhanBoSL(dateTime, maKhuVuc);
+    }
+    function onRowSelectedPhanBoSL(args) {
+        // Lấy dữ liệu của hàng được chọn
+        var selectedRecord = args.data;
+        // Lấy giá trị Id từ dữ liệu của hàng được chọn
+        var Ngay = selectedRecord.Ngay;
+        var MaThanhPhamOrg = selectedRecord.MaThanhPhamOrg;
+        var MaThanhPhamDes = selectedRecord.MaThanhPhamDes;
+        var MaKhuVuc = selectedRecord.MaKhuVuc;
+        var MaXuong = selectedRecord.MaXuong;
+        var MaLo = selectedRecord.MaLo;
+        $('#rowSelectedPhanBoSL').val(Ngay + "," + MaThanhPhamOrg + "," + MaThanhPhamDes + "," + MaKhuVuc + "," + MaXuong + "," + MaLo);
+        var l = $('#rowSelectedPhanBoSL').val();
+        //alert(l);
+    }
+
+    $('#maKhuVucPhanBoSL').on('change', function () {
+        var selectedValue = $(this).val();
+        if (selectedValue === 'DH') {
+            $('.flTppbsl').hide();
+            $('.dhTppbsl').show();
+        } else {
+            $('.flTppbsl').show();
+            $('.dhTppbsl').hide();
+        }
+        var dateTime = $('#dateTimeTL').val();
+        reloadDataPhanBoSL(dateTime, selectedValue);
+    });
+    function phanBoSLShow() {
+        $('#maKhuVucPhanBoSL').val("DH");
+        $('#modalPhanBoSL').modal('show');
+    }
+    function showInsertPhanBoSL() {
+        var maKhuVucPhanBoSL = $('#maKhuVucPhanBoSL').val();
+        if (maKhuVucPhanBoSL == null || maKhuVucPhanBoSL == undefined || maKhuVucPhanBoSL == "") {
+            toastOptionNotyfi();
+            toastr["warning"]("Bạn chưa chọn khu vực", "Thông báo");
+            return;
+        }
+        $('#modalThemPhanBoSL').modal('show');
+    }
+    function insertPhanBoSL() {
+        var dateTime = $('#dateTimeTL').val();
+        var maXuong = @XuongId;
+        var maKhuVuc = $('#maKhuVucPhanBoSL').val();
+        var maThanhPhamOrg = "";
+        var maThanhPhamDes = "";
+        if (maKhuVuc == "DH") {
+            maThanhPhamOrg = $('#maThanhPhamOrgPhanBoSL').val();
+            maThanhPhamDes = $('#maThanhPhamDesPhanBoSL').val();
+
+        } else if (maKhuVuc == "FL") {
+            maThanhPhamOrg = $('#maThanhPhamFLOrgPhanBoSL').val();
+            maThanhPhamDes = $('#maThanhPhamFLDesPhanBoSL').val();
+        }
+        var maLo = $('#maLoPhanBoSL').val();
+        var tyLe = $('#tyLePhanBoSL').val();
+        document.getElementById("txtThemPhanBoSL").style.visibility = "hidden";
+        document.getElementById("loadingIndicatorPhanBoSL").style.display = "block";
+        $.ajax({
+            type: 'POST',
+            url: '/Chinh/DoInsertThanhPhamPhoiTron',
+            data: {
+                dateTime: dateTime,
+                maXuong: maXuong,
+                maKhuVuc: maKhuVuc,
+                maThanhPhamOrg: maThanhPhamOrg,
+                maThanhPhamDes: maThanhPhamDes,
+                maLo: maLo,
+                tyLe: tyLe
+            },
+            success: function (rs) {
+                if (rs.isSuccess === true) {
+                    toastOptionNotyfi();
+                    toastr["success"](rs.Messages, "Thông báo");
+                    $('#modalThemPhanBoSL').modal('hide');
+                    reloadDataPhanBoSL(dateTime, maKhuVuc);
+                } else {
+                    toastOptionNotyfi();
+                    toastr["warning"](rs.Messages, "Thông báo");
+                }
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error, "Thông báo");
+            },
+            complete: function () {
+                document.getElementById("loadingIndicatorPhanBoSL").style.display = "none";
+                document.getElementById("txtThemPhanBoSL").style.visibility = "visible";
+            }
+        });
+    }
+    function showUpdatePhanBoSL() {
+        var listKeyPhanBoSL = $('#rowSelectedPhanBoSL').val();
+
+        $.ajax({
+            url: "/Chinh/GetsByMaThanhPhamPhoiTron",
+            data: { listKeyPhanBoSL: listKeyPhanBoSL },
+            type: 'GET',
+            dataType: 'json',
+            success: function (rs) {
+                if (rs.isSuccess === true) {
+                    if (rs.MaKhuVuc == "DH") {
+                        $('#maThanhPhamOrgPhanBoSLSua').val(rs.MaThanhPhamOrg);
+                        $('#maThanhPhamDesPhanBoSLSua').val(rs.MaThanhPhamDes);
+                    } else {
+                        $('#maThanhPhamFLOrgPhanBoSLSua').val(rs.MaThanhPhamOrg);
+                        $('#maThanhPhamFLDesPhanBoSLSua').val(rs.MaThanhPhamDes);
+                    }
+                    $('#maLoPhanBoSLSua').val(rs.MaLo);
+                    $('#tyLePhanBoSLSua').val(rs.TyLe);
+                    $('#modalSuaPhanBoSL').modal('show');
+                }
+                else {
+                    toastOptionNotyfi();
+                    toastr["warning"](rs.Mesages, "Thông báo");
+                }
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error, "Thông báo");
+            }
+        });
+    }
+    function updatePhanBoSL() {
+        var dateTime = $('#dateTimeTL').val();
+        var maXuong = @XuongId;
+        var maKhuVuc = $('#maKhuVucPhanBoSL').val();
+        var maThanhPhamOrg = "";
+        var maThanhPhamDes = "";
+        if (maKhuVuc == "DH") {
+            maThanhPhamOrg = $('#maThanhPhamOrgPhanBoSLSua').val();
+            maThanhPhamDes = $('#maThanhPhamDesPhanBoSLSua').val();
+
+        } else if (maKhuVuc == "FL") {
+            maThanhPhamOrg = $('#maThanhPhamFLOrgPhanBoSLSua').val();
+            maThanhPhamDes = $('#maThanhPhamFLDesPhanBoSLSua').val();
+        }
+        var maLo = $('#maLoPhanBoSLSua').val();
+        var tyLe = $('#tyLePhanBoSLSua').val();
+        document.getElementById("txtSuaPhanBoSL").style.visibility = "hidden";
+        document.getElementById("loadingIndicatorSuaPhanBoSL").style.display = "block";
+        $.ajax({
+            url: '/Chinh/DoUpDateThanhPhamPhoiTron',
+            data: {
+                dateTime: dateTime,
+                maXuong: maXuong,
+                maKhuVuc: maKhuVuc,
+                maThanhPhamOrg: maThanhPhamOrg,
+                maThanhPhamDes: maThanhPhamDes,
+                maLo: maLo,
+                tyLe: tyLe
+            },
+            type: 'POST',
+            dataType: 'json',
+            success: function (rs) {
+                if (rs.isSuccess === true) {
+                    $('#modalSuaPhanBoSL').modal('hide');
+                    reloadDataPhanBoSL(dateTime, maKhuVuc);
+                    toastOptionNotyfi();
+                    toastr["success"](rs.Messages, "Thông báo");
+                } else {
+                    toastOptionNotyfi();
+                    toastr["warning"](rs.Messages, "Thông báo");
+                }
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error.toString(), "Thông báo");
+            },
+            complete: function () {
+                document.getElementById("loadingIndicatorSuaPhanBoS").style.display = "none";
+                document.getElementById("txtSuaPhanBoS").style.visibility = "visible";
+            }
+        });
+    }
+    function showDeletePhanBoSL() {
+        var listKeyPhanBoSL = $('#rowSelectedPhanBoSL').val();
+        $.ajax({
+            url: "/Chinh/GetsByMaThanhPhamPhoiTron",
+            data: { listKeyPhanBoSL: listKeyPhanBoSL },
+            type: 'GET',
+            dataType: 'json',
+            success: function (rs) {
+                if (rs.isSuccess === true) {
+                    bootbox.confirm({
+                        title: "Thông báo!",
+                        message: "Bạn có chắc muốn xoá : " + rs.MaThanhPhamOrg,
+                        buttons: {
+                            confirm: {
+                                label: 'OK',
+                                className: 'btn btn-primary'
+                            }
+                        },
+                        callback: function (result) {
+                            if (result) {
+                                //Người dùng đã bấm OK, Gọi API xóa ở đây
+                                $.ajax({
+                                    url: '/Chinh/DoDeleteThanhPhamPhoiTron',
+                                    data: {
+                                        dateTime: rs.Ngay,
+                                        maThanhPhamOrg: rs.MaThanhPhamOrg,
+                                        maThanhPhamDes: rs.MaThanhPhamDes,
+                                        maKhuVuc: rs.MaKhuVuc,
+                                        maXuong: rs.MaXuong,
+                                        maLo: rs.MaLo,
+                                    },
+                                    type: 'POST',
+                                    dataType: 'json',
+                                    success: function (rs2) {
+                                        if (rs2.isSuccess === true) {
+                                            reloadDataPhanBoSL(rs.Ngay, rs.MaKhuVuc);
+                                            toastOptionNotyfi();
+                                            toastr["success"](rs2.Messages, "Thông báo");
+                                        } else {
+                                            toastOptionNotyfi();
+                                            toastr["warning"](rs2.Messages, "Thông báo");
+                                        }
+                                    },
+                                    error: function (error) {
+                                        toastOptionNotyfi();
+                                        toastr["error"]('Đã xảy ra lỗi: ' + error.toString(), "Thông báo");
+                                    }
+                                });
+                            }
+                        }
+                    });
+                } else {
+                    toastOptionNotyfi();
+                    toastr["warning"]('Không tìm thấy thông tin!', "Thông báo");
+                }
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error.toString(), "Thông báo");
+            }
+        });
+
+    }
+
+    function tpSoftAction() {
+        // Lấy giá trị dateTime từ input và maXuong từ biến Razor
+        var dateTime = $('#dateTimeTL').val();
+        var maXuong = '@XuongId';
+        const token = document.getElementById('TokenTL').value;
+        $.ajax({
+            url: '/Chinh/GetSignalRConnectionInfo',
+            type: 'POST',
+            dataType: "json",
+            success: function (response) {
+
+                const connection = new signalR.HubConnectionBuilder().withUrl("@AppViewModels.AppViewModel.Instance.ApiHostUrl" + "/progressHub", {
+                    accessTokenFactory: () => token
+                }).build();
+
+                connection.on("ReceiveProgress", function (message) {
+                    document.getElementById("progressStatus").innerText = message;
+                });
+
+                connection.start().then(function () {
+                    console.log("SignalR Connected.");
+
+                    $.ajax({
+                        url: '/Chinh/ExecuteTPSoftAction',
+                        data: {
+                            dateTime: dateTime,
+                            maXuong: maXuong
+                        },
+                        type: 'POST',
+                        dataType: "json",
+                        success: function () {
+                            console.log('Request sent successfully.');
+                        },
+                        error: function (error) {
+                            console.error('Error:', error);
+                        }
+                    });
+                }).catch(function (err) {
+                    console.error('SignalR Connection Error:', err.toString());
+                });
+            },
+            error: function (error) {
+                console.error('Error fetching SignalR connection info:', error);
+            }
+        });
+    }
+    function ketChuyen() {
+        if (selectedIdsString != "") {
+            var dateTime = $('#dateTimeTL').val();
+            var maXuong = '@XuongId';
+            bootbox.confirm({
+                title: "Thông báo!",
+                message: "Xác nhận chuyển dữ liệu lên CSDL tính lương trên " + numRowSelect + " dòng dữ liệu!",
+                buttons: {
+                    confirm: {
+                        label: 'OK',
+                        className: 'btn btn-primary'
+                    }
+                },
+                callback: function (result) {
+                    if (result) {
+                        //Người dùng đã bấm OK, Gọi API xóa ở đây
+                        $.ajax({
+                            url: '/Chinh/KetChuyen',
+                            data: { dateTime: dateTime, maXuong: maXuong, listPhieuCanTongHopDinhHinh: selectedIdsString },
+                            type: 'POST',
+                            dataType: 'json',
+                            success: function (rs) {
+                                if (rs.isSuccess === true) {
+                                    reloadData();
+                                    toastOptionNotyfi();
+                                    toastr["success"](rs.Messages, "Thông báo");
+                                } else {
+                                    toastOptionNotyfi();
+                                    toastr["warning"](rs.Messages, "Thông báo");
+                                }
+                            },
+                            error: function (error) {
+                                toastOptionNotyfi();
+                                toastr["error"]('Đã xảy ra lỗi: ' + error.toString(), "Thông báo");
+                            }
+                        });
+                    }
+                }
+            });
+        }
+        else {
+            toastOptionNotyfi();
+            toastr["warning"]("Bạn chưa chọn dữ liệu cần kết chuyển", "Thông báo");
+        }
+    }
+</script>

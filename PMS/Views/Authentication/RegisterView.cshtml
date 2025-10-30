@@ -1,0 +1,531 @@
+﻿@{
+    ViewData["Title"] = "Đăng ký tài khoản";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var listRoles = ViewBag.listRoles;
+}
+<style>
+    #loadingIndicator {
+        left: 0;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        margin: auto;
+        position: absolute;
+    }
+
+    #modalInfo .modal-dialog {
+        max-height: 50vh; /* Thiết lập chiều cao tối đa là 70% chiều cao của màn hình */
+    }
+
+    .form-check {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .form-switch {
+        margin-top: 9px;
+        
+        ; /* Khoảng cách giữa label và checkbox */
+    }
+
+    .form-check-input{
+        width: 4.8em;
+        height: 2em;
+        margin-left: -2.9em;
+    }
+
+    .form-switch .form-check-input {
+        width: 4em;
+        margin-left: -2.5em;
+        background-position: left center;
+        border-radius: 2em;
+        transition: background-position 0.15s ease-in-out;
+    }
+
+    .form-check-input:checked, .form-check-input[type=checkbox]:indeterminate {
+        background-color: #6beb34;
+        border-color: #6beb34;
+        box-shadow: 0 2px 4px 0 rgba(105, 108, 255, 0.4);
+    }
+
+    div[style*="color: #222222;"] {
+        display: none;
+    }
+</style>
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h2 class="mb-0">Danh Sách Người Dùng</h2>
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalDangKy">Đăng Ký Tài Khoản</button>
+                </div>
+                <div class="card-body">
+                    <div id="Grid"></div>
+                    <div style="margin-top:20px;">
+                        <button style="margin-right:5px" title="Xem, Sửa người dùng" id="btnShowInfo" onclick="btnShowInfo()" class="btn btn-outline-info"><i class='bx bxs-info-square'></i> Xem/Sửa</button>
+                        <button title="Xoá người dùng" id="btnDeleteUser" onclick="btnDeleteUser()" class="btn btn-outline-danger"><i class='bx bx-trash'></i> Xoá</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="modalDangKy" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Đăng Ký</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <div class="form-outline">
+                                    <label class="form-label" for="userName">Tên Đăng Nhập</label>
+                                    <input type="text" id="userName" class="form-control form-control-lg" autocomplete="off" />
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <div class="form-outline">
+                                    <label class="form-label" for="passWord">Mật Khẩu</label>
+                                    <input type="password" id="passWord" class="form-control form-control-lg" autocomplete="new-password" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <div class="form-outline">
+                                    <label class="form-label" for="hoTen">Họ Tên</label>
+                                    <input type="text" id="hoTen" class="form-control form-control-lg" autocomplete="off" />
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <div class="form-outline">
+                                    <label class="form-label" for="emailAddress">Số Điện Thoại</label>
+                                    <input type="text" id="phoneNumber" class="form-control form-control-lg" autocomplete="off" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <div class="form-outline">
+                                    <label class="form-label" for="emailAddress">Mã Nhân Viên</label>
+                                    <input type="text" id="maNhanVien" class="form-control form-control-lg" autocomplete="off" />
+                                </div>
+                            </div>
+                           @*  <div class="col-md-6 mb-4">
+                                <label class="form-label select-label">Loại nhân viên</label>
+                                <select id="IdRoles" class="form-control form-control-lg">
+                                    <option disabled>Loại người dùng</option>
+                                    @foreach (var item in listRoles)
+                                    {
+                                        <option value="@item.Id">@item.Name</option>
+                                    }
+                                </select>
+                            </div> *@
+                        </div>
+
+                        <div class="row mt-4 pt-2">
+                            <div class="col-12">
+                                <button onclick="register(this)" class="btn btn-primary w-100" type="submit" id="registerBtn">
+                                    <div class=" align-items-center">
+                                        <span id="txtDangKy">Đăng Ký</span>
+                                        <div id="loadingIndicator" class=" spinner-border text-secondary" role="status" style="display: none;">
+                                            <span class="visually-hidden">Đang tải...</span>
+                                        </div>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="modalInfo" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Thông Tin Người Dùng</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row mb-3">
+                    <div class="col-md-4 text-center">
+                        <img id="avatarImgInfo" class="img-fluid rounded-circle mb-3" alt="Ảnh Đại Diện" src="~/authentication/images/defautavatar.png">
+                        <div class="mb-3">
+                            <button class="btn btn-outline-primary btn-sm">Thay Đổi Ảnh</button>
+                        </div>
+                    </div>
+                    <div class="col-md-8">
+                        <div class="mb-3">
+                            <label for="hoTen" class="form-label">Họ và Tên</label>
+                            <input type="text" id="hoTenInfo" class="form-control">
+                        </div>
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="text" id="emailInfo" class="form-control">
+                        </div>
+                        <div class="mb-3">
+                            <label for="dob" class="form-label">Mã Nhân Viên</label>
+                            <input type="text" id="maNhanVienInfo" class="form-control">
+                        </div>
+                        <div class="mb-3">
+                            <label for="phoneNumber" class="form-label">Số Điện Thoại</label>
+                            <input type="text" id="phoneNumberInfo" class="form-control">
+                        </div>
+                        <div class="mb-3">
+                            <label for="address" class="form-label">Địa Chỉ</label>
+                            <textarea id="addressInfo" class="form-control" rows="3"></textarea>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col">
+                                <label for="cardID" class="form-label">Số CMND</label>
+                                <input type="text" id="cardIDInfo" class="form-control">
+                            </div>
+                            <div class="col">
+                                <div class="form-check">
+                                    <label class="form-check-label" for="isActiveInfo">Kích hoạt</label>
+                                    <div class="form-switch">
+                                        <input id="isActiveInfo" class="form-check-input" type="checkbox" role="switch" />
+                                    </div>
+                                </div>
+                            </div>
+                            @* <div class="col">
+                                <label for="status" class="form-label">Trạng Thái</label>
+                                @* <input type="text" id="statusInfo" class="form-control"> *@
+                                @* <select id="statusInfo" class="select2 form-select">
+                                    <option value="" disabled>Select</option>
+                                    <option value="1">Thử việc</option>
+                                    <option value="2">Đang làm</option>
+                                    <option value="3">Tạm nghĩ</option>
+                                    <option value="4">Đã nghĩ</option>
+                                </select>
+                            </div> *@
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Đóng</button>
+                <button type="button" onclick="updateInfoUser()" class="btn btn-primary">Lưu Thay Đổi</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<input id="idUserRowSelected" type="hidden"/>
+<input id="userNameInfo" type="hidden" />
+<input id="passwordInfo" type="hidden" />
+<input id="hoTenUserDelete" type="hidden" />
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" rel="stylesheet" />
+<script id="statusTemplate" type="text/x-template">
+    <div>
+        ${if(Status===1)}
+           <span class="badge bg-info">Thử việc</span>
+        ${else if(Status===2)}
+            <span class="badge bg-primary">Đang làm</span>
+        ${else if(Status===3)}
+            <span class="badge bg-secondary">Tạm nghĩ</span>
+        ${else if(Status===4)}
+            <span class="badge bg-dark">Đã nghĩ</span>
+        ${else}
+            <span class=’ico-female’></span>
+        ${/if}
+    </div>
+</script>
+@**@
+<script type="text/x-template" id="isActiveTemplate">
+     <div>
+        ${if(IsActive)}
+           <span class="badge bg-success">Đã kích hoạt</span>
+        ${else}
+            <span class="badge bg-warning">Chưa kích hoạt</span>
+        ${/if}
+    </div>
+</script>
+<script type="text/x-template" id="optionTemplate">
+    <div>
+       @*  <button style="margin-right:5px" title="Xem, Sửa người dùng" id="btnShowInfo" onclick="btnShowInfo()"  class="btn btn-sm btn-info"><i class='bx bxs-info-square'></i></button>
+        <button title="Xoá người dùng" id="btnDeleteUser" onclick="btnDeleteUser()"  class="btn btn-sm btn-danger"><i class='bx bx-trash'></i></button> *@
+    </div>
+    
+</script>
+<script>
+    $(document).ready(function () {
+        loadGridData();
+    });
+    var grid;
+
+    function loadGridData() {
+        $.ajax({
+            url: '/Authentication/GetAllUser',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                // Khởi tạo DataManager và gán dữ liệu từ API vào dataSource
+                var dataManager = new ej.data.DataManager({
+                    json: data,
+                    adaptor: new ej.data.JsonAdaptor()
+                });
+
+                // Kiểm tra xem Grid đã được tạo chưa
+                if (grid) {
+                    // Nếu Grid đã được tạo, chỉ cập nhật dữ liệu mới
+                    grid.dataSource = dataManager;
+                    grid.refresh();
+                } else {
+                    // Nếu Grid chưa được tạo, tạo mới Grid
+                    grid = new ej.grids.Grid({
+                        dataSource: dataManager,
+                        allowPaging: true,
+                        pageSettings: { pageSize: 10 },
+                        allowFiltering: true,
+                        filterSettings: { type: 'Excel' },
+                        allowSorting: true,
+                        //frozenColumns: 3,
+                        allowResizing: true,
+                        rowSelected: onRowSelected,
+                        //height: 400,
+                        columns: [
+                            { field: 'STT', headerText: 'STT', width: 80, textAlign: 'Center' },
+                            { field: 'Id', headerText: 'Id', width: 80, textAlign: 'Center' },
+                            { field: 'UserName', headerText: 'Tài khoản', width: 100 },
+                            { field: 'MaNhanVien', headerText: 'Mã Nhân Viên', width: 150 },
+                            { field: 'HoTen', headerText: 'Họ tên', width: 150 },
+                            { field: 'Email', headerText: 'Email', width: 200 },
+                            { field: 'PhoneNumber', headerText: 'Số Điện Thoại', width: 100 },
+                            { field: 'Address', headerText: 'Địa Chỉ', width: 200 },
+                            //{ field: 'Status', headerText: 'Trạng Thái', width: 150, template: '#statusTemplate' },
+                            { field: 'IsActive', headerText: 'Kích Hoạt', width: 150, template: '#isActiveTemplate' },
+                            //{ field: '', headerText: '', width: 100, template: '#optionTemplate' },
+                        ]
+                    });
+                    // Hiển thị Grid trên trang web
+                    grid.appendTo('#Grid');
+                }
+            },
+            error: function (error) {
+                console.error(error);
+            }
+        });
+    }
+
+    loadGridData();
+    function reloadData() {
+        loadGridData();
+    }
+    function onRowSelected(args) {
+        // Lấy dữ liệu của hàng được chọn
+        var selectedRecord = args.data;
+        // Lấy giá trị Id từ dữ liệu của hàng được chọn
+        var id = selectedRecord.Id;
+        $('#idUserRowSelected').val(id);
+    }
+    function register(input) {
+        var username = $("#userName").val();
+        var password = $("#passWord").val();
+        var hoten = $("#hoTen").val();
+        var phoneNumber = $("#phoneNumber").val();
+        var maNhanVien = $("#maNhanVien").val();
+        if (!username || !password || !hoten || !phoneNumber || !maNhanVien) {
+            toastOptionNotyfi();
+            toastr["error"]("Vui lòng nhập đầy đủ thông tin!", "Thông báo");
+            return false;
+        }
+        // Ẩn chữ "Đăng Ký"
+        document.getElementById("txtDangKy").style.visibility = "hidden";
+        // Hiển thị chỉ báo tải
+        //$("#loadingIndicator").show();
+        document.getElementById("loadingIndicator").style.display = "block";
+
+        $.ajax({
+            type: "POST",
+            url: "/Authentication/DoRegister",
+            data: { username: username, password: password, hoten: hoten, phoneNumber: phoneNumber, maNhanVien: maNhanVien }, // Không cần JSON.stringify ở đây
+            success: function (response) {
+               
+                if (response.isSuccess === true) {
+                    // $.notify(rs.Messages, "success");
+                    toastOptionNotyfi();
+                    toastr["success"](response.Messages, "Thông báo");
+
+                    // Xóa dữ liệu trong modal
+                    $('#userName').val('');
+                    $('#passWord').val('');
+                    $('#hoTen').val('');
+                    $('#phoneNumber').val('');
+                    $('#maNhanVien').val('');
+
+                    // Ẩn modal
+                    $('#modalDangKy').modal('hide');
+                    reloadData();
+                }
+                else {
+                    if (response.Messages == null || response.Messages == "") {
+
+                    }
+                    else {
+                        toastOptionNotyfi();
+                        toastr["error"](response.Messages, "Thông báo");
+                    }
+
+                }
+            },
+            error: function (xhr, status, error) {
+                if (response.Messages == null || response.Messages == "") {
+
+                }
+                else {
+                    toastOptionNotyfi();
+                    toastr["error"]('Đã xảy ra lỗi khi gửi yêu cầu đăng ký: ' + error, "Thông báo");
+                }
+                //$.notify(rs.Messages, "error");
+            },
+            complete: function () {
+                // // Ẩn chỉ báo tải sau khi nhận kết quả hoặc gặp lỗi
+                // Sau khi tải xong, ẩn chỉ báo tải và hiển thị lại chữ "Đăng Ký"
+                document.getElementById("loadingIndicator").style.display = "none";
+                document.getElementById("txtDangKy").style.visibility = "visible";
+            }
+        });
+    }
+</script>
+<script>
+    function btnShowInfo() {
+       
+        var id = $('#idUserRowSelected').val();
+        $.ajax({
+            url: '/Authentication/GetInfoUserById',
+            data: { id: id},
+            type: 'GET',
+            dataType: 'json',
+            success: function (rs) {
+                if (rs.isSuccess === true) {
+                    
+                    $('#usernameInfo').val(rs.UserName);
+                    $('#avatarImgInfo').val(rs.AvatarImg);
+                    $('#hoTenInfo').val(rs.HoTen);
+                    $('#emailInfo').val(rs.Email);
+                    $('#maNhanVienInfo').val(rs.MaNhanVien);
+                    $('#phoneNumberInfo').val(rs.PhoneNumber);
+                    $('#addressInfo').val(rs.Address);
+                    $('#cardIDInfo').val(rs.CardID);
+                    $('#isActiveInfo').prop('checked', rs.IsActive);
+                    //$('#statusInfo').val(rs.Status);
+                    $('#userNameInfo').val(rs.UserName);
+                    $('#passwordInfo').val(rs.Password);
+                    $('#modalInfo').modal('show');
+                } else {
+                    toastOptionNotyfi();
+                    toastr["warning"]('Không tìm thấy thông tin!', "Thông báo");
+                }
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error, "Thông báo");
+            }
+        });
+    }
+
+    function updateInfoUser() {
+        var id = $('#idUserRowSelected').val();
+        var avatarImg = $('#avatarImgInfo').val();
+        var hoten = $('#hoTenInfo').val();
+        var email = $('#emailInfo').val();
+        var maNhanVien = $('#maNhanVienInfo').val();
+        var phoneNumber = $('#phoneNumberInfo').val();
+        var address = $('#addressInfo').val();
+        var cardID = $('#cardIDInfo').val();
+        var isActive = $('#isActiveInfo').prop('checked');
+        //var status = $('#statusInfo').val();
+        var userName = $('#userNameInfo').val();
+        var password = $('#passwordInfo').val();
+        $.ajax({
+            url: '/Authentication/DoUpdate',
+            data: { id: id, avatarImg: avatarImg, hoten: hoten, email: email, maNhanVien: maNhanVien, phoneNumber: phoneNumber, address: address, cardID: cardID, isActive: isActive, userName: userName, password: password },
+            type: 'GET',
+            dataType: 'json',
+            success: function (rs) {
+                if (rs.isSuccess === true) {
+                    $('#modalInfo').modal('hide');
+                    reloadData();
+                    toastOptionNotyfi();
+                    toastr["success"](rs.Messages, "Thông báo");
+                } else {
+                    toastOptionNotyfi();
+                    toastr["warning"](rs.Messages, "Thông báo");
+                }
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error, "Thông báo");
+            }
+        });
+    }
+    function btnDeleteUser(){
+        var id = $('#idUserRowSelected').val();
+        $.ajax({
+            url: '/Authentication/GetInfoUserById',
+            data: { id: id },
+            type: 'GET',
+            dataType: 'json',
+            success: function (rs) {
+                if (rs.isSuccess === true) {
+                    $('#hoTenUserDelete').val(rs.HoTen);
+                    var hoten = $('#hoTenUserDelete').val();
+                    bootbox.confirm({
+                        title: "Thông báo!",
+                        message: "Bạn có chắc muốn xoá người dùng: " + hoten,
+                        buttons: {
+                            confirm: {
+                                label: 'OK',
+                                className: 'btn btn-primary'
+                            }
+                        },
+                        callback: function (result) {
+                            if (result) {
+                                //Người dùng đã bấm OK, Gọi API xóa ở đây
+                                $.ajax({
+                                    url: '/Authentication/DeleteUser',
+                                    data: { id: id },
+                                    type: 'POST',
+                                    dataType: 'json',
+                                    success: function (rs) {
+                                        if (rs.isSuccess === true) {
+                                            reloadData();
+                                            toastOptionNotyfi();
+                                            toastr["success"](rs.Messages, "Thông báo");
+                                        } else {
+                                            toastOptionNotyfi();
+                                            toastr["warning"](rs.Messages, "Thông báo");
+                                        }
+                                    },
+                                    error: function (error) {
+                                        toastOptionNotyfi();
+                                        toastr["error"]('Đã xảy ra lỗi: ' + error, "Thông báo");
+                                    }
+                                });
+                            }
+                        }
+                    });
+                } else {
+                    toastOptionNotyfi();
+                    toastr["warning"]('Không tìm thấy thông tin!', "Thông báo");
+                }
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error, "Thông báo");
+            }
+        });
+        
+    }
+</script>
+

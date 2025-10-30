@@ -1,0 +1,823 @@
+﻿@{
+    ViewData["Title"] = "Decentralization";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    //lấy danh sách roleid từ cookie
+    var roleIds = PMS.Middlewares.AuthenticationHelpers.GetRoleIdsFromCookie(Context);
+    // lấy danh sách fu func từ list roleId
+    var rolePermistions = await PMS.Middlewares.AuthenticationHelpers.GetRolePermistionsAsync(Context, roleIds);
+}
+<div class="container-xxl flex-grow-1 container-p-y" style="margin-top:-51px">
+    <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Phân Quyền /</span> Tạo Quyền</h4>
+    <div class="row">
+        <div class="col-md-12">
+            <ul class="nav nav-pills flex-column flex-md-row mb-3">
+                <li class="nav-item">
+                    <a class="nav-link active" href="/Authentication/Decentralization"><i class='bx bx-shield-quarter'></i> Tạo Quyền</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link " href="/Authentication/GrantAccess"><i class='bx bx-shield'></i> Phân Quyền</a>
+                </li>
+                @{
+                    var hubs = rolePermistions.Where(x => x.Fu.Contains("Hubs")).FirstOrDefault();
+                    if (hubs != null)
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link" href="/Authentication/UserArea"><i class='bx bx-shield'></i> Người Dùng Theo Khu Vực Máy Cân</a>
+                        </li>
+                    }
+                }
+            </ul>
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Tạo Quyền Cho Vai Trò</h5>
+
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-sm-2">
+                            <h6>Vai trò</h6>
+                            <div id="GridRole" style="margin-bottom:10px"></div>
+                            <div style="margin-bottom:5px">
+                                <button onclick="showInsert()" style="margin-right:5px;margin-bottom:5px" type="button" class="btn btn-outline-primary"><i class='bx bx-plus'></i>Thêm</button>
+                                <button onclick="showUpdate()" style="margin-right:5px;margin-bottom:5px" class="btn btn-outline-warning"><i class='bx bx-edit-alt'></i>Sửa</button>
+                                <button onclick="showDelete()" style="margin-right:5px;margin-bottom:5px" class="btn btn-outline-danger"><i class='bx bx-trash'></i>Xoá</button>
+                                <button id="creatPermistion" onclick="showCreatPermistion()" style="margin-right:5px;margin-bottom:5px; display:none" class="btn btn-outline-primary"><i class='bx bx-shield'></i>Tạo Quyền</button>
+                            </div>
+
+                        </div>
+                        <div class="col-sm-10">
+                            <h6>Quyền của vai trò</h6>
+                            <div id="GridDecentralization" style="margin-bottom:10px"></div>
+                            <div style="margin-bottom:5px">
+                                <button onclick="showUpdatePermistion()" style="margin-right:5px;margin-bottom:5px" class="btn btn-outline-warning"><i class='bx bx-edit-alt'></i>Cập Nhật Trạng Thái</button>
+                                <button onclick="showDeletePermistion()" style="margin-right:5px;margin-bottom:5px" class="btn btn-outline-danger"><i class='bx bx-trash'></i>Huỷ Quyền</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="modalThem" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Thêm Vai Trò</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-12 mb-12 ">
+                                <div class="form-outline">
+                                    <label class="form-label" for="x1">Mã</label>
+                                    <input type="text" id="maRole" class="form-control form-control-lg" autocomplete="off" placeholder="Nhập Mã..." style="text-transform: uppercase;" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 mb-12 ">
+                                <div class="form-outline">
+                                    <label class="form-label" for="x1">Tên</label>
+                                    <input type="text" id="tenRole" class="form-control form-control-lg" autocomplete="off" placeholder="Nhập Tên..." />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-4 pt-2">
+                            <div class="col-12">
+                                <button onclick="insert()" class="btn btn-primary w-100 position-relative" type="submit" id="">
+                                    <div class=" align-items-center">
+                                        <span id="txtThem">Thêm</span>
+                                        <div id="loadingIndicator" class=" spinner-border text-secondary position-absolute" role="status" style="left: 0;right: 0;top: 0;bottom: 0;margin: auto; display:none">
+                                            <span class="visually-hidden">Đang tải...</span>
+                                        </div>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="modalSua" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Sửa Vai Trò</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-12 mb-12 ">
+                                <div class="form-outline">
+                                    <label class="form-label" for="x1">Mã</label>
+                                    <input type="text" id="maRoleSua" class="form-control form-control-lg" autocomplete="off" placeholder="Nhập Mã..." style="text-transform: uppercase;" disabled />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 mb-12 ">
+                                <div class="form-outline">
+                                    <label class="form-label" for="x1">Tên</label>
+                                    <input type="text" id="tenRoleSua" class="form-control form-control-lg" autocomplete="off" placeholder="Nhập Tên..." />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-4 pt-2">
+                            <div class="col-12">
+                                <button onclick="update()" class="btn btn-primary w-100 position-relative" type="submit" id="">
+                                    <div class=" align-items-center">
+                                        <span id="txtSua">Sửa</span>
+                                        <div id="loadingIndicatorSua" class=" spinner-border text-secondary position-absolute" role="status" style="left: 0;right: 0;top: 0;bottom: 0;margin: auto; display:none">
+                                            <span class="visually-hidden">Đang tải...</span>
+                                        </div>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="modalTaoQuyen" tabindex="-1" aria-hidden="true" data-bs-focus="false" no-enforce-focus>
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Tạo Quyền Cho Vai Trò</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-12 mb-12 ">
+                        <label class="form-label">Chức Năng</label>
+                        <input class="form-control" type="text" id="multiselectFu" />
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12 mb-12 ">
+                        <label class="form-label">Hành Động</label>
+                        <input class="form-control" type="text" id="multiselectFunc" />
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-12">
+                        <label class="form-label">Trạng Thái</label>
+                        <select class="form-select" id="statusPermis">
+                            <option value="1">Sử Dụng</option>
+                            <option value="-1">Không Sử Dụng</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="row mt-4 pt-2">
+                    <div class="col-12">
+                        <button onclick="CreatRolePermistion()" class="btn btn-primary w-100 position-relative" type="submit" id="">
+                            <div class=" align-items-center">
+                                <span id="txtTaoQuyen">Xác Nhận</span>
+                                <div id="loadingIndicatorTaoQuyen" class=" spinner-border text-secondary position-absolute" role="status" style="left: 0;right: 0;top: 0;bottom: 0;margin: auto; display:none">
+                                    <span class="visually-hidden">Đang tải...</span>
+                                </div>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="modalUpdateTrangThaiRolePermistion" tabindex="-1" aria-hidden="true" data-bs-focus="false" no-enforce-focus>
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Cập Nhật Trạng Thái Quyền Của Vai Trò</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row ">
+                    <div class="col-12">
+                        <label class="form-label">Trạng Thái</label>
+                        <select class="form-select" id="statusPermisUpdate">
+                            <option value="1">Sử Dụng</option>
+                            <option value="-1">Không Sử Dụng</option>
+                        </select>
+                    </div>
+                </div>
+                <input type="hidden" id="idPer" />
+                <input type="hidden" id="idRolePer" />
+                <input type="hidden" id="fuPer" />
+                <input type="hidden" id="funcPer" />
+                <input type="hidden" id="creatDatePer" />
+                <div class="row mt-4 pt-2">
+                    <div class="col-12">
+                        <button onclick="UpdateTrangThaiRolePermistion()" class="btn btn-primary w-100 position-relative" type="submit" id="">
+                            <div class=" align-items-center">
+                                <span id="txtUpdateTrangThaiRolePermistion">Xác Nhận</span>
+                                <div id="loadingIndicatorUpdateTrangThaiRolePermistion" class=" spinner-border text-secondary position-absolute" role="status" style="left: 0;right: 0;top: 0;bottom: 0;margin: auto; display:none">
+                                    <span class="visually-hidden">Đang tải...</span>
+                                </div>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<input type="hidden" id="maRoleRowSelected" />
+<input type="hidden" id="maDecentralizationRowSelected" />
+<script type="text/x-template" id="StatusTemplate">
+     <div>
+        ${if(Status===1)}
+           <span class="badge bg-success">Đang sử dụng</span>
+        ${else if(Status===-1)}
+            <span class="badge bg-warning">Không sử dụng</span>
+        ${/if}
+    </div>
+</script>
+
+<script>
+    $(document).ready(function () {
+        loadGridRoleData();
+        loadGridDataDecentralization();
+    });
+    var gridRole;
+    function loadGridRoleData() {
+        $.ajax({
+            url: '/Authentication/GetAllRoles',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                var dataManager = new ej.data.DataManager({
+                    json: data,
+                    adaptor: new ej.data.JsonAdaptor()
+                });
+                if (gridRole) {
+                    gridRole.dataSource = dataManager;
+                    gridRole.refresh();
+                } else {
+                    gridRole = new ej.grids.Grid({
+                        dataSource: dataManager,
+                        allowPaging: true,
+                        pageSettings: { pageSize: 50 },
+                        allowFiltering: true,
+                        allowSorting: true,
+                        filterSettings: { type: 'Excel' },
+                        //frozenColumns: 3,
+                        allowResizing: true,
+                        rowSelected: onRowSelectedRole,
+                        height: 300,
+                        columns: [
+                            { field: 'Id', headerText: 'Id', width: 15 },
+                            { field: 'Name', headerText: 'Vai Trò', width: 50 }
+                            //{ field: 'SuDung', headerText: 'Sử Dụng', width: 100, displayAsCheckBox: 'true', textAlign: 'Center' },
+                        ]
+                    });
+                    // Hiển thị Grid trên trang web
+                    gridRole.appendTo('#GridRole');
+                }
+            },
+            error: function (error) {
+                console.error(error);
+            }
+        });
+    }
+    loadGridRoleData();
+    function reloadDataRole() {
+        loadGridRoleData();
+    }
+    function ClearData(GridId) {
+        try {
+            var gridObj = document.getElementById(GridId).ej2_instances[0];
+            if(gridObj)
+                gridObj.dataSource = [];
+        } catch (e) {
+            Console.log(e);
+        } 
+       
+    }
+    function onRowSelectedRole(args) {
+        ClearData("GridDecentralization");
+        // Lấy dữ liệu của hàng được chọn
+        var selectedRecord = args.data;
+        // Lấy giá trị Id từ dữ liệu của hàng được chọn
+        var IdRole = selectedRecord.Id;
+        $('#maRoleRowSelected').val(IdRole);
+        reloadGridDataDecentralization(IdRole);
+
+    }
+    function reloadGridDataDecentralization(IdRole) {
+        $.ajax({
+            url: "/Authentication/GetsByRoleIdDecentralization",
+            data: { IdRole: IdRole },
+            type: 'GET',
+            dataType: 'json',
+            success: function (rs) {
+                if (rs != null) {
+                    loadGridDataDecentralization(rs);
+                    document.getElementById("creatPermistion").style.display = "block";
+                } else {
+                    toastOptionNotyfi();
+                    toastr["warning"](rs.Mesages, "Thông báo");
+                }
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error, "Thông báo");
+            }
+        });
+    }
+
+    var gridDecentralization;
+
+    function initializeGrid(data) {
+        var dataManager = new ej.data.DataManager({
+            json: data,
+            adaptor: new ej.data.JsonAdaptor()
+        });
+
+        gridDecentralization = new ej.grids.Grid({
+            dataSource: dataManager,
+            allowPaging: true,
+            pageSettings: { pageSize: 100 },
+            allowFiltering: true,
+            filterSettings: { type: 'Excel' },
+            allowSorting: true,
+            allowResizing: true,
+            rowSelected: onRowSelectedDecentralization,
+            height: 300,
+            columns: [
+                { field: 'Fu', headerText: 'Chức Năng', width: 300 },
+                { field: 'Func', headerText: 'Hành Động', width: 250 },
+                { field: 'CreatedDateTime', headerText: 'Ngày Tạo', type: 'date', format: 'dd/MM/yyyy', width: 100 },
+                { field: 'Status', headerText: 'Trạng Thái', width: 100, template: '#StatusTemplate' },
+            ]
+        });
+
+        // Hiển thị Grid trên trang web
+        gridDecentralization.appendTo('#GridDecentralization');
+    }
+
+    function onRowSelectedDecentralization(args) {
+        var selectedRecord = args.data;
+        var IdDecentralization = selectedRecord.Id;
+        $('#maDecentralizationRowSelected').val(IdDecentralization);
+    }
+
+    function loadGridDataDecentralization(data) {
+        if (gridDecentralization) {
+            var dataManager = new ej.data.DataManager({
+                json: data,
+                adaptor: new ej.data.JsonAdaptor()
+            });
+            gridDecentralization.dataSource = dataManager;
+            gridDecentralization.refresh();
+        } else {
+            initializeGrid(data);
+        }
+    }
+
+    // // Sử dụng hàm này để tải dữ liệu vào lưới
+    // loadGridDataDecentralization(/* provide your data here */);
+</script>
+<script>
+
+    function showInsert() {
+        $.ajax({
+            type: "GET",
+            url: "/Authentication/RoleCreatDefautNew",
+            success: function (rs) {
+                if (rs.isSuccess === true) {
+                    $('#maRole').val(rs.Id);
+                    $('#tenRole').val(rs.Ten);
+                    //$('#suDungRole').prop('checked', rs.SuDung);
+                    $('#modalThem').modal('show');
+                }
+                else {
+                    toastOptionNotyfi();
+                    toastr["warning"](rs.Mesages, "Thông báo");
+                }
+            },
+            error: function () {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error, "Thông báo");
+            }
+        });
+    }
+    function insert() {
+        var ma = $('#maRole').val();
+        var ten = $('#tenRole').val();
+        var suDung = $('#suDungRole').prop('checked');
+        document.getElementById("txtThem").style.visibility = "hidden";
+        document.getElementById("loadingIndicator").style.display = "block";
+        $.ajax({
+            type: 'POST',
+            url: '/Authentication/DoInsertRole',
+            data: {
+                ma: ma,
+                ten: ten
+                //suDung: suDung
+            },
+            success: function (rs) {
+                if (rs.isSuccess === true) {
+                    toastOptionNotyfi();
+                    toastr["success"](rs.Messages, "Thông báo");
+                    $('#modalThem').modal('hide');
+                    reloadDataRole();
+                } else {
+                    toastOptionNotyfi();
+                    toastr["warning"](rs.Messages, "Thông báo");
+                }
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error, "Thông báo");
+            },
+            complete: function () {
+                document.getElementById("loadingIndicator").style.display = "none";
+                document.getElementById("txtThem").style.visibility = "visible";
+            }
+        });
+    }
+</script>
+<script>
+    function showUpdate() {
+        var ma = $('#maRoleRowSelected').val();
+        $.ajax({
+            url: "/Authentication/GetsByMaRole",
+            data: { ma: ma },
+            type: 'GET',
+            dataType: 'json',
+            success: function (rs) {
+                if (rs.isSuccess === true) {
+                    $('#maRoleSua').val(rs.Id);
+                    $('#tenRoleSua').val(rs.Name);
+                    //$('#suDungRoleSua').prop('checked', rs.SuDung);
+                    $('#modalSua').modal('show');
+                }
+                else {
+                    toastOptionNotyfi();
+                    toastr["warning"](rs.Mesages, "Thông báo");
+                }
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error, "Thông báo");
+            }
+        });
+    }
+    function update() {
+        var ma = $('#maRoleSua').val();
+        var ten = $('#tenRoleSua').val();
+        //var suDung = $('#suDungRoleSua').prop('checked');
+        document.getElementById("txtSua").style.visibility = "hidden";
+        document.getElementById("loadingIndicatorSua").style.display = "block";
+        $.ajax({
+            url: '/Authentication/DoUpDateRole',
+            data: {
+                ma: ma,
+                ten: ten
+                //suDung: suDung
+            },
+            type: 'POST',
+            dataType: 'json',
+            success: function (rs) {
+                if (rs.isSuccess === true) {
+                    $('#modalSua').modal('hide');
+                    reloadDataRole();
+                    toastOptionNotyfi();
+                    toastr["success"](rs.Messages, "Thông báo");
+                } else {
+                    toastOptionNotyfi();
+                    toastr["warning"](rs.Messages, "Thông báo");
+                }
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error.toString(), "Thông báo");
+            },
+            complete: function () {
+                document.getElementById("loadingIndicatorSua").style.display = "none";
+                document.getElementById("txtSua").style.visibility = "visible";
+            }
+        });
+    }
+</script>
+<script>
+    function showDelete() {
+        var ma = $('#maRoleRowSelected').val();
+        $.ajax({
+            url: "/Authentication/GetsByMaRole",
+            data: { ma: ma },
+            type: 'GET',
+            dataType: 'json',
+            success: function (rs) {
+                if (rs.isSuccess === true) {
+                    bootbox.confirm({
+                        title: "Thông báo!",
+                        message: "Bạn có chắc muốn xoá : " + rs.Name,
+                        buttons: {
+                            confirm: {
+                                label: 'OK',
+                                className: 'btn btn-primary'
+                            }
+                        },
+                        callback: function (result) {
+                            if (result) {
+                                //Người dùng đã bấm OK, Gọi API xóa ở đây
+                                $.ajax({
+                                    url: '/Authentication/DoDeleteRole',
+                                    data: { ma: ma },
+                                    type: 'POST',
+                                    dataType: 'json',
+                                    success: function (rs) {
+                                        if (rs.isSuccess === true) {
+                                            reloadDataRole();
+                                            toastOptionNotyfi();
+                                            toastr["success"](rs.Messages, "Thông báo");
+                                        } else {
+                                            toastOptionNotyfi();
+                                            toastr["warning"](rs.Messages, "Thông báo");
+                                        }
+                                    },
+                                    error: function (error) {
+                                        toastOptionNotyfi();
+                                        toastr["error"]('Đã xảy ra lỗi: ' + error.toString(), "Thông báo");
+                                    }
+                                });
+                            }
+                        }
+                    });
+                } else {
+                    toastOptionNotyfi();
+                    toastr["warning"]('Không tìm thấy thông tin!', "Thông báo");
+                }
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error.toString(), "Thông báo");
+            }
+        });
+
+    }
+</script>
+<script>
+    var multiselectObjFu;
+    var multiselectObjFunc;
+    function renderMultiselect(roleId) {
+        // Function to load JSON data
+        function loadJSON(callback) {
+            $.ajax({
+                url: '/Authentication/GetDataMultiSelectRolePermistion',
+                data: { roleId: roleId },
+                type: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    callback(data);
+                },
+                error: function (xhr, status, error) {
+                    toastOptionNotyfi();
+                    toastr["error"]('Lỗi khi tải file JSON: ' + error.toString(), "Thông báo");
+                }
+            });
+        }
+
+        // Call the loadJSON function
+        loadJSON(function (data) {
+            // Remove duplicates from the 'Fu' field
+            var uniqueFuValues = [...new Set(data.map(item => item.Fu))];
+            var uniqueFuData = uniqueFuValues.map(fuValue => {
+                return { Fu: fuValue };
+            });
+
+            initializeMultiSelect(uniqueFuData, data);
+        });
+
+
+        function initializeMultiSelect(uniqueFuData, sampleData) {
+            if (!multiselectObjFu) {
+                // Create multiselectObjFu if it doesn't exist
+                multiselectObjFu = new ej.dropdowns.MultiSelect({
+                    dataSource: uniqueFuData,
+                    fields: { text: 'Fu', value: 'Fu' },
+                    placeholder: 'Chọn Chức Năng',
+                    mode: 'CheckBox',
+                    showSelectAll: true,
+                    showDropDownIcon: true,
+                    filterBarPlaceholder: 'Tìm Chức Năng',
+                    zIndex: 9999,
+                    change: function (args) {
+                        var selectedFuValues = args.value;
+                        var filteredData = sampleData.filter(function (item) {
+                            return selectedFuValues.includes(item.Fu) || selectedFuValues.length === 0;
+                        });
+
+                        multiselectObjFunc.dataSource = filteredData;
+                        multiselectObjFunc.dataBind();
+                    }
+                });
+
+                // Render MultiSelect Dropdown for Fu
+                multiselectObjFu.appendTo('#multiselectFu');
+            } else {
+                // Update data source if multiselectObjFu already exists
+                multiselectObjFu.dataSource = uniqueFuData;
+                multiselectObjFu.dataBind();
+            }
+
+            if (!multiselectObjFunc) {
+                // Create multiselectObjFunc if it doesn't exist
+                multiselectObjFunc = new ej.dropdowns.MultiSelect({
+                    dataSource: sampleData,
+                    fields: { text: 'Func', value: 'Func' },
+                    placeholder: 'Chọn Hành Động',
+                    mode: 'CheckBox',
+                    showSelectAll: true,
+                    showDropDownIcon: true,
+                    filterBarPlaceholder: 'Tìm Hành Động',
+                    zIndex: 9999,
+                });
+
+                // Render MultiSelect Dropdown for Func
+                multiselectObjFunc.appendTo('#multiselectFunc');
+            } else {
+                // Update data source if multiselectObjFunc already exists
+                multiselectObjFunc.dataSource = sampleData;
+                multiselectObjFunc.dataBind();
+            }
+        }
+
+    }
+
+
+    function showCreatPermistion() {
+        var roleId = $('#maRoleRowSelected').val();
+        renderMultiselect(roleId);
+        $('#modalTaoQuyen').modal('show');
+    }
+
+    function CreatRolePermistion() {
+        var roleId = $('#maRoleRowSelected').val();
+
+        var selectedFuValues = multiselectObjFu.value;
+        var selectedFuncValues = multiselectObjFunc.value;
+
+        var fu = selectedFuValues.join(', ');
+        var func = selectedFuncValues.join(', ')
+
+        var status = $('#statusPermis').find(":selected").val();
+
+        $.ajax({
+            url: '/Authentication/DoInsertDecentralization',
+            data: {
+                roleId: roleId,
+                fu: fu,
+                func: func,
+                status: status
+            },
+            type: 'POST',
+            dataType: 'json',
+            success: function (rs) {
+                if (rs.isSuccess === true) {
+                    $('#modalTaoQuyen').modal('hide');
+                    reloadGridDataDecentralization(roleId);
+                    toastOptionNotyfi();
+                    toastr["success"](rs.Messages, "Thông báo");
+                } else {
+                    toastOptionNotyfi();
+                    toastr["warning"](rs.Messages, "Thông báo");
+                }
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error.toString(), "Thông báo");
+            },
+            complete: function () {
+                document.getElementById("loadingIndicatorTaoQuyen").style.display = "none";
+                document.getElementById("txtTaoQuyen").style.visibility = "visible";
+            }
+        });
+
+    }
+</script>
+<script>
+    function showUpdatePermistion() {
+        var permistionId = $('#maDecentralizationRowSelected').val();
+        $.ajax({
+            url: "/Authentication/GetsByMaDecentralization",
+            data: { permistionId: permistionId },
+            type: 'GET',
+            dataType: 'json',
+            success: function (rs) {
+                if (rs.isSuccess === true) {
+                    $('#statusPermisUpdate').val(rs.Status);
+                    $('#idPer').val(rs.Id);
+                    $('#idRolePer').val(rs.RoleId);
+                    $('#fuPer').val(rs.Fu);
+                    $('#funcPer').val(rs.Func);
+                    $('#creatDatePer').val(rs.CreatedDateTime);
+                    $('#modalUpdateTrangThaiRolePermistion').modal('show');
+                }
+                else {
+                    toastOptionNotyfi();
+                    toastr["warning"](rs.Mesages, "Thông báo");
+                }
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error, "Thông báo");
+            }
+        });
+    }
+    function UpdateTrangThaiRolePermistion() {
+        var roleId = $('#maRoleRowSelected').val();
+        var permistionId = $('#maDecentralizationRowSelected').val();
+        var status = $('#statusPermisUpdate').val();
+        var idRolePer = $('#idRolePer').val();
+        var fuPer = $('#fuPer').val();
+        var funcPer = $('#funcPer').val();
+        var creatDatePer = $('#creatDatePer').val();
+
+        document.getElementById("txtUpdateTrangThaiRolePermistion").style.visibility = "hidden";
+        document.getElementById("loadingIndicatorUpdateTrangThaiRolePermistion").style.display = "block";
+        $.ajax({
+            url: "/Authentication/DoUpDateDecentralization",
+            data: {
+                permistionId: permistionId,
+                idRolePer: idRolePer,
+                fuPer: fuPer,
+                funcPer: funcPer,
+                creatDatePer: creatDatePer,
+                status: status
+            },
+            type: 'POST',
+            dataType: 'json',
+            success: function (rs) {
+                if (rs.isSuccess === true) {
+                    $('#modalUpdateTrangThaiRolePermistion').modal('hide');
+                    reloadGridDataDecentralization(roleId);
+                    toastOptionNotyfi();
+                    toastr["success"](rs.Messages, "Thông báo");
+                } else {
+                    toastOptionNotyfi();
+                    toastr["warning"](rs.Messages, "Thông báo");
+                }
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error.toString(), "Thông báo");
+            },
+            complete: function () {
+                document.getElementById("loadingIndicatorUpdateTrangThaiRolePermistion").style.display = "none";
+                document.getElementById("txtUpdateTrangThaiRolePermistion").style.visibility = "visible";
+            }
+        });
+    }
+    function showDeletePermistion() {
+        var permistionId = $('#maDecentralizationRowSelected').val();
+        var roleId = $('#maRoleRowSelected').val();
+        bootbox.confirm({
+            title: "Thông báo!",
+            message: "Bạn có chắc muốn xoá quyền này!",
+            buttons: {
+                confirm: {
+                    label: 'OK',
+                    className: 'btn btn-primary'
+                }
+            },
+            callback: function (result) {
+                if (result) {
+                    //Người dùng đã bấm OK, Gọi API xóa ở đây
+                    $.ajax({
+                        url: '/Authentication/DoDeleteDecentralization',
+                        data: { permistionId: permistionId },
+                        type: 'POST',
+                        dataType: 'json',
+                        success: function (rs) {
+                            if (rs.isSuccess === true) {
+                                reloadGridDataDecentralization(roleId);
+                                toastOptionNotyfi();
+                                toastr["success"](rs.Messages, "Thông báo");
+                            } else {
+                                toastOptionNotyfi();
+                                toastr["warning"](rs.Messages, "Thông báo");
+                            }
+                        },
+                        error: function (error) {
+                            toastOptionNotyfi();
+                            toastr["error"]('Đã xảy ra lỗi: ' + error.toString(), "Thông báo");
+                        }
+                    });
+                }
+            }
+        });
+    }
+</script>

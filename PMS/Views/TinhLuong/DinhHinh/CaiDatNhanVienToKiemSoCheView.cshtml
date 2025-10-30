@@ -1,0 +1,728 @@
+﻿@{
+    ViewData["Title"] = "CaiDatNhanVienToKiemSoCheView";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    //lấy danh sách roleid từ cookie
+    var roleIds = PMS.Middlewares.AuthenticationHelpers.GetRoleIdsFromCookie(Context);
+    // lấy danh sách fu func từ list roleId
+    var rolePermistions = await PMS.Middlewares.AuthenticationHelpers.GetRolePermistionsAsync(Context, roleIds);
+    var listNhomKiemSoChe = ViewBag.listNhomKiemSoChe;
+    var XuongId = @Context.Session.GetString("XuongId");
+}
+
+<style>
+    .vertical-buttons {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+    }
+
+        .vertical-buttons button {
+            margin-bottom: 5px; /* Khoảng cách giữa các nút */
+        }
+
+    @@media (max-width: 767px) {
+        .vertical-buttons {
+            margin-top: 5px;
+            flex-direction: row;
+        }
+    }
+</style>
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h2 class="mb-0">Cài Đặt Nhân Viên Tổ Kiểm Sơ Chế</h2>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-sm-7">
+                            <h6>Danh sách mặc định</h6>
+                            <div id="gridNhanVienSoChe"></div>
+                            <div style="margin-top:5px">
+                                <button onclick="reloadGridNhanVienSoChes()" style="margin-right:5px" class="btn btn-outline-secondary">Tải Dữ Liệu</button>
+                            </div>
+                        </div>
+                        <div class="col-sm-1">
+                            <div class="vertical-buttons">
+                                <button onclick="moveTo()" class="btn btn-primary w-100 position-relative" id="">
+                                    <div class=" align-items-center">
+                                        <span id="txtThem"><i class='bx bxs-chevrons-right'></i></span>
+                                        <div id="loadingIndicator" class=" spinner-border text-secondary position-absolute" role="status" style="left: 0;right: 0;top: 0;bottom: 0;margin: auto; display:none">
+                                            <span class="visually-hidden">Đang tải...</span>
+                                        </div>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="row">
+                                <div class="col-sm-7">
+                                    <h6>Danh sách nhân viên theo nhóm</h6>
+                                </div>
+                                <div class="col-sm-3">
+                                    <select id="listNhomKiemSoChe" class="form-control-sm">
+                                        <option>Chọn nhóm sơ chế</option>
+                                        @foreach (var item in listNhomKiemSoChe)
+                                        {
+                                            <option value="@item.Ma">@item.Ma</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                            <div id="GridNhanVienDaiThanhTo"></div>
+                            <div style="margin-top:5px">
+                                <button onclick="ShowDanhSachNhanVien()" style="margin-right:5px" class="btn btn-outline-secondary">
+                                    <div class=" align-items-center">
+                                        <span id="txtThemNhanVienDaiThanhToBtn">Thêm</span>
+                                        <div id="loadingIndicatorNhanVienDaiThanhToBtn" class=" spinner-border text-primary position-absolute" role="status" style="left: 0;right: 0;top: 0;bottom: 0;margin: auto; display:none">
+                                            <span class="visually-hidden">Đang tải...</span>
+                                        </div>
+                                    </div>
+                                </button>
+                                <button onclick="deleteNhanVienDaiThanhTo()" style="margin-right:5px" class="btn btn-outline-secondary">Loại Bỏ</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="modalShowDanhSachNhanVien" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Danh sách nhân viên</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-12 mb-12 ">
+                                <div id="gridThemNhanVienDaiThanhTo"></div>
+                            </div>
+                        </div>
+                        <div class="row mt-4 pt-2">
+                            <div class="col-12">
+                                <button onclick="addNhanVienDaiThanhTo()" class="btn btn-primary w-100 position-relative" type="submit" id="">
+                                    <div class=" align-items-center">
+                                        <span id="txtThemNhanVienDaiThanhTo">Thêm</span>
+                                        <div id="loadingIndicatorNhanVienDaiThanhTo" class=" spinner-border text-secondary position-absolute" role="status" style="left: 0;right: 0;top: 0;bottom: 0;margin: auto; display:none">
+                                            <span class="visually-hidden">Đang tải...</span>
+                                        </div>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<input id="rowSelectedNhanVienDaiThanhTo" hidden />
+<input id="typeCheck" hidden />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js" integrity="sha512-7rhBJh1om/W5Ztx7WiYOR9h2wlSaTmPyQMoHFtbT/FVNIA12y6S6I8HY9mrBS1uJ3dSU/R3qaSAXsGYuRjMDxg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script>
+    $(document).ready(function () {
+        $('#khuVucTL').val("DH");
+    });
+</script>
+
+<script>
+    var gridNhanVienSoChe;
+    function loadGridDataNhanVienSoChe(data) {
+        var dataManager = new ej.data.DataManager({
+            json: data,
+            adaptor: new ej.data.JsonAdaptor()
+        });
+        if (gridNhanVienSoChe) {
+            gridNhanVienSoChe.dataSource = dataManager;
+            gridNhanVienSoChe.refresh();
+        } else {
+            gridNhanVienSoChe = new ej.grids.Grid({
+                dataSource: dataManager,
+                allowPaging: true,
+                pageSettings: { pageSize: 500 },
+                allowFiltering: true,
+                allowSorting: true,
+                //frozenColumns: 3,
+                filterSettings: { type: 'Excel' },
+                selectionSettings: { persistSelection: true },
+                allowResizing: true,
+                rowSelected: selectionChangedCaiDatNhanVien,
+                rowDeselected: unSelectionChangedCaiDatNhanVien,
+                height: 400,
+                allowGrouping: true,
+                groupSettings: { showDropArea: false, columns: ['MaNhomKiem'] },
+                columns: [
+                    { type: "checkbox", field: "", allowFiltering: false, allowSorting: false, width: '50' },
+                    { field: 'MaNhomKiem', headerText: 'Nhóm', width: 150 },
+                    { field: 'MaNhanVien', headerText: 'Mã Nhân Viên', width: 150 },
+                    { field: 'MaHoSo', headerText: 'Mã Số', width: 200 },
+                    { field: 'Name', headerText: 'Tên Nhân Viên', width: 200 },
+                    { field: 'SoGio', headerText: 'Số Giờ', type: 'number', width: 150 },
+                    { field: 'TyLeHuong', headerText: 'Tỷ Lệ', type: 'number', width: 150 },
+                    { field: 'TyLeTru', headerText: 'Tỷ Lệ Trừ', type: 'number', width: 150 },
+                ]
+            });
+            gridNhanVienSoChe.appendTo('#gridNhanVienSoChe');
+            // Hiển thị Grid trên trang web
+
+        }
+
+    }
+    loadGridDataNhanVienSoChe();
+
+    let selectedIdsStringCaiDatNhanVien = "";
+    let numRowSelectCaiDatNhanVien = 0;
+    function unSelectionChangedCaiDatNhanVien(args) {
+        let deselectedRecords = args.data ? args.data : []; // Lấy các bản ghi được bỏ chọn
+
+        // Kiểm tra xem deselectedRecords có phải là một mảng không
+        if (Array.isArray(deselectedRecords)) {
+            // Nếu là một mảng rỗng hoặc không tồn tại
+            if (deselectedRecords.length === 0) {
+                selectedIdsStringCaiDatNhanVien = "";
+                numRowSelectCaiDatNhanVien = 0; // Reset số dòng đã chọn
+                return;
+            }
+            // Lặp qua từng bản ghi được bỏ chọn
+            for (let i = 0; i < deselectedRecords.length; i++) {
+                let deselected = deselectedRecords[i];
+                let deselectedString = JSON.stringify(deselected);
+
+                // Kiểm tra xem bản ghi đã có trong chuỗi chưa trước khi loại bỏ
+                if (selectedIdsStringCaiDatNhanVien.includes(deselectedString)) {
+                    // Loại bỏ chuỗi JSON của bản ghi và dấu " | " theo sau
+                    selectedIdsStringCaiDatNhanVien = selectedIdsStringCaiDatNhanVien.replace("|" + deselectedString, "");
+                    numRowSelectCaiDatNhanVien--; // Giảm số dòng đã chọn
+                }
+            }
+            selectedIdsStringCaiDatNhanVien = selectedIdsStringCaiDatNhanVien.replace(/^\|+|\|+$/g, '');
+
+            // Loại bỏ dấu ' | ' cuối cùng nếu có
+            // if (selectedIdsString.endsWith("|")) {
+            //     selectedIdsString = selectedIdsString.slice(0, -3);
+            // }
+        } else {
+            // Trường hợp chỉ có một bản ghi được bỏ chọn
+            let deselectedString = JSON.stringify(deselectedRecords);
+
+            // Kiểm tra xem bản ghi đã có trong chuỗi chưa trước khi loại bỏ
+            if (selectedIdsStringCaiDatNhanVien.includes(deselectedString)) {
+                // Loại bỏ chuỗi JSON của bản ghi và dấu " | " theo sau
+                selectedIdsStringCaiDatNhanVien = selectedIdsStringCaiDatNhanVien.replace("|" + deselectedString, "");
+                numRowSelectCaiDatNhanVien--; // Giảm số dòng đã chọn
+            }
+            selectedIdsStringCaiDatNhanVien = selectedIdsStringCaiDatNhanVien.replace(/^\|+|\|+$/g, '');
+
+            // Loại bỏ dấu ' | ' cuối cùng nếu có
+            // if (selectedIdsString.endsWith("|")) {
+            //     selectedIdsString = selectedIdsString.slice(0, -3);
+            // }
+        }
+        // alert(selectedIdsStringCaiDatNhanVien);
+    }
+    function selectionChangedCaiDatNhanVien(args) {
+        let selectedRecords = Array.isArray(args.data) ? args.data : (args.data ? [args.data] : []);
+
+        if (selectedRecords.length === 0) {
+            // Lấy toàn bộ danh sách từ grid vào selectedIdsString
+            let allDataRecords = gridNhanVienSoChe.dataSource instanceof ej.data.DataManager ? gridNhanVienSoChe.dataSource.dataSource.json : gridNhanVienSoChe.dataSource; // Lấy toàn bộ dữ liệu
+            selectedIdsStringCaiDatNhanVien = ""; // Reset selectedIdsString trước khi thêm dữ liệu mới
+            numRowSelectCaiDatNhanVien = allDataRecords.length; // Cập nhật số dòng đã chọn
+            allDataRecords.forEach(record => {
+                // Chuyển đổi đối tượng thành chuỗi JSON
+                selectedIdsStringCaiDatNhanVien += "|" + JSON.stringify(record);
+            });
+            // Loại bỏ dấu ' | ' cuối cùng
+            selectedIdsStringCaiDatNhanVien = selectedIdsStringCaiDatNhanVien.replace(/^\|+|\|+$/g, '');
+            return;
+        }
+
+        selectedRecords.forEach(record => {
+            // Chuyển đổi đối tượng thành chuỗi JSON và kiểm tra xem đã tồn tại chưa
+            let recordString = JSON.stringify(record);
+            if (!selectedIdsStringCaiDatNhanVien.includes(recordString)) {
+                selectedIdsStringCaiDatNhanVien += "|" + recordString;
+                numRowSelectCaiDatNhanVien++; // Tăng số dòng đã chọn
+            }
+        });
+
+        // Loại bỏ dấu ' | ' cuối cùng
+        selectedIdsStringCaiDatNhanVien = selectedIdsStringCaiDatNhanVien.replace(/^\|+|\|+$/g, '');
+        // alert(selectedIdsStringCaiDatNhanVien);
+
+    }
+
+    function reloadDataNhanVienSoChe(dateTime, xuongId) {
+        loadGridDataNhanVienSoChe(dateTime, xuongId);
+    }
+    function reloadGridNhanVienSoChes() {
+        var dateTime = $('#dateTimeTL').val();
+        var xuongId = @XuongId;
+        var typeReload = "LoadBoTriNhomKiemSoChe";
+        $.ajax({
+            url: "@Url.Action("Reload", "ToKiemSoChe")",
+            type: "GET",
+            data: { dateTime: dateTime, xuongId: xuongId, typeReload: typeReload },
+            success: function (response) {
+                if (response.Success) {
+                    loadGridDataNhanVienSoChe(response.Data);
+                } else {
+                    toastOptionNotyfi();
+                    toastr["error"](response.Messages, "Không có dữ liệu!");
+                }
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"](error, "Thông báo");
+            }
+        });
+        // reloadDataNhanVienKiem(dateTime, xuongId)
+    }
+
+</script>
+<script>
+    //var dateTime2 = $('#dateTimeTL').val();
+    var gridNhanVienDaiThanhTo;
+    function loadGridDataNhanVienDaiThanhTo(dateTime, xuongId, nhomKiemSoChe) {
+        $.ajax({
+            url: '/ToKiemSoChe/LoadNhanVienNhomKiemSoChe',
+            data: { dateTime: dateTime, xuongId: xuongId, nhomKiemSoChe: nhomKiemSoChe },
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                var dataManager = new ej.data.DataManager({
+                    json: data,
+                    adaptor: new ej.data.JsonAdaptor()
+                });
+                if (gridNhanVienDaiThanhTo) {
+                    gridNhanVienDaiThanhTo.dataSource = dataManager;
+                    gridNhanVienDaiThanhTo.refresh();
+                } else {
+                    gridNhanVienDaiThanhTo = new ej.grids.Grid({
+                        dataSource: dataManager,
+                        allowPaging: true,
+                        pageSettings: { pageSize: 500 },
+                        allowFiltering: true,
+                        allowSorting: true,
+                        //frozenColumns: 3,
+                        filterSettings: { type: 'Excel' },
+                        allowResizing: true,
+                        selectionSettings: { persistSelection: true },
+                        rowSelected: selectionChangedCaiDatNhanVienDaiThanhTo,
+                        rowDeselected: unSelectionChangedCaiDatNhanVienDaiThanhTo,
+                        height: 400,
+                        columns: [
+                            { type: "checkbox", field: "", allowFiltering: false, allowSorting: false, width: '50' },
+                            { field: 'MaNhanVien', headerText: 'Mã Nhân Viên', width: 150 },
+                            { field: 'MaHoSo', headerText: 'Mã Số', width: 50 },
+                            { field: 'Name', headerText: 'Tên Nhân Viên', width: 200 },
+                            { field: 'FirstWorkingDate', headerText: 'Trạng Thái', width: 50 },
+
+                        ]
+                    });
+                    gridNhanVienDaiThanhTo.appendTo('#GridNhanVienDaiThanhTo');
+
+
+                    // Hiển thị Grid trên trang web
+
+                }
+            },
+            error: function (error) {
+                console.error(error);
+            }
+        });
+    }
+    loadGridDataNhanVienDaiThanhTo("DH");
+    function reloadDataNhanVienDaiThanhTo(dateTime, xuongId, nhomKiemSoChe) {
+        loadGridDataNhanVienDaiThanhTo(dateTime, xuongId, nhomKiemSoChe);
+    }
+    let selectedIdsStringCaiDatNhanVienDatThanhTo = "";
+    let numRowSelectCaiDatNhanVienDaiThanhTo = 0;
+    function unSelectionChangedCaiDatNhanVienDaiThanhTo(args) {
+        let deselectedRecords = args.data ? args.data : []; // Lấy các bản ghi được bỏ chọn
+
+        // Kiểm tra xem deselectedRecords có phải là một mảng không
+        if (Array.isArray(deselectedRecords)) {
+            // Nếu là một mảng rỗng hoặc không tồn tại
+            if (deselectedRecords.length === 0) {
+                selectedIdsStringCaiDatNhanVienDatThanhTo = "";
+                numRowSelectCaiDatNhanVienDaiThanhTo = 0; // Reset số dòng đã chọn
+                return;
+            }
+            // Lặp qua từng bản ghi được bỏ chọn
+            for (let i = 0; i < deselectedRecords.length; i++) {
+                let deselected = deselectedRecords[i];
+                let deselectedString = JSON.stringify(deselected);
+
+                // Kiểm tra xem bản ghi đã có trong chuỗi chưa trước khi loại bỏ
+                if (selectedIdsStringCaiDatNhanVienDatThanhTo.includes(deselectedString)) {
+                    // Loại bỏ chuỗi JSON của bản ghi và dấu " | " theo sau
+                    selectedIdsStringCaiDatNhanVienDatThanhTo = selectedIdsStringCaiDatNhanVienDatThanhTo.replace("|" + deselectedString, "");
+                    numRowSelectCaiDatNhanVienDaiThanhTo--; // Giảm số dòng đã chọn
+                }
+            }
+            selectedIdsStringCaiDatNhanVienDatThanhTo = selectedIdsStringCaiDatNhanVienDatThanhTo.replace(/^\|+|\|+$/g, '');
+
+            // Loại bỏ dấu ' | ' cuối cùng nếu có
+            // if (selectedIdsString.endsWith("|")) {
+            //     selectedIdsString = selectedIdsString.slice(0, -3);
+            // }
+        } else {
+            // Trường hợp chỉ có một bản ghi được bỏ chọn
+            let deselectedString = JSON.stringify(deselectedRecords);
+
+            // Kiểm tra xem bản ghi đã có trong chuỗi chưa trước khi loại bỏ
+            if (selectedIdsStringCaiDatNhanVienDatThanhTo.includes(deselectedString)) {
+                // Loại bỏ chuỗi JSON của bản ghi và dấu " | " theo sau
+                selectedIdsStringCaiDatNhanVienDatThanhTo = selectedIdsStringCaiDatNhanVienDatThanhTo.replace("|" + deselectedString, "");
+                numRowSelectCaiDatNhanVienDaiThanhTo--; // Giảm số dòng đã chọn
+            }
+            selectedIdsStringCaiDatNhanVienDatThanhTo = selectedIdsStringCaiDatNhanVienDatThanhTo.replace(/^\|+|\|+$/g, '');
+
+            // Loại bỏ dấu ' | ' cuối cùng nếu có
+            // if (selectedIdsString.endsWith("|")) {
+            //     selectedIdsString = selectedIdsString.slice(0, -3);
+            // }
+        }
+        // alert(selectedIdsStringCaiDatNhanVien);
+    }
+    function selectionChangedCaiDatNhanVienDaiThanhTo(args) {
+        let selectedRecords = Array.isArray(args.data) ? args.data : (args.data ? [args.data] : []);
+
+        if (selectedRecords.length === 0) {
+            // Lấy toàn bộ danh sách từ grid vào selectedIdsString
+            let allDataRecords = grid.dataSource instanceof ej.data.DataManager ? grid.dataSource.dataSource.json : grid.dataSource; // Lấy toàn bộ dữ liệu
+            selectedIdsStringCaiDatNhanVienDatThanhTo = ""; // Reset selectedIdsString trước khi thêm dữ liệu mới
+            numRowSelectCaiDatNhanVienDaiThanhTo = allDataRecords.length; // Cập nhật số dòng đã chọn
+            allDataRecords.forEach(record => {
+                // Chuyển đổi đối tượng thành chuỗi JSON
+                selectedIdsStringCaiDatNhanVienDatThanhTo += "|" + JSON.stringify(record);
+            });
+            // Loại bỏ dấu ' | ' cuối cùng
+            selectedIdsStringCaiDatNhanVienDatThanhTo = selectedIdsStringCaiDatNhanVienDatThanhTo.replace(/^\|+|\|+$/g, '');
+            return;
+        }
+
+        selectedRecords.forEach(record => {
+            // Chuyển đổi đối tượng thành chuỗi JSON và kiểm tra xem đã tồn tại chưa
+            let recordString = JSON.stringify(record);
+            if (!selectedIdsStringCaiDatNhanVienDatThanhTo.includes(recordString)) {
+                selectedIdsStringCaiDatNhanVienDatThanhTo += "|" + recordString;
+                numRowSelectCaiDatNhanVienDaiThanhTo++; // Tăng số dòng đã chọn
+            }
+        });
+
+        // Loại bỏ dấu ' | ' cuối cùng
+        selectedIdsStringCaiDatNhanVienDatThanhTo = selectedIdsStringCaiDatNhanVienDatThanhTo.replace(/^\|+|\|+$/g, '');
+        // alert(selectedIdsStringCaiDatNhanVien);
+
+    }
+
+
+    // load danh sách nhân viên nhóm kiểm
+    $('#listNhomKiemSoChe').on('change', function () {
+        var selectedValue = $(this).val();
+        var dateTime = $('#dateTimeTL').val();
+        var xuongId = @XuongId;
+        reloadDataNhanVienDaiThanhTo(dateTime, xuongId, selectedValue);
+    });
+
+    function moveTo() {
+        var nhomKiemSoChe = $('#listNhomKiemSoChe').val();
+        var dateTime = $('#dateTimeTL').val();
+        var xuongId = @XuongId;
+        if (nhomKiemSoChe == "" || nhomKiemSoChe == undefined || nhomKiemSoChe == "Chọn nhóm sơ chế" || numRowSelectCaiDatNhanVien == 0) {
+            toastOptionNotyfi();
+            toastr["warning"]("Bạn chưa chọn Nhóm Kiểm hoặc Nhân Viên Kiểm", "Thông báo");
+            return;
+        }
+
+        $.ajax({
+            url: '/ToKiemSoChe/MoveTo',
+            data: {
+                dateTime: dateTime,
+                xuongId: xuongId,
+                nhomKiemSoChe: nhomKiemSoChe,
+                listNhanVienKiemSoCheSelectedItems: selectedIdsStringCaiDatNhanVien
+            },
+            type: 'POST',
+            dataType: 'json',
+            success: function (rs) {
+                if (rs.isSuccess === true) {
+
+                    reloadDataNhanVienDaiThanhTo(dateTime, xuongId, nhomKiemSoChe);
+                    reloadGridNhanVienSoChes();
+                    selectedIdsStringCaiDatNhanVien = "";
+                    numRowSelectCaiDatNhanVien = 0;
+                    toastOptionNotyfi();
+                    toastr["success"](rs.Messages, "Thông báo");
+                } else {
+                    toastOptionNotyfi();
+                    toastr["warning"](rs.Messages, "Thông báo");
+                }
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error.toString(), "Thông báo");
+            }
+        });
+
+    }
+    function deleteNhanVienDaiThanhTo() {
+        var nhomKiemSoChe = $('#listNhomKiemSoChe').val();
+        var dateTime = $('#dateTimeTL').val();
+        var xuongId = @XuongId;
+        if (numRowSelectCaiDatNhanVienDaiThanhTo == 0) {
+            toastOptionNotyfi();
+            toastr["warning"]("Bạn chưa chọn Nhân Viên", "Thông báo");
+            return;
+        }
+
+        //Người dùng đã bấm OK, Gọi API xóa ở đây
+        $.ajax({
+            url: '/ToKiemSoChe/RemoveTo',
+            data: {
+                dateTime: dateTime,
+                xuongId: xuongId,
+                nhomKiemSoChe: nhomKiemSoChe,
+                listNhanVienToSelectedItems: selectedIdsStringCaiDatNhanVienDatThanhTo
+            },
+            type: 'POST',
+            dataType: 'json',
+            success: function (rs) {
+                if (rs.isSuccess === true) {
+
+                    reloadDataNhanVienDaiThanhTo(dateTime, xuongId,nhomKiemSoChe);
+
+                    reloadGridNhanVienSoChes();
+                    selectedIdsStringCaiDatNhanVien = "";
+                    numRowSelectCaiDatNhanVienDaiThanhTo = 0;
+                    toastOptionNotyfi();
+                    toastr["success"](rs.Messages, "Thông báo");
+                } else {
+                    toastOptionNotyfi();
+                    toastr["warning"](rs.Messages, "Thông báo");
+                }
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error.toString(), "Thông báo");
+            }
+        });
+
+    }
+
+
+    var gridThemNhanVienDaiThanhTo;
+    function loadGridDataNhanVienThemDaiThanhTo(callback) {
+        $.ajax({
+            url: '/Staff/GetAllNhanViens',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                var dataManager = new ej.data.DataManager({
+                    json: data,
+                    adaptor: new ej.data.JsonAdaptor()
+                });
+                if (gridThemNhanVienDaiThanhTo) {
+                    gridThemNhanVienDaiThanhTo.dataSource = dataManager;
+                    gridThemNhanVienDaiThanhTo.refresh();
+                } else {
+                    gridThemNhanVienDaiThanhTo = new ej.grids.Grid({
+                        dataSource: dataManager,
+                        allowPaging: true,
+                        pageSettings: { pageSize: 1000 },
+                        allowFiltering: true,
+                        allowSorting: true,
+                        //frozenColumns: 3,
+                        filterSettings: { type: 'Excel' },
+                        allowResizing: true,
+                        selectionSettings: { persistSelection: true },
+                        rowSelected: selectionChangedThemNhanVienDaiThanhTo,
+                        rowDeselected: unSelectionChangedThemNhanVienDaiThanhTo,
+                        height: 400,
+                        columns: [
+                            { type: "checkbox", field: "", allowFiltering: false, allowSorting: false, width: '50' },
+                            { field: 'MaNhanVien', headerText: 'Mã Nhân Viên', width: 150 },
+                            { field: 'MaHoSo', headerText: 'Mã Số', width: 150 },
+                            { field: 'Name', headerText: 'Tên Nhân Viên', width: 150 },
+                            { field: 'DeptName0', headerText: 'Tên Nhóm', width: 150 },
+                            { field: 'FirstWorkingDate', headerText: 'Ngày Bắt Đầu Làm Việc', width: 150 },
+                            { field: 'Xuong', headerText: 'Xưởng', width: 150 }
+                        ]
+                    });
+                    gridThemNhanVienDaiThanhTo.appendTo('#gridThemNhanVienDaiThanhTo');
+                }
+                // Gọi callback sau khi xử lý dữ liệu xong
+                if (typeof callback === 'function') {
+                    callback();
+                }
+            },
+            error: function (error) {
+                console.error(error);
+                // Gọi callback để báo lỗi nếu cần
+                if (typeof callback === 'function') {
+                    callback(error);
+                }
+            }
+        });
+    }
+
+
+    let selectedIdsStringThemNhanVienDatThanhTo = "";
+    let numRowSelectThemNhanVienDaiThanhTo = 0;
+    function unSelectionChangedThemNhanVienDaiThanhTo(args) {
+        let deselectedRecords = args.data ? args.data : []; // Lấy các bản ghi được bỏ chọn
+
+        // Kiểm tra xem deselectedRecords có phải là một mảng không
+        if (Array.isArray(deselectedRecords)) {
+            // Nếu là một mảng rỗng hoặc không tồn tại
+            if (deselectedRecords.length === 0) {
+                selectedIdsStringThemNhanVienDatThanhTo = "";
+                numRowSelectThemNhanVienDaiThanhTo = 0; // Reset số dòng đã chọn
+                return;
+            }
+            // Lặp qua từng bản ghi được bỏ chọn
+            for (let i = 0; i < deselectedRecords.length; i++) {
+                let deselected = deselectedRecords[i];
+                let deselectedString = JSON.stringify(deselected);
+
+                // Kiểm tra xem bản ghi đã có trong chuỗi chưa trước khi loại bỏ
+                if (selectedIdsStringThemNhanVienDatThanhTo.includes(deselectedString)) {
+                    // Loại bỏ chuỗi JSON của bản ghi và dấu " | " theo sau
+                    selectedIdsStringThemNhanVienDatThanhTo = selectedIdsStringThemNhanVienDatThanhTo.replace("|" + deselectedString, "");
+                    numRowSelectThemNhanVienDaiThanhTo--; // Giảm số dòng đã chọn
+                }
+            }
+            selectedIdsStringThemNhanVienDatThanhTo = selectedIdsStringThemNhanVienDatThanhTo.replace(/^\|+|\|+$/g, '');
+
+            // Loại bỏ dấu ' | ' cuối cùng nếu có
+            // if (selectedIdsString.endsWith("|")) {
+            //     selectedIdsString = selectedIdsString.slice(0, -3);
+            // }
+        } else {
+            // Trường hợp chỉ có một bản ghi được bỏ chọn
+            let deselectedString = JSON.stringify(deselectedRecords);
+
+            // Kiểm tra xem bản ghi đã có trong chuỗi chưa trước khi loại bỏ
+            if (selectedIdsStringThemNhanVienDatThanhTo.includes(deselectedString)) {
+                // Loại bỏ chuỗi JSON của bản ghi và dấu " | " theo sau
+                selectedIdsStringThemNhanVienDatThanhTo = selectedIdsStringThemNhanVienDatThanhTo.replace("|" + deselectedString, "");
+                numRowSelectThemNhanVienDaiThanhTo--; // Giảm số dòng đã chọn
+            }
+            selectedIdsStringThemNhanVienDatThanhTo = selectedIdsStringThemNhanVienDatThanhTo.replace(/^\|+|\|+$/g, '');
+
+            // Loại bỏ dấu ' | ' cuối cùng nếu có
+            // if (selectedIdsString.endsWith("|")) {
+            //     selectedIdsString = selectedIdsString.slice(0, -3);
+            // }
+        }
+        // alert(selectedIdsStringCaiDatNhanVien);
+    }
+    function selectionChangedThemNhanVienDaiThanhTo(args) {
+        let selectedRecords = Array.isArray(args.data) ? args.data : (args.data ? [args.data] : []);
+
+        if (selectedRecords.length === 0) {
+            // Lấy toàn bộ danh sách từ grid vào selectedIdsString
+            let allDataRecords = grid.dataSource instanceof ej.data.DataManager ? grid.dataSource.dataSource.json : grid.dataSource; // Lấy toàn bộ dữ liệu
+            selectedIdsStringThemNhanVienDatThanhTo = ""; // Reset selectedIdsString trước khi thêm dữ liệu mới
+            numRowSelectThemNhanVienDaiThanhTo = allDataRecords.length; // Cập nhật số dòng đã chọn
+            allDataRecords.forEach(record => {
+                // Chuyển đổi đối tượng thành chuỗi JSON
+                selectedIdsStringThemNhanVienDatThanhTo += "|" + JSON.stringify(record);
+            });
+            // Loại bỏ dấu ' | ' cuối cùng
+            selectedIdsStringThemNhanVienDatThanhTo = selectedIdsStringThemNhanVienDatThanhTo.replace(/^\|+|\|+$/g, '');
+            return;
+        }
+
+        selectedRecords.forEach(record => {
+            // Chuyển đổi đối tượng thành chuỗi JSON và kiểm tra xem đã tồn tại chưa
+            let recordString = JSON.stringify(record);
+            if (!selectedIdsStringThemNhanVienDatThanhTo.includes(recordString)) {
+                selectedIdsStringThemNhanVienDatThanhTo += "|" + recordString;
+                numRowSelectThemNhanVienDaiThanhTo++; // Tăng số dòng đã chọn
+            }
+        });
+
+        // Loại bỏ dấu ' | ' cuối cùng
+        selectedIdsStringThemNhanVienDatThanhTo = selectedIdsStringThemNhanVienDatThanhTo.replace(/^\|+|\|+$/g, '');
+        // alert(selectedIdsStringCaiDatNhanVien);
+
+    }
+
+    function ShowDanhSachNhanVien() {
+        var nhomKiemSoChe = $('#listNhomKiemSoChe').val();
+        if (nhomKiemSoChe == "Chọn nhóm kiểm") {
+            toastOptionNotyfi();
+            toastr["warning"]("Bạn chưa chọn nhóm kiểm", "Thông báo");
+            return;
+        }
+        document.getElementById("txtThemNhanVienDaiThanhToBtn").style.visibility = "hidden";
+        document.getElementById("loadingIndicatorNhanVienDaiThanhToBtn").style.display = "block";
+        loadGridDataNhanVienThemDaiThanhTo(function (error) {
+            if (!error) {
+                document.getElementById("loadingIndicatorNhanVienDaiThanhToBtn").style.display = "none";
+                document.getElementById("txtThemNhanVienDaiThanhToBtn").style.visibility = "visible";
+                $('#modalShowDanhSachNhanVien').modal('show');
+            } else {
+                console.error('Failed to load data:', error);
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi khi tải danh sách nhân viên: ' + error, "Thông báo");
+                document.getElementById("loadingIndicatorNhanVienDaiThanhToBtn").style.display = "none";
+                document.getElementById("txtThemNhanVienDaiThanhToBtn").style.visibility = "visible";
+                // Xử lý lỗi nếu cần
+            }
+        });
+    }
+    function addNhanVienDaiThanhTo() {
+        var nhomKiemSoChe = $('#listNhomKiemSoChe').val();
+        var dateTime = $('#dateTimeTL').val();
+        var xuongId = @XuongId;
+        $.ajax({
+            url: '/ToKiemSoChe/AddNhanVienDaiThanhTo',
+            data: {
+                dateTime: dateTime,
+                xuongId: xuongId,
+                nhomKiemSoChe: nhomKiemSoChe,
+                listNhanVienToSelectedItems: selectedIdsStringThemNhanVienDatThanhTo
+            },
+            type: 'POST',
+            dataType: 'json',
+            success: function (rs) {
+                if (rs.isSuccess === true) {
+                    $('#modalShowDanhSachNhanVien').modal('hide');
+
+
+                    reloadDataNhanVienDaiThanhTo(dateTime, xuongId, nhomKiemSoChe);
+
+                    reloadGridNhanVienSoChes();
+                    selectedIdsStringThemNhanVienDatThanhTo = "";
+
+                    numRowSelectThemNhanVienDaiThanhTo = 0;
+
+                    $('#typeCheck').val("");
+                    toastOptionNotyfi();
+                    toastr["success"](rs.Messages, "Thông báo");
+                } else {
+                    toastOptionNotyfi();
+                    toastr["warning"](rs.Messages, "Thông báo");
+                }
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error.toString(), "Thông báo");
+            }
+        });
+    }
+</script>

@@ -1,0 +1,429 @@
+﻿
+@{
+    ViewData["Title"] = "ThanhPhamBlockXepKhuonView";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    //lấy danh sách roleid từ cookie
+    var roleIds = PMS.Middlewares.AuthenticationHelpers.GetRoleIdsFromCookie(Context);
+    // lấy danh sách fu func từ list roleId
+    var rolePermistions = await PMS.Middlewares.AuthenticationHelpers.GetRolePermistionsAsync(Context, roleIds);
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h2 class="mb-0">Danh Sách Thành Phẩm Block Xếp Khuôn</h2>
+                    @{
+                        var themThanhPhamBlockXepKhuon = rolePermistions.Where(x => x.Fu == "Danh Mục / Xếp Khuôn / Thành Phẩm Block" && x.Func == "Thêm Xếp Khuôn / Thành Phẩm Block" && x.Status == 1).FirstOrDefault();
+                        if (themThanhPhamBlockXepKhuon != null)
+                        {
+                            <button onclick="showInsert()" type="button" class="btn btn-primary">Thêm Thành Phẩm Block Xếp Khuôn</button>
+                        }
+                    }
+
+                </div>
+                <div class="card-body">
+                    <div id="Grid"></div>
+                    <div style="margin-top:20px;">
+                        @{
+                            var suaThanhPhamBlockXepKhuon = rolePermistions.Where(x => x.Fu == "Danh Mục / Xếp Khuôn / Thành Phẩm Block" && x.Func == "Sửa Xếp Khuôn / Thành Phẩm Block" && x.Status == 1).FirstOrDefault();
+                            if (suaThanhPhamBlockXepKhuon != null)
+                            {
+                                <button onclick="showUpdate()" style="margin-right:5px" class="btn btn-outline-warning"><i class='bx bx-edit-alt'></i>Sửa</button>
+                            }
+                            var xoaThanhPhamBlockXepKhuon = rolePermistions.Where(x => x.Fu == "Danh Mục / Xếp Khuôn / Thành Phẩm Block" && x.Func == "Xóa Xếp Khuôn / Thành Phẩm Block" && x.Status == 1).FirstOrDefault();
+                            if (xoaThanhPhamBlockXepKhuon != null)
+                            {
+                                <button onclick="showDelete()" style="margin-right:5px" class="btn btn-outline-danger"><i class='bx bx-trash'></i>Xoá</button>
+                            }
+                            var importThanhPhamBlockXepKhuon = rolePermistions.Where(x => x.Fu == "Danh Mục / Xếp Khuôn / Thành Phẩm Block" && x.Func == "Import Xếp Khuôn / Thành Phẩm Block" && x.Status == 1).FirstOrDefault();
+                            if (importThanhPhamBlockXepKhuon != null)
+                            {
+                                <button onclick="import()" style="margin-right:5px" class="btn btn-outline-info"><i class='bx bx-import'></i>Import</button>
+                            }
+                            var exportThanhPhamBlockXepKhuon = rolePermistions.Where(x => x.Fu == "Danh Mục / Xếp Khuôn / Thành Phẩm Block" && x.Func == "Export Xếp Khuôn / Thành Phẩm Block" && x.Status == 1).FirstOrDefault();
+                            if (exportThanhPhamBlockXepKhuon != null)
+                            {
+                                <button onclick="export()" style="margin-right:5px" class="btn btn-outline-secondary"><i class='bx bx-export'></i>Export Excel</button>
+                            }
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="modalThem" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Thêm Thành Phẩm Block Xếp Khuôn</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-12 mb-12 ">
+                                <div class="form-outline">
+                                    <label class="form-label" for="x1">Mã</label>
+                                    <input type="text" id="maTPBXK" class="form-control form-control-lg" autocomplete="off" placeholder="Nhập Mã..." style="text-transform: uppercase;" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 mb-12 ">
+                                <div class="form-outline">
+                                    <label class="form-label" for="x1">Tên</label>
+                                    <input type="text" id="tenTPBXK" class="form-control form-control-lg" autocomplete="off" placeholder="Nhập Tên..." />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 mb-12 ">
+                                <div class="form-outline">
+                                    <label class="form-label" for="x1">Mã Lương</label>
+                                    <input type="text" id="bravoIdTPBXK" class="form-control form-control-lg" autocomplete="off" placeholder="Nhập Mã Lương..." />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-12">
+                                <div class="list-group form-outline">
+                                    <label class="">
+                                        <input class="form-check-input me-1" type="checkbox" value="" id="suDungTPBXK" />
+                                        Sử Dụng
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-4 pt-2">
+                            <div class="col-12">
+                                <button onclick="insert()" class="btn btn-primary w-100 position-relative" type="submit" id="">
+                                    <div class=" align-items-center">
+                                        <span id="txtThem">Thêm</span>
+                                        <div id="loadingIndicator" class=" spinner-border text-secondary position-absolute" role="status" style="left: 0;right: 0;top: 0;bottom: 0;margin: auto; display:none">
+                                            <span class="visually-hidden">Đang tải...</span>
+                                        </div>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="modalSua" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Sửa Thành Phẩm Block Xếp Khuôn</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-12 mb-12 ">
+                                <div class="form-outline">
+                                    <label class="form-label" for="x1">Mã</label>
+                                    <input type="text" id="maTPBXKSua" class="form-control form-control-lg" autocomplete="off" placeholder="Nhập Mã..." style="text-transform: uppercase;" disabled />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 mb-12 ">
+                                <div class="form-outline">
+                                    <label class="form-label" for="x1">Tên</label>
+                                    <input type="text" id="tenTPBXKSua" class="form-control form-control-lg" autocomplete="off" placeholder="Nhập Tên..." />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 mb-12 ">
+                                <div class="form-outline">
+                                    <label class="form-label" for="x1">Mã Lương</label>
+                                    <input type="text" id="bravoIdTPBXKSua" class="form-control form-control-lg" autocomplete="off" placeholder="Nhập Mã Lương..." />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-12">
+                                <div class="list-group form-outline">
+                                    <label class="">
+                                        <input class="form-check-input me-1" type="checkbox" value="" id="suDungTPBXKSua" />
+                                        Sử Dụng
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-4 pt-2">
+                            <div class="col-12">
+                                <button onclick="update()" class="btn btn-primary w-100 position-relative" type="submit" id="">
+                                    <div class=" align-items-center">
+                                        <span id="txtSua">Sửa</span>
+                                        <div id="loadingIndicatorSua" class=" spinner-border text-secondary position-absolute" role="status" style="left: 0;right: 0;top: 0;bottom: 0;margin: auto; display:none">
+                                            <span class="visually-hidden">Đang tải...</span>
+                                        </div>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<input type="hidden" id="maTPBXKRowSelected" />
+<script>
+    $(document).ready(function () {
+        loadGridData();
+    });
+    var grid;
+    function loadGridData() {
+        $.ajax({
+            url: '/ThanhPhamBlockXepKhuon/GetAlls',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                var dataManager = new ej.data.DataManager({
+                    json: data,
+                    adaptor: new ej.data.JsonAdaptor()
+                });
+                if (grid) {
+                    grid.dataSource = dataManager;
+                    grid.refresh();
+                } else {
+                    grid = new ej.grids.Grid({
+                        dataSource: dataManager,
+                        allowPaging: true,
+                        pageSettings: { pageSize: 50 },
+                        allowFiltering: true,
+                        filterSettings: { type: 'Excel' },
+                        allowSorting: true,
+                        //frozenColumns: 3,
+                        allowResizing: true,
+                        rowSelected: onRowSelected,
+                        height: 400,
+                        columns: [
+                            { field: 'Ma', headerText: 'Mã', width: 150 },
+                            { field: 'Ten', headerText: 'Tên', width: 150 },
+                            { field: 'BravoId', headerText: 'Mã Lương', width: 150 },
+                            { field: 'SuDung', headerText: 'Sử Dụng', width: 100, displayAsCheckBox: 'true', textAlign: 'Center' },
+                        ]
+                    });
+                    // Hiển thị Grid trên trang web
+                    grid.appendTo('#Grid');
+                }
+            },
+            error: function (error) {
+                console.error(error);
+            }
+        });
+    }
+    loadGridData();
+    function reloadData() {
+        loadGridData();
+    }
+    function onRowSelected(args) {
+        // Lấy dữ liệu của hàng được chọn
+        var selectedRecord = args.data;
+        // Lấy giá trị Id từ dữ liệu của hàng được chọn
+        var Ma = selectedRecord.Ma;
+
+        $('#maTPBXKRowSelected').val(Ma);
+    }
+</script>
+<script>
+    function showInsert() {
+        $.ajax({
+            type: "GET",
+            url: "/ThanhPhamBlockXepKhuon/CreatDefautNew",
+            success: function (rs) {
+                if (rs.isSuccess === true) {
+                    $('#maTPBXK').val(rs.Ma);
+                    $('#tenTPBXK').val(rs.Ten);
+                    $('#bravoIdTPBXK').val(rs.BravoId);
+                    $('#suDungTPBXK').prop('checked', rs.SuDung);
+                    $('#modalThem').modal('show');
+                }
+                else {
+                    toastOptionNotyfi();
+                    toastr["warning"](rs.Mesages, "Thông báo");
+                }
+            },
+            error: function () {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error, "Thông báo");
+            }
+        });
+    }
+    function insert() {
+        var ma = $('#maTPBXK').val();
+        var ten = $('#tenTPBXK').val();
+        var bravoId = $('#bravoIdTPBXK').val();
+        var suDung = $('#suDungTPBXK').prop('checked');
+        document.getElementById("txtThem").style.visibility = "hidden";
+        document.getElementById("loadingIndicator").style.display = "block";
+        $.ajax({
+            type: 'POST',
+            url: '/ThanhPhamBlockXepKhuon/DoInsert',
+            data: {
+                ma: ma,
+                ten: ten,
+                bravoId: bravoId,
+                suDung: suDung,
+            },
+            success: function (rs) {
+                if (rs.isSuccess === true) {
+                    toastOptionNotyfi();
+                    toastr["success"](rs.Messages, "Thông báo");
+                    $('#modalThem').modal('hide');
+                    reloadData();
+                } else {
+                    toastOptionNotyfi();
+                    toastr["warning"](rs.Messages, "Thông báo");
+                }
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error, "Thông báo");
+            },
+            complete: function () {
+                document.getElementById("loadingIndicator").style.display = "none";
+                document.getElementById("txtThem").style.visibility = "visible";
+            }
+        });
+    }
+</script>
+<script>
+    function showUpdate() {
+        var ma = $('#maTPBXKRowSelected').val();
+        $.ajax({
+            url: "/ThanhPhamBlockXepKhuon/GetsByMa",
+            data: { ma: ma },
+            type: 'GET',
+            dataType: 'json',
+            success: function (rs) {
+                if (rs.isSuccess === true) {
+                    $('#maTPBXKSua').val(rs.Ma);
+                    $('#tenTPBXKSua').val(rs.Ten);
+                    $('#bravoIdTPBXKSua').val(rs.BravoId);
+                    $('#suDungTPBXKSua').prop('checked', rs.SuDung);
+                    $('#modalSua').modal('show');
+                }
+                else {
+                    toastOptionNotyfi();
+                    toastr["warning"](rs.Mesages, "Thông báo");
+                }
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error, "Thông báo");
+            }
+        });
+    }
+    function update() {
+        var ma = $('#maTPBXKSua').val();
+        var ten = $('#tenTPBXKSua').val();
+        var bravoId = $('#bravoIdTPBXKSua').val();
+        var suDung = $('#suDungTPBXKSua').prop('checked');
+        document.getElementById("txtSua").style.visibility = "hidden";
+        document.getElementById("loadingIndicatorSua").style.display = "block";
+        $.ajax({
+            url: '/ThanhPhamBlockXepKhuon/DoUpdate',
+            data: {
+                ma: ma,
+                ten: ten,
+                bravoId: bravoId,
+                suDung: suDung
+            },
+            type: 'POST',
+            dataType: 'json',
+            success: function (rs) {
+                if (rs.isSuccess === true) {
+                    $('#modalSua').modal('hide');
+                    reloadData();
+                    toastOptionNotyfi();
+                    toastr["success"](rs.Messages, "Thông báo");
+                } else {
+                    toastOptionNotyfi();
+                    toastr["warning"](rs.Messages, "Thông báo");
+                }
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error.toString(), "Thông báo");
+            },
+            complete: function () {
+                document.getElementById("loadingIndicatorSua").style.display = "none";
+                document.getElementById("txtSua").style.visibility = "visible";
+            }
+        });
+    }
+</script>
+<script>
+    function showDelete() {
+        var ma = $('#maTPBXKRowSelected').val();
+        $.ajax({
+            url: "/ThanhPhamBlockXepKhuon/GetsByMa",
+            data: { ma: ma },
+            type: 'GET',
+            dataType: 'json',
+            success: function (rs) {
+                if (rs.isSuccess === true) {
+                    bootbox.confirm({
+                        title: "Thông báo!",
+                        message: "Bạn có chắc muốn xoá : " + rs.Ten,
+                        buttons: {
+                            confirm: {
+                                label: 'OK',
+                                className: 'btn btn-primary'
+                            }
+                        },
+                        callback: function (result) {
+                            if (result) {
+                                //Người dùng đã bấm OK, Gọi API xóa ở đây
+                                $.ajax({
+                                    url: '/ThanhPhamBlockXepKhuon/DoDelete',
+                                    data: { ma: ma },
+                                    type: 'POST',
+                                    dataType: 'json',
+                                    success: function (rs) {
+                                        if (rs.isSuccess === true) {
+                                            reloadData();
+                                            toastOptionNotyfi();
+                                            toastr["success"](rs.Messages, "Thông báo");
+                                        } else {
+                                            toastOptionNotyfi();
+                                            toastr["warning"](rs.Messages, "Thông báo");
+                                        }
+                                    },
+                                    error: function (error) {
+                                        toastOptionNotyfi();
+                                        toastr["error"]('Đã xảy ra lỗi: ' + error.toString(), "Thông báo");
+                                    }
+                                });
+                            }
+                        }
+                    });
+                } else {
+                    toastOptionNotyfi();
+                    toastr["warning"]('Không tìm thấy thông tin!', "Thông báo");
+                }
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error.toString(), "Thông báo");
+            }
+        });
+
+    }
+</script>
+

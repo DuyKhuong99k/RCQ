@@ -1,0 +1,776 @@
+﻿@{
+    ViewData["Title"] = "DinhMucFilletView";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    //lấy danh sách roleid từ cookie
+    var roleIds = PMS.Middlewares.AuthenticationHelpers.GetRoleIdsFromCookie(Context);
+    // lấy danh sách fu func từ list roleId
+    var rolePermistions = await PMS.Middlewares.AuthenticationHelpers.GetRolePermistionsAsync(Context, roleIds);
+    var listMaLos = ViewBag.listMaLos;
+    var listMaLoaiCas = ViewBag.listMaLoaiCas;
+    var listMaMaus = ViewBag.listMaMaus;
+    var listTPFLs = ViewBag.listTPFLs;
+    var listSFLs = ViewBag.listSFLs;
+    var listXuongs = ViewBag.listXuongs;
+}
+<style>
+    #caTraDMFLRowSelected {
+        display: none;
+    }
+</style>
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h2 class="mb-0">Danh Sách Định Mức Fillet</h2>
+                    @{
+                        var themdinhmucFillet = rolePermistions.Where(x => x.Fu == "Danh Mục / Fillet / Định Mức" && x.Func == "Thêm Fillet / Định Mức" && x.Status == 1).FirstOrDefault();
+                        if (themdinhmucFillet != null)
+                        {
+                            <button onclick="showInsert()" type="button" class="btn btn-primary">Thêm</button>
+                        }
+                    }
+
+                </div>
+                <div class="card-body">
+                    <div id="Grid"></div>
+                    <div style="margin-top:20px;">
+                        @{
+                            var suadinhmucFillet = rolePermistions.Where(x => x.Fu == "Danh Mục / Fillet / Định Mức" && x.Func == "Sửa Fillet / Định Mức" && x.Status == 1).FirstOrDefault();
+                            if (suadinhmucFillet != null)
+                            {
+                                <button onclick="showUpdate()" style="margin-right:5px" class="btn btn-outline-warning"><i class='bx bx-edit-alt'></i>Sửa</button>
+                            }
+                            var xoadinhmucFillet = rolePermistions.Where(x => x.Fu == "Danh Mục / Fillet / Định Mức" && x.Func == "Xoá Fillet / Định Mức" && x.Status == 1).FirstOrDefault();
+                            if (xoadinhmucFillet != null)
+                            {
+                                <button onclick="showDelete()" style="margin-right:5px" class="btn btn-outline-danger"><i class='bx bx-trash'></i>Xoá</button>
+                            }
+                            var importdinhmucFillet = rolePermistions.Where(x => x.Fu == "Danh Mục / Fillet / Định Mức" && x.Func == "Import Fillet / Định Mức" && x.Status == 1).FirstOrDefault();
+                            if (importdinhmucFillet != null)
+                            {
+                                <button onclick="import()" style="margin-right:5px" class="btn btn-outline-info"><i class='bx bx-import'></i>Import</button>
+                            }
+                            var exportdinhmucFillet = rolePermistions.Where(x => x.Fu == "Danh Mục / Fillet / Định Mức" && x.Func == "Export Fillet / Định Mức" && x.Status == 1).FirstOrDefault();
+                            if (exportdinhmucFillet != null)
+                            {
+                                <button onclick="export()" style="margin-right:5px" class="btn btn-outline-secondary"><i class='bx bx-export'></i>Export Excel</button>
+                            }
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="modalThem" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Thêm Định Mức Fillet</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-12 mb-12 ">
+                                <div class="form-outline">
+                                    <label class="form-label">STT</label>
+                                    <input type="text" id="sttDMFL" class="form-control form-control-lg" autocomplete="off" placeholder="Nhập STT..." style="text-transform: uppercase;" disabled/>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 mb-12 ">
+                                <div class="form-outline">
+                                    <label class="form-label">Giờ</label>
+                                    <input type="time" id="gioDMFL" class="form-control form-control-lg" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12 mb-12 ">
+                                <div class="form-outline">
+                                    <label class="form-label">Mã Lô</label>
+                                    <select id="maLoDMFL" class="form-control form-control-lg">
+                                        <option disabled selected>Chọn Lô</option>
+                                        @foreach (var item in listMaLos)
+                                        {
+                                            <option value="@item.Item2">@item.Item2</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 mb-12 ">
+                                <div class="form-outline">
+                                    <label class="form-label">Loại Cá</label>
+                                    <select id="maLoaiCaDMFL" class="form-control form-control-lg">
+                                        <option disabled selected>Chọn Loại Cá</option>
+                                        @foreach (var item in listMaLoaiCas)
+                                        {
+                                            <option value="@item.Ma">@item.Ten</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 mb-12 ">
+                                <div class="form-outline">
+                                    <label class="form-label">Màu</label>
+                                    <select id="maMauDMFL" class="form-control form-control-lg">
+                                        <option disabled selected>Chọn Màu</option>
+                                        @foreach (var item in listMaMaus)
+                                        {
+                                            <option value="@item.Ma">@item.Ten</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 mb-12 ">
+                                <div class="form-outline">
+                                    <label class="form-label">Size</label>
+                                    <select id="maSizeDMFL" class="form-control form-control-lg">
+                                        <option disabled selected>Chọn Size</option>
+                                        @foreach (var item in listSFLs)
+                                        {
+                                            <option value="@item.Ma">@item.Ten</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 mb-12 ">
+                                <div class="form-outline">
+                                    <label class="form-label">Thành Phẩm</label>
+                                    <select id="maThanhPhamDMFL" class="form-control form-control-lg">
+                                        <option disabled selected>Chọn Thành Phẩm</option>
+                                        @foreach (var item in listTPFLs)
+                                        {
+                                            <option value="@item.Ma">@item.Ten</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-12">
+                                <div class="list-group form-outline">
+                                    <label class="">
+                                        <input class="form-check-input me-1" type="checkbox" value="" id="caTraDMFL" />
+                                        Cá Trả
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 mb-12 ">
+                                <div class="form-outline">
+                                    <label class="form-label" for="x1">Định Mức</label>
+                                    <input type="number" min="0" step="0.0001" id="dinhMucDMFL" class="form-control form-control-lg" autocomplete="off" placeholder="0.0000" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 mb-12 ">
+                                <div class="form-outline">
+                                    <label class="form-label">Xưởng</label>
+                                    <select id="maXuongDMFL" class="form-control form-control-lg">
+                                        <option disabled selected>Chọn Xưởng</option>
+                                        @foreach (var item in listXuongs)
+                                        {
+                                            <option value="@item.Ma">@item.Ten</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-12">
+                                <div class="list-group form-outline">
+                                    <label class="">
+                                        <input class="form-check-input me-1" type="checkbox" value="" id="suDungDMFL" />
+                                        Sử Dụng
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-4 pt-2">
+                            <div class="col-12">
+                                <button onclick="insert()" class="btn btn-primary w-100 position-relative" type="submit" id="">
+                                    <div class=" align-items-center">
+                                        <span id="txtThem">Thêm</span>
+                                        <div id="loadingIndicator" class=" spinner-border text-secondary position-absolute" role="status" style="left: 0;right: 0;top: 0;bottom: 0;margin: auto; display:none">
+                                            <span class="visually-hidden">Đang tải...</span>
+                                        </div>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="modalSua" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Sửa Định Mức Fillet</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-12 mb-12 ">
+                                <div class="form-outline">
+                                    <label class="form-label">STT</label>
+                                    <input type="text" id="sttDMFLSua" class="form-control form-control-lg" autocomplete="off" placeholder="Nhập STT..." style="text-transform: uppercase;" disabled />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 mb-12 ">
+                                <div class="form-outline">
+                                    <label class="form-label">Giờ</label>
+                                    <input type="time" id="gioDMFLSua" class="form-control form-control-lg" disabled />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12 mb-12 ">
+                                <div class="form-outline">
+                                    <label class="form-label">Mã Lô</label>
+                                    <select id="maLoDMFLSua" class="form-control form-control-lg" disabled>
+                                        <option disabled selected>Chọn Lô</option>
+                                        @foreach (var item in listMaLos)
+                                        {
+                                            <option value="@item.Item2">@item.Item2</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 mb-12 ">
+                                <div class="form-outline">
+                                    <label class="form-label">Loại Cá</label>
+                                    <select id="maLoaiCaDMFLSua" class="form-control form-control-lg" disabled>
+                                        <option disabled selected>Chọn Loại Cá</option>
+                                        @foreach (var item in listMaLoaiCas)
+                                        {
+                                            <option value="@item.Ma">@item.Ten</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 mb-12 ">
+                                <div class="form-outline">
+                                    <label class="form-label">Màu</label>
+                                    <select id="maMauDMFLSua" class="form-control form-control-lg" disabled>
+                                        <option disabled selected>Chọn Màu</option>
+                                        @foreach (var item in listMaMaus)
+                                        {
+                                            <option value="@item.Ma">@item.Ten</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 mb-12 ">
+                                <div class="form-outline">
+                                    <label class="form-label">Size</label>
+                                    <select id="maSizeDMFLSua" class="form-control form-control-lg" disabled>
+                                        <option disabled selected>Chọn Size</option>
+                                        @foreach (var item in listSFLs)
+                                        {
+                                            <option value="@item.Ma">@item.Ten</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 mb-12 ">
+                                <div class="form-outline">
+                                    <label class="form-label">Thành Phẩm</label>
+                                    <select id="maThanhPhamDMFLSua" class="form-control form-control-lg" disabled>
+                                        <option disabled selected>Chọn Thành Phẩm</option>
+                                        @foreach (var item in listTPFLs)
+                                        {
+                                            <option value="@item.Ma">@item.Ten</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-12">
+                                <div class="list-group form-outline">
+                                    <label class="">
+                                        <input class="form-check-input me-1" type="checkbox" value="" id="caTraDMFLSua" disabled />
+                                        Cá Trả
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 mb-12 ">
+                                <div class="form-outline">
+                                    <label class="form-label" for="x1">Định Mức</label>
+                                    <input type="number" min="0" step="0.0001" id="dinhMucDMFLSua" class="form-control form-control-lg" autocomplete="off" placeholder="0.0000" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 mb-12 ">
+                                <div class="form-outline">
+                                    <label class="form-label">Xưởng</label>
+                                    <select id="maXuongDMFLSua" class="form-control form-control-lg" disabled>
+                                        <option disabled selected>Chọn Xưởng</option>
+                                        @foreach (var item in listXuongs)
+                                        {
+                                            <option value="@item.Ma">@item.Ten</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-12">
+                                <div class="list-group form-outline">
+                                    <label class="">
+                                        <input class="form-check-input me-1" type="checkbox" value="" id="suDungDMFLSua" />
+                                        Sử Dụng
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-4 pt-2">
+                            <div class="col-12">
+                                <button onclick="update()" class="btn btn-primary w-100 position-relative" type="submit" id="">
+                                    <div class=" align-items-center">
+                                        <span id="txtSua">Sửa</span>
+                                        <div id="loadingIndicatorSua" class=" spinner-border text-secondary position-absolute" role="status" style="left: 0;right: 0;top: 0;bottom: 0;margin: auto; display:none">
+                                            <span class="visually-hidden">Đang tải...</span>
+                                        </div>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<input type="hidden" id="sttDMFLRowSelected" />
+<input type="hidden" id="ngayDMFLRowSelected" />
+<input type="hidden" id="gioDMFLRowSelected" />
+<input type="hidden" id="maloDMFLRowSelected" />
+<input type="hidden" id="maloaicaDMFLRowSelected" />
+<input type="hidden" id="mamauDMFLRowSelected" />
+<input type="hidden" id="masizeDMFLRowSelected" />
+<input type="hidden" id="mathanhphamDMFLRowSelected" />
+<input type="hidden" id="maxuongDMFLRowSelected" />
+<input type="checkbox" id="caTraDMFLRowSelected" />
+<script>
+    $(document).ready(function () {
+        loadGridData();
+    });
+    var grid;
+    function loadGridData() {
+        $.ajax({
+            url: '/dinhmucFillet/GetAllsFullField',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                var dataManager = new ej.data.DataManager({
+                    json: data,
+                    adaptor: new ej.data.JsonAdaptor()
+                });
+                if (grid) {
+                    grid.dataSource = dataManager;
+                    grid.refresh();
+                } else {
+                    grid = new ej.grids.Grid({
+                        dataSource: dataManager,
+                        allowPaging: true,
+                        pageSettings: { pageSize: 50 },
+                        allowFiltering: true,
+                        filterSettings: { type: 'Excel' },
+                        allowSorting: true,
+                        //frozenColumns: 3,
+                        allowResizing: true,
+                        rowSelected: onRowSelected,
+                        height: 400,
+                        columns: [
+                            { field: 'STT', headerText: 'STT', width: 50 },
+                            { field: 'Ngay', headerText: 'Ngày', width: 150 },
+                            { field: 'Gio', headerText: 'Giờ', width: 150 },
+                            { field: 'MaLo', headerText: 'Lô', width: 150 },
+                            { field: 'LoaiCaName', headerText: 'Loại Cá', width: 150 },
+                            { field: 'ThanhPhamName', headerText: 'Thành Phẩm', width: 150 },
+                            { field: 'MauName', headerText: 'Màu', width: 150 },
+                            { field: 'SizeName', headerText: 'Size', width: 150 },
+                            { field: 'CaTra', headerText: 'Cá Trả', width: 100, displayAsCheckBox: 'true', textAlign: 'Center' },
+                            { field: 'DinhMuc', headerText: 'Định Mức', type: 'number', width: 150 },
+                            { field: 'XuongName', headerText: 'Xưởng', width: 150 },
+                            { field: 'SuDung', headerText: 'Sử Dụng', width: 100, displayAsCheckBox: 'true', textAlign: 'Center' },
+                        ]
+                    });
+                    // Hiển thị Grid trên trang web
+                    grid.appendTo('#Grid');
+                }
+            },
+            error: function (error) {
+                console.error(error);
+            }
+        });
+    }
+    loadGridData();
+    function reloadData() {
+        loadGridData();
+    }
+    function onRowSelected(args) {
+        // Lấy dữ liệu của hàng được chọn
+        var selectedRecord = args.data;
+        // Lấy giá trị Id từ dữ liệu của hàng được chọn
+        var stt = selectedRecord.STT;
+        var ngay = selectedRecord.Ngay;
+        var gio = selectedRecord.Gio;
+        var malo = selectedRecord.MaLo;
+        var maloaica = selectedRecord.MaLoaiCa;
+        var mamau = selectedRecord.MaMau;
+        var masize = selectedRecord.MaSize;
+        var mathanhpham = selectedRecord.MaThanhPham;
+        var maxuong = selectedRecord.MaXuong;
+        var catra = selectedRecord.CaTra;
+        $('#sttDMFLRowSelected').val(stt);
+        $('#ngayDMFLRowSelected').val(ngay);
+        $('#gioDMFLRowSelected').val(gio);
+        $('#maloDMFLRowSelected').val(malo);
+        $('#maloaicaDMFLRowSelected').val(maloaica);
+        $('#mamauDMFLRowSelected').val(mamau);
+        $('#masizeDMFLRowSelected').val(masize);
+        $('#mathanhphamDMFLRowSelected').val(mathanhpham);
+        $('#maxuongDMFLRowSelected').val(maxuong);
+        $('#caTraDMFLRowSelected').prop('checked', catra);
+    }
+</script>
+<script>
+    function layGioTuDate(dateString) {
+        // Khởi tạo một đối tượng Date từ chuỗi ngày
+        var date = new Date(dateString);
+
+        // Lấy giờ, phút và giây từ đối tượng Date
+        var gio = date.getHours();
+        var phut = date.getMinutes();
+        var giay = date.getSeconds();
+
+        // Định dạng lại chuỗi kết quả
+        var gioPhutGiayString = pad(gio, 2) + ":" + pad(phut, 2) + ":" + pad(giay, 2);
+
+        // Trả về chuỗi kết quả
+        return gioPhutGiayString;
+    }
+    // Hàm pad để thêm số 0 vào trước nếu cần
+    function pad(number, length) {
+        var str = '' + number;
+        while (str.length < length) {
+            str = '0' + str;
+        }
+        return str;
+    }
+    function showInsert() {
+        $.ajax({
+            type: "GET",
+            url: "/dinhmucFillet/CreatDefautNew",
+            success: function (rs) {
+                if (rs.isSuccess === true) {
+                    $('#sttDMFL').val(rs.STT);
+                    $('#gioDMFL').val(layGioTuDate(rs.Gio));
+                    $('#dinhMucDMFL').val(rs.DinhMuc);
+                    $('#caTraDMFL').prop('checked', rs.CaTra);
+                    $('#suDungDMFL').prop('checked', rs.SuDung);
+                    $('#modalThem').modal('show');
+                }
+                else {
+                    toastOptionNotyfi();
+                    toastr["warning"](rs.Mesages, "Thông báo");
+                }
+            },
+            error: function () {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error, "Thông báo");
+            }
+        });
+    }
+    function insert() {
+        var stt = $('#sttDMFL').val();
+        var gio = $('#gioDMFL').val();
+        var maLo = $('#maLoDMFL').val();
+        var maLoaiCa = $('#maLoaiCaDMFL').val();
+        var maMau = $('#maMauDMFL').val();
+        var masize = $('#maSizeDMFL').val();
+        var maThanhPham = $('#maThanhPhamDMFL').val();
+        var caTra = $('#caTraDMFL').prop('checked');
+        var dinhMuc = $('#dinhMucDMFL').val();
+        var maXuong = $('#maXuongDMFL').val();
+        var suDung = $('#suDungDMFL').prop('checked');
+        document.getElementById("txtThem").style.visibility = "hidden";
+        document.getElementById("loadingIndicator").style.display = "block";
+        $.ajax({
+            type: 'POST',
+            url: '/DinhMucFillet/DoInsert',
+            data: {
+                stt: stt,
+                gio: gio,
+                maLo: maLo,
+                maLoaiCa: maLoaiCa,
+                maMau: maMau,
+                masize: masize,
+                maThanhPham: maThanhPham,
+                maXuong: maXuong,
+                caTra: caTra,
+                dinhMuc: dinhMuc,
+                suDung: suDung,
+            },
+            success: function (rs) {
+                if (rs.isSuccess === true) {
+                    toastOptionNotyfi();
+                    toastr["success"](rs.Messages, "Thông báo");
+                    $('#modalThem').modal('hide');
+                    reloadData();
+                } else {
+                    toastOptionNotyfi();
+                    toastr["warning"](rs.Messages, "Thông báo");
+                }
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error, "Thông báo");
+            },
+            complete: function () {
+                document.getElementById("loadingIndicator").style.display = "none";
+                document.getElementById("txtThem").style.visibility = "visible";
+            }
+        });
+    }
+</script>
+<script>
+    function showUpdate() {
+        var stt = $('#sttDMFLRowSelected').val();
+        var ngay = $('#ngayDMFLRowSelected').val();
+        var gio = $('#gioDMFLRowSelected').val();
+        var malo = $('#maloDMFLRowSelected').val();
+        var maloaica = $('#maloaicaDMFLRowSelected').val();
+        var mamau = $('#mamauDMFLRowSelected').val();
+        var masize = $('#masizeDMFLRowSelected').val();
+        var mathanhpham = $('#mathanhphamDMFLRowSelected').val();
+        var maxuong = $('#maxuongDMFLRowSelected').val();
+        var catra = $('#caTraDMFLRowSelected').prop('checked');
+        
+        $.ajax({
+            url: "/DinhMucFillet/GetsByMa",
+            data: { 
+                stt: stt,
+                ngay: ngay,
+                gio: gio,
+                malo: malo,
+                maloaica: maloaica,
+                mamau: mamau,
+                masize: masize,
+                mathanhpham: mathanhpham,
+                maxuong: maxuong,
+                catra: catra
+            },
+            type: 'GET',
+            dataType: 'json',
+            success: function (rs) {
+                if (rs.isSuccess === true) {
+                    $('#sttDMFLSua').val(rs.STT);
+                    $('#gioDMFLSua').val(rs.Gio);
+                    $('#maLoDMFLSua').val(rs.MaLo);
+                    $('#maLoaiCaDMFLSua').val(rs.MaLoaiCa);
+                    $('#maMauDMFLSua').val(rs.MaMau);
+                    $('#maSizeDMFLSua').val(rs.MaSize);
+                    $('#maThanhPhamDMFLSua').val(rs.MaThanhPham);
+                    $('#caTraDMFLSua').prop('checked', rs.CaTra);
+                    $('#dinhMucDMFLSua').val(rs.DinhMuc);
+                    $('#maXuongDMFLSua').val(rs.MaXuong);
+                    $('#suDungDMFLSua').prop('checked', rs.SuDung);
+                    $('#modalSua').modal('show');
+                }
+                else {
+                    toastOptionNotyfi();
+                    toastr["warning"](rs.Mesages, "Thông báo");
+                }
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error, "Thông báo");
+            }
+        });
+    }
+    function update() {
+        var stt = $('#sttDMFLSua').val();
+        var ngay = $('#ngayDMFLRowSelected').val();
+        var gio = $('#gioDMFLSua').val();
+        var maLo = $('#maLoDMFLSua').val();
+        var maLoaiCa = $('#maLoaiCaDMFLSua').val();
+        var maMau = $('#maMauDMFLSua').val();
+        var masize = $('#maSizeDMFLSua').val();
+        var maThanhPham = $('#maThanhPhamDMFLSua').val();
+        var caTra = $('#caTraDMFLSua').prop('checked');
+        var dinhMuc = $('#dinhMucDMFLSua').val();
+        var maXuong = $('#maXuongDMFLSua').val();
+        var suDung = $('#suDungDMFLSua').prop('checked');
+        document.getElementById("txtSua").style.visibility = "hidden";
+        document.getElementById("loadingIndicatorSua").style.display = "block";
+        $.ajax({
+            url: '/DinhMucFillet/DoUpdate',
+            data: {
+                stt: stt,
+                ngay:ngay,
+                gio: gio,
+                maLo: maLo,
+                maLoaiCa: maLoaiCa,
+                maMau: maMau,
+                masize: masize,
+                maThanhPham: maThanhPham,
+                maXuong: maXuong,
+                caTra: caTra,
+                dinhMuc: dinhMuc,
+                suDung: suDung,
+            },
+            type: 'POST',
+            dataType: 'json',
+            success: function (rs) {
+                if (rs.isSuccess === true) {
+                    $('#modalSua').modal('hide');
+                    reloadData();
+                    toastOptionNotyfi();
+                    toastr["success"](rs.Messages, "Thông báo");
+                } else {
+                    toastOptionNotyfi();
+                    toastr["warning"](rs.Messages, "Thông báo");
+                }
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error.toString(), "Thông báo");
+            },
+            complete: function () {
+                document.getElementById("loadingIndicatorSua").style.display = "none";
+                document.getElementById("txtSua").style.visibility = "visible";
+            }
+        });
+    }
+</script>
+<script>
+    function showDelete() {
+        var stt = $('#sttDMFLRowSelected').val();
+        var ngay = $('#ngayDMFLRowSelected').val();
+        var gio = $('#gioDMFLRowSelected').val();
+        var malo = $('#maloDMFLRowSelected').val();
+        var maloaica = $('#maloaicaDMFLRowSelected').val();
+        var mamau = $('#mamauDMFLRowSelected').val();
+        var masize = $('#masizeDMFLRowSelected').val();
+        var mathanhpham = $('#mathanhphamDMFLRowSelected').val();
+        var maxuong = $('#maxuongDMFLRowSelected').val();
+        var catra = $('#caTraDMFLRowSelected').prop('checked');
+        $.ajax({
+            url: "/DinhMucFillet/GetsByMa",
+            data: {
+                stt: stt,
+                ngay: ngay,
+                gio: gio,
+                malo: malo,
+                maloaica: maloaica,
+                mamau: mamau,
+                masize: masize,
+                mathanhpham: mathanhpham,
+                maxuong: maxuong,
+                catra: catra
+            },
+            type: 'GET',
+            dataType: 'json',
+            success: function (rs) {
+                if (rs.isSuccess === true) {
+                    bootbox.confirm({
+                        title: "Thông báo!",
+                        message: "Bạn có chắc muốn xoá ! ",
+                        buttons: {
+                            confirm: {
+                                label: 'OK',
+                                className: 'btn btn-primary'
+                            }
+                        },
+                        callback: function (result) {
+                            if (result) {
+                                //Người dùng đã bấm OK, Gọi API xóa ở đây
+                                $.ajax({
+                                    url: '/DinhMucFillet/DoDelete',
+                                    data: {
+                                        stt: stt,
+                                        ngay: ngay,
+                                        gio: gio,
+                                        malo: malo,
+                                        maloaica: maloaica,
+                                        mamau: mamau,
+                                        masize: masize,
+                                        mathanhpham: mathanhpham,
+                                        maxuong: maxuong,
+                                        catra: catra
+                                    },
+                                    type: 'POST',
+                                    dataType: 'json',
+                                    success: function (rs) {
+                                        if (rs.isSuccess === true) {
+                                            reloadData();
+                                            toastOptionNotyfi();
+                                            toastr["success"](rs.Messages, "Thông báo");
+                                        } else {
+                                            toastOptionNotyfi();
+                                            toastr["warning"](rs.Messages, "Thông báo");
+                                        }
+                                    },
+                                    error: function (error) {
+                                        toastOptionNotyfi();
+                                        toastr["error"]('Đã xảy ra lỗi: ' + error.toString(), "Thông báo");
+                                    }
+                                });
+                            }
+                        }
+                    });
+                } else {
+                    toastOptionNotyfi();
+                    toastr["warning"]('Không tìm thấy thông tin!', "Thông báo");
+                }
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error.toString(), "Thông báo");
+            }
+        });
+
+    }
+</script>
+
+

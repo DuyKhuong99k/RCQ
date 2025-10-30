@@ -1,0 +1,186 @@
+﻿@{
+    var tptl = ViewBag.listTPTLModel;
+    var NumberDate = @Context.Session.GetString("NumberDate");
+    var XuongId = @Context.Session.GetString("XuongId");
+}
+
+<style>
+
+    .active-link2 {
+        color: #696cff; /* Màu chữ khi đã click */
+        font-weight: bold; /* Độ đậm chữ khi đã click */
+        text-decoration: underline; /* Gạch chân khi đã click (tùy chọn) */
+        transition: all 0.3s ease; /* Hiệu ứng chuyển đổi trong 0.3 giây */
+    }
+
+
+    .apexcharts-tooltip {
+        display: none !important;
+    }
+
+    td.fitwidth {
+        width: 1px;
+        white-space: nowrap;
+    }
+
+</style>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <div class=" d-flex flex-column justify-content-between align-items-center mb-3">
+            <div id="element2" class="position-relative"></div>
+        </div>
+        
+
+        <div id="loadingIndicator2" class=" spinner-border text-primary position-absolute" role="status" style="left: 0;right: 0;top: 0;bottom: 0;margin: auto; display:none">
+            <span class="visually-hidden">Đang tải...</span>
+        </div>
+
+        <a id="detailLink2" class="me-1"
+           data-bs-toggle="collapse"
+           data-bs-target="#collapseExample2"
+           aria-expanded="false"
+           aria-controls="collapseExample2">
+            Xem chi tiết
+        </a>
+        <div class="collapse" id="collapseExample2">
+            <div class="table-responsive text-nowrap">
+                <table class="table table-hover">
+                    <thead class="d-none">
+                        <tr>
+                            <th scope="col">1</th>
+                            <th scope="col">2</th>
+                            <th scope="col">3</th>
+                        </tr>
+                    <tbody class="table-border-bottom-0 v">
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+
+
+@* <script>
+    // Get the height of the element
+    var elementHeight = document.getElementById("element").offsetHeight;
+
+    // Set the height of the card-body to the height of the element
+    document.getElementById("cardBody").style.height = elementHeight + "px";
+</script> *@
+<script src="~/js/adduserwaitview.js"></script>
+<script>
+    if(typeof detailLink === 'undefined'){
+        var detailLink = document.getElementById('detailLink2');
+    }
+    if(typeof tongHopTPDHChart2 === 'undefined'){
+        var tongHopTPDHChart2;
+    }
+    detailLink.addEventListener('click', function () {
+        if (this.classList.contains('active-link2')) {
+            this.classList.remove('active-link2');
+        } else {
+            this.classList.add('active-link2'); 
+        }
+    });
+
+    $(document).ready(function () {
+        document.getElementById("loadingIndicator2").style.display = "block";
+        loadData2();
+        //var XuongId = @Context.Session.GetString("XuongId");
+        // var xuongId = @XuongId;
+        // AddUserWaitView(xuongId);
+    });
+    function loadData2() {
+        var xuongId = @XuongId;
+        AddUserWaitView(xuongId);
+        const parentElement = document.querySelector('.v');
+        var fromDate = "@DateTime.Now.Date.AddDays(int.Parse((NumberDate ?? "0").ToString()) * -1).ToString("yyyy-MM-dd")";
+        var toDate = "@DateTime.Now.Date.ToString("yyyy-MM-dd")";
+        $.ajax({
+            url: '/Dashboard/TongHopTyLeThanhPhamWithDate',
+            data: { fromDate: fromDate, toDate: toDate },
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                if (tongHopTPDHChart2) {
+                    tongHopTPDHChart2.dataSource = data.datas;
+                } else {
+                    rendertChartTHTPDH2(data);
+                }
+                parentElement.innerHTML = '';
+                updateUI2(data);
+
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi khi lấy dữ liệu từ server: ', error, "Thông báo");
+            },
+            complete: function () {
+                document.getElementById("loadingIndicator2").style.display = "none";
+            }
+        });
+    }
+
+    function rendertChartTHTPDH2(data) {
+        var _data = data.datas;
+       
+        tongHopTPDHChart2 = new ej.treemap.TreeMap({
+            dataSource: _data,
+            weightValuePath: 'TrongLuongTP',
+            layoutType: 'Squarified',
+            leafItemSettings: {
+                labelPath: 'labels',
+                labelFormat: '${labels}:${DinhMucTP} - ${TrongLuongTP}Kg'
+                
+            },
+
+            palette: ['#71B081', '#5A9A77', '#498770', '#39776C', '#266665', '#124F5E'],
+            renderDirection: 'BottomLeftTopRight',
+            tooltipSettings: {
+                visible: true,
+                format: '${labels} : ${DinhMucTP} - ${TrongLuongTP}Kg'
+            },
+            width: '100%', // Thay đổi giá trị tùy theo kích thước mong muốn
+            height: '100%',
+            canvasRendering: true,
+        }, '#element2');
+    }
+   
+    function updateUI2(data) {
+
+        const parentElement = document.querySelector('.v');
+        // document.getElementById("tongTLTPDinHinh").textContent = data.TongTL + " Kg";
+        for (let i = 0; i < data.datas.length; i++) {
+            const newItem = document.createElement('tr');
+            // newItem.classList.add('table-border-bottom-0');
+            var item = data.datas[i];
+            newItem.innerHTML = `
+                                                                        <td>
+                                                                            <div>
+
+                                                                                        <h6 class="mb-0">${item.labels}</h6>
+                                                                            </div>
+                                                                        </td>
+                                                                        <td>
+                                                                                <small class="fw-semibold">${item.DinhMucTP}</small>
+                                                                        </td>
+                                                                            <td style="text-align: right;">
+                                                                                <small class="fw-semibold">${item.TrongLuongTP} Kg</small>
+                                                                        </td>
+
+
+                                                                        `;
+
+            parentElement.appendChild(newItem);
+        }
+    }
+    function RefreshDBTHTPDH2() {
+        loadData();
+    }
+    var timeInterval = @AppViewModels.AppViewModel.Instance.TimeSetIntervalDashBoardView;
+    setInterval(loadData2, timeInterval);
+</script>

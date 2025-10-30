@@ -1,0 +1,106 @@
+﻿@{
+    ViewData["Title"] = "Dashboard";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="container-xxl flex-grow-1 container-p-y" style="margin-top:-51px">
+    <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Cài Đặt /</span> Dashboard</h4>
+
+    <div class="row">
+        <div class="col-md-12">
+            @* <ul class="nav nav-pills flex-column flex-md-row mb-3">
+                <li class="nav-item">
+                    <a class="nav-link " href="/SettingWebApp/Account"><i class="bx bx-user me-1"></i> Tài Khoản</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/SettingWebApp/Notifications"><i class="bx bx-bell me-1"></i> Thông Báo</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link " href="/SettingWebApp/Connections"><i class="bx bx-link-alt me-1"></i> Kết Nối</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="/SettingWebApp/Dashboard"><i class='bx bxs-dashboard me-1'></i> Dashboard</a>
+                </li>
+            </ul> *@
+            <div class="card mb-4">
+                <h5 class="card-header">Cài Đặt Dashboard</h5>
+                <div class="card-body">
+                    <div class="col-md-6 list-group">
+                        Chọn số ngày tính từ ngày hiện tại để tổng hợp dữ liệu (0 = Ngày Hiện Tại).
+                        <div class="mt-1 d-flex align-items-center">
+                            <p style="color: #dc3545; margin-bottom: 0; margin-right: 0.5rem;">Chức năng này đã bị vô hiệu hóa! Vui lòng không sử dụng</p>
+                            <input id="numberDate" type="text" class="form-control" placeholder="Nhập số ngày..." disabled />
+                        </div>
+                    </div>
+                    <div class="row mt-4">
+                        <div class="col-sm-10">
+                            <button onclick="saveSettingDB()" class="btn btn-primary mb-2 position-relative" type="submit" id="" disabled>
+                                <div class=" align-items-center">
+                                    <span id="txtSetting">Lưu</span>
+                                    <div id="loadingIndicatorSetting" class=" spinner-border text-secondary position-absolute" role="status" style="left: 0;right: 0;top: 0;bottom: 0;margin: auto; display:none">
+                                        <span class="visually-hidden">Đang tải...</span>
+                                    </div>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        
+        $.ajax({
+            type: "GET",
+            url: "/SettingWebApp/GetsSDB",
+            success: function (rs) {
+                if (rs.isSuccess === true) {
+                    $('#numberDate').val(rs.NumberDate);
+                }
+                else {
+                    toastOptionNotyfi();
+                    toastr["warning"](rs.Mesages, "Thông báo");
+                }
+            },
+            error: function () {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error, "Thông báo");
+            }
+        });
+    });
+    function saveSettingDB() {
+        document.getElementById("txtSetting").style.visibility = "hidden";
+        document.getElementById("loadingIndicatorSetting").style.display = "block";
+        var numberDate = $('#numberDate').val();
+        $.ajax({
+            url: '/SettingWebApp/DoUpDateSDB',
+            data: {
+                numberDate: numberDate
+            },
+            type: 'POST',
+            dataType: 'json',
+            success: function (rs) {
+                if (rs.isSuccess === true) {
+                    $('#modalSua').modal('hide');
+                   
+                    toastOptionNotyfi();
+                    toastr["success"](rs.Messages, "Thông báo");
+                } else {
+                    toastOptionNotyfi();
+                    toastr["warning"](rs.Messages, "Thông báo");
+                }
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error.toString(), "Thông báo");
+            },
+            complete: function () {
+                document.getElementById("txtSetting").style.visibility = "visible";
+                document.getElementById("loadingIndicatorSetting").style.display = "none";
+            }
+        });
+    }
+</script>
+

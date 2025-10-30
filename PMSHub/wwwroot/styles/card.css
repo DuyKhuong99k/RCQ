@@ -1,0 +1,159 @@
+﻿.e-listbox-container {
+    border: none !important;
+    box-sizing: border-box;
+    /*display: inline-block;*/
+    margin: auto;
+}
+
+.list-wrapper {
+    height: inherit;
+    padding: 14px 12px 14px 78px;
+    position: relative;
+}
+
+.list-wrapper .text,
+.list-wrapper .description {
+    display: block;
+    margin: 0;
+    padding-bottom: 3px;
+    white-space: normal;
+}
+
+.list-wrapper .description {
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.e-listbox-container .list-wrapper .text {
+    font-size: 13px;
+    font-weight: bold;
+}
+
+.list-wrapper .e-avatar {
+    background-color: transparent;
+    font-size: 22px;
+    left: 5px;
+    position: absolute;
+    top: calc(50% - 33px);
+}
+
+.e-listbox-container { height: auto !important; }
+.e-listbox-container .e-list-wrap .e-list-parent .e-list-item {
+        height: auto !important;
+        width: 25% !important;
+    }
+@media (max-width: 2000px) {
+    
+    .e-listbox-container .e-list-wrap .e-list-parent .e-list-item {
+        
+        width: 33% !important;
+    }
+}
+@media (max-width: 1524px) {
+    .e-listbox-container .e-list-wrap .e-list-parent .e-list-item {
+        width: 50% !important;
+    }
+}
+@media (max-width: 900px) {
+    .e-listbox-container .e-list-wrap .e-list-parent .e-list-item {
+        width: 100% !important;
+    }
+}
+
+
+.e-list-group-item {
+    flex-basis: 100%
+}
+
+
+/*.e-list-group-item + .listbox-item {
+    display: inline-block !important;*/ /* or inline-flex */
+    /*margin-right: 20px;*/ /* Adjust the spacing between cards */
+    /*vertical-align: top;*/ /* Align cards at the top */
+    /*width: calc(33.33% - 20px);*/ /* Adjust the width as needed */
+/*}*/
+
+.e-list-parent.e-ul {
+    display: flex;
+    flex-wrap: wrap;
+    /* Adjust other properties as needed */
+}
+
+.e-list-item.e-selected {
+    background-color: whitesmoke !important;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.5);
+    transform: translateY(-5px);
+}
+
+.TextCenter { text-align: center; }
+
+.TempClass { font-size: 30px; }
+
+.e-card .e-card-header .e-card-header-caption .e-card-header-title {
+    font-size: 25px;
+    line-height: 32px;
+}
+
+.e-card .e-card-header .e-card-header-caption .e-card-sub-title {
+    font-size: 16px;
+    line-height: 20px;
+}
+
+.e-card .e-card-content { padding-top: 0px; }
+
+.sf-card {
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 10px;
+    padding: 10px;
+    position: relative;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.sf-card:hover {
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 1);
+    transform: translateY(-5px);
+}
+
+.sf-card::before {
+    background: linear-gradient(45deg, #ffffff, #f0f0f0);
+    border-radius: 10px;
+    bottom: 0;
+    content: "";
+    left: 0;
+    opacity: 0.5;
+    pointer-events: none;
+    position: absolute;
+    right: 0;
+    top: 0;
+    z-index: -1;
+}
+
+table { width: 100%; }
+
+.e-card-layout {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    margin: auto;
+}
+
+.e-card-header {
+    border-bottom: 1px solid #ccc;
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+}
+
+.e-card-header-title {
+    color: #333;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.e-card-sub-title {
+    color: #666;
+    font-size: 14px;
+}

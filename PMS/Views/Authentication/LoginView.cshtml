@@ -1,0 +1,322 @@
+﻿@using Syncfusion.EJ2
+@{
+    Layout = null; // Loại bỏ layout chung
+    var listXuongs = ViewBag.listXuongs;
+    var XuongId = "";
+    try
+    {
+        XuongId = (@Context.Session.GetString("XuongId"))??"";
+    }
+    catch (Exception e)
+    {
+        Console.WriteLine(e);
+        // throw;
+    }
+    
+}
+
+<!DOCTYPE html>
+
+<html lang="en"
+      class="light-style customizer-hide"
+      dir="ltr"
+      data-theme="theme-default"
+      data-assets-path="../assets/"
+      data-template="vertical-menu-template-free">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
+
+    <title>PMSoft | Đăng Nhập</title>
+
+    <meta name="description" content="" />
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="~/assets/img/favicon/PMS.ico">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap"
+          rel="stylesheet" />
+
+    <!-- Icons. Uncomment required icon fonts -->
+    <link rel="stylesheet" href="../assets/vendor/fonts/boxicons.css" />
+
+    <!-- Core CSS -->
+    <link rel="stylesheet" href="../assets/vendor/css/core.css" class="template-customizer-core-css" />
+    <link rel="stylesheet" href="../assets/vendor/css/theme-default.css" class="template-customizer-theme-css" />
+    <link rel="stylesheet" href="../assets/css/demo.css" />
+
+    <!-- Vendors CSS -->
+    <link rel="stylesheet" href="../assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
+
+    <!-- Page CSS -->
+    <!-- Page -->
+    <link rel="stylesheet" href="../assets/vendor/css/pages/page-auth.css" />
+    <!-- Helpers -->
+    <script src="../assets/vendor/js/helpers.js"></script>
+
+    <!--! Template customizer & Theme config files MUST be included after core stylesheets and helpers.js in the <head> section -->
+    <!--? Config:  Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file.  -->
+    <script src="../assets/js/config.js"></script>
+    <link rel="stylesheet" href="https://cdn.syncfusion.com/ej2/25.1.41/fluent.css" />
+    <script src="https://cdn.syncfusion.com/ej2/25.1.41/dist/ej2.min.js"></script>
+    <style>
+        #loadingIndicator {
+            left: 0;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            margin: auto;
+            position: absolute;
+        }
+        .e-input-group:not(.e-success):not(.e-warning):not(.e-error), .e-input-group.e-control-wrapper:not(.e-success):not(.e-warning):not(.e-error) {
+            border-color: #d9dee3;
+            box-shadow: none;
+        }
+        span.e-input-group.e-control-wrapper.e-ddl {
+            border: 1px solid #d9dee3;
+            border-radius: 0.5rem;
+        }
+        .form-control.e-control.e-combobox.e-lib.e-input.e-keyboard{
+            box-shadow: none;
+            border-radius: 0.5rem;
+        }
+        .e-input-group.e-input-focus:not(.e-success):not(.e-warning):not(.e-error),.e-input-group.e-control-wrapper.e-input-focus:not(.e-success):not(.e-warning):not(.e-error) {
+            border-color: #0078d4;
+            border-radius: 0.5rem;
+            box-shadow: 0 0 0 1px #0078d4
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Content -->
+
+    <div class="container-xxl">
+        <div class="authentication-wrapper authentication-basic container-p-y">
+            <div class="authentication-inner">
+                <!-- Register -->
+                <div class="card">
+                    <div class="card-body">
+                        <!-- Logo -->
+                        <div class="app-brand justify-content-center">
+                            <a href="index.html" class="app-brand-link gap-2">
+                                <span class="app-brand-logo demo">
+                                    <img style="width:120px" src="~/assets/img/logo/PMSLogo.png" />
+                                </span>
+                            </a>
+                        </div>
+                        <!-- /Logo -->
+                        <h4 class="mb-2">Chào mừng đến với PMSoft</h4>
+                        <p class="mb-4">Vui lòng đăng nhập để bất đầu!</p>
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between">
+                                <label class="form-label" for="password">Xưởng</label>
+                            </div>
+                            <div class="input-group input-group-merge">
+                              
+                                <ejs-combobox id="xuongSelect" dataSource="@listXuongs" placeholder="Chọn Xưởng" class="form-control">
+
+                                    <e-combobox-fields value="Ma" text="Ten"></e-combobox-fields>
+                                </ejs-combobox>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Tài khoản</label>
+                            <input type="text"
+                                   class="form-control"
+                                   id="txtUsername"
+                                   name="username"
+                                   placeholder="Nhập tài khoản"
+                                   autofocus
+                                   autocomplete="off" />
+                        </div>
+                        <div class="mb-3 form-password-toggle">
+                            <div class="d-flex justify-content-between">
+                                <label class="form-label" for="password">Mật khẩu</label>
+                            </div>
+                            <div class="input-group input-group-merge">
+                                <input type="password"
+                                       id="txtPassword"
+                                       class="form-control"
+                                       name="password"
+                                       placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
+                                       aria-describedby="password" autocomplete="off" />
+                                <span class="input-group-text cursor-pointer"><i class="bx bx-hide"></i></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="remember-me" />
+                                <label class="form-check-label" for="remember-me"> Giữ Phiên Đăng Nhập </label>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <div class="col-12">
+                                <button onclick="login(this)" class="btn btn-primary w-100" type="submit" id="loginBtn">
+                                    <div class=" align-items-center">
+                                        <span id="txtDangNhap">Đăng Nhập</span>
+                                        <div id="loadingIndicator" class=" spinner-border text-secondary" role="status" style="display: none;">
+                                            <span class="visually-hidden">Đang tải...</span>
+                                        </div>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Core JS -->
+    <!-- build:js assets/vendor/js/core.js -->
+    <script src="../assets/vendor/libs/jquery/jquery.js"></script>
+    <script src="../assets/vendor/libs/popper/popper.js"></script>
+    <script src="../assets/vendor/js/bootstrap.js"></script>
+    <script src="../assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
+
+    <script src="../assets/vendor/js/menu.js"></script>
+    <!-- endbuild -->
+    <!-- Vendors JS -->
+    <!-- Main JS -->
+    <script src="../assets/js/main.js"></script>
+
+    <!-- Page JS -->
+    <!-- Place this tag in your head or just before your close body tag. -->
+    @* <script async defer src="https://buttons.github.io/buttons.js"></script> *@
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" rel="stylesheet" />
+    <script src="~/js/toastoptionnotyfi.js"></script>
+    <script>
+        $(document).ready(function() {
+            if (typeof(Storage) !== "undefined") {
+                var xuongId = localStorage.getItem("XuongId");
+                if(xuongId != null && xuongId != "")
+                {
+                    var obj = document.getElementById("xuongSelect").ej2_instances[0];
+                    if(obj != null)
+                    {
+                        obj.value = xuongId;
+                    }
+                }
+            } else {
+                if('@XuongId' != null && '@XuongId' != "")
+                {
+                    var obj = document.getElementById("xuongSelect").ej2_instances[0];
+                    if(obj != null)
+                    {
+                        obj.value = '@XuongId';
+                    }
+                }
+            }
+            
+        });
+       
+        function login(input) {
+            // Lấy URL hiện tại
+            var currentUrl = window.location.href;
+
+            // Phân tích đường dẫn
+            var url = new URL(currentUrl);
+
+            // Lấy giá trị của tham số ReturnUrl
+            var returnUrl = url.searchParams.get("ReturnUrl");
+
+            var username = $("#txtUsername").val();
+            var password = $("#txtPassword").val();
+            var xuongId = "";
+            var obj = document.getElementById("xuongSelect").ej2_instances[0];
+            if(obj != null)
+            {
+                var xuongId = obj.value;
+                if (typeof(Storage) !== "undefined") {
+                    localStorage.setItem("XuongId", xuongId);
+                }
+            }
+            
+            var rememberme = $('#remember-me').prop('checked');// $("#c").val();
+            
+            if (username == null || username == "") {
+                toastOptionNotyfi();
+                toastr["error"]("Vui lòng nhập tài khoản", "Thông báo");
+                return false;
+            }
+            if (password == null || password == "") {
+                toastOptionNotyfi();
+                toastr["error"]("Vui lòng nhập mật khẩu", "Thông báo");
+                return false;
+            }
+            if (xuongId == null || xuongId == "") {
+                toastOptionNotyfi();
+                toastr["error"]("Vui lòng chọn xưởng", "Thông báo");
+                return false;
+            }
+            // Ẩn chữ "Đăng Ký"
+            document.getElementById("txtDangNhap").style.visibility = "hidden";
+            // Hiển thị chỉ báo tải
+            $("#loadingIndicator").show();
+            $.ajax({
+                type: "POST",
+                url: "/Authentication/DoLogin",
+                data: { username: username, password: password, xuongId: xuongId, rememberme: rememberme, returnUrl: returnUrl }, // Không cần JSON.stringify ở đây
+                success: function (rs) {
+                
+                    if (rs.isSuccess === true) {
+                        // $.notify(rs.Messages, "success");
+                        toastOptionNotyfi();
+                        toastr["success"]("Đăng nhập thành công", "Thông báo");
+                        location.href = rs.url;
+                    }
+                    else {
+                        if (rs.Messages == null || rs.Messages == "") {
+
+                        }
+                        else {
+                            toastOptionNotyfi();
+                            toastr["error"](rs.Messages, "Thông báo");
+                        }
+
+                    }
+                },
+                error: function (rs) {
+                    if (rs.Messages == null || rs.Messages == "") {
+
+                    }
+                    else {
+                        toastOptionNotyfi();
+                        toastr["error"](rs.Messages, "Thông báo");
+                    }
+                    //$.notify(rs.Messages, "error");
+                },
+                complete: function () {
+                    // // Ẩn chỉ báo tải sau khi nhận kết quả hoặc gặp lỗi
+                    // $("#txtDangKy").Show();
+                    // Sau khi tải xong, ẩn chỉ báo tải và hiển thị lại chữ "Đăng Ký"
+                    $("#loadingIndicator").hide();
+                    document.getElementById("txtDangNhap").style.visibility = "visible";
+                }
+            });
+
+        }
+        $(document).keypress(function (event) {
+            var keycode = (event.keyCode ? event.keyCode : event.which);
+            if (keycode == '13') {
+                login();
+            }
+        });
+    </script>
+    <!-- Syncfusion ASP.NET Core Script Manager -->
+
+
+
+    <ejs-scripts></ejs-scripts>
+
+</body>
+</html>

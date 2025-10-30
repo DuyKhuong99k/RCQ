@@ -1,0 +1,223 @@
+﻿
+@{
+    ViewData["Title"] = "RecoverAccoutView";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+    
+</style>
+<div class="card">
+    <div class="card-body">
+        <div class="row">
+            <div class="">
+                <div class="form-outline">
+                    <label class="form-label" for="userName">Tên Đăng Nhập</label>
+                    <input type="text" id="userNameRecover" class="form-control form-control-lg" autocomplete="off" placeholder="Nhập tên tài khoản..." />
+                    <div style="margin-top:20px" class="card">             
+                        <h5 class="card-header">Thông tin: </h5>
+                        <div class="table-responsive text-nowrap">
+                            <table id="infoUserTable" class="table">
+                                <thead>
+                                    <tr class="text-nowrap">
+                                        <th>Tài Khoản</th>
+                                        <th>Mật Khẩu</th>
+                                        <th>Họ Tên</th>
+                                        <th>Số Điện Thoại</th>
+                                        <th>CCCD/CMCD</th>
+                                        <th>Kích Hoạt</th>
+                                    </tr>
+                                </thead>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row mt-4 pt-2">
+            <div class="col-12 ">
+                <button data-bs-toggle="modal" data-bs-target="#modalRecover" class="btn btn-primary position-relative" type="button" id="showRecoverBtn" disabled>
+                    <div class="d-flex align-items-center justify-content-center">
+                        <span id="txtKhoiPhuc">Khôi Phục</span>
+                    </div>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="modalRecover" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Khôi Phục Tài Khoản</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <div class="form-outline">
+                                    <label class="form-label" for="userName">Mật khẩu mới</label>
+                                    <input type="password" id="password" class="form-control form-control-lg" autocomplete="new-password" />
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <div class="form-outline">
+                                    <label class="form-label" for="passWord">Xác nhận mật khẩu</label>
+                                    <input type="password" id="confirmPassword" class="form-control form-control-lg" autocomplete="new-password" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-4 pt-2">
+                            <div class="col-12">
+                                <button onclick="recover(this)" class="btn btn-primary w-100 position-relative" type="submit" id="recoverBtn">
+                                    <div class=" align-items-center">
+                                        <span id="txtRecover">Xác Nhận</span>
+                                        <div id="loadingIndicator" class=" spinner-border text-secondary position-absolute " role="status" style="left: 0;right: 0;top: 0;bottom: 0;margin: auto;display: none;">
+                                            <span class="visually-hidden">Đang tải...</span>
+                                        </div>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<input id="passwordTb" type="hidden"/>
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" rel="stylesheet" />
+<script>
+    // Lấy thẻ input và phần tử p để hiển thị thông báo
+    var userNameInput = document.getElementById('userNameRecover');
+    var infoUserTable = document.getElementById('infoUserTable');
+    function GetInfoUserByUserName() {
+        var username = $('#userNameRecover').val();
+        // Hiển thị thông báo khi người dùng nhấn Enter
+        if ($('#userNameRecover').val() != '') {
+            $.ajax({
+                url: '/Authentication/GetInfoUserByUserName',
+                data: { username: username },
+                type: 'GET',
+                dataType: 'json',
+                success: function (rs) {
+                    if (rs.isSuccess === true) {
+                        $("#infoUserTable tbody").empty();
+                        var trHTML = '';
+                        trHTML += '<tbody><tr><td>' + rs.UserName + '</td><td id="tdPasswordTb" style="text-align: left;"><button onclick="showPasswordTb()" style="border: none;" type="button" class="btn btn-xs btn-icon btn-outline-secondary"><i id="iconPassword" class="bx bxs-low-vision"></i></button></td><td>' + rs.HoTen + '</td><td>' + rs.PhoneNumber + '</td><td>' + rs.CardID + '</td><td>' + rs.IsActive + '</td></tr></tbody>';
+                        $('#infoUserTable').append(trHTML);
+                        $("#showRecoverBtn").removeAttr('disabled');
+                        $('#passwordTb').val(rs.Password);
+                    } else {
+                        toastOptionNotyfi();
+                        toastr["warning"]('Không tìm thấy thông tin!', "Thông báo");
+                    }
+                },
+                error: function (error) {
+                    toastOptionNotyfi();
+                    toastr["error"]('Đã xảy ra lỗi: ' + error, "Thông báo");
+                }
+            });
+        }
+        else {
+            $("#infoUserTable tbody").empty();
+            // toastOptionNotyfi();
+            // toastr["warning"]('Nhập Tên Tài Khoản để kiểm tra thông tin', "Thông báo");
+            $("#showRecoverBtn").attr('disabled', 'disabled');
+        }
+    }
+    // Bắt sự kiện khi người dùng nhấn phím
+    userNameInput.addEventListener('keypress', function (event) {
+        if (event.keyCode === 13) { //keyCode phím Enter  = 13
+            GetInfoUserByUserName();
+        }
+    });
+
+    function recover() {
+        document.getElementById("txtRecover").style.visibility = "hidden";
+        document.getElementById("loadingIndicator").style.display = "block";
+        var username = $('#userNameRecover').val();
+        var newPassword = $('#password').val();
+        var confirmPassword = $('#confirmPassword').val();
+        if (newPassword != confirmPassword) {
+            toastOptionNotyfi();
+            toastr["warning"]('Mật khẩu không khớp!', "Thông báo");
+            document.getElementById("loadingIndicator").style.display = "none";
+            document.getElementById("txtRecover").style.visibility = "visible";
+            return false;
+        }
+        $.ajax({
+            url: '/Authentication/DoRecoverUser',
+            data: { username: username, newPassword: newPassword },
+            type: 'GET',
+            dataType: 'json',
+            success: function (rs) {
+                if (rs.isSuccess === true) {
+                    toastOptionNotyfi();
+                    toastr["success"](rs.Messages, "Thông báo");
+                    $('#modalRecover').modal('hide');
+                    GetInfoUserByUserName();
+                    $('#password').val('');
+                    $('#confirmPassword').val('');
+                } else {
+                    toastOptionNotyfi();
+                    toastr["warning"](rs.Messages, "Thông báo");
+                }
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error, "Thông báo");
+            },
+            complete: function () {
+                document.getElementById("loadingIndicator").style.display = "none";
+                document.getElementById("txtRecover").style.visibility = "visible";
+            }
+        });
+    }
+    function showPasswordTb(){
+        var tdPasswordTbElement = document.getElementById('tdPasswordTb');
+        var passwordTb = $('#passwordTb').val();
+        tdPasswordTbElement.textContent = passwordTb;
+        // Tạo button element
+        var buttonElement = document.createElement('button');
+        buttonElement.setAttribute('onclick', 'hidePasswordTb()');
+        buttonElement.setAttribute('style', 'border: none; margin-left: 2px');
+        buttonElement.setAttribute('type', 'button');
+        buttonElement.classList.add('btn', 'btn-xs', 'btn-icon', 'btn-outline-secondary');
+        // Tạo icon element
+        var iconElement = document.createElement('i');
+        iconElement.setAttribute('id', 'iconPassword');
+        iconElement.classList.add('bx', 'bxs-low-vision');
+
+        // Thêm icon element vào button element
+        buttonElement.appendChild(iconElement);
+
+        // Thêm button element vào tdPasswordTb
+        tdPasswordTbElement.appendChild(buttonElement);
+    }
+    function hidePasswordTb() {
+        var tdPasswordTbElement = document.getElementById('tdPasswordTb');
+        tdPasswordTbElement.textContent = '';
+        // Tạo button element 
+        var buttonElement = document.createElement('button');
+        buttonElement.setAttribute('onclick', 'showPasswordTb()');
+        buttonElement.setAttribute('style', 'border: none;');
+        buttonElement.setAttribute('type', 'button');
+        buttonElement.classList.add('btn', 'btn-xs', 'btn-icon', 'btn-outline-secondary');
+
+        // Tạo icon element
+        var iconElement = document.createElement('i');
+        iconElement.setAttribute('id', 'iconPassword');
+        iconElement.classList.add('bx', 'bxs-low-vision');
+        // Thêm icon element vào button element
+        buttonElement.appendChild(iconElement);
+
+        // Thêm button element vào tdPasswordTb
+        tdPasswordTbElement.appendChild(buttonElement);
+    }
+</script>
+

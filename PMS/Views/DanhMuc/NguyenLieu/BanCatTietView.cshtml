@@ -1,0 +1,963 @@
+﻿@{
+    ViewData["Title"] = ViewBag.TitlePage;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var roleIds = PMS.Middlewares.AuthenticationHelpers.GetRoleIdsFromCookie(Context);
+    // lấy danh sách fu func từ list roleId
+    var rolePermistions = ViewModels.Repos.HQ.RolePermistionViewModel.Instance.GetRolePermistions(roleIds);//
+    var i = 1;
+}
+<style>
+
+    div[style*="color: #222222;"] {
+        display: none;
+    }
+</style>
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h2 class="mb-0">Danh Sách Bàn Cắt Tiết</h2>
+                    @{
+                        var thembancattiet = rolePermistions.Where(x => x.Fu == "Danh Mục / Nguyên Liệu / Bàn Cắt Tiết" && x.Func == "Thêm Nguyên Liệu / Bàn Cắt Tiết" && x.Status == 1).FirstOrDefault();
+                        if (thembancattiet != null)
+                        {
+                            <button onclick="showInsertBanCatTiet()" type="button" class="btn btn-primary">Thêm</button>
+                        }
+                    }
+                </div>
+                <div class="card-body">
+                    <div id="Grid"></div>
+                    <div style="margin-top:20px;">
+                        @{
+                            var suabancattiet = rolePermistions.Where(x => x.Fu == "Danh Mục / Nguyên Liệu / Bàn Cắt Tiết" && x.Func == "Sửa Nguyên Liệu / Bàn Cắt Tiết" && x.Status == 1).FirstOrDefault();
+                            if (suabancattiet != null)
+                            {
+                                <button onclick="showUpdateBanCatTiet()" style="margin-right:5px" class="btn btn-outline-warning"><i class='bx bx-edit-alt'></i>Sửa</button>
+                            }
+                            var xoabancattiet = rolePermistions.Where(x => x.Fu == "Danh Mục / Nguyên Liệu / Bàn Cắt Tiết" && x.Func == "Xoá Nguyên Liệu / Bàn Cắt Tiết" && x.Status == 1).FirstOrDefault();
+                            if (xoabancattiet != null)
+                            {
+                                <button onclick="showDeleteBanCatTiet()" style="margin-right:5px" class="btn btn-outline-danger"><i class='bx bx-trash'></i>Xoá</button>
+                            }
+                            var importbancattiet = rolePermistions.Where(x => x.Fu == "Danh Mục / Nguyên Liệu / Bàn Cắt Tiết" && x.Func == "Import Nguyên Liệu / Bàn Cắt Tiết" && x.Status == 1).FirstOrDefault();
+                            if (importbancattiet != null)
+                            {
+                                <button onclick="importNhanVien()" style="margin-right:5px" class="btn btn-outline-info"><i class='bx bx-import'></i>Import</button>
+                            }
+                            var exportbancattiet = rolePermistions.Where(x => x.Fu == "Danh Mục / Nguyên Liệu / Bàn Cắt Tiết" && x.Func == "Export Nguyên Liệu / Bàn Cắt Tiết" && x.Status == 1).FirstOrDefault();
+                            if (suabancattiet != null)
+                            {
+                                <button onclick="exportNhanVien()" style="margin-right:5px" class="btn btn-outline-secondary"><i class='bx bx-export'></i>Export Excel</button>
+                            }
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="modalThemBanCatTiet" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Thêm Bàn Cắt Tiết</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-12 mb-12 ">
+                                <div class="form-outline">
+                                    <label class="form-label" for="x1">Mã</label>
+                                    <input type="text" id="maBanCatTiet" class="form-control form-control-sm" autocomplete="off" placeholder="Nhập Mã..." style="text-transform: uppercase;" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 mb-12 ">
+                                <div class="form-outline">
+                                    <label class="form-label" for="x1">Tên</label>
+                                    <input type="text" id="tenBanCatTiet" class="form-control form-control-sm" autocomplete="off" placeholder="Nhập Tên..." />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-12">
+                                <div class="list-group form-outline">
+                                    <label class="">
+                                        <input class="form-check-input me-1" type="checkbox" value="" id="isShowX1" />
+                                        Show X1
+                                    </label><label class="">
+                                        <input class="form-check-input me-1" type="checkbox" value="" id="isCaMuoiX1" />
+                                        Cá Muối X1
+                                    </label>
+                                </div>
+
+                            </div>
+                            <div class="col-md-6 mb-12">
+                                <div class="list-group form-outline">
+                                    <label class="">
+                                        <input class="form-check-input me-1" type="checkbox" value="" id="isShowX2" />
+                                        Show X2
+                                    </label><label class="">
+                                        <input class="form-check-input me-1" type="checkbox" value="" id="isCaMuoiX2" />
+                                        Cá Muối X2
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-12">
+                                <div class="form-outline">
+                                    <label class="form-label" for="x1">X1</label>
+                                    <input type="number" id="x1" class="form-control form-control-sm" autocomplete="off" placeholder="Nhập X1..." />
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-12">
+                                <div class="form-outline">
+                                    <label class="form-label" for="passWord">Y1</label>
+                                    <input type="number" id="y1" class="form-control form-control-sm" autocomplete="new-password" placeholder="Nhập Y1..." />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-12">
+                                <div class="form-outline">
+                                    <label class="form-label" for="x1">X2</label>
+                                    <input type="number" id="x2" class="form-control form-control-sm" autocomplete="off" placeholder="Nhập X2..." />
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-12">
+                                <div class="form-outline">
+                                    <label class="form-label" for="passWord">Y2</label>
+                                    <input type="number" id="y2" class="form-control form-control-sm" autocomplete="new-password" placeholder="Nhập Y2..." />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-12">
+                                <div class="form-outline">
+                                    <label class="form-label" for="x1">Column Span X1</label>
+                                    <input type="number" id="colSpanX1" class="form-control form-control-sm" autocomplete="off" placeholder="Nhập Column Span X1..." />
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-12">
+                                <div class="form-outline">
+                                    <label class="form-label" for="passWord">Column Span X2</label>
+                                    <input type="number" id="colSpanX2" class="form-control form-control-sm" placeholder="Nhập Column Span X2..." />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-12">
+                                <div class="form-outline">
+                                    <label class="form-label" for="x1">Độ Ưu Tiên X1</label>
+                                    <input type="number" id="doUuTienX1" class="form-control form-control-sm" autocomplete="off" placeholder="Nhập Độ Ưu Tiên X1..." />
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-12">
+                                <div class="form-outline">
+                                    <label class="form-label" for="passWord">Độ Ưu Tiên X2</label>
+                                    <input type="number" id="doUuTienX2" class="form-control form-control-sm" autocomplete="new-password" placeholder="Nhập Độ Ưu Tiên X2..." />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-12">
+                                <div class="form-outline">
+                                    <label class="form-label" for="x1">Số Lần Chia Cá X1</label>
+                                    <input type="number" id="soLanChiaCaX1" class="form-control form-control-sm" autocomplete="off" placeholder="Nhập Số Lần Chia Cá X1..." />
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-12">
+                                <div class="form-outline">
+                                    <label class="form-label" for="passWord">Số Lần Chia Cá X2</label>
+                                    <input type="number" id="soLanChiaCaX2" class="form-control form-control-sm" autocomplete="new-password" placeholder="Nhập Số Lần Chia Cá X2..." />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-12">
+                                <div class="form-outline">
+                                    <label class="form-label" for="x1">Thời Gian Phễu 1 X1 (ms)</label>
+                                    <input type="number" id="thoiGianQuangDuongPheu1X1" class="form-control form-control-sm" autocomplete="off" placeholder="Nhập Thời Gian Phễu 1 X1 (ms)..." />
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-12">
+                                <div class="form-outline">
+                                    <label class="form-label" for="passWord">Thời Gian Phễu 2 X1 (ms)</label>
+                                    <input type="number" id="thoiGianQuangDuongPheu2X1" class="form-control form-control-sm" autocomplete="new-password" placeholder="Nhập Thời Gian Phễu 2 X1 (ms)..." />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-12">
+                                <div class="form-outline">
+                                    <label class="form-label" for="x1">Thời Gian Phễu 1 X2 (ms)</label>
+                                    <input type="number" id="thoiGianQuangDuongPheu1X2" class="form-control form-control-sm" autocomplete="off" placeholder="Nhập Thời Gian Phễu 1 X2 (ms)..." />
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-12">
+                                <div class="form-outline">
+                                    <label class="form-label" for="passWord">Thời Gian Phễu 2 X2 (ms)</label>
+                                    <input type="number" id="thoiGianQuangDuongPheu2X2" class="form-control form-control-sm" autocomplete="new-password" placeholder="Nhập Thời Gian Phễu 2 X2 (ms)..." />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-12">
+                                <div class="form-outline">
+                                    <label class="form-label" for="x1">Thời Gian Nhận Cá X1 (ms)</label>
+                                    <input type="number" id="thoiGianNhanCaX1" class="form-control form-control-sm" autocomplete="off" placeholder="Nhập Thời Gian Nhận Cá X1 (ms)..." />
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-12">
+                                <div class="form-outline">
+                                    <label class="form-label" for="passWord">Thời Gian Nhận Cá X2 (ms)</label>
+                                    <input type="number" id="thoiGianNhanCaX2" class="form-control form-control-sm" autocomplete="new-password" placeholder="Nhập Thời Gian Nhận Cá X2 (ms)..." />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-12">
+                                <div class="form-outline">
+                                    <label class="form-label" for="x1">Vị Trí H X1 (ms)</label>
+                                    <input type="number" id="viTri_HX1" class="form-control form-control-sm" autocomplete="off" placeholder="Nhập Vị Trí H X1 (ms)..." />
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-12">
+                                <div class="form-outline">
+                                    <label class="form-label" for="passWord">Vị Trí H X2 (ms)</label>
+                                    <input type="number" id="viTri_HX2" class="form-control form-control-sm" autocomplete="new-password" placeholder="Nhập Vị Trí H X2 (ms)..." />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-12">
+                                <div class="form-outline">
+                                    <label class="form-label" for="x1">PLC_M</label>
+                                    <input type="number" id="plcAdr" class="form-control form-control-sm" autocomplete="off" placeholder="Nhập PLC_M..." />
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-12">
+                                <div class="form-outline">
+                                    <label class="form-label" for="passWord">PLC_Y</label>
+                                    <input type="number" id="plcYadr" class="form-control form-control-sm" autocomplete="new-password" placeholder="Nhập PLC_Y..." />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-12 ">
+                                <div class="list-group form-outline">
+                                    <label class="">
+                                        <input class="form-check-input me-1" type="checkbox" value="" id="isKhoaX1" />
+                                        Khoá X1
+                                    </label>
+                                </div>
+
+                            </div>
+                            <div class="col-md-6 mb-12">
+                                <div class="list-group form-outline">
+                                    <label class="">
+                                        <input class="form-check-input me-1" type="checkbox" value="" id="isKhoaX2" />
+                                        Khoá X2
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-12 ">
+                                <div class="list-group form-outline">
+                                    <label class="">
+                                        <input class="form-check-input me-1" type="checkbox" value="" id="suDung" />
+                                        Sử Dụng
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-4 pt-2">
+                            <div class="col-12">
+                                <button onclick="insertBanCatTiet()" class="btn btn-primary w-100 position-relative" type="submit" id="registerBtn">
+                                    <div class=" align-items-center">
+                                        <span id="txtThem">Thêm</span>
+                                        <div id="loadingIndicator" class=" spinner-border text-secondary position-absolute" role="status" style="left: 0;right: 0;top: 0;bottom: 0;margin: auto; display:none">
+                                            <span class="visually-hidden">Đang tải...</span>
+                                        </div>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="modalSuaBanCatTiet" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Sửa Bàn Cắt Tiết</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-12 mb-12 ">
+                                <div class="form-outline">
+                                    <label class="form-label" for="x1">Mã</label>
+                                    <input type="text" id="maBanCatTietSua" class="form-control form-control-sm" autocomplete="off" placeholder="Nhập Mã..." style="text-transform: uppercase; " disabled />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 mb-12 ">
+                                <div class="form-outline">
+                                    <label class="form-label" for="x1">Tên</label>
+                                    <input type="text" id="tenBanCatTietSua" class="form-control form-control-sm" autocomplete="off" placeholder="Nhập Tên..." />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-12">
+                                <div class="list-group form-outline">
+                                    <label class="">
+                                        <input class="form-check-input me-1" type="checkbox" value="" id="isShowX1Sua" />
+                                        Show X1
+                                    </label><label class="">
+                                        <input class="form-check-input me-1" type="checkbox" value="" id="isCaMuoiX1Sua" />
+                                        Cá Muối X1
+                                    </label>
+                                </div>
+
+                            </div>
+                            <div class="col-md-6 mb-12">
+                                <div class="list-group form-outline">
+                                    <label class="">
+                                        <input class="form-check-input me-1" type="checkbox" value="" id="isShowX2Sua" />
+                                        Show X2
+                                    </label><label class="">
+                                        <input class="form-check-input me-1" type="checkbox" value="" id="isCaMuoiX2Sua" />
+                                        Cá Muối X2
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-12">
+                                <div class="form-outline">
+                                    <label class="form-label" for="x1">X1</label>
+                                    <input type="number" id="x1Sua" class="form-control form-control-sm" autocomplete="off" placeholder="Nhập X1..." />
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-12">
+                                <div class="form-outline">
+                                    <label class="form-label" for="passWord">Y1</label>
+                                    <input type="number" id="y1Sua" class="form-control form-control-sm" autocomplete="new-password" placeholder="Nhập Y1..." />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-12">
+                                <div class="form-outline">
+                                    <label class="form-label" for="x1">X2</label>
+                                    <input type="number" id="x2Sua" class="form-control form-control-sm" autocomplete="off" placeholder="Nhập X2..." />
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-12">
+                                <div class="form-outline">
+                                    <label class="form-label" for="passWord">Y2</label>
+                                    <input type="number" id="y2Sua" class="form-control form-control-sm" autocomplete="new-password" placeholder="Nhập Y2..." />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-12">
+                                <div class="form-outline">
+                                    <label class="form-label" for="x1">Column Span X1</label>
+                                    <input type="number" id="colSpanX1Sua" class="form-control form-control-sm" autocomplete="off" placeholder="Nhập Column Span X1..." />
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-12">
+                                <div class="form-outline">
+                                    <label class="form-label" for="passWord">Column Span X2</label>
+                                    <input type="number" id="colSpanX2Sua" class="form-control form-control-sm" placeholder="Nhập Column Span X2..." />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-12">
+                                <div class="form-outline">
+                                    <label class="form-label" for="x1">Độ Ưu Tiên X1</label>
+                                    <input type="number" id="doUuTienX1Sua" class="form-control form-control-sm" autocomplete="off" placeholder="Nhập Độ Ưu Tiên X1..." />
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-12">
+                                <div class="form-outline">
+                                    <label class="form-label" for="passWord">Độ Ưu Tiên X2</label>
+                                    <input type="number" id="doUuTienX2Sua" class="form-control form-control-sm" autocomplete="new-password" placeholder="Nhập Độ Ưu Tiên X2..." />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-12">
+                                <div class="form-outline">
+                                    <label class="form-label" for="x1">Số Lần Chia Cá X1</label>
+                                    <input type="number" id="soLanChiaCaX1Sua" class="form-control form-control-sm" autocomplete="off" placeholder="Nhập Số Lần Chia Cá X1..." />
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-12">
+                                <div class="form-outline">
+                                    <label class="form-label" for="passWord">Số Lần Chia Cá X2</label>
+                                    <input type="number" id="soLanChiaCaX2Sua" class="form-control form-control-sm" autocomplete="new-password" placeholder="Nhập Số Lần Chia Cá X2..." />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-12">
+                                <div class="form-outline">
+                                    <label class="form-label" for="x1">Thời Gian Phễu 1 X1 (ms)</label>
+                                    <input type="number" id="thoiGianQuangDuongPheu1X1Sua" class="form-control form-control-sm" autocomplete="off" placeholder="Nhập Thời Gian Phễu 1 X1 (ms)..." />
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-12">
+                                <div class="form-outline">
+                                    <label class="form-label" for="passWord">Thời Gian Phễu 2 X1 (ms)</label>
+                                    <input type="number" id="thoiGianQuangDuongPheu2X1Sua" class="form-control form-control-sm" autocomplete="new-password" placeholder="Nhập Thời Gian Phễu 2 X1 (ms)..." />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-12">
+                                <div class="form-outline">
+                                    <label class="form-label" for="x1">Thời Gian Phễu 1 X2 (ms)</label>
+                                    <input type="number" id="thoiGianQuangDuongPheu1X2Sua" class="form-control form-control-sm" autocomplete="off" placeholder="Nhập Thời Gian Phễu 1 X2 (ms)..." />
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-12">
+                                <div class="form-outline">
+                                    <label class="form-label" for="passWord">Thời Gian Phễu 2 X2 (ms)</label>
+                                    <input type="number" id="thoiGianQuangDuongPheu2X2Sua" class="form-control form-control-sm" autocomplete="new-password" placeholder="Nhập Thời Gian Phễu 2 X2 (ms)..." />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-12">
+                                <div class="form-outline">
+                                    <label class="form-label" for="x1">Thời Gian Nhận Cá X1 (ms)</label>
+                                    <input type="number" id="thoiGianNhanCaX1Sua" class="form-control form-control-sm" autocomplete="off" placeholder="Nhập Thời Gian Nhận Cá X1 (ms)..." />
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-12">
+                                <div class="form-outline">
+                                    <label class="form-label" for="passWord">Thời Gian Nhận Cá X2 (ms)</label>
+                                    <input type="number" id="thoiGianNhanCaX2Sua" class="form-control form-control-sm" autocomplete="new-password" placeholder="Nhập Thời Gian Nhận Cá X2 (ms)..." />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-12">
+                                <div class="form-outline">
+                                    <label class="form-label" for="x1">Vị Trí H X1 (ms)</label>
+                                    <input type="number" id="viTri_HX1Sua" class="form-control form-control-sm" autocomplete="off" placeholder="Nhập Vị Trí H X1 (ms)..." />
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-12">
+                                <div class="form-outline">
+                                    <label class="form-label" for="passWord">Vị Trí H X2 (ms)</label>
+                                    <input type="number" id="viTri_HX2Sua" class="form-control form-control-sm" autocomplete="new-password" placeholder="Nhập Vị Trí H X2 (ms)..." />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-12">
+                                <div class="form-outline">
+                                    <label class="form-label" for="x1">PLC_M</label>
+                                    <input type="number" id="plcAdrSua" class="form-control form-control-sm" autocomplete="off" placeholder="Nhập PLC_M..." />
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-12">
+                                <div class="form-outline">
+                                    <label class="form-label" for="passWord">PLC_Y</label>
+                                    <input type="number" id="plcYadrSua" class="form-control form-control-sm" autocomplete="new-password" placeholder="Nhập PLC_Y..." />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-12 ">
+                                <div class="list-group form-outline">
+                                    <label class="">
+                                        <input class="form-check-input me-1" type="checkbox" value="" id="isKhoaX1Sua" />
+                                        Khoá X1
+                                    </label>
+                                </div>
+
+                            </div>
+                            <div class="col-md-6 mb-12">
+                                <div class="list-group form-outline">
+                                    <label class="">
+                                        <input class="form-check-input me-1" type="checkbox" value="" id="isKhoaX2Sua" />
+                                        Khoá X2
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-12 ">
+                                <div class="list-group form-outline">
+                                    <label class="">
+                                        <input class="form-check-input me-1" type="checkbox" value="" id="suDungSua" />
+                                        Sử Dụng
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-4 pt-2">
+                            <div class="col-12">
+                                <button onclick="updateBanCatTiet()" class="btn btn-primary w-100 position-relative" type="submit" id="registerBtn">
+                                    <div class=" align-items-center">
+                                        <span id="txtSua">Sửa</span>
+                                        <div id="loadingIndicatorSua" class=" spinner-border text-secondary position-absolute" role="status" style="left: 0;right: 0;top: 0;bottom: 0;margin: auto; display:none">
+                                            <span class="visually-hidden">Đang tải...</span>
+                                        </div>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<input type="hidden" id="maBanCatTietRowSelected" />
+<script>
+    $(document).ready(function () {
+        loadGridData();
+    });
+    var grid;
+    function loadGridData() {
+        $.ajax({
+            url: '/BanCatTiet/GetAllBanCatTiets',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                // Khởi tạo DataManager và gán dữ liệu từ API vào dataSource
+                var dataManager = new ej.data.DataManager({
+                    json: data,
+                    adaptor: new ej.data.JsonAdaptor()
+                });
+                // Kiểm tra xem Grid đã được tạo chưa
+                if (grid) {
+                    // Nếu Grid đã được tạo, chỉ cập nhật dữ liệu mới
+                    grid.dataSource = dataManager;
+                    grid.refresh();
+                } else {
+                    // Nếu Grid chưa được tạo, tạo mới Grid
+                    grid = new ej.grids.Grid({
+                        dataSource: dataManager,
+                        allowPaging: true,
+                        pageSettings: { pageSize: 50 },
+                        allowFiltering: true,
+                        filterSettings: { type: 'Excel' },
+                        allowSorting: true,
+                        //frozenColumns: 3,
+                        allowResizing: true,
+                        rowSelected: onRowSelected,
+                        height: 400,
+                        columns: [
+                            //{ field: 'STT', headerText: 'STT', width: 80, textAlign: 'Center' },
+                            { field: 'Ma', headerText: 'Mã', width: 150 },
+                            { field: 'Ten', headerText: 'Tên', width: 150 },
+                            { field: 'SuDung', headerText: 'Sử Dụng', width: 100, displayAsCheckBox: 'true', textAlign: 'Center' },
+                            { field: 'X1', headerText: 'X1', type: 'number', width: 50, textAlign: 'Center' },
+                            { field: 'Y1', headerText: 'Y1', type: 'number', width: 50, textAlign: 'Center' },
+                            { field: 'ColSpanX1', headerText: 'Col Span X1', type: 'number', width: 110, textAlign: 'Center' },
+                            { field: 'X2', headerText: 'X2', type: 'number', width: 50, textAlign: 'Center' },
+                            { field: 'Y2', headerText: 'Y2', type: 'number', width: 50, textAlign: 'Center' },
+                            { field: 'ColSpanX2', headerText: 'Co Span X2', type: 'number', width: 110, textAlign: 'Center' },
+                            { field: 'IsShowX1', headerText: 'Show X1', width: 100, displayAsCheckBox: 'true', textAlign: 'Center' },
+                            { field: 'IsCaMuoiX1', headerText: 'Cá Muối X1', width: 110, displayAsCheckBox: 'true', textAlign: 'Center' },
+                            { field: 'DoUuTienX1', headerText: 'Độ Ưu Tiên X1', type: 'number', width: 130, textAlign: 'Center' },
+                            { field: 'SoLanChiaCaX1', headerText: 'Số Lần Chia Cá X1', type: 'number', width: 150, textAlign: 'Center' },
+                            { field: 'IsKhoaX1', headerText: 'Khoá X1', width: 100, displayAsCheckBox: 'true', textAlign: 'Center' },
+                            { field: 'ThoiGianQuangDuongPheu1X1', headerText: 'Thời Gian Quãng Đường Phễu 1 X1', type: 'number', width: 250, textAlign: 'Center' },
+                            { field: 'ThoiGianQuangDuongPheu2X1', headerText: 'Thời Gian Quãng Đường Phễu 2 X1', type: 'number', width: 250, textAlign: 'Center' },
+                            { field: 'ThoiGianNhanCaX1', headerText: 'Thời Gian Nhận X1', type: 'number', width: 150, textAlign: 'Center' },
+                            { field: 'ViTri_HX1', headerText: 'Vị Trí_HX1', type: 'number', width: 100, textAlign: 'Center' },
+                            { field: 'IsShowX2', headerText: 'Show X2', width: 100, displayAsCheckBox: 'true', textAlign: 'Center', textAlign: 'Center' },
+                            { field: 'IsCaMuoiX2', headerText: 'Cá Muối X2', width: 110, displayAsCheckBox: 'true', textAlign: 'Center', textAlign: 'Center' },
+                            { field: 'DoUuTienX2', headerText: 'Độ Ưu Tiên X2', type: 'number', width: 130, textAlign: 'Center' },
+                            { field: 'SoLanChiaCaX2', headerText: 'Số Lần Chia Cá X2', type: 'number', width: 150, textAlign: 'Center' },
+                            { field: 'IsKhoaX2', headerText: 'Khoá X2', width: 100, displayAsCheckBox: 'true', textAlign: 'Center' },
+                            { field: 'ThoiGianQuangDuongPheu1X2', headerText: 'Thời Gian Quãng Đường Phễu 1 X2', type: 'number', width: 250, textAlign: 'Center' },
+                            { field: 'ThoiGianQuangDuongPheu2X2', headerText: 'Thời Gian Quãng Đường Phễu 2 X2', type: 'number', width: 250, textAlign: 'Center' },
+                            { field: 'ThoiGianNhanCaX2', headerText: 'Thời Gian Nhận X2', type: 'number', width: 150, textAlign: 'Center' },
+                            { field: 'ViTri_HX2', headerText: 'Vị Trí_HX2', type: 'number', width: 100, textAlign: 'Center' },
+                            { field: 'PlcAdr', headerText: 'Plc_M', type: 'number', width: 100, textAlign: 'Center' },
+                            { field: 'PlcYadr', headerText: 'Plc_Y', type: 'number', width: 100, textAlign: 'Center' },
+                        ]
+                    });
+                    // Hiển thị Grid trên trang web
+                    grid.appendTo('#Grid');
+                }
+            },
+            error: function (error) {
+                console.error(error);
+            }
+        });
+    }
+    loadGridData();
+    function reloadData() {
+        loadGridData();
+    }
+    function onRowSelected(args) {
+        // Lấy dữ liệu của hàng được chọn
+        var selectedRecord = args.data;
+        // Lấy giá trị Id từ dữ liệu của hàng được chọn
+        var Ma = selectedRecord.Ma;
+        $('#maBanCatTietRowSelected').val(Ma);
+    }
+</script>
+<script>
+    function showInsertBanCatTiet() {
+        $.ajax({
+            type: "GET",
+            url: "/BanCatTiet/CreatDefautNew", // Đường dẫn đến action trong controller
+            success: function (rs) {
+                if (rs.isSuccess === true) {
+                    $('#maBanCatTiet').val(rs.Ma);
+                    $('#tenBanCatTiet').val(rs.Ten);
+                    $('#isShowX1').prop('checked', rs.IsShowX1);
+                    $('#isShowX2').prop('checked', rs.IsShowX2);
+                    $('#isCaMuoiX1').prop('checked', rs.IsCaMuoiX1);
+                    $('#isCaMuoiX2').prop('checked', rs.IsCaMuoiX2);
+                    $('#x1').val(rs.X1);
+                    $('#y1').val(rs.Y1);
+                    $('#x2').val(rs.X2);
+                    $('#y2').val(rs.Y2);
+                    $('#colSpanX1').val(rs.ColSpanX1);
+                    $('#colSpanX2').val(rs.ColSpanX2);
+                    $('#doUuTienX1').val(rs.DoUuTienX1);
+                    $('#doUuTienX2').val(rs.DoUuTienX2);
+                    $('#soLanChiaCaX1').val(rs.SoLanChiaCaX1);
+                    $('#soLanChiaCaX2').val(rs.SoLanChiaCaX2);
+                    $('#thoiGianQuangDuongPheu1X1').val(rs.ThoiGianQuangDuongPheu1X1);
+                    $('#thoiGianQuangDuongPheu1X2').val(rs.ThoiGianQuangDuongPheu1X2);
+                    $('#thoiGianQuangDuongPheu2X1').val(rs.ThoiGianQuangDuongPheu2X1);
+                    $('#thoiGianQuangDuongPheu2X2').val(rs.ThoiGianQuangDuongPheu2X2);
+                    $('#thoiGianNhanCaX1').val(rs.ThoiGianNhanCaX1);
+                    $('#thoiGianNhanCaX2').val(rs.ThoiGianNhanCaX2);
+                    $('#viTri_HX1').val(rs.ViTri_HX1);
+                    $('#viTri_HX2').val(rs.ViTri_HX2);
+                    $('#plcAdr').val(rs.PlcAdr);
+                    $('#plcYadr').val(rs.PlcYadr);
+                    $('#isKhoaX1').prop('checked', rs.IsKhoaX1);
+                    $('#isKhoaX2').prop('checked', rs.IsKhoaX2);
+                    $('#suDung').prop('checked', rs.SuDung);
+                    $('#modalThemBanCatTiet').modal('show');
+                }
+                else {
+                    toastOptionNotyfi();
+                    toastr["warning"](rs.Mesages, "Thông báo");
+                }
+            },
+            error: function () {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error, "Thông báo");
+            }
+        });
+    }
+    function insertBanCatTiet() {
+        var maBanCatTiet = $('#maBanCatTiet').val();
+        var tenBanCatTiet = $('#tenBanCatTiet').val();
+        var isShowX1 = $('#isShowX1').prop('checked');
+        var isShowX2 = $('#isShowX2').prop('checked');
+        var isCaMuoiX1 = $('#isCaMuoiX1').prop('checked');
+        var isCaMuoiX2 = $('#isCaMuoiX2').prop('checked');
+        var x1 = $('#x1').val();
+        var y1 = $('#y1').val();
+        var x2 = $('#x2').val();
+        var y2 = $('#y2').val();
+        var colSpanX1 = $('#colSpanX1').val();
+        var colSpanX2 = $('#colSpanX2').val();
+        var doUuTienX1 = $('#doUuTienX1').val();
+        var doUuTienX2 = $('#doUuTienX2').val();
+        var soLanChiaCaX1 = $('#soLanChiaCaX1').val();
+        var soLanChiaCaX2 = $('#soLanChiaCaX2').val();
+        var thoiGianQuangDuongPheu1X1 = $('#thoiGianQuangDuongPheu1X1').val();
+        var thoiGianQuangDuongPheu1X2 = $('#thoiGianQuangDuongPheu1X2').val();
+        var thoiGianQuangDuongPheu2X1 = $('#thoiGianQuangDuongPheu2X1').val();
+        var thoiGianQuangDuongPheu2X2 = $('#thoiGianQuangDuongPheu2X2').val();
+        var thoiGianNhanCaX1 = $('#thoiGianNhanCaX1').val();
+        var thoiGianNhanCaX2 = $('#thoiGianNhanCaX2').val();
+        var viTri_HX1 = $('#viTri_HX1').val();
+        var viTri_HX2 = $('#viTri_HX2').val();
+        var plcAdr = $('#plcAdr').val();
+        var plcYadr = $('#plcYadr').val();
+        var isKhoaX1 = $('#isKhoaX1').prop('checked');
+        var isKhoaX2 = $('#isKhoaX2').prop('checked');
+        var suDung = $('#suDung').prop('checked');
+        document.getElementById("txtThem").style.visibility = "hidden";
+        document.getElementById("loadingIndicator").style.display = "block";
+        $.ajax({
+            type: 'POST',
+            url: '/BanCatTiet/DoInsert',
+            data: {
+                maBanCatTiet: maBanCatTiet,
+                tenBanCatTiet: tenBanCatTiet,
+                isShowX1: isShowX1,
+                isShowX2: isShowX2,
+                isCaMuoiX1: isCaMuoiX1,
+                isCaMuoiX2: isCaMuoiX2,
+                x1: x1,
+                y1: y1,
+                x2: x2,
+                y2: y2,
+                colSpanX1: colSpanX1,
+                colSpanX2: colSpanX2,
+                doUuTienX1: doUuTienX1,
+                doUuTienX2: doUuTienX2,
+                soLanChiaCaX1: soLanChiaCaX1,
+                soLanChiaCaX2: soLanChiaCaX2,
+                thoiGianQuangDuongPheu1X1: thoiGianQuangDuongPheu1X1,
+                thoiGianQuangDuongPheu1X2: thoiGianQuangDuongPheu1X2,
+                thoiGianQuangDuongPheu2X1: thoiGianQuangDuongPheu2X1,
+                thoiGianQuangDuongPheu2X2: thoiGianQuangDuongPheu2X2,
+                thoiGianNhanCaX1: thoiGianNhanCaX1,
+                thoiGianNhanCaX2: thoiGianNhanCaX2,
+                viTri_HX1: viTri_HX1,
+                viTri_HX2: viTri_HX2,
+                plcAdr: plcAdr,
+                plcYadr: plcYadr,
+                isKhoaX1: isKhoaX1,
+                isKhoaX2: isKhoaX2,
+                suDung: suDung
+            },
+            success: function (rs) {
+                if (rs.isSuccess === true) {
+                    toastOptionNotyfi();
+                    toastr["success"](rs.Messages, "Thông báo");
+                    $('#modalThemBanCatTiet').modal('hide');
+                    reloadData();
+                } else {
+                    toastOptionNotyfi();
+                    toastr["warning"](rs.Messages, "Thông báo");
+                }
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error, "Thông báo");
+            },
+            complete: function () {
+                document.getElementById("loadingIndicator").style.display = "none";
+                document.getElementById("txtThem").style.visibility = "visible";
+            }
+        });
+    }
+</script>
+<script>
+    function showUpdateBanCatTiet() {
+        var maBanCatTiet = $('#maBanCatTietRowSelected').val();
+        $.ajax({
+            url: "/BanCatTiet/GetBanCatTietByMaBanCatTiet",
+            data: { maBanCatTiet: maBanCatTiet },
+            type: 'GET',
+            dataType: 'json',
+            success: function (rs) {
+                if (rs.isSuccess === true) {
+                    $('#maBanCatTietSua').val(rs.Ma);
+                    $('#tenBanCatTietSua').val(rs.Ten);
+                    $('#isShowX1Sua').prop('checked', rs.IsShowX1);
+                    $('#isShowX2Sua').prop('checked', rs.IsShowX2);
+                    $('#isCaMuoiX1Sua').prop('checked', rs.IsCaMuoiX1);
+                    $('#isCaMuoiX2Sua').prop('checked', rs.IsCaMuoiX2);
+                    $('#x1Sua').val(rs.X1);
+                    $('#y1Sua').val(rs.Y1);
+                    $('#x2Sua').val(rs.X2);
+                    $('#y2Sua').val(rs.Y2);
+                    $('#colSpanX1Sua').val(rs.ColSpanX1);
+                    $('#colSpanX2Sua').val(rs.ColSpanX2);
+                    $('#doUuTienX1Sua').val(rs.DoUuTienX1);
+                    $('#doUuTienX2Sua').val(rs.DoUuTienX2);
+                    $('#soLanChiaCaX1Sua').val(rs.SoLanChiaCaX1);
+                    $('#soLanChiaCaX2Sua').val(rs.SoLanChiaCaX2);
+                    $('#thoiGianQuangDuongPheu1X1Sua').val(rs.ThoiGianQuangDuongPheu1X1);
+                    $('#thoiGianQuangDuongPheu1X2Sua').val(rs.ThoiGianQuangDuongPheu1X2);
+                    $('#thoiGianQuangDuongPheu2X1Sua').val(rs.ThoiGianQuangDuongPheu2X1);
+                    $('#thoiGianQuangDuongPheu2X2Sua').val(rs.ThoiGianQuangDuongPheu2X2);
+                    $('#thoiGianNhanCaX1Sua').val(rs.ThoiGianNhanCaX1);
+                    $('#thoiGianNhanCaX2Sua').val(rs.ThoiGianNhanCaX2);
+                    $('#viTri_HX1Sua').val(rs.ViTri_HX1);
+                    $('#viTri_HX2Sua').val(rs.ViTri_HX2);
+                    $('#plcAdrSua').val(rs.PlcAdr);
+                    $('#plcYadrSua').val(rs.PlcYadr);
+                    $('#isKhoaX1Sua').prop('checked', rs.IsKhoaX1);
+                    $('#isKhoaX2Sua').prop('checked', rs.IsKhoaX2);
+                    $('#suDungSua').prop('checked', rs.SuDung);
+                    $('#modalSuaBanCatTiet').modal('show');
+                }
+                else {
+                    toastOptionNotyfi();
+                    toastr["warning"](rs.Mesages, "Thông báo");
+                }
+            },
+            error: function () {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error, "Thông báo");
+            }
+        });
+    }
+    function updateBanCatTiet() {
+        var maBanCatTiet = $('#maBanCatTietSua').val();
+        var tenBanCatTiet = $('#tenBanCatTietSua').val();
+        var isShowX1 = $('#isShowX1Sua').prop('checked');
+        var isShowX2 = $('#isShowX2Sua').prop('checked');
+        var isCaMuoiX1 = $('#isCaMuoiX1Sua').prop('checked');
+        var isCaMuoiX2 = $('#isCaMuoiX2Sua').prop('checked');
+        var x1 = $('#x1Sua').val();
+        var y1 = $('#y1Sua').val();
+        var x2 = $('#x2Sua').val();
+        var y2 = $('#y2Sua').val();
+        var colSpanX1 = $('#colSpanX1Sua').val();
+        var colSpanX2 = $('#colSpanX2Sua').val();
+        var doUuTienX1 = $('#doUuTienX1Sua').val();
+        var doUuTienX2 = $('#doUuTienX2Sua').val();
+        var soLanChiaCaX1 = $('#soLanChiaCaX1Sua').val();
+        var soLanChiaCaX2 = $('#soLanChiaCaX2Sua').val();
+        var thoiGianQuangDuongPheu1X1 = $('#thoiGianQuangDuongPheu1X1Sua').val();
+        var thoiGianQuangDuongPheu1X2 = $('#thoiGianQuangDuongPheu1X2Sua').val();
+        var thoiGianQuangDuongPheu2X1 = $('#thoiGianQuangDuongPheu2X1Sua').val();
+        var thoiGianQuangDuongPheu2X2 = $('#thoiGianQuangDuongPheu2X2Sua').val();
+        var thoiGianNhanCaX1 = $('#thoiGianNhanCaX1Sua').val();
+        var thoiGianNhanCaX2 = $('#thoiGianNhanCaX2Sua').val();
+        var viTri_HX1 = $('#viTri_HX1Sua').val();
+        var viTri_HX2 = $('#viTri_HX2Sua').val();
+        var plcAdr = $('#plcAdrSua').val();
+        var plcYadr = $('#plcYadrSua').val();
+        var isKhoaX1 = $('#isKhoaX1Sua').prop('checked');
+        var isKhoaX2 = $('#isKhoaX2Sua').prop('checked');
+        var suDung = $('#suDungSua').prop('checked');
+        document.getElementById("txtSua").style.visibility = "hidden";
+        document.getElementById("loadingIndicatorSua").style.display = "block";
+        $.ajax({
+            url: '/BanCatTiet/DoUpdate',
+            data: {
+                maBanCatTiet: maBanCatTiet,
+                tenBanCatTiet: tenBanCatTiet,
+                isShowX1: isShowX1,
+                isShowX2: isShowX2,
+                isCaMuoiX1: isCaMuoiX1,
+                isCaMuoiX2: isCaMuoiX2,
+                x1: x1,
+                y1: y1,
+                x2: x2,
+                y2: y2,
+                colSpanX1: colSpanX1,
+                colSpanX2: colSpanX2,
+                doUuTienX1: doUuTienX1,
+                doUuTienX2: doUuTienX2,
+                soLanChiaCaX1: soLanChiaCaX1,
+                soLanChiaCaX2: soLanChiaCaX2,
+                thoiGianQuangDuongPheu1X1: thoiGianQuangDuongPheu1X1,
+                thoiGianQuangDuongPheu1X2: thoiGianQuangDuongPheu1X2,
+                thoiGianQuangDuongPheu2X1: thoiGianQuangDuongPheu2X1,
+                thoiGianQuangDuongPheu2X2: thoiGianQuangDuongPheu2X2,
+                thoiGianNhanCaX1: thoiGianNhanCaX1,
+                thoiGianNhanCaX2: thoiGianNhanCaX2,
+                viTri_HX1: viTri_HX1,
+                viTri_HX2: viTri_HX2,
+                plcAdr: plcAdr,
+                plcYadr: plcYadr,
+                isKhoaX1: isKhoaX1,
+                isKhoaX2: isKhoaX2,
+                suDung: suDung
+            },
+            type: 'POST',
+            dataType: 'json',
+            success: function (rs) {
+                if (rs.isSuccess === true) {
+                    $('#modalSuaBanCatTiet').modal('hide');
+                    reloadData();
+                    toastOptionNotyfi();
+                    toastr["success"](rs.Messages, "Thông báo");
+                } else {
+                    toastOptionNotyfi();
+                    toastr["warning"](rs.Messages, "Thông báo");
+                }
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error, "Thông báo");
+            },
+            complete: function () {
+                document.getElementById("loadingIndicatorSua").style.display = "none";
+                document.getElementById("txtSua").style.visibility = "visible";
+            }
+        });
+    }
+</script>
+<script>
+    function showDeleteBanCatTiet() {
+        var maBanCatTiet = $('#maBanCatTietRowSelected').val();
+        $.ajax({
+            url: '/BanCatTiet/GetBanCatTietByMaBanCatTiet',
+            data: { maBanCatTiet: maBanCatTiet },
+            type: 'GET',
+            dataType: 'json',
+            success: function (rs) {
+                if (rs.isSuccess === true) {
+                    bootbox.confirm({
+                        title: "Thông báo!",
+                        message: "Bạn có chắc muốn xoá bàn cắt tiết: " + rs.Ten,
+                        buttons: {
+                            confirm: {
+                                label: 'OK',
+                                className: 'btn btn-primary'
+                            }
+                        },
+                        callback: function (result) {
+                            if (result) {
+                                //Người dùng đã bấm OK, Gọi API xóa ở đây
+                                $.ajax({
+                                    url: '/BanCatTiet/DeleteNhanVien',
+                                    data: { maBanCatTiet: maBanCatTiet },
+                                    type: 'POST',
+                                    dataType: 'json',
+                                    success: function (rs) {
+                                        if (rs.isSuccess === true) {
+                                            reloadData();
+                                            toastOptionNotyfi();
+                                            toastr["success"](rs.Messages, "Thông báo");
+                                        } else {
+                                            toastOptionNotyfi();
+                                            toastr["warning"](rs.Messages, "Thông báo");
+                                        }
+                                    },
+                                    error: function (error) {
+                                        toastOptionNotyfi();
+                                        toastr["error"]('Đã xảy ra lỗi: ' + error, "Thông báo");
+                                    }
+                                });
+                            }
+                        }
+                    });
+                } else {
+                    toastOptionNotyfi();
+                    toastr["warning"]('Không tìm thấy thông tin!', "Thông báo");
+                }
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error, "Thông báo");
+            }
+        });
+
+    }
+</script>
+

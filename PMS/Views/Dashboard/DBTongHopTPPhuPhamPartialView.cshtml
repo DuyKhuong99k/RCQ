@@ -1,0 +1,176 @@
+﻿@{
+    var tptl = ViewBag.listTPTLModel;
+    var NumberDate = Context.Session.GetString("NumberDate");
+    var XuongId = @Context.Session.GetString("XuongId");
+}
+<style>
+    @@media (max-width: 768px) {
+        div#elementTPPhuPham.e-lib.e-accumulationchart.e-control.e-touch.e-accumulationchart-focused {
+            height: 0px !important;
+            margin-top: -8.5rem !important;
+        }
+
+        svg#elementTPPhuPham_svg {
+            height: 350px;
+        }
+    }
+    
+</style>
+<link href="~/css/dbtonghoptpstyle.css" rel="stylesheet" />
+<div class="card mb-4">
+    <div class="card-header" style="text-align: center">
+        <h6>Tổng Hợp Thành Phẩm Phụ Phẩm</h6>
+    </div>
+    <div style="margin-top: -1.5rem !important" class="card-body ">
+        <div class="fixed-chartPie d-flex flex-column justify-content-between align-items-center mb-3" style="height: 200px; width: 100%;">
+            <div id="elementTPPhuPham"></div>
+
+        </div>
+        <div style="text-align: center">
+            <div id="tongTLTPTPPhuPham"></div>
+        </div>
+        <div id="loadingIndicatorTPPhuPham" class=" spinner-border text-primary position-absolute" role="status" style="bottom: 0; display: none; left: 0; margin: auto; right: 0; top: 0;">
+            <span class="visually-hidden">Đang tải...</span>
+        </div>
+
+        <a id="detailLinkTPPhuPham" class="me-1"
+           data-bs-toggle="collapse"
+           data-bs-target="#collapseExampleTPPhuPham"
+           aria-expanded="false"
+           aria-controls="collapseExample">
+            Xem chi tiết
+        </a>
+        <div class="collapse" id="collapseExampleTPPhuPham">
+            <div class="table-responsive text-nowrap">
+                <table class="table table-hover">
+                    <thead class="d-none">
+                        <tr>
+                            <th scope="col">1</th>
+                            <th scope="col">2</th>
+                            <th scope="col">3</th>
+                        </tr>
+                    <tbody class="table-border-bottom-0 phupham">
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+<script src="~/js/adduserwaitview.js"></script>
+<script>
+    if (typeof detailLinkTPPhuPham === 'undefined') {
+        var detailLinkTPPhuPham = document.getElementById('detailLinkTPPhuPham');
+    }
+    if (typeof tongHopTPTPPhuPhamChart === 'undefined') {
+        var tongHopTPTPPhuPhamChart;
+    }
+    detailLinkTPPhuPham.addEventListener('click',
+        function () {
+            if (this.classList.contains('active-link')) {
+                this.classList.remove('active-link');
+            } else {
+                this.classList.add('active-link');
+            }
+        });
+
+    $(document).ready(function () {
+        document.getElementById("loadingIndicatorTPPhuPham").style.display = "block";
+        loadDataTPPhuPham();
+        //var XuongId = @Context.Session.GetString("XuongId");
+        // var xuongId = @XuongId;
+        // AddUserWaitView(xuongId);
+    });
+
+    function loadDataTPPhuPham() {
+        var xuongId = @XuongId;
+        AddUserWaitView(xuongId);
+        const parentElement = document.querySelector('.phupham');
+        const fromDate = "@DateTime.Now.Date.AddDays(int.Parse(NumberDate ?? "0") * -1).ToString("yyyy-MM-dd")";
+        const toDate = "@DateTime.Now.Date.ToString("yyyy-MM-dd")";
+        $.ajax({
+            url: '/Dashboard/TongHopTyLeThanhPhamPhuPhamWithDate',
+            data: { fromDate: fromDate, toDate: toDate },
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                if (tongHopTPTPPhuPhamChart) {
+                    tongHopTPTPPhuPhamChart.series[0].dataSource = data.datas;
+                } else {
+                    rendertChartTHTPTPPhuPham(data);
+                }
+                parentElement.innerHTML = '';
+                updateUITPPhuPham(data);
+
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi khi lấy dữ liệu từ server: ', error, "Thông báo");
+            },
+            complete: function () {
+                document.getElementById("loadingIndicatorTPPhuPham").style.display = "none";
+            }
+        });
+    }
+
+    function rendertChartTHTPTPPhuPham(data) {
+        const _data = data.datas;
+        chartData = {
+            series: [
+                {
+                    dataSource: _data,
+                    innerRadius: '80%',
+                    xName: 'labels',
+                    yName: 'TrongLuongTP',
+                    text: 'TrongLuongTP',
+                    dataLabel: {
+                        visible: true,
+                        name: 'TrongLuongTP',
+                        position: 'Outside',
+                        template: '<div>${point.text}</div>'
+                    }
+
+                }
+            ],
+            centerLabel: {
+                text: ' ',
+                hoverTextFormat: '${point.x}<br>${point.percentage}%'
+            },
+            legendSettings: {
+                visible: false
+            },
+            //title: 'Tổng Hợp Loại Thành Phẩm Định Hình',
+            width: '100%',
+            height: '100%'
+        };
+        tongHopTPTPPhuPhamChart = new ej.charts.AccumulationChart(chartData, '#elementTPPhuPham');
+
+    }
+
+    function updateUITPPhuPham(data) {
+
+        const parentElement = document.querySelector('.phupham');
+        //tongHopTPDHChart.centerLabel.text = 'Tổng<br>' + data.TongTL + 'Kg';
+        document.getElementById("tongTLTPTPPhuPham").textContent = `Tổng: ${data.TongTL} Kg`;
+        const series = tongHopTPTPPhuPhamChart.series[0];
+        for (let i = 0; i < series.points.length; i++) {
+            const item = series.points[i];
+            const newItem = document.createElement('tr');
+            newItem.innerHTML = `
+                                                <td>
+                                                    <div>
+                                                        <h6 style="color: ${item.color}" class="mb-0">${item.x}</h6>
+                                                    </div>
+                                                </td>
+                                                <td style="text-align: right;">
+                                                    <small class="fw-semibold">${item.y} Kg</small>
+                                                </td>
+                                             `;
+
+            parentElement.appendChild(newItem);
+        }
+    }
+    var timeInterval = @AppViewModels.AppViewModel.Instance.TimeSetIntervalDashBoardView;
+    setInterval(loadDataTPPhuPham, timeInterval);
+</script>

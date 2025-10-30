@@ -1,0 +1,33 @@
+{
+  "TableName": [
+    "PhieuCanBTPFillet",
+    "PhieuCanBTPFilletv2",
+    "PhieuCanBTPDinhHinh",
+    "PhieuCanTPDinhHinh",
+    "PhieuCanCaChet",
+    "PhieuCanCaChetDaiThanhSide",
+    "PhieuCanCaGiongVungNuoi",
+    "PhieuCanCaGiongVungNuoiDaiThanhSide",
+    "PhieuCanCaoThit",
+    "PhieuCanChinhXepKhuon",
+    "PhieuCanDinhHinh",
+    "PhieuCanLangDa",
+    "PhieuCanNguyenLieu",
+    "PhieuCanPhaLoc",
+    "PhieuCanPhuPham",
+    "PhieuCanPhuPhamv2",
+    "PhieuCanPhuXepKhuon",
+    "PhieuCanRaDong",
+    "PhieuCanSauXepKhuon",
+    "PhieuCanSoCheDinhHinh",
+    "PhieuCanTaiChe",
+    "PhieuCanTPFillet",
+    "PhieuCanTPFilletv2",
+    "PhieuCanVungNuoi",
+    "PhieuCanVungNuoiDaiThanhSide",
+    "PhieuCanXepKhuonBlock",
+    "PhieuCanXepKhuonKHC",
+    "BT_PhieuCan",
+    "T_PhieuCan"
+  ]
+}

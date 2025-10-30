@@ -1,0 +1,83 @@
+﻿.active-link {
+    color: #696cff; /* Màu chữ khi đã click */
+    font-weight: bold; /* Độ đậm chữ khi đã click */
+    text-decoration: underline; /* Gạch chân khi đã click (tùy chọn) */
+    transition: all 0.3s ease; /* Hiệu ứng chuyển đổi trong 0.3 giây */
+}
+
+
+.apexcharts-tooltip {
+    display: none !important;
+}
+
+td.fitwidth {
+    width: 1px;
+    white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+   
+    div#element.e-lib.e-accumulationchart.e-control.e-touch.e-accumulationchart-focused {
+        user-select: none !important;
+        position: relative !important;
+        display: block !important;
+        height: 0px !important;
+        margin-top: -8.5rem !important;
+    }
+    svg#element_svg{
+       height:350px
+        
+    }
+    div#elementFillet.e-lib.e-accumulationchart.e-control.e-touch.e-accumulationchart-focused {
+        height: 0 !important;
+        margin-top: -8.5rem !important;
+    }
+
+    svg#elementFillet_svg {
+        height: 350px
+    }
+
+    div#elementNguyenLieu.e-lib.e-accumulationchart.e-control.e-touch.e-accumulationchart-focused {
+        height: 0 !important;
+        margin-top: -8.5rem !important;
+    }
+
+    svg#elementNguyenLieu_svg {
+        height: 350px
+    }
+    div#elementXepKhuon.e-lib.e-accumulationchart.e-control.e-touch.e-accumulationchart-focused {
+        height: 0 !important;
+        margin-top: -8.5rem !important;
+    }
+
+    svg#elementXepKhuon_svg {
+        height: 350px
+    }
+
+    div#elementGheVungNuoi.e-lib.e-accumulationchart.e-control.e-touch.e-accumulationchart-focused {
+        height: 0 !important;
+        margin-top: -8.5rem !important;
+    }
+
+    svg#elementGheVungNuoi_svg {
+        height: 350px
+    }
+
+   /* div#elementBTPFillet.e-lib.e-accumulationchart.e-control.e-accumulationchart-focused{
+        height:0 !important;
+        margin-top: -8.5rem !important;
+    }
+
+    svg#elementBTPFillet_svg{
+        height:350px;
+    }*/
+
+   /* div#elementTPSoCheDinhHinh.e-lib.e-accumulationchart.e-control.e-touch.e-accumulationchart-focused {
+        height: 0px !important;
+        margin-top: -8.5rem !important;
+    }
+    svg#elementTPSoCheDinhHinh_svg {
+        height: 350px;
+    }*/
+}
+

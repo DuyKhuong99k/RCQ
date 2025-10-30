@@ -1,0 +1,79 @@
+﻿<UserControl
+    x:Class="Test_PMS_NET7_WPF.View.BanCatTiet.BanCatTietTestItemUCView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:cvr="clr-namespace:Test_PMS_NET7_WPF.Convert"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:Test_PMS_NET7_WPF.View.ViTriFillet"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:viewModel="clr-namespace:Test_PMS_NET7_WPF.ViewModel"
+    Name="wd"
+    Width="auto"
+    Height="auto"
+    DataContext="{Binding Source={x:Static viewModel:MainViewModel.Ins}}"
+    mc:Ignorable="d">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <cvr:BoolToVisible x:Key="BoolToVisible" />
+        </ResourceDictionary>
+    </UserControl.Resources>
+    <Grid>
+
+        <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <StackPanel Orientation="Vertical">
+            <TextBlock Text="Mã" />
+            <TextBox IsReadOnly="{Binding VmViTriFillet.IdItemIsReadOnly}" Text="{Binding VmViTriFillet.Item.Ma, UpdateSourceTrigger=PropertyChanged}" />
+            <TextBlock Text="Tên" />
+            <TextBox Text="{Binding VmViTriFillet.Item.Ten, UpdateSourceTrigger=PropertyChanged}" />
+            <CheckBox
+                VerticalContentAlignment="Center"
+                Content="Sử Dụng"
+                IsChecked="{Binding VmViTriFillet.Item.SuDung, UpdateSourceTrigger=PropertyChanged}" />
+            <CheckBox
+                VerticalContentAlignment="Center"
+                Content="Mặc Định"
+                IsChecked="{Binding VmViTriFillet.Item.MacDinh, UpdateSourceTrigger=PropertyChanged}" />
+            <TextBlock Text="CodeId" />
+            <TextBox Text="{Binding VmViTriFillet.Item.CodeId, UpdateSourceTrigger=PropertyChanged}" />
+        </StackPanel>
+        <Grid Grid.Row="1">
+            <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
+                <StackPanel.Resources>
+                    <Style TargetType="Button">
+                        <Setter Property="Margin" Value="6" />
+                        <Setter Property="Width" Value="88" />
+                        <Setter Property="Height" Value="50" />
+                    </Style>
+                    <Style x:Key="localButtonPms" TargetType="Button">
+                        <Setter Property="Height" Value="50" />
+                        <Setter Property="Width" Value="88" />
+                        <Setter Property="Margin" Value="4" />
+                    </Style>
+                </StackPanel.Resources>
+                <Button
+                    Command="{Binding VmViTriFillet.Insert_Command}"
+                    CommandParameter="{Binding VmViTriFillet.Item}"
+                    Content="Thêm"
+                    Visibility="{Binding VmViTriFillet.IsAdd, Converter={StaticResource BoolToVisible}}" />
+                <Button
+                    Command="{Binding VmViTriFillet.Update_Command}"
+                    CommandParameter="{Binding VmViTriFillet.Item}"
+                    Content="Sửa"
+                    Visibility="{Binding VmViTriFillet.IsEdit, Converter={StaticResource BoolToVisible}}" />
+                <!--<Button
+                    Command="{Binding VmApp.CloseWindow}"
+                    CommandParameter="{Binding ElementName=wd}"
+                    Content="Thoát" />-->
+                <!--  // Hide Panel Button //  -->
+                <Button Command="{Binding VmApp.HidePanel_Command}" Content="Thoát" />
+
+            </StackPanel>
+        </Grid>
+
+
+    </Grid>
+</UserControl>
+

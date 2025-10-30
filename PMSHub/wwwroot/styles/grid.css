@@ -1,0 +1,49 @@
+﻿.grid-container {
+    display: grid;
+    grid-template-columns: 60% 20% 20%;
+    padding: 2px;
+}
+.grid-item {
+    display: flex;
+    -ms-align-items: center;
+    -o-align-items: center;
+    -webkit-align-items: center;
+    align-items: center;
+    height: 100%; /* Đảm bảo div có đủ chiều cao để căn giữa các phần tử */
+}
+.grid-container2 {
+    display: grid;
+    grid-template-columns: auto auto;
+    padding: 2px;
+}
+
+.grid-item2 {
+    display: flex;
+    -ms-align-items: center;
+    -o-align-items: center;
+    -webkit-align-items: center;
+    align-items: center;
+    height: 100%; /* Đảm bảo div có đủ chiều cao để căn giữa các phần tử */
+}
+.grid-container3 {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.grid-item3 {
+    flex-grow: 1;
+    flex-basis: 120px;
+    /*border: 1px solid black;*/
+  
+}
+.grid-container4 {
+    display: flex;
+    flex-wrap: wrap;
+    
+}
+
+.grid-item4 {
+    flex-grow: 0;
+    margin: 2px;
+    flex-basis: 50px;
+}

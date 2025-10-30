@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <ApplicationIcon>PMSLogo.ico</ApplicationIcon>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="PMSLogo.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AppViewModels\AppViewModels.csproj" />
+    <ProjectReference Include="..\EAD\EAD.csproj" />
+    <ProjectReference Include="..\JsonTreeView2\JsonTreeView2.csproj" />
+  </ItemGroup>
+
+</Project>

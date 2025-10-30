@@ -1,0 +1,402 @@
+﻿@{
+    ViewData["Title"] = "GrantAccess";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    //lấy danh sách roleid từ cookie
+    var roleIds = PMS.Middlewares.AuthenticationHelpers.GetRoleIdsFromCookie(Context);
+    // lấy danh sách fu func từ list roleId
+    var rolePermistions = await PMS.Middlewares.AuthenticationHelpers.GetRolePermistionsAsync(Context, roleIds);
+}
+<div class="container-xxl flex-grow-1 container-p-y" style="margin-top:-51px">
+    <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Phân Quyền /</span> Phân Quyền</h4>
+    <div class="row">
+        <div class="col-md-12">
+            <ul class="nav nav-pills flex-column flex-md-row mb-3">
+                <li class="nav-item">
+                    <a class="nav-link " href="/Authentication/Decentralization"><i class='bx bx-shield'></i> Tạo Quyền</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="/Authentication/GrantAccess"><i class='bx bx-shield-quarter'></i> Phân Quyền</a>
+                </li>
+                @{
+                    var hubs = rolePermistions.Where(x => x.Fu.Contains("Hubs")).FirstOrDefault();
+                    if (hubs != null)
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link" href="/Authentication/UserArea"><i class='bx bx-shield'></i> Người Dùng Theo Khu Vực Máy Cân</a>
+                        </li>
+                    }
+                }
+            </ul>
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Phần Quyền Cho Người Dùng</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-sm-9">
+                            <h6>Danh sách người dùng</h6>
+                            <div id="Grid"></div>
+                            <div style="margin-top:20px;">
+                                <button onclick="showCreatUserRole()" style="margin-right:5px;margin-bottom:5px" type="button" class="btn btn-outline-primary"><i class='bx bx-shield-quarter'></i>Thêm Vai Trò</button>
+                            </div>
+                        </div>
+                        <div class="col-sm-3">
+                            <h6>Vai trò của người dùng</h6>
+                            <div id="GridUserRole"></div>
+                            <div style="margin-top:20px">
+                                <button onclick="cancelUserRole()" style="margin-right:5px;margin-bottom:5px" class="btn btn-outline-danger"><i class='bx bx-trash'></i>Huỷ Vai Trò</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="modalThemUserRole" tabindex="-1" aria-hidden="true" data-bs-focus="false" no-enforce-focus>
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Thêm Vai Trò Cho Người Dùng</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-12 mb-12 ">
+                        <label class="form-label">Vai Trò</label>
+                        <input class="form-control" type="text" id="multiselectRole" />
+                    </div>
+                </div>
+                <div class="row mt-4 pt-2">
+                    <div class="col-12">
+                        <button onclick="CreatUserRole()" class="btn btn-primary w-100 position-relative" type="submit" id="">
+                            <div class=" align-items-center">
+                                <span id="txtUserRole">Xác Nhận</span>
+                                <div id="loadingIndicatorUserRole" class=" spinner-border text-secondary position-absolute" role="status" style="left: 0;right: 0;top: 0;bottom: 0;margin: auto; display:none">
+                                    <span class="visually-hidden">Đang tải...</span>
+                                </div>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<input id="idUserRowSelected" type="hidden" />
+<input id="maUserRoleRowSelected" type="hidden" />
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" rel="stylesheet" />
+<script id="statusTemplate" type="text/x-template">
+    <div>
+        ${if(Status===1)}
+           <span class="badge bg-info">Thử việc</span>
+        ${else if(Status===2)}
+            <span class="badge bg-primary">Đang làm</span>
+        ${else if(Status===3)}
+            <span class="badge bg-secondary">Tạm nghĩ</span>
+        ${else if(Status===4)}
+            <span class="badge bg-dark">Đã nghĩ</span>
+        ${else}
+            <span class=’ico-female’></span>
+        ${/if}
+    </div>
+</script>
+@**@
+<script type="text/x-template" id="isActiveTemplate">
+     <div>
+        ${if(IsActive)}
+           <span class="badge bg-success">Đã kích hoạt</span>
+        ${else}
+            <span class="badge bg-warning">Chưa kích hoạt</span>
+        ${/if}
+    </div>
+</script>
+<script type="text/x-template" id="optionTemplate">
+    <div>
+    @*  <button style="margin-right:5px" title="Xem, Sửa người dùng" id="btnShowInfo" onclick="btnShowInfo()"  class="btn btn-sm btn-info"><i class='bx bxs-info-square'></i></button>
+        <button title="Xoá người dùng" id="btnDeleteUser" onclick="btnDeleteUser()"  class="btn btn-sm btn-danger"><i class='bx bx-trash'></i></button> *@
+    </div>
+
+</script>
+<script>
+    $(document).ready(function () {
+        loadGridData();
+        loadGridDataUserRole();
+    });
+    var grid;
+
+    function loadGridData() {
+        $.ajax({
+            url: '/Authentication/GetAllUser',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                // Khởi tạo DataManager và gán dữ liệu từ API vào dataSource
+                var dataManager = new ej.data.DataManager({
+                    json: data,
+                    adaptor: new ej.data.JsonAdaptor()
+                });
+
+                // Kiểm tra xem Grid đã được tạo chưa
+                if (grid) {
+                    // Nếu Grid đã được tạo, chỉ cập nhật dữ liệu mới
+                    grid.dataSource = dataManager;
+                    grid.refresh();
+                } else {
+                    // Nếu Grid chưa được tạo, tạo mới Grid
+                    grid = new ej.grids.Grid({
+                        dataSource: dataManager,
+                        allowPaging: true,
+                        pageSettings: { pageSize: 10 },
+                        allowFiltering: true,
+                        filterSettings: { type: 'Excel' },
+                        allowSorting: true,
+                        //frozenColumns: 3,
+                        allowResizing: true,
+                        rowSelected: onRowSelected,
+                        height: 300,
+                        columns: [
+                            //{ field: 'STT', headerText: 'STT', width: 80, textAlign: 'Center' },
+                            { field: 'Id', headerText: 'Id', width: 80, textAlign: 'Center' },
+                            { field: 'UserName', headerText: 'Tài khoản', width: 100 },
+                            { field: 'MaNhanVien', headerText: 'Mã Nhân Viên', width: 150 },
+                            { field: 'HoTen', headerText: 'Họ tên', width: 150 },
+                            { field: 'IsActive', headerText: 'Kích Hoạt', width: 150, template: '#isActiveTemplate' },
+                        ]
+                    });
+                    // Hiển thị Grid trên trang web
+                    grid.appendTo('#Grid');
+                }
+            },
+            error: function (error) {
+                console.error(error);
+            }
+        });
+    }
+
+    loadGridData();
+    function reloadData() {
+        loadGridData();
+    }
+    function onRowSelected(args) {
+        // Lấy dữ liệu của hàng được chọn
+        var selectedRecord = args.data;
+        // Lấy giá trị Id từ dữ liệu của hàng được chọn
+        var id = selectedRecord.Id;
+        $('#idUserRowSelected').val(id);
+        reloadGridDataUserRole(id);
+    }
+
+    function reloadGridDataUserRole(userId) {
+        $.ajax({
+            url: "/Authentication/GetsByUserIdUserRole",
+            data: { userId: userId },
+            type: 'GET',
+            dataType: 'json',
+            success: function (rs) {
+                if (rs != null) {
+                    loadGridDataUserRole(rs);
+                    // document.getElementById("creatPermistion").style.display = "block";
+                } else {
+                    toastOptionNotyfi();
+                    toastr["warning"](rs.Mesages, "Thông báo");
+                }
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error, "Thông báo");
+            }
+        });
+    }
+    var gridUserRole;
+    function initializeGrid(data) {
+        var dataManager = new ej.data.DataManager({
+            json: data,
+            adaptor: new ej.data.JsonAdaptor()
+        });
+
+        gridUserRole = new ej.grids.Grid({
+            dataSource: dataManager,
+            allowPaging: true,
+            pageSettings: { pageSize: 50 },
+            allowFiltering: true,
+            filterSettings: { type: 'Excel' },
+            allowSorting: true,
+            allowResizing: true,
+            rowSelected: onRowSelectedUserRole,
+            height: 300,
+            columns: [
+
+                { field: 'RoleName', headerText: 'Vai Trò', width: 150 }
+            ]
+        });
+
+        // Hiển thị Grid trên trang web
+        gridUserRole.appendTo('#GridUserRole');
+    }
+
+    function onRowSelectedUserRole(args) {
+        var selectedRecord = args.data;
+        var IdUserRole = selectedRecord.Id;
+        $('#maUserRoleRowSelected').val(IdUserRole);
+    }
+
+    function loadGridDataUserRole(data) {
+        if (gridUserRole) {
+            var dataManager = new ej.data.DataManager({
+                json: data,
+                adaptor: new ej.data.JsonAdaptor()
+            });
+            gridUserRole.dataSource = dataManager;
+            gridUserRole.refresh();
+        } else {
+            initializeGrid(data);
+        }
+    }
+
+</script>
+<script>
+    var multiselectObjRole;
+    function multiselectRole(userId) {
+
+        function loadJSON(callback) {
+            $.ajax({
+                url: '/Authentication/GetRolesFilterIsExst',
+                data: {
+                    userId: userId
+                },
+                type: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    callback(data);
+                },
+                error: function (xhr, status, error) {
+                    toastOptionNotyfi();
+                    toastr["error"]('Lỗi khi gọi API: ' + error.toString(), "Thông báo");
+                }
+            });
+        }
+
+        if (multiselectObjRole) {
+            // Lấy dữ liệu mới và cập nhật cho MultiSelect hiện tại
+            loadJSON(function (data) {
+                multiselectObjRole.dataSource = data;
+                multiselectObjRole.refresh();
+            });
+        } else {
+            // Nếu chưa được khởi tạo, tạo mới MultiSelect
+            initializeMultiSelect();
+        }
+
+
+        function initializeMultiSelect() {
+            loadJSON(function (data) {
+                multiselectObjRole = new ej.dropdowns.MultiSelect({
+                    dataSource: data,
+                    fields: { text: 'Name', value: 'Id' },
+                    placeholder: 'Chọn Vai Trò',
+                    mode: 'CheckBox',
+                    showSelectAll: true,
+                    showDropDownIcon: true,
+                    filterBarPlaceholder: 'Tìm Vai Trò',
+                    zIndex: 9999
+                });
+                multiselectObjRole.appendTo('#multiselectRole');
+            });
+        }
+    }
+
+    function showCreatUserRole() {
+        var userId = $('#idUserRowSelected').val();
+        $('#modalThemUserRole').modal('show');
+        multiselectRole(userId);
+
+    }
+
+
+    function CreatUserRole() {
+        document.getElementById("txtUserRole").style.visibility = "hidden";
+        document.getElementById("loadingIndicatorUserRole").style.display = "block";
+        var userId = $('#idUserRowSelected').val();
+
+        var selectedRoleIdValues = multiselectObjRole.value;
+
+        var listroleId = selectedRoleIdValues.join(', ');
+
+        $.ajax({
+            url: '/Authentication/DoInsertUserRole',
+            data: {
+                userId: userId,
+                listroleId: listroleId
+            },
+            type: 'POST',
+            dataType: 'json',
+            success: function (rs) {
+                if (rs.isSuccess === true) {
+                    $('#modalThemUserRole').modal('hide');
+                    reloadGridDataUserRole(userId);
+                    toastOptionNotyfi();
+                    toastr["success"](rs.Messages, "Thông báo");
+                } else {
+                    toastOptionNotyfi();
+                    toastr["warning"](rs.Messages, "Thông báo");
+                }
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error.toString(), "Thông báo");
+            },
+            complete: function () {
+                document.getElementById("loadingIndicatorUserRole").style.display = "none";
+                document.getElementById("txtUserRole").style.visibility = "visible";
+            }
+        });
+
+    }
+
+    function cancelUserRole() {
+        var userRoleId = $('#maUserRoleRowSelected').val();
+        var userId = $('#idUserRowSelected').val();
+        bootbox.confirm({
+            title: "Thông báo!",
+            message: "Bạn có chắc muốn huỷ vai trò này! ",
+            buttons: {
+                confirm: {
+                    label: 'OK',
+                    className: 'btn btn-primary'
+                }
+            },
+            callback: function (result) {
+                if (result) {
+                    //Người dùng đã bấm OK, Gọi API xóa ở đây
+                    $.ajax({
+                        url: '/Authentication/DoDeleteUserRole',
+                        data: { userRoleId: userRoleId },
+                        type: 'POST',
+                        dataType: 'json',
+                        success: function (rs) {
+                            if (rs.isSuccess === true) {
+                                reloadGridDataUserRole(userId);
+                                toastOptionNotyfi();
+                                toastr["success"](rs.Messages, "Thông báo");
+                            } else {
+                                toastOptionNotyfi();
+                                toastr["warning"](rs.Messages, "Thông báo");
+                            }
+                        },
+                        error: function (error) {
+                            toastOptionNotyfi();
+                            toastr["error"]('Đã xảy ra lỗi: ' + error, "Thông báo");
+                        }
+                    });
+                }
+            }
+        });
+
+
+
+    }
+</script>
+

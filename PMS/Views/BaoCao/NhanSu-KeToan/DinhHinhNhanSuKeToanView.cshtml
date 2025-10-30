@@ -1,0 +1,115 @@
+﻿
+@{
+    ViewData["Title"] = "DinhHinhNhanSuKeToanView";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h2 class="mb-0">Định Hình</h2>
+                </div>
+                <div class="card-body">
+                    <div id="Spreadsheet"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    var spreadsheet;
+    function loadSpreadsheet(data) {
+        // Kiểm tra nếu có dữ liệu
+        if (data && data.length > 0) {
+            // Lấy tên cột từ dữ liệu JSON
+            var columns = Object.keys(data[0]).map(() => {
+                return { width: 120 }; // Tùy chỉnh chiều rộng cột
+            });
+
+            // Khởi tạo DataManager với dữ liệu JSON
+            var dataManager = new ej.data.DataManager({
+                json: data,
+                adaptor: new ej.data.JsonAdaptor()
+            });
+
+            // Nếu spreadsheet đã tồn tại và có dữ liệu, chỉ cần cập nhật lại dữ liệu
+            if (spreadsheet != null) {
+                spreadsheet.sheets[0].ranges[0].dataSource = dataManager;
+                spreadsheet.sheets[0].columns = columns; // Cập nhật cột động
+                spreadsheet.refresh(); // Làm mới spreadsheet
+            }
+            // Nếu chưa có spreadsheet, khởi tạo mới
+            else {
+                spreadsheet = new ej.spreadsheet.Spreadsheet({
+                    sheets: [{
+                        ranges: [{ dataSource: dataManager }],
+                        columns: columns // Gán cột động
+                    }],
+                    allowSorting: true,
+                    allowFiltering: true,
+                    height: 400,
+                });
+
+                // Gắn spreadsheet vào container
+                spreadsheet.appendTo('#Spreadsheet');
+            }
+        } else {
+
+            //chỉ tạo Spreadsheet không có dữ liệu
+            spreadsheet = new ej.spreadsheet.Spreadsheet({
+                sheets: [{
+                    ranges: [{ dataSource: dataManager }],
+                    // columns: [
+                    //     { width: 180 }, { width: 130 }, { width: 130 }, { width: 180 },
+                    //     { width: 130 }, { width: 120 }
+                    // ]
+                }],
+                allowSorting: true,
+                allowFiltering: true,
+                height: 400,
+            });
+
+            // Gắn spreadsheet vào container
+            spreadsheet.appendTo('#Spreadsheet');
+        }
+    }
+
+    loadSpreadsheet();
+
+
+    document.getElementById('RefreshButton').addEventListener("click",
+        function () {
+            var btn = document.getElementById('RefreshButton').ej2_instances[0];
+            var content = btn.content;
+            btn.content = "Đang Tải ...";
+            var fromDate = document.getElementById("datepicker1").ej2_instances[0];
+            var toDate = document.getElementById("datepicker2").ej2_instances[0];
+            $.ajax({
+                url: "@Url.Action("Reload", "BaoCaoNhanSu_KeToan")",
+                type: "POST",
+                data: { "fromDate": fromDate.value.toDateString(), "toDate": toDate.value.toDateString() },
+                success: function (response) {
+                    // Kiểm tra trạng thái "Success" trong dữ liệu JSON từ máy chủ
+                    if (response.Success) {
+                        loadSpreadsheet(response.Data);
+                    } else {
+                        loadSpreadsheet(response.Data);
+                        console.error(response.Messages);
+                        toastOptionNotyfi();
+                        toastr["error"](response.Messages, "Không có dữ liệu!");
+                    }
+                },
+                error: function (error) {
+                    toastOptionNotyfi();
+                    toastr["error"](error, "Thông báo");
+                }
+
+            }).always(function () {
+                btn.content = content;
+            });
+        });
+</script>
+
+

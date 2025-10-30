@@ -1,0 +1,569 @@
+﻿
+@{
+    ViewData["Title"] = "MapTPTLFilletView";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    //lấy danh sách roleid từ cookie
+    var roleIds = PMS.Middlewares.AuthenticationHelpers.GetRoleIdsFromCookie(Context);
+    // lấy danh sách fu func từ list roleId
+    var rolePermistions = await PMS.Middlewares.AuthenticationHelpers.GetRolePermistionsAsync(Context, roleIds);
+    
+    var listMaLoaiCas = ViewBag.listMaLoaiCas;
+   
+    var listTPFLs = ViewBag.listTPFLs;
+    var listSFLs = ViewBag.listSFLs;
+    var listSPTLs = ViewBag.listSPTLs;
+}
+
+<style>
+    #isTangCaMTPRowSelected {
+        display: none;
+    }
+</style>
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h2 class="mb-0">Danh Sách Map TPFillet Tính Lương Fillet</h2>
+                    @{
+                        var themMapTPTinhLuongFillet = rolePermistions.Where(x => x.Fu == "Danh Mục / Fillet / Map TPFillet Tính Lương" && x.Func == "Thêm Fillet / Map TPFillet Tính Lương" && x.Status == 1).FirstOrDefault();
+                        if (themMapTPTinhLuongFillet != null)
+                        {
+                            <button onclick="showInsert()" type="button" class="btn btn-primary">Thêm</button>
+                        }
+                    }
+
+                </div>
+                <div class="card-body">
+                    <div id="Grid"></div>
+                    <div style="margin-top:20px;">
+                        @{
+                            var suaMapTPTinhLuongFillet = rolePermistions.Where(x => x.Fu == "Danh Mục / Fillet / Map TPFillet Tính Lương" && x.Func == "Sửa Fillet / Map TPFillet Tính Lương" && x.Status == 1).FirstOrDefault();
+                            if (suaMapTPTinhLuongFillet != null)
+                            {
+                                <button onclick="showUpdate()" style="margin-right:5px" class="btn btn-outline-warning"><i class='bx bx-edit-alt'></i>Sửa</button>
+                            }
+                            var xoaMapTPTinhLuongFillet = rolePermistions.Where(x => x.Fu == "Danh Mục / Fillet / Map TPFillet Tính Lương" && x.Func == "Xoá Fillet / Map TPFillet Tính Lương" && x.Status == 1).FirstOrDefault();
+                            if (xoaMapTPTinhLuongFillet != null)
+                            {
+                                <button onclick="showDelete()" style="margin-right:5px" class="btn btn-outline-danger"><i class='bx bx-trash'></i>Xoá</button>
+                            }
+                            var importMapTPTinhLuongFillet = rolePermistions.Where(x => x.Fu == "Danh Mục / Fillet / Map TPFillet Tính Lương" && x.Func == "Import Fillet / Map TPFillet Tính Lương" && x.Status == 1).FirstOrDefault();
+                            if (importMapTPTinhLuongFillet != null)
+                            {
+                                <button onclick="import()" style="margin-right:5px" class="btn btn-outline-info"><i class='bx bx-import'></i>Import</button>
+                            }
+                            var exportMapTPTinhLuongFillet = rolePermistions.Where(x => x.Fu == "Danh Mục / Fillet / Map TPFillet Tính Lương" && x.Func == "Export Fillet / Map TPFillet Tính Lương" && x.Status == 1).FirstOrDefault();
+                            if (exportMapTPTinhLuongFillet != null)
+                            {
+                                <button onclick="export()" style="margin-right:5px" class="btn btn-outline-secondary"><i class='bx bx-export'></i>Export Excel</button>
+                            }
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="modalThem" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Thêm Map TPFillet Tính Lương Fillet</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="card">
+                    <div class="card-body">
+                        
+                        <div class="row">
+                            <div class="col-md-12 mb-12 ">
+                                <div class="form-outline">
+                                    <label class="form-label">Loại Cá</label>
+                                    <select id="maLoaiCaMTP" class="form-control form-control-lg">
+                                        <option disabled selected>Chọn Loại Cá</option>
+                                        @foreach (var item in listMaLoaiCas)
+                                        {
+                                            <option value="@item.Ma">@item.Ten</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 mb-12 ">
+                                <div class="form-outline">
+                                    <label class="form-label">Thành Phẩm</label>
+                                    <select id="maThanhPhamMTP" class="form-control form-control-lg">
+                                        <option disabled selected>Chọn Thành Phẩm</option>
+                                        @foreach (var item in listTPFLs)
+                                        {
+                                            <option value="@item.Ma">@item.Ten</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 mb-12 ">
+                                <div class="form-outline">
+                                    <label class="form-label">Size</label>
+                                    <select id="maSizeMTP" class="form-control form-control-lg">
+                                        <option disabled selected>Chọn Size</option>
+                                        @foreach (var item in listSFLs)
+                                        {
+                                            <option value="@item.Ma">@item.Ten</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 mb-12 ">
+                                <div class="form-outline">
+                                    <label class="form-label">Sản Phẩm Tính Lương</label>
+                                    <select id="maBravoMTP" class="form-control form-control-lg">
+                                        <option disabled selected>Chọn Sản Phẩm TL</option>
+                                        @foreach (var item in listSPTLs)
+                                        {
+                                            <option value="@item.Ma">@item.Ten</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-12">
+                                <div class="list-group form-outline">
+                                    <label class="">
+                                        <input class="form-check-input me-1" type="checkbox" value="" id="isTangCaMTP" />
+                                        Tăng Ca
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                      
+                        <div class="row mt-4 pt-2">
+                            <div class="col-12">
+                                <button onclick="insert()" class="btn btn-primary w-100 position-relative" type="submit" id="">
+                                    <div class=" align-items-center">
+                                        <span id="txtThem">Thêm</span>
+                                        <div id="loadingIndicator" class=" spinner-border text-secondary position-absolute" role="status" style="left: 0;right: 0;top: 0;bottom: 0;margin: auto; display:none">
+                                            <span class="visually-hidden">Đang tải...</span>
+                                        </div>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="modalSua" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Sửa Map TPFillet Tính Lương Fillet</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-12 mb-12 ">
+                                <div class="form-outline">
+                                    <label class="form-label">Loại Cá</label>
+                                    <select id="maLoaiCaMTPSua" class="form-control form-control-lg" disabled>
+                                        <option disabled selected>Chọn Loại Cá</option>
+                                        @foreach (var item in listMaLoaiCas)
+                                        {
+                                            <option value="@item.Ma">@item.Ten</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 mb-12 ">
+                                <div class="form-outline">
+                                    <label class="form-label">Thành Phẩm</label>
+                                    <select id="maThanhPhamMTPSua" class="form-control form-control-lg" disabled>
+                                        <option disabled selected>Chọn Thành Phẩm</option>
+                                        @foreach (var item in listTPFLs)
+                                        {
+                                            <option value="@item.Ma">@item.Ten</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 mb-12 ">
+                                <div class="form-outline">
+                                    <label class="form-label">Size</label>
+                                    <select id="maSizeMTPSua" class="form-control form-control-lg" disabled>
+                                        <option disabled selected>Chọn Size</option>
+                                        @foreach (var item in listSFLs)
+                                        {
+                                            <option value="@item.Ma">@item.Ten</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 mb-12 ">
+                                <div class="form-outline">
+                                    <label class="form-label">Sản Phẩm Tính Lương</label>
+                                    <select id="maBravoMTPSua" class="form-control form-control-lg">
+                                        <option disabled selected>Chọn Sản Phẩm TL</option>
+                                        @foreach (var item in listSPTLs)
+                                        {
+                                            <option value="@item.Ma">@item.Ten</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-12">
+                                <div class="list-group form-outline">
+                                    <label class="">
+                                        <input class="form-check-input me-1" type="checkbox" value="" id="isTangCaMTPSua" disabled />
+                                        Tăng Ca
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-4 pt-2">
+                            <div class="col-12">
+                                <button onclick="update()" class="btn btn-primary w-100 position-relative" type="submit" id="">
+                                    <div class=" align-items-center">
+                                        <span id="txtSua">Sửa</span>
+                                        <div id="loadingIndicatorSua" class=" spinner-border text-secondary position-absolute" role="status" style="left: 0;right: 0;top: 0;bottom: 0;margin: auto; display:none">
+                                            <span class="visually-hidden">Đang tải...</span>
+                                        </div>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<input type="hidden" id="maloaicaMTPRowSelected" />
+<input type="hidden" id="masizeMTPRowSelected" />
+<input type="hidden" id="mathanhphamMTPRowSelected" />
+<input type="checkbox" id="isTangCaMTPRowSelected" />
+<script>
+    $(document).ready(function () {
+        loadGridData();
+    });
+    var grid;
+    function loadGridData() {
+        $.ajax({
+            url: '/MapTPTinhLuongFillet/GetAllsFullField',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                // Đảo ngược dữ liệu
+                data.reverse();
+                var dataManager = new ej.data.DataManager({
+                    json: data,
+                    adaptor: new ej.data.JsonAdaptor()
+                });
+                if (grid) {
+                    grid.dataSource = dataManager;
+                    grid.refresh();
+                } else {
+                    grid = new ej.grids.Grid({
+                        dataSource: dataManager,
+                        allowPaging: true,
+                        pageSettings: { pageSize: 50 },
+                        allowFiltering: true,
+                        filterSettings: { type: 'Excel' },
+                        allowSorting: true,
+                        //frozenColumns: 3,
+                        allowResizing: true,
+                        rowSelected: onRowSelected,
+                        height: 400,
+                        columns: [         
+                            { field: 'LoaiCaName', headerText: 'Loại Cá', width: 150 },
+                            { field: 'ThanhPhamName', headerText: 'Thành Phẩm', width: 150 },
+                            { field: 'SizeName', headerText: 'Size', width: 150 },
+                            { field: 'IsTangCa', headerText: 'Tăng Ca', width: 100, displayAsCheckBox: 'true', textAlign: 'Center' },
+                            { field: 'SizeName', headerText: 'Size', width: 150 },
+                            { field: 'MaBravoFillet', headerText: 'Ma Tính Lương', width: 150 },
+                            { field: 'SLTLName', headerText: 'Sản Phẩm', width: 150 },
+                        ]
+                    });
+                    // Hiển thị Grid trên trang web
+                    grid.appendTo('#Grid');
+                }
+            },
+            error: function (error) {
+                console.error(error);
+            }
+        });
+    }
+    loadGridData();
+    function reloadData() {
+        loadGridData();
+    }
+    function onRowSelected(args) {
+        // Lấy dữ liệu của hàng được chọn
+        var selectedRecord = args.data;
+        // Lấy giá trị Id từ dữ liệu của hàng được chọn
+        var maloaica = selectedRecord.MaLoaiCaFillet;
+        var mathanhpham = selectedRecord.MaTPFillet;
+        var masize = selectedRecord.MaSize;
+        var isTangCa = selectedRecord.IsTangCa;
+      
+        $('#maloaicaMTPRowSelected').val(maloaica);
+        $('#mathanhphamMTPRowSelected').val(mathanhpham);
+        $('#masizeMTPRowSelected').val(masize);
+        $('#isTangCaMTPRowSelected').prop('checked', isTangCa);
+    }
+</script>
+<script>
+    function layGioTuDate(dateString) {
+        // Khởi tạo một đối tượng Date từ chuỗi ngày
+        var date = new Date(dateString);
+
+        // Lấy giờ, phút và giây từ đối tượng Date
+        var gio = date.getHours();
+        var phut = date.getMinutes();
+        var giay = date.getSeconds();
+
+        // Định dạng lại chuỗi kết quả
+        var gioPhutGiayString = pad(gio, 2) + ":" + pad(phut, 2) + ":" + pad(giay, 2);
+
+        // Trả về chuỗi kết quả
+        return gioPhutGiayString;
+    }
+    // Hàm pad để thêm số 0 vào trước nếu cần
+    function pad(number, length) {
+        var str = '' + number;
+        while (str.length < length) {
+            str = '0' + str;
+        }
+        return str;
+    }
+    function showInsert() {
+        $.ajax({
+            type: "GET",
+            url: "/MapTPTinhLuongFillet/CreatDefautNew",
+            success: function (rs) {
+                if (rs.isSuccess === true) {
+                    $('#isTangCaMTP').prop('checked', rs.IsTangCa);
+                    $('#modalThem').modal('show');
+                }
+                else {
+                    toastOptionNotyfi();
+                    toastr["warning"](rs.Mesages, "Thông báo");
+                }
+            },
+            error: function () {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error, "Thông báo");
+            }
+        });
+    }
+    function insert() {
+        var maLoaiCa = $('#maLoaiCaMTP').val();
+        var maThanhPham = $('#maThanhPhamMTP').val();
+        var masize = $('#maSizeMTP').val();
+        var maBravo = $('#maBravoMTP').val();
+        var isTangCa = $('#isTangCaMTP').prop('checked');
+        document.getElementById("txtThem").style.visibility = "hidden";
+        document.getElementById("loadingIndicator").style.display = "block";
+        $.ajax({
+            type: 'POST',
+            url: '/MapTPTinhLuongFillet/DoInsert',
+            data: {
+              
+                maLoaiCa: maLoaiCa,
+                maThanhPham: maThanhPham,
+                masize: masize,
+                maBravo: maBravo,
+                isTangCa: isTangCa
+            },
+            success: function (rs) {
+                if (rs.isSuccess === true) {
+                    toastOptionNotyfi();
+                    toastr["success"](rs.Messages, "Thông báo");
+                    $('#modalThem').modal('hide');
+                    reloadData();
+                } else {
+                    toastOptionNotyfi();
+                    toastr["warning"](rs.Messages, "Thông báo");
+                }
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error, "Thông báo");
+            },
+            complete: function () {
+                document.getElementById("loadingIndicator").style.display = "none";
+                document.getElementById("txtThem").style.visibility = "visible";
+            }
+        });
+    }
+</script>
+<script>
+    function showUpdate() {
+      
+        var maLoaiCa = $('#maloaicaMTPRowSelected').val();
+        var maSize = $('#masizeMTPRowSelected').val();
+        var maThanhPham = $('#mathanhphamMTPRowSelected').val();
+        var isTangCa = $('#isTangCaMTPRowSelected').prop('checked');
+        $.ajax({
+            url: "/MapTPTinhLuongFillet/GetsByMa",
+            data: {
+                maLoaiCa: maLoaiCa,
+                maThanhPham: maThanhPham,
+                maSize: maSize,
+                isTangCa: isTangCa
+            },
+            type: 'GET',
+            dataType: 'json',
+            success: function (rs) {
+                if (rs.isSuccess === true) {
+                    $('#maLoaiCaMTPSua').val(rs.MaLoaiCaFillet);
+                    $('#maThanhPhamMTPSua').val(rs.MaTPFillet);
+                    $('#maSizeMTPSua').val(rs.MaSize);
+                    $('#maBravoMTPSua').val(rs.MaBravoFillet);
+                    $('#isTangCaMTPSua').prop('checked', rs.IsTangCa);
+                    $('#modalSua').modal('show');
+                }
+                else {
+                    toastOptionNotyfi();
+                    toastr["warning"](rs.Mesages, "Thông báo");
+                }
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error, "Thông báo");
+            }
+        });
+    }
+    function update() {
+        var maLoaiCa = $('#maLoaiCaMTPSua').val();
+        var maThanhPham = $('#maThanhPhamMTPSua').val();
+        var masize = $('#maSizeMTPSua').val();
+        var maBravo = $('#maBravoMTPSua').val();
+        var isTangCa = $('#isTangCaMTPSua').prop('checked');
+        document.getElementById("txtSua").style.visibility = "hidden";
+        document.getElementById("loadingIndicatorSua").style.display = "block";
+        $.ajax({
+            url: '/MapTPTinhLuongFillet/DoUpdate',
+            data: {
+                maLoaiCa: maLoaiCa,
+                maThanhPham: maThanhPham,
+                masize: masize,
+                maBravo: maBravo,
+                isTangCa: isTangCa
+            },
+            type: 'POST',
+            dataType: 'json',
+            success: function (rs) {
+                if (rs.isSuccess === true) {
+                    $('#modalSua').modal('hide');
+                    reloadData();
+                    toastOptionNotyfi();
+                    toastr["success"](rs.Messages, "Thông báo");
+                } else {
+                    toastOptionNotyfi();
+                    toastr["warning"](rs.Messages, "Thông báo");
+                }
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error.toString(), "Thông báo");
+            },
+            complete: function () {
+                document.getElementById("loadingIndicatorSua").style.display = "none";
+                document.getElementById("txtSua").style.visibility = "visible";
+            }
+        });
+    }
+</script>
+<script>
+    function showDelete() {
+        var maLoaiCa = $('#maloaicaMTPRowSelected').val();
+        var maSize = $('#masizeMTPRowSelected').val();
+        var maThanhPham = $('#mathanhphamMTPRowSelected').val();
+        var isTangCa = $('#isTangCaMTPRowSelected').prop('checked');
+        $.ajax({
+            url: "/MapTPTinhLuongFillet/GetsByMa",
+            data: {
+                maLoaiCa: maLoaiCa,
+                maThanhPham: maThanhPham,
+                maSize: maSize,
+                isTangCa: isTangCa
+            },
+            type: 'GET',
+            dataType: 'json',
+            success: function (rs) {
+                if (rs.isSuccess === true) {
+                    bootbox.confirm({
+                        title: "Thông báo!",
+                        message: "Bạn có chắc muốn xoá ! ",
+                        buttons: {
+                            confirm: {
+                                label: 'OK',
+                                className: 'btn btn-primary'
+                            }
+                        },
+                        callback: function (result) {
+                            if (result) {
+                                //Người dùng đã bấm OK, Gọi API xóa ở đây
+                                $.ajax({
+                                    url: '/MapTPTinhLuongFillet/DoDelete',
+                                    data: {
+                                        maLoaiCa: maLoaiCa,
+                                        maThanhPham: maThanhPham,
+                                        maSize: maSize,
+                                        isTangCa: isTangCa
+                                    },
+                                    type: 'POST',
+                                    dataType: 'json',
+                                    success: function (rs) {
+                                        if (rs.isSuccess === true) {
+                                            reloadData();
+                                            toastOptionNotyfi();
+                                            toastr["success"](rs.Messages, "Thông báo");
+                                        } else {
+                                            toastOptionNotyfi();
+                                            toastr["warning"](rs.Messages, "Thông báo");
+                                        }
+                                    },
+                                    error: function (error) {
+                                        toastOptionNotyfi();
+                                        toastr["error"]('Đã xảy ra lỗi: ' + error.toString(), "Thông báo");
+                                    }
+                                });
+                            }
+                        }
+                    });
+                } else {
+                    toastOptionNotyfi();
+                    toastr["warning"]('Không tìm thấy thông tin!', "Thông báo");
+                }
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error.toString(), "Thông báo");
+            }
+        });
+
+    }
+</script>
+

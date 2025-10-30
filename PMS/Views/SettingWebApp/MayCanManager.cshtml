@@ -1,0 +1,759 @@
+﻿@model Models.Repos.Models.MayCan
+@{
+    ViewData["Title"] = "MayCanManager";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    //lấy danh sách roleid từ cookie
+    var roleIds = PMS.Middlewares.AuthenticationHelpers.GetRoleIdsFromCookie(Context);
+    // lấy danh sách fu func từ list roleId
+    var rolePermistions = await PMS.Middlewares.AuthenticationHelpers.GetRolePermistionsAsync(Context, roleIds);
+    var listXuongs = ViewBag.listXuongs;
+    var appKVValues = Enum.GetNames(typeof(Vars.AppKV));
+    var jsonAppKVValues = Newtonsoft.Json.JsonConvert.SerializeObject(appKVValues);
+
+    var appTypeValues = Enum.GetNames(typeof(Vars.AppType));
+    var jsonAppTypeValues = Newtonsoft.Json.JsonConvert.SerializeObject(appTypeValues);
+}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h2 class="mb-0">Danh Sách Máy Cân</h2>
+                    @{
+                        var themMayCanManager = rolePermistions.Where(x => x.Fu == "Cài Đặt" && x.Func == "Thêm Quản Lý Máy Cân" && x.Status == 1).FirstOrDefault();
+                        if (themMayCanManager != null)
+                        {
+                                        <button onclick="showInsert()" type="button" class="btn btn-primary">Thêm</button>
+                        }
+                    }
+
+                </div>
+                <div class="card-body">
+                    <div id="Grid"></div>
+                    <div style="margin-top:20px;">
+                        @{
+                            var suaMayCanManager = rolePermistions.Where(x => x.Fu == "Cài Đặt" && x.Func == "Sửa Quản Lý Máy Cân" && x.Status == 1).FirstOrDefault();
+                            if (suaMayCanManager != null)
+                            {
+                                            <button onclick="showUpdate()" style="margin-right:5px" class="btn btn-outline-warning"><i class='bx bx-edit-alt'></i>Sửa</button>
+                            }
+                            var xoaMayCanManager = rolePermistions.Where(x => x.Fu == "Cài Đặt" && x.Func == "Xoá Quản Lý Máy Cân" && x.Status == 1).FirstOrDefault();
+                            if (xoaMayCanManager != null)
+                            {
+                                            <button onclick="showDelete()" style="margin-right:5px" class="btn btn-outline-danger"><i class='bx bx-trash'></i>Xoá</button>
+                            }
+                            var importMayCanManager = rolePermistions.Where(x => x.Fu == "Cài Đặt" && x.Func == "Import Quản Lý Máy Cân" && x.Status == 1).FirstOrDefault();
+                            if (importMayCanManager != null)
+                            {
+                                            <button onclick="import()" style="margin-right:5px" class="btn btn-outline-info"><i class='bx bx-import'></i>Import</button>
+                            }
+                            var exportMayCanManager = rolePermistions.Where(x => x.Fu == "Cài Đặt" && x.Func == "Export Quản Lý Máy Cân" && x.Status == 1).FirstOrDefault();
+                            if (exportMayCanManager != null)
+                            {
+                                            <button onclick="export()" style="margin-right:5px" class="btn btn-outline-secondary"><i class='bx bx-export'></i>Export Excel</button>
+                            }
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="modalThem" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Thêm Máy Cân</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="row">
+                                    <div class="col-md-12 mb-12 ">
+                                        <div class="form-outline">
+                                            <label class="form-label" for="x1">Id</label>
+                                            <input type="text" id="idMCST" class="form-control form-control-lg" autocomplete="off" placeholder="Nhập Id..." style="text-transform: uppercase;" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12 mb-12 ">
+                                        <div class="form-outline">
+                                            <label class="form-label" for="x1">Tên Máy</label>
+                                            <input type="text" id="displayNameMCST" class="form-control form-control-lg" autocomplete="off" placeholder="Nhập Máy Cân..." />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12 mb-12 ">
+                                        <div class="form-outline">
+                                            <label class="form-label" for="x1">Khu Vực</label>
+                                            <select id="wKvMCST" asp-for="WKv" class="form-control form-control-lg">
+                                                @{
+                                                    int value = 0;
+                                                    foreach (var item in Enum.GetValues(typeof(Vars.AppKV)))
+                                                    {
+                                                                    <option value="@value">@item</option>
+                                                        value++;
+                                                    }
+                                                }
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12 mb-12 ">
+                                        <div class="form-outline">
+                                            <label class="form-label" for="x1">Loại Cân</label>
+                                            <select id="aTypeMCST" asp-for="AType" class="form-control form-control-lg">
+                                                @{
+                                                    int value2 = 0;
+                                                    foreach (var item in Enum.GetValues(typeof(Vars.AppType)))
+                                                    {
+                                                                    <option value="@value2">@item</option>
+                                                        value2++;
+                                                    }
+                                                }
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12 mb-12 ">
+                                        <div class="form-outline">
+                                            <label class="form-label" for="x1">Loại Máy</label>
+                                            <select id="mTypeMCST" class="form-control form-control-lg">
+                                                <option value="BOARD">BOARD</option>
+                                                <option value="DESKTOP">DESKTOP</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12 mb-12 ">
+                                        <div class="form-outline">
+                                            <label class="form-label">Xưởng</label>
+                                            <select id="maXuongMCST" class="form-control form-control-lg">
+                                                <option disabled selected>Chọn Xưởng</option>
+                                                @foreach (var item in listXuongs)
+                                                {
+                                                    <option value="@item.Ma">@item.Ten</option>
+                                                }
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-12">
+                                        <label class="">
+                                            <input class="form-check-input me-1" type="checkbox" value="" id="isSuDungMauThanhPhamMCST" />
+                                            Màu TP
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="row">
+                                    <div class="col-md-12 mb-12 ">
+                                        <div class="form-outline">
+                                            <label class="form-label" for="x1">SCode</label>
+                                            <input type="text" id="sCodeMCST" class="form-control form-control-lg" autocomplete="off" placeholder="Nhập SCode..." />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12 mb-12 ">
+                                        <div class="form-outline">
+                                            <label class="form-label" for="x1">Par1</label>
+                                            <input type="text" id="par1MCST" class="form-control form-control-lg" autocomplete="off" placeholder="Nhập Par1..." />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12 mb-12 ">
+                                        <div class="form-outline">
+                                            <label class="form-label" for="x1">Par2</label>
+                                            <input type="text" id="par2MCST" class="form-control form-control-lg" autocomplete="off" placeholder="Nhập Par2..." />
+                                        </div>
+                                    </div>
+                                </div> <div class="row">
+                                    <div class="col-md-12 mb-12 ">
+                                        <div class="form-outline">
+                                            <label class="form-label" for="x1">Par3</label>
+                                            <input type="text" id="par3MCST" class="form-control form-control-lg" autocomplete="off" placeholder="Nhập Par3..." />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12 mb-12 ">
+                                        <div class="form-outline">
+                                            <label class="form-label" for="x1">Par4</label>
+                                            <input type="text" id="par4MCST" class="form-control form-control-lg" autocomplete="off" placeholder="Nhập Par4..." />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12 mb-12 ">
+                                        <div class="form-outline">
+                                            <label class="form-label" for="x1">Index</label>
+                                            <input type="text" id="idxMCST" class="form-control form-control-lg" autocomplete="off" placeholder="Nhập Index..." />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-4 pt-2">
+                            <div class="col-12">
+                                <button onclick="insert()" class="btn btn-primary w-100 position-relative" type="submit" id="">
+                                    <div class=" align-items-center">
+                                        <span id="txtThem">Thêm</span>
+                                        <div id="loadingIndicator" class=" spinner-border text-secondary position-absolute" role="status" style="left: 0;right: 0;top: 0;bottom: 0;margin: auto; display:none">
+                                            <span class="visually-hidden">Đang tải...</span>
+                                        </div>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="modalSua" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Sửa Máy Cân</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="row">
+                                    <div class="col-md-12 mb-12 ">
+                                        <div class="form-outline">
+                                            <label class="form-label" for="x1">Id</label>
+                                            <input type="text" id="idMCSTSua" class="form-control form-control-lg" autocomplete="off" placeholder="Nhập Id..." style="text-transform: uppercase;" disabled />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12 mb-12 ">
+                                        <div class="form-outline">
+                                            <label class="form-label" for="x1">Tên Máy</label>
+                                            <input type="text" id="displayNameMCSTSua" class="form-control form-control-lg" autocomplete="off" placeholder="Nhập Máy Cân..." />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12 mb-12 ">
+                                        <div class="form-outline">
+                                            <label class="form-label" for="x1">Khu Vực</label>
+                                            <select id="wKvMCSTSua" asp-for="WKv" class="form-control form-control-lg">
+                                                @{
+                                                    int value3 = 0;
+                                                    foreach (var item in Enum.GetValues(typeof(Vars.AppKV)))
+                                                    {
+                                                                    <option value="@value3">@item</option>
+                                                        value3++;
+                                                    }
+                                                }
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12 mb-12 ">
+                                        <div class="form-outline">
+                                            <label class="form-label" for="x1">Loại Cân</label>
+                                            <select id="aTypeMCSTSua" asp-for="AType" class="form-control form-control-lg">
+                                                @{
+                                                    int value4 = 0;
+                                                    foreach (var item in Enum.GetValues(typeof(Vars.AppType)))
+                                                    {
+                                                                    <option value="@value4">@item</option>
+                                                        value4++;
+                                                    }
+                                                }
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12 mb-12 ">
+                                        <div class="form-outline">
+                                            <label class="form-label" for="x1">Loại Máy</label>
+                                            <select id="mTypeMCSTSua" class="form-control form-control-lg">
+                                                <option value="BOARD">BOARD</option>
+                                                <option value="DESKTOP">DESKTOP</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12 mb-12 ">
+                                        <div class="form-outline">
+                                            <label class="form-label">Xưởng</label>
+                                            <select id="maXuongMCSTSua" class="form-control form-control-lg">
+                                                <option disabled selected>Chọn Xưởng</option>
+                                                @foreach (var item in listXuongs)
+                                                {
+                                                    <option value="@item.Ma">@item.Ten</option>
+                                                }
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-12">
+                                        <label class="">
+                                            <input class="form-check-input me-1" type="checkbox" value="" id="isSuDungMauThanhPhamMCSTSua" />
+                                            Màu TP
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="row">
+                                    <div class="col-md-12 mb-12 ">
+                                        <div class="form-outline">
+                                            <label class="form-label" for="x1">SCode</label>
+                                            <input type="text" id="sCodeMCSTSua" class="form-control form-control-lg" autocomplete="off" placeholder="Nhập SCode..." />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12 mb-12 ">
+                                        <div class="form-outline">
+                                            <label class="form-label" for="x1">Par1</label>
+                                            <input type="text" id="par1MCSTSua" class="form-control form-control-lg" autocomplete="off" placeholder="Nhập Par1..." />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12 mb-12 ">
+                                        <div class="form-outline">
+                                            <label class="form-label" for="x1">Par2</label>
+                                            <input type="text" id="par2MCSTSua" class="form-control form-control-lg" autocomplete="off" placeholder="Nhập Par2..." />
+                                        </div>
+                                    </div>
+                                </div> <div class="row">
+                                    <div class="col-md-12 mb-12 ">
+                                        <div class="form-outline">
+                                            <label class="form-label" for="x1">Par3</label>
+                                            <input type="text" id="par3MCSTSua" class="form-control form-control-lg" autocomplete="off" placeholder="Nhập Par3..." />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12 mb-12 ">
+                                        <div class="form-outline">
+                                            <label class="form-label" for="x1">Par4</label>
+                                            <input type="text" id="par4MCSTSua" class="form-control form-control-lg" autocomplete="off" placeholder="Nhập Par4..." />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12 mb-12 ">
+                                        <div class="form-outline">
+                                            <label class="form-label" for="x1">Index</label>
+                                            <input type="text" id="idxMCSTSua" class="form-control form-control-lg" autocomplete="off" placeholder="Nhập Index..." />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-4 pt-2">
+                            <div class="col-12">
+                                <button onclick="update()" class="btn btn-primary w-100 position-relative" type="submit" id="">
+                                    <div class=" align-items-center">
+                                        <span id="txtSua">Sửa</span>
+                                        <div id="loadingIndicatorSua" class=" spinner-border text-secondary position-absolute" role="status" style="left: 0;right: 0;top: 0;bottom: 0;margin: auto; display:none">
+                                            <span class="visually-hidden">Đang tải...</span>
+                                        </div>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<input type="hidden" id="idMCSTRowSelected" />
+<script>
+    var appKVValues = @Html.Raw(jsonAppKVValues);
+    var appTypeValues = @Html.Raw(jsonAppTypeValues);
+</script>
+<script type="text/x-template" id="WKvTemplate">
+    <div>
+        <span>${covert(data)}</span>
+    </div>
+</script> 
+<script type="text/x-template" id="ATypeTemplate">
+    <div>
+        <span>${covert2(data)}</span>
+    </div>
+</script>
+<script>
+    function covert(data) {
+        var appKVValue = "";
+        try {
+            var wkValue = data.WKv;
+            appKVValue = appKVValues[wkValue];
+        } catch (error) {
+            console.error(error);
+        }
+        if (appKVValue == "" || appKVValue == undefined) {
+            appKVValue = "Chưa xác định";
+        }
+        return appKVValue;
+    }
+    function covert2(data) {
+        var appTypeValue = "";
+        try {
+            var appTypeValue = data.AType;
+            appTypeValue = appTypeValues[appTypeValue];
+        } catch (error) {
+            console.error(error);
+        }
+        if (appTypeValue == "" || appTypeValue == undefined) {
+            appTypeValue = "Chưa xác định";
+        }
+        return appTypeValue;
+    }
+    $(document).ready(function () {
+        loadGridData();
+    });
+    var grid;
+    function loadGridData() {
+
+        $.ajax({
+            url: '/SettingWebApp/GetAllMayCanManagers', 
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                var dataManager = new ej.data.DataManager({
+                    json: data,
+                    adaptor: new ej.data.JsonAdaptor()
+                });
+                if (grid) {
+                    grid.dataSource = dataManager;
+                    grid.refresh();
+                } else {
+                    grid = new ej.grids.Grid({
+                        dataSource: dataManager,
+                        allowPaging: true,
+                        pageSettings: { pageSize: 50 },
+                        allowFiltering: true,
+                        filterSettings: { type: 'Excel' },
+                        allowSorting: true,
+                        //frozenColumns: 3,
+                        allowResizing: true,
+                        rowSelected: onRowSelected,
+                        height: 400,
+                        columns: [
+                            { field: 'Id', headerText: 'Id', width: 150 },
+                            { field: 'DisplayName', headerText: 'Tên Máy', width: 150 },
+                            { field: 'MType', headerText: 'Loại Máy', width: 150},
+                            { field: 'WKv', headerText: 'Khu Vực', width: 150, template: '#WKvTemplate' },
+                            { field: 'AType', headerText: 'Loại Cân', width: 150, template: '#ATypeTemplate' },
+                            { field: 'SCode', headerText: 'SCode', width: 150 },
+                            { field: 'Par1', headerText: 'Par1', width: 150 },
+                            { field: 'Par2', headerText: 'Par2', width: 150 },
+                            { field: 'Par3', headerText: 'Par3', width: 150 },
+                            { field: 'Par4', headerText: 'Par4', width: 150 },
+                            { field: 'Idx', headerText: 'Index', width: 150 },
+                            { field: 'MaXuong', headerText: 'Xưởng', width: 150 },
+                            { field: 'IsSuDungMauThanhPham', headerText: 'Màu TP', width: 100, displayAsCheckBox: 'true', textAlign: 'Center' },
+                        ]
+                    });
+                    // Hiển thị Grid trên trang web
+                    grid.appendTo('#Grid');
+                }
+            },
+            error: function (error) {
+                console.error(error);
+            }
+        });
+    }
+    loadGridData();
+
+    function reloadData() {
+        loadGridData();
+    }
+    function onRowSelected(args) {
+        // Lấy dữ liệu của hàng được chọn
+        var selectedRecord = args.data;
+        // Lấy giá trị Id từ dữ liệu của hàng được chọn
+        var Id = selectedRecord.Id;
+
+        $('#idMCSTRowSelected').val(Id);
+    }
+    function templateKV(data) {
+        var wkValue = data.WKv;
+        var appKVValue = "";
+        for (var i = 0; i < appKVValues.length; i++) {
+            if (appKVValues[i] == wkValue) {
+                appKVValue = appKVValues[i];
+                break;
+            }
+        }
+        if (!appKVValue) {
+            appKVValue = "Chưa xác định";
+        }
+        return "<div><span>" + appKVValue + "</span></div>";
+    }
+</script>
+<script>
+    function showInsert() {
+        $.ajax({
+            type: "GET",
+            url: "/SettingWebApp/CreatDefautNewMayCanManagers",
+            success: function (rs) {
+                if (rs.isSuccess === true) {
+                   // $('#idMCST').val(rs.Id);
+                    $('#sCodeMCST').val(rs.SCode);
+                    $('#par1MCST').val(rs.Par1);
+                    $('#par2MCST').val(rs.Par2);
+                    $('#par3MCST').val(rs.Par3);
+                    $('#par4MCST').val(rs.Par4);
+                    $('#idxMCST').val(rs.Idx);
+                    $('#isSuDungMauThanhPhamMCST').prop('checked', rs.IsSuDungMauThanhPham);
+                    $('#modalThem').modal('show');
+                }
+                else {
+                    toastOptionNotyfi();
+                    toastr["warning"](rs.Mesages, "Thông báo");
+                }
+            },
+            error: function () {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error, "Thông báo");
+            }
+        });
+
+    }
+    function insert() {
+        var id = $('#idMCST').val();
+        if (id == null || id == "" || id == undefined) {
+            toastOptionNotyfi();
+            toastr["error"]('Bạn Chưa Nhập Id', "Thông báo");
+            return;
+        }
+        var displayName = $('#displayNameMCST').val();
+        var wKv = $('#wKvMCST').val();
+        var aType = $('#aTypeMCST').val();
+        var mType = $('#mTypeMCST').val();
+        var xuongId = $('#maXuongMCST').val();
+        var isSuDungMauThanhPham = $('#isSuDungMauThanhPhamMCST').prop('checked');
+        var sCode = $('#sCodeMCST').val();
+        var par1 = $('#par1MCST').val();
+        var par2= $('#par2MCST').val();
+        var par3 = $('#par3MCST').val();
+        var par4 = $('#par4MCST').val();
+        var idx = $('#idxMCST').val();
+        document.getElementById("txtThem").style.visibility = "hidden";
+        document.getElementById("loadingIndicator").style.display = "block";
+        $.ajax({
+            type: 'POST',
+            url: '/SettingWebApp/DoInsertMayCanManager',
+            data: {
+                id: id,
+                displayName: displayName,
+                wKv: wKv,
+                aType: aType,
+                mType: mType,
+                xuongId: xuongId,
+                isSuDungMauThanhPham: isSuDungMauThanhPham,
+                sCode: sCode,
+                par1: par1,
+                par2: par2,
+                par3: par3,
+                par4: par4,
+                idx: idx,
+            },
+            success: function (rs) {
+                if (rs.isSuccess === true) {
+                    toastOptionNotyfi();
+                    toastr["success"](rs.Messages, "Thông báo");
+                    $('#modalThem').modal('hide');
+                    reloadData();
+                } else {
+                    toastOptionNotyfi();
+                    toastr["warning"](rs.Messages, "Thông báo");
+                }
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error, "Thông báo");
+            },
+            complete: function () {
+                document.getElementById("loadingIndicator").style.display = "none";
+                document.getElementById("txtThem").style.visibility = "visible";
+            }
+        });
+    }
+</script>
+<script>
+    function showUpdate() {
+        var id = $('#idMCSTRowSelected').val();
+        $.ajax({
+            url: "/SettingWebApp/GetsByMaMayCanManager",
+            data: { id: id },
+            type: 'GET',
+            dataType: 'json',
+            success: function (rs) {
+                if (rs.isSuccess === true) {
+                    $('#idMCSTSua').val(rs.Id);
+                    $('#displayNameMCSTSua').val(rs.DisplayName);
+                    $('#wKvMCSTSua').val(rs.WKv);
+                    $('#aTypeMCSTSua').val(rs.AType);
+                    $('#mTypeMCSTSua').val(rs.MType);
+                    $('#maXuongMCSTSua').val(rs.MaXuong);
+                    $('#isSuDungMauThanhPhamMCSTSua').prop('checked', rs.IsSuDungMauThanhPham);
+                    $('#sCodeMCSTSua').val(rs.SCode);
+                    $('#par1MCSTSua').val(rs.Par1);
+                    $('#par2MCSTSua').val(rs.Par2);
+                    $('#par3MCSTSua').val(rs.Par3);
+                    $('#par4MCSTSua').val(rs.Par4);
+                    $('#idxMCSTSua').val(rs.Idx);
+                    $('#modalSua').modal('show');
+                }
+                else {
+                    toastOptionNotyfi();
+                    toastr["warning"](rs.Mesages, "Thông báo");
+                }
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error, "Thông báo");
+            }
+        });
+    }
+    function update() {
+        var id = $('#idMCSTSua').val();
+        var displayName = $('#displayNameMCSTSua').val();
+        var wKv = $('#wKvMCSTSua').val();
+        var aType = $('#aTypeMCSTSua').val();
+        var mType = $('#mTypeMCSTSua').val();
+        var xuongId = $('#maXuongMCSTSua').val();
+        var isSuDungMauThanhPham = $('#isSuDungMauThanhPhamMCSTSua').prop('checked');
+        var sCode = $('#sCodeMCSTSua').val();
+        var par1 = $('#par1MCSTSua').val();
+        var par2 = $('#par2MCSTSua').val();
+        var par3 = $('#par3MCSTSua').val();
+        var par4 = $('#par4MCSTSua').val();
+        var idx = $('#idxMCSTSua').val();
+        document.getElementById("txtSua").style.visibility = "hidden";
+        document.getElementById("loadingIndicatorSua").style.display = "block";
+        $.ajax({
+            url: '/SettingWebApp/DoUpDateManager',
+            data: {
+                id: id,
+                displayName: displayName,
+                wKv: wKv,
+                aType: aType,
+                mType: mType,
+                xuongId: xuongId,
+                isSuDungMauThanhPham: isSuDungMauThanhPham,
+                sCode: sCode,
+                par1: par1,
+                par2: par2,
+                par3: par3,
+                par4: par4,
+                idx: idx,
+            },
+            type: 'POST',
+            dataType: 'json',
+            success: function (rs) {
+                if (rs.isSuccess === true) {
+                    $('#modalSua').modal('hide');
+                    reloadData();
+                    toastOptionNotyfi();
+                    toastr["success"](rs.Messages, "Thông báo");
+                } else {
+                    toastOptionNotyfi();
+                    toastr["warning"](rs.Messages, "Thông báo");
+                }
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error.toString(), "Thông báo");
+            },
+            complete: function () {
+                document.getElementById("loadingIndicatorSua").style.display = "none";
+                document.getElementById("txtSua").style.visibility = "visible";
+            }
+        });
+    }
+</script>
+<script>
+    function showDelete() {
+        var id = $('#idMCSTRowSelected').val();
+        $.ajax({
+            url: "/SettingWebApp/GetsByMaMayCanManager",
+            data: { id: id },
+            type: 'GET',
+            dataType: 'json',
+            success: function (rs) {
+                if (rs.isSuccess === true) {
+                    bootbox.confirm({
+                        title: "Thông báo!",
+                        message: "Bạn có chắc muốn xoá : " + rs.DisplayName,
+                        buttons: {
+                            confirm: {
+                                label: 'OK',
+                                className: 'btn btn-primary'
+                            }
+                        },
+                        callback: function (result) {
+                            if (result) {
+                                //Người dùng đã bấm OK, Gọi API xóa ở đây
+                                $.ajax({
+                                    url: '/SettingWebApp/DoDeleteManager',
+                                    data: { id: id },
+                                    type: 'POST',
+                                    dataType: 'json',
+                                    success: function (rs) {
+                                        if (rs.isSuccess === true) {
+                                            reloadData();
+                                            toastOptionNotyfi();
+                                            toastr["success"](rs.Messages, "Thông báo");
+                                        } else {
+                                            toastOptionNotyfi();
+                                            toastr["warning"](rs.Messages, "Thông báo");
+                                        }
+                                    },
+                                    error: function (error) {
+                                        toastOptionNotyfi();
+                                        toastr["error"]('Đã xảy ra lỗi: ' + error.toString(), "Thông báo");
+                                    }
+                                });
+                            }
+                        }
+                    });
+                } else {
+                    toastOptionNotyfi();
+                    toastr["warning"]('Không tìm thấy thông tin!', "Thông báo");
+                }
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error.toString(), "Thông báo");
+            }
+        });
+
+    }
+</script>
+
+

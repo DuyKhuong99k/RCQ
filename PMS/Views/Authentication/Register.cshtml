@@ -1,0 +1,281 @@
+﻿@{
+    ViewData["Title"] = "Đăng ký tài khoản";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var listRoles = ViewBag.listRoles;
+}
+<style>
+    #loadingIndicator {
+        left: 0;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        margin: auto;
+        position: absolute;
+    }
+</style>
+<div class="container">
+    <div class="row">
+        <!-- Cột Form Đăng Ký -->
+        <div class="col-12 col-lg-4 col-xl-4">
+            <div class="card">
+                @* <div class="card-header">
+                Pie Chart
+                </div> *@
+                <div class="card-body">
+                    <h2 class="mt-2">Đăng Ký</h2>
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <div class="form-outline">
+                                <label class="form-label" for="userName">Tên Đăng Nhập</label>
+                                <input type="text" id="userName" class="form-control form-control-lg" autocomplete="off" />
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <div class="form-outline">
+                                <label class="form-label" for="passWord">Mật Khẩu</label>
+                                <input type="password" id="passWord" class="form-control form-control-lg" autocomplete="new-password" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <div class="form-outline">
+                                <label class="form-label" for="hoTen">Họ Tên</label>
+                                <input type="text" id="hoTen" class="form-control form-control-lg" autocomplete="off" />
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <div class="form-outline">
+                                <label class="form-label" for="emailAddress">Số Điện Thoại</label>
+                                <input type="text" id="phoneNumber" class="form-control form-control-lg" autocomplete="off" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <div class="form-outline">
+                                <label class="form-label" for="emailAddress">Mã Nhân Viên</label>
+                                <input type="text" id="maNhanVien" class="form-control form-control-lg" autocomplete="off" />
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <label class="form-label select-label">Loại nhân viên</label>
+                            <select id="IdRoles" class="form-control form-control-lg">
+                                <option disabled>Loại người dùng</option>
+                                @foreach (var item in listRoles)
+                                {
+                                    <option value="@item.Id">@item.Name</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row mt-4 pt-2">
+                        <div class="col-12">
+                            <button onclick="register(this)" class="btn btn-primary w-100" type="submit" id="registerBtn">
+                                <div class=" align-items-center">
+                                    <span id="txtDangKy">Đăng Ký</span>
+                                    <div id="loadingIndicator" class=" spinner-border text-secondary" role="status" style="display: none;">
+                                        <span class="visually-hidden">Đang tải...</span>
+                                    </div>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Cột DataGrid -->
+        <div class="col-12 col-lg-8 col-xl-8">
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="mt-2">Danh Sách Người Dùng</h2>
+                    <div id="Grid"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" rel="stylesheet" />
+<script id="statusTemplate" type="text/x-template">
+    <div>
+        ${if(Status===4)}
+           <span class="badge bg-info">Thử việc</span>
+        ${else if(Status===1)}
+            <span class="badge bg-primary">Đang làm</span>
+        ${else if(Status===2)}
+            <<span class="badge bg-secondary">Tạm nghĩ</span>
+        ${else if(Status===3)}
+            <<span class="badge bg-dark">Đã nghĩ</span>
+        ${else}
+            <span class=’ico-female’></span>
+        ${/if}
+    </div>
+</script>
+
+<script type="text/x-template" id="isActiveTemplate">
+     <div>
+        ${if(IsActive)}
+           <span class="badge bg-success">Đã kích hoạt</span>
+        ${else}
+            <span class="badge bg-warning">Chưa kích hoạt</span>
+        ${/if}
+    </div>
+</script>
+<script type="text/x-template" id="optionTemplate">
+    <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#modalCenter"><i class='bx bxs-info-square'></i></button>
+    <div class="modal fade" id="modalCenter" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Modal title</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Name</label>
+                        <input type="text" id="name" class="form-control" placeholder="Enter Name">
+                    </div>
+                    <div class="row g-2">
+                        <div class="col">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" id="email" class="form-control" placeholder="xxxx@xxx.xx">
+                        </div>
+                        <div class="col">
+                            <label for="dob" class="form-label">DOB</label>
+                            <input type="text" id="dob" class="form-control" placeholder="DD / MM / YY">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary">Save changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</script>
+<script>
+    $(document).ready(function () {
+        loadGridData();
+    });
+    var grid;
+
+    function loadGridData() {
+        $.ajax({
+            url: '/Authentication/GetAllUser',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                // Khởi tạo DataManager và gán dữ liệu từ API vào dataSource
+                var dataManager = new ej.data.DataManager({
+                    json: data,
+                    adaptor: new ej.data.JsonAdaptor()
+                });
+
+                // Kiểm tra xem Grid đã được tạo chưa
+                if (grid) {
+                    // Nếu Grid đã được tạo, chỉ cập nhật dữ liệu mới
+                    grid.dataSource = dataManager;
+                    grid.refresh();
+                } else {
+                    // Nếu Grid chưa được tạo, tạo mới Grid
+                    grid = new ej.grids.Grid({
+                        dataSource: dataManager,
+                        allowPaging: true,
+                        pageSettings: { pageSize: 10 },
+                        allowFiltering: true,
+                        filterSettings: { type: 'Excel' },
+                        allowSorting: true,
+                        frozenColumns: 3,
+                        allowResizing: true,
+                        columns: [
+                            { field: 'STT', headerText: 'STT', width: 80, textAlign: 'Center' },
+                            { field: 'UserName', headerText: 'Tài khoản', width: 100 },
+                            { field: 'HoTen', headerText: 'Họ tên', width: 150 },
+                            { field: 'MaNhanVien', headerText: 'Mã Nhân Viên', width: 150 },
+                            { field: 'Email', headerText: 'Email', width: 100 },
+                            { field: 'PhoneNumber', headerText: 'Số Điện Thoại', width: 100 },
+                            { field: 'Address', headerText: 'Địa Chỉ', width: 100 },
+                            { field: 'Status', headerText: 'Trạng Thái', width: 150, template: '#statusTemplate' },
+                            { field: 'IsActive', headerText: 'Kích Hoạt', width: 150, template: '#isActiveTemplate' },
+                            { field: '', headerText: '', width: 80, template: '#optionTemplate' },
+                        ]
+                    });
+                    // Hiển thị Grid trên trang web
+                    grid.appendTo('#Grid');
+                }
+            },
+            error: function (error) {
+                console.error(error);
+            }
+        });
+    }
+
+    loadGridData();
+    function reloadData() {
+        loadGridData();
+    }
+
+    function register(input) {
+        var username = $("#userName").val();
+        var password = $("#passWord").val();
+        var hoten = $("#hoTen").val();
+        var phoneNumber = $("#phoneNumber").val();
+        var maNhanVien = $("#maNhanVien").val();
+        if (!username || !password || !hoten || !phoneNumber || !maNhanVien) {
+            toastOptionNotyfi();
+            toastr["error"]("Vui lòng nhập đầy đủ thông tin!", "Thông báo");
+            return false;
+        }
+        // Ẩn chữ "Đăng Ký"
+        document.getElementById("txtDangKy").style.visibility = "hidden";
+        // Hiển thị chỉ báo tải
+        //$("#loadingIndicator").show();
+        document.getElementById("loadingIndicator").style.display = "block";
+
+        $.ajax({
+            type: "POST",
+            url: "/Authentication/DoRegister",
+            data: { username: username, password: password, hoten: hoten, phoneNumber: phoneNumber, maNhanVien: maNhanVien }, // Không cần JSON.stringify ở đây
+            success: function (response) {
+                debugger
+                if (response.isSuccess === true) {
+                    // $.notify(rs.Messages, "success");
+                    toastOptionNotyfi();
+                    toastr["success"](response.Messages, "Thông báo");
+                    reloadData();
+                }
+                else {
+                    if (response.Messages == null || response.Messages == "") {
+
+                    }
+                    else {
+                        toastOptionNotyfi();
+                        toastr["error"](response.Messages, "Thông báo");
+                    }
+
+                }
+            },
+            error: function (xhr, status, error) {
+                if (response.Messages == null || response.Messages == "") {
+
+                }
+                else {
+                    toastOptionNotyfi();
+                    toastr["error"]('Đã xảy ra lỗi khi gửi yêu cầu đăng ký: ' + error, "Thông báo");
+                }
+                //$.notify(rs.Messages, "error");
+            },
+            complete: function () {
+                // // Ẩn chỉ báo tải sau khi nhận kết quả hoặc gặp lỗi
+                // Sau khi tải xong, ẩn chỉ báo tải và hiển thị lại chữ "Đăng Ký"
+                document.getElementById("loadingIndicator").style.display = "none";
+                document.getElementById("txtDangKy").style.visibility = "visible";
+            }
+        });
+    }
+</script>
+

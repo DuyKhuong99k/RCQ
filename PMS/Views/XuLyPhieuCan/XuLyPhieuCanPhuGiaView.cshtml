@@ -1,0 +1,1251 @@
+﻿@using Newtonsoft.Json
+@{
+    ViewData["Title"] = "XuLyPhieuCanPhuGiaView";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    //lấy danh sách roleid từ cookie
+    var roleIds = PMS.Middlewares.AuthenticationHelpers.GetRoleIdsFromCookie(Context);
+    // lấy danh sách fu func từ list roleId
+    var rolePermistions = await PMS.Middlewares.AuthenticationHelpers.GetRolePermistionsAsync(Context, roleIds);
+    var XuongId = @Context.Session.GetString("XuongId");
+    string khuVuc = "PHUGIA";
+    var listSanPhams = ViewBag.listSanPhams;
+    var listCoiChinhs = ViewBag.listCoiChinhs;
+    var listCongthucs = ViewBag.listCongthucs;
+    var listLyDos = ViewBag.listLyDos;
+    var DataNhanVien = ViewBag.DataNhanVien;
+    var listXuongs = ViewBag.listXuongs;
+}
+<style>
+    /* CSS */
+    #modalThem .modal-dialog {
+        max-width: 1000px; /* Thiết lập kích thước tùy chỉnh cho modal */
+    }
+
+    #modalSua .modal-dialog {
+        max-width: 1000px; /* Thiết lập kích thước tùy chỉnh cho modal */
+    }
+
+    .displayValueNV {
+        width: 100%; /* Thiết lập chiều rộng của combobox bằng 100% để nó lớn hơn và mở rộng ra toàn bộ kích thước của phần tử cha */
+    }
+    /* CSS cho headerTemplate */
+    .head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background-color: #f0f0f0; /* Màu nền header */
+        padding: 5px 10px; /* Khoảng cách bên trong header */
+        font-weight: bold;
+        border-bottom: 1px solid #ccc; /* Viền dưới header */
+    }
+
+        .head .ma, .head .ten, .head .ghichu {
+            flex: 1;
+            text-align: center; /* Căn giữa nội dung của các cột */
+        }
+
+    /* CSS cho itemTemplate */
+    .item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 5px 10px; /* Khoảng cách bên trong mỗi item */
+        border-bottom: 1px solid #eee; /* Viền dưới mỗi item */
+    }
+
+        .item .ma, .item .ten, .item .ghichu {
+            flex: 1;
+            text-align: center; /* Căn giữa nội dung của các cột */
+        }
+
+    span.e-input-group.e-control-wrapper.e-multi-column.e-ddl {
+        height: 50px !important;
+        border: 1px solid #d9dee3 !important;
+        color: #697a8d !important;
+        /*   font-weight: 400 !important;
+                                                                                                                                                line-height: 1.53 !important; */
+        background-clip: padding-box !important;
+        min-height: calc(1.53em + 1.5rem + 2px) !important;
+        padding: 0.75rem 1.25rem !important;
+        font-size: 1rem !important;
+        border-radius: 0.5rem !important;
+    }
+
+    div#inputpicker-wrapped-list.inputpicker-wrapped-list {
+        width: 500px !important;
+        max-height: 400px !important;
+    }
+
+    @@media (max-width: 768px) {
+        div#inputpicker-wrapped-list.inputpicker-wrapped-list {
+            width: 244px !important;
+            max-height: 400px !important;
+        }
+    }
+
+    .inputpicker-wrapped-list .inputpicker-active {
+        background-color: #C0C0C0 !important;
+    }
+</style>
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h2 class="mb-0">Phiếu Cân Phụ Gia</h2>
+                </div>
+                <div class="card-body">
+                    <div id="Grid"></div>
+
+                    <div style="margin-top:20px;">
+                        @{
+                            var themPhieuCanPhuGia = rolePermistions.Where(x => x.Fu == "Xử Lý Phiếu Cân / Phiếu Cân Phụ Gia" && x.Func == "Thêm Xử Lý Phiếu Cân / Phiếu Cân Phụ Gia" && x.Status == 1).FirstOrDefault();
+                            if (themPhieuCanPhuGia != null)
+                            {
+                                <button onclick="showInsert()" style="margin-right:5px" class="btn btn-outline-primary">Thêm</button>
+                            }
+                            var suaPhieuCanPhuGia = rolePermistions.Where(x => x.Fu == "Xử Lý Phiếu Cân / Phiếu Cân Phụ Gia" && x.Func == "Sửa Xử Lý Phiếu Cân / Phiếu Cân Phụ Gia" && x.Status == 1).FirstOrDefault();
+                            if (suaPhieuCanPhuGia != null)
+                            {
+                                <button onclick="showUpdate()" style="margin-right:5px" class="btn btn-outline-warning"><i class='bx bx-edit-alt'></i>Sửa</button>
+                            }
+                            var xoaPhieuCanPhuGia = rolePermistions.Where(x => x.Fu == "Xử Lý Phiếu Cân / Phiếu Cân Phụ Gia" && x.Func == "Xoá Xử Lý Phiếu Cân / Phiếu Cân Phụ Gia" && x.Status == 1).FirstOrDefault();
+                            if (xoaPhieuCanPhuGia != null)
+                            {
+                                <button onclick="showDelete()" style="margin-right:5px" class="btn btn-outline-danger"><i class='bx bx-trash'></i>Xoá</button>
+                            }
+                            var importPhieuCanPhuGia = rolePermistions.Where(x => x.Fu == "Xử Lý Phiếu Cân / Phiếu Cân Phụ Gia" && x.Func == "Import Xử Lý Phiếu Cân / Phiếu Cân Phụ Gia" && x.Status == 1).FirstOrDefault();
+                            if (importPhieuCanPhuGia != null)
+                            {
+                                <button onclick="import()" style="margin-right:5px" class="btn btn-outline-info"><i class='bx bx-import'></i>Import</button>
+                            }
+                            var exportPhieuCanPhuGia = rolePermistions.Where(x => x.Fu == "Xử Lý Phiếu Cân / Phiếu Cân Phụ Gia" && x.Func == "Export Xử Lý Phiếu Cân / Phiếu Cân Phụ Gia" && x.Status == 1).FirstOrDefault();
+                            if (exportPhieuCanPhuGia != null)
+                            {
+                                <button onclick="export()" style="margin-right:5px" class="btn btn-outline-secondary"><i class='bx bx-export'></i>Export Excel</button>
+                            }
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="modalThem" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Thêm Phiếu Cân</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4 mb-2">
+                                <div class="form-outline">
+                                    <label class="form-label">STT</label>
+                                    <input type="text" id="sttXLPCPG" class="form-control form-control-lg" disabled />
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-2">
+                                <div class="form-outline">
+                                    <label class="form-label">Giờ</label>
+                                    <input type="time" id="gioXLPCPG" class="form-control form-control-lg" placeholder="Chọn giờ..." disabled />
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-2">
+                                <div class="form-outline">
+                                    <label class="form-label">Sản Phẩm</label>
+                                    <select id="maSanPhamXLPCPG" class="form-control form-control-lg">
+                                        <option value="">Chọn sản phẩm</option>
+                                        @foreach (var item in listSanPhams)
+                                        {
+                                            <option value="@item.Ma">@item.Ten</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4 mb-2">
+                                <div class="form-outline">
+                                    <label class="form-label">Cối</label>
+                                    <select id="maCoiXLPCPG" class="form-control form-control-lg">
+                                        <option value="">Chọn cối</option>
+                                        @foreach (var item in listCoiChinhs)
+                                        {
+                                            <option value="@item.Ma">@item.Ten</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-2">
+                                <div class="form-outline">
+                                    <label class="form-label">Công Thức</label>
+                                    <select id="maCongThucXLPCPG" class="form-control form-control-lg">
+                                        <option value="">Chọn công thức</option>
+                                        @foreach (var item in listCongthucs)
+                                        {
+                                            <option value="@item.Ma">@item.Ten</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-2">
+                                <div class="form-outline">
+                                    <label class="form-label">Lý Do</label>
+                                    <select id="maLyDoXLPCPG" class="form-control form-control-lg">
+                                        <option value="">Chọn lý do</option>
+                                        @foreach (var item in listLyDos)
+                                        {
+                                            <option value="@item.Ma">@item.Ten</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4 mb-2">
+                                <div class="form-outline">
+                                    <label class="form-label">Trọng Lượng Nguyên Liệu</label>
+                                    <input type="number" min="0" step=".001" class="form-control form-control-lg" id="trongLuongNguyenLieuXLPCPG" placeholder="0.000" />
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-2">
+                                <div class="form-outline">
+                                    <label class="form-label">Trọng Lượng</label>
+                                    <input type="number" min="0" step=".001" class="form-control form-control-lg" id="trongLuongXLPCPG" placeholder="0.000" />
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-2">
+                                <div class="form-outline">
+                                    <label class="form-label">Block</label>
+                                    <input type="number" class="form-control form-control-lg" id="blockXLPCPG" placeholder="Nhập số Block" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+
+                            <div class="col-md-6 mb-4">
+                                <div class="form-outline">
+                                    <label class="form-label">Nhân Viên</label>
+                                    @* <input class="form-control form-control-lg" id="maNhanVienXLPCPG" placeholder="Chọn nhân viên" /> *@
+                                    <ejs-combobox id="maNhanVienXLPCPG"
+                                                  open="onComboBoxOpen"
+                                                  dataBound="isCheckScroll"
+                                                  dataSource="@DataNhanVien"
+                                                  cssClass="e-multi-column"
+                                                  filtering="onfiltering"
+                                                  allowFiltering="true"
+                                                  placeholder="Chọn nhân viên"
+                                                  popupHeight="400px"
+                                                  enableVirtualization="true"
+                                                  headerTemplate="@Html.Raw("<table><tr><th class='e-text-center' style='width: 75px;'>Mã</th><th>Tên</th><th>Nhóm</th></tr></table>")"
+                                                  itemTemplate="@Html.Raw("<table><tbody><tr><td class='e-text-center' style='width: 75px;'>${MaNhanVien}</td><td>${Name}</td><td>${DeptName0}</td></tr> </tbody></table>")">
+                                        <e-combobox-fields text="Name" value="MaNhanVien"></e-combobox-fields>
+                                    </ejs-combobox>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <div class="list-group form-outline">
+                                    <label class="">
+                                        <input class="form-check-input me-1" type="checkbox" value="" id="khoaXLPCPG" />
+                                        Khóa
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-4 pt-2">
+                            <div class="col-12">
+                                <button onclick="insert()" class="btn btn-primary w-100 position-relative" type="submit" id="">
+                                    <div class=" align-items-center">
+                                        <span id="txtThem">Thêm</span>
+                                        <div id="loadingIndicator" class=" spinner-border text-secondary position-absolute" role="status" style="left: 0;right: 0;top: 0;bottom: 0;margin: auto; display:none">
+                                            <span class="visually-hidden">Đang tải...</span>
+                                        </div>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="modalSua" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Sửa Phiếu Cân</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4 mb-2">
+                                <div class="form-outline">
+                                    <label class="form-label">STT</label>
+                                    <input type="text" id="sttXLPCPGSua" class="form-control form-control-lg" disabled />
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-2">
+                                <div class="form-outline">
+                                    <label class="form-label">Giờ</label>
+                                    <input type="time" id="gioXLPCPGSua" class="form-control form-control-lg" placeholder="Chọn giờ..." disabled />
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-2">
+                                <div class="form-outline">
+                                    <label class="form-label">Sản Phẩm</label>
+                                    <select id="maSanPhamXLPCPGSua" class="form-control form-control-lg">
+                                        <option value="">Chọn sản phẩm</option>
+                                        @foreach (var item in listSanPhams)
+                                        {
+                                            <option value="@item.Ma">@item.Ten</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4 mb-2">
+                                <div class="form-outline">
+                                    <label class="form-label">Cối</label>
+                                    <select id="maCoiXLPCPGSua" class="form-control form-control-lg">
+                                        <option value="">Chọn cối</option>
+                                        @foreach (var item in listCoiChinhs)
+                                        {
+                                            <option value="@item.Ma">@item.Ten</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-2">
+                                <div class="form-outline">
+                                    <label class="form-label">Công Thức</label>
+                                    <select id="maCongThucXLPCPGSua" class="form-control form-control-lg">
+                                        <option value="">Chọn công thức</option>
+                                        @foreach (var item in listCongthucs)
+                                        {
+                                            <option value="@item.Ma">@item.Ten</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-2">
+                                <div class="form-outline">
+                                    <label class="form-label">Lý Do</label>
+                                    <select id="maLyDoXLPCPGSua" class="form-control form-control-lg">
+                                        <option value="">Chọn lý do</option>
+                                        @foreach (var item in listLyDos)
+                                        {
+                                            <option value="@item.Ma">@item.Ten</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4 mb-2">
+                                <div class="form-outline">
+                                    <label class="form-label">Trọng Lượng Nguyên Liệu</label>
+                                    <input type="number" min="0" step=".001" class="form-control form-control-lg" id="trongLuongNguyenLieuXLPCPGSua" placeholder="0.000" disabled />
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-2">
+                                <div class="form-outline">
+                                    <label class="form-label">Trọng Lượng</label>
+                                    <input type="number" min="0" step=".001" class="form-control form-control-lg" id="trongLuongXLPCPGSua" placeholder="0.000" disabled />
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-2">
+                                <div class="form-outline">
+                                    <label class="form-label">Block</label>
+                                    <input type="number" class="form-control form-control-lg" id="blockXLPCPGSua" placeholder="Nhập số Block" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+
+                            <div class="col-md-6 mb-4">
+                                <div class="form-outline">
+                                    <label class="form-label">Nhân Viên</label>
+                                    @* <input class="form-control form-control-lg" id="maNhanVienXLPCPGSua" placeholder="Chọn nhân viên" /> *@
+                                    <ejs-combobox id="maNhanVienXLPCPGSua"
+                                                  open="onComboBoxOpen"
+                                                  dataBound="isCheckScroll"
+                                                  dataSource="@DataNhanVien"
+                                                  cssClass="e-multi-column"
+                                                  filtering="onfiltering"
+                                                  allowFiltering="true"
+                                                  placeholder="Chọn nhân viên"
+                                                  popupHeight="400px"
+                                                  enableVirtualization="true"
+                                                  headerTemplate="@Html.Raw("<table><tr><th class='e-text-center' style='width: 75px;'>Mã</th><th>Tên</th><th>Nhóm</th></tr></table>")"
+                                                  itemTemplate="@Html.Raw("<table><tbody><tr><td class='e-text-center' style='width: 75px;'>${MaNhanVien}</td><td>${Name}</td><td>${DeptName0}</td></tr> </tbody></table>")">
+                                        <e-combobox-fields text="Name" value="MaNhanVien"></e-combobox-fields>
+                                    </ejs-combobox>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <div class="list-group form-outline">
+                                    <label class="">
+                                        <input class="form-check-input me-1" type="checkbox" value="" id="khoaXLPCPGSua" />
+                                        Khóa
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-4 pt-2">
+                            <div class="col-12">
+                                <button onclick="update()" class="btn btn-primary w-100 position-relative" type="submit" id="">
+                                    <div class=" align-items-center">
+                                        <span id="txtSua">Sửa</span>
+                                        <div id="loadingIndicatorSua" class=" spinner-border text-secondary position-absolute" role="status" style="left: 0;right: 0;top: 0;bottom: 0;margin: auto; display:none">
+                                            <span class="visually-hidden">Đang tải...</span>
+                                        </div>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="modalChuyenXuong" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Chọn Xưởng Muốn Chuyển</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-12 mb-12 ">
+                                <div class="form-outline">
+                                    <label class="form-label">Xưởng</label>
+                                    <select id="maXuongChuyenXuongXLPCPG" class="form-control form-control-lg">
+                                        <option disabled selected>Chọn Xưởng</option>
+                                        @foreach (var item in listXuongs)
+                                        {
+                                            <option value="@item.Ma">@item.Ten</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-4 pt-2">
+                            <div class="col-12">
+                                <button onclick="changeDepartment()" class="btn btn-primary w-100 position-relative" type="submit" id="">
+                                    <div class=" align-items-center">
+                                        <span id="txtChuyenXuongXLPCPG">Xác Nhận</span>
+                                        <div id="loadingIndicatorChuyenXuongXLPCPG" class=" spinner-border text-secondary position-absolute" role="status" style="left: 0;right: 0;top: 0;bottom: 0;margin: auto; display:none">
+                                            <span class="visually-hidden">Đang tải...</span>
+                                        </div>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<input type="hidden" id="maNhanVienXLPCPGHHidden" />
+<input type="hidden" id="sttXLPCPGHHidden" />
+<input type="hidden" id="sttBTPXLPCPGHHidden" />
+<input type="hidden" id="maMayCanXLPCPGHHidden" />
+
+
+<script src="~/assets/vendor/libs/inputpicker/jquery.inputpicker.js?v3"></script>
+<script>
+
+    function onfiltering(e) {
+        var query = new ej.data.Query().select(['Name', 'MaNhanVien', 'DeptName0']); // Chỉ lấy 100 phần tử đầu tiên
+        var predicateQuery = query.where(new ej.data.Predicate('MaNhanVien', 'contains', e.text, true).or('Name', 'contains', e.text, true));
+        query = (e.text !== '') ? predicateQuery : query;
+        e.updateData(@Html.Raw(JsonConvert.SerializeObject(@ViewBag.DataNhanVien)), query);
+        isCheckScroll.call(this);
+    }
+
+    function onComboBoxOpen(args) {
+        var comboBox = args.popup; // Lấy popup của combobox
+        if (comboBox) {
+            // Kiểm tra nếu dataSource tồn tại
+            if (comboBox.dataSource) {
+                // Chỉ hiển thị 10 phần tử đầu tiên
+                comboBox.dataSource = comboBox.dataSource.slice(0, 10);
+            }
+        }
+    }
+
+    function isCheckScroll() {
+        if (this.popupObj && this.popupObj.element && this.liCollections.length > 0) {
+            var offsetHeight = this.popupObj.element.querySelector('.e-content').offsetHeight;
+            var contentHeight = offsetHeight < this.liCollections[0].offsetHeight * this.liCollections.length;
+            if (contentHeight || offsetHeight === 0) {
+                this.popupObj.element.classList.add('e-scroller');
+            } else {
+                this.popupObj.element.classList.remove('e-scroller');
+            }
+        }
+    }
+
+</script>
+<script>
+    // $(document).ready(function () {
+    //     loadGridData();
+    // });
+    let selectedIdsString = ""; // Khai báo một chuỗi để lưu trữ MaNhanVien đã chọn
+    let numRowSelect = 0;
+    var grid;
+    function creatTable(data) {
+        var dataManager = new ej.data.DataManager({
+            json: data,
+            adaptor: new ej.data.JsonAdaptor()
+        });
+        if (grid) {
+            grid.dataSource = dataManager;
+            grid.refresh();
+        } else {
+
+            var contextMenuItems = [
+                { text: 'Xem ghi chú', id: 'viewNote' },
+                { text: 'Chuyển xưởng', id: 'changeDepartment' },
+                // { text: 'Chuyển size', id: 'changeSize' },
+                // { text: 'Chuyển thành phẩm', id: 'changeThanhPham' },
+            ];
+            grid = new ej.grids.Grid({
+                dataSource: dataManager,
+                allowPaging: true,
+                pageSettings: { pageSize: 500 },
+                allowSelection: true,
+                allowFiltering: true,
+                allowSorting: true,
+                allowResizing: true,
+                //enableVirtualization: true,
+                //loadingIndicator: { indicatorType: 'Shimmer' },
+                filterSettings: { type: 'Excel' },
+                //selectionSettings: { persistSelection: true, type: "Multiple", checkboxOnly: true },
+                selectionSettings: { persistSelection: true },
+                rowSelected: selectionChanged,
+                rowDeselected: unSelectionChanged,
+                height: 400,
+                contextMenuItems: contextMenuItems,
+                contextMenuClick: contextMenuClickHandler,
+                columns: [
+                    { type: "checkbox", field: "", allowFiltering: false, allowSorting: false, width: '50' },
+                    { field: 'STT', headerText: 'STT', width: 150 },
+                    { field: 'Gio', headerText: 'Giờ', width: 150 },
+                    { field: 'MaNhanVien', headerText: 'Mã Nhân Viên', width: 150 },
+                    { field: 'MaHoSo', headerText: 'Mã Số', width: 150 },
+                    { field: 'NhanVienName', headerText: 'Tên Nhân Viên', width: 150 },
+                    { field: 'SanPhamName', headerText: 'Sản Phẩm', width: 150 },
+                    { field: 'TrongLuongNguyenLieu', headerText: 'Trọng Lượng Nguyên Liệu', type: 'number', width: 150 },
+                    { field: 'TrongLuong', headerText: 'Trọng Lượng', type: 'number', width: 150 },
+                    { field: 'CoiName', headerText: 'Cối', width: 150 },
+                    { field: 'CongThucName', headerText: 'Công Thức', width: 250 },
+                    { field: 'LyDoName', headerText: 'Lý Do', width: 150 },
+                    { field: 'Block', headerText: 'Block', type: 'number', width: 150 },
+                    { field: 'MaMayCan', headerText: 'Máy Cân', width: 150 },
+
+                ],
+                aggregates: [{
+                    columns: [{
+                        type: 'Sum',
+                        field: 'TrongLuong',
+                        format: 'N2',
+                        footerTemplate: 'Tổng TL: ${Sum} Kg'
+                    }]
+                }]
+            });
+            grid.appendTo('#Grid');
+        }
+    }
+
+    creatTable();
+    function contextMenuClickHandler(args) {
+        var rowData = args.rowInfo.rowData;
+        if (rowData) {
+            switch (args.item.id) {
+                case 'viewNote':
+                    var ghiChu = rowData.GhiChu;
+                    if (ghiChu) {
+                        // Thay thế dấu phẩy bằng thẻ <br> để tạo xuống hàng
+                        ghiChu = ghiChu.replace(/,/g, '<br>');
+                        bootbox.alert({
+                            title: "Ghi chú",
+                            message: ghiChu,
+                            callback: function () { }
+                        });
+                    } else {
+                        bootbox.alert("Không có ghi chú nào cho hàng này.");
+                    }
+                    break;
+                case 'changeDepartment':
+                    $.ajax({
+                        url: "/XuLyPhieuCan/CheckQuyenPhuGia",
+                        data: { typeOption: "CHUYENXUONG" },
+                        type: 'GET',
+                        dataType: 'json',
+                        success: function (rs) {
+                            if (rs.isSuccess === true) {
+                                bootbox.confirm({
+                                    title: "Thông báo!",
+                                    message: "Bạn có chắc muốn chuyển xưởng của " + numRowSelect + " phiếu cân đang chọn!",
+                                    buttons: {
+                                        confirm: {
+                                            label: 'OK',
+                                            className: 'btn btn-primary'
+                                        }
+                                    },
+                                    callback: function (result) {
+                                        if (result) {
+                                            $('#modalChuyenXuong').modal('show');
+                                        }
+                                    }
+                                });
+                            }
+                            else {
+                                toastOptionNotyfi();
+                                toastr["warning"](rs.Messages, "Thông báo");
+                            }
+                        },
+                        error: function (error) {
+                            toastOptionNotyfi();
+                            toastr["error"]('Đã xảy ra lỗi: ' + error, "Thông báo");
+                        }
+                    });
+
+                    break;
+                case 'changeSize':
+                    $.ajax({
+                        url: "/XuLyPhieuCan/CheckQuyenPhuGia",
+                        data: { typeOption: "CHUYENSIZE" },
+                        type: 'GET',
+                        dataType: 'json',
+                        success: function (rs) {
+                            if (rs.isSuccess === true) {
+                                bootbox.confirm({
+                                    title: "Thông báo!",
+                                    message: "Bạn có chắc muốn chuyển sỉze của " + numRowSelect + " phiếu cân đang chọn!",
+                                    buttons: {
+                                        confirm: {
+                                            label: 'OK',
+                                            className: 'btn btn-primary'
+                                        }
+                                    },
+                                    callback: function (result) {
+                                        if (result) {
+                                            $('#modalChuyenSize').modal('show');
+                                        }
+                                    }
+                                });
+                            }
+                            else {
+                                toastOptionNotyfi();
+                                toastr["warning"](rs.Messages, "Thông báo");
+                            }
+                        },
+                        error: function (error) {
+                            toastOptionNotyfi();
+                            toastr["error"]('Đã xảy ra lỗi: ' + error, "Thông báo");
+                        }
+                    });
+
+                    break;
+                case 'changeThanhPham':
+                    $.ajax({
+                        url: "/XuLyPhieuCan/CheckQuyenPhuGia",
+                        data: { typeOption: "CHUYENTHANHPHAM" },
+                        type: 'GET',
+                        dataType: 'json',
+                        success: function (rs) {
+                            if (rs.isSuccess === true) {
+                                bootbox.confirm({
+                                    title: "Thông báo!",
+                                    message: "Bạn có chắc muốn chuyển thành phẩm của " + numRowSelect + " phiếu cân đang chọn!",
+                                    buttons: {
+                                        confirm: {
+                                            label: 'OK',
+                                            className: 'btn btn-primary'
+                                        }
+                                    },
+                                    callback: function (result) {
+                                        if (result) {
+                                            $('#modalChuyenThanhPham').modal('show');
+                                        }
+                                    }
+                                });
+                            }
+                            else {
+                                toastOptionNotyfi();
+                                toastr["warning"](rs.Messages, "Thông báo");
+                            }
+                        },
+                        error: function (error) {
+                            toastOptionNotyfi();
+                            toastr["error"]('Đã xảy ra lỗi: ' + error, "Thông báo");
+                        }
+                    });
+
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+
+
+    function unSelectionChanged(args) {
+        let deselectedRecords = args.data ? args.data : []; // Lấy các bản ghi được bỏ chọn
+
+        // Kiểm tra xem deselectedRecords có phải là một mảng không
+        if (Array.isArray(deselectedRecords)) {
+            // Nếu là một mảng rỗng hoặc không tồn tại
+            if (deselectedRecords.length === 0) {
+                selectedIdsString = "";
+                numRowSelect = 0; // Reset số dòng đã chọn
+                //alert(selectedIdsString);
+                return;
+            }
+            // Lặp qua từng bản ghi được bỏ chọn
+            for (let i = 0; i < deselectedRecords.length; i++) {
+                let deselectedSTT = deselectedRecords[i].STT;
+                let deselectedMaMayCan = deselectedRecords[i].MaMayCan;
+                let deselectedMaXuong = deselectedRecords[i].MaXuong;
+                let deselectedId = deselectedSTT + "," + deselectedMaMayCan + "," + deselectedMaXuong;
+
+                // Kiểm tra xem MaNhanVien đã có trong chuỗi chưa trước khi loại bỏ
+                if (selectedIdsString.includes(deselectedId)) {
+                    selectedIdsString = selectedIdsString.replace(deselectedId + "|", ""); // Loại bỏ MaNhanVien khỏi chuỗi
+                    numRowSelect--; // Giảm số dòng đã chọn
+                }
+            }
+        } else {
+            // Nếu deselectedRecords không phải là một mảng
+            let deselectedSTT = deselectedRecords.STT;
+            let deselectedMaMayCan = deselectedRecords.MaMayCan;
+            let deselectedMaXuong = deselectedRecords.MaXuong;
+            let deselectedId = deselectedSTT + "," + deselectedMaMayCan + "," + deselectedMaXuong;
+
+            // Kiểm tra xem MaNhanVien đã có trong chuỗi chưa trước khi loại bỏ
+            if (selectedIdsString.includes(deselectedId)) {
+                selectedIdsString = selectedIdsString.replace(deselectedId + "|", ""); // Loại bỏ MaNhanVien khỏi chuỗi
+                numRowSelect--; // Giảm số dòng đã chọn
+            }
+            //alert(selectedIdsString);
+        }
+        // Hiển thị số dòng đã chọn nếu cần
+        //alert(numRowSelect);
+    }
+
+    function selectionChanged(args) {
+        let selectedRecords = args.data ? args.data : []; // Lấy các bản ghi được chọn
+        // Giả định có một thuộc tính isHeader để xác định xem dữ liệu có phải từ header hay không
+        if (selectedRecords.length == 0) {
+            // Lấy toàn bộ Mã Nhân viên từ grid vào selectedIdsString
+            let filteredRecords = grid.getCurrentViewRecords(); // Lấy các bản ghi đã được lọc
+            selectedIdsString = ""; // Reset selectedIdsString trước khi thêm dữ liệu mới
+            numRowSelect = filteredRecords.length; // Cập nhật số dòng đã chọn
+            filteredRecords.forEach(record => {
+                selectedIdsString += record.STT + ","; // Thêm STT vào chuỗi, phân tách bằng dấu phẩy
+                selectedIdsString += record.MaMayCan + ""; // Thêm MayTP vào chuỗi, phân tách bằng dấu phẩy
+                selectedIdsString += record.MaXuong + "|";
+            });
+
+            // Loại bỏ dấu | cuối cùng
+            selectedIdsString = selectedIdsString.slice(0, -1);
+            //alert(selectedIdsString);
+            //alert(numRowSelect);
+            return;
+        }
+        let selectedSTT = selectedRecords.STT;
+        let selectedMaMayCan = selectedRecords.MaMayCan;
+        let selectedMaXuong = selectedRecords.MaXuong;
+        // Kiểm tra xem MaNhanVien đã được thêm vào chuỗi chưa trước khi thêm vào
+        if (!selectedIdsString.includes(selectedSTT)) {
+            selectedIdsString += selectedSTT + ","; // Thêm STT vào chuỗi, phân tách bằng dấu phẩy
+            selectedIdsString += selectedMaMayCan + ","; // Thêm MayTP vào chuỗi, phân tách bằng dấu phẩy
+            selectedIdsString += selectedMaXuong + "|"; // Thêm MaXuong vào chuỗi, phân tách bằng dấu chấm than, ngăn cách các bản ghi bằng dấu |
+
+            numRowSelect++; // Tăng số dòng đã chọn
+        }
+        // Loại bỏ dấu | cuối cùng
+        //selectedIdsString = selectedIdsString.slice(0, -1);
+        //alert(selectedIdsString);
+        // Hiển thị số dòng đã chọn nếu cần
+        //alert(numRowSelect);
+    }
+    function reloadDataXLPCPG() {
+        var btn = document.getElementById('RefreshButtonXLPC').ej2_instances[0];
+        var content = btn.content;
+        btn.content = "Đang Tải ...";
+        var dateTime = $('#dateTimeXLPC').val();
+        var xuongId = @XuongId;
+        var typeValue = "@khuVuc";
+        $.ajax({
+            url: "@Url.Action("Reload", "XuLyPhieuCan")",
+            type: "GET",
+            data: { dateTime: dateTime, xuongId: xuongId, typeValue: typeValue },
+            success: function (response) {
+                if (response.Success) {
+                    creatTable(response.Data);
+                } else {
+                    creatTable(response.Data);
+                    console.error(response.Messages);
+                    toastOptionNotyfi();
+                    toastr["error"](response.Messages, "Không có dữ liệu!");
+                }
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"](error, "Thông báo");
+            }
+        }).always(function () {
+            btn.content = content;
+        });
+    }
+    document.getElementById('RefreshButtonXLPC').addEventListener("click", function () {
+        reloadDataXLPCPG();
+    });
+</script>
+<script>
+    function getCurrentTime() {
+        let now = new Date();
+
+        // Lấy các thành phần giờ, phút, giây và mili giây
+        let hours = String(now.getHours()).padStart(2, '0');
+        let minutes = String(now.getMinutes()).padStart(2, '0');
+        let seconds = String(now.getSeconds()).padStart(2, '0');
+        let milliseconds = String(now.getMilliseconds()).padStart(7, '0');
+
+        // Định dạng thời gian theo yêu cầu
+        let currentTime = `${hours}:${minutes}:${seconds}.${milliseconds}`;
+
+        return currentTime;
+    }
+    function setFormattedTime(timeString) {
+        // Chuyển đổi chuỗi thời gian sang đối tượng Date
+        var time = new Date("1970-01-01T" + timeString);
+
+        // Lấy giờ và phút
+        var hours = time.getHours().toString().padStart(2, '0');
+        var minutes = time.getMinutes().toString().padStart(2, '0');
+        var seconds = time.getSeconds().toString().padStart(2, '0');
+
+        // Định dạng lại chuỗi thời gian
+        var formattedTime = hours + ":" + minutes;
+
+        return formattedTime;
+    }
+    function showInsert() {
+        $('#gioXLPCPG').val(setFormattedTime(getCurrentTime()));
+        // $.ajax({
+        //     type: "GET",
+        //     url: "/XuLyPhieuCan/GetNhanVien_XLPC",
+        //     success: function (rs) {
+        //         if (rs != null) {
+        //             $('#maNhanVienXLPCPG').inputpicker({
+        //                 data: rs,
+        //                 fields: [
+        //                     { name: 'MaNhanVien', text: 'Mã Nhân Viên' },
+        //                     { name: 'MaHoSo', text: 'Mã Hồ Sơ' },
+        //                     { name: 'Name', text: 'Tên' },
+        //                     { name: 'DeptName0', text: 'Nhóm' },
+        //                 ],
+        //                 headShow: true,
+        //                 fieldText: 'Name',
+        //                 fieldValue: 'MaNhanVien',
+        //                 filterOpen: true
+        //             });
+        //         }
+        //         else {
+        //             toastOptionNotyfi();
+        //             toastr["warning"](rs.Mesages, "Thông báo");
+        //         }
+        //     },
+        //     error: function () {
+        //         toastOptionNotyfi();
+        //         toastr["error"]('Đã xảy ra lỗi: ' + error, "Thông báo");
+        //     }
+        // });
+        var dateTime = $('#dateTimeXLPC').val();
+        $.ajax({
+            type: "GET",
+            url: "/XuLyPhieuCan/CreatDefautNewPhuGia",
+            data: {
+                dateTime: dateTime,
+                xuongId: @XuongId
+                                                                                                },
+            success: function (rs) {
+                if (rs.isSuccess === true) {
+
+                    $('#sttXLPCPG').val(rs.STT);
+                    $('#modalThem').modal('show');
+                }
+                else {
+                    toastOptionNotyfi();
+                    toastr["warning"](rs.Mesages, "Thông báo");
+                }
+            },
+            error: function () {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error, "Thông báo");
+            }
+        });
+    }
+    function insert() {
+        var dateTime = $('#dateTimeXLPC').val();
+        var xuongId = @XuongId;
+        var stt = $('#sttXLPCPG').val();
+        var gio = $('#gioXLPCPG').val();
+        var maSanPham = $('#maSanPhamXLPCPG').val();
+        var maCoi = $('#maCoiXLPCPG').val();
+        var maCongThuc = $('#maCongThucXLPCPG').val();
+        var maLyDo = $('#maLyDoXLPCPG').val();
+        var trongLuongNguyenLieu = $('#trongLuongNguyenLieuXLPCPG').val();
+        var trongLuong = $('#trongLuongXLPCPG').val();
+        var block = $('#blockXLPCPG').val();
+        //var maNhanVien = $('#maNhanVienXLPCPG').val();
+        var comboboxNhanVien = document.getElementById('maNhanVienXLPCPG').ej2_instances[0];
+        var maNhanVien = comboboxNhanVien.value;
+        var khoa = $('#khoaXLPCPGS').prop('checked');
+        document.getElementById("txtThem").style.visibility = "hidden";
+        document.getElementById("loadingIndicator").style.display = "block";
+        $.ajax({
+            type: 'POST',
+            url: '/XuLyPhieuCan/DoInsert_PhuGia',
+            data: {
+                dateTime: dateTime,
+                xuongId: xuongId,
+                stt: stt,
+                gio: gio,
+                maSanPham: maSanPham,
+                maCoi: maCoi,
+                maCongThuc: maCongThuc,
+                maLyDo: maLyDo,
+                trongLuongNguyenLieu: trongLuongNguyenLieu,
+                trongLuong: trongLuong,
+                block: block,
+                maNhanVien: maNhanVien,
+                khoa: khoa,
+            },
+            success: function (rs) {
+                if (rs.isSuccess === true) {
+                    toastOptionNotyfi();
+                    toastr["success"](rs.Messages, "Thông báo");
+                    $('#modalThem').modal('hide');
+                    reloadDataXLPCPG();
+                } else {
+                    toastOptionNotyfi();
+                    toastr["warning"](rs.Messages, "Thông báo");
+                }
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error, "Thông báo");
+            },
+            complete: function () {
+                document.getElementById("loadingIndicator").style.display = "none";
+                document.getElementById("txtThem").style.visibility = "visible";
+            }
+        });
+    }
+</script>
+<script>
+
+    function showUpdate() {
+        // $.ajax({
+        //     type: "GET",
+        //     url: "/XuLyPhieuCan/GetNhanVien_XLPC",
+        //     success: function (rs) {
+        //         if (rs != null) {
+        //             $('#maNhanVienXLPCPGSua').inputpicker({
+        //                 data: rs,
+        //                 fields: [
+        //                     { name: 'MaNhanVien', text: 'Mã Nhân Viên' },
+        //                     { name: 'MaHoSo', text: 'Mã Hồ Sơ' },
+        //                     { name: 'Name', text: 'Tên' },
+        //                     { name: 'DeptName0', text: 'Nhóm' },
+        //                 ],
+        //                 headShow: true,
+        //                 fieldText: 'Name',
+        //                 fieldValue: 'MaNhanVien',
+        //                 filterOpen: true
+        //             });
+        //         }
+        //         else {
+        //             toastOptionNotyfi();
+        //             toastr["warning"](rs.Mesages, "Thông báo");
+        //         }
+        //     },
+        //     error: function () {
+        //         toastOptionNotyfi();
+        //         toastr["error"]('Đã xảy ra lỗi: ' + error, "Thông báo");
+        //     }
+        // });
+        var dateTime = $('#dateTimeXLPC').val();
+        $.ajax({
+            url: "/XuLyPhieuCan/GetsByMa_PhuGia",
+            data: { listInfoPhieuCan: selectedIdsString, ngay: dateTime },
+            type: 'GET',
+            dataType: 'json',
+            success: function (rs) {
+                if (rs.isSuccess === true) {
+                    $('#sttXLPCPGSua').val(rs.STT);
+                    $('#gioXLPCPGSua').val(rs.Gio);
+                    $('#maSanPhamXLPCPGSua').val(rs.MaSanPham);
+                    $('#maCoiXLPCPGSua').val(rs.MaCoi);
+                    $('#maCongThucXLPCPGSua').val(rs.MaCongThuc);
+                    $('#maLyDoXLPCPGSua').val(rs.MaLyDo);
+                    $('#trongLuongNguyenLieuXLPCPGSua').val(rs.TrongLuongNguyenLieu);
+                    $('#trongLuongXLPCPGSua').val(rs.TrongLuong);
+                    $('#blockXLPCPGSua').val(rs.Block);
+                    //$('#maNhanVienXLPCPGSua').val(rs.MaNhanVien);
+                    var comboBoxObj = document.getElementById('maNhanVienXLPCPGSua').ej2_instances[0];
+                    // Sử dụng phương thức value để gán MaNhanVien
+                    comboBoxObj.value = rs.MaNhanVien;
+
+                    // Nếu cần, có thể dùng phương thức `dataBound` để gán giá trị sau khi dữ liệu đã được liên kết
+                    comboBoxObj.dataBound = function () {
+                        comboBoxObj.value = rs.MaNhanVien;
+                    };
+                    $('#khoaXLPCPGSua').prop('checked', rs.Khoa);
+                    $('#maMayCanXLPCPGHHidden').val(rs.MaMayCan);
+                    $('#modalSua').modal('show');
+                }
+                else {
+                    toastOptionNotyfi();
+                    toastr["warning"](rs.Mesages, "Thông báo");
+                }
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error, "Thông báo");
+            }
+        });
+
+    }
+    function update() {
+        var ngay = $('#dateTimeXLPC').val();
+        var xuongId = @XuongId;
+        var stt = $('#sttXLPCPGSua').val();
+        var gio = $('#gioXLPCPGSua').val();
+        var maSanPham = $('#maSanPhamXLPCPGSua').val();
+        var maCoi = $('#maCoiXLPCPGSua').val();
+        var maCongThuc = $('#maCongThucXLPCPGSua').val();
+        var maLyDo = $('#maLyDoXLPCPGSua').val();
+        var trongLuongNguyenLieu = $('#trongLuongNguyenLieuXLPCPGSua').val();
+        var trongLuong = $('#trongLuongXLPCPGSua').val();
+        var block = $('#blockXLPCPGSua').val();
+        //var maNhanVien = $('#maNhanVienXLPCPGSua').val();
+        var comboboxNhanVien = document.getElementById('maNhanVienXLPCPGSua').ej2_instances[0];
+        var maNhanVien = comboboxNhanVien.value;
+        var khoa = $('#khoaXLPCPGSua').prop('checked');
+        var maMayCan = $('#maMayCanXLPCPGHHidden').val();
+        document.getElementById("txtSua").style.visibility = "hidden";
+        document.getElementById("loadingIndicatorSua").style.display = "block";
+        $.ajax({
+            url: '/XuLyPhieuCan/DoUpDate_PhuGia',
+            data: {
+                ngay: ngay,
+                maXuong: xuongId,
+                stt: stt,
+                gio: gio,
+                maSanPham: maSanPham,
+                maCoi: maCoi,
+                maCongThuc: maCongThuc,
+                maLyDo: maLyDo,
+                trongLuongNguyenLieu: trongLuongNguyenLieu,
+                trongLuong: trongLuong,
+                block: block,
+                maNhanVien: maNhanVien,
+                khoa: khoa,
+                maMayCan: maMayCan
+            },
+            type: 'POST',
+            dataType: 'json',
+            success: function (rs) {
+                if (rs.isSuccess === true) {
+                    $('#modalSua').modal('hide');
+                    reloadDataXLPCPG();
+                    toastOptionNotyfi();
+                    toastr["success"](rs.Messages, "Thông báo");
+                } else {
+                    toastOptionNotyfi();
+                    toastr["warning"](rs.Messages, "Thông báo");
+                }
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error.toString(), "Thông báo");
+            },
+            complete: function () {
+                document.getElementById("loadingIndicatorSua").style.display = "none";
+                document.getElementById("txtSua").style.visibility = "visible";
+            }
+        });
+    }
+</script>
+<script>
+    function showDelete() {
+        var dateTime = $('#dateTimeXLPC').val();
+
+        bootbox.confirm({
+            title: "Thông báo!",
+            message: "Bạn có chắc muốn xoá " + numRowSelect + " phiếu cân đang chọn!",
+            buttons: {
+                confirm: {
+                    label: 'OK',
+                    className: 'btn btn-primary'
+                }
+            },
+            callback: function (result) {
+                if (result) {
+                    //Người dùng đã bấm OK, Gọi API xóa ở đây
+                    $.ajax({
+                        url: '/XuLyPhieuCan/DoDelete_PhuGia',
+                        data: { listInfoPhieuCan: selectedIdsString, ngay: dateTime },
+                        type: 'POST',
+                        dataType: 'json',
+                        success: function (rs) {
+                            if (rs.isSuccess === true) {
+                                reloadDataXLPCPG();
+                                toastOptionNotyfi();
+                                toastr["success"](rs.Messages, "Thông báo");
+                            } else {
+                                toastOptionNotyfi();
+                                toastr["warning"](rs.Messages, "Thông báo");
+                            }
+                        },
+                        error: function (error) {
+                            toastOptionNotyfi();
+                            toastr["error"]('Đã xảy ra lỗi: ' + error.toString(), "Thông báo");
+                        }
+                    });
+                }
+            }
+        });
+    }
+</script>
+<script>
+    function changeDepartment() {
+        var maXuongChange = $('#maXuongChuyenXuongXLPCPG').val();
+        if (maXuongChange == "" || maXuongChange == null || maXuongChange == undefined) {
+            toastOptionNotyfi();
+            toastr["warning"]("Bạn chưa chọn xưởng!", "Thông báo");
+            return;
+        }
+        var dateTime = $('#dateTimeXLPC').val();
+        document.getElementById("txtChuyenXuongXLPCPG").style.visibility = "hidden";
+        document.getElementById("loadingIndicatorChuyenXuongXLPCPG").style.display = "block";
+        $.ajax({
+            url: '/XuLyPhieuCan/ChuyenXuong_PhuGia',
+            data: { listInfoPhieuCan: selectedIdsString, ngay: dateTime, maXuongChange: maXuongChange },
+            type: 'POST',
+            dataType: 'json',
+            success: function (rs) {
+                if (rs.isSuccess === true) {
+                    $('#modalChuyenXuong').modal('hide');
+                    reloadDataXLPCPG();
+                    toastOptionNotyfi();
+                    toastr["success"](rs.Messages, "Thông báo");
+                } else {
+                    toastOptionNotyfi();
+                    toastr["warning"](rs.Messages, "Thông báo");
+                }
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error.toString(), "Thông báo");
+            },
+            complete: function () {
+                document.getElementById("loadingIndicatorChuyenXuongXLPCPG").style.display = "none";
+                document.getElementById("txtChuyenXuongXLPCPG").style.visibility = "visible";
+            }
+        });
+    }
+    function changeSize() {
+        var maSizeChange = $('#maSizeChuyenSizeXLPCPG').val();
+        if (maSizeChange == "" || maSizeChange == null || maSizeChange == undefined) {
+            toastOptionNotyfi();
+            toastr["warning"]("Bạn chưa chọn size!", "Thông báo");
+            return;
+        }
+        var dateTime = $('#dateTimeXLPC').val();
+        document.getElementById("txtChuyenSizeXLPCPG").style.visibility = "hidden";
+        document.getElementById("loadingIndicatorChuyenSizeXLPCPG").style.display = "block";
+        $.ajax({
+            url: '/XuLyPhieuCan/ChuyenSize_PhuGia',
+            data: { listInfoPhieuCan: selectedIdsString, ngay: dateTime, maSizeChange: maSizeChange },
+            type: 'POST',
+            dataType: 'json',
+            success: function (rs) {
+                if (rs.isSuccess === true) {
+                    $('#modalChuyenSize').modal('hide');
+                    reloadDataXLPCPG();
+                    toastOptionNotyfi();
+                    toastr["success"](rs.Messages, "Thông báo");
+                } else {
+                    toastOptionNotyfi();
+                    toastr["warning"](rs.Messages, "Thông báo");
+                }
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error.toString(), "Thông báo");
+            },
+            complete: function () {
+                document.getElementById("loadingIndicatorChuyenSizeXLPCPG").style.display = "none";
+                document.getElementById("txtChuyenSizeXLPCPG").style.visibility = "visible";
+            }
+        });
+    }
+    function changeThanhPham() {
+        var maThanhPhamChange = $('#maThanhPhamChuyenThanhPhamXLPCPG').val();
+        if (maThanhPhamChange == "" || maThanhPhamChange == null || maThanhPhamChange == undefined) {
+            toastOptionNotyfi();
+            toastr["warning"]("Bạn chưa chọn thành phẩm!", "Thông báo");
+            return;
+        }
+        var dateTime = $('#dateTimeXLPC').val();
+        document.getElementById("txtChuyenThanhPhamXLPCPG").style.visibility = "hidden";
+        document.getElementById("loadingIndicatorChuyenThanhPhamXLPCPG").style.display = "block";
+        $.ajax({
+            url: '/XuLyPhieuCan/ChuyenThanhPham_PhuGia',
+            data: { listInfoPhieuCan: selectedIdsString, ngay: dateTime, maThanhPhamChange: maThanhPhamChange },
+            type: 'POST',
+            dataType: 'json',
+            success: function (rs) {
+                if (rs.isSuccess === true) {
+                    $('#modalChuyenThanhPham').modal('hide');
+                    reloadDataXLPCPG();
+                    toastOptionNotyfi();
+                    toastr["success"](rs.Messages, "Thông báo");
+                } else {
+                    toastOptionNotyfi();
+                    toastr["warning"](rs.Messages, "Thông báo");
+                }
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error.toString(), "Thông báo");
+            },
+            complete: function () {
+                document.getElementById("loadingIndicatorChuyenThanhPhamXLPCPG").style.display = "none";
+                document.getElementById("txtChuyenThanhPhamXLPCPG").style.visibility = "visible";
+            }
+        });
+    }
+</script>
+

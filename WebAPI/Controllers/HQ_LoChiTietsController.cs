@@ -1,0 +1,247 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Linq;
+using System.Runtime.InteropServices;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Models.Repos;
+using Models.Repos.Models;
+using ViewModels.Repos.API;
+using WebAPI.Models;
+
+namespace WebAPI.Controllers
+{
+    [Route("api/[controller]/[action]")]
+    [ApiController]
+    public class HQ_LoChiTietsController : ControllerBase
+    {
+        private readonly dbPMScontext _context;
+
+        public HQ_LoChiTietsController(dbPMScontext context)
+        {
+            _context = context;
+        }
+        private MainViewModel Vm => MainViewModel.Instance;
+        [HttpGet]
+        [Authorize]
+        public IActionResult GetAlls()
+        {
+            var items = _context.HqLoChiTiets.OrderByDescending(x => x.Id).ToList();
+
+            return Ok(items);
+        }
+        [HttpGet("{ma}")]
+        [Authorize]
+        public IActionResult GetsByMa(string ma)
+        {
+            var item = _context.HqLoChiTiets.FirstOrDefault(x => x.Id == ma);
+            if (item == null)
+            {
+                return NotFound(new ApiResponse
+                {
+                    Success = false,
+                    Message = "Mã này không tồn tại!."
+                });
+            }
+            return Ok(item);
+        }
+        [HttpPost]
+        [Authorize]
+        public async Task<IActionResult> Insert(HQ_LoChiTiet model)
+        {
+            //kiểm tra xem dữ liệu đầu vào có hợp lệ không và trả về danh sách lỗi nếu có.
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState.Values.SelectMany(v => v.Errors)
+                                              .Select(e => e.ErrorMessage)
+                                              .ToList();
+
+                return BadRequest(new ApiResponse
+                {
+                    Success = false,
+                    Message = "Dữ liệu không hợp lệ.",
+                    Errors = errors
+                });
+            }
+            // ... kiểm tra mã nhân viên đã tồn tại chưa ...
+            if (_context.HqLoChiTiets.Any(u => u.Id == model.Id))
+            {
+                return BadRequest(new ApiResponse
+                {
+                    Success = false,
+                    Message = "Mã này đã tồn tại.",
+                });
+            }
+            var newItem = new HQ_LoChiTiet
+            {
+                Id = model.Id,
+                Ten = model.Ten,
+                LoId = model.LoId,
+                MNgay = model.MNgay,
+                TyLe = model.TyLe,
+            };
+            _context.HqLoChiTiets.Add(newItem);
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new ApiResponse
+                {
+                    Success = false,
+                    Message = "Đã xảy ra lỗi khi lưu dữ liệu." + ex.Message.ToString(),
+                    Errors = new List<string> { ex.Message.ToString() }
+                });
+            }
+            return Ok(new ApiResponse
+            {
+                Success = true,
+                Message = "Thêm thành công!"
+            });
+        }
+        [HttpPost("{id}")]
+        [Authorize]
+        public async Task<IActionResult> Update(string id, [FromBody] HQ_LoChiTiet model)
+        {
+            // Kiểm tra xem ID người dùng được cập nhật có hợp lệ không
+            if (string.IsNullOrEmpty(id))
+            {
+                return BadRequest(new ApiResponse
+                {
+                    Success = false,
+                    Message = "Mã này không hợp lệ."
+                });
+            }
+
+            // Kiểm tra xem nhân viên có tồn tại trong cơ sở dữ liệu không
+            var item = await _context.HqLoChiTiets.FindAsync(id);
+            if (item == null)
+            {
+                return BadRequest(new ApiResponse
+                {
+                    Success = false,
+                    Message = "Mã này không tồn tại."
+                });
+            }
+
+            // Kiểm tra xem dữ liệu đầu vào có hợp lệ không và trả về danh sách lỗi nếu có.
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState.Values.SelectMany(v => v.Errors)
+                                              .Select(e => e.ErrorMessage)
+                                              .ToList();
+
+                return BadRequest(new ApiResponse
+                {
+                    Success = false,
+                    Message = "Dữ liệu không hợp lệ.",
+                    Errors = errors
+                });
+            }
+            item.Id = model.Id;
+            item.Ten = model.Ten;
+            item.LoId = model.LoId;
+            //item.MNgay = model.MNgay;
+            try
+            {
+                await _context.SaveChangesAsync();
+
+                // Tạo bản ghi mới cho bảng HqLoaiNguyenLieuUs
+                var newItemUs = new HQ_LoChiTiet_U
+                {
+                    LoChiTietId = item.Id,
+                    Ten = item.Ten,
+                    LoId = item.LoId,
+                    MNgay = item.MNgay,
+                    TyLe = item.TyLe,
+                    Ngay = DateTime.Now // Ngày hiện tại khi tạo mới
+                };
+
+                // Thêm vào bảng HqLoaiNguyenLieuUs
+                _context.HqLoChiTietUs.Add(newItemUs);
+
+                // Lưu thay đổi vào cơ sở dữ liệu
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new ApiResponse
+                {
+                    Success = false,
+                    Message = "Đã xảy ra lỗi khi cập nhật dữ liệu.",
+                    Errors = new List<string> { ex.Message }
+                });
+            }
+            return Ok(new ApiResponse
+            {
+                Success = true,
+                Message = "Cập nhật thông tin thành công!"
+            });
+        }
+        [HttpPost("{id}")]
+        [Authorize]
+        public async Task<IActionResult> Delete(string id)
+        {
+            if (string.IsNullOrEmpty(id))
+            {
+                return BadRequest(new ApiResponse
+                {
+                    Success = false,
+                    Message = "Bạn chưa chọn thông tin!."
+                });
+            }
+            var item = await _context.HqLoChiTiets.FindAsync(id);
+            if (item == null)
+            {
+                return NotFound(new ApiResponse
+                {
+                    Success = false,
+                    Message = "Nhà cung cấp không tồn tại."
+                });
+            }
+
+            _context.HqLoChiTiets.Remove(item);
+
+            try
+            {
+                // Tạo bản ghi mới cho bảng HqLoaiNguyenLieuUs để lưu lịch sử
+                var newItemUs = new HQ_LoChiTiet_D
+                {
+                    LoChiTietId = item.Id,
+                    Ten = item.Ten,
+                    LoId = item.LoId,
+                    MNgay = item.MNgay,
+                    TyLe = item.TyLe,
+                    Ngay = DateTime.Now // Ngày hiện tại khi tạo mới
+                };
+
+                // Thêm bản ghi vào bảng HqLoaiNguyenLieuUs
+                _context.HqLoChiTietDs.Add(newItemUs);
+
+
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                // Xử lý lỗi nếu có
+                return BadRequest(new ApiResponse
+                {
+                    Success = false,
+                    Message = "Đã xảy ra lỗi khi xóa.",
+                    Errors = new List<string> { ex.Message }
+                });
+            }
+
+            return Ok(new ApiResponse
+            {
+                Success = true,
+                Message = "Đã xoá!"
+            });
+        }
+    }
+}

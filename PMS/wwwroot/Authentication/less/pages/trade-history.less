@@ -1,0 +1,211 @@
+#trade-history {
+    background-color: #f6f6f6;
+    padding-top: 50px;
+    padding-bottom: 50px;
+    .box {
+        border-radius: 5px;
+        box-shadow: 0px 1px 6px #b5b0b0;
+        background-color: white;
+        .title {
+            background-image: url('../images/header.gif');
+            height: 50px;
+            background-color: #01b8bf;
+            background-repeat: no-repeat;
+            border-top-left-radius: 5px;
+            position: relative;
+            border-top-right-radius: 5px;
+            padding-left: 30px;
+            h4 {
+                display: inline-block;
+                color: white;
+                font-weight: bold;
+                font-size: 20px;
+                position: relative;
+                top: 5px;
+            }
+            .export {
+                position: absolute;
+                top: 15px;
+                right: 31px;
+                i,
+                a {
+                    color: white;
+                }
+                a {
+                    text-decoration: underline;
+                }
+            }
+        }
+        .content {
+            padding: 30px 30px 50px 30px;
+            padding-top: 0;
+            .select-option {
+                padding: 15px;
+                overflow: auto;
+                .select-content {
+                    min-width: 630px;
+                    max-width: 900px;
+                    margin-left: auto;
+                    margin-right: auto;
+                }
+                p,
+                input,
+                select,
+                button {
+                    display: inline-block;
+                    width: auto;
+                }
+                p:nth-child(5) {
+                    padding: 0 12px;
+                }
+                p:nth-child(9) {
+                    padding: 0 12px;
+                }
+                input:nth-child(2) {
+                    width: 150px;
+                    padding: 0;
+                    padding-left: 3px;
+                }
+                input:nth-child(4) {
+                    width: 150px;
+                    padding: 0;
+                    padding-left: 3px;
+                }
+                button:nth-child(11) {
+                    margin-left: 13px;
+                    position: relative;
+                    background-color: #00f3d9;
+                    color: #111111;
+                    top: -3px;
+                }
+                button:nth-child(12) {
+                    margin-right: 13px;
+                    position: relative;
+                    top: -3px;
+                    background-color: #01b8bf;
+                    color: #111111;
+                }
+                input:nth-child(13) {
+                    margin: 0;
+                }
+                .reset__btn {
+                    position: relative;
+                    top: -3.5px;
+                    background: #0a397ec2;
+                    cursor: pointer;
+                    box-shadow: none;
+                    color: #111111;
+                    &:hover,
+                    &:active {
+                        background: #00d0b9;
+                    }
+                }
+            }
+            .table {
+                border-radius: 5px;
+                box-shadow: 0px 1px 6px #b5b0b0;
+                margin-bottom: 0;
+            }
+            table {
+                width: 100%;
+                thead {
+                    background-color: #e5e5e5;
+                    tr {
+                        th {
+                            padding: 15px;
+                            font-weight: normal;
+                            color: #444;
+                        }
+                    }
+                }
+                tbody {
+                    tr {
+                        td {
+                            padding: 15px;
+                            color: #555555;
+                            white-space: nowrap;
+                        }
+                        td:nth-last-child(1) {
+                            text-decoration: underline;
+                        }
+                    }
+                    tr:nth-child(1) {
+                        td:nth-child(3) {
+                            color: #fa3c7f;
+                        }
+                    }
+                    tr:nth-child(2) {
+                        background-color: #ededed;
+                        td:nth-child(3) {
+                            color: #ff9000;
+                        }
+                    }
+                }
+            }
+            .text {
+                text-align: center;
+                padding-top: 50px;
+                padding-bottom: 35px;
+                background-color: #f7f7f7;
+            }
+        }
+    }
+}
+
+@media (max-width:1200px) {
+    #trade-history {
+        padding-bottom: 50px;
+        .box {
+            .content {
+                max-width: 933px;
+                .select-content {
+                    max-width: 630px !important;
+                   
+                }
+                .table {
+                    overflow: auto;
+                }
+            }
+        }
+    }
+}
+
+@media (max-width:768px) {
+    #trade-history {
+        .box {
+            .title {
+                .export {
+                    width: 60px;
+                    overflow: hidden;
+                    height: 20px;
+                }
+            }
+            .content {
+                padding: 20px;
+                padding-top: 0;
+                padding-bottom: 30px;
+                .select-option {
+                    text-align: left;
+                }
+                
+            }
+        }
+    }
+}
+
+@media (max-width:480px) {
+    #trade-history {
+        padding-top: 30px;
+        padding-bottom: 30px;
+        .box {
+            .title {
+                h4 {
+                    font-size: 16px;
+                }
+            }
+            .content {
+                padding: 15px;
+            }
+        }
+    }
+}

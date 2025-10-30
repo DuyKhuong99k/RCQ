@@ -1,0 +1,629 @@
+﻿@{
+    ViewData["Title"] = "XacNhanGioVaoRaView";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    //lấy danh sách roleid từ cookie
+    var roleIds = PMS.Middlewares.AuthenticationHelpers.GetRoleIdsFromCookie(Context);
+    // lấy danh sách fu func từ list roleId
+    var rolePermistions = await PMS.Middlewares.AuthenticationHelpers.GetRolePermistionsAsync(Context, roleIds);
+    var listThanhPhamPFLs = ViewBag.listThanhPhamPFLs;
+    var XuongId = @Context.Session.GetString("XuongId");
+    var listNhanViens = ViewBag.listNhanViens;
+    var jsonNhanViens = Newtonsoft.Json.JsonConvert.SerializeObject(listNhanViens);
+}
+<style>
+    .vertical-buttons {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+    }
+
+        .vertical-buttons button {
+            margin-bottom: 10px;
+        }
+
+    #loadingIndicator {
+        width: 1.5rem;
+        height: 1.5rem;
+    }
+
+    .input-group-text {
+        background-color: #f8f9fa;
+        border-right: 0;
+    }
+
+    .input-group input {
+        border-left: 0;
+    }
+
+</style>
+
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h2 class="mb-0">Ghi Nhận Giờ Vào Ra</h2>
+                </div>
+                <div class="card-body">
+                    <div class="row g-2">
+                        <div class="col-md-6">
+                            <div class="input-group">
+                                <span class="input-group-text">Mã số</span>
+                                <input id="maHoSoInput" type="text" class="form-control" placeholder="Nhập mã số">
+                            </div>
+                        </div>
+                        <div class="col-md-6 d-flex justify-content-end">
+                            <button onclick="findNhanVien()" class="btn btn-outline-secondary me-2">
+                                <i class='bx bxs-search'></i> Tìm
+                            </button>
+                            <button onclick="showKhungGioVaoRa()" class="btn btn-outline-secondary me-2">
+                                <i class='bx bxs-time'></i> Giờ vào ra mặc định
+                            </button>
+                            <button onclick="clearFind()" class="btn btn-outline-secondary">
+                                <i class='bx bxs-trash-alt'></i> Xoá Danh sách tìm
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-sm-7">
+                            <div class="mb-3 d-flex justify-content-between align-items-center">
+                                <h6 class="mb-0">Danh sách nhân viên</h6>
+                                <select id="listThanhPhamPhuFillet" class="form-select form-select w-auto">
+                                    <option>Chọn thành phẩm phụ Fillet</option>
+                                    @foreach (var item in listThanhPhamPFLs)
+                                    {
+                                        <option value="@item.Ma">@item.Ten</option>
+                                    }
+                                </select>
+                            </div>
+                            <div id="GridPhanBoNhanVienPhuFillet"></div>
+                        </div>
+                        <div class="col-sm-1 d-flex align-items-center justify-content-center">
+                            <div class="vertical-buttons">
+                                <button onclick="moveTo()" class="btn btn-primary w-100">
+                                    <i class='bx bx-check'></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="mb-3 d-flex justify-content-between align-items-center">
+                                <h6 class="mb-0 me-2">Danh sách giờ vào ra</h6>
+                                <div class="input-group w-50">
+                                    <input type="text" id="timeInput" class="form-control" readonly>
+                                    <button id="toggleButton" onclick="toggleTime()" class="btn btn-outline-secondary">Dừng</button>
+                                </div>
+                            </div>
+                            <div id="GridGioRaVaoFillet"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="modalShowKhungGioVaoRa" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Khung giờ ra vào</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-12 ">
+                                <div class="form-outline">
+                                    <label class="form-label">Giờ Vào</label>
+                                    <input type="time" id="timeIn" class="form-control">
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-12 ">
+                                <div class="form-outline">
+                                    <label class="form-label">Giờ Ra</label>
+                                    <input type="time" id="timeOut" class="form-control">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-4 pt-2">
+                            <div class="col-12">
+                                <button onclick="setGioVaoRaMacDinh()" class="btn btn-primary w-100 position-relative" type="submit" id="">
+                                    <div class=" align-items-center">
+                                        <span id="txtThemNhanVienDaiThanhTo">Xác Nhận</span>
+                                        <div id="loadingIndicatorNhanVienDaiThanhTo" class=" spinner-border text-secondary position-absolute" role="status" style="left: 0;right: 0;top: 0;bottom: 0;margin: auto; display:none">
+                                            <span class="visually-hidden">Đang tải...</span>
+                                        </div>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<input id="manhanvienhidden" hidden />
+<script>
+    let intervalId;
+    let isRunning = true;
+
+    function updateTime() {
+        const now = new Date();
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const seconds = String(now.getSeconds()).padStart(2, '0');
+        const currentTime = `${hours}:${minutes}:${seconds}`;
+        document.getElementById('timeInput').value = currentTime;
+    }
+
+    function startTime() {
+        intervalId = setInterval(updateTime, 1000);
+        updateTime();
+        isRunning = true;
+        document.getElementById('toggleButton').textContent = 'Dừng';
+    }
+
+    function stopTime() {
+        clearInterval(intervalId);
+        isRunning = false;
+        document.getElementById('toggleButton').textContent = 'Chạy';
+    }
+
+    function toggleTime() {
+        if (isRunning) {
+            stopTime();
+        } else {
+            startTime();
+        }
+    }
+    startTime();
+</script>
+<script>
+    var nhanViens = @Html.Raw(jsonNhanViens);
+</script>
+<script type="text/x-template" id="MaHoSoTemplate">
+    <div>
+        <span>${covertMaNhanVienToMaHoSo(data)}</span>
+    </div>
+</script>
+<script type="text/x-template" id="TenNhanVienTemplate">
+    <div>
+        <span>${covertMaNhanVienToTenNhanVien(data)}</span>
+    </div>
+</script>
+<script>
+    function covertMaNhanVienToMaHoSo(data) {
+        var maHoSo = "";
+        try {
+            var maNhanVien = data.MaNhanVien;
+            var nhanVien = nhanViens.find(nv => nv.MaNhanVien === maNhanVien);
+            if (nhanVien) {
+                maHoSo = nhanVien.MaHoSo;
+            }
+        } catch (error) {
+            console.error(error);
+        }
+        if (maHoSo == "" || maHoSo == undefined) {
+            maHoSo = "Chưa xác định";
+        }
+        return maHoSo;
+    }
+    function covertMaNhanVienToTenNhanVien(data) {
+        var tenNhanVien = "";
+        try {
+            var maNhanVien = data.MaNhanVien;
+            var nhanVien = nhanViens.find(nv => nv.MaNhanVien === maNhanVien);
+            if (nhanVien) {
+                tenNhanVien = nhanVien.Name;
+            }
+        } catch (error) {
+            console.error(error);
+        }
+        if (tenNhanVien == "" || tenNhanVien == undefined) {
+            tenNhanVien = "Chưa xác định";
+        }
+        return tenNhanVien;
+    }
+    $(document).ready(function () {
+        $('#khuVucTL').val("FL");
+    });
+    function ClearData(GridId) {
+        try {
+            var gridObj = document.getElementById(GridId).ej2_instances[0];
+            if (gridObj)
+                gridObj.dataSource = [];
+        } catch (e) {
+            Console.log(e);
+        }
+
+    }
+    var gridPhanBoNhanVienPhuFillet;
+    function loadGridPhanBoNhanVienPhuFillet(data) {
+        var dataManager = new ej.data.DataManager({
+            json: data,
+            adaptor: new ej.data.JsonAdaptor()
+        });
+        if (gridPhanBoNhanVienPhuFillet) {
+            gridPhanBoNhanVienPhuFillet.dataSource = dataManager;
+            gridPhanBoNhanVienPhuFillet.refresh();
+        } else {
+            gridPhanBoNhanVienPhuFillet = new ej.grids.Grid({
+                dataSource: dataManager,
+                allowPaging: true,
+                pageSettings: { pageSize: 500 },
+                allowFiltering: true,
+                allowSorting: true,
+                //frozenColumns: 3,
+                filterSettings: { type: 'Excel' },
+                allowResizing: true,
+                selectionSettings: { persistSelection: true },
+                rowSelected: selectionChangedCaiDatNhanVienDaiThanhTo,
+                rowDeselected: unSelectionChangedCaiDatNhanVienDaiThanhTo,
+                height: 400,
+                columns: [
+                    { type: "checkbox", field: "", allowFiltering: false, allowSorting: false, width: '50' },
+                    { field: 'MaNhanVien', headerText: 'Mã Nhân Viên', width: 150 },
+                    { field: 'MaNhanVien', headerText: 'Mã Số', width: 150, template: '#MaHoSoTemplate' },
+                    { field: 'MaNhanVien', headerText: 'Tên Nhân Viên', width: 150, template: '#TenNhanVienTemplate' },
+                    { field: 'FirstWorkingDate', headerText: 'Trạng Thái', width: 50 },
+
+                ]
+            });
+            gridPhanBoNhanVienPhuFillet.appendTo('#GridPhanBoNhanVienPhuFillet');
+            // Hiển thị Grid trên trang web
+
+        }
+
+    }
+    loadGridPhanBoNhanVienPhuFillet();
+    function reloadDataNhanVienDaiThanhTo(nhomKiem) {
+        loadGridDataNhanVienDaiThanhTo(nhomKiem);
+    }
+
+    function reloadGridPhanBoNhanVienPhuFillet(thanhPham) {
+        var dateTime = $('#dateTimeTL').val();
+        var xuongId = @XuongId;
+        $.ajax({
+            url: "@Url.Action("LoadPhanBoNhanVienPhuFillet", "ChinhPhuFillet")",
+            type: "GET",
+            data: { dateTime: dateTime, xuongId: xuongId, thanhPham: thanhPham },
+            success: function (response) {
+                if (response.Success) {
+                    loadGridPhanBoNhanVienPhuFillet(response.Data);
+
+                } else {
+                    toastOptionNotyfi();
+                    toastr["error"](response.Messages, "Không có dữ liệu!");
+                }
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"](error, "Thông báo");
+            }
+        });
+        // reloadDataNhanVienKiem(dateTime, xuongId)
+    }
+
+
+    let selectedIdsStringCaiDatNhanVienDatThanhTo = "";
+    let numRowSelectCaiDatNhanVienDaiThanhTo = 0;
+    function unSelectionChangedCaiDatNhanVienDaiThanhTo(args) {
+        let deselectedRecords = args.data ? args.data : []; // Lấy các bản ghi được bỏ chọn
+
+        // Kiểm tra xem deselectedRecords có phải là một mảng không
+        if (Array.isArray(deselectedRecords)) {
+            // Nếu là một mảng rỗng hoặc không tồn tại
+            if (deselectedRecords.length === 0) {
+                selectedIdsStringCaiDatNhanVienDatThanhTo = "";
+                numRowSelectCaiDatNhanVienDaiThanhTo = 0; // Reset số dòng đã chọn
+                return;
+            }
+            // Lặp qua từng bản ghi được bỏ chọn
+            for (let i = 0; i < deselectedRecords.length; i++) {
+                let deselected = deselectedRecords[i];
+                let deselectedString = JSON.stringify(deselected);
+
+                // Kiểm tra xem bản ghi đã có trong chuỗi chưa trước khi loại bỏ
+                if (selectedIdsStringCaiDatNhanVienDatThanhTo.includes(deselectedString)) {
+                    // Loại bỏ chuỗi JSON của bản ghi và dấu " | " theo sau
+                    selectedIdsStringCaiDatNhanVienDatThanhTo = selectedIdsStringCaiDatNhanVienDatThanhTo.replace("|" + deselectedString, "");
+                    numRowSelectCaiDatNhanVienDaiThanhTo--; // Giảm số dòng đã chọn
+                }
+            }
+            selectedIdsStringCaiDatNhanVienDatThanhTo = selectedIdsStringCaiDatNhanVienDatThanhTo.replace(/^\|+|\|+$/g, '');
+
+            // Loại bỏ dấu ' | ' cuối cùng nếu có
+            // if (selectedIdsString.endsWith("|")) {
+            //     selectedIdsString = selectedIdsString.slice(0, -3);
+            // }
+        } else {
+            // Trường hợp chỉ có một bản ghi được bỏ chọn
+            let deselectedString = JSON.stringify(deselectedRecords);
+
+            // Kiểm tra xem bản ghi đã có trong chuỗi chưa trước khi loại bỏ
+            if (selectedIdsStringCaiDatNhanVienDatThanhTo.includes(deselectedString)) {
+                // Loại bỏ chuỗi JSON của bản ghi và dấu " | " theo sau
+                selectedIdsStringCaiDatNhanVienDatThanhTo = selectedIdsStringCaiDatNhanVienDatThanhTo.replace("|" + deselectedString, "");
+                numRowSelectCaiDatNhanVienDaiThanhTo--; // Giảm số dòng đã chọn
+            }
+            selectedIdsStringCaiDatNhanVienDatThanhTo = selectedIdsStringCaiDatNhanVienDatThanhTo.replace(/^\|+|\|+$/g, '');
+
+            // Loại bỏ dấu ' | ' cuối cùng nếu có
+            // if (selectedIdsString.endsWith("|")) {
+            //     selectedIdsString = selectedIdsString.slice(0, -3);
+            // }
+        }
+        // alert(selectedIdsStringCaiDatNhanVien);
+    }
+    function selectionChangedCaiDatNhanVienDaiThanhTo(args) {
+        let selectedRecords = Array.isArray(args.data) ? args.data : (args.data ? [args.data] : []);
+
+        if (selectedRecords.length === 0) {
+            // Lấy toàn bộ danh sách từ grid vào selectedIdsString
+            let allDataRecords = gridPhanBoNhanVienPhuFillet.dataSource instanceof ej.data.DataManager ? gridPhanBoNhanVienPhuFillet.dataSource.dataSource.json : gridPhanBoNhanVienPhuFillet.dataSource; // Lấy toàn bộ dữ liệu
+            selectedIdsStringCaiDatNhanVienDatThanhTo = ""; // Reset selectedIdsString trước khi thêm dữ liệu mới
+            numRowSelectCaiDatNhanVienDaiThanhTo = allDataRecords.length; // Cập nhật số dòng đã chọn
+            allDataRecords.forEach(record => {
+                // Chuyển đổi đối tượng thành chuỗi JSON
+                selectedIdsStringCaiDatNhanVienDatThanhTo += "|" + JSON.stringify(record);
+            });
+            // Loại bỏ dấu ' | ' cuối cùng
+            selectedIdsStringCaiDatNhanVienDatThanhTo = selectedIdsStringCaiDatNhanVienDatThanhTo.replace(/^\|+|\|+$/g, '');
+            return;
+        }
+
+        selectedRecords.forEach(record => {
+            // Chuyển đổi đối tượng thành chuỗi JSON và kiểm tra xem đã tồn tại chưa
+            let recordString = JSON.stringify(record);
+            if (!selectedIdsStringCaiDatNhanVienDatThanhTo.includes(recordString)) {
+                selectedIdsStringCaiDatNhanVienDatThanhTo += "|" + recordString;
+                numRowSelectCaiDatNhanVienDaiThanhTo++; // Tăng số dòng đã chọn
+            }
+        });
+
+        // Loại bỏ dấu ' | ' cuối cùng
+        selectedIdsStringCaiDatNhanVienDatThanhTo = selectedIdsStringCaiDatNhanVienDatThanhTo.replace(/^\|+|\|+$/g, '');
+        // alert(selectedIdsStringCaiDatNhanVien);
+
+        var selectedRecord = args.data;
+        // Lấy giá trị Id từ dữ liệu của hàng được chọn
+        var MaNhanVien = selectedRecord.MaNhanVien;
+        $('#manhanvienhidden').val(MaNhanVien);
+        reloadGridGioRaVaoFilletSelectedNhanVien(MaNhanVien);
+    }
+    // GIO RA VAO FILLET
+    $(document).ready(function () {
+        reloadGridGioRaVaoFillet();
+    });
+    var gridGioRaVaoFillet;
+    function loadGridGioRaVaoFillet(data) {
+        var dataManager = new ej.data.DataManager({
+            json: data,
+            adaptor: new ej.data.JsonAdaptor()
+        });
+        if (gridGioRaVaoFillet) {
+            gridGioRaVaoFillet.dataSource = dataManager;
+            gridGioRaVaoFillet.refresh();
+        } else {
+            gridGioRaVaoFillet = new ej.grids.Grid({
+                dataSource: dataManager,
+                allowPaging: true,
+                pageSettings: { pageSize: 500 },
+                allowFiltering: true,
+                allowSorting: true,
+                //frozenColumns: 3,
+                filterSettings: { type: 'Excel' },
+                allowResizing: true,
+                selectionSettings: { persistSelection: true },
+                // rowSelected: selectionChangedCaiDatNhanVienDaiThanhTo,
+                // rowDeselected: unSelectionChangedCaiDatNhanVienDaiThanhTo,
+                height: 400,
+                columns: [
+                    { type: "checkbox", field: "", allowFiltering: false, allowSorting: false, width: '50' },
+                    { field: 'STT', headerText: 'STT', width: 70 },
+                    { field: 'GioVao', headerText: 'Giờ Vào', width: 100 },
+                    { field: 'GioRa', headerText: 'Giờ Ra', width: 100 },
+                ]
+            });
+            gridGioRaVaoFillet.appendTo('#GridGioRaVaoFillet');
+            // Hiển thị Grid trên trang web
+
+        }
+
+    }
+    loadGridGioRaVaoFillet();
+    function reloadDataNhanVienDaiThanhTo(nhomKiem) {
+        loadGridDataNhanVienDaiThanhTo(nhomKiem);
+    }
+
+    function reloadGridGioRaVaoFillet() {
+        var dateTime = $('#dateTimeTL').val();
+        var xuongId = @XuongId;
+        $.ajax({
+            url: "@Url.Action("LoadGioRaVaoFilletFillet", "ChinhPhuFillet")",
+            type: "GET",
+            data: { dateTime: dateTime, xuongId: xuongId },
+            success: function (response) {
+                //if (response.Success) {
+                loadGridGioRaVaoFillet(response.Data);
+
+                // } else {
+                //     toastOptionNotyfi();
+                //     toastr["error"](response.Messages, "Chưa có dữ liệu!");
+                // }
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"](error, "Thông báo");
+            }
+        });
+        //reloadDataNhanVienKiem(dateTime, xuongId)
+    }
+    function reloadGridGioRaVaoFilletSelectedNhanVien(maNhanVien) {
+        ClearData("GridGioRaVaoFillet");
+        var dateTime = $('#dateTimeTL').val();
+        var xuongId = @XuongId;
+        var thanhPham = $('#listThanhPhamPhuFillet').val();
+        $.ajax({
+            url: "@Url.Action("NhanViensFindGhiNhanSelectedItemChanged", "ChinhPhuFillet")",
+            type: "GET",
+            data: { dateTime: dateTime, xuongId: xuongId, thanhPham: thanhPham, maNhanVien: maNhanVien },
+            success: function (response) {
+                //if (response.Success) {
+                loadGridGioRaVaoFillet(response.Data);
+
+                // } else {
+                //     toastOptionNotyfi();
+                //     toastr["error"](response.Messages, "Chưa có dữ liệu!");
+                // }
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"](error, "Thông báo");
+            }
+        });
+        //reloadDataNhanVienKiem(dateTime, xuongId)
+    }
+
+
+</script>
+<script>
+    // load danh sách nhân viên nhóm kiểm
+    $('#listThanhPhamPhuFillet').on('change', function () {
+        var selectedValue = $(this).val();
+        reloadGridPhanBoNhanVienPhuFillet(selectedValue)
+    });
+
+
+    function findNhanVien() {
+        var thanhPham = $('#listThanhPhamPhuFillet').val();
+        var dateTime = $('#dateTimeTL').val();
+        var xuongId = @XuongId;
+        var maHoSoInput = $('#maHoSoInput').val();
+        $.ajax({
+            url: "@Url.Action("FindNhanVienByMaHoSo", "ChinhPhuFillet")",
+            type: "GET",
+            data: { dateTime: dateTime, xuongId: xuongId, thanhPham: thanhPham, maHoSoInput: maHoSoInput },
+            success: function (response) {
+                if (response.Success) {
+                    loadGridPhanBoNhanVienPhuFillet(response.Data);
+
+                } else {
+                    toastOptionNotyfi();
+                    toastr["error"](response.Messages, "Không có dữ liệu!");
+                }
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"](error, "Thông báo");
+            }
+        });
+    }
+
+</script>
+<script>
+    function layGioTuDate() {
+        // Khởi tạo một đối tượng Date từ chuỗi ngày
+        var date = new Date();
+
+        // Lấy giờ, phút và giây từ đối tượng Date
+        var gio = date.getHours();
+        var phut = date.getMinutes();
+        var giay = date.getSeconds();
+
+        // Định dạng lại chuỗi kết quả
+        var gioPhutGiayString = pad(gio, 2) + ":" + pad(phut, 2) + ":" + pad(giay, 2);
+
+        // Trả về chuỗi kết quả
+        return gioPhutGiayString;
+    }
+
+    // Hàm pad để thêm số 0 vào trước nếu cần
+    function pad(number, length) {
+        var str = '' + number;
+        while (str.length < length) {
+            str = '0' + str;
+        }
+        return str;
+    }
+    function showKhungGioVaoRa() {
+        $('#modalShowKhungGioVaoRa').modal('show');
+        $('#timeIn').val(layGioTuDate());
+        $('#timeOut').val(layGioTuDate());
+    }
+    function setGioVaoRaMacDinh() {
+        var dateTime = $('#dateTimeTL').val();
+        var xuongId = @XuongId;
+        var gioVao = $('#timeIn').val();
+        var gioRa = $('#timeOut').val();
+        var thanhPham = $('#listThanhPhamPhuFillet').val();
+        var maNhanVien = $('#manhanvienhidden').val();
+
+        if (gioVao >= gioRa) {
+            toastOptionNotyfi();
+            toastr["warning"]("Thời gian không hợp lệ!", "Giờ Vào Lớn Hơn Hoặc Bằng Giờ Ra!");
+        }
+        else {
+            bootbox.confirm({
+                title: "Thông báo!",
+                message: "Thao tác sẽ xóa toàn bộ các ghi nhận của các nhân viên đã chọn và thay thế bằng ghi nhận mặc định đã chọn!",
+                buttons: {
+                    confirm: {
+                        label: 'OK',
+                        className: 'btn btn-primary'
+                    }
+                },
+                callback: function (result) {
+                    if (result) {
+                        $.ajax({
+                            url: '/ChinhPhuFillet/SetGioVaoRaMacDinh',
+                            data: {
+                                dateTime: dateTime,
+                                xuongId: xuongId,
+                                gioVao: gioVao,
+                                gioRa: gioRa,
+                                thanhPham: thanhPham,
+                                listPhanBoNhanVienPhuFilletSelectedItems: selectedIdsStringCaiDatNhanVienDatThanhTo
+                            },
+                            type: 'POST',
+                            dataType: 'json',
+                            success: function (response) {
+                                if (response.isSuccess) {
+                                    //loadGridGioRaVaoFillet(response.Data);
+                                    reloadGridGioRaVaoFilletSelectedNhanVien(maNhanVien);
+                                    $('#modalShowKhungGioVaoRa').modal('hide');
+                                    toastOptionNotyfi();
+                                    toastr["success"](rs.Messages, "Thông báo");
+                                } else {
+                                    toastOptionNotyfi();
+                                    toastr["warning"](rs.Messages, "Thông báo");
+                                }
+                            },
+                            error: function (error) {
+                                toastOptionNotyfi();
+                                toastr["error"]('Đã xảy ra lỗi: ' + error.toString(), "Thông báo");
+                            }
+                        });
+                    }
+                }
+            });
+        }
+    }
+    function clearFind(){
+        var thanhPham = $('#listThanhPhamPhuFillet').val();
+
+        reloadGridPhanBoNhanVienPhuFillet(thanhPham);
+    }
+</script>
+

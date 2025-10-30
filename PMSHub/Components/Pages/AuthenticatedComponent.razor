@@ -1,0 +1,41 @@
+﻿@using ViewModels.Repos.Hubs.IServices
+@inject ILoginService loginService
+@inject NavigationManager NavigationManager
+
+@code {
+    private bool isInitialized = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!loginService.IsSessionCreated())
+        {
+            loginService.CreateDefaultSession();
+        }
+
+        // Xác định `isInitialized` để kiểm tra lần đầu trong `OnAfterRenderAsync`
+        isInitialized = true;
+
+        await base.OnInitializedAsync();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        // Chỉ điều hướng khi render lần đầu tiên để tránh vòng lặp
+        if (firstRender && isInitialized)
+        {
+            if (!loginService.IsUserAuthenticated())
+            {
+                // Sử dụng forceLoad để đảm bảo điều hướng hoàn tất mà không bị lỗi state
+                NavigationManager.NavigateTo("/api/loginlocal", forceLoad: true);
+            }
+            else
+            {
+                await OnAuthenticatedAsync();
+            }
+        }
+
+        await base.OnAfterRenderAsync(firstRender);
+    }
+
+    protected virtual Task OnAuthenticatedAsync() => Task.CompletedTask;
+}

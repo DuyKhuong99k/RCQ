@@ -1,0 +1,481 @@
+﻿@{
+    ViewData["Title"] = "CaiDatNhanVienPhuTheoCongViecView";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    //lấy danh sách roleid từ cookie
+    var roleIds = PMS.Middlewares.AuthenticationHelpers.GetRoleIdsFromCookie(Context);
+    // lấy danh sách fu func từ list roleId
+    var rolePermistions = await PMS.Middlewares.AuthenticationHelpers.GetRolePermistionsAsync(Context, roleIds);
+    var listThanhPhamPFLs = ViewBag.listThanhPhamPFLs;
+    var XuongId = @Context.Session.GetString("XuongId");
+    var listNhanViens = ViewBag.listNhanViens;
+    var jsonNhanViens = Newtonsoft.Json.JsonConvert.SerializeObject(listNhanViens);
+
+
+}
+
+<style>
+    .vertical-buttons {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+    }
+
+        .vertical-buttons button {
+            margin-bottom: 5px; /* Khoảng cách giữa các nút */
+        }
+
+    @@media (max-width: 767px) {
+        .vertical-buttons {
+            margin-top: 5px;
+            flex-direction: row;
+        }
+    }
+
+    .btn-equal-size {
+        width: 100%;
+    }
+
+    div.col-sm-9 > span.e-input-group.e-control-wrapper.e-ddl {
+        width: 30% !important;
+    }
+</style>
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h2 class="mb-0">Cài Đặt Nhân Viên Phụ Theo Công Việc</h2>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-sm-5">
+                            <h6>Danh sách nhân viên</h6>
+                            <div id="Grid"></div>
+                        </div>
+                        <div class="col-sm-1">
+                            <div class="vertical-buttons">
+                                <button onclick="insert()" class="btn btn-primary w-100 position-relative" id="">
+                                    <div class=" align-items-center">
+                                        <span id="txtThem">>></span>
+                                        <div id="loadingIndicator" class=" spinner-border text-secondary position-absolute" role="status" style="left: 0;right: 0;top: 0;bottom: 0;margin: auto; display:none">
+                                            <span class="visually-hidden">Đang tải...</span>
+                                        </div>
+                                    </div>
+                                </button>
+                                <button onclick="deleteNhanVienCongViec()" class="btn btn-primary w-100 position-relative" type="submit" id="">
+                                    <div class=" align-items-center">
+                                        <span id="txtXoa">-</span>
+                                        <div id="loadingIndicatorXoa" class=" spinner-border text-secondary position-absolute" role="status" style="left: 0;right: 0;top: 0;bottom: 0;margin: auto;  display:none">
+                                            <span class="visually-hidden">Đang tải...</span>
+                                        </div>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="row">
+                                <div class="col-sm-3">
+                                    <h6>Danh sách nhân viên theo công việc</h6>
+                                </div>
+                                <div class="col-sm-9">
+                                    <select id="listThanhPhamPhuFillet" class="form-select form-select w-auto">
+                                        <option>Chọn thành phẩm phụ Fillet</option>
+                                        @foreach (var item in listThanhPhamPFLs)
+                                        {
+                                            <option value="@item.Ma">@item.Ten</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                            <div id="GridNhanVienTheoCongViec"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<input type="hidden" id="maNhanVienRowSelected" />
+<input type="hidden" id="maBanId" />
+<input type="hidden" id="maXuongId" />
+
+<script>
+    $(document).ready(function () {
+        loadGridData();
+    });
+    var grid;
+    function loadGridData() {
+        $.ajax({
+            url: '/Staff/GetAllNhanViens',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                // Khởi tạo DataManager và gán dữ liệu từ API vào dataSource
+                var dataManager = new ej.data.DataManager({
+                    json: data,
+                    adaptor: new ej.data.JsonAdaptor()
+                });
+                // Kiểm tra xem Grid đã được tạo chưa
+                if (grid) {
+                    // Nếu Grid đã được tạo, chỉ cập nhật dữ liệu mới
+                    grid.dataSource = dataManager;
+                    grid.refresh();
+                } else {
+                    // Nếu Grid chưa được tạo, tạo mới Grid
+                    grid = new ej.grids.Grid({
+                        dataSource: dataManager,
+                        allowPaging: true,
+                        pageSettings: { pageSize: 500 },
+                        allowSelection: true,
+                        allowFiltering: true,
+                        allowSorting: true,
+                        allowResizing: true,
+                        // enableVirtualization: true,
+                        // loadingIndicator: { indicatorType: 'Shimmer' },
+                        filterSettings: { type: 'Excel' },
+                        //selectionSettings: { persistSelection: true, type: "Multiple", checkboxOnly: true },
+                        selectionSettings: { persistSelection: true },
+                        rowSelected: selectionChanged,
+                        rowDeselected: unSelectionChanged,
+                        height: 400,
+                        columns: [
+                            { type: "checkbox", field: "", allowFiltering: false, allowSorting: false, width: '50' },
+                            { field: 'MaNhanVien', headerText: 'Mã Nhân Viên', width: 150 },
+                            { field: 'MaHoSo', headerText: 'Mã Số', width: 150 },
+                            { field: 'Name', headerText: 'Tên Nhân Viên', width: 150 },
+                            { field: 'DeptName0', headerText: 'Tên Nhóm', width: 150 },
+                            { field: 'IsContracting', headerText: 'Trạng Thái', width: 100, displayAsCheckBox: 'true', textAlign: 'Center' }
+                        ]
+                    });
+
+                    grid.appendTo('#Grid');
+                }
+            },
+            error: function (error) {
+                console.error(error);
+            }
+        });
+    }
+    loadGridData();
+    function reloadData() {
+        loadGridData();
+    }
+
+    let selectedIdsString = ""; // Khai báo một chuỗi để lưu trữ MaNhanVien đã chọn
+
+    function unSelectionChanged(args) {
+        let deselectedRecords = args.data ? args.data : []; // Lấy các bản ghi được chọn
+        if (deselectedRecords.length == 0) {
+            selectedIdsString = "";
+            //alert(selectedIdsString);
+            return;
+        }
+
+        let deselectedId = deselectedRecords.MaNhanVien;
+
+        // Kiểm tra xem MaNhanVien đã có trong chuỗi chưa trước khi loại bỏ
+        if (selectedIdsString.includes(deselectedId)) {
+            selectedIdsString = selectedIdsString.replace(deselectedId + ",", ""); // Loại bỏ MaNhanVien khỏi chuỗi
+        }
+
+
+    }
+    function selectionChanged(args) {
+        let selectedRecords = args.data ? args.data : []; // Lấy các bản ghi được chọn
+        // Giả định có một thuộc tính isHeader để xác định xem dữ liệu có phải từ header hay không
+        if (selectedRecords.length == 0) {
+
+            // Lấy toàn bộ Mã Nhân viên từ grid vào selectedIdsString
+            let filteredRecords = grid.getCurrentViewRecords(); // Lấy các bản ghi đã được lọc
+            selectedIdsString = ""; // Reset selectedIdsString trước khi thêm dữ liệu mới
+            filteredRecords.forEach(record => {
+                selectedIdsString += record.MaNhanVien + ","; // Thêm Mã Nhân viên vào chuỗi, phân tách bằng dấu phẩy
+            });
+
+            return;
+        }
+        let selectedId = selectedRecords.MaNhanVien;
+        // Kiểm tra xem MaNhanVien đã được thêm vào chuỗi chưa trước khi thêm vào
+        if (!selectedIdsString.includes(selectedId)) {
+            selectedIdsString += selectedId + ","; // Thêm MaNhanVien mới vào chuỗi, phân tách bằng dấu phẩy
+        }
+        //alert(selectedIdsString);
+    }
+
+</script>
+<script>
+    var nhanViens = @Html.Raw(jsonNhanViens);
+</script>
+<script type="text/x-template" id="MaHoSoTemplate">
+    <div>
+        <span>${covertMaNhanVienToMaHoSo(data)}</span>
+    </div>
+</script>
+<script type="text/x-template" id="TenNhanVienTemplate">
+    <div>
+        <span>${covertMaNhanVienToTenNhanVien(data)}</span>
+    </div>
+</script>
+<script>
+
+    function covertMaNhanVienToMaHoSo(data) {
+        var maHoSo = "";
+        try {
+            var maNhanVien = data.MaNhanVien;
+            var nhanVien = nhanViens.find(nv => nv.MaNhanVien === maNhanVien);
+            if (nhanVien) {
+                maHoSo = nhanVien.MaHoSo;
+            }
+        } catch (error) {
+            console.error(error);
+        }
+        if (maHoSo == "" || maHoSo == undefined) {
+            maHoSo = "Chưa xác định";
+        }
+        return maHoSo;
+    }
+    function covertMaNhanVienToTenNhanVien(data) {
+        var tenNhanVien = "";
+        try {
+            var maNhanVien = data.MaNhanVien;
+            var nhanVien = nhanViens.find(nv => nv.MaNhanVien === maNhanVien);
+            if (nhanVien) {
+                tenNhanVien = nhanVien.Name;
+            }
+        } catch (error) {
+            console.error(error);
+        }
+        if (tenNhanVien == "" || tenNhanVien == undefined) {
+            tenNhanVien = "Chưa xác định";
+        }
+        return tenNhanVien;
+    }
+    $(document).ready(function () {
+        $('#khuVucTL').val("FL");
+    });
+    function ClearData(GridId) {
+        try {
+            var gridObj = document.getElementById(GridId).ej2_instances[0];
+            if (gridObj)
+                gridObj.dataSource = [];
+        } catch (e) {
+            Console.log(e);
+        }
+
+    }
+    var gridNhanVienPhuTheoCongViec;
+    function loadGridPhanBoNhanVienPhuFillet(data) {
+        var dataManager = new ej.data.DataManager({
+            json: data,
+            adaptor: new ej.data.JsonAdaptor()
+        });
+        if (gridNhanVienPhuTheoCongViec) {
+            gridNhanVienPhuTheoCongViec.dataSource = dataManager;
+            gridNhanVienPhuTheoCongViec.refresh();
+        } else {
+            gridNhanVienPhuTheoCongViec = new ej.grids.Grid({
+                dataSource: dataManager,
+                allowPaging: true,
+                pageSettings: { pageSize: 500 },
+                allowFiltering: true,
+                allowSorting: true,
+                //frozenColumns: 3,
+                filterSettings: { type: 'Excel' },
+                allowResizing: true,
+                selectionSettings: { persistSelection: true },
+                rowSelected: selectionChangedCaiDatNhanVienTheoCongViec,
+                rowDeselected: unSelectionChangedCaiDatNhanVienTheoCongViec,
+                height: 400,
+                columns: [
+                    { type: "checkbox", field: "", allowFiltering: false, allowSorting: false, width: '50' },
+                    { field: 'MaNhanVien', headerText: 'Mã Nhân Viên', width: 150 },
+                    { field: 'MaNhanVien', headerText: 'Mã Số', width: 150, template: '#MaHoSoTemplate' },
+                    { field: 'MaNhanVien', headerText: 'Tên Nhân Viên', width: 150, template: '#TenNhanVienTemplate' },
+                    { field: 'TyLeHuong', headerText: 'Tỷ Lệ', type: 'number', width: 150 },
+                    { field: 'TyLeTru', headerText: 'Tỷ Lệ Trừ', type: 'number', width: 150 },
+
+                ]
+            });
+            gridNhanVienPhuTheoCongViec.appendTo('#GridNhanVienTheoCongViec');
+            // Hiển thị Grid trên trang web
+
+        }
+
+    }
+    loadGridPhanBoNhanVienPhuFillet();
+    function reloadDataNhanVienDaiThanhTo(nhomKiem) {
+        loadGridDataNhanVienDaiThanhTo(nhomKiem);
+    }
+
+    function reloadGridPhanBoNhanVienPhuFillet(thanhPham) {
+        ClearData("GridNhanVienTheoCongViec");
+        var dateTime = $('#dateTimeTL').val();
+        var xuongId = @XuongId;
+        $.ajax({
+            url: "@Url.Action("LoadPhanBoNhanVienPhuFillet", "ChinhPhuFillet")",
+            type: "GET",
+            data: { dateTime: dateTime, xuongId: xuongId, thanhPham: thanhPham },
+            success: function (response) {
+                if (response.Success) {
+                    loadGridPhanBoNhanVienPhuFillet(response.Data);
+
+                } else {
+                    toastOptionNotyfi();
+                    toastr["error"](response.Messages, "Không có dữ liệu!");
+                }
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"](error, "Thông báo");
+            }
+        });
+        // reloadDataNhanVienKiem(dateTime, xuongId)
+    }
+
+
+    let selectedIdsStringNhanVienTheoCongViec = ""; // Khai báo một chuỗi để lưu trữ MaNhanVien đã chọn
+    let selectedCount = 0;
+    function unSelectionChangedCaiDatNhanVienTheoCongViec(args) {
+        let deselectedRecords = args.data ? args.data : []; // Lấy các bản ghi được chọn
+        if (deselectedRecords.length == 0) {
+            selectedIdsStringNhanVienTheoCongViec = "";
+            selectedCount = 0;
+            //alert(selectedIdsString);
+            return;
+        }
+
+        let deselectedId = deselectedRecords.MaNhanVien;
+
+        // Kiểm tra xem MaNhanVien đã có trong chuỗi chưa trước khi loại bỏ
+        if (selectedIdsStringNhanVienTheoCongViec.includes(deselectedId)) {
+            selectedIdsStringNhanVienTheoCongViec = selectedIdsStringNhanVienTheoCongViec.replace(deselectedId + ",", ""); // Loại bỏ MaNhanVien khỏi chuỗi
+            selectedCount--;
+        }
+
+
+    }
+    function selectionChangedCaiDatNhanVienTheoCongViec(args) {
+        let selectedRecords = args.data ? args.data : []; // Lấy các bản ghi được chọn
+        // Giả định có một thuộc tính isHeader để xác định xem dữ liệu có phải từ header hay không
+        if (selectedRecords.length == 0) {
+
+            // Lấy toàn bộ Mã Nhân viên từ grid vào selectedIdsString
+            let filteredRecords = gridNhanVienPhuTheoCongViec.getCurrentViewRecords(); // Lấy các bản ghi đã được lọc
+            selectedIdsStringNhanVienTheoCongViec = ""; // Reset selectedIdsString trước khi thêm dữ liệu mới
+            selectedCount = filteredRecords.length;
+            filteredRecords.forEach(record => {
+                selectedIdsStringNhanVienTheoCongViec += record.MaNhanVien + ","; // Thêm Mã Nhân viên vào chuỗi, phân tách bằng dấu phẩy
+            });
+
+            return;
+        }
+        let selectedId = selectedRecords.MaNhanVien;
+        // Kiểm tra xem MaNhanVien đã được thêm vào chuỗi chưa trước khi thêm vào
+        if (!selectedIdsStringNhanVienTheoCongViec.includes(selectedId)) {
+            selectedIdsStringNhanVienTheoCongViec += selectedId + ","; // Thêm MaNhanVien mới vào chuỗi, phân tách bằng dấu phẩy
+            selectedCount++;
+        }
+        //alert(selectedIdsString);
+    }
+    // load danh sách nhân viên nhóm kiểm
+    $('#listThanhPhamPhuFillet').on('change', function () {
+        var selectedValue = $(this).val();
+        reloadGridPhanBoNhanVienPhuFillet(selectedValue)
+    });
+    ///////////////////////////////////////////////////////////////////////////
+    function insert() {
+        var maCongViec = $('#listThanhPhamPhuFillet').val();
+        var dateTime = $('#dateTimeTL').val();
+        var maXuong = @XuongId;
+        document.getElementById("txtThem").style.visibility = "hidden";
+        document.getElementById("loadingIndicator").style.display = "block";
+        $.ajax({
+            type: 'POST',
+            url: '/ChinhPhuFillet/DoInsertNhanVienPhuTheoCongViec',
+            data: {
+                selectedIdsString: selectedIdsString,
+                maCongViec: maCongViec,
+                dateTime: dateTime,
+                maXuong: maXuong
+            },
+            success: function (rs) {
+                if (rs.isSuccess === true) {
+                    toastOptionNotyfi();
+                    toastr["success"](rs.Messages, "Thông báo");
+                    //$('#modalThem').modal('hide');
+                    //loadData();
+                    loadGridData();
+                    reloadGridPhanBoNhanVienPhuFillet(maCongViec);
+                    selectedIdsString = "";
+                } else {
+                    toastOptionNotyfi();
+                    toastr["warning"](rs.Messages, "Thông báo");
+                }
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error, "Thông báo");
+            },
+            complete: function () {
+                document.getElementById("loadingIndicator").style.display = "none";
+                document.getElementById("txtThem").style.visibility = "visible";
+            }
+        });
+    }
+
+
+    function deleteNhanVienCongViec() {
+        var maCongViec = $('#listThanhPhamPhuFillet').val();
+        var dateTime = $('#dateTimeTL').val();
+        var maXuong = @XuongId;
+        bootbox.confirm({
+            title: "Thông báo!",
+            message: "Bạn có chắc muốn xoá " + selectedCount + " items!  ",
+            buttons: {
+                confirm: {
+                    label: 'OK',
+                    className: 'btn btn-primary'
+                }
+            },
+            callback: function (result) {
+                if (result) {
+                    //Người dùng đã bấm OK, Gọi API xóa ở đây
+                    $.ajax({
+                        url: '/ChinhPhuFillet/DoDeleteNhanVienPhuTheoCongViec',
+                        data: {
+                            selectedIdsStringNhanVienTheoCongViec: selectedIdsStringNhanVienTheoCongViec,
+                            maCongViec: maCongViec,
+                            dateTime: dateTime,
+                            maXuong: maXuong
+                        },
+                        type: 'POST',
+                        dataType: 'json',
+                        success: function (rs) {
+                            if (rs.isSuccess === true) {
+                                loadGridData();
+                                reloadGridPhanBoNhanVienPhuFillet(maCongViec);
+                                selectedIdsStringNhanVienTheoCongViec = "";
+                                selectedCount = 0;
+                                toastOptionNotyfi();
+                                toastr["success"](rs.Messages, "Thông báo");
+
+                            } else {
+                                toastOptionNotyfi();
+                                toastr["warning"](rs.Messages, "Thông báo");
+                            }
+                        },
+                        error: function (error) {
+                            toastOptionNotyfi();
+                            toastr["error"]('Đã xảy ra lỗi: ' + error.toString(), "Thông báo");
+                        }
+                    });
+                }
+            }
+        });
+    }
+</script>
+
+

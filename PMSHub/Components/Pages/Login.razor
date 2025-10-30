@@ -1,0 +1,23 @@
+﻿@page "/api/login/{parameter1}/{parameter2}"
+@using ViewModels.Repos.Hubs.IServices
+@inject ILoginService loginService
+@inject NavigationManager Navigation
+@code {
+    [Parameter] public string Parameter1 { get; set; }
+    [Parameter] public string Parameter2 { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        
+
+        // Xử lý tham số
+        if (!string.IsNullOrEmpty(Parameter1) && !string.IsNullOrEmpty(Parameter2))
+        {
+            loginService.Login(Parameter1, Parameter2);
+            // Điều hướng đến trang home
+            Navigation.NavigateTo("/", true);
+
+        }
+        await base.OnInitializedAsync();
+    }
+}

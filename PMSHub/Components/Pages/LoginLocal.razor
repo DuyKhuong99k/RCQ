@@ -1,0 +1,197 @@
+﻿@page "/api/loginlocal/"
+@layout ErrorLayout
+@rendermode InteractiveServer
+@inject IMainService MainService
+@inject IJSRuntime jsRuntime
+@using ViewModels.Repos.Hubs.IServices
+@using PMSHub.Components.Layout
+@inject ILoginService loginService
+@inject NavigationManager Navigation
+@inject ISessionService SessionService
+@inject IMessageService MessageService
+@inject ILocalStorageService LocalStorage
+@using System.Globalization
+@using System.Text.Json
+@using Blazored.LocalStorage
+@using Models.Repos.Models
+@using Syncfusion.Blazor.Buttons
+@using Syncfusion.Blazor.Cards
+@using Syncfusion.Blazor.DropDowns
+@using Syncfusion.Blazor.Grids
+@using Syncfusion.Blazor.Inputs
+@using Syncfusion.Blazor.Navigations
+@using Syncfusion.Blazor.Popups
+@using ViewModels.Repos.Hubs.IServices
+@using ChangeEventArgs = Microsoft.AspNetCore.Components.ChangeEventArgs
+@using EventArgs = EventArgs
+@using FilterType = Syncfusion.Blazor.DropDowns.FilterType
+@using OpenEventArgs = Syncfusion.Blazor.Popups.OpenEventArgs
+@inject IJSRuntime JsRuntime
+
+
+<PageTitle>Đăng Nhập</PageTitle>
+<div class="container-xxl">
+    <div class="authentication-wrapper authentication-basic container-p-y">
+        <div class="authentication-inner">
+            <!-- Register -->
+            <div class="card">
+                <div class="card-body">
+                    <!-- Logo -->
+                    <div class="app-brand justify-content-center">
+                        <a href="index.html" class="app-brand-link gap-2">
+                            <span class="app-brand-logo demo">
+                                <img style="width:120px" src="imgs/PMSLogo.png" />
+                            </span>
+                        </a>
+                    </div>
+                    <!-- /Logo -->
+                    <h4 class="mb-2">Chào mừng đến với PMSHub</h4>
+                    <p class="mb-4">Vui lòng đăng nhập để bất đầu!</p>
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between">
+                            <label class="form-label" for="password">Xưởng</label>
+                        </div>
+                        <div class="input-group input-group-merge">
+
+                           @*  <SfDropDownList TValue="XiNghiep" Placeholder="Xí Nghiệp" FloatLabelType="FloatLabelType.Auto" TItem="XiNghiep" @bind-Value="@MainService.VmXiNghiep.SelectedItem" DataSource="@MainService.VmXiNghiep.Items">
+                                <DropDownListEvents TItem="XiNghiep" TValue="XiNghiep" ValueChange="xiNghiepValueChange" />
+                                <DropDownListFieldSettings Value="Ma" Text="Ten"></DropDownListFieldSettings>
+                            </SfDropDownList> *@
+                            <SfDropDownList TValue="XiNghiep" Placeholder="Xí Nghiệp" FloatLabelType="FloatLabelType.Auto" TItem="XiNghiep" @bind-Value="@MainService.VmXiNghiep.SelectedItem" DataSource="@MainService.VmXiNghiep.Items">
+                                <DropDownListEvents TItem="XiNghiep" TValue="XiNghiep" ValueChange="xiNghiepValueChange" />
+                                <DropDownListFieldSettings Value="Ma" Text="Ten"></DropDownListFieldSettings>
+                            </SfDropDownList>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Tài khoản</label>
+                        <input type="text"
+                               class="form-control"
+                               id="txtUsername"
+                               @bind="userName"
+                               name="username"
+                               placeholder="Nhập tài khoản"
+                               autofocus
+                               autocomplete="off" />
+                    </div>
+                    <div class="mb-3 form-password-toggle">
+                        <div class="d-flex justify-content-between">
+                            <label class="form-label" for="password">Mật khẩu</label>
+                        </div>
+                        <div class="input-group input-group-merge">
+                            <input type="password"
+                                   id="txtPassword"
+                                   @bind="passWord"
+                                   class="form-control"
+                                   name="password"
+                                   placeholder="*****"
+                                   aria-describedby="password" autocomplete="off" />
+                            <span class="input-group-text cursor-pointer"><i class="bx bx-hide"></i></span>
+                        </div>
+                    </div>
+@* 
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="remember-me" />
+                            <label class="form-check-label" for="remember-me"> Giữ Phiên Đăng Nhập </label>
+                        </div>
+                    </div> *@
+                    <div class="mb-3">
+                        <div class="col-12">
+                            <button @onclick="DoLogin" class="btn btn-primary w-100" type="submit" id="loginBtn">
+                                <div class=" align-items-center">
+                                    <span id="txtDangNhap">Đăng Nhập</span>
+                                    <div id="loadingIndicator" class=" spinner-border text-secondary" role="status" style="display: none;">
+                                        <span class="visually-hidden">Đang tải...</span>
+                                    </div>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            // Lấy giá trị XuongId từ LocalStorage
+            //var xuongId = await JsRuntime.InvokeAsync<string>("localStorage.getItem", "XuongId");
+            var xuongId = await LocalStorage.GetItemAsync<string>("XuongId");
+            if (!string.IsNullOrEmpty(xuongId))
+            {
+                // Gán giá trị vào SelectedItem trong ViewModel
+                MainService.VmXiNghiep.SelectedItem = MainService.VmXiNghiep.Items.FirstOrDefault(x => x.Ma == xuongId);
+            }
+        }
+    }
+
+    private string userName { get; set; }
+    private string passWord { get; set; }
+    private async void xiNghiepValueChange(ChangeEventArgs<XiNghiep, XiNghiep> obj)
+    {
+        try
+        {
+            //await JsRuntime.InvokeVoidAsync("SetXuongId", obj.Value.Ma);
+            SessionService.Set("XuongId", obj.Value.Ma);
+            await LocalStorage.SetItemAsync("XuongId", obj.Value.Ma);
+            
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            //throw;
+        }
+    }
+    private void ReloadPage()
+    {
+        // Lấy URL hiện tại và buộc tải lại trang
+        Navigation.NavigateTo(Navigation.Uri, forceLoad: true);
+    }
+    private async Task DoLogin()
+    {
+        try
+        {
+            if (loginService.LoginLocal(userName, passWord))
+            {
+                await LocalStorage.SetItemAsync("PageReloadKey", "false");
+                Navigation.NavigateTo("/Home", true);
+                
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+        }
+    }
+    private async Task HandleEnterKey(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            await DoLogin(); // Gọi hàm DoLogin khi nhấn Enter
+        }
+    }
+    // private void DoLogin()
+    // {
+    //     try
+    //     {
+    //         if (loginService.LoginLocal(userName, passWord) == true)
+    //         {
+    //             Navigation.NavigateTo("/", true);
+    //         }
+
+    //     }
+    //     catch (Exception e)
+    //     {
+    //         Console.WriteLine(e);
+    //         // throw;
+    //     }
+    //}
+
+}
+

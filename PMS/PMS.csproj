@@ -1,0 +1,524 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>32bb03ab-392c-4fd7-b33f-ac0ab9010798</UserSecretsId>
+    <DockerDefaultTargetOS>Windows</DockerDefaultTargetOS>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Remove="wwwroot\js\AddUserWaitView.js" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <_ContentIncludedByDefault Remove="wwwroot\JsonFuFunc\WebAppSetting.json" />
+    <_ContentIncludedByDefault Remove="wwwroot\js\AddUserWaitView.js" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="wwwroot\assets\img\error-404-monochrome.svg" />
+    <None Include="wwwroot\Authentication\css\admin.css" />
+    <None Include="wwwroot\Authentication\css\ajax-loader.gif" />
+    <None Include="wwwroot\Authentication\css\animate.css" />
+    <None Include="wwwroot\Authentication\css\aos.css" />
+    <None Include="wwwroot\Authentication\css\blank.gif" />
+    <None Include="wwwroot\Authentication\css\bootstrap.css" />
+    <None Include="wwwroot\Authentication\css\demo.css" />
+    <None Include="wwwroot\Authentication\css\font-awesome.css" />
+    <None Include="wwwroot\Authentication\css\fonts\slick.ttf" />
+    <None Include="wwwroot\Authentication\css\fonts\slick.woff" />
+    <None Include="wwwroot\Authentication\css\login.css" />
+    <None Include="wwwroot\Authentication\css\main.css" />
+    <None Include="wwwroot\Authentication\css\prefixfree.min.js" />
+    <None Include="wwwroot\Authentication\css\showcode.css" />
+    <None Include="wwwroot\Authentication\css\slick-theme.css" />
+    <None Include="wwwroot\Authentication\css\slick.css" />
+    <None Include="wwwroot\Authentication\css\sweetalert2.min.css" />
+    <None Include="wwwroot\Authentication\fonts\fontawesome-webfont.eot" />
+    <None Include="wwwroot\Authentication\fonts\fontawesome-webfont.svg" />
+    <None Include="wwwroot\Authentication\fonts\fontawesome-webfont.ttf" />
+    <None Include="wwwroot\Authentication\fonts\fontawesome-webfont.woff" />
+    <None Include="wwwroot\Authentication\fonts\fontawesome-webfont.woff2" />
+    <None Include="wwwroot\Authentication\fonts\FontAwesome.otf" />
+    <None Include="wwwroot\Authentication\fonts\font_Futura_Bold\FuturaBold.css" />
+    <None Include="wwwroot\Authentication\fonts\font_Futura_Bold\FuturaBold.eot" />
+    <None Include="wwwroot\Authentication\fonts\font_Futura_Bold\FuturaBold.svg" />
+    <None Include="wwwroot\Authentication\fonts\font_Futura_Bold\FuturaBold.ttf" />
+    <None Include="wwwroot\Authentication\fonts\font_Futura_Bold\FuturaBold.woff" />
+    <None Include="wwwroot\Authentication\fonts\font_Futura_Bold\FuturaBold.woff2" />
+    <None Include="wwwroot\Authentication\fonts\font_iCielGothamMedium\font.css" />
+    <None Include="wwwroot\Authentication\fonts\font_iCielGothamMedium\iCielGothamMedium.eot" />
+    <None Include="wwwroot\Authentication\fonts\font_iCielGothamMedium\iCielGothamMedium.svg" />
+    <None Include="wwwroot\Authentication\fonts\font_iCielGothamMedium\iCielGothamMedium.ttf" />
+    <None Include="wwwroot\Authentication\fonts\font_iCielGothamMedium\iCielGothamMedium.woff" />
+    <None Include="wwwroot\Authentication\fonts\font_iCielGothamMedium\iCielGothamMedium.woff2" />
+    <None Include="wwwroot\Authentication\fonts\font_iCielGotham\font.css" />
+    <None Include="wwwroot\Authentication\fonts\font_iCielGotham\iCielGotham.eot" />
+    <None Include="wwwroot\Authentication\fonts\font_iCielGotham\iCielGotham.svg" />
+    <None Include="wwwroot\Authentication\fonts\font_iCielGotham\iCielGotham.ttf" />
+    <None Include="wwwroot\Authentication\fonts\font_iCielGotham\iCielGotham.woff" />
+    <None Include="wwwroot\Authentication\fonts\font_iCielGotham\iCielGotham.woff2" />
+    <None Include="wwwroot\Authentication\fonts\font_OpenSans_Bold\OpenSans-Bold.eot" />
+    <None Include="wwwroot\Authentication\fonts\font_OpenSans_Bold\OpenSans-Bold.svg" />
+    <None Include="wwwroot\Authentication\fonts\font_OpenSans_Bold\OpenSans-Bold.ttf" />
+    <None Include="wwwroot\Authentication\fonts\font_OpenSans_Bold\OpenSans-Bold.woff" />
+    <None Include="wwwroot\Authentication\fonts\font_OpenSans_Regular\OpenSans-Regular.eot" />
+    <None Include="wwwroot\Authentication\fonts\font_OpenSans_Regular\OpenSans-Regular.woff2" />
+    <None Include="wwwroot\Authentication\fonts\font_OpenSans_Regular\OpenSans.svg" />
+    <None Include="wwwroot\Authentication\fonts\font_OpenSans_Regular\OpenSans.ttf" />
+    <None Include="wwwroot\Authentication\fonts\font_OpenSans_Regular\OpenSans.woff" />
+    <None Include="wwwroot\Authentication\fonts\font_Poppin\Poppin_Bold\Poppins-Bold.eot" />
+    <None Include="wwwroot\Authentication\fonts\font_Poppin\Poppin_Bold\Poppins-Bold.woff2" />
+    <None Include="wwwroot\Authentication\fonts\font_Poppin\Poppin_Bold\Poppins.svg" />
+    <None Include="wwwroot\Authentication\fonts\font_Poppin\Poppin_Bold\Poppins.ttf" />
+    <None Include="wwwroot\Authentication\fonts\font_Poppin\Poppin_Bold\Poppins.woff" />
+    <None Include="wwwroot\Authentication\fonts\font_Poppin\Poppin_Light\Poppins-Light.eot" />
+    <None Include="wwwroot\Authentication\fonts\font_Poppin\Poppin_Light\Poppins-Light.svg" />
+    <None Include="wwwroot\Authentication\fonts\font_Poppin\Poppin_Light\Poppins-Light.ttf" />
+    <None Include="wwwroot\Authentication\fonts\font_Poppin\Poppin_Light\Poppins-Light.woff" />
+    <None Include="wwwroot\Authentication\fonts\font_Poppin\Poppin_Light\Poppins-Light.woff2" />
+    <None Include="wwwroot\Authentication\fonts\font_Poppin\Poppin_Medium\Poppins-Medium.eot" />
+    <None Include="wwwroot\Authentication\fonts\font_Poppin\Poppin_Medium\Poppins-Medium.svg" />
+    <None Include="wwwroot\Authentication\fonts\font_Poppin\Poppin_Medium\Poppins-Medium.ttf" />
+    <None Include="wwwroot\Authentication\fonts\font_Poppin\Poppin_Medium\Poppins-Medium.woff" />
+    <None Include="wwwroot\Authentication\fonts\font_Poppin\Poppin_Medium\Poppins-Medium.woff2" />
+    <None Include="wwwroot\Authentication\fonts\font_Poppin\Poppin_Regular\Poppins-Regular.eot" />
+    <None Include="wwwroot\Authentication\fonts\font_Poppin\Poppin_Regular\Poppins-Regular.svg" />
+    <None Include="wwwroot\Authentication\fonts\font_Poppin\Poppin_Regular\Poppins-Regular.ttf" />
+    <None Include="wwwroot\Authentication\fonts\font_Poppin\Poppin_Regular\Poppins-Regular.woff" />
+    <None Include="wwwroot\Authentication\fonts\font_Poppin\Poppin_Regular\Poppins-Regular.woff2" />
+    <None Include="wwwroot\Authentication\fonts\font_Poppin\Poppin_SemiBold\Poppins-SemiBold.eot" />
+    <None Include="wwwroot\Authentication\fonts\font_Poppin\Poppin_SemiBold\Poppins-SemiBold.svg" />
+    <None Include="wwwroot\Authentication\fonts\font_Poppin\Poppin_SemiBold\Poppins-SemiBold.ttf" />
+    <None Include="wwwroot\Authentication\fonts\font_Poppin\Poppin_SemiBold\Poppins-SemiBold.woff" />
+    <None Include="wwwroot\Authentication\fonts\font_Poppin\Poppin_SemiBold\Poppins-SemiBold.woff2" />
+    <None Include="wwwroot\Authentication\fonts\font_RobotoRegular\font.css" />
+    <None Include="wwwroot\Authentication\fonts\font_RobotoRegular\RobotoRegular.eot" />
+    <None Include="wwwroot\Authentication\fonts\font_RobotoRegular\RobotoRegular.svg" />
+    <None Include="wwwroot\Authentication\fonts\font_RobotoRegular\RobotoRegular.ttf" />
+    <None Include="wwwroot\Authentication\fonts\font_RobotoRegular\RobotoRegular.woff" />
+    <None Include="wwwroot\Authentication\fonts\font_RobotoRegular\RobotoRegular.woff2" />
+    <None Include="wwwroot\Authentication\fonts\font_SFUFuturaBold\font.css" />
+    <None Include="wwwroot\Authentication\fonts\font_SFUFuturaBold\SFUFuturaBold.eot" />
+    <None Include="wwwroot\Authentication\fonts\font_SFUFuturaBold\SFUFuturaBold.svg" />
+    <None Include="wwwroot\Authentication\fonts\font_SFUFuturaBold\SFUFuturaBold.ttf" />
+    <None Include="wwwroot\Authentication\fonts\font_SFUFuturaBold\SFUFuturaBold.woff" />
+    <None Include="wwwroot\Authentication\fonts\font_SFUFuturaBold\SFUFuturaBold.woff2" />
+    <None Include="wwwroot\Authentication\fonts\font_UTM\UTMAndrogyne.css" />
+    <None Include="wwwroot\Authentication\fonts\font_UTM\UTMAndrogyne.eot" />
+    <None Include="wwwroot\Authentication\fonts\font_UTM\UTMAndrogyne.svg" />
+    <None Include="wwwroot\Authentication\fonts\font_UTM\UTMAndrogyne.ttf" />
+    <None Include="wwwroot\Authentication\fonts\font_UTM\UTMAndrogyne.woff" />
+    <None Include="wwwroot\Authentication\fonts\font_UTM\UTMAndrogyne.woff2" />
+    <None Include="wwwroot\Authentication\fonts\Quicksand-Bold.otf" />
+    <None Include="wwwroot\Authentication\fonts\Quicksand-Regular.otf" />
+    <None Include="wwwroot\Authentication\images\avatar.jpg" />
+    <None Include="wwwroot\Authentication\images\bg-sg.jpg" />
+    <None Include="wwwroot\Authentication\images\bgfoot.gif" />
+    <None Include="wwwroot\Authentication\images\buy_btn.gif" />
+    <None Include="wwwroot\Authentication\images\buy_sell_btn.gif" />
+    <None Include="wwwroot\Authentication\images\chart.gif" />
+    <None Include="wwwroot\Authentication\images\coin_bg.gif" />
+    <None Include="wwwroot\Authentication\images\fullscreen_btn.gif" />
+    <None Include="wwwroot\Authentication\images\header.gif" />
+    <None Include="wwwroot\Authentication\images\icon1.gif" />
+    <None Include="wwwroot\Authentication\images\icon2.gif" />
+    <None Include="wwwroot\Authentication\images\icon3.gif" />
+    <None Include="wwwroot\Authentication\images\icon_chart.gif" />
+    <None Include="wwwroot\Authentication\images\icon_coin_btc.gif" />
+    <None Include="wwwroot\Authentication\images\icon_coin_eth.gif" />
+    <None Include="wwwroot\Authentication\images\icon_coin_vcx.gif" />
+    <None Include="wwwroot\Authentication\images\icon_funds.gif" />
+    <None Include="wwwroot\Authentication\images\icon_funds_hover.gif" />
+    <None Include="wwwroot\Authentication\images\icon_order.gif" />
+    <None Include="wwwroot\Authentication\images\icon_order_hover.gif" />
+    <None Include="wwwroot\Authentication\images\img1.gif" />
+    <None Include="wwwroot\Authentication\images\img2.gif" />
+    <None Include="wwwroot\Authentication\images\img3.gif" />
+    <None Include="wwwroot\Authentication\images\img4.gif" />
+    <None Include="wwwroot\Authentication\images\logo.gif" />
+    <None Include="wwwroot\Authentication\images\qrcode.gif" />
+    <None Include="wwwroot\Authentication\images\radio_active.gif" />
+    <None Include="wwwroot\Authentication\images\red.gif" />
+    <None Include="wwwroot\Authentication\images\red.jpg" />
+    <None Include="wwwroot\Authentication\images\sell_btn.gif" />
+    <None Include="wwwroot\Authentication\images\star.gif" />
+    <None Include="wwwroot\Authentication\js\aos.js" />
+    <None Include="wwwroot\Authentication\js\bootstrap.js" />
+    <None Include="wwwroot\Authentication\js\index.js" />
+    <None Include="wwwroot\Authentication\js\jquery-3.2.1.js" />
+    <None Include="wwwroot\Authentication\js\jquery.final-countdown.js" />
+    <None Include="wwwroot\Authentication\js\kinetic.js" />
+    <None Include="wwwroot\Authentication\js\main.js" />
+    <None Include="wwwroot\Authentication\js\particles.js" />
+    <None Include="wwwroot\Authentication\js\slick.js" />
+    <None Include="wwwroot\Authentication\js\stats.min.js" />
+    <None Include="wwwroot\Authentication\js\sweetalert2.min.js" />
+    <None Include="wwwroot\Authentication\js\tagcanvas.js" />
+    <None Include="wwwroot\Authentication\js\wow.js" />
+    <None Include="wwwroot\Authentication\less\main.less" />
+    <None Include="wwwroot\Authentication\less\master\basic.less" />
+    <None Include="wwwroot\Authentication\less\master\js\master.js" />
+    <None Include="wwwroot\Authentication\less\master\js\menu-responsive.js" />
+    <None Include="wwwroot\Authentication\less\module.less" />
+    <None Include="wwwroot\Authentication\less\pages\acc.less" />
+    <None Include="wwwroot\Authentication\less\pages\deposit.less" />
+    <None Include="wwwroot\Authentication\less\pages\index.less" />
+    <None Include="wwwroot\Authentication\less\pages\login.less" />
+    <None Include="wwwroot\Authentication\less\pages\order-history.less" />
+    <None Include="wwwroot\Authentication\less\pages\order.less" />
+    <None Include="wwwroot\Authentication\less\pages\trade-history.less" />
+    <None Include="wwwroot\Authentication\less\pages\withdrawal.less" />
+    <None Include="wwwroot\Authentication\less\responsive\responsive-1200px-min.less" />
+    <None Include="wwwroot\Authentication\less\responsive\responsive-479px-max.less" />
+    <None Include="wwwroot\Authentication\less\responsive\responsive-480px-767px.less" />
+    <None Include="wwwroot\Authentication\less\responsive\responsive-768px-991px.less" />
+    <None Include="wwwroot\Authentication\less\responsive\responsive-992px-1199px.less" />
+    <None Include="wwwroot\js\AddUserWaitView.js" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="GroupDocs.Viewer" Version="24.2.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.QuickGrid.EntityFrameworkAdapter" Version="8.0.3" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="8.0.3" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="8.0.3" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.3">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.19.6" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="8.0.6" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="Syncfusion.EJ2.AspNet.Core" Version="25.1.41" />
+    <PackageReference Include="Syncfusion.XlsIO.Net.Core" Version="25.1.41" />
+    <PackageReference Include="toastr" Version="2.1.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AppViewModels\AppViewModels.csproj" />
+    <ProjectReference Include="..\BravoModelV1\BravoModelV1.csproj" />
+    <ProjectReference Include="..\EAD\EAD.csproj" />
+    <ProjectReference Include="..\Models\Models.csproj" />
+    <ProjectReference Include="..\ToolsEx\ToolsEx.csproj" />
+    <ProjectReference Include="..\ViewModels\ViewModels.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="FilePrivate\" />
+    <Folder Include="Views\DanhMucHQ\HQ_LoaiNguyenLieu\" />
+    <Folder Include="Views\DanhMucHQ\HQ_LoChiTiet\" />
+    <Folder Include="Views\DanhMucHQ\HQ_ColorCor\" />
+    <Folder Include="Views\NewFolder\" />
+    <Folder Include="wwwroot\Authentication\less\master\images\" />
+    <Folder Include="wwwroot\vendor\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="wwwroot\assets\img\illustrations\401-Error-Unauthorized.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\Authentication\images\Avatar\anhbuichat.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\HuongDanFile\HuongDanSuDung2.pdf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="XlsIOTemplate\BaoTu\SanLuongTemplate.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="XlsIOTemplate\ChiTiet.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="XlsIOTemplate\ChiTietTGTemplate.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="XlsIOTemplate\DanhSachTheDaCap.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="XlsIOTemplate\DauAo\BaoCaoCaGiong.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="XlsIOTemplate\DauAo\BaoCaoDauAo.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="XlsIOTemplate\DauAo\BaoCaoDauAoChiTiet.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="XlsIOTemplate\DinhHinh\ChiTietTGTemplate.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="XlsIOTemplate\DinhHinh\ChiTietTPDinhHinh.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="XlsIOTemplate\DinhHinh\TemplateBangKeNSCongNhat_CMX.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="XlsIOTemplate\DinhHinh\TemplateBaoCaoTPDHTongHopNhanVien.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="XlsIOTemplate\DinhHinh\TemplateChiTietBTP_FATI.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="XlsIOTemplate\DinhHinh\TemplateChiTietDH_FATI.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="XlsIOTemplate\DinhHinh\TemplateChiTietDinhHinh_FATI.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="XlsIOTemplate\DinhHinh\TemplateFormTinhLuong.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="XlsIOTemplate\DinhHinh\TemplateTongHop.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="XlsIOTemplate\DinhHinh\TemplateTongHopBTP_FATI.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="XlsIOTemplate\DinhHinh\TemplateTongHopDanhGiaDMChiTietDH2_FATI.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="XlsIOTemplate\DinhHinh\TemplateTongHopDanhGiaDMChiTietDH_FATI.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="XlsIOTemplate\DinhHinh\TemplateTongHopDanhGiaDMDinhHinh_FATI.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="XlsIOTemplate\DinhHinh\TemplateTongHopNVDinhHinh_FATI.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="XlsIOTemplate\DinhHinh\TongHopDanhGiaDinhMucTPDinhHinh.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="XlsIOTemplate\DinhHinh\TongHopDanhGiaDinhMucTPDinhHinhTrenChiTiet.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="XlsIOTemplate\DinhHinh\TongHopLoaiThanhPhamTPDinhHinh.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="XlsIOTemplate\DinhHinh\TongHopNhanVienTPDinhHinh.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="XlsIOTemplate\Fillet\BTPv2\ChiTietTG.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="XlsIOTemplate\Fillet\TemplateBaoCaoTongHopNVFillet_FATI.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="XlsIOTemplate\Fillet\TemplateChiTietDH_FATI.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="XlsIOTemplate\Fillet\TemplateChiTietFillet_HN.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="XlsIOTemplate\Fillet\TemplateFormTinhLuongFillet.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="XlsIOTemplate\Fillet\TemplateTHNVFillet_HN.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="XlsIOTemplate\Fillet\TemplateTPFillet_HN.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="XlsIOTemplate\Fillet\TPv2\ChiTietTemplate.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="XlsIOTemplate\Fillet\TPv2\ChiTietTG.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="XlsIOTemplate\Fillet\TPv2\TongHop2Template.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="XlsIOTemplate\Fillet\TPv2\TongHopRowTemplate.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="XlsIOTemplate\Fillet\TPv2\TongHopTemplate.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="XlsIOTemplate\Fillet\TPv2\TongHopTGTemplate.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="XlsIOTemplate\NguyenLieu\BaoCaoKeToan.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="XlsIOTemplate\NguyenLieu\BaoCaoKeToanGhe.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="XlsIOTemplate\NguyenLieu\BaoCaoKeToanNCC.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="XlsIOTemplate\NguyenLieu\BaoCaoKeToanVanChuyen.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="XlsIOTemplate\NhanVienImportTemplate.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="XlsIOTemplate\SauXepKhuon\TemplateChiTietSauXepKhuonPT.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="XlsIOTemplate\SauXepKhuon\TemplateTongHopThanhPham2SauXepKhuonPT.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="XlsIOTemplate\SauXepKhuon\TemplateTongHopThanhPhamSauXepKhuonPT.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="XlsIOTemplate\SauXepKhuon\TemplateTyLeTangTrongSauXepKhuonPT.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="XlsIOTemplate\SauXepKhuon\TemplateTyLeTangTrong_MaBangSauXepKhuonPT.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="XlsIOTemplate\TemplateBangKeNSCongNhat_CMX.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="XlsIOTemplate\TemplateBaoCaoChiTiet_FATI.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="XlsIOTemplate\TemplateChiTietXepKhuon_FATI.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="XlsIOTemplate\TemplateImportDH_XL_PhieuCan-Type2.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="XlsIOTemplate\TemplateImportDH_XL_PhieuCan-Type3.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="XlsIOTemplate\TemplateImportDH_XL_PhieuCan.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="XlsIOTemplate\TemplateImportFL_XL_PhieuCan.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="XlsIOTemplate\TemplateImportFL_XL_PhieuCanType2.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="XlsIOTemplate\TemplateImportFL_XL_PhieuCanType3.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="XlsIOTemplate\TemplateNSFillet_AD.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="XlsIOTemplate\TemplateNSFillet_HN.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="XlsIOTemplate\TemplateNSFillet_NV.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="XlsIOTemplate\TemplateNSSuaCa_AD.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="XlsIOTemplate\TemplateNSSuaCa_NV.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="XlsIOTemplate\TemplateNS_HN.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="XlsIOTemplate\TemplateNS_HN2.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="XlsIOTemplate\TemplatePhuPham_DT.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="XlsIOTemplate\TemplatePhuPham_HN.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="XlsIOTemplate\TemplateThangDinhMucFillet.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="XlsIOTemplate\TemplateTongHop.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="XlsIOTemplate\TemplateTongHopCoiXepKhuon_FATI.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="XlsIOTemplate\Thit_PhaLoc\BaoCaoNgaySanXuatTemplate.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="XlsIOTemplate\Thit_PhaLoc\BaoCaoTyLePhaLocThangTemplate.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="XlsIOTemplate\TinhLuongDinhHinh\PhieuCanSanLuongPhuTemplate.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="XlsIOTemplate\TinhLuongDinhHinh\PhieuCanTemplate.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="XlsIOTemplate\TinhLuongDinhHinh\SanLuongKiemSoChe.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="XlsIOTemplate\TinhLuongDinhHinh\SanLuongSoChe.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="XlsIOTemplate\TongHopChiTiet.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="XlsIOTemplate\TongHopDanhGiaDinhMuc.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="XlsIOTemplate\TongHopLoaiThanhPham.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="XlsIOTemplate\TongHopNhanVien.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="XlsIOTemplate\TongHopTheoLo.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="XlsIOTemplate\T\MauPhieuPhanCo.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="XlsIOTemplate\T\MauPhieuYeuCau.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="XlsIOTemplate\T\TemplateBangKeNSCongNhat_CMX.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="XlsIOTemplate\T\TemplateBangKeNSCongNhat_CMX2.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="XlsIOTemplate\T\TemplateBangKe_TienThoiVu1.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="XlsIOTemplate\T\TemplateBangKe_TienThoiVu2.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="XlsIOTemplate\T\TemplateBaoCaoDinhMucLacDauTTTM.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="XlsIOTemplate\T\TemplateBaoCaoHaoHutPC_Giao.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="XlsIOTemplate\T\TemplateBCNgamHoaChat.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="XlsIOTemplate\T\TemplateBCTHSauRaiMayPC.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="XlsIOTemplate\T\TemplateListTHSauRai_CMX.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="XlsIOTemplate\T\TemplateListTHSauRai_CMX2.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="XlsIOTemplate\T\TemplateTongHopPhanCoTheoYeuCau.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="XlsIOTemplate\XepKhuon\TemplateChiTietXepKhuon_FATI.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="XlsIOTemplate\XepKhuon\TemplateTongHopCoiXepKhuon_FATI.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="XlsIOTemplate\XepKhuon\TemplateTongHopTP2XepKhuon_FATI.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="XlsIOTemplate\XepKhuon\TemplateTongHopTPXepKhuon_FATI.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+</Project>

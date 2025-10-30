@@ -1,0 +1,330 @@
+﻿@page "/DatMauTheFillet"
+@using Models.Repos.Models
+@using Syncfusion.Blazor.Grids
+@using Syncfusion.Blazor.Inputs
+@using Syncfusion.Blazor.Navigations
+@using Syncfusion.Blazor.Popups
+@using Vars
+@using ViewModels.Repos.Hubs.IServices
+@using Syncfusion.Blazor.DropDowns
+@using System.Drawing
+@using PMSHub.Components.Layout
+@rendermode InteractiveServer
+@attribute [StreamRendering]
+@inject NavigationManager Navigation
+@inject IMainService MainService
+@inject IConverterService ConverterService
+@inject IJSRuntime JsRuntime
+@inherits AuthenticatedComponent
+<PageTitle>Đặt màu thẻ - Fillet</PageTitle>
+<!-- Navbar -->
+<TopLayout />
+<!-- / Navbar -->
+<!-- Content wrapper -->
+<div class="content-wrapper">
+    <!-- Content -->
+
+    <div class="container-xxl flex-grow-1 container-p-y">
+        <h1>Đặt màu thẻ - Fillet</h1>
+
+        <SfGrid Height="500" DataSource="MainService.VmThanhPhamFilletColor.Items" @ref="Grid" AllowSorting="true" AllowMultiSorting="true" TValue="MaThanhPhamFillet_Color" AllowFiltering="true">
+            <GridTemplates>
+                <ToolbarTemplate>
+                    <SfToolbar>
+                        <ToolbarEvents Clicked="ToolbarClickHandler"></ToolbarEvents>
+                        <ToolbarItems>
+                            <ToolbarItem Type="@ItemType.Button" PrefixIcon="e-refresh icon" Id="refresh" Text="Tải Lại"></ToolbarItem>
+                            <ToolbarItem Type="@ItemType.Button" PrefixIcon="e-expand icon" Id="add" Text="Thêm"></ToolbarItem>
+                            <ToolbarItem Type="@ItemType.Button" PrefixIcon="e-edit icon" Id="edit" Text="Sửa"></ToolbarItem>
+                            @* <ToolbarItem Type="@ItemType.Button" PrefixIcon="e-circle-remove icon" Id="delete" Text="Xóa"></ToolbarItem> *@
+                        </ToolbarItems>
+                    </SfToolbar>
+                </ToolbarTemplate>
+            </GridTemplates>
+            <GridSortSettings>
+                <GridSortColumns>
+                    <GridSortColumn Field="@nameof(MaThanhPhamFillet_Color.MaXuong)" Direction="SortDirection.Ascending"></GridSortColumn>
+                </GridSortColumns>
+            </GridSortSettings>
+            <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings>
+            <GridColumns>
+                @* <GridColumn Type="ColumnType.CheckBox"></GridColumn> *@
+                <GridColumn Field="@nameof(MaThanhPhamFillet_Color.Ngay)" HeaderText="Ngày" Format="dd/MM/yyyy" Type="ColumnType.Date" TextAlign="TextAlign.Center" Width="120"></GridColumn>
+                <GridColumn Field="@nameof(MaThanhPhamFillet_Color.MaThanhPham)" HeaderText="Thành Phẩm" Type="ColumnType.String" TextAlign="TextAlign.Center" Width="150">
+                    <Template>
+
+                        @{
+                            var a = (context as MaThanhPhamFillet_Color)?.MaThanhPham;
+
+                            @ConverterService.ThanhPhamToName(a, AppKV.BTPFilletv2)
+                            ;
+                        }
+
+                    </Template>
+                    <FilterItemTemplate>
+                        @{
+                            var filterContext = context as FilterItemTemplateContext;
+                            if (filterContext != null)
+                            {
+                                <ln /> @ConverterService.ThanhPhamToName(filterContext.Value.ToString(), AppKV.BTPFilletv2)
+                                ;
+
+                            }
+
+
+                        }
+                    </FilterItemTemplate>
+                </GridColumn>
+                <GridColumn Field="@nameof(MaThanhPhamFillet_Color.MaLo)" HeaderText="Lô" Type="ColumnType.String" TextAlign="TextAlign.Center" Width="130"></GridColumn>
+                <GridColumn Field="@nameof(MaThanhPhamFillet_Color.MaXuong)" HeaderText="Xưởng" Format="d" Type="ColumnType.String" TextAlign="TextAlign.Center" Width="130">
+                    <Template>
+
+                        @{
+                            var a = (context as MaThanhPhamFillet_Color)?.MaXuong;
+                            @ConverterService.XuongToName(a)
+                            ;
+                        }
+
+                    </Template>
+                    <FilterItemTemplate>
+                        @{
+                            var filterContext = context as FilterItemTemplateContext;
+                            if (filterContext != null)
+                            {
+                                <ln /> @ConverterService.XuongToName(filterContext.Value.ToString())
+                                ;
+
+                            }
+
+
+                        }
+                    </FilterItemTemplate>
+                </GridColumn>
+                <GridColumn Field="@nameof(MaThanhPhamFillet_Color.ColorCode)" HeaderText="Màu 1" Type="ColumnType.String" TextAlign="TextAlign.Center" Width="120">
+                    <Template>
+
+                        @{
+                            var a = (context as MaThanhPhamFillet_Color)?.ColorCode.ToLower();
+                            if (a != null)
+                            {
+                                a = a.Split(",").FirstOrDefault() ?? "";
+                                a = ColorTranslator.ToHtml(ColorTranslator.FromHtml(a));
+                            }
+
+                            <h1 style="background-color: @a;">&nbsp;</h1>
+                        }
+
+                    </Template>
+
+                </GridColumn>
+                <GridColumn Field="@nameof(MaThanhPhamFillet_Color.ColorCode)" HeaderText="Màu 2" Type="ColumnType.String" TextAlign="TextAlign.Center" Width="120">
+                    <Template>
+
+                        @{
+                            var a = (context as MaThanhPhamFillet_Color)?.ColorCode.ToLower();
+                            if (a != null)
+                            {
+                                a = a.Split(",").LastOrDefault() ?? "";
+                                a = ColorTranslator.ToHtml(ColorTranslator.FromHtml(a));
+                            }
+
+                            <h1 style="background-color: @a;">&nbsp;</h1>
+                        }
+
+                    </Template>
+                </GridColumn>
+            </GridColumns>
+        </SfGrid>
+        <SfDialog Width="400px" IsModal="true" CloseOnEscape="true" ShowCloseIcon="true" @bind-Visible="@IsVisibleAdd">
+            <DialogEvents OnOverlayModalClick="@OverlayClick"></DialogEvents>
+            <DialogTemplates>
+                <Header>
+                    <div>@(isUpdate == false ? "Thêm" : "Sửa")</div>
+                </Header>
+                <Content>
+                    <SfComboBox TValue="string" Placeholder="Chọn Lô" FloatLabelType="FloatLabelType.Auto" AllowFiltering="true" TItem="string" @bind-Value="@Item.MaLo" DataSource="@MainService.VmLo.Items" Enabled="@(!isUpdate)" />
+                    <SfDropDownList TValue="string" Placeholder="Thành Phẩm" FloatLabelType="FloatLabelType.Auto" AllowFiltering="true" TItem="MaThanhPhamFillet" @bind-Value="@Item.MaThanhPham" DataSource="@MainService.VmThanhPhamFillet.Items">
+                        <DropDownListFieldSettings Value="Ma" Text="Ten"></DropDownListFieldSettings>
+                    </SfDropDownList>
+                    <SfDropDownList TValue="string" Placeholder="Màu" FloatLabelType="FloatLabelType.Auto" AllowFiltering="true" TItem="ColorCode" @bind-Value="@Item.ColorCode" DataSource="@MainService.VmColorCode.Items" Enabled="@(!isUpdate)">
+                        <DropDownListFieldSettings Value="Code" Text="Name">
+
+                        </DropDownListFieldSettings>
+                        <DropDownListTemplates TItem="ColorCode">
+                            <ItemTemplate>
+
+                                <div style="width: 100%; display: flex">
+
+
+                                    @{
+                                        var con = context as ColorCode;
+                                        var c1 = (con?.Code ?? "").Split(",").FirstOrDefault() ?? "";
+                                        var c2 = (con?.Code ?? "").Split(",").LastOrDefault() ?? "";
+                                        ;
+                                        c1 = ColorTranslator.ToHtml(ColorTranslator.FromHtml(c1));
+                                        c2 = ColorTranslator.ToHtml(ColorTranslator.FromHtml(c2));
+                                    }
+                                    <div style="width: 60%;">
+                                        <p>@con?.Name</p>
+                                    </div>
+                                    <div style="width: 20%;">
+                                        <p style="background-color: @c1;">&nbsp;</p>
+                                    </div>
+                                    <div style="width: 20%;">
+                                        <p style="background-color: @c2;">&nbsp;</p>
+                                    </div>
+
+
+                                </div>
+                            </ItemTemplate>
+                        </DropDownListTemplates>
+                    </SfDropDownList>
+                    <div style="width: 100%">
+                        <table style="width: 100%">
+                            <tr>
+                                @{
+                                    code1 = (Item.ColorCode ?? "").Split(",").FirstOrDefault() ?? "";
+                                    code2 = (Item.ColorCode ?? "").Split(",").LastOrDefault() ?? "";
+                                    ;
+                                    code1 = ColorTranslator.ToHtml(ColorTranslator.FromHtml(code1));
+                                    code2 = ColorTranslator.ToHtml(ColorTranslator.FromHtml(code2));
+                                }
+                                <td>
+                                    <h1 style="background-color: @code1;">&nbsp;</h1>
+                                </td>
+                                <td>
+                                    <h1 style="background-color: @code2;">&nbsp;</h1>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                    <SfDropDownList TValue="string" Placeholder="Xưởng" FloatLabelType="FloatLabelType.Auto" AllowFiltering="true" TItem="XiNghiep" @bind-Value="@Item.MaXuong" DataSource="@MainService.VmXiNghiep.Items" Enabled="@(!isUpdate)">
+                        <DropDownListFieldSettings Value="Ma" Text="Ten"></DropDownListFieldSettings>
+                    </SfDropDownList>
+                </Content>
+            </DialogTemplates>
+            <DialogButtons>
+                <DialogButton Content="Xác Nhận" IsPrimary="true" OnClick="@CloseDialogAdd" />
+            </DialogButtons>
+        </SfDialog>
+    </div>
+
+    <!-- / Content -->
+    <!-- Footer -->
+    <FooterLayout />
+    <!-- / Footer -->
+    <div class="content-backdrop fade"></div>
+</div>
+<!-- Content wrapper -->
+@code {
+    private bool IsVisibleAdd;
+    private bool isUpdate;
+    private string code1 = "";
+    private string code2 = "";
+    private MaThanhPhamFillet_Color Item = new();
+    private void OpenDialogAdd()
+    {
+        if (isUpdate == false)
+        {
+            var item = MainService.VmThanhPhamFilletColor.CreateDefaultNew();
+
+            Item = item;
+        }
+
+
+
+        IsVisibleAdd = true;
+    }
+    private void OverlayClick(OverlayModalClickEventArgs args)
+    {
+        IsVisibleAdd = false;
+
+    }
+
+    private async void CloseDialogAdd()
+    {
+        var item = Item;
+
+        if (isUpdate == true)
+        {
+            var result = Handlers.ErrorHandler.Handle(() =>
+            {
+                MainService.VmThanhPhamFilletColor.Update(Item);
+                IsVisibleAdd = false;
+                isUpdate = false;
+                MainService.VmThanhPhamFilletColor.Reload();
+            });
+            if (!result.IsSuccess)
+            {
+                await JsRuntime.InvokeVoidAsync("alert", result.Error?.Message); // Alert
+            }
+
+
+        }
+        else
+        {
+            var result = await Handlers.ErrorHandler.HandleAsync(async () =>
+            {
+                if (Item.MaLo != null && Item.MaLo.Trim() != "" && Item.ColorCode != null && Item.ColorCode.Trim() != "" && Item.MaThanhPham != null && Item.MaThanhPham.Trim() != "" && Item.MaXuong != null && Item.MaXuong.Trim() != "")
+                {
+                    MainService.VmThanhPhamFilletColor.Insert(Item);
+                    IsVisibleAdd = false;
+                    MainService.VmThanhPhamFilletColor.Reload();
+                }
+                else
+                {
+                    await JsRuntime.InvokeVoidAsync("alert", "Vui Lòng nhập đầy đủ thông tin"); // Alert
+                }
+            });
+            if (!result.IsSuccess)
+            {
+                await JsRuntime.InvokeVoidAsync("alert", result.Error?.ToString()); // Alert
+            }
+        }
+
+
+    }
+
+    private SfGrid<MaThanhPhamFillet_Color> Grid;
+
+    public async Task ToolbarClickHandler(ClickEventArgs args)
+    {
+        if (args.Item.Id == "refresh")
+        {
+            MainService.VmThanhPhamFilletColor.Reload();
+        }
+
+        if (args.Item.Id == "add")
+        {
+            isUpdate = false;
+            OpenDialogAdd();
+
+        }
+
+        if (args.Item.Id == "edit")
+        {
+            var value = await Grid.GetSelectedRecordsAsync();
+            if (value != null && value.Count == 1)
+            {
+                isUpdate = true;
+                Item = MainService.VmThanhPhamFilletColor.CopyItem(value.First());
+                OpenDialogAdd();
+            }
+            else
+            {
+                await JsRuntime.InvokeVoidAsync("alert", "Không có dữ liệu được chọn!"); // Alert
+            }
+
+        }
+
+        if (args.Item.Id == "delete")
+        {
+            var value = await Grid.GetSelectedRecordsAsync();
+        }
+    }
+
+    protected override void OnInitialized()
+    {
+    }
+
+}

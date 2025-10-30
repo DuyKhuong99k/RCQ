@@ -1,0 +1,79 @@
+﻿<div class="col-sm-7 mb-2">
+    <div id="Grid"></div>
+</div>
+<div class="col-sm-5 mb-2">
+    <div class="control-section">
+        <div id="column-container" align="center"></div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', (event) => {
+        var grid;
+        function loadGridData(data) {
+            var dataManager = new ej.data.DataManager({
+                json: data,
+                adaptor: new ej.data.JsonAdaptor()
+            });
+            if (grid && data != null && data != "") {
+                grid.dataSource = dataManager;
+                grid.refresh();
+            } else {
+                grid = new ej.grids.Grid({
+                    dataSource: dataManager,
+                    allowPaging: true,
+                    pageSettings: { pageSize: 50 },
+                    allowFiltering: true,
+                    allowSorting: true,
+                    filterSettings: { type: 'Excel' },
+                    selectionSettings: { persistSelection: true },
+                    allowResizing: true,
+                    height: 400,
+                    columns: [
+                        { field: 'MaNhanVien', headerText: 'Mã Nhân Viên', width: 150 },
+                        { field: 'MaHoSo', headerText: 'Mã Hồ Sơ', width: 150 },
+                        { field: 'NhanVienName', headerText: 'Tên Nhân Viên', width: 150 },
+                        { field: 'KhachHangName', headerText: 'Khách Hàng', width: 150 },
+                        { field: 'LoaiCaName', headerText: 'Loại Cá', width: 150 },
+                        { field: 'ThanhPhamName', headerText: 'Thành Phẩm', width: 150 },
+                        { field: 'TrongLuong', headerText: 'Trọng Lượng', type: 'number', width: 150 },
+                    ],
+                    aggregates: [{
+                        columns: [
+                            {
+                                type: 'Sum',
+                                field: 'TrongLuong',
+                                footerTemplate: 'Tổng Trọng Lượng: ${Sum} Kg'
+                            }
+                        ]
+                    }]
+                });
+                grid.appendTo('#Grid');
+            }
+        }
+
+        function loadChart(data) {
+            var chart = new ej.charts.Chart({
+                primaryXAxis: {
+                    valueType: 'Category', interval: 1, majorGridLines: { width: 0 }, majorTickLines: { width: 0 }, labelIntersectAction: 'None', labelRotation: ej.base.Browser.isDevice ? -45 : 0, minorTickLines: { width: 0 }
+                },
+                chartArea: { border: { width: 0 } },
+                primaryYAxis: {
+                    title: 'Trọng Lượng',
+                    majorTickLines: { width: 0 }, lineStyle: { width: 0 }, maximum: 300, interval: 100,
+                },
+                series: [
+                    {
+                        type: 'Column', xName: 'x', width: 2, yName: 'y', name: 'Trọng Lượng', columnSpacing: 0.1, tooltipMappingName: 'tooltipMappingName',
+                        dataSource: data,
+                    }
+                ],
+                title: 'Biểu Đồ Năng Suất',
+                width: ej.base.Browser.isDevice ? '100%' : '75%',
+                tooltip: { enable: true, header: "<b>${point.tooltip}</b>", shared: true },
+                legendSettings: { enableHighlight: true },
+            });
+            chart.appendTo('#column-container');
+        }
+    });
+</script>

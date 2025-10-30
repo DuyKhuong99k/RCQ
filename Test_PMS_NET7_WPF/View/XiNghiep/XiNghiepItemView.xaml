@@ -1,0 +1,77 @@
+﻿<Window
+    x:Class="Test_PMS_NET7_WPF.View.XiNghiep.XiNghiepItemView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:cvr="clr-namespace:Test_PMS_NET7_WPF.Convert"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+    xmlns:local="clr-namespace:Test_PMS_NET7_WPF.View.XiNghiep"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:viewModel="clr-namespace:Test_PMS_NET7_WPF.ViewModel"
+    Name="wd"
+    Title="XiNghiepItemView"
+    Width="800"
+    Height="450"
+    DataContext="{Binding Source={x:Static viewModel:MainViewModel.Ins}}"
+    mc:Ignorable="d">
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="PreviewKeyUp">
+            <i:InvokeCommandAction Command="{Binding VmXiNghiep.ForceRaseCanExcuteCommand}" />
+        </i:EventTrigger>
+        <i:EventTrigger EventName="PreviewMouseUp">
+            <i:InvokeCommandAction Command="{Binding VmXiNghiep.ForceRaseCanExcuteCommand}" />
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
+    <Window.Resources>
+        <ResourceDictionary>
+            <cvr:BoolToVisible x:Key="BoolToVisible" />
+
+        </ResourceDictionary>
+
+    </Window.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <StackPanel Orientation="Vertical">
+            <TextBlock Text="Mã" />
+            <TextBox IsReadOnly="{Binding VmXiNghiep.IdItemIsReadOnly}" Text="{Binding VmXiNghiep.Item.Ma, UpdateSourceTrigger=PropertyChanged}" />
+            <TextBlock Text="Tên" />
+            <TextBox Text="{Binding VmXiNghiep.Item.Ten, UpdateSourceTrigger=PropertyChanged}" />
+            <CheckBox
+                VerticalContentAlignment="Center"
+                Content="Sử Dụng"
+                IsChecked="{Binding VmXiNghiep.Item.SuDung, UpdateSourceTrigger=PropertyChanged}" />
+
+            <TextBlock Text="CodeId" />
+            <TextBox Text="{Binding VmXiNghiep.Item.CodeId, UpdateSourceTrigger=PropertyChanged}" />
+        </StackPanel>
+        <Grid Grid.Row="1">
+            <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
+                <Button
+                    Command="{Binding VmXiNghiep.Insert_Command}"
+                    CommandParameter="{Binding VmXiNghiep.Item}"
+                    Content="Thêm"
+                    Visibility="{Binding VmXiNghiep.IsAdd, Converter={StaticResource BoolToVisible}}" />
+                <Button
+                    Command="{Binding VmXiNghiep.Update_Command}"
+                    Content="Sửa"
+                    Visibility="{Binding VmXiNghiep.IsEdit, Converter={StaticResource BoolToVisible}}" />
+                <!--<Button
+                    Command="{Binding VmApp.CloseWindow}"
+                    CommandParameter="{Binding ElementName=wd}"
+                    Content="Thoát" />-->
+                <ToggleButton Content="Thoát" IsChecked="{Binding VmXiNghiep.IsWindowItemShown}">
+                    <i:Interaction.Triggers>
+                        <i:DataTrigger Binding="{Binding VmXiNghiep.IsWindowItemShown}" Value="False">
+                            <i:InvokeCommandAction Command="{Binding VmApp.CloseWindow}" CommandParameter="{Binding ElementName=wd}" />
+                        </i:DataTrigger>
+                    </i:Interaction.Triggers>
+                </ToggleButton>
+            </StackPanel>
+        </Grid>
+
+
+    </Grid>
+</Window>

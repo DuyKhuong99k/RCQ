@@ -1,0 +1,70 @@
+
+.countdown-container {
+    position: relative;
+    top: 50%;
+    -webkit-transform: translateY(-50%);
+    -moz-transform: translateY(-50%);
+    transform: translateY(-50%);
+}
+
+.clock-item .inner {
+    height: 0px;
+    padding-bottom: 100%;
+    position: relative;
+    width: 100%;
+}
+
+.clock-canvas {
+background-image: url(../images/shaw.gif);
+    border-radius: 50%;
+    height: 0px;
+    padding-bottom: 100%;
+    z-index: 10;
+    background-size: 100%;
+    box-shadow: 4px 7px 4px rgba(0,0,0,0.5);
+}
+
+#header .text {
+    color: #fff;
+    font-weight: bold;
+    margin-top: -45px;
+    position: absolute;
+    top: 55%;
+    text-align: center;
+    width: 100%;
+}
+.clock-canvas .kineticjs-content canvas{
+    display: none;
+}
+.text .val {
+    font-size: 40px !important;
+    font-weight: normal;
+    color: #ffe700;
+    font-family: quicksand_bold;
+    text-align: unset !important;
+        text-shadow: 4px 4px 4px rgba(0,0,0,0.5);
+}
+
+.text .type-time {
+    font-size: 15px;
+   font-family: quicksand_bold;
+    margin-bottom: 0;
+    text-align: unset !important;
+}
+
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+    .clock-item {
+        margin-bottom: 30px;
+    
+    }
+    
+}
+
+@media (max-width: 767px) {
+    .clock-item {
+        margin-top: 30px;
+    }
+}
+

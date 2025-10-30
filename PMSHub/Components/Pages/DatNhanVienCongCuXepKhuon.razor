@@ -1,0 +1,471 @@
+﻿@page "/DatNhanVienCongCuXepKhuon"
+@using Models.Repos.Models
+@using Syncfusion.Blazor.DropDowns
+@using Syncfusion.Blazor.Grids
+@using Syncfusion.Blazor.Inputs
+@using Syncfusion.Blazor.Navigations
+@using Syncfusion.Blazor.Popups
+@using Vars
+@using ViewModels.Repos.Hubs.IServices
+@using FilteringEventArgs = Syncfusion.Blazor.DropDowns.FilteringEventArgs
+@using FilterType = Syncfusion.Blazor.Grids.FilterType
+@using Syncfusion.Blazor.Data
+@using System.Drawing
+@using PMSHub.Components.Layout
+@rendermode InteractiveServer
+@attribute [StreamRendering]
+@inject NavigationManager Navigation
+@inject IMainService MainService
+@inject IConverterService ConverterService
+@inject IJSRuntime JsRuntime
+@inherits AuthenticatedComponent
+<PageTitle>Đặt Nhân Viên Công Cụ Xếp Khuôn</PageTitle>
+<!-- Navbar -->
+<TopLayout />
+<!-- / Navbar -->
+<!-- Content wrapper -->
+<div class="content-wrapper">
+    <!-- Content -->
+
+    <div class="container-xxl flex-grow-1 container-p-y">
+        <h1>Đặt Nhân Viên Công Cụ Xếp Khuôn</h1>
+
+        <SfGrid DataSource="MainService.VmNhanVienCongCu.Items" @ref="Grid" AllowSorting="true" AllowMultiSorting="true" TValue="NhanVienCongCu" AllowFiltering="true" Height="500">
+            <GridTemplates>
+                <ToolbarTemplate>
+                    <SfToolbar>
+                        <ToolbarEvents Clicked="ToolbarClickHandler"></ToolbarEvents>
+                        <ToolbarItems>
+                            <ToolbarItem Type="@ItemType.Button" PrefixIcon="e-refresh icon" Id="refresh" Text="Tải Lại"></ToolbarItem>
+                            <ToolbarItem Type="@ItemType.Button" PrefixIcon="e-expand icon" Id="add" Text="Thêm"></ToolbarItem>
+                            <ToolbarItem Type="@ItemType.Button" PrefixIcon="e-edit icon" Id="edit" Text="Sửa"></ToolbarItem>
+                            @* <ToolbarItem Type="@ItemType.Button" PrefixIcon="e-circle-remove icon" Id="delete" Text="Xóa"></ToolbarItem> *@
+                        </ToolbarItems>
+                    </SfToolbar>
+                </ToolbarTemplate>
+            </GridTemplates>
+            <GridSortSettings>
+                <GridSortColumns>
+                    <GridSortColumn Field="@nameof(NhanVienCongCu.MaXuong)" Direction="SortDirection.Ascending"></GridSortColumn>
+                    <GridSortColumn Field="@nameof(NhanVienCongCu.TabName)" Direction="SortDirection.Ascending"></GridSortColumn>
+                </GridSortColumns>
+            </GridSortSettings>
+            <GridFilterSettings Type="FilterType.Excel"></GridFilterSettings>
+            <GridColumns>
+                @* <GridColumn Type="ColumnType.CheckBox"></GridColumn> *@
+                <GridColumn Field="@nameof(NhanVienCongCu.Ngay)" HeaderText="Ngày" Format="dd/MM/yyyy" Type="ColumnType.Date" TextAlign="TextAlign.Center" Width="120"></GridColumn>
+                <GridColumn Field="@nameof(NhanVienCongCu.Gio)" HeaderText="Gio" Format="HH:mm:ss" Type="ColumnType.TimeOnly" TextAlign="TextAlign.Center" Width="120"></GridColumn>
+                <GridColumn Field="@nameof(NhanVienCongCu.MaNhanVien)" HeaderText="Mã Nhân Viên" Type="ColumnType.String" TextAlign="TextAlign.Center" Width="120"></GridColumn>
+                <GridColumn Field="@nameof(NhanVienCongCu.MaNhanVien)" HeaderText="Mã Hồ Sơ" Type="ColumnType.String" TextAlign="TextAlign.Center" Width="120">
+                    <Template>
+
+                        @{
+                            var a = (context as NhanVienCongCu)?.MaNhanVien;
+                            @ConverterService.NhanVienToMaHoSo(a)
+                            ;
+                        }
+
+                    </Template>
+                    <FilterItemTemplate>
+                        @{
+                            var filterContext = context as FilterItemTemplateContext;
+                            if (filterContext != null)
+                            {
+                                <ln />
+                                @ConverterService.NhanVienToMaHoSo(filterContext.Value.ToString())
+                                ;
+                            }
+                        }
+                    </FilterItemTemplate>
+                </GridColumn>
+                <GridColumn Field="@nameof(NhanVienCongCu.MaNhanVien)" HeaderText="Tên Nhân Viên" Type="ColumnType.String" TextAlign="TextAlign.Center" Width="120">
+                    <Template>
+
+                        @{
+                            var a = (context as NhanVienCongCu)?.MaNhanVien;
+                            @ConverterService.NhanVienToName(a)
+                            ;
+                        }
+
+                    </Template>
+                    <FilterItemTemplate>
+                        @{
+                            var filterContext = context as FilterItemTemplateContext;
+                            if (filterContext != null)
+                            {
+                                <ln />
+                                @ConverterService.NhanVienToName(filterContext.Value.ToString())
+                                ;
+                            }
+                        }
+                    </FilterItemTemplate>
+                </GridColumn>
+                <GridColumn Field="@nameof(NhanVienCongCu.TabName)" HeaderText="Tab" Type="ColumnType.String" TextAlign="TextAlign.Center" Width="120"></GridColumn>
+                <GridColumn Field="@nameof(NhanVienCongCu.MaLo)" HeaderText="Lô" Type="ColumnType.String" TextAlign="TextAlign.Center" Width="120"></GridColumn>
+                <GridColumn Field="@nameof(NhanVienCongCu.MaSizeXepKhuonChinh)" HeaderText="Size XK Chính" Type="ColumnType.String" TextAlign="TextAlign.Center" Width="120">
+                    <Template>
+
+                        @{
+                            var a = (context as NhanVienCongCu)?.MaSizeXepKhuonChinh;
+                            @ConverterService.SizeToName(a, AppKV.XepKhuon)
+                            ;
+                        }
+
+                    </Template>
+                    <FilterItemTemplate>
+                        @{
+                            var filterContext = context as FilterItemTemplateContext;
+                            if (filterContext != null)
+                            {
+                                <ln />
+                                @ConverterService.SizeToName(filterContext.Value.ToString(), AppKV.XepKhuon)
+                                ;
+                            }
+                        }
+                    </FilterItemTemplate>
+                </GridColumn>
+                <GridColumn Field="@nameof(NhanVienCongCu.MaThanhPhamXepKhuonChinh)" HeaderText="Thành Phẩm XK Chính" Type="ColumnType.String" TextAlign="TextAlign.Center" Width="150">
+                    <Template>
+
+                        @{
+                            var a = (context as NhanVienCongCu)?.MaThanhPhamXepKhuonChinh;
+                            @ConverterService.ThanhPhamToName(a, AppKV.XepKhuon)
+                            ;
+                        }
+
+                    </Template>
+                    <FilterItemTemplate>
+                        @{
+                            var filterContext = context as FilterItemTemplateContext;
+                            if (filterContext != null)
+                            {
+                                <ln />
+                                @ConverterService.ThanhPhamToName(filterContext.Value.ToString(), AppKV.XepKhuon)
+                                ;
+                            }
+                        }
+                    </FilterItemTemplate>
+                </GridColumn>
+                <GridColumn Field="@nameof(NhanVienCongCu.MaChieuXaXepKhuonChinh)" HeaderText="Chiếu Xạ XK Chính" Type="ColumnType.String" TextAlign="TextAlign.Center" Width="150">
+                    <Template>
+
+                        @{
+                            var a = (context as NhanVienCongCu)?.MaChieuXaXepKhuonChinh;
+                            @ConverterService.ChieuXaToName(a)
+                            ;
+                        }
+
+                    </Template>
+                    <FilterItemTemplate>
+                        @{
+                            var filterContext = context as FilterItemTemplateContext;
+                            if (filterContext != null)
+                            {
+                                <ln />
+                                @ConverterService.ChieuXaToName(filterContext.Value.ToString())
+                                ;
+                            }
+                        }
+                    </FilterItemTemplate>
+                </GridColumn>
+                <GridColumn Field="@nameof(NhanVienCongCu.MaSizeXepKhuonKXL)" HeaderText="Size XK KXL" Type="ColumnType.String" TextAlign="TextAlign.Center" Width="130">
+                    <Template>
+
+                        @{
+                            var a = (context as NhanVienCongCu)?.MaSizeXepKhuonKXL;
+                            @ConverterService.SizeToName(a, AppKV.XepKhuonKXL)
+                            ;
+                        }
+
+                    </Template>
+                    <FilterItemTemplate>
+                        @{
+                            var filterContext = context as FilterItemTemplateContext;
+                            if (filterContext != null)
+                            {
+                                <ln />
+                                @ConverterService.SizeToName(filterContext.Value.ToString(), AppKV.XepKhuonKXL)
+                                ;
+                            }
+                        }
+                    </FilterItemTemplate>
+                </GridColumn>
+                <GridColumn Field="@nameof(NhanVienCongCu.MaThanhPhamXepKhuonKXL)" HeaderText="Thành Phẩm XK KXL" Type="ColumnType.String" TextAlign="TextAlign.Center" Width="130">
+                    <Template>
+
+                        @{
+                            var a = (context as NhanVienCongCu)?.MaThanhPhamXepKhuonKXL;
+                            @ConverterService.ThanhPhamToName(a, AppKV.XepKhuonKXL)
+                            ;
+                        }
+
+                    </Template>
+                    <FilterItemTemplate>
+                        @{
+                            var filterContext = context as FilterItemTemplateContext;
+                            if (filterContext != null)
+                            {
+                                <ln />
+                                @ConverterService.ThanhPhamToName(filterContext.Value.ToString(), AppKV.XepKhuonKXL)
+                                ;
+                            }
+                        }
+                    </FilterItemTemplate>
+                </GridColumn>
+                <GridColumn Field="@nameof(NhanVienCongCu.MaKhachHangXepKhuonKXL)" HeaderText="Khách Hàng XK KXL" Type="ColumnType.String" TextAlign="TextAlign.Center" Width="130">
+                    <Template>
+
+                        @{
+                            var a = (context as NhanVienCongCu)?.MaKhachHangXepKhuonKXL;
+                            @ConverterService.KhachHangXepKhuonToName(a)
+                            ;
+                        }
+
+                    </Template>
+                    <FilterItemTemplate>
+                        @{
+                            var filterContext = context as FilterItemTemplateContext;
+                            if (filterContext != null)
+                            {
+                                <ln />
+                                @ConverterService.KhachHangXepKhuonToName(filterContext.Value.ToString())
+                                ;
+                            }
+                        }
+                    </FilterItemTemplate>
+                </GridColumn>
+                <GridColumn Field="@nameof(NhanVienCongCu.MaXuong)" HeaderText="Xưởng" Format="d" Type="ColumnType.String" TextAlign="TextAlign.Center" Width="130">
+                    <Template>
+
+                        @{
+                            var a = (context as NhanVienCongCu)?.MaXuong;
+                            @ConverterService.XuongToName(a)
+                            ;
+                        }
+
+                    </Template>
+                    <FilterItemTemplate>
+                        @{
+                            var filterContext = context as FilterItemTemplateContext;
+                            if (filterContext != null)
+                            {
+                                <ln />
+                                @ConverterService.XuongToName(filterContext.Value.ToString())
+                                ;
+                            }
+                        }
+                    </FilterItemTemplate>
+                </GridColumn>
+
+            </GridColumns>
+        </SfGrid>
+        <SfDialog Width="500px" IsModal="true" CloseOnEscape="true" ShowCloseIcon="true" @bind-Visible="@IsVisibleAdd">
+            <DialogEvents OnOverlayModalClick="@OverlayClick"></DialogEvents>
+            <DialogTemplates>
+                <Header>
+                    <div>@(isUpdate == false ? "Thêm" : "Sửa")</div>
+                </Header>
+                <Content>
+                    <SfDropDownList TValue="string" Placeholder="Tab" FloatLabelType="FloatLabelType.Auto" AllowFiltering="true" TItem="Tuple<int, string>" @bind-Value="@Item.TabName" DataSource="@MainService.VmApp.TabXKNames" Enabled="@(!isUpdate)">
+                        <DropDownListFieldSettings Value="Item1" Text="Item2"></DropDownListFieldSettings>
+                    </SfDropDownList>
+                    <SfComboBox TValue="string" Placeholder="Lô" FloatLabelType="FloatLabelType.Auto" AllowFiltering="true" TItem="string" @bind-Value="@Item.MaLo" DataSource="@MainService.VmLo.Items" Enabled="@(!isUpdate)" />
+                    <SfDropDownList EnableVirtualization="true" @ref="DropNhanVien" Query="@LocalDataQuery" TValue="string" Placeholder="Nhân Viên" FloatLabelType="FloatLabelType.Auto" AllowFiltering="true" CssClass="e-multi-column" TItem="NhanVienDaiThanh" @bind-Value="@Item.MaNhanVien" DataSource="@MainService.VmNhanVien.Items" Enabled="@(!isUpdate)">
+                        <DropDownListFieldSettings Value="MaNhanVien" Text="Name"></DropDownListFieldSettings>
+                        <DropDownListTemplates TItem="NhanVienDaiThanh">
+
+                            <HeaderTemplate>
+
+                                <table>
+                                    <tr>
+                                        <th>Mã</th>
+                                        <th>Mã Hồ Sơ</th>
+                                        <th>Tên</th>
+                                    </tr>
+                                </table>
+
+                            </HeaderTemplate>
+
+                            <ItemTemplate>
+
+                                <table>
+                                    <tbody>
+                                        <tr>
+
+                                            <td>@context.MaNhanVien</td>
+                                            <td>@context.MaHoSo</td>
+                                            <td>@context.Name</td>
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+
+                            </ItemTemplate>
+
+                        </DropDownListTemplates>
+
+                        <DropDownListEvents TValue="string" TItem="NhanVienDaiThanh" Filtering="OnFiltering_NhanVien"></DropDownListEvents>
+                    </SfDropDownList>
+                    <SfDropDownList TValue="string" Placeholder="Thành Phẩm XK Chính" FloatLabelType="FloatLabelType.Auto" AllowFiltering="true" TItem="MaThanhPhamChinhXepKhuon" @bind-Value="@Item.MaThanhPhamXepKhuonChinh" DataSource="@MainService.VmThanhPhamChinhXepKhuon.Items">
+                        <DropDownListFieldSettings Value="Ma" Text="Ten"></DropDownListFieldSettings>
+                    </SfDropDownList>
+                    <SfDropDownList TValue="string" Placeholder="Size XK Chính" FloatLabelType="FloatLabelType.Auto" AllowFiltering="true" TItem="MaSizeChinhXepKhuon" @bind-Value="@Item.MaSizeXepKhuonChinh" DataSource="@MainService.VmSizeChinhXepKhuon.Items">
+                        <DropDownListFieldSettings Value="Ma" Text="Ten"></DropDownListFieldSettings>
+                    </SfDropDownList>
+                    <SfDropDownList TValue="string" Placeholder="Chiếu Xạ XK" FloatLabelType="FloatLabelType.Auto" AllowFiltering="true" TItem="MaChieuXaXepKhuon" @bind-Value="@Item.MaChieuXaXepKhuonChinh" DataSource="@MainService.VmChieuXaXepKhuon.Items">
+                        <DropDownListFieldSettings Value="Ma" Text="Ten"></DropDownListFieldSettings>
+                    </SfDropDownList>
+                    <SfDropDownList TValue="string" Placeholder="Thành Phẩm XK KXL" FloatLabelType="FloatLabelType.Auto" AllowFiltering="true" TItem="MaThanhPhamXepKhuonKHC" @bind-Value="@Item.MaThanhPhamXepKhuonKXL" DataSource="@MainService.VmThanhPhamKHCXepKhuon.Items">
+                        <DropDownListFieldSettings Value="Ma" Text="Ten"></DropDownListFieldSettings>
+                    </SfDropDownList>
+                    <SfDropDownList TValue="string" Placeholder="Size XK KXL" FloatLabelType="FloatLabelType.Auto" AllowFiltering="true" TItem="MaSizeXepKhuonKHC" @bind-Value="@Item.MaSizeXepKhuonKXL" DataSource="@MainService.VmSizeKHCXepKhuon.Items">
+                        <DropDownListFieldSettings Value="Ma" Text="Ten"></DropDownListFieldSettings>
+                    </SfDropDownList>
+                    <SfDropDownList TValue="string" Placeholder="Khách Hàng XK KXL" FloatLabelType="FloatLabelType.Auto" AllowFiltering="true" TItem="MaKhachHangXepKhuon" @bind-Value="@Item.MaKhachHangXepKhuonKXL" DataSource="@MainService.VmKhachHangXepKhuon.Items">
+                        <DropDownListFieldSettings Value="Ma" Text="Ten"></DropDownListFieldSettings>
+                    </SfDropDownList>
+                    <SfDropDownList TValue="string" Placeholder="Xưởng" FloatLabelType="FloatLabelType.Auto" AllowFiltering="true" TItem="XiNghiep" @bind-Value="@Item.MaXuong" DataSource="@MainService.VmXiNghiep.Items" Enabled="@(!isUpdate)">
+                        <DropDownListFieldSettings Value="Ma" Text="Ten"></DropDownListFieldSettings>
+                    </SfDropDownList>
+                </Content>
+            </DialogTemplates>
+            <DialogButtons>
+                <DialogButton Content="Xác Nhận" IsPrimary="true" OnClick="@CloseDialogAdd" />
+            </DialogButtons>
+        </SfDialog>
+
+    </div>
+
+    <!-- / Content -->
+    <!-- Footer -->
+    <FooterLayout />
+    <!-- / Footer -->
+    <div class="content-backdrop fade"></div>
+</div>
+<!-- Content wrapper -->
+@code {
+    private bool IsVisibleAdd;
+    private bool isUpdate;
+    private string code1 = "";
+    private string code2 = "";
+    private NhanVienCongCu Item = new();
+    SfDropDownList<string, NhanVienDaiThanh> DropNhanVien;
+    public Query LocalDataQuery = new Query().Take(10);
+    private void OpenDialogAdd()
+    {
+        if (isUpdate == false)
+        {
+            var item = MainService.VmNhanVienCongCu.CreateDefaultNew();
+
+            Item = item;
+        }
+
+
+        IsVisibleAdd = true;
+    }
+    private void OverlayClick(OverlayModalClickEventArgs args)
+    {
+        IsVisibleAdd = false;
+
+    }
+
+    private async void CloseDialogAdd()
+    {
+        var item = Item;
+
+        if (isUpdate)
+        {
+            var result = Handlers.ErrorHandler.Handle(() =>
+            {
+                MainService.VmNhanVienCongCu.Update(Item);
+                IsVisibleAdd = false;
+                isUpdate = false;
+                MainService.VmNhanVienCongCu.Reload();
+            });
+            if (!result.IsSuccess)
+            {
+                await JsRuntime.InvokeVoidAsync("alert", result.Error?.ToString()); // Alert
+            }
+        }
+        else
+        {
+            var result = await Handlers.ErrorHandler.HandleAsync(async () =>
+            {
+                if (Item.MaLo != null && Item.MaLo.Trim() != "" && Item.Ngay != null && Item.TabName != null && Item.TabName.Trim() != "" && Item.MaXuong != null && Item.MaXuong.Trim() != "" && Item.MaNhanVien != null && Item.MaNhanVien.Trim() != "")
+                {
+                    MainService.VmNhanVienCongCu.Insert(Item);
+                    IsVisibleAdd = false;
+                    MainService.VmNhanVienCongCu.Reload();
+                }
+                else
+                {
+                    await JsRuntime.InvokeVoidAsync("alert", "Vui Lòng nhập đầy đủ thông tin"); // Alert
+                }
+            });
+            if (!result.IsSuccess)
+            {
+                await JsRuntime.InvokeVoidAsync("alert", result.Error?.ToString()); // Alert
+            };
+        }
+    }
+
+    private SfGrid<NhanVienCongCu> Grid;
+
+    public async Task OnFiltering_NhanVien(FilteringEventArgs args)
+
+    {
+        args.PreventDefaultAction = true;
+
+        var pre = new WhereFilter();
+
+        var predicate = new List<WhereFilter>();
+
+        predicate.Add(new WhereFilter { Condition = "or", Field = "Name", value = args.Text, Operator = "startswith", IgnoreAccent = true, IgnoreCase = true });
+        predicate.Add(new WhereFilter { Condition = "or", Field = "MaHoSo", value = args.Text, Operator = "startswith", IgnoreAccent = true, IgnoreCase = true });
+        predicate.Add(new WhereFilter { Condition = "or", Field = "MaNhanVien", value = args.Text, Operator = "startswith", IgnoreAccent = true, IgnoreCase = true });
+        pre = WhereFilter.Or(predicate);
+
+        var query = new Query().Where(pre);
+
+        await DropNhanVien.FilterAsync(MainService.VmNhanVien.Items, query);
+    }
+
+    public async Task ToolbarClickHandler(ClickEventArgs args)
+    {
+        if (args.Item.Id == "refresh")
+        {
+            MainService.VmNhanVienCongCu.Reload();
+        }
+
+        if (args.Item.Id == "add")
+        {
+            isUpdate = false;
+            OpenDialogAdd();
+        }
+
+        if (args.Item.Id == "edit")
+        {
+            var value = await Grid.GetSelectedRecordsAsync();
+            if (value != null && value.Count == 1)
+            {
+                isUpdate = true;
+                Item = MainService.VmNhanVienCongCu.CopyItem(value.First());
+                OpenDialogAdd();
+            }
+            else
+            {
+                await JsRuntime.InvokeVoidAsync("alert", "Không có dữ liệu được chọn!"); // Alert
+            }
+        }
+
+        if (args.Item.Id == "delete")
+        {
+            var value = await Grid.GetSelectedRecordsAsync();
+        }
+    }
+
+    protected override void OnInitialized()
+    {
+    }
+
+}

@@ -1,0 +1,65 @@
+﻿.svg-frame {
+    position: relative;
+    width: 50px;
+    height: 50px;
+    transform-style: preserve-3d;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: -20px 0px 0px -20px;
+    
+}
+
+    .svg-frame svg {
+        position: absolute;
+        transition: .5s;
+        z-index: -1;
+        transform-origin: 270px 270px;
+        width: 344px;
+        height: 344px;
+        fill: none;
+        transform: scale(0.4);
+        /*border: 1px solid #000;*/
+    }
+
+    .svg-frame:hover svg {
+        transform-origin: bottom right;transform: rotate(0deg) skew(30deg) translateX(calc(45px * var(--i))) translateY(calc(-35px * var(--i))) scale(0.5);
+    }
+
+.svg-frame svg #center {
+    transition: .5s;
+    transform-origin: center;
+}
+
+.svg-frame:hover svg #center {
+    transform: rotate(-30deg) translateX(45px) translateY(-3px);
+}
+
+#out2 {
+    animation: rotate16 7s ease-in-out infinite alternate;
+    transform-origin: center;
+}
+
+#out3 {
+    animation: rotate16 3s ease-in-out infinite alternate;
+    transform-origin: center;
+    stroke: red;
+}
+
+#inner3,
+#inner1 {
+    animation: rotate16 4s ease-in-out infinite alternate;
+    transform-origin: center;
+}
+
+#center1 {
+    fill: red;
+    animation: rotate16 2s ease-in-out infinite alternate;
+    transform-origin: center;
+}
+
+@keyframes rotate16 {
+    to {
+        transform: rotate(360deg);
+    }
+}

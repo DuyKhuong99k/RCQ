@@ -1,0 +1,13 @@
+[
+  {
+    "NameMayCanHubs": "Máy Cân",
+    //"HubsMayCanUrl": "https://192.168.1.5:7251/api/login",
+    "HubsMayCanUrl": "https://192.168.1.107/api/login",
+    "TypeMayCanHubs": 0
+  },
+  {
+    "NameMayCanHubs": "Máy Cân 2",
+    "HubsMayCanUrl": "https://192.168.1.5:7251/api/login",
+    "TypeMayCanHubs": 0
+  }
+]

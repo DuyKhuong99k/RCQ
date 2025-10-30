@@ -1,0 +1,235 @@
+﻿@{
+    ViewData["Title"] = "Account";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="container-xxl flex-grow-1 container-p-y" style="margin-top:-51px">
+    <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Cài Đặt /</span> Tài Khoản</h4>
+
+    <div class="row">
+        <div class="col-md-12">
+            @* <ul class="nav nav-pills flex-column flex-md-row mb-3">
+                <li class="nav-item">
+                    <a class="nav-link active" href="/SettingWebApp/Account"><i class="bx bx-user me-1"></i> Tài Khoản</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/SettingWebApp/Notifications"><i class="bx bx-bell me-1"></i> Thông Báo</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link " href="/SettingWebApp/Connections"><i class="bx bx-link-alt me-1"></i> Kết Nối</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link " href="/SettingWebApp/Dashboard"><i class='bx bxs-dashboard me-1'></i> Dashboard</a>
+                </li>
+            </ul> *@
+            <div class="card mb-4">
+                <h5 class="card-header">Chi tiết hồ sơ</h5>
+                <!-- Account -->
+                <div class="card-body">
+                    <div class="d-flex align-items-start align-items-sm-center gap-4">
+                        <img src="~/authentication/images/defautavatar.png"
+                             alt="user-avatar"
+                             class="d-block rounded"
+                             height="100"
+                             width="100"
+                             id="uploadedAvatar"
+                             data-original-src="../authentication/images/defautavatar.png" />
+                        <div class="button-wrapper">
+                            <label for="upload" class="btn btn-primary me-2 mb-4" tabindex="0">
+                                <span class="d-none d-sm-block">Tải ảnh mới</span>
+                                <i class="bx bx-upload d-block d-sm-none"></i>
+                                <input type="file"
+                                       id="upload"
+                                       class="account-file-input"
+                                       hidden
+                                       accept="image/png, image/jpeg"
+                                       onchange="displaySelectedImage(event)" />
+                            </label>
+                            <button type="button" class="btn btn-outline-secondary account-image-reset mb-4" onclick="resetImage()">
+                                <i class="bx bx-reset d-block d-sm-none"></i>
+                                <span class="d-none d-sm-block">Tải lại</span>
+                            </button>
+
+                            <p class="text-muted mb-0">Được phép JPG, GIF hoặc PNG. Kích thước tối đa 800K</p>
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="my-0" />
+                <div class="card-body">
+                    <form id="formAccountSettings" method="POST" onsubmit="return false">
+                        <div class="row">
+                            <div class="mb-3 col-md-6">
+                                <label for="firstName" class="form-label">Tài Khoản</label>
+                                <input class="form-control"
+                                       type="text"
+                                       id="userNameSettingApp"
+                                       name="firstName"
+                                       autofocus disabled />
+                            </div>
+                            <div class="mb-3 col-md-6">
+                                <label for="lastName" class="form-label">Họ Tên</label>
+                                <input class="form-control" type="text" name="hoTen" id="hoTenSettingApp" />
+                            </div>
+                            <div class="mb-3 col-md-6">
+                                <label for="email" class="form-label">E-mail</label>
+                                <input class="form-control"
+                                       type="text"
+                                       id="emailSettingApp"
+                                       name="email"
+                                       placeholder="test.pms-vn@gmail.com" />
+                            </div>
+
+                            <div class="mb-3 col-md-6">
+                                <label class="form-label" for="phoneNumber">Số Điện Thoại</label>
+                                <div class="input-group input-group-merge">
+                                    <span class="input-group-text">VN (+84)</span>
+                                    <input type="text"
+                                           id="phoneNumberSettingApp"
+                                           name="phoneNumber"
+                                           class="form-control"
+                                           placeholder="09485550**" />
+                                </div>
+                            </div>
+                            <div class="mb-3 col-md-6">
+                                <label for="address" class="form-label">Địa Chỉ</label>
+                                <input type="text" class="form-control" id="addressSettingApp" name="address" placeholder="Địa Chỉ" />
+                            </div>
+
+                            <div class="mb-3 col-md-6">
+                                <label for="zipCode" class="form-label">Mã Hồ Sơ</label>
+                                <input type="text"
+                                       class="form-control"
+                                       id="zipCodeSettingApp"
+                                       name="zipCode"
+                                       placeholder="231465"
+                                       maxlength="6" />
+                            </div>
+
+                        </div>
+                        <div class="mt-2">
+                            <button onclick="insert()" class="btn btn-primary me-2 position-relative" type="submit" id="">
+                                <div class=" align-items-center">
+                                    <span id="txtThem">Lưu</span>
+                                    <div id="loadingIndicator" class=" spinner-border text-secondary position-absolute" role="status" style="left: 0;right: 0;top: 0;bottom: 0;margin: auto; display:none">
+                                        <span class="visually-hidden">Đang tải...</span>
+                                    </div>
+                                </div>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                <!-- /Account -->
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        getInfoAndShowModal();
+    });
+    function getInfoAndShowModal() {
+        var id = $('#abc').val();
+        $.ajax({
+            url: '/Authentication/GetInfoUserById',
+            data: { id: id },
+            type: 'GET',
+            dataType: 'json',
+            success: function (rs) {
+                if (rs.isSuccess === true) {
+                    $('#userNameSettingApp').val(rs.UserName);
+                    var avatarImgUrl = rs.AvatarImg;
+                    if (avatarImgUrl === null || typeof avatarImgUrl === 'undefined') {
+                        // Sử dụng đường dẫn ảnh mặc định
+                        avatarImgUrl = '../authentication/images/defautavatar.png';
+                    }
+                    $('#uploadedAvatar').attr('src',avatarImgUrl);
+                    $('#uploadedAvatar').attr('data-original-src',avatarImgUrl);
+                    $('#hoTenSettingApp').val(rs.HoTen);
+                    $('#emailSettingApp').val(rs.Email);
+                    $('#zipCodeSettingApp').val(rs.MaNhanVien);
+                    $('#phoneNumberSettingApp').val(rs.PhoneNumber);
+                    $('#addressSettingApp').val(rs.Address);
+                } else {
+                    toastOptionNotyfi();
+                    toastr["warning"]('Không tìm thấy thông tin!', "Thông báo");
+                }
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error, "Thông báo");
+            }
+        });
+    }
+    function insert() {
+        var id = $('#abc').val();
+        var fileVal = document.getElementById("upload");
+        var file = fileVal; // Lấy tệp ảnh từ input file
+        var avatarImg = $('#uploadedAvatar').attr('src');
+        var hoTen = $('#hoTenSettingApp').val();
+        var email = $('#emailSettingApp').val();
+        var maNhanVien = $('#zipCodeSettingApp').val();
+        var phoneNumber = $('#phoneNumberSettingApp').val();
+        var address = $('#addressSettingApp').val();
+        document.getElementById("txtThem").style.visibility = "hidden";
+        document.getElementById("loadingIndicator").style.display = "block";
+
+        $.ajax({
+            type: 'POST',
+            url: '/Authentication/DoUpdateSetting',
+            data: {
+                id: id,
+                avatarImg: avatarImg,
+                hoten: hoTen, // Chú ý sửa tên tham số tương ứng
+                email: email,
+                maNhanVien: maNhanVien,
+                phoneNumber: phoneNumber,
+                address: address
+            },
+            success: function (rs) {
+                if (rs.isSuccess === true) {
+                    toastOptionNotyfi();
+                    toastr["success"](rs.Messages, "Thông báo");
+                    setTimeout(function () {
+                        location.reload();
+                    }, 2000);
+                } else {
+                    toastOptionNotyfi();
+                    toastr["warning"](rs.Messages, "Thông báo");
+                }
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error, "Thông báo");
+            },
+            complete: function () {
+                document.getElementById("loadingIndicator").style.display = "none";
+                document.getElementById("txtThem").style.visibility = "visible";
+            }
+        });
+
+        // Đọc dữ liệu từ tệp ảnh
+        reader.readAsDataURL(file);
+    }
+
+
+    function displaySelectedImage(event) {
+        var selectedFile = event.target.files[0];
+        var reader = new FileReader();
+
+        var imgElement = document.getElementById('uploadedAvatar');
+        reader.onload = function () {
+            imgElement.src = reader.result;
+        }
+
+        reader.readAsDataURL(selectedFile);
+    }
+
+    function resetImage() {
+        var imgElement = document.getElementById('uploadedAvatar');
+        var originalSrc = imgElement.getAttribute('data-original-src');
+        imgElement.src = originalSrc;
+    }
+
+
+</script>
+

@@ -1,0 +1,142 @@
+﻿@inject ILocalStorageService LocalStorage
+@inject NavigationManager Navigation
+@inject ILoginService loginService
+@inject IHttpContextAccessor HttpContextAccessor
+@using Blazored.LocalStorage
+@using Syncfusion.Blazor.Buttons
+@using ViewModels.Repos.Hubs.IServices
+@inject IJSRuntime JsRuntime
+<!-- Navbar -->
+<style>
+    .layout-menu-toggle {
+        position: absolute; /* Hoặc fixed nếu muốn nút luôn cố định */
+       
+        z-index: 1050; /* Nút nằm trên các thành phần khác */
+    }
+
+    .layout-navbar {
+        position: relative; /* Làm gốc cho các phần tử con */
+        z-index: 1; /* Navbar nằm dưới nút toggle */
+    }
+    @@media (max-width: 768px) {
+    .layout-menu-toggle {
+        top: 10px;
+        left: 10px;
+    }
+}
+</style>
+<nav class="layout-navbar container-xxl navbar navbar-expand-xl navbar-detached align-items-center bg-navbar-theme" id="layout-navbar" style="margin-bottom:25px">
+    <div class="layout-menu-toggle navbar-nav align-items-xl-center me-3 me-xl-0 d-xl-none">
+        <a class="nav-item nav-link px-0 me-xl-4" href="javascript:void(0);">
+            <i class="top-layout bx bx-menu bx-sm"></i>
+        </a>
+    </div>
+
+    <div class="navbar-nav-right d-flex align-items-center" id="navbar-collapse">
+        <!-- Search -->
+        <div class="navbar-nav align-items-center">
+            <div class="nav-item d-flex align-items-center">
+                <i style="margin-left:17px" class="bx bx-search fs-4 lh-0"></i>
+                <input type="text"
+                       class="form-control border-0 shadow-none"
+                       placeholder="Search..."
+                       aria-label="Search..." />
+            </div>
+        </div>
+        <!-- /Search -->
+
+        <ul class="navbar-nav flex-row align-items-center ms-auto">
+            <!-- Place this tag where you want the button to render. -->
+            <!-- User -->
+            <li class="nav-item navbar-dropdown dropdown-user dropdown">
+                <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown">
+                    <div class="">
+
+                        @if (!string.IsNullOrEmpty(Username))
+                        {
+                            <p id="userNameSesstion">Xin Chào, @Username</p>
+                        }
+                        else
+                        {
+                            <p>Không có người dùng đăng nhập.</p>
+                        }
+                    </div>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li>
+                        <div class="dropdown-divider"></div>
+                    </li>
+                    <li>
+                        @if (loginService.IsUserAuthenticated())
+                        {
+                            <button class="dropdown-item btn-link" @onclick="Logout">
+                                <i class="bx bx-power-off me-2"></i>
+                                <span class="align-middle">Đăng Xuất</span>
+                            </button>
+
+                            @* <SfButton style="margin: 2px;" CssClass="e-primary" @onclick="Logout">Đăng xuất</SfButton> *@
+
+                        }
+                        else
+                        {
+                            <p>Vui lòng đăng nhập</p>
+                        }
+                    </li>
+                </ul>
+            </li>
+            <!--/ User -->
+        </ul>
+    </div>
+</nav>
+
+<!-- / Navbar -->
+@code {
+    private bool isInitialized = false;
+    private async Task Logout()
+    {
+        await loginService.Logout();
+        Navigation.NavigateTo("/", true);
+        StateHasChanged();
+    }
+    private void ReloadPage()
+    {
+        // Lấy URL hiện tại và buộc tải lại trang
+        Navigation.NavigateTo(Navigation.Uri, forceLoad: true);
+    }
+
+    private string? Username;
+    private string? usernameDisplay;
+    protected override async Task OnInitializedAsync()
+    {
+        if (!loginService.IsSessionCreated())
+        {
+            loginService.CreateDefaultSession();
+        }
+
+        // Xác định `isInitialized` để kiểm tra lần đầu trong `OnAfterRenderAsync`
+        isInitialized = true;
+
+        await base.OnInitializedAsync();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        // Chỉ điều hướng khi render lần đầu tiên để tránh vòng lặp
+        if (firstRender && isInitialized)
+        {
+            await LoadUsernameAsync();
+        }
+
+        await base.OnAfterRenderAsync(firstRender);
+    }
+
+
+
+    private async Task LoadUsernameAsync()
+    {
+        Username = HttpContextAccessor.HttpContext?.Session.GetString("Username");
+
+        StateHasChanged(); // Cập nhật giao diện ngay lập tức
+
+    }
+}

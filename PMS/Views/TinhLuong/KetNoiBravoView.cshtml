@@ -1,0 +1,1066 @@
+﻿@{
+    ViewData["Title"] = "KetNoiBravoView";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var roleIds = PMS.Middlewares.AuthenticationHelpers.GetRoleIdsFromCookie(Context);
+    // lấy danh sách fu func từ list roleId
+    var rolePermistions = await PMS.Middlewares.AuthenticationHelpers.GetRolePermistionsAsync(Context, roleIds);
+    var XuongId = @Context.Session.GetString("XuongId");
+
+    var ListCongDoan = ViewBag.ListCongDoan;
+}
+<style>
+    .card-body {
+        padding: 20px;
+        background-color: #f9f9f9;
+    }
+
+    .section {
+        margin-top: 20px;
+        padding: 15px;
+        border-radius: 8px;
+        background-color: #fff;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .section-title {
+        margin-bottom: 15px;
+        font-weight: bold;
+        color: #333;
+    }
+
+    .row {
+        margin-bottom: 10px;
+    }
+
+    .btn {
+        transition: background-color 0.3s;
+    }
+
+        .btn:hover {
+            background-color: #0056b3;
+        }
+
+    h6 {
+        font-weight: normal;
+        color: #555;
+    }
+
+</style>
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm border-0 rounded-lg">
+                <div class="card-header d-flex justify-content-between align-items-center  text-white">
+                    <h2>Kết Chuyển Dữ Liệu - Bravo</h2>
+                </div>
+                <div class="card-body">
+                    <div class="section">
+                        <h5 class="section-title">Vùng Nuôi</h5>
+                        <div class="row mb-3 align-items-center">
+                            <div class="col">
+                                <h6 class="mb-0">Cá Giống</h6>
+                            </div>
+                            <div class="col text-right">
+                                <button onclick="upLoadCaGiong()" class="btn btn-primary btn-lg">
+                                    <i class='bx bx-upload'></i> Tải Lên
+                                </button>
+                            </div>
+                        </div>
+                        <div class="row mb-3 align-items-center">
+                            <div class="col">
+                                <h6 class="mb-0">Cá Thịt</h6>
+                            </div>
+                            <div class="col text-right">
+                                <button onclick="upLoadCaThit()" class="btn btn-primary btn-lg">
+                                    <i class='bx bx-upload'></i> Tải Lên
+                                </button>
+                            </div>
+                        </div>
+                        <div class="row mb-3 align-items-center">
+                            <div class="col">
+                                <h6 class="mb-0">Cá Ngộp</h6>
+                            </div>
+                            <div class="col text-right">
+                                <button onclick="upLoadCaNgop()" class="btn btn-primary btn-lg">
+                                    <i class='bx bx-upload'></i> Tải Lên
+                                </button>
+                            </div>
+                        </div>
+                        <div class="row mb-3 align-items-center">
+                            <div class="col">
+                                <h6 class="mb-0">Bột Cá</h6>
+                            </div>
+                            <div class="col text-right">
+                                <button onclick="upLoadBotCa()" class="btn btn-primary btn-lg">
+                                    <i class='bx bx-upload'></i> Tải Lên
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="section">
+                        <h5 class="section-title">Sản Xuất</h5>
+
+                        <div class="row mb-3 align-items-center">
+                            <div class="col-3">
+                                <h6 class="mb-0">Công Đoạn</h6>
+                            </div>
+                            <div class="col-3">
+                                <select id="listCongDoan" class="form-control form-control-lg">
+                                    <option disabled selected>Chọn công đoạn</option>
+                                    @foreach (var item in ListCongDoan)
+                                    {
+                                        <option value="@item.Key">@item.Value</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-3 text-right">
+                                <button id="btnCongDoan" onclick="upLoadSanXuat()" class="btn btn-primary btn-lg" disabled>
+                                    <i class='bx bx-upload'></i> Tải Lên
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $('#listCongDoan').on('change', function () {
+        // Kiểm tra xem có phần tử nào được chọn hay không
+        if ($(this).val()) {
+            $('#btnCongDoan').prop('disabled', false);
+        } else {
+            $('#btnCongDoan').prop('disabled', true);
+        }
+    });
+</script>
+<script>
+    function upLoadSanXuat() {
+        var congDoanId = $('#listCongDoan').val();
+        var dateTime = $('#dateTimeTL').val();
+        // CheckItemServerBV
+        $.ajax({
+            url: "@Url.Action("CheckItemServerBVPhieuCanSanXuat", "KetNoiBravo")",
+            type: "GET",
+            data: { ngay: dateTime, congDoanId: congDoanId },
+            success: function (response) {
+                if (response.isSuccess) {
+                    bootbox.confirm({
+                        title: "Thông báo!",
+                        message: 'Thực Hiện Lại Thao Tác',
+                        buttons: {
+                            cancel: {
+                                label: 'Cancel',
+                                className: 'btn btn-secondary'
+                            },
+                            confirm: {
+                                label: 'OK',
+                                className: 'btn btn-primary'
+                            }
+                        },
+                        callback: function (result) {
+                            if (!result) { // Cancel
+                                toastOptionNotyfi();
+                                toastr["warning"]("Dừng Upload dữ liệu Bravo!", "Thông báo");
+                                return;
+                            }
+                            else if (result) { // OK
+                                $.ajax({
+                                    url: '/KetNoiBravo/DeleteItemServerBVPhieuCanSanXuat',
+                                    data: { ngay: dateTime, congDoanId: congDoanId },
+                                    type: 'POST',
+                                    success: function (response) {
+                                        if (response.isSuccess) {
+                                            toastOptionNotyfi();
+                                            toastr["success"](response.Messages, "Thông báo");
+                                            $.ajax({
+                                                url: '/KetNoiBravo/ConfirmItemCountUploadBVPhieuCanSanXuat',
+                                                data: { ngay: dateTime, congDoanId: congDoanId },
+                                                type: 'POST',
+                                                success: function (response) {
+                                                    if (response.isSuccess) {
+                                                        bootbox.confirm({
+                                                            title: "Thông báo!",
+                                                            message: response.Messages,
+                                                            buttons: {
+                                                                cancel: {
+                                                                    label: 'Cancel',
+                                                                    className: 'btn btn-secondary'
+                                                                },
+                                                                confirm: {
+                                                                    label: 'OK',
+                                                                    className: 'btn btn-primary'
+                                                                }
+                                                            },
+                                                            callback: function (result) {
+                                                                if (!result) { // Cancel
+                                                                    toastOptionNotyfi();
+                                                                    toastr["warning"]("Dừng Upload dữ liệu Bravo!", "Thông báo");
+                                                                    return;
+                                                                }
+                                                                else if (result) { // OK
+                                                                    $.ajax({
+                                                                        url: '/KetNoiBravo/UploadSanXuat',
+                                                                        data: { ngay: dateTime, congDoanId: congDoanId },
+                                                                        type: 'POST',
+                                                                        success: function (response) {
+                                                                            if (response.isSuccess) {
+                                                                                toastOptionNotyfi();
+                                                                                toastr["success"](response.Messages, "Thông báo");
+                                                                            }
+                                                                            else {
+                                                                                toastOptionNotyfi();
+                                                                                toastr["error"](response.Messages, "Thông báo");
+                                                                            }
+                                                                        },
+                                                                        error: function (xhr, status, error) {
+                                                                            // Xử lý lỗi ở đây
+                                                                            toastOptionNotyfi();
+                                                                            toastr["error"]("Có lỗi xảy ra trong quá trình xử lý dữ liệu! Vui lòng thử lại!", "Thông báo");
+                                                                        }
+                                                                    });
+                                                                }
+                                                            }
+                                                        });
+                                                    }
+                                                    else {
+                                                        toastOptionNotyfi();
+                                                        toastr["error"](response.Messages, "Thông báo");
+                                                    }
+                                                },
+                                                error: function (xhr, status, error) {
+                                                    // Xử lý lỗi ở đây
+                                                    toastOptionNotyfi();
+                                                    toastr["error"]("Có lỗi xảy ra trong quá trình xử lý dữ liệu! Vui lòng thử lại!", "Thông báo");
+                                                }
+                                            });
+                                        }
+                                        else {
+                                            toastOptionNotyfi();
+                                            toastr["error"](response.Messages, "Thông báo");
+                                        }
+                                    },
+                                    error: function (xhr, status, error) {
+                                        // Xử lý lỗi ở đây
+                                        toastOptionNotyfi();
+                                        toastr["error"]("Có lỗi xảy ra trong quá trình xử lý dữ liệu! Vui lòng thử lại!", "Thông báo");
+                                    }
+                                });
+                            }
+                        }
+                    });
+                } else {
+                    $.ajax({
+                        url: '/KetNoiBravo/ConfirmItemCountUploadBVPhieuCanSanXuat',
+                        data: { ngay: dateTime, congDoanId: congDoanId },
+                        type: 'POST',
+                        success: function (response) {
+                            if (response.isSuccess) {
+                                bootbox.confirm({
+                                    title: "Thông báo!",
+                                    message: response.Messages,
+                                    buttons: {
+                                        cancel: {
+                                            label: 'Cancel',
+                                            className: 'btn btn-secondary'
+                                        },
+                                        confirm: {
+                                            label: 'OK',
+                                            className: 'btn btn-primary'
+                                        }
+                                    },
+                                    callback: function (result) {
+                                        if (!result) { // Cancel
+                                            toastOptionNotyfi();
+                                            toastr["warning"]("Dừng Upload dữ liệu Bravo!", "Thông báo");
+                                            return;
+                                        }
+                                        else if (result) { // OK
+                                            $.ajax({
+                                                url: '/KetNoiBravo/UploadSanXuat',
+                                                data: { ngay: dateTime, congDoanId: congDoanId },
+                                                type: 'POST',
+                                                success: function (response) {
+                                                    if (response.isSuccess) {
+                                                        toastOptionNotyfi();
+                                                        toastr["success"](response.Messages, "Thông báo");
+                                                    }
+                                                    else {
+                                                        toastOptionNotyfi();
+                                                        toastr["error"](response.Messages, "Thông báo");
+                                                    }
+                                                },
+                                                error: function (xhr, status, error) {
+                                                    // Xử lý lỗi ở đây
+                                                    toastOptionNotyfi();
+                                                    toastr["error"]("Có lỗi xảy ra trong quá trình xử lý dữ liệu! Vui lòng thử lại!", "Thông báo");
+                                                }
+                                            });
+                                        }
+                                    }
+                                });
+                            }
+                            else {
+                                toastOptionNotyfi();
+                                toastr["error"](response.Messages, "Thông báo");
+                            }
+                        },
+                        error: function (xhr, status, error) {
+                            // Xử lý lỗi ở đây
+                            toastOptionNotyfi();
+                            toastr["error"]("Có lỗi xảy ra trong quá trình xử lý dữ liệu! Vui lòng thử lại!", "Thông báo");
+                        }
+                    });
+                }
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"](error, "Thông báo");
+            }
+        });
+    }
+</script>
+<script>
+    function upLoadCaGiong() {
+
+        var dateTime = $('#dateTimeTL').val();
+        // CheckItemServerBV
+        $.ajax({
+            url: "@Url.Action("CheckItemServerBVPhieuCanCaGiong", "KetNoiBravo")",
+            type: "GET",
+            data: { ngay: dateTime },
+            success: function (response) {
+                if (response.isSuccess) {
+                    bootbox.confirm({
+                        title: "Thông báo!",
+                        message: 'Thực Hiện Lại Thao Tác',
+                        buttons: {
+                            cancel: {
+                                label: 'Cancel',
+                                className: 'btn btn-secondary'
+                            },
+                            confirm: {
+                                label: 'OK',
+                                className: 'btn btn-primary'
+                            }
+                        },
+                        callback: function (result) {
+                            if (!result) { // Cancel
+                                toastOptionNotyfi();
+                                toastr["warning"]("Dừng Upload dữ liệu Bravo!", "Thông báo");
+                                return;
+                            }
+                            else if (result) { // OK
+                                $.ajax({
+                                    url: '/KetNoiBravo/DeleteItemServerBVPhieuCanCaGiong',
+                                    data: { ngay: dateTime },
+                                    type: 'POST',
+                                    success: function (response) {
+                                        if (response.isSuccess) {
+                                            toastOptionNotyfi();
+                                            toastr["success"](response.Messages, "Thông báo");
+                                            $.ajax({
+                                                url: '/KetNoiBravo/ConfirmItemCountUploadBVPhieuCanCaGiong',
+                                                data: { ngay: dateTime },
+                                                type: 'POST',
+                                                success: function (response) {
+                                                    if (response.isSuccess) {
+                                                        bootbox.confirm({
+                                                            title: "Thông báo!",
+                                                            message: response.Messages,
+                                                            buttons: {
+                                                                cancel: {
+                                                                    label: 'Cancel',
+                                                                    className: 'btn btn-secondary'
+                                                                },
+                                                                confirm: {
+                                                                    label: 'OK',
+                                                                    className: 'btn btn-primary'
+                                                                }
+                                                            },
+                                                            callback: function (result) {
+                                                                if (!result) { // Cancel
+                                                                    toastOptionNotyfi();
+                                                                    toastr["warning"]("Dừng Upload dữ liệu Bravo!", "Thông báo");
+                                                                    return;
+                                                                }
+                                                                else if (result) { // OK
+                                                                    $.ajax({
+                                                                        url: '/KetNoiBravo/UploadCaGiong',
+                                                                        data: { ngay: dateTime, congDoanId: congDoanId },
+                                                                        type: 'POST',
+                                                                        success: function (response) {
+                                                                            if (response.isSuccess) {
+                                                                                toastOptionNotyfi();
+                                                                                toastr["success"](response.Messages, "Thông báo");
+                                                                            }
+                                                                            else {
+                                                                                toastOptionNotyfi();
+                                                                                toastr["error"](response.Messages, "Thông báo");
+                                                                            }
+                                                                        },
+                                                                        error: function (xhr, status, error) {
+                                                                            // Xử lý lỗi ở đây
+                                                                            toastOptionNotyfi();
+                                                                            toastr["error"]("Có lỗi xảy ra trong quá trình xử lý dữ liệu! Vui lòng thử lại!", "Thông báo");
+                                                                        }
+                                                                    });
+                                                                }
+                                                            }
+                                                        });
+                                                    }
+                                                    else {
+                                                        toastOptionNotyfi();
+                                                        toastr["error"](response.Messages, "Thông báo");
+                                                    }
+                                                },
+                                                error: function (xhr, status, error) {
+                                                    // Xử lý lỗi ở đây
+                                                    toastOptionNotyfi();
+                                                    toastr["error"]("Có lỗi xảy ra trong quá trình xử lý dữ liệu! Vui lòng thử lại!", "Thông báo");
+                                                }
+                                            });
+                                        }
+                                        else {
+                                            toastOptionNotyfi();
+                                            toastr["error"](response.Messages, "Thông báo");
+                                        }
+                                    },
+                                    error: function (xhr, status, error) {
+                                        // Xử lý lỗi ở đây
+                                        toastOptionNotyfi();
+                                        toastr["error"]("Có lỗi xảy ra trong quá trình xử lý dữ liệu! Vui lòng thử lại!", "Thông báo");
+                                    }
+                                });
+                            }
+                        }
+                    });
+                } else {
+                    $.ajax({
+                        url: '/KetNoiBravo/ConfirmItemCountUploadBVPhieuCanCaGiong',
+                        data: { ngay: dateTime },
+                        type: 'POST',
+                        success: function (response) {
+                            if (response.isSuccess) {
+                                bootbox.confirm({
+                                    title: "Thông báo!",
+                                    message: response.Messages,
+                                    buttons: {
+                                        cancel: {
+                                            label: 'Cancel',
+                                            className: 'btn btn-secondary'
+                                        },
+                                        confirm: {
+                                            label: 'OK',
+                                            className: 'btn btn-primary'
+                                        }
+                                    },
+                                    callback: function (result) {
+                                        if (!result) { // Cancel
+                                            toastOptionNotyfi();
+                                            toastr["warning"]("Dừng Upload dữ liệu Bravo!", "Thông báo");
+                                            return;
+                                        }
+                                        else if (result) { // OK
+                                            $.ajax({
+                                                url: '/KetNoiBravo/UploadCaGiong',
+                                                data: { ngay: dateTime },
+                                                type: 'POST',
+                                                success: function (response) {
+                                                    if (response.isSuccess) {
+                                                        toastOptionNotyfi();
+                                                        toastr["success"](response.Messages, "Thông báo");
+                                                    }
+                                                    else {
+                                                        toastOptionNotyfi();
+                                                        toastr["error"](response.Messages, "Thông báo");
+                                                    }
+                                                },
+                                                error: function (xhr, status, error) {
+                                                    // Xử lý lỗi ở đây
+                                                    toastOptionNotyfi();
+                                                    toastr["error"]("Có lỗi xảy ra trong quá trình xử lý dữ liệu! Vui lòng thử lại!", "Thông báo");
+                                                }
+                                            });
+                                        }
+                                    }
+                                });
+                            }
+                            else {
+                                toastOptionNotyfi();
+                                toastr["error"](response.Messages, "Thông báo");
+                            }
+                        },
+                        error: function (xhr, status, error) {
+                            // Xử lý lỗi ở đây
+                            toastOptionNotyfi();
+                            toastr["error"]("Có lỗi xảy ra trong quá trình xử lý dữ liệu! Vui lòng thử lại!", "Thông báo");
+                        }
+                    });
+                }
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"](error, "Thông báo");
+            }
+        });
+    }
+</script>
+<script>
+    function upLoadCaThit() {
+
+        var dateTime = $('#dateTimeTL').val();
+        // CheckItemServerBV
+        $.ajax({
+            url: "@Url.Action("CheckItemServerBVPhieuCanCaThit", "KetNoiBravo")",
+            type: "GET",
+            data: { ngay: dateTime },
+            success: function (response) {
+                if (response.isSuccess) {
+                    bootbox.confirm({
+                        title: "Thông báo!",
+                        message: 'Thực Hiện Lại Thao Tác',
+                        buttons: {
+                            cancel: {
+                                label: 'Cancel',
+                                className: 'btn btn-secondary'
+                            },
+                            confirm: {
+                                label: 'OK',
+                                className: 'btn btn-primary'
+                            }
+                        },
+                        callback: function (result) {
+                            if (!result) { // Cancel
+                                toastOptionNotyfi();
+                                toastr["warning"]("Dừng Upload dữ liệu Bravo!", "Thông báo");
+                                return;
+                            }
+                            else if (result) { // OK
+                                $.ajax({
+                                    url: '/KetNoiBravo/DeleteItemServerBVPhieuCanCaThit',
+                                    data: { ngay: dateTime },
+                                    type: 'POST',
+                                    success: function (response) {
+                                        if (response.isSuccess) {
+                                            toastOptionNotyfi();
+                                            toastr["success"](response.Messages, "Thông báo");
+                                            $.ajax({
+                                                url: '/KetNoiBravo/ConfirmItemCountUploadBVPhieuCanCaThit',
+                                                data: { ngay: dateTime },
+                                                type: 'POST',
+                                                success: function (response) {
+                                                    if (response.isSuccess) {
+                                                        bootbox.confirm({
+                                                            title: "Thông báo!",
+                                                            message: response.Messages,
+                                                            buttons: {
+                                                                cancel: {
+                                                                    label: 'Cancel',
+                                                                    className: 'btn btn-secondary'
+                                                                },
+                                                                confirm: {
+                                                                    label: 'OK',
+                                                                    className: 'btn btn-primary'
+                                                                }
+                                                            },
+                                                            callback: function (result) {
+                                                                if (!result) { // Cancel
+                                                                    toastOptionNotyfi();
+                                                                    toastr["warning"]("Dừng Upload dữ liệu Bravo!", "Thông báo");
+                                                                    return;
+                                                                }
+                                                                else if (result) { // OK
+                                                                    $.ajax({
+                                                                        url: '/KetNoiBravo/UploadCaThit',
+                                                                        data: { ngay: dateTime, congDoanId: congDoanId },
+                                                                        type: 'POST',
+                                                                        success: function (response) {
+                                                                            if (response.isSuccess) {
+                                                                                toastOptionNotyfi();
+                                                                                toastr["success"](response.Messages, "Thông báo");
+                                                                            }
+                                                                            else {
+                                                                                toastOptionNotyfi();
+                                                                                toastr["error"](response.Messages, "Thông báo");
+                                                                            }
+                                                                        },
+                                                                        error: function (xhr, status, error) {
+                                                                            // Xử lý lỗi ở đây
+                                                                            toastOptionNotyfi();
+                                                                            toastr["error"]("Có lỗi xảy ra trong quá trình xử lý dữ liệu! Vui lòng thử lại!", "Thông báo");
+                                                                        }
+                                                                    });
+                                                                }
+                                                            }
+                                                        });
+                                                    }
+                                                    else {
+                                                        toastOptionNotyfi();
+                                                        toastr["error"](response.Messages, "Thông báo");
+                                                    }
+                                                },
+                                                error: function (xhr, status, error) {
+                                                    // Xử lý lỗi ở đây
+                                                    toastOptionNotyfi();
+                                                    toastr["error"]("Có lỗi xảy ra trong quá trình xử lý dữ liệu! Vui lòng thử lại!", "Thông báo");
+                                                }
+                                            });
+                                        }
+                                        else {
+                                            toastOptionNotyfi();
+                                            toastr["error"](response.Messages, "Thông báo");
+                                        }
+                                    },
+                                    error: function (xhr, status, error) {
+                                        // Xử lý lỗi ở đây
+                                        toastOptionNotyfi();
+                                        toastr["error"]("Có lỗi xảy ra trong quá trình xử lý dữ liệu! Vui lòng thử lại!", "Thông báo");
+                                    }
+                                });
+                            }
+                        }
+                    });
+                } else {
+                    $.ajax({
+                        url: '/KetNoiBravo/ConfirmItemCountUploadBVPhieuCanCaThit',
+                        data: { ngay: dateTime },
+                        type: 'POST',
+                        success: function (response) {
+                            if (response.isSuccess) {
+                                bootbox.confirm({
+                                    title: "Thông báo!",
+                                    message: response.Messages,
+                                    buttons: {
+                                        cancel: {
+                                            label: 'Cancel',
+                                            className: 'btn btn-secondary'
+                                        },
+                                        confirm: {
+                                            label: 'OK',
+                                            className: 'btn btn-primary'
+                                        }
+                                    },
+                                    callback: function (result) {
+                                        if (!result) { // Cancel
+                                            toastOptionNotyfi();
+                                            toastr["warning"]("Dừng Upload dữ liệu Bravo!", "Thông báo");
+                                            return;
+                                        }
+                                        else if (result) { // OK
+                                            $.ajax({
+                                                url: '/KetNoiBravo/UploadCaThit',
+                                                data: { ngay: dateTime },
+                                                type: 'POST',
+                                                success: function (response) {
+                                                    if (response.isSuccess) {
+                                                        toastOptionNotyfi();
+                                                        toastr["success"](response.Messages, "Thông báo");
+                                                    }
+                                                    else {
+                                                        toastOptionNotyfi();
+                                                        toastr["error"](response.Messages, "Thông báo");
+                                                    }
+                                                },
+                                                error: function (xhr, status, error) {
+                                                    // Xử lý lỗi ở đây
+                                                    toastOptionNotyfi();
+                                                    toastr["error"]("Có lỗi xảy ra trong quá trình xử lý dữ liệu! Vui lòng thử lại!", "Thông báo");
+                                                }
+                                            });
+                                        }
+                                    }
+                                });
+                            }
+                            else {
+                                toastOptionNotyfi();
+                                toastr["error"](response.Messages, "Thông báo");
+                            }
+                        },
+                        error: function (xhr, status, error) {
+                            // Xử lý lỗi ở đây
+                            toastOptionNotyfi();
+                            toastr["error"]("Có lỗi xảy ra trong quá trình xử lý dữ liệu! Vui lòng thử lại!", "Thông báo");
+                        }
+                    });
+                }
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"](error, "Thông báo");
+            }
+        });
+    }
+</script>
+<script>
+    function upLoadCaNgop() {
+        var dateTime = $('#dateTimeTL').val();
+        // CheckItemServerBV
+        $.ajax({
+            url: "@Url.Action("CheckItemServerBVPhieuCanCaNgop", "KetNoiBravo")",
+            type: "GET",
+            data: { ngay: dateTime },
+            success: function (response) {
+                if (response.isSuccess) {
+                    bootbox.confirm({
+                        title: "Thông báo!",
+                        message: 'Thực Hiện Lại Thao Tác',
+                        buttons: {
+                            cancel: {
+                                label: 'Cancel',
+                                className: 'btn btn-secondary'
+                            },
+                            confirm: {
+                                label: 'OK',
+                                className: 'btn btn-primary'
+                            }
+                        },
+                        callback: function (result) {
+                            if (!result) { // Cancel
+                                toastOptionNotyfi();
+                                toastr["warning"]("Dừng Upload dữ liệu Bravo!", "Thông báo");
+                                return;
+                            }
+                            else if (result) { // OK
+                                $.ajax({
+                                    url: '/KetNoiBravo/DeleteItemServerBVPhieuCanCaNgop',
+                                    data: { ngay: dateTime },
+                                    type: 'POST',
+                                    success: function (response) {
+                                        if (response.isSuccess) {
+                                            toastOptionNotyfi();
+                                            toastr["success"](response.Messages, "Thông báo");
+                                            $.ajax({
+                                                url: '/KetNoiBravo/ConfirmItemCountUploadBVPhieuCanCaNgop',
+                                                data: { ngay: dateTime },
+                                                type: 'POST',
+                                                success: function (response) {
+                                                    if (response.isSuccess) {
+                                                        bootbox.confirm({
+                                                            title: "Thông báo!",
+                                                            message: response.Messages,
+                                                            buttons: {
+                                                                cancel: {
+                                                                    label: 'Cancel',
+                                                                    className: 'btn btn-secondary'
+                                                                },
+                                                                confirm: {
+                                                                    label: 'OK',
+                                                                    className: 'btn btn-primary'
+                                                                }
+                                                            },
+                                                            callback: function (result) {
+                                                                if (!result) { // Cancel
+                                                                    toastOptionNotyfi();
+                                                                    toastr["warning"]("Dừng Upload dữ liệu Bravo!", "Thông báo");
+                                                                    return;
+                                                                }
+                                                                else if (result) { // OK
+                                                                    $.ajax({
+                                                                        url: '/KetNoiBravo/UploadCaNgop',
+                                                                        data: { ngay: dateTime, congDoanId: congDoanId },
+                                                                        type: 'POST',
+                                                                        success: function (response) {
+                                                                            if (response.isSuccess) {
+                                                                                toastOptionNotyfi();
+                                                                                toastr["success"](response.Messages, "Thông báo");
+                                                                            }
+                                                                            else {
+                                                                                toastOptionNotyfi();
+                                                                                toastr["error"](response.Messages, "Thông báo");
+                                                                            }
+                                                                        },
+                                                                        error: function (xhr, status, error) {
+                                                                            // Xử lý lỗi ở đây
+                                                                            toastOptionNotyfi();
+                                                                            toastr["error"]("Có lỗi xảy ra trong quá trình xử lý dữ liệu! Vui lòng thử lại!", "Thông báo");
+                                                                        }
+                                                                    });
+                                                                }
+                                                            }
+                                                        });
+                                                    }
+                                                    else {
+                                                        toastOptionNotyfi();
+                                                        toastr["error"](response.Messages, "Thông báo");
+                                                    }
+                                                },
+                                                error: function (xhr, status, error) {
+                                                    // Xử lý lỗi ở đây
+                                                    toastOptionNotyfi();
+                                                    toastr["error"]("Có lỗi xảy ra trong quá trình xử lý dữ liệu! Vui lòng thử lại!", "Thông báo");
+                                                }
+                                            });
+                                        }
+                                        else {
+                                            toastOptionNotyfi();
+                                            toastr["error"](response.Messages, "Thông báo");
+                                        }
+                                    },
+                                    error: function (xhr, status, error) {
+                                        // Xử lý lỗi ở đây
+                                        toastOptionNotyfi();
+                                        toastr["error"]("Có lỗi xảy ra trong quá trình xử lý dữ liệu! Vui lòng thử lại!", "Thông báo");
+                                    }
+                                });
+                            }
+                        }
+                    });
+                } else {
+                    $.ajax({
+                        url: '/KetNoiBravo/ConfirmItemCountUploadBVPhieuCanCaNgop',
+                        data: { ngay: dateTime },
+                        type: 'POST',
+                        success: function (response) {
+                            if (response.isSuccess) {
+                                bootbox.confirm({
+                                    title: "Thông báo!",
+                                    message: response.Messages,
+                                    buttons: {
+                                        cancel: {
+                                            label: 'Cancel',
+                                            className: 'btn btn-secondary'
+                                        },
+                                        confirm: {
+                                            label: 'OK',
+                                            className: 'btn btn-primary'
+                                        }
+                                    },
+                                    callback: function (result) {
+                                        if (!result) { // Cancel
+                                            toastOptionNotyfi();
+                                            toastr["warning"]("Dừng Upload dữ liệu Bravo!", "Thông báo");
+                                            return;
+                                        }
+                                        else if (result) { // OK
+                                            $.ajax({
+                                                url: '/KetNoiBravo/UploadCaNgop',
+                                                data: { ngay: dateTime },
+                                                type: 'POST',
+                                                success: function (response) {
+                                                    if (response.isSuccess) {
+                                                        toastOptionNotyfi();
+                                                        toastr["success"](response.Messages, "Thông báo");
+                                                    }
+                                                    else {
+                                                        toastOptionNotyfi();
+                                                        toastr["error"](response.Messages, "Thông báo");
+                                                    }
+                                                },
+                                                error: function (xhr, status, error) {
+                                                    // Xử lý lỗi ở đây
+                                                    toastOptionNotyfi();
+                                                    toastr["error"]("Có lỗi xảy ra trong quá trình xử lý dữ liệu! Vui lòng thử lại!", "Thông báo");
+                                                }
+                                            });
+                                        }
+                                    }
+                                });
+                            }
+                            else {
+                                toastOptionNotyfi();
+                                toastr["error"](response.Messages, "Thông báo");
+                            }
+                        },
+                        error: function (xhr, status, error) {
+                            // Xử lý lỗi ở đây
+                            toastOptionNotyfi();
+                            toastr["error"]("Có lỗi xảy ra trong quá trình xử lý dữ liệu! Vui lòng thử lại!", "Thông báo");
+                        }
+                    });
+                }
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"](error, "Thông báo");
+            }
+        });
+    }
+</script>
+<script>
+    function upLoadBotCa() {
+        var dateTime = $('#dateTimeTL').val();
+        // CheckItemServerBV
+        $.ajax({
+            url: "@Url.Action("CheckItemServerBVPhieuCanBotCa", "KetNoiBravo")",
+            type: "GET",
+            data: { ngay: dateTime },
+            success: function (response) {
+                if (response.isSuccess) {
+                    bootbox.confirm({
+                        title: "Thông báo!",
+                        message: 'Thực Hiện Lại Thao Tác',
+                        buttons: {
+                            cancel: {
+                                label: 'Cancel',
+                                className: 'btn btn-secondary'
+                            },
+                            confirm: {
+                                label: 'OK',
+                                className: 'btn btn-primary'
+                            }
+                        },
+                        callback: function (result) {
+                            if (!result) { // Cancel
+                                toastOptionNotyfi();
+                                toastr["warning"]("Dừng Upload dữ liệu Bravo!", "Thông báo");
+                                return;
+                            }
+                            else if (result) { // OK
+                                $.ajax({
+                                    url: '/KetNoiBravo/DeleteItemServerBVPhieuCanBotCa',
+                                    data: { ngay: dateTime },
+                                    type: 'POST',
+                                    success: function (response) {
+                                        if (response.isSuccess) {
+                                            toastOptionNotyfi();
+                                            toastr["success"](response.Messages, "Thông báo");
+                                            $.ajax({
+                                                url: '/KetNoiBravo/ConfirmItemCountUploadBVPhieuCanBotCa',
+                                                data: { ngay: dateTime },
+                                                type: 'POST',
+                                                success: function (response) {
+                                                    if (response.isSuccess) {
+                                                        bootbox.confirm({
+                                                            title: "Thông báo!",
+                                                            message: response.Messages,
+                                                            buttons: {
+                                                                cancel: {
+                                                                    label: 'Cancel',
+                                                                    className: 'btn btn-secondary'
+                                                                },
+                                                                confirm: {
+                                                                    label: 'OK',
+                                                                    className: 'btn btn-primary'
+                                                                }
+                                                            },
+                                                            callback: function (result) {
+                                                                if (!result) { // Cancel
+                                                                    toastOptionNotyfi();
+                                                                    toastr["warning"]("Dừng Upload dữ liệu Bravo!", "Thông báo");
+                                                                    return;
+                                                                }
+                                                                else if (result) { // OK
+                                                                    $.ajax({
+                                                                        url: '/KetNoiBravo/UploadBotCa',
+                                                                        data: { ngay: dateTime, congDoanId: congDoanId },
+                                                                        type: 'POST',
+                                                                        success: function (response) {
+                                                                            if (response.isSuccess) {
+                                                                                toastOptionNotyfi();
+                                                                                toastr["success"](response.Messages, "Thông báo");
+                                                                            }
+                                                                            else {
+                                                                                toastOptionNotyfi();
+                                                                                toastr["error"](response.Messages, "Thông báo");
+                                                                            }
+                                                                        },
+                                                                        error: function (xhr, status, error) {
+                                                                            // Xử lý lỗi ở đây
+                                                                            toastOptionNotyfi();
+                                                                            toastr["error"]("Có lỗi xảy ra trong quá trình xử lý dữ liệu! Vui lòng thử lại!", "Thông báo");
+                                                                        }
+                                                                    });
+                                                                }
+                                                            }
+                                                        });
+                                                    }
+                                                    else {
+                                                        toastOptionNotyfi();
+                                                        toastr["error"](response.Messages, "Thông báo");
+                                                    }
+                                                },
+                                                error: function (xhr, status, error) {
+                                                    // Xử lý lỗi ở đây
+                                                    toastOptionNotyfi();
+                                                    toastr["error"]("Có lỗi xảy ra trong quá trình xử lý dữ liệu! Vui lòng thử lại!", "Thông báo");
+                                                }
+                                            });
+                                        }
+                                        else {
+                                            toastOptionNotyfi();
+                                            toastr["error"](response.Messages, "Thông báo");
+                                        }
+                                    },
+                                    error: function (xhr, status, error) {
+                                        // Xử lý lỗi ở đây
+                                        toastOptionNotyfi();
+                                        toastr["error"]("Có lỗi xảy ra trong quá trình xử lý dữ liệu! Vui lòng thử lại!", "Thông báo");
+                                    }
+                                });
+                            }
+                        }
+                    });
+                } else {
+                    $.ajax({
+                        url: '/KetNoiBravo/ConfirmItemCountUploadBVPhieuCanBotCa',
+                        data: { ngay: dateTime },
+                        type: 'POST',
+                        success: function (response) {
+                            if (response.isSuccess) {
+                                bootbox.confirm({
+                                    title: "Thông báo!",
+                                    message: response.Messages,
+                                    buttons: {
+                                        cancel: {
+                                            label: 'Cancel',
+                                            className: 'btn btn-secondary'
+                                        },
+                                        confirm: {
+                                            label: 'OK',
+                                            className: 'btn btn-primary'
+                                        }
+                                    },
+                                    callback: function (result) {
+                                        if (!result) { // Cancel
+                                            toastOptionNotyfi();
+                                            toastr["warning"]("Dừng Upload dữ liệu Bravo!", "Thông báo");
+                                            return;
+                                        }
+                                        else if (result) { // OK
+                                            $.ajax({
+                                                url: '/KetNoiBravo/UploadBotCa',
+                                                data: { ngay: dateTime },
+                                                type: 'POST',
+                                                success: function (response) {
+                                                    if (response.isSuccess) {
+                                                        toastOptionNotyfi();
+                                                        toastr["success"](response.Messages, "Thông báo");
+                                                    }
+                                                    else {
+                                                        toastOptionNotyfi();
+                                                        toastr["error"](response.Messages, "Thông báo");
+                                                    }
+                                                },
+                                                error: function (xhr, status, error) {
+                                                    // Xử lý lỗi ở đây
+                                                    toastOptionNotyfi();
+                                                    toastr["error"]("Có lỗi xảy ra trong quá trình xử lý dữ liệu! Vui lòng thử lại!", "Thông báo");
+                                                }
+                                            });
+                                        }
+                                    }
+                                });
+                            }
+                            else {
+                                toastOptionNotyfi();
+                                toastr["error"](response.Messages, "Thông báo");
+                            }
+                        },
+                        error: function (xhr, status, error) {
+                            // Xử lý lỗi ở đây
+                            toastOptionNotyfi();
+                            toastr["error"]("Có lỗi xảy ra trong quá trình xử lý dữ liệu! Vui lòng thử lại!", "Thông báo");
+                        }
+                    });
+                }
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"](error, "Thông báo");
+            }
+        });
+    }
+</script>
+

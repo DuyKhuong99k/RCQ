@@ -1,0 +1,409 @@
+﻿@using Newtonsoft.Json
+@using PMS.Middlewares
+@using Vars
+@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    ViewData["Title"] = "UserArea";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    //lấy danh sách roleid từ cookie
+    var roleIds = AuthenticationHelpers.GetRoleIdsFromCookie(Context);
+    // lấy danh sách fu func từ list roleId
+    var rolePermistions = await AuthenticationHelpers.GetRolePermistionsAsync(Context, roleIds);
+    var appKVValues = Enum.GetNames(typeof(AppKV));
+    var jsonAppKVValues = JsonConvert.SerializeObject(appKVValues);
+}
+<style>
+    .e-input-group:not(.e-success):not(.e-warning):not(.e-error), .e-input-group.e-control-wrapper:not(.e-success):not(.e-warning):not(.e-error) {
+        border-color: #d9dee3;
+        box-shadow: none;
+    }
+
+    .e-input-group.e-control-wrapper.e-ddl {
+        border: 1px solid #d9dee3;
+        border-radius: 0.5rem;
+    }
+
+    .form-control.form-control-lg.e-control.e-combobox.e-lib.e-input.e-keyboard {
+        border-radius: 0.5rem;
+        box-shadow: none;
+    }
+
+    .e-input-group.e-input-focus:not(.e-success):not(.e-warning):not(.e-error), .e-input-group.e-control-wrapper.e-input-focus:not(.e-success):not(.e-warning):not(.e-error) {
+        border-color: #0078d4;
+        border-radius: 0.5rem;
+        box-shadow: 0 0 0 1px #0078d4
+    }
+</style>
+<div class="container-xxl flex-grow-1 container-p-y" style="margin-top: -51px">
+    <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Phân Quyền /</span> Người Dùng Theo Khu Vực Máy Cân</h4>
+    <div class="row">
+        <div class="col-md-12">
+            <ul class="nav nav-pills flex-column flex-md-row mb-3">
+                <li class="nav-item">
+                    <a class="nav-link " href="/Authentication/Decentralization"><i class="bx bx-shield"></i> Tạo Quyền</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/Authentication/GrantAccess"><i class="bx bx-shield"></i> Phân Quyền</a>
+                </li>
+                @{
+                    var hubs = rolePermistions.Where(x => x.Fu.Contains("Hubs")).FirstOrDefault();
+                    if (hubs != null)
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link active" href="/Authentication/UserArea"><i class='bx bx-shield-quarter'></i> Người Dùng Theo Khu Vực Máy Cân</a>
+                        </li>
+                    }
+                }
+
+
+            </ul>
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Bố Trí Người Dùng</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-sm-9">
+                            <h6>Danh sách người dùng</h6>
+                            <ejs-grid id="gridUser" rowSelected="rowSelected" allowSelection="true" allowPaging="true" allowFiltering="true" >
+                                <e-grid-filtersettings mode="Immediate" type="Excel" />
+                                <e-grid-selectionsettings type="Single"/>
+                                <e-grid-pagesettings pageSize="10" />
+                                <e-grid-columns>
+                                    <e-grid-column field="Id" headerText="Id" width="80" textAlign="Center"></e-grid-column>
+                                    <e-grid-column field="UserName" headerText="Người Dùng" width="100"></e-grid-column>
+                                    <e-grid-column field="MaNhanVien" headerText="Mã Nhân Viên" textAlign="Right" width="150"></e-grid-column>
+                                    <e-grid-column field="HoTen" headerText="Họ Tên" textAlign="Right" width="150"></e-grid-column>
+                                    <e-grid-column field="IsActive" headerText="Kích Hoạt" textAlign="Right" width="150" template="#isActiveTemplate"></e-grid-column>
+                                </e-grid-columns>
+                            </ejs-grid>
+                        </div>
+                        <div class="col-sm-3">
+                            <h6>Khu Vực</h6>
+                            <div>
+                                <ejs-grid id="gridUserArea" allowSelection="true" allowPaging="true" allowFiltering="true" >
+                                    <e-grid-filtersettings mode="Immediate" type="Excel"/>
+                                    <e-grid-selectionsettings type="Multiple" />
+                                    <e-grid-pagesettings pageSize="10"/>
+                                    <e-grid-columns>
+                                        <e-grid-column field="WKv" headerText="Khu Vực" width="100" template="#WKvTemplate"></e-grid-column>
+                                        <e-grid-column field="NgayGio" headerText="Ngày Tạo" textAlign="Center" width="150" format="dd/MM/yyyy HH:mm:ss"></e-grid-column>
+                                    </e-grid-columns>
+                                </ejs-grid>
+                            </div>
+                            <div style="margin-top: 20px">
+                                <button onclick="showAddKhuVuc()" style="margin-bottom: 5px; margin-right: 5px;" type="button" class="btn btn-outline-primary"><i class="bx bx-shield-quarter"></i>Thêm</button>
+                                <button onclick="removeKhuVuc()" style="margin-bottom: 5px; margin-right: 5px;" class="btn btn-outline-danger"><i class="bx bx-trash"></i>Xóa</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="modalThemKhuVuc" tabindex="-1" aria-hidden="true" data-bs-focus="false" no-enforce-focus>
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="titleAdd">Thêm Khu Vực Cho Người Dùng</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-12 mb-12 ">
+                        <ejs-combobox id="cboKhuVuc" dataSource="@appKVValues" placeholder="Chọn Khu Vực" class="form-control form-control-lg">
+                        </ejs-combobox>
+                    </div>
+                </div>
+                <div class="row mt-4 pt-2">
+                    <div class="col-12">
+                        <button onclick="addKhuVuc()" class="btn btn-primary w-100 position-relative" type="submit" id="">
+                            <div class=" align-items-center">
+                                <bu id="txtUserArea">Xác Nhận</bu>
+                                <div id="loadingIndicatorUserRole" class=" spinner-border text-secondary position-absolute" role="status" style="bottom: 0; display: none; left: 0; margin: auto; right: 0; top: 0;">
+                                    <span class="visually-hidden">Đang tải...</span>
+                                </div>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" rel="stylesheet"/>
+
+<script type="text/x-template" id="isActiveTemplate">
+     <div>
+        ${if(IsActive)}
+           <span class="badge bg-success">Đã kích hoạt</span>
+        ${else}
+            <span class="badge bg-warning">Chưa kích hoạt</span>
+        ${/if}
+    </div>
+</script>
+<script type="text/x-template" id="WKvTemplate">
+    <div>
+        <span>${covert(data)}</span>
+    </div>
+</script>
+<script>
+    var appKVValues = @Html.Raw(jsonAppKVValues);
+    $(document).ready(function() {
+        loadUserData();
+    });
+
+    function showAddKhuVuc() {
+        const grid = GetGridIns('gridUser');
+        if (!grid) return;
+        const selectedrecords = grid.getSelectedRecords();
+        if (selectedrecords.length > 0) {
+            const selectedRecord = selectedrecords[0];
+            const userName = selectedRecord.UserName;
+            const title = `Thêm Khu Vực Cho Người Dùng: ${userName}`;
+            document.getElementById("titleAdd").innerText = title;
+            $('#modalThemKhuVuc').modal('show');
+        } else {
+            toastOptionNotyfi();
+            toastr["warning"]("Vui lòng chọn người dùng trước khi thêm khu vực", "Thông báo");
+        }
+
+    }
+
+    function addKhuVuc() {
+        try {
+            const cbo = GetGridIns('cboKhuVuc');
+            const grid = GetGridIns('gridUser');
+            if (!cbo) return;
+            if (!grid) return;
+            const selectedrecords = grid.getSelectedRecords();
+            if (selectedrecords.length == 0) {
+                toastOptionNotyfi();
+                toastr["warning"]("Vui lòng chọn người dùng trước khi thêm khu vực", "Thông báo");
+                return;
+            }
+            const selectedRecord = selectedrecords[0];
+            const khoVuc = cbo.value;
+            const index = appKVValues.indexOf(khoVuc);
+            if (index == -1) {
+                toastOptionNotyfi();
+                toastr["warning"]("Vui lòng chọn khu vực", "Thông báo");
+                return;
+            }
+            const data = {
+                UserId : selectedRecord.Id,
+                WKv : index
+            }
+            var dataJson = JSON.stringify(data);
+            fetch('/Authentication/DoInsertUserData', {
+                    method: 'POST',
+                    headers: {
+                       
+                        'Content-Type': 'application/json'
+                    },
+                body:  dataJson
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(rs => {
+                    if (rs.isSuccess === true) {
+                        $('#modalThemKhuVuc').modal('hide');
+                        toastOptionNotyfi();
+                        toastr["success"](rs.Messages, "Thông báo");
+                    } else {
+                        toastOptionNotyfi();
+                        toastr["warning"](rs.Messages, "Thông báo");
+                    }
+                })
+                .catch(error => {
+                    toastOptionNotyfi();
+                    toastr["error"](`Đã xảy ra lỗi: ${error.message}`, "Thông báo");
+                })
+                .finally(() => {
+                    loadUserAreaData(selectedRecord.Id);
+
+                });
+        } catch (e) {
+            toastOptionNotyfi();
+            toastr["error"](`Đã xảy ra lỗi: ${e}`, "Thông báo");
+        }
+    }
+
+    function removeKhuVuc() {
+        try {
+            const grid = GetGridIns('gridUserArea');
+            const gridUser = GetGridIns('gridUser');
+            if (!gridUser) return;
+            if (!grid) return;
+            const selectedrecords = grid.getSelectedRecords();
+            const selectedUserRecords = gridUser.getSelectedRecords();
+            if (selectedrecords.length == 0) {
+                toastOptionNotyfi();
+                toastr["warning"]("Vui lòng chọn khu vực", "Thông báo");
+                return;
+            }
+            const selectedRecord = selectedrecords[0];
+            const selectedUserRecord = selectedUserRecords[0];
+            const userAreaId = selectedRecord.Id;
+            const areaName = appKVValues[selectedRecord.WKv];
+            bootbox.confirm({
+                title: "Thông báo!",
+                message: `Bạn có chắc muốn xóa ${areaName}`,
+                buttons: {
+                    confirm: {
+                        label: 'OK',
+                        className: 'btn btn-primary'
+                    }
+                },
+                callback: function (result) {
+                    if (result) {
+                        fetch('/Authentication/DoDeleteUserData', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                body:  userAreaId 
+                            })
+                            .then(response => {
+                                if (!response.ok) {
+                                    throw new Error('Network response was not ok');
+                                }
+                                return response.json();
+                            })
+                            .then(rs => {
+                                if (rs.isSuccess === true) {
+                                    toastOptionNotyfi();
+                                    toastr["success"](rs.Messages, "Thông báo");
+                                } else {
+                                    toastOptionNotyfi();
+                                    toastr["warning"](rs.Messages, "Thông báo");
+                                }
+                            })
+                            .catch(error => {
+                                toastOptionNotyfi();
+                                toastr["error"](`Đã xảy ra lỗi: ${error.message}`, "Thông báo");
+                            })
+                            .finally(() => {
+                                loadUserAreaData(selectedUserRecord.Id);
+                            });
+                    }
+                }
+            });
+        } catch (e) {
+            toastOptionNotyfi();
+            toastr["error"](`Đã xảy ra lỗi: ${e}`, "Thông báo");
+        } 
+    }
+
+    function covert(data) {
+        var appKVValue = "";
+        try {
+            const wkValue = data.WKv;
+            appKVValue = appKVValues[wkValue];
+        } catch (error) {
+            console.error(error);
+        }
+        if (appKVValue == "" || appKVValue == undefined) {
+            appKVValue = "Chưa xác định";
+        }
+        return appKVValue;
+    }
+
+    function rowSelected(args) {
+
+        const selectedrecords = this.getSelectedRecords();
+        if (selectedrecords.length > 0) {
+            const selectedRecord = selectedrecords[0];
+            const id = selectedRecord.Id;
+            loadUserAreaData(id);
+        }
+
+    }
+
+
+    function GetGridIns(gridId) {
+        return document.getElementById(gridId).ej2_instances[0];
+    }
+
+    function ClearData(GridId) {
+
+
+        try {
+            const gridObj = GetGridIns(GridId);
+            if (gridObj) {
+                gridObj.dataSource = [];
+                gridObj.refresh();
+            }
+
+            return gridObj;
+        } catch (e) {
+            Console.log(e);
+        }
+        return null;
+    }
+
+    function loadUserData() {
+        const gridId = 'gridUser';
+        var gridobj = ClearData(gridId);
+
+        (async () => {
+            try {
+                const response = await fetch('/Authentication/GetAllUser', {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                if (gridobj && gridobj != null) {
+                    gridobj.dataSource = data;
+                    gridobj.refresh();
+                }
+            } catch (error) {
+                toastOptionNotyfi();
+                toastr["error"](`Đã xảy ra lỗi: ${error.message}`, "Thông báo");
+                console.error(error);
+            }
+        })();
+    }
+
+    function loadUserAreaData(userId) {
+        const gridId = 'gridUserArea';
+        var gridobj = ClearData(gridId);
+        fetch(`/Authentication/GetsUserAreaByUserId?userId=${encodeURIComponent(userId)}`, {
+                method: 'GET'
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (gridobj) {
+                    gridobj.dataSource = data;
+                    gridobj.refresh();
+                }
+            })
+            .catch(error => {
+                toastOptionNotyfi();
+                toastr["error"](`Đã xảy ra lỗi: ${error.message}`, "Thông báo");
+                console.error(error);
+            });
+    }
+</script>

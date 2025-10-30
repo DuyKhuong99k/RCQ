@@ -1,0 +1,875 @@
+﻿@page "/TheChucNang"
+@using System.Drawing
+@using Models.Repos.Models
+@using Syncfusion.Blazor.Buttons
+@using Syncfusion.Blazor.Data
+@using Syncfusion.Blazor.DropDowns
+@using Syncfusion.Blazor.Grids
+@using Syncfusion.Blazor.Inputs
+@using Syncfusion.Blazor.Navigations
+@using Syncfusion.Blazor.Popups
+@using ViewModels.Repos.Hubs.IServices
+@using EventArgs = EventArgs
+@using FilterType = Syncfusion.Blazor.Grids.FilterType
+@using SelectionMode = Syncfusion.Blazor.Grids.SelectionMode
+@using SelectionType = Syncfusion.Blazor.Grids.SelectionType
+@using PMSHub.Components.Layout
+@rendermode InteractiveServer
+@inherits AuthenticatedComponent
+@attribute [StreamRendering]
+@inject NavigationManager Navigation
+@inject IMainService MainService
+@inject IMayCansService MayCansService
+@inject ICardService cardService
+@inject IDeviceViewService DeviceViewService
+@inject IJSRuntime JsRuntime
+<link rel="stylesheet" href="styles/grid.css" />
+<PageTitle>Thẻ Chức Năng</PageTitle>
+<!-- Navbar -->
+<TopLayout />
+<!-- / Navbar -->
+<!-- Content wrapper -->
+<div class="content-wrapper">
+    <!-- Content -->
+
+    <div class="container-xxl flex-grow-1 container-p-y">
+        <h3>Thẻ Chức Năng</h3>
+        <SfGrid DataSource="MainService.VmTheThanhPham.Items" Height="500" @ref="Grid" AllowSorting="true"
+                AllowMultiSorting="true" TValue="TheThanhPham" AllowFiltering="true" AllowPaging="true"
+                AllowSelection="true">
+            <GridPageSettings PageCount="10" PageSize="10" PageSizes="@(new[] { "5", "10", "15", "20", "100", "200", "500" })">
+            </GridPageSettings>
+            <GridTemplates>
+                <ToolbarTemplate>
+                    <SfToolbar>
+                        <ToolbarEvents Clicked="ToolbarClickHandler"></ToolbarEvents>
+                        <ToolbarItems>
+                            <ToolbarItem Type="@ItemType.Button" PrefixIcon="e-refresh icon" Id="refresh" Text="Tải Lại">
+                            </ToolbarItem>
+                            <ToolbarItem Type="@ItemType.Button" PrefixIcon="e-expand icon" Id="add" Text="Thêm"></ToolbarItem>
+                            <ToolbarItem Type="@ItemType.Button" PrefixIcon="e-edit icon" Id="edit" Text="Sửa"></ToolbarItem>
+                            @* <ToolbarItem Type="@ItemType.Button" PrefixIcon="e-export-excel icon" Id="ExcelExport" Text="Xuất
+                            Excel"></ToolbarItem> *@
+                            <ToolbarItem Type="@ItemType.Button" PrefixIcon="e-circle-remove icon" Id="delete" Text="Xóa">
+                            </ToolbarItem>
+                        </ToolbarItems>
+                    </SfToolbar>
+                </ToolbarTemplate>
+            </GridTemplates>
+            <GridFilterSettings Type="FilterType.Excel"></GridFilterSettings>
+            <GridSelectionSettings AllowDragSelection="true" Mode="SelectionMode.Row" Type="SelectionType.Multiple"
+                                   EnableSimpleMultiRowSelection="true" CheckboxOnly="true" PersistSelection="true">
+            </GridSelectionSettings>
+            <GridColumns>
+                <GridColumn Type="ColumnType.CheckBox" Width="50"></GridColumn>
+                <GridColumn Field="@nameof(TheThanhPham.MaThe)" HeaderText="Id" Type="ColumnType.String"
+                            TextAlign="TextAlign.Center" Width="130">
+                </GridColumn>
+                <GridColumn Field="@nameof(TheThanhPham.ThanhPhamDHName)" HeaderText="Thành Phẩm Định Hình"
+                            Type="ColumnType.String" TextAlign="TextAlign.Center" Width="120" />
+                <GridColumn Field="@nameof(TheThanhPham.SizeDHName)" HeaderText="Size Định Hình"
+                            Type="ColumnType.String" TextAlign="TextAlign.Center" Width="120" />
+                <GridColumn Field="@nameof(TheThanhPham.ThanhPhamFilletName)" HeaderText="Thành Phẩm Fillet"
+                            Type="ColumnType.String" TextAlign="TextAlign.Center" Width="120" />
+                <GridColumn Field="@nameof(TheThanhPham.SizeFilletName)" HeaderText="Size Fillet"
+                            Type="ColumnType.String" TextAlign="TextAlign.Center" Width="120" />
+                <GridColumn Field="@nameof(TheThanhPham.QuyTrinhName)" HeaderText="Quy Trình"
+                            Type="ColumnType.String" TextAlign="TextAlign.Center" Width="120" />
+                <GridColumn Field="@nameof(TheThanhPham.STTPhieuPhanCoChiTietT)"
+                            HeaderText="STT Phiếu Phân Cỡ Chi Tiết" Type="ColumnType.Integer" TextAlign="TextAlign.Center"
+                            Width="120" />
+                <GridColumn Field="@nameof(TheThanhPham.TrongLuongTare)" HeaderText="Tare"
+                            Type="ColumnType.Decimal" TextAlign="TextAlign.Center" Width="120" />
+                <GridColumn AllowEditing="false" Field="@nameof(TheThanhPham.IsZero)" HeaderText="Zero"
+                            Type="ColumnType.Boolean" TextAlign="TextAlign.Center" Width="120" />
+                <GridColumn AllowEditing="false" Field="@nameof(TheThanhPham.IsRestart)" HeaderText="Restart"
+                            Type="ColumnType.Boolean" TextAlign="TextAlign.Center" Width="120" />
+
+            </GridColumns>
+        </SfGrid>
+        <SfDialog Width="500px" Height="650px" ShowCloseIcon="true" IsModal="true" CloseOnEscape="true"
+                  @bind-Visible="@IsVisibleAdd">
+            <DialogEvents OnOverlayModalClick="@OverlayClick" Closed="Closed"></DialogEvents>
+            <DialogTemplates>
+                <Header>
+                    <div>@(isXoa == false ? "Thêm" : "Xóa")</div>
+                </Header>
+                <Content>
+                    @if (isXoa == false)
+                    {
+                        <div class="grid-container2">
+                            <SfDropDownList CssClass="grid-ỉtem2" TValue="string" Placeholder="Thành Phẩm Định Hình" FloatLabelType="FloatLabelType.Auto"
+                                            AllowFiltering="true" TItem="MaThanhPhamDinhHinh" @bind-Value="@cardService.ItemChucNang.MaThanhPham"
+                                            DataSource="@MainService.VmThanhPhamDinhHinh.Items">
+                                <DropDownListFieldSettings Value="Ma" Text="Ten" />
+                                <DropDownListTemplates TItem="MaThanhPhamDinhHinh">
+                                    <HeaderTemplate>
+                                        <table>
+                                            <tr>
+                                                <th>Tên</th>
+                                            </tr>
+                                        </table>
+                                    </HeaderTemplate>
+                                    <ItemTemplate>
+                                        <table>
+                                            <tbody>
+                                                <tr>
+                                                    <td>@context.Ten</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </ItemTemplate>
+                                </DropDownListTemplates>
+                            </SfDropDownList>
+                            <SfDropDownList CssClass="grid-ỉtem2" TValue="string" Placeholder="Size Định Hình" FloatLabelType="FloatLabelType.Auto"
+                                            AllowFiltering="true" TItem="MaSizeDinhHinh" @bind-Value="@cardService.ItemChucNang.MaSizeDinhHinh"
+                                            DataSource="@MainService.VmSizeDinhHinh.Items">
+                                <DropDownListFieldSettings Value="Ma" Text="Ten" />
+                                <DropDownListTemplates TItem="MaSizeDinhHinh">
+                                    <HeaderTemplate>
+                                        <table>
+                                            <tr>
+                                                <th>Tên</th>
+                                            </tr>
+                                        </table>
+                                    </HeaderTemplate>
+                                    <ItemTemplate>
+                                        <table>
+                                            <tbody>
+                                                <tr>
+                                                    <td>@context.Ten</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </ItemTemplate>
+                                </DropDownListTemplates>
+                            </SfDropDownList>
+                            <SfDropDownList CssClass="grid-ỉtem2" TValue="string" Placeholder="Size Định Hình" FloatLabelType="FloatLabelType.Auto"
+                                            AllowFiltering="true" TItem="MaSizeDinhHinh" @bind-Value="@cardService.ItemChucNang.MaSizeDinhHinh"
+                                            DataSource="@MainService.VmSizeDinhHinh.Items">
+                                <DropDownListFieldSettings Value="Ma" Text="Ten" />
+                                <DropDownListTemplates TItem="MaSizeDinhHinh">
+                                    <HeaderTemplate>
+                                        <table>
+                                            <tr>
+                                                <th>Tên</th>
+                                            </tr>
+                                        </table>
+                                    </HeaderTemplate>
+                                    <ItemTemplate>
+                                        <table>
+                                            <tbody>
+                                                <tr>
+                                                    <td>@context.Ten</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </ItemTemplate>
+                                </DropDownListTemplates>
+                            </SfDropDownList>
+                            <SfDropDownList CssClass="grid-ỉtem2" TValue="string" Placeholder="Thành Phẩm Fillet" FloatLabelType="FloatLabelType.Auto"
+                                            AllowFiltering="true" TItem="MaThanhPhamFillet" @bind-Value="@cardService.ItemChucNang.MaThanhPhamFillet"
+                                            DataSource="@MainService.VmThanhPhamFillet.Items">
+                                <DropDownListFieldSettings Value="Ma" Text="Ten" />
+                                <DropDownListTemplates TItem="MaThanhPhamFillet">
+                                    <HeaderTemplate>
+                                        <table>
+                                            <tr>
+                                                <th>Tên</th>
+                                            </tr>
+                                        </table>
+                                    </HeaderTemplate>
+                                    <ItemTemplate>
+                                        <table>
+                                            <tbody>
+                                                <tr>
+                                                    <td>@context.Ten</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </ItemTemplate>
+                                </DropDownListTemplates>
+                            </SfDropDownList>
+                            <SfDropDownList CssClass="grid-ỉtem2" TValue="string" Placeholder="Size Fillet" FloatLabelType="FloatLabelType.Auto"
+                                            AllowFiltering="true" TItem="MaSizeFillet" @bind-Value="@cardService.ItemChucNang.MaSizeFillet"
+                                            DataSource="@MainService.VmSizeFillet.Items">
+                                <DropDownListFieldSettings Value="Ma" Text="Ten" />
+                                <DropDownListTemplates TItem="MaSizeFillet">
+                                    <HeaderTemplate>
+                                        <table>
+                                            <tr>
+                                                <th>Tên</th>
+                                            </tr>
+                                        </table>
+                                    </HeaderTemplate>
+                                    <ItemTemplate>
+                                        <table>
+                                            <tbody>
+                                                <tr>
+                                                    <td>@context.Ten</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </ItemTemplate>
+                                </DropDownListTemplates>
+                            </SfDropDownList>
+                            <SfDropDownList CssClass="grid-ỉtem2" TValue="string" Placeholder="Thành Phẩm Phụ Phẩm" FloatLabelType="FloatLabelType.Auto"
+                                            AllowFiltering="true" TItem="MaThanhPhamPhuPham" @bind-Value="@cardService.ItemChucNang.MaThanhPhamPhuPham"
+                                            DataSource="@MainService.VmThanhPhamPhuPham.Items">
+                                <DropDownListFieldSettings Value="Ma" Text="Ten" />
+                                <DropDownListTemplates TItem="MaThanhPhamPhuPham">
+                                    <HeaderTemplate>
+                                        <table>
+                                            <tr>
+                                                <th>Tên</th>
+                                            </tr>
+                                        </table>
+                                    </HeaderTemplate>
+                                    <ItemTemplate>
+                                        <table>
+                                            <tbody>
+                                                <tr>
+                                                    <td>@context.Ten</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </ItemTemplate>
+                                </DropDownListTemplates>
+                            </SfDropDownList>
+                            <SfDropDownList CssClass="grid-ỉtem2" TValue="string" Placeholder="T_Quy Trình" FloatLabelType="FloatLabelType.Auto"
+                                            AllowFiltering="true" TItem="T_QuyTrinh" @bind-Value="@cardService.ItemChucNang.MaQuyTrinhT"
+                                            DataSource="@MainService.VmTQuyTrinh.Items">
+                                <DropDownListFieldSettings Value="Ma" Text="Ten" />
+                                <DropDownListTemplates TItem="T_QuyTrinh">
+                                    <HeaderTemplate>
+                                        <table>
+                                            <tr>
+                                                <th>Tên</th>
+                                            </tr>
+                                        </table>
+                                    </HeaderTemplate>
+                                    <ItemTemplate>
+                                        <table>
+                                            <tbody>
+                                                <tr>
+                                                    <td>@context.Ten</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </ItemTemplate>
+                                </DropDownListTemplates>
+                            </SfDropDownList>
+                        </div>
+                        <div class="grid-container2">
+                            <SfCheckBox CssClass="grid-item2" Label="Zero" @bind-Checked="@cardService.ItemChucNang.IsZero"></SfCheckBox>
+                            <SfCheckBox CssClass="grid-item2" Label="Restart" @bind-Checked="@cardService.ItemChucNang.IsRestart"></SfCheckBox>
+                            <SfNumericTextBox TValue="decimal" ValidateDecimalOnType="true" Format="n2" Decimals=2 Min=0 CssClass="grid-item2" Label="Tare" @bind-Value="@cardService.ItemChucNang.TrongLuongTare"></SfNumericTextBox>
+                            <SfNumericTextBox TValue="int" Min=0 CssClass="grid-item2" Label="Tare" @bind-Value="@cardService.ItemChucNang.STTPhieuPhanCoChiTietT"></SfNumericTextBox>
+                        </div>
+                    }
+
+                    <div class="grid-container">
+                        <div class="grid-item">
+                            <SfDropDownList EnableVirtualization="true" TValue="string" Placeholder="Máy Cân"
+                                            FloatLabelType="FloatLabelType.Auto" AllowFiltering="true" CssClass="e-multi-column"
+                                            TItem="MayCan" DataSource="@MayCansService.Items"
+                                            @bind-Value="DeviceViewService.DeviceSelectedId">
+                                <DropDownListFieldSettings Value="Id" Text="SubTitle"></DropDownListFieldSettings>
+                                <DropDownListTemplates TItem="MayCan">
+
+                                    <HeaderTemplate>
+
+                                        <table>
+                                            <tr>
+                                                <th>Tên</th>
+                                            </tr>
+                                        </table>
+
+                                    </HeaderTemplate>
+
+                                    <ItemTemplate>
+
+                                        <table>
+                                            <tbody>
+                                                <tr>
+                                                    <td>@context.SubTitle</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+
+                                    </ItemTemplate>
+
+                                </DropDownListTemplates>
+
+                            </SfDropDownList>
+                        </div>
+                        <div class="grid-item">
+                            <SfButton style="margin: 2px; width: 100%;"
+                                      Disabled="@(DeviceViewService.DeviceCard == null ? false : DeviceViewService.DeviceCard.IsNapThe)"
+                                      @onclick="() => MayCanStartStop(DeviceViewService.DeviceSelectedId)" CssClass="e-primary">
+                                Bắt
+                                Đầu
+                            </SfButton>
+                        </div>
+                        <div class="grid-item">
+                            <SfButton style="margin: 2px; width: 100%;"
+                                      Disabled="@(DeviceViewService.DeviceCard == null ? true : !DeviceViewService.DeviceCard.IsNapThe)"
+                                      @onclick="() => MayCanStartStop(DeviceViewService.DeviceSelectedId)" CssClass="e-primary">
+                                Dừng
+                            </SfButton>
+                        </div>
+                    </div>
+                    <SfTextBox Placeholder="Thẻ Id" Value="@TheId" ValueChange="@ValueChangeHandler"></SfTextBox>
+                    <SfTextBox Placeholder="Thông Báo" Value="@ThongBao"></SfTextBox>
+                    <SfGrid DataSource="cardService.ItemsByChucNang" Height="200px" AllowSorting="true" AllowMultiSorting="true"
+                            TValue="Models.Repos.Models.TheThanhPham" AllowPaging="true" AllowSelection="true">
+                        <GridPageSettings PageCount="10" PageSize="10"
+                                          PageSizes="@(new[] { "5", "10", "15", "20", "100", "200", "500" })">
+                        </GridPageSettings>
+
+                        <GridColumns>
+                            <GridColumn Field="@nameof(Models.Repos.Models.TheThanhPham.MaThe)" HeaderText="Id"
+                                        Type="ColumnType.String" TextAlign="TextAlign.Center" Width="100">
+                            </GridColumn>
+
+                            <GridColumn Field="@nameof(TheThanhPham.ThanhPhamDHName)" HeaderText="Thành Phẩm Định Hình"
+                                        Type="ColumnType.String" TextAlign="TextAlign.Center" Width="120" />
+                            <GridColumn Field="@nameof(TheThanhPham.SizeDHName)" HeaderText="Size Định Hình"
+                                        Type="ColumnType.String" TextAlign="TextAlign.Center" Width="120" />
+                            <GridColumn Field="@nameof(TheThanhPham.ThanhPhamFilletName)" HeaderText="Thành Phẩm Fillet"
+                                        Type="ColumnType.String" TextAlign="TextAlign.Center" Width="120" />
+                            <GridColumn Field="@nameof(TheThanhPham.SizeFilletName)" HeaderText="Size Fillet"
+                                        Type="ColumnType.String" TextAlign="TextAlign.Center" Width="120" />
+                            <GridColumn Field="@nameof(TheThanhPham.QuyTrinhName)" HeaderText="Quy Trình"
+                                        Type="ColumnType.String" TextAlign="TextAlign.Center" Width="120" />
+                            <GridColumn Field="@nameof(TheThanhPham.STTPhieuPhanCoChiTietT)"
+                                        HeaderText="STT Phiếu Phân Cỡ Chi Tiết" Type="ColumnType.Integer" TextAlign="TextAlign.Center"
+                                        Width="120" />
+                            <GridColumn Field="@nameof(TheThanhPham.TrongLuongTare)" HeaderText="Tare"
+                                        Type="ColumnType.Decimal" TextAlign="TextAlign.Center" Width="120" />
+                            <GridColumn Field="@nameof(TheThanhPham.IsZero)" HeaderText="Zero"
+                                        Type="ColumnType.CheckBox" TextAlign="TextAlign.Center" Width="120" />
+                            <GridColumn Field="@nameof(TheThanhPham.IsRestart)" HeaderText="Restart"
+                                        Type="ColumnType.CheckBox" TextAlign="TextAlign.Center" Width="120" />
+
+                        </GridColumns>
+                    </SfGrid>
+
+                </Content>
+            </DialogTemplates>
+            @* <DialogButtons>
+            <DialogButton Content="Close" IsPrimary="true" OnClick="@CloseDialogAdd"/>
+            </DialogButtons> *@
+        </SfDialog>
+        <SfDialog Width="500px" ShowCloseIcon="true" IsModal="true" CloseOnEscape="true" @bind-Visible="@IsVisibleEdit">
+            <DialogEvents OnOverlayModalClick="@OverlayClick"></DialogEvents>
+            <DialogTemplates>
+                <Header>
+                    <div>Chọn Thông Tin</div>
+                </Header>
+                <Content>
+                    <div>
+                        <SfNumericTextBox TValue="decimal" ValidateDecimalOnType="true" Format="n2" Decimals=2 Min=0 Label="Tare" @bind-Value="@cardService.ItemChucNang.TrongLuongTare"></SfNumericTextBox>
+                        <SfNumericTextBox TValue="int" Min=0 Label="Tare" @bind-Value="@cardService.ItemChucNang.STTPhieuPhanCoChiTietT"></SfNumericTextBox>
+                        <SfCheckBox Label="Zero" @bind-Checked="@cardService.ItemChucNang.IsZero"></SfCheckBox>
+                        <SfCheckBox Label="Restart" @bind-Checked="@cardService.ItemChucNang.IsRestart"></SfCheckBox>
+
+                    </div>
+                    <div class="grid-container2">
+                        <SfDropDownList CssClass="grid-ỉtem2" TValue="string" Placeholder="Thành Phẩm Định Hình" FloatLabelType="FloatLabelType.Auto"
+                                        AllowFiltering="true" TItem="MaThanhPhamDinhHinh" @bind-Value="@cardService.ItemChucNang.MaThanhPham"
+                                        DataSource="@MainService.VmThanhPhamDinhHinh.Items">
+                            <DropDownListFieldSettings Value="Ma" Text="Ten" />
+                            <DropDownListTemplates TItem="MaThanhPhamDinhHinh">
+                                <HeaderTemplate>
+                                    <table>
+                                        <tr>
+                                            <th>Tên</th>
+                                        </tr>
+                                    </table>
+                                </HeaderTemplate>
+                                <ItemTemplate>
+                                    <table>
+                                        <tbody>
+                                            <tr>
+                                                <td>@context.Ten</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </ItemTemplate>
+                            </DropDownListTemplates>
+                        </SfDropDownList>
+                        <SfDropDownList CssClass="grid-ỉtem2" TValue="string" Placeholder="Size Định Hình" FloatLabelType="FloatLabelType.Auto"
+                                        AllowFiltering="true" TItem="MaSizeDinhHinh" @bind-Value="@cardService.ItemChucNang.MaSizeDinhHinh"
+                                        DataSource="@MainService.VmSizeDinhHinh.Items">
+                            <DropDownListFieldSettings Value="Ma" Text="Ten" />
+                            <DropDownListTemplates TItem="MaSizeDinhHinh">
+                                <HeaderTemplate>
+                                    <table>
+                                        <tr>
+                                            <th>Tên</th>
+                                        </tr>
+                                    </table>
+                                </HeaderTemplate>
+                                <ItemTemplate>
+                                    <table>
+                                        <tbody>
+                                            <tr>
+                                                <td>@context.Ten</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </ItemTemplate>
+                            </DropDownListTemplates>
+                        </SfDropDownList>
+                        <SfDropDownList CssClass="grid-ỉtem2" TValue="string" Placeholder="Size Định Hình" FloatLabelType="FloatLabelType.Auto"
+                                        AllowFiltering="true" TItem="MaSizeDinhHinh" @bind-Value="@cardService.ItemChucNang.MaSizeDinhHinh"
+                                        DataSource="@MainService.VmSizeDinhHinh.Items">
+                            <DropDownListFieldSettings Value="Ma" Text="Ten" />
+                            <DropDownListTemplates TItem="MaSizeDinhHinh">
+                                <HeaderTemplate>
+                                    <table>
+                                        <tr>
+                                            <th>Tên</th>
+                                        </tr>
+                                    </table>
+                                </HeaderTemplate>
+                                <ItemTemplate>
+                                    <table>
+                                        <tbody>
+                                            <tr>
+                                                <td>@context.Ten</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </ItemTemplate>
+                            </DropDownListTemplates>
+                        </SfDropDownList>
+                        <SfDropDownList CssClass="grid-ỉtem2" TValue="string" Placeholder="Thành Phẩm Fillet" FloatLabelType="FloatLabelType.Auto"
+                                        AllowFiltering="true" TItem="MaThanhPhamFillet" @bind-Value="@cardService.ItemChucNang.MaThanhPhamFillet"
+                                        DataSource="@MainService.VmThanhPhamFillet.Items">
+                            <DropDownListFieldSettings Value="Ma" Text="Ten" />
+                            <DropDownListTemplates TItem="MaThanhPhamFillet">
+                                <HeaderTemplate>
+                                    <table>
+                                        <tr>
+                                            <th>Tên</th>
+                                        </tr>
+                                    </table>
+                                </HeaderTemplate>
+                                <ItemTemplate>
+                                    <table>
+                                        <tbody>
+                                            <tr>
+                                                <td>@context.Ten</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </ItemTemplate>
+                            </DropDownListTemplates>
+                        </SfDropDownList>
+                        <SfDropDownList CssClass="grid-ỉtem2" TValue="string" Placeholder="Size Fillet" FloatLabelType="FloatLabelType.Auto"
+                                        AllowFiltering="true" TItem="MaSizeFillet" @bind-Value="@cardService.ItemChucNang.MaSizeFillet"
+                                        DataSource="@MainService.VmSizeFillet.Items">
+                            <DropDownListFieldSettings Value="Ma" Text="Ten" />
+                            <DropDownListTemplates TItem="MaSizeFillet">
+                                <HeaderTemplate>
+                                    <table>
+                                        <tr>
+                                            <th>Tên</th>
+                                        </tr>
+                                    </table>
+                                </HeaderTemplate>
+                                <ItemTemplate>
+                                    <table>
+                                        <tbody>
+                                            <tr>
+                                                <td>@context.Ten</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </ItemTemplate>
+                            </DropDownListTemplates>
+                        </SfDropDownList>
+                        <SfDropDownList CssClass="grid-ỉtem2" TValue="string" Placeholder="Thành Phẩm Phụ Phẩm" FloatLabelType="FloatLabelType.Auto"
+                                        AllowFiltering="true" TItem="MaThanhPhamPhuPham" @bind-Value="@cardService.ItemChucNang.MaThanhPhamPhuPham"
+                                        DataSource="@MainService.VmThanhPhamPhuPham.Items">
+                            <DropDownListFieldSettings Value="Ma" Text="Ten" />
+                            <DropDownListTemplates TItem="MaThanhPhamPhuPham">
+                                <HeaderTemplate>
+                                    <table>
+                                        <tr>
+                                            <th>Tên</th>
+                                        </tr>
+                                    </table>
+                                </HeaderTemplate>
+                                <ItemTemplate>
+                                    <table>
+                                        <tbody>
+                                            <tr>
+                                                <td>@context.Ten</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </ItemTemplate>
+                            </DropDownListTemplates>
+                        </SfDropDownList>
+                        <SfDropDownList CssClass="grid-ỉtem2" TValue="string" Placeholder="T_Quy Trình" FloatLabelType="FloatLabelType.Auto"
+                                        AllowFiltering="true" TItem="T_QuyTrinh" @bind-Value="@cardService.ItemChucNang.MaQuyTrinhT"
+                                        DataSource="@MainService.VmTQuyTrinh.Items">
+                            <DropDownListFieldSettings Value="Ma" Text="Ten" />
+                            <DropDownListTemplates TItem="T_QuyTrinh">
+                                <HeaderTemplate>
+                                    <table>
+                                        <tr>
+                                            <th>Tên</th>
+                                        </tr>
+                                    </table>
+                                </HeaderTemplate>
+                                <ItemTemplate>
+                                    <table>
+                                        <tbody>
+                                            <tr>
+                                                <td>@context.Ten</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </ItemTemplate>
+                            </DropDownListTemplates>
+                        </SfDropDownList>
+
+                    </div>
+
+
+
+                </Content>
+            </DialogTemplates>
+            <DialogButtons>
+                <DialogButton Content="OK" IsPrimary="true" OnClick="@Edit" />
+                <DialogButton Content="Close" IsPrimary="true" OnClick="@CloseDialogAdd" />
+            </DialogButtons>
+        </SfDialog>
+    </div>
+
+    <!-- / Content -->
+    <!-- Footer -->
+    <FooterLayout />
+    <!-- / Footer -->
+    <div class="content-backdrop fade"></div>
+</div>
+<!-- Content wrapper -->
+
+
+@code {
+    private SfGrid<TheThanhPham> Grid;
+    private bool IsVisibleAdd;
+    private bool IsVisibleEdit;
+    private bool isXoa;
+    SfDropDownList<string, ColorCode> DropNhanVien;
+    private readonly Query LocalDataQuery = new Query().Take(10);
+    private string TheId = "";
+    private string ThongBao = "";
+
+    private async void Edit()
+    {
+        var edit = async () =>
+        {
+            var values = await Grid.GetSelectedRecordsAsync();
+            if (values != null && values.Count >= 1)
+            {
+                // if (cardService.ItemRo.ColorCode != null && cardService.ItemRo.ColorCode.Trim() != "")
+                // {
+                foreach (var val in values)
+                {
+                    val.IsRestart = cardService.ItemChucNang.IsRestart;
+                    val.IsZero = cardService.ItemChucNang.IsZero;
+                    val.STTPhieuPhanCoChiTietT = cardService.ItemChucNang.STTPhieuPhanCoChiTietT;
+                    val.TrongLuongTare = cardService.ItemChucNang.TrongLuongTare;
+                    val.MaThanhPham = cardService.ItemChucNang.MaThanhPham;
+                    val.MaSizeDinhHinh = cardService.ItemChucNang.MaSizeDinhHinh;
+                    val.MaThanhPhamFillet = cardService.ItemChucNang.MaThanhPhamFillet;
+                    val.MaMayLangDa = cardService.ItemChucNang.MaMayLangDa;
+                    val.MaSizeFillet = cardService.ItemChucNang.MaSizeFillet;
+                    val.MaQuyTrinhT = cardService.ItemChucNang.MaQuyTrinhT;
+                    val.MaThanhPhamPhuPham = cardService.ItemChucNang.MaThanhPhamPhuPham;
+                    val.NgayGio = cardService.ItemChucNang.NgayGio;
+                }
+
+                try
+                {
+                    if (MainService.VmTheThanhPham.Update(values) > 0)
+                    {
+                        foreach (var val in values)
+                        {
+                            var item = MainService.VmTheThanhPham.Items.FirstOrDefault(x => x.MaThe == val.MaThe);
+                            if (item != null)
+                            {
+                                var index = MainService.VmTheThanhPham.Items.IndexOf(item);
+                                MainService.VmTheThanhPham.Items.RemoveAt(index);
+                                @* MainService.VmTheRo.Items.Insert(index, val); *@
+                            }
+                        }
+
+                        IsVisibleEdit = false;
+                        await Grid.Refresh();
+                    }
+                    else
+                    {
+                        await JsRuntime.InvokeVoidAsync("alert", "Không Thể Cập Nhật!"); // Alert
+                    }
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                    await JsRuntime.InvokeVoidAsync("alert", e.ToString()); // Alert
+                }
+                // }
+                // else
+                // {
+                //     await JsRuntime.InvokeVoidAsync("alert", "Chưa chọn nhân viên!"); // Alert
+                // }
+            }
+            else
+            {
+                await JsRuntime.InvokeVoidAsync("alert", "Không có dữ liệu được chọn!"); // Alert
+            }
+        };
+        var result = await Handlers.ErrorHandler.HandleAsync(edit);
+        if (!result.IsSuccess)
+        {
+            var e = result.Error;
+            Console.WriteLine(e);
+            await JsRuntime.InvokeVoidAsync("alert", e.ToString()); // Alert
+        }
+    }
+
+    private void MayCanChangedHandler(object? sender, EventArgs args)
+    {
+        if (DeviceViewService.DeviceCard != null)
+        {
+            TheId = DeviceViewService.DeviceCard.NapTheId;
+            InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private async void CloseDialogAdd()
+    {
+        IsVisibleAdd = false;
+        IsVisibleEdit = false;
+    }
+
+    private async void MayCanStartStop(string id)
+    {
+        // if (cardService.ItemRo.ColorCode == null && isXoa == false)
+        // {
+        //     await JsRuntime.InvokeVoidAsync("alert", "Chưa chọn Màu!"); // Alert
+        //     return;
+        // }
+
+        DeviceViewService.DeviceCard = MayCansService.Items.FirstOrDefault(x => x.Id == id);
+        DeviceViewService.DeviceSelectedId = id;
+
+        if (DeviceViewService.DeviceCard != null)
+        {
+            DeviceViewService.DeviceCard.IsNapThe = !DeviceViewService.DeviceCard.IsNapThe;
+            if (DeviceViewService.DeviceCard.IsNapThe)
+            {
+                MayCansService.ItemChanged -= MayCanChangedHandler;
+                MayCansService.ItemChanged += MayCanChangedHandler;
+                await MayCansService.CommandSendMess(DeviceViewService.DeviceCard.Id, "Nạp Thẻ");
+            }
+            else
+            {
+                MayCansService.ItemChanged -= MayCanChangedHandler;
+                await MayCansService.CommandSendMess(DeviceViewService.DeviceCard.Id, "");
+            }
+
+
+            MayCansService.NotifyItemChanged();
+        }
+    }
+
+    private void ValueChangeHandler(ChangedEventArgs args)
+    {
+        if (args.Value.Length >= 10)
+        {
+            ThongBao = "";
+            //JsRuntime.InvokeVoidAsync("alert", args.Value); // Alert
+            var the = new Models.Repos.Models.TheThanhPham()
+                {
+                    MaThe = args.Value,
+                    IsRestart = cardService.ItemChucNang.IsRestart,
+                    IsZero = cardService.ItemChucNang.IsZero,
+                    STTPhieuPhanCoChiTietT = cardService.ItemChucNang.STTPhieuPhanCoChiTietT,
+                    TrongLuongTare = cardService.ItemChucNang.TrongLuongTare,
+                    MaThanhPham = cardService.ItemChucNang.MaThanhPham,
+                    MaSizeDinhHinh = cardService.ItemChucNang.MaSizeDinhHinh,
+                    MaThanhPhamFillet = cardService.ItemChucNang.MaThanhPhamFillet,
+                    MaMayLangDa = cardService.ItemChucNang.MaMayLangDa,
+                    MaSizeFillet = cardService.ItemChucNang.MaSizeFillet,
+                    MaQuyTrinhT = cardService.ItemChucNang.MaQuyTrinhT,
+                    MaThanhPhamPhuPham = cardService.ItemChucNang.MaThanhPhamPhuPham,
+                    NgayGio = DateTime.Now
+                };
+            var mes = cardService.Find(args.Value);
+            if (mes == "")
+            {
+                if (isXoa == false)
+                {
+                    if (MainService.VmTheThanhPham.Insert(the) > 0)
+                    {
+                        cardService.ItemsByChucNang.Insert(0, the);
+                        MainService.VmTheThanhPham.Items.Add(the);
+                        ThongBao = $"Đã Thêm Thẻ! {the.MaThe}";
+                    }
+                    else
+                    {
+                        ThongBao = $"Không Thể Thêm Thẻ! {the.MaThe}";
+                    }
+                }
+                else
+                {
+                    ThongBao = $"Không Tìm Thấy Thẻ! {the.MaThe}";
+                }
+            }
+            else
+            {
+                if (isXoa == false)
+                {
+                    ThongBao = mes;
+                }
+                else
+                {
+                    if (MainService.VmTheThanhPham.Delete(the) > 0)
+                    {
+                        cardService.ItemsByChucNang.Insert(0, the);
+                        var item = MainService.VmTheThanhPham.Items.FirstOrDefault(x => x.MaThe == the.MaThe);
+                        if (item != null)
+                        {
+                            MainService.VmTheThanhPham.Items.Remove(item);
+                        }
+
+                        ThongBao = $"Đã Xóa Thẻ! {the.MaThe}";
+                    }
+                    else
+                    {
+                        ThongBao = $"Không Thể Xóa Thẻ! {the.MaThe}";
+                    }
+                }
+            }
+
+            TheId = "";
+        }
+        //JsRuntime.InvokeVoidAsync("alert", args.Value); // Alert
+        //TheId = "ádasd";
+    }
+
+    private async Task ToolbarClickHandler(ClickEventArgs args)
+    {
+        if (args.Item.Id == "refresh")
+        {
+            MainService.VmTheThanhPham.Reload();
+            await Grid.Refresh();
+            await JsRuntime.InvokeVoidAsync("alert", "Thực hiện xong!"); // Alert
+        }
+
+        if (args.Item.Id == "add")
+        {
+            ThongBao = "";
+            isXoa = false;
+            cardService.ItemChucNang = new Models.Repos.Models.TheThanhPham();
+            if (DeviceViewService.DeviceCard != null && DeviceViewService.DeviceSelectedId != "")
+            {
+                var mayCan = MayCansService.Items.FirstOrDefault(x => x.Id == DeviceViewService.DeviceCard.Id);
+                DeviceViewService.DeviceCard.IsNapThe = mayCan.IsNapThe;
+            }
+
+            IsVisibleAdd = true;
+        }
+
+        if (args.Item.Id == "edit")
+        {
+            cardService.ItemChucNang = new Models.Repos.Models.TheThanhPham();
+            var value = await Grid.GetSelectedRecordsAsync();
+            if (value != null && value.Count >= 1)
+            {
+                IsVisibleEdit = true;
+            }
+            else
+            {
+                await JsRuntime.InvokeVoidAsync("alert", "Không có dữ liệu được chọn!"); // Alert
+            }
+        }
+
+        if (args.Item.Id == "delete")
+        {
+            var value = await Grid.GetSelectedRecordsAsync();
+            if (value != null && value.Count >= 1)
+            {
+                var result = await JsRuntime.InvokeAsync<bool>("confirm", $"Xóa {value.Count} thẻ");
+                if (result)
+                {
+                    if (MainService.VmTheThanhPham.Delete(value) > 0)
+                    {
+                        foreach (var val in value)
+                        {
+                            var item = MainService.VmTheThanhPham.Items.FirstOrDefault(x => x.MaThe == val.MaThe);
+                            if (item != null)
+                            {
+                                var index = MainService.VmTheThanhPham.Items.IndexOf(item);
+                                MainService.VmTheThanhPham.Items.RemoveAt(index);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        ThongBao = "Không Thể Xóa Thẻ!";
+                    }
+                }
+            }
+            else
+            {
+                ThongBao = "";
+                isXoa = true;
+                cardService.ItemChucNang = new Models.Repos.Models.TheThanhPham();
+                if (DeviceViewService.DeviceCard != null && DeviceViewService.DeviceSelectedId != "")
+                {
+                    var mayCan = MayCansService.Items.FirstOrDefault(x => x.Id == DeviceViewService.DeviceCard.Id);
+                    DeviceViewService.DeviceCard.IsNapThe = mayCan.IsNapThe;
+                }
+
+                cardService.ItemsByChucNang.Clear();
+                IsVisibleAdd = true;
+                //await JsRuntime.InvokeVoidAsync("alert", "Không có dữ liệu được chọn!"); // Alert
+            }
+        }
+    }
+
+    private void OverlayClick(OverlayModalClickEventArgs args)
+    {
+        IsVisibleAdd = false;
+        IsVisibleEdit = false;
+        MayCansService.ItemChanged -= MayCanChangedHandler;
+
+        if (DeviceViewService.DeviceCard != null)
+        {
+            DeviceViewService.DeviceCard.IsNapThe = false;
+            MayCansService.NotifyItemChanged();
+        }
+    }
+
+
+    private void Closed(CloseEventArgs obj)
+    {
+        IsVisibleAdd = false;
+        IsVisibleEdit = false;
+        MayCansService.ItemChanged -= MayCanChangedHandler;
+
+        if (DeviceViewService.DeviceCard != null)
+        {
+            DeviceViewService.DeviceCard.IsNapThe = false;
+            MayCansService.NotifyItemChanged();
+        }
+    }
+
+}

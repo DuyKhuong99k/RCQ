@@ -1,0 +1,651 @@
+﻿@{
+    ViewData["Title"] = "NhanVienView";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var listXuongs = ViewBag.listXuongs;
+    var listNhoms = ViewBag.listNhoms;
+    //lấy danh sách roleid từ cookie
+    var roleIds = PMS.Middlewares.AuthenticationHelpers.GetRoleIdsFromCookie(Context);
+    // lấy danh sách fu func từ list roleId
+    var rolePermistions = await PMS.Middlewares.AuthenticationHelpers.GetRolePermistionsAsync(Context, roleIds);
+}
+<style>
+
+    div[style*="color: #222222;"] {
+        display: none;
+    }
+</style>
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h2 class="mb-0">Danh Sách Nhân Viên</h2>
+                    @{
+                        var themnhanvien = rolePermistions.Where(x => x.Fu == "Danh Mục / Nhân Viên" && x.Func == "Thêm Nhân Viên" && x.Status == 1).FirstOrDefault();
+                        if (themnhanvien != null)
+                        {
+                            <button onclick="showInsertNhanVien()" type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalThemNhanVien">Thêm</button>
+                        }
+                    }
+
+                </div>
+                <div class="card-body">
+                    <div id="Grid"></div>
+                    <div style="margin-top:20px;">
+                        @{
+                            var suanhanvien = rolePermistions.Where(x => x.Fu == "Danh Mục / Nhân Viên" && x.Func == "Sửa Nhân Viên" && x.Status == 1).FirstOrDefault();
+                            if (suanhanvien != null)
+                            {
+                                <button onclick="showUpdateNhanVien()" style="margin-right:5px" class="btn btn-outline-warning"><i class='bx bx-edit-alt'></i>Sửa</button>
+                            }
+                            var xoanhanvien = rolePermistions.Where(x => x.Fu == "Danh Mục / Nhân Viên" && x.Func == "Xoá Nhân Viên" && x.Status == 1).FirstOrDefault();
+                            if (xoanhanvien != null)
+                            {
+                                <button onclick="showDeleteNhanVien()" style="margin-right:5px" class="btn btn-outline-danger"><i class='bx bx-trash'></i>Xoá</button>
+                            }
+                            var importnhanvien = rolePermistions.Where(x => x.Fu == "Danh Mục / Nhân Viên" && x.Func == "Import Nhân Viên" && x.Status == 1).FirstOrDefault();
+                            if (importnhanvien != null)
+                            {
+                                <button onclick="importNhanVien()" style="margin-right:5px" class="btn btn-outline-info"><i class='bx bx-import'></i>Import</button>
+                            }
+                            var exportnhanvien = rolePermistions.Where(x => x.Fu == "Danh Mục / Nhân Viên" && x.Func == "Export Nhân Viên" && x.Status == 1).FirstOrDefault();
+                            if (exportnhanvien != null)
+                            {
+                                <button onclick="exportNhanVien()" style="margin-right:5px" class="btn btn-outline-secondary"><i class='bx bx-export'></i>Export Excel</button>
+                            }
+                        }      
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="modalThemNhanVien" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Thêm Nhân Viên</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <div class="form-outline">
+                                    <label class="form-label" for="userName">Mã Nhân Viên</label>
+                                    <input type="text" id="maNhanVien" class="form-control form-control-lg" autocomplete="off" placeholder="Nhập mã nhân viên..." style="text-transform: uppercase;" />
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <div class="form-outline">
+                                    <label class="form-label" for="passWord">Mã Hồ Sơ</label>
+                                    <input type="text" id="maHoSo" class="form-control form-control-lg" autocomplete="new-password" placeholder="Nhập mã hồ sơ..." style="text-transform: uppercase;" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <div class="form-outline">
+                                    <label class="form-label" for="hoTen">Tên Nhân Viên</label>
+                                    <input type="text" id="hoTen" class="form-control form-control-lg" autocomplete="off" placeholder="Nhập tên nhân viên..." />
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <div class="form-outline">
+                                    <label class="form-label" for="emailAddress">Loại Sản Lượng</label>
+                                    <select id="loaiSanLuong" class="form-control form-control-lg">
+                                        <option disabled>Loại sản lượng</option>
+                                        <option value="-1">-1</option>
+                                        <option value="0">0</option>
+                                        <option value="1">1</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <div class="form-outline">
+                                    <label class="form-label select-label" for="emailAddress">Nhóm</label>
+                                    <input type="text" class="form-control form-control-lg displayValueNhom" id="displayValueNhom" />
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <label class="form-label select-label">Xưởng</label>
+                                <select id="xuongSelect" class="form-control form-control-lg">
+                                    <option disabled>Chọn Xưởng</option>
+                                    @foreach (var item in listXuongs)
+                                    {
+                                        <option value="@item.Ma">@item.Ten</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-4 list-group">
+                                <label class="">
+                                    <input class="form-check-input me-1" type="checkbox" value="" id="isContracting" />
+                                    Trạng Thái Làm Việc
+                                </label>
+                                <label class="">
+                                    <input class="form-check-input me-1" type="checkbox" value="" id="isPhucVu" />
+                                    Phục Vụ
+                                </label>
+                                <label class="">
+                                    <input class="form-check-input me-1" type="checkbox" value="" id="isBanKiem" />
+                                    Bàn Kiểm
+                                </label>
+                                <label class="">
+                                    <input class="form-check-input me-1" type="checkbox" value="" id="isNhom" />
+                                    Nhóm
+                                </label>
+                            </div>
+                            <div class="col-md-6 mb-4 list-group">
+                                <label class="">
+                                    <input class="form-check-input me-1" type="checkbox" value="" id="isHuman" />
+                                    Nhân Viên Bình Thường
+                                </label>
+                                <label class="">
+                                    <input class="form-check-input me-1" type="checkbox" value="" id="isGiaCong" />
+                                    Gia Công
+                                </label>
+                                <label class="">
+                                    <input class="form-check-input me-1" type="checkbox" value="" id="isChucNang" />
+                                    Chức Năng
+                                </label>
+                            </div>
+                            <div class="col-md-12 mb-12 list-group">
+                                <label class="">
+                                    <input class="form-check-input me-1" type="checkbox" value="" id="isShowDinhMuc" />
+                                    Thông Báo Trạng Thái Định Mức TP ĐH
+                                </label>
+                            </div>
+                        </div>
+                        <div class="row mt-4 pt-2">
+                            <div class="col-12">
+                                <button onclick="insertNhanVien()" class="btn btn-primary w-100 position-relative" type="submit" id="registerBtn">
+                                    <div class=" align-items-center">
+                                        <span id="txtThemNhanVien">Thêm</span>
+                                        <div id="loadingIndicator" class=" spinner-border text-secondary position-absolute" role="status" style="left: 0;right: 0;top: 0;bottom: 0;margin: auto; display:none">
+                                            <span class="visually-hidden">Đang tải...</span>
+                                        </div>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="modalSuaNhanVien" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Sửa Nhân Viên</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <div class="form-outline">
+                                    <label class="form-label" for="userName">Mã Nhân Viên</label>
+                                    <input type="text" id="maNhanVienSua" class="form-control form-control-lg" autocomplete="off" placeholder="Nhập mã nhân viên..." style="text-transform: uppercase;" disabled />
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <div class="form-outline">
+                                    <label class="form-label" for="passWord">Mã Hồ Sơ</label>
+                                    <input type="text" id="maHoSoSua" class="form-control form-control-lg" autocomplete="new-password" placeholder="Nhập mã hồ sơ..." style="text-transform: uppercase;" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <div class="form-outline">
+                                    <label class="form-label" for="hoTen">Tên Nhân Viên</label>
+                                    <input type="text" id="hoTenSua" class="form-control form-control-lg" autocomplete="off" placeholder="Nhập tên nhân viên..." />
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <div class="form-outline">
+                                    <label class="form-label" for="emailAddress">Loại Sản Lượng</label>
+                                    <select id="loaiSanLuongSua" class="form-control form-control-lg">
+                                        <option disabled>Loại sản lượng</option>
+                                        <option value="-1">-1</option>
+                                        <option value="0">0</option>
+                                        <option value="1">1</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <div class="form-outline">
+                                    <label class="form-label select-label" for="emailAddress">Nhóm</label>
+                                    <input type="text" class="form-control form-control-lg" id="displayValueNhomSua" />
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <label class="form-label select-label">Xưởng</label>
+                                <select id="xuongSelectSua" class="form-control form-control-lg">
+                                    <option disabled>Chọn Xưởng</option>
+                                    @foreach (var item in listXuongs)
+                                    {
+                                        <option value="@item.Ma">@item.Ten</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-4 list-group">
+                                <label class="">
+                                    <input class="form-check-input me-1" type="checkbox" value="" id="isContractingSua" />
+                                    Trạng Thái Làm Việc
+                                </label>
+                                <label class="">
+                                    <input class="form-check-input me-1" type="checkbox" value="" id="isPhucVuSua" />
+                                    Phục Vụ
+                                </label>
+                                <label class="">
+                                    <input class="form-check-input me-1" type="checkbox" value="" id="isBanKiemSua" />
+                                    Bàn Kiểm
+                                </label>
+                                <label class="">
+                                    <input class="form-check-input me-1" type="checkbox" value="" id="isNhomSua" />
+                                    Nhóm
+                                </label>
+                            </div>
+                            <div class="col-md-6 mb-4 list-group">
+                                <label class="">
+                                    <input class="form-check-input me-1" type="checkbox" value="" id="isHumanSua" />
+                                    Nhân Viên Bình Thường
+                                </label>
+                                <label class="">
+                                    <input class="form-check-input me-1" type="checkbox" value="" id="isGiaCongSua" />
+                                    Gia Công
+                                </label>
+                                <label class="">
+                                    <input class="form-check-input me-1" type="checkbox" value="" id="isChucNangSua" />
+                                    Chức Năng
+                                </label>
+                            </div>
+                            <div class="col-md-12 mb-12 list-group">
+                                <label class="">
+                                    <input class="form-check-input me-1" type="checkbox" value="" id="isShowDinhMucSua" />
+                                    Thông Báo Trạng Thái Định Mức TP ĐH
+                                </label>
+                            </div>
+                        </div>
+                        <div class="row mt-4 pt-2">
+                            <div class="col-12">
+                                <button onclick="updateNhanVien()" class="btn btn-primary w-100 position-relative" type="submit" id="registerBtn">
+                                    <div class=" align-items-center">
+                                        <span id="txtSuaNhanVien">Xác Nhận</span>
+                                        <div id="loadingIndicatorSua" class=" spinner-border text-secondary position-absolute" role="status" style="left: 0;right: 0;top: 0;bottom: 0;margin: auto; display:none">
+                                            <span class="visually-hidden">Đang tải...</span>
+                                        </div>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<input type="hidden" id="maNhanVienRowSelected" />
+<script>
+    var listNhoms = @Html.Raw(Json.Serialize(listNhoms));
+    // initialize ComboBox component
+    var comboBox = new ej.dropdowns.ComboBox({
+        dataSource: listNhoms,
+        placeholder: 'Nhập/Chọn Nhóm',
+    });
+    var comboBox2 = new ej.dropdowns.ComboBox({
+        dataSource: listNhoms,
+        placeholder: 'Nhập/Chọn Nhóm',
+    });
+    // Render initialized ComboBox.
+    comboBox.appendTo('#displayValueNhom');
+    comboBox2.appendTo('#displayValueNhomSua');
+</script>
+<script>
+    $(document).ready(function () {
+        loadGridData();
+    });
+    var grid;
+    function loadGridData() {
+        $.ajax({
+            url: '/Staff/GetAllNhanViens',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                // Khởi tạo DataManager và gán dữ liệu từ API vào dataSource
+                var dataManager = new ej.data.DataManager({
+                    json: data,
+                    adaptor: new ej.data.JsonAdaptor()
+                });
+                // Kiểm tra xem Grid đã được tạo chưa
+                if (grid) {
+                    // Nếu Grid đã được tạo, chỉ cập nhật dữ liệu mới
+                    grid.dataSource = dataManager;
+                    grid.refresh();
+                } else {
+                    // Nếu Grid chưa được tạo, tạo mới Grid
+                    grid = new ej.grids.Grid({
+                        dataSource: dataManager,
+                        allowPaging: true,
+                        pageSettings: { pageSize: 50 },
+                        allowFiltering: true,
+                        allowSorting: true,
+                        filterSettings: { type: 'Excel' },
+                        //frozenColumns: 3,
+                        allowResizing: true,
+                        rowSelected: onRowSelected,
+                        height: 400,
+                        columns: [
+                            //{ field: 'STT', headerText: 'STT', width: 80, textAlign: 'Center' },
+                            { field: 'MaNhanVien', headerText: 'Mã Nhân Viên', width: 150 },
+                            { field: 'MaHoSo', headerText: 'Mã Số', width: 150 },
+                            { field: 'Name', headerText: 'Tên Nhân Viên', width: 150 },
+                            { field: 'DeptName0', headerText: 'Tên Nhóm', width: 150 },
+                            { field: 'IsContracting', headerText: 'Trạng Thái', width: 100, displayAsCheckBox: 'true', textAlign: 'Center' },
+                            { field: 'IsPhucVu', headerText: 'Phục Vụ', width: 100, displayAsCheckBox: 'true', textAlign: 'Center' },
+                            { field: 'IsBanKiem', headerText: 'Bàn Kiểm', width: 100, displayAsCheckBox: 'true', textAlign: 'Center' },
+                            { field: 'IsChucNang', headerText: 'Chức Năng', width: 100, displayAsCheckBox: 'true', textAlign: 'Center' },
+                            { field: 'LoaiSanLuong', headerText: 'Loại SL', width: 100, textAlign: 'Center' },
+                            { field: 'IsHuman', headerText: 'Nhân Viên BT', width: 150, displayAsCheckBox: 'true', textAlign: 'Center' },
+                            { field: 'IsNhom', headerText: 'Nhóm', width: 100, displayAsCheckBox: 'true', textAlign: 'Center' },
+                            { field: 'IsGiaCong', headerText: 'Gia Công', width: 100, displayAsCheckBox: 'true', textAlign: 'Center' },
+                            //{ field: '', headerText: '', width: 100, template: '#optionTemplate' },
+                        ]
+                    });
+                    // Hiển thị Grid trên trang web
+                    grid.appendTo('#Grid');
+                }
+            },
+            error: function (error) {
+                console.error(error);
+            }
+        });
+    }
+    loadGridData();
+    function reloadData() {
+        loadGridData();
+    }
+    function onRowSelected(args) {
+        // Lấy dữ liệu của hàng được chọn
+        var selectedRecord = args.data;
+        // Lấy giá trị Id từ dữ liệu của hàng được chọn
+        var maNhanVien = selectedRecord.MaNhanVien;
+        $('#maNhanVienRowSelected').val(maNhanVien);
+    }
+</script>
+<script>
+    function showInsertNhanVien() {
+        $.ajax({
+            type: "GET",
+            url: "/Staff/CreatDefaulNew", // Đường dẫn đến action trong controller
+            success: function (rs) {
+                if (rs.isSuccess === true) {
+                    $('#maNhanVien').val(rs.MaNhanVien);
+                    $('#maHoSo').val(rs.MaHoSo);
+                    $('#hoTen').val(rs.Name);
+                    $('#loaiSanLuong').val(rs.LoaiSanLuong);
+                    $('#displayValueNhom').val(rs.DeptName0);
+                    $('#xuongSelect').val(rs.Xuong);
+                    $('#isContracting').prop('checked', rs.IsContracting);
+                    $('#isPhucVu').prop('checked', rs.IsPhucVu);
+                    $('#isBanKiem').prop('checked', rs.IsBanKiem);
+                    $('#isNhom').prop('checked', rs.IsNhom);
+                    $('#isHuman').prop('checked', rs.IsHuman);
+                    $('#isGiaCong').prop('checked', rs.IsGiaCong);
+                    $('#isChucNang').prop('checked', rs.IsChucNang);
+                    $('#isShowDinhMuc').prop('checked', rs.IsShowDinhMuc);
+
+                }
+                else {
+                    toastOptionNotyfi();
+                    toastr["warning"](rs.Mesages, "Thông báo");
+                }
+            },
+            error: function () {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error, "Thông báo");
+            }
+        });
+    }
+
+    function insertNhanVien() {
+        var maNhanVien = $('#maNhanVien').val();
+        var maHoSo = $('#maHoSo').val();
+        var tenNhanVien = $('#hoTen').val();
+        var loaiSL = $('#loaiSanLuong').val();
+        var nhomName = $('#displayValueNhom').val();
+        var xuongId = $('#xuongSelect').val();
+        var isContracting = $('#isContracting').prop('checked');
+        var isPhucVu = $('#isPhucVu').prop('checked');
+        var isBanKiem = $('#isBanKiem').prop('checked');
+        var isNhom = $('#isNhom').prop('checked');
+        var isHuman = $('#isHuman').prop('checked');
+        var isGiaCong = $('#isGiaCong').prop('checked');
+        var isChucNang = $('#isChucNang').prop('checked');
+        var isShowDinhMuc = $('#isShowDinhMuc').prop('checked');
+        document.getElementById("txtThemNhanVien").style.visibility = "hidden";
+        document.getElementById("loadingIndicator").style.display = "block";
+        $.ajax({
+            type: 'POST',
+            url: '/Staff/DoInsert',
+            data: {
+                maNhanVien: maNhanVien,
+                maHoSo: maHoSo,
+                tenNhanVien: tenNhanVien,
+                loaiSL: loaiSL,
+                nhomName: nhomName,
+                xuongId: xuongId,
+                isContracting: isContracting,
+                isHuman: isHuman,
+                isPhucVu: isPhucVu,
+                isGiaCong: isGiaCong,
+                isBanKiem: isBanKiem,
+                isChucNang: isChucNang,
+                isNhom: isNhom,
+                isShowDinhMuc: isShowDinhMuc
+            },
+            success: function (rs) {
+                if (rs.isSuccess === true) {
+                    toastOptionNotyfi();
+                    toastr["success"](rs.Messages, "Thông báo");
+                    $('#modalThemNhanVien').modal('hide');
+                    $('#nhomSelect').val('');
+                    reloadData();
+                } else {
+                    toastOptionNotyfi();
+                    toastr["warning"](rs.Messages, "Thông báo");
+                }
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error, "Thông báo");
+            },
+            complete: function () {
+                document.getElementById("loadingIndicator").style.display = "none";
+                document.getElementById("txtThemNhanVien").style.visibility = "visible";
+            }
+        });
+    }
+</script>
+<script>
+    function showUpdateNhanVien() {
+        var maNhanVien = $('#maNhanVienRowSelected').val();
+        $.ajax({
+            url: "/Staff/GetInfoNhanVienByMaNhanVien",
+            data: { maNhanVien: maNhanVien },
+            type: 'GET',
+            dataType: 'json',
+            success: function (rs) {
+                if (rs.isSuccess === true) {
+                    $('#maNhanVienSua').val(rs.MaNhanVien);
+                    $('#maHoSoSua').val(rs.MaHoSo);
+                    $('#hoTenSua').val(rs.Name);
+                    $('#loaiSanLuongSua').val(rs.LoaiSanLuong);
+                    $('#displayValueNhomSua').val(rs.DeptName0);
+                    $('#xuongSelectSua').val(rs.Xuong);
+                    $('#isContractingSua').prop('checked', rs.IsContracting);
+                    $('#isPhucVuSua').prop('checked', rs.IsPhucVu);
+                    $('#isBanKiemSua').prop('checked', rs.IsBanKiem);
+                    $('#isNhomSua').prop('checked', rs.IsNhom);
+                    $('#isHumanSua').prop('checked', rs.IsHuman);
+                    $('#isGiaCongSua').prop('checked', rs.IsGiaCong);
+                    $('#isChucNangSua').prop('checked', rs.IsChucNang);
+                    $('#isShowDinhMucSua').prop('checked', rs.IsShowDinhMuc);
+                    $('#modalSuaNhanVien').modal('show');
+                }
+                else {
+                    toastOptionNotyfi();
+                    toastr["warning"](rs.Mesages, "Thông báo");
+                }
+            },
+            error: function () {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error, "Thông báo");
+            }
+        });
+    }
+    function updateNhanVien() {
+        var maNhanVien = $('#maNhanVienRowSelected').val();
+        var maHoSo = $('#maHoSoSua').val();
+        var tenNhanVien = $('#hoTenSua').val();
+        var loaiSL = $('#loaiSanLuongSua').val();
+        var nhomName = $('#displayValueNhomSua').val();
+        var xuongId = $('#xuongSelectSua').val();
+        var isContracting = $('#isContractingSua').prop('checked');
+        var isPhucVu = $('#isPhucVuSua').prop('checked');
+        var isBanKiem = $('#isBanKiemSua').prop('checked');
+        var isNhom = $('#isNhomSua').prop('checked');
+        var isHuman = $('#isHumanSua').prop('checked');
+        var isGiaCong = $('#isGiaCongSua').prop('checked');
+        var isChucNang = $('#isChucNangSua').prop('checked');
+        var isShowDinhMuc = $('#isShowDinhMucSua').prop('checked');
+        document.getElementById("txtSuaNhanVien").style.visibility = "hidden";
+        document.getElementById("loadingIndicatorSua").style.display = "block";
+        $.ajax({
+            url: '/Staff/DoUpdate',
+            data: {
+                maNhanVien: maNhanVien,
+                maHoSo: maHoSo,
+                tenNhanVien: tenNhanVien,
+                loaiSL: loaiSL,
+                nhomName: nhomName,
+                xuongId: xuongId,
+                isContracting: isContracting,
+                isHuman: isHuman,
+                isPhucVu: isPhucVu,
+                isGiaCong: isGiaCong,
+                isBanKiem: isBanKiem,
+                isChucNang: isChucNang,
+                isNhom: isNhom,
+                isShowDinhMuc: isShowDinhMuc
+            },
+            type: 'POST',
+            dataType: 'json',
+            success: function (rs) {
+                if (rs.isSuccess === true) {
+                    $('#modalSuaNhanVien').modal('hide');
+                    reloadData();
+                    toastOptionNotyfi();
+                    toastr["success"](rs.Messages, "Thông báo");
+                } else {
+                    toastOptionNotyfi();
+                    toastr["warning"](rs.Messages, "Thông báo");
+                }
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error, "Thông báo");
+            },
+            complete: function () {
+                document.getElementById("loadingIndicatorSua").style.display = "none";
+                document.getElementById("txtSuaNhanVien").style.visibility = "visible";
+            }
+        });
+    }
+    function showDeleteNhanVien() {
+        var maNhanVien = $('#maNhanVienRowSelected').val();
+        $.ajax({
+            url: '/Staff/GetInfoNhanVienByMaNhanVien',
+            data: { maNhanVien: maNhanVien },
+            type: 'GET',
+            dataType: 'json',
+            success: function (rs) {
+                if (rs.isSuccess === true) {
+                    bootbox.confirm({
+                        title: "Thông báo!",
+                        message: "Bạn có chắc muốn xoá nhân viên: " + rs.Name,
+                        buttons: {
+                            confirm: {
+                                label: 'OK',
+                                className: 'btn btn-primary'
+                            }
+                        },
+                        callback: function (result) {
+                            if (result) {
+                                //Người dùng đã bấm OK, Gọi API xóa ở đây
+                                $.ajax({
+                                    url: '/Staff/DeleteNhanVien',
+                                    data: { maNhanVien: maNhanVien },
+                                    type: 'POST',
+                                    dataType: 'json',
+                                    success: function (rs) {
+                                        if (rs.isSuccess === true) {
+                                            reloadData();
+                                            toastOptionNotyfi();
+                                            toastr["success"](rs.Messages, "Thông báo");
+                                        } else {
+                                            toastOptionNotyfi();
+                                            toastr["warning"](rs.Messages, "Thông báo");
+                                        }
+                                    },
+                                    error: function (error) {
+                                        toastOptionNotyfi();
+                                        toastr["error"]('Đã xảy ra lỗi: ' + error, "Thông báo");
+                                    }
+                                });
+                            }
+                        }
+                    });
+                } else {
+                    toastOptionNotyfi();
+                    toastr["warning"]('Không tìm thấy thông tin!', "Thông báo");
+                }
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error, "Thông báo");
+            }
+        });
+
+    }
+
+
+
+
+    function importNhanVien() {
+        toastOptionNotyfi();
+        toastr["warning"]('Tính năng chưa phát triển!', "Thông báo");
+    } function exportNhanVien() {
+        toastOptionNotyfi();
+        toastr["warning"]('Tính năng chưa phát triển!', "Thông báo");
+    }
+</script>

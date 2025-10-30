@@ -1,0 +1,137 @@
+is_global = true
+build_property.TargetFramework = net8.0
+build_property.TargetPlatformMinVersion = 
+build_property.UsingMicrosoftNETSdkWeb = true
+build_property.ProjectTypeGuids = 
+build_property.InvariantGlobalization = 
+build_property.PlatformNeutralAssembly = 
+build_property.EnforceExtendedAnalyzerRules = 
+build_property._SupportedPlatformList = Linux,macOS,Windows
+build_property.RootNamespace = PMSHub
+build_property.RootNamespace = PMSHub
+build_property.ProjectDir = /Volumes/LocalData/PhanBachProject/PMSSoft/PMSHub/
+build_property.EnableComHosting = 
+build_property.EnableGeneratedComInterfaceComImportInterop = 
+build_property.RazorLangVersion = 8.0
+build_property.SupportLocalizedComponentNames = 
+build_property.GenerateRazorMetadataSourceChecksumAttributes = 
+build_property.MSBuildProjectDirectory = /Volumes/LocalData/PhanBachProject/PMSSoft/PMSHub
+build_property._RazorSourceGeneratorDebug = 
+build_property.EffectiveAnalysisLevelStyle = 8.0
+build_property.EnableCodeStyleSeverity = 
+
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMSHub/Components/App.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9BcHAucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMSHub/Components/Layout/ErrorLayout.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9MYXlvdXQvRXJyb3JMYXlvdXQucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMSHub/Components/Layout/FooterLayout.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9MYXlvdXQvRm9vdGVyTGF5b3V0LnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMSHub/Components/Layout/TopLayout.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9MYXlvdXQvVG9wTGF5b3V0LnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMSHub/Components/Pages/AuthenticatedComponent.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9QYWdlcy9BdXRoZW50aWNhdGVkQ29tcG9uZW50LnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMSHub/Components/Pages/CoiTamView.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9QYWdlcy9Db2lUYW1WaWV3LnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMSHub/Components/Pages/CoiTamViewLogin.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9QYWdlcy9Db2lUYW1WaWV3TG9naW4ucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMSHub/Components/Pages/Counter.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9QYWdlcy9Db3VudGVyLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMSHub/Components/Pages/DatMauTheDinhHinh.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9QYWdlcy9EYXRNYXVUaGVEaW5oSGluaC5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMSHub/Components/Pages/DatMauTheFillet.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9QYWdlcy9EYXRNYXVUaGVGaWxsZXQucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMSHub/Components/Pages/DatMauThePhuXepKhuon.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9QYWdlcy9EYXRNYXVUaGVQaHVYZXBLaHVvbi5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMSHub/Components/Pages/DatNhanVienCongCuXepKhuon.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9QYWdlcy9EYXROaGFuVmllbkNvbmdDdVhlcEtodW9uLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMSHub/Components/Pages/Devices.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9QYWdlcy9EZXZpY2VzLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMSHub/Components/Pages/DevicesCoiView.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9QYWdlcy9EZXZpY2VzQ29pVmlldy5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMSHub/Components/Pages/DevicesCoiViewNotLogin.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9QYWdlcy9EZXZpY2VzQ29pVmlld05vdExvZ2luLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMSHub/Components/Pages/DevicesCoiViewWithLogin.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9QYWdlcy9EZXZpY2VzQ29pVmlld1dpdGhMb2dpbi5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMSHub/Components/Pages/Error.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9QYWdlcy9FcnJvci5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMSHub/Components/Pages/Home.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9QYWdlcy9Ib21lLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMSHub/Components/Pages/Index.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9QYWdlcy9JbmRleC5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMSHub/Components/Pages/Login.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9QYWdlcy9Mb2dpbi5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMSHub/Components/Pages/LoginLocal.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9QYWdlcy9Mb2dpbkxvY2FsLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMSHub/Components/Pages/TheChucNang.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9QYWdlcy9UaGVDaHVjTmFuZy5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMSHub/Components/Pages/TheNhanVien.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9QYWdlcy9UaGVOaGFuVmllbi5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMSHub/Components/Pages/TheRo.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9QYWdlcy9UaGVSby5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMSHub/Components/Pages/Weather.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9QYWdlcy9XZWF0aGVyLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMSHub/Components/Routes.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9Sb3V0ZXMucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMSHub/Components/_Imports.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9fSW1wb3J0cy5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMSHub/Components/Layout/MainLayout.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9MYXlvdXQvTWFpbkxheW91dC5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = b-u6c1k6rapa
+
+[/Volumes/LocalData/PhanBachProject/PMSSoft/PMSHub/Components/Layout/NavMenu.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9MYXlvdXQvTmF2TWVudS5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = b-vtfjmolcge

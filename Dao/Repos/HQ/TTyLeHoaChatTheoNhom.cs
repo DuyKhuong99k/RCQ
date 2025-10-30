@@ -1,0 +1,74 @@
+﻿using Dapper;
+using Microsoft.Data.SqlClient;
+
+namespace Dao.Repos.HQ
+{
+    public partial class TTyLeHoaChatTheoNhom
+    {
+        private readonly string connectionString;
+        private string tableName = @"T_TyLeHoaChatTheoNhom";
+        private readonly string qrDelete = @"DELETE FROM [dbo].[T_TyLeHoaChatTheoNhom]
+      WHERE [Ma] = @Ma
+";
+
+        private readonly string qrInsert = @"INSERT INTO [dbo].[T_TyLeHoaChatTheoNhom]
+           ([Ma]
+           ,[MaNhomHoaChat]
+           ,[MaHoaChat]
+           ,[TyLe]
+           ,[SuDung],[Ten])
+     VALUES
+           (@Ma
+           ,@MaNhomHoaChat
+           ,@MaHoaChat
+           ,@TyLe
+           ,@SuDung,@Ten)";
+
+        private readonly string qrUpdate = @"UPDATE [dbo].[T_TyLeHoaChatTheoNhom]
+   SET [MaNhomHoaChat] = @MaNhomHoaChat
+      ,[MaHoaChat] = @MaHoaChat
+      ,[TyLe] = @TyLe
+      ,[SuDung] = @SuDung, [Ten] =@Ten
+ WHERE [Ma] = @Ma";
+
+        private readonly string qrGetAll = "Select * from T_TyLeHoaChatTheoNhom";
+
+        public TTyLeHoaChatTheoNhom()
+        {
+            connectionString = AppViewModels.Base.Ins.ConnectionString;
+
+        }
+
+        public int Delete<T>(T item)
+        {
+            using var connection = new SqlConnection(connectionString);
+            connection.Open();
+            var rows = connection.Execute(qrDelete, item);
+            return rows;
+        }
+
+        public List<T> Gets<T>()
+        {
+            using var connection = new SqlConnection(connectionString);
+            connection.Open();
+            var rows = connection.Query<T>(qrGetAll).ToList();
+            return rows;
+        }
+
+        public int Insert<T>(T item)
+        {
+            using var connection = new SqlConnection(connectionString);
+            connection.Open();
+            var rows = connection.Execute(qrInsert, item);
+            return rows;
+        }
+
+        public int Update<T>(T item)
+        {
+            using var connection = new SqlConnection(connectionString);
+            connection.Open();
+            var rows = connection.Execute(qrUpdate, item);
+            return rows;
+        }
+    }
+}

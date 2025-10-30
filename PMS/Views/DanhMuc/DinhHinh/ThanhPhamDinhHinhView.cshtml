@@ -1,0 +1,870 @@
+﻿@{
+    ViewData["Title"] = "ThanhPhamDinhHinhView";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var listXuongs = ViewBag.listXuongs;
+    var listSPTLs = ViewBag.listSPTLs;
+    //lấy danh sách roleid từ cookie
+    var roleIds = PMS.Middlewares.AuthenticationHelpers.GetRoleIdsFromCookie(Context);
+    // lấy danh sách fu func từ list roleId
+    var rolePermistions = await PMS.Middlewares.AuthenticationHelpers.GetRolePermistionsAsync(Context, roleIds);
+
+}
+<style>
+
+    /* CSS cho headerTemplate */
+    .head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background-color: #f0f0f0; /* Màu nền header */
+        padding: 5px 10px; /* Khoảng cách bên trong header */
+        font-weight: bold;
+        border-bottom: 1px solid #ccc; /* Viền dưới header */
+    }
+
+        .head .ma, .head .ten, .head .ghichu {
+            flex: 1;
+            text-align: center; /* Căn giữa nội dung của các cột */
+        }
+
+    /* CSS cho itemTemplate */
+    .item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 5px 10px; /* Khoảng cách bên trong mỗi item */
+        border-bottom: 1px solid #eee; /* Viền dưới mỗi item */
+    }
+
+        .item .ma, .item .ten, .item .ghichu {
+            flex: 1;
+            text-align: center; /* Căn giữa nội dung của các cột */
+        }
+</style>
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h2 class="mb-0">Danh Sách Thành Phẩm Định Hình</h2>
+                    @{
+                        var themThanhPhamDinhHinh = rolePermistions.Where(x => x.Fu == "Danh Mục / Định Hình / Thành Phẩm" && x.Func == "Thêm Định Hình / Thành Phẩm" && x.Status == 1).FirstOrDefault();
+                        if (themThanhPhamDinhHinh != null)
+                        {
+                            <button onclick="showInsert()" type="button" class="btn btn-primary">Thêm</button>
+                        }
+                    }
+
+                </div>
+                <div class="card-body">
+                    <div id="Grid"></div>
+                    <div style="margin-top:20px;">
+                        @{
+                            var suaThanhPhamDinhHinh = rolePermistions.Where(x => x.Fu == "Danh Mục / Định Hình / Thành Phẩm" && x.Func == "Sửa Định Hình / Thành Phẩm" && x.Status == 1).FirstOrDefault();
+                            if (suaThanhPhamDinhHinh != null)
+                            {
+                                <button onclick="showUpdate()" style="margin-right:5px" class="btn btn-outline-warning"><i class='bx bx-edit-alt'></i>Sửa</button>
+                            }
+                            var xoaThanhPhamDinhHinh = rolePermistions.Where(x => x.Fu == "Danh Mục / Định Hình / Thành Phẩm" && x.Func == "Xoá Định Hình / Thành Phẩm" && x.Status == 1).FirstOrDefault();
+                            if (xoaThanhPhamDinhHinh != null)
+                            {
+                                <button onclick="showDelete()" style="margin-right:5px" class="btn btn-outline-danger"><i class='bx bx-trash'></i>Xoá</button>
+                            }
+                            var importThanhPhamDinhHinh = rolePermistions.Where(x => x.Fu == "Danh Mục / Định Hình / Thành Phẩm" && x.Func == "Import Định Hình / Thành Phẩm" && x.Status == 1).FirstOrDefault();
+                            if (importThanhPhamDinhHinh != null)
+                            {
+                                <button onclick="import()" style="margin-right:5px" class="btn btn-outline-info"><i class='bx bx-import'></i>Import</button>
+                            }
+                            var exportThanhPhamDinhHinh = rolePermistions.Where(x => x.Fu == "Danh Mục / Định Hình / Thành Phẩm" && x.Func == "Export Định Hình / Thành Phẩm" && x.Status == 1).FirstOrDefault();
+                            if (exportThanhPhamDinhHinh != null)
+                            {
+                                <button onclick="export()" style="margin-right:5px" class="btn btn-outline-secondary"><i class='bx bx-export'></i>Export Excel</button>
+                            }
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="modalThem" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Thêm Thành Phẩm Định Hình</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="row">
+                                    <div class="col-md-12 mb-12 ">
+                                        <div class="form-outline">
+                                            <label class="form-label">Mã</label>
+                                            <input type="text" id="maTPDH" class="form-control form-control-lg" autocomplete="off" placeholder="Nhập Mã..." style="text-transform: uppercase;" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12 mb-12 ">
+                                        <div class="form-outline">
+                                            <label class="form-label">Tên</label>
+                                            <input type="text" id="tenTPDH" class="form-control form-control-lg" autocomplete="off" placeholder="Nhập Tên..." />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12 mb-12 ">
+                                        <div class="form-outline">
+                                            <label class="form-label">Định Mức</label>
+                                            <input type="number" min="0" step="0.001" id="dinhMucTPDH" class="form-control form-control-lg" autocomplete="off" placeholder="0,000" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12 mb-12 ">
+                                        <div class="form-outline">
+                                            <label class="form-label">Trọng Lượng Min</label>
+                                            <input type="number" min="0" step="0.001" id="TLMinTPDH" class="form-control form-control-lg" autocomplete="off" placeholder="0,000" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12 mb-12 ">
+                                        <div class="form-outline">
+                                            <label class="form-label">Trọng Lượng Max</label>
+                                            <input type="number" min="0" step="0.001" id="TLMaxTPDH" class="form-control form-control-lg" autocomplete="off" placeholder="0,000" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12 mb-12 ">
+                                        <div class="form-outline">
+                                            <label class="form-label">Trọng Lượng Min Out</label>
+                                            <input type="number" min="0" step="0.001" id="TLMinOutTPDH" class="form-control form-control-lg" autocomplete="off" placeholder="0,000" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12 mb-12 ">
+                                        <div class="form-outline">
+                                            <label class="form-label">Trọng Lượng Max Out</label>
+                                            <input type="number" min="0" step="0.001" id="TLMaxOutTPDH" class="form-control form-control-lg" autocomplete="off" placeholder="0,000" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12 mb-12 ">
+                                        <div class="form-outline">
+                                            <label class="form-label">Xí Nghiệp</label>
+                                            <select id="codeIdTPDH" class="form-control form-control-lg">
+                                                <option disabled selected>Chọn Xưởng</option>
+                                                @foreach (var item in listXuongs)
+                                                {
+                                                    <option value="@item.Ma">@item.Ten</option>
+                                                }
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="row">
+                                    <div class="col-md-12 mb-12 ">
+                                        <div class="form-outline">
+                                            <label class="form-label">Tỷ Lệ Định Mức Đậu</label>
+                                            <input type="number" min="0" step="0.0001" id="TyLeDinhMucDauTPDH" class="form-control form-control-lg" autocomplete="off" placeholder="0,0000" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12 mb-12 ">
+                                        <div class="form-outline">
+                                            <label class="form-label">Tỷ Lệ Định Mức Rớt</label>
+                                            <input type="number" min="0" step="0.0001" id="TyLeDinhMucRotTPDH" class="form-control form-control-lg" autocomplete="off" placeholder="0,0000" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12 mb-12 ">
+                                        <div class="form-outline">
+                                            <label class="form-label">Trọng Lượng Tare</label>
+                                            <input type="number" min="0" step="0.001" id="TLTareTPDH" class="form-control form-control-lg" autocomplete="off" placeholder="0,000" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12 mb-12 ">
+                                        <div class="form-outline">
+                                            <label class="form-label">Sản Phẩm Tính Lương</label>
+                                            <input type="text" id="sanPhamTLTPDH" class="form-control form-control-lg">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12 mb-12 ">
+                                        <div class="form-outline">
+                                            <label class="form-label">Định Mức Không Cân Đầu Vào</label>
+                                            <input type="number" min="0" step="0.0001" id="dinhMucKhongCanDauVaoTPDH" class="form-control form-control-lg" autocomplete="off" placeholder="0,0000" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12 mb-12 ">
+                                        <div class="form-outline">
+                                            <label class="form-label">Định Mức Cá Trả</label>
+                                            <input type="number" min="0" step="0.0001" id="dinhMucCaTraTPDH" class="form-control form-control-lg" autocomplete="off" placeholder="0,0000" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row" style="margin-top:10px">
+                                    <div class="col-md-12 mb-12">
+                                        <div class="list-group form-outline">
+                                            <label class="">
+                                                <input class="form-check-input me-1" type="checkbox" value="" id="isSuDungThoiGianGiuaLoaiThanhPhamTPDH" />
+                                                Đặt thời gian các trả (2p)
+                                            </label>
+                                            <label class="">
+                                                <input class="form-check-input me-1" type="checkbox" value="" id="isDauVaoBatBuocTPDH" />
+                                                Đầu vào bắt buộc
+                                            </label>
+                                            <label class="">
+                                                <input class="form-check-input me-1" type="checkbox" value="" id="isBaoCaoDauRotTPDH" />
+                                                Báo cáo đậu rớt
+                                            </label>
+                                            <label class="">
+                                                <input class="form-check-input me-1" type="checkbox" value="" id="suDungTPDH" />
+                                                Sử dụng
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="row mt-4 pt-2">
+                            <div class="col-12">
+                                <button onclick="insert()" class="btn btn-primary w-100 position-relative" type="submit" id="">
+                                    <div class=" align-items-center">
+                                        <span id="txtThem">Thêm</span>
+                                        <div id="loadingIndicator" class=" spinner-border text-secondary position-absolute" role="status" style="left: 0;right: 0;top: 0;bottom: 0;margin: auto; display:none">
+                                            <span class="visually-hidden">Đang tải...</span>
+                                        </div>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="modalSua" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Sửa Thành Phẩm Định Hình</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="row">
+                                    <div class="col-md-12 mb-12 ">
+                                        <div class="form-outline">
+                                            <label class="form-label">Mã</label>
+                                            <input type="text" id="maTPDHSua" class="form-control form-control-lg" autocomplete="off" placeholder="Nhập Mã..." style="text-transform: uppercase;" disabled />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12 mb-12 ">
+                                        <div class="form-outline">
+                                            <label class="form-label">Tên</label>
+                                            <input type="text" id="tenTPDHSua" class="form-control form-control-lg" autocomplete="off" placeholder="Nhập Tên..." />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12 mb-12 ">
+                                        <div class="form-outline">
+                                            <label class="form-label">Định Mức</label>
+                                            <input type="number" min="0" step="0.001" id="dinhMucTPDHSua" class="form-control form-control-lg" autocomplete="off" placeholder="0,000" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12 mb-12 ">
+                                        <div class="form-outline">
+                                            <label class="form-label">Trọng Lượng Min</label>
+                                            <input type="number" min="0" step="0.001" id="TLMinTPDHSua" class="form-control form-control-lg" autocomplete="off" placeholder="0,000" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12 mb-12 ">
+                                        <div class="form-outline">
+                                            <label class="form-label">Trọng Lượng Max</label>
+                                            <input type="number" min="0" step="0.001" id="TLMaxTPDHSua" class="form-control form-control-lg" autocomplete="off" placeholder="0,000" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12 mb-12 ">
+                                        <div class="form-outline">
+                                            <label class="form-label">Trọng Lượng Min Out</label>
+                                            <input type="number" min="0" step="0.001" id="TLMinOutTPDHSua" class="form-control form-control-lg" autocomplete="off" placeholder="0,000" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12 mb-12 ">
+                                        <div class="form-outline">
+                                            <label class="form-label">Trọng Lượng Max Out</label>
+                                            <input type="number" min="0" step="0.001" id="TLMaxOutTPDHSua" class="form-control form-control-lg" autocomplete="off" placeholder="0,000" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12 mb-12 ">
+                                        <div class="form-outline">
+                                            <label class="form-label">Xí Nghiệp</label>
+                                            <select id="codeIdTPDHSua" class="form-control form-control-lg">
+                                                <option disabled selected>Chọn Xưởng</option>
+                                                @foreach (var item in listXuongs)
+                                                {
+                                                    <option value="@item.Ma">@item.Ten</option>
+                                                }
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="row">
+                                    <div class="col-md-12 mb-12 ">
+                                        <div class="form-outline">
+                                            <label class="form-label">Tỷ Lệ Định Mức Đậu</label>
+                                            <input type="number" min="0" step="0.0001" id="TyLeDinhMucDauTPDHSua" class="form-control form-control-lg" autocomplete="off" placeholder="0,0000" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12 mb-12 ">
+                                        <div class="form-outline">
+                                            <label class="form-label">Tỷ Lệ Định Mức Rớt</label>
+                                            <input type="number" min="0" step="0.0001" id="TyLeDinhMucRotTPDHSua" class="form-control form-control-lg" autocomplete="off" placeholder="0,0000" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12 mb-12 ">
+                                        <div class="form-outline">
+                                            <label class="form-label">Trọng Lượng Tare</label>
+                                            <input type="number" min="0" step="0.001" id="TLTareTPDHSua" class="form-control form-control-lg" autocomplete="off" placeholder="0,000" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12 mb-12 ">
+                                        <div class="form-outline">
+                                            <label class="form-label">Sản Phẩm Tính Lương</label>
+                                            <input type="text" id="sanPhamTLTPDHSua" class="form-control form-control-lg">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12 mb-12 ">
+                                        <div class="form-outline">
+                                            <label class="form-label">Định Mức Không Cân Đầu Vào</label>
+                                            <input type="number" min="0" step="0.0001" id="dinhMucKhongCanDauVaoTPDHSua" class="form-control form-control-lg" autocomplete="off" placeholder="0,0000" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12 mb-12 ">
+                                        <div class="form-outline">
+                                            <label class="form-label">Định Mức Cá Trả</label>
+                                            <input type="number" min="0" step="0.0001" id="dinhMucCaTraTPDHSua" class="form-control form-control-lg" autocomplete="off" placeholder="0,0000" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row" style="margin-top:10px">
+                                    <div class="col-md-12 mb-12">
+                                        <div class="list-group form-outline">
+                                            <label class="">
+                                                <input class="form-check-input me-1" type="checkbox" value="" id="isSuDungThoiGianGiuaLoaiThanhPhamTPDHSua" />
+                                                Đặt thời gian các trả (2p)
+                                            </label>
+                                            <label class="">
+                                                <input class="form-check-input me-1" type="checkbox" value="" id="isDauVaoBatBuocTPDHSua" />
+                                                Đầu vào bắt buộc
+                                            </label>
+                                            <label class="">
+                                                <input class="form-check-input me-1" type="checkbox" value="" id="isBaoCaoDauRotTPDHSua" />
+                                                Báo cáo đậu rớt
+                                            </label>
+                                            <label class="">
+                                                <input class="form-check-input me-1" type="checkbox" value="" id="suDungTPDHSua" />
+                                                Sử dụng
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="row mt-4 pt-2">
+                            <div class="col-12">
+                                <button onclick="update()" class="btn btn-primary w-100 position-relative" type="submit" id="">
+                                    <div class=" align-items-center">
+                                        <span id="txtSua">Sửa</span>
+                                        <div id="loadingIndicatorSua" class=" spinner-border text-secondary position-absolute" role="status" style="left: 0;right: 0;top: 0;bottom: 0;margin: auto; display:none">
+                                            <span class="visually-hidden">Đang tải...</span>
+                                        </div>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<input type="hidden" id="maTPDHRowSelected" />
+<input type="hidden" id="maCaTPDHRowSelected" />
+<input type="hidden" id="sanPhamTLTPDHHidden" />
+<script>
+    $(document).ready(function () {
+        loadGridData();
+    });
+    var grid;
+    function loadGridData() {
+        $.ajax({
+            url: '/ThanhPhamDinhHinh/GetAllsFullField',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                var dataManager = new ej.data.DataManager({
+                    json: data,
+                    adaptor: new ej.data.JsonAdaptor()
+                });
+                if (grid) {
+                    grid.dataSource = dataManager;
+                    grid.refresh();
+                } else {
+                    grid = new ej.grids.Grid({
+                        dataSource: dataManager,
+                        allowPaging: true,
+                        pageSettings: { pageSize: 500 },
+                        allowFiltering: true,
+                        filterSettings: { type: 'Excel' },
+                        allowSorting: true,
+                        //frozenColumns: 3,
+                        allowResizing: true,
+                        rowSelected: onRowSelected,
+                        height: 400,
+                        columns: [
+                            { field: 'Ma', headerText: 'Mã', width: 150 },
+                            { field: 'Ten', headerText: 'Tên', width: 150 },
+                            { field: 'DinhMuc', headerText: 'Định Mức', type: 'number', width: 150 },
+                            { field: 'SanPhamTinhLuongName', headerText: 'Sản Phẩm Tính Lương', width: 250 },
+                            { field: 'TLMin', headerText: 'TL Min', type: 'number', width: 150 },
+                            { field: 'TLMax', headerText: 'TL Max', type: 'number', width: 150 },
+                            { field: 'TLMinOut', headerText: 'TL Min Out', type: 'number', width: 150 },
+                            { field: 'TLMaxOut', headerText: 'TL Max Out', type: 'number', width: 150 },
+                            { field: 'TyLeDinhMucDau', headerText: 'Tỷ Lệ Định Mức Đậu', type: 'number', width: 150 },
+                            { field: 'TyLeDinhMucRot', headerText: 'Tỷ Lệ Định Mức Rớt', type: 'number', width: 150 },
+                            { field: 'TrongLuongTare', headerText: 'Trọng Lượng Tare', type: 'number', width: 150 },
+                            { field: 'IsDauVaoBatBuoc', headerText: 'Đầu Vào Bất Buộc', width: 100, displayAsCheckBox: 'true', textAlign: 'Center' },
+                            { field: 'DinhMucKhongDauVao', headerText: 'Định Mức Không Đầu Vào', type: 'number', width: 150 },
+                            { field: 'DinhMucCaTra', headerText: 'Định Mức Cá Trả', type: 'number', width: 150 },
+                            { field: 'IsSuDungThoiGianGiuaLoaiThanhPham', headerText: 'Thời Gian Cá Trả (2p)', width: 100, displayAsCheckBox: 'true', textAlign: 'Center' },
+                            { field: 'BaoCaoDauRot', headerText: 'Báo Cáo Đậu Rớt', width: 100, displayAsCheckBox: 'true', textAlign: 'Center' },
+                            { field: 'SuDung', headerText: 'Sử Dụng', width: 100, displayAsCheckBox: 'true', textAlign: 'Center' },
+                            { field: 'XuongName', headerText: 'Xưởng', type: 'number', width: 150 },
+                        ]
+                    });
+                    // Hiển thị Grid trên trang web
+                    grid.appendTo('#Grid');
+                }
+            },
+            error: function (error) {
+                console.error(error);
+            }
+        });
+    }
+    loadGridData();
+    function reloadData() {
+        loadGridData();
+    }
+    function onRowSelected(args) {
+        // Lấy dữ liệu của hàng được chọn
+        var selectedRecord = args.data;
+        // Lấy giá trị Id từ dữ liệu của hàng được chọn
+        var Ma = selectedRecord.Ma;
+        var MaCa = selectedRecord.MaCa
+        $('#maTPDHRowSelected').val(Ma);
+        $('#maCaTPDHRowSelected').val(MaCa);
+    }
+</script>
+<script>
+    function loadDataSanPham() {
+        $.ajax({
+            type: "GET",
+            url: "/SanPhamSPTL/GetAlls",
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (response) {
+                // Khởi tạo ComboBox khi dữ liệu được tải
+                initializeComboBoxSanPham(response);
+                initializeComboBoxSanPhamSua(response);
+            },
+            error: function (xhr, status, error) {
+                console.error(status, error);
+            }
+        });
+    }
+    function initializeComboBoxSanPham(data) {
+        var comboBoxObject = new ej.dropdowns.ComboBox({
+            dataSource: data,
+            fields: { value: 'Ma', text: 'Ten', tooltip: 'GhiChu' },
+            placeholder: "Chọn Sản Phẩm",
+            sortOrder: 'Ascending',
+            headerTemplate: "<span class='head'><span class='ma'>Mã</span><span class='ten'>Tên</span><span class='ghichu'>Ghi Chú</span></span>",
+            itemTemplate: "<span class='item' ><span class='ma'>${Ma}</span><span class='ten'>${Ten}</span><span class='ghichu'>${GhiChu}</span></span>"
+        });
+        comboBoxObject.appendTo('#sanPhamTLTPDH');
+        // Bắt sự kiện khi combobox thay đổi giá trị
+        comboBoxObject.addEventListener('change', function (e) {
+            // Lấy giá trị đã chọn
+            var selectedData = comboBoxObject.getDataByValue(comboBoxObject.value);
+
+            // Kiểm tra xem có dữ liệu đã chọn hay không
+            if (selectedData) {
+                // Lấy giá trị của trường 'Ma'
+                var maSanPham = selectedData.Ma;
+                $('#sanPhamTLTPDHHidden').val(maSanPham);
+            }
+        });
+    }
+    var comboBoxObjectSanPhamSua;
+    function initializeComboBoxSanPhamSua(data) {
+        comboBoxObjectSanPhamSua = new ej.dropdowns.ComboBox({
+            dataSource: data,
+            fields: { value: 'Ma', text: 'Ten', tooltip: 'GhiChu' },
+            placeholder: "Chọn Sản Phẩm",
+            sortOrder: 'Ascending',
+            headerTemplate: "<span class='head'><span class='ma'>Mã</span><span class='ten'>Tên</span><span class='ghichu'>Ghi Chú</span></span>",
+            itemTemplate: "<span class='item' ><span class='ma'>${Ma}</span><span class='ten'>${Ten}</span><span class='ghichu'>${GhiChu}</span></span>"
+        });
+        comboBoxObjectSanPhamSua.appendTo('#sanPhamTLTPDHSua');
+        // Bắt sự kiện khi combobox thay đổi giá trị
+        comboBoxObjectSanPhamSua.addEventListener('change', function (e) {
+            // Lấy giá trị đã chọn
+            var selectedData = comboBoxObjectSanPhamSua.getDataByValue(comboBoxObjectSanPhamSua.value);
+
+            // Kiểm tra xem có dữ liệu đã chọn hay không
+            if (selectedData) {
+                // Lấy giá trị của trường 'Ma'
+                var maSanPham = selectedData.Ma;
+                $('#sanPhamTLTPDHHidden').val(maSanPham);
+            }
+        });
+    }
+    $(document).ready(function () {
+        loadDataSanPham();
+    });
+</script>
+<script>
+    function showInsert() {
+        $.ajax({
+            type: "GET",
+            url: "/ThanhPhamDinhHinh/CreatDefautNew",
+            success: function (rs) {
+                if (rs.isSuccess === true) {
+                    $('#maTPDH').val(rs.Ma);
+                    $('#dinhMucTPDH').val(rs.DinhMuc);
+                    $('#TLMinTPDH').val(rs.Min);
+                    $('#TLMaxTPDH').val(rs.Max);
+                    $('#TLMinOutTPDH').val(rs.MinOut);
+                    $('#TLMaxOutTPDH').val(rs.MaxOut);
+                    $('#TyLeDinhMucDauTPDH').val(rs.TyLeDinhMucDau);
+                    $('#TyLeDinhMucRotTPDH').val(rs.TyLeDinhMucRot);
+                    $('#TLTareTPDH').val(rs.TrongLuongTare);
+                    $('#dinhMucKhongCanDauVaoTPDH').val(rs.DinhMucKhongDauVao);
+                    $('#dinhMucCaTraTPDH').val(rs.DinhMucCaTra);
+                    $('#isSuDungThoiGianGiuaLoaiThanhPhamTPDH').prop('checked', rs.IsSuDungThoiGianGiuaLoaiThanhPham);
+                    $('#isDauVaoBatBuocTPDH').prop('checked', rs.IsDauVaoBatBuoc);
+                    $('#isBaoCaoDauRotTPDH').prop('checked', rs.BaoCaoDauRot);
+                    $('#suDungTPDH').prop('checked', rs.SuDung);
+                    $('#modalThem').modal('show');
+                }
+                else {
+                    toastOptionNotyfi();
+                    toastr["warning"](rs.Mesages, "Thông báo");
+                }
+            },
+            error: function () {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error, "Thông báo");
+            }
+        });
+    }
+    function insert() {
+        var ma = $('#maTPDH').val();
+        var ten = $('#tenTPDH').val();
+        var dinhMuc = $('#dinhMucTPDH').val();
+        var min = $('#TLMinTPDH').val();
+        var max = $('#TLMaxTPDH').val();
+        var minOut = $('#TLMinOutTPDH').val();
+        var maxOut = $('#TLMaxOutTPDH').val();
+        var tyLeDinhMucDau = $('#TyLeDinhMucDauTPDH').val();
+        var tyLeDinhMucRot = $('#TyLeDinhMucRotTPDH').val();
+        var trongLuongTare = $('#TLTareTPDH').val();
+        var bravoId = $('#sanPhamTLTPDHHidden').val();
+        var dinhMucKhongCanDauVao = $('#dinhMucKhongCanDauVaoTPDH').val();
+        var dinhMucCaTra = $('#dinhMucCaTraTPDH').val();
+        var codeId = $('#codeIdTPDH').val();
+        var isSuDungThoiGianGiuaLoaiThanhPham = $('#isSuDungThoiGianGiuaLoaiThanhPhamTPDH').prop('checked');
+        var isDauVaoBatBuoc = $('#isDauVaoBatBuocTPDH').prop('checked');
+        var isBaoCaoDauRot = $('#isBaoCaoDauRotTPDH').prop('checked');
+        var suDung = $('#suDungTPDH').prop('checked');
+        document.getElementById("txtThem").style.visibility = "hidden";
+        document.getElementById("loadingIndicator").style.display = "block";
+        $.ajax({
+            type: 'POST',
+            url: '/ThanhPhamDinhHinh/DoInsert',
+            data: {
+                ma: ma,
+                ten: ten,
+                dinhMuc: dinhMuc,
+                min: min,
+                max: max,
+                minOut: minOut,
+                maxOut: maxOut,
+                tyLeDinhMucDau: tyLeDinhMucDau,
+                tyLeDinhMucRot: tyLeDinhMucRot,
+                trongLuongTare: trongLuongTare,
+                bravoId: bravoId,
+                dinhMucKhongCanDauVao: dinhMucKhongCanDauVao,
+                dinhMucCaTra: dinhMucCaTra,
+                codeId: codeId,
+                isSuDungThoiGianGiuaLoaiThanhPham: isSuDungThoiGianGiuaLoaiThanhPham,
+                isDauVaoBatBuoc: isDauVaoBatBuoc,
+                isBaoCaoDauRot: isBaoCaoDauRot,
+                suDung: suDung
+            },
+            success: function (rs) {
+                if (rs.isSuccess === true) {
+                    toastOptionNotyfi();
+                    toastr["success"](rs.Messages, "Thông báo");
+                    $('#modalThem').modal('hide');
+                    reloadData();
+                } else {
+                    toastOptionNotyfi();
+                    toastr["warning"](rs.Messages, "Thông báo");
+                }
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error, "Thông báo");
+            },
+            complete: function () {
+                document.getElementById("loadingIndicator").style.display = "none";
+                document.getElementById("txtThem").style.visibility = "visible";
+            }
+        });
+    }
+</script>
+<script>
+    function showUpdate() {
+        var ma = $('#maTPDHRowSelected').val();
+        var maCa = $('#maCaTPDHRowSelected').val();
+        $.ajax({
+            url: "/ThanhPhamDinhHinh/GetsByMa",
+            data: { ma: ma, maCa: maCa },
+            type: 'GET',
+            dataType: 'json',
+            success: function (rs) {
+                if (rs.isSuccess === true) {
+                    $('#maTPDHSua').val(rs.Ma);
+                    $('#tenTPDHSua').val(rs.Ten);
+                    $('#dinhMucTPDHSua').val(rs.DinhMuc);
+                    $('#TLMinTPDHSua').val(rs.Min);
+                    $('#TLMaxTPDHSua').val(rs.Max);
+                    $('#TLMinOutTPDHSua').val(rs.MinOut);
+                    $('#TLMaxOutTPDHSua').val(rs.MaxOut);
+                    $('#TyLeDinhMucDauTPDHSua').val(rs.TyLeDinhMucDau);
+                    $('#TyLeDinhMucRotTPDHSua').val(rs.TyLeDinhMucRot);
+                    $('#TLTareTPDHSua').val(rs.TrongLuongTare);
+                    $('#sanPhamTLTPDHHidden').val(rs.BravoId);
+                    // Kiểm tra xem comboBoxObjectLDGSua đã được khởi tạo và dữ liệu đã được nạp vào
+                    if (comboBoxObjectSanPhamSua && comboBoxObjectSanPhamSua.dataSource && comboBoxObjectSanPhamSua.dataSource.length > 0) {
+                        // Lặp qua danh sách dữ liệu của combobox để tìm giá trị mặc định
+                        for (var i = 0; i < comboBoxObjectSanPhamSua.dataSource.length; i++) {
+                            if (comboBoxObjectSanPhamSua.dataSource[i].Ma === rs.BravoId) {
+                                // Nếu tìm thấy giá trị mặc định, chọn nó và thoát khỏi vòng lặp
+                                comboBoxObjectSanPhamSua.value = rs.BravoId;
+                                break;
+                            }
+                        }
+                    }
+                    $('#dinhMucKhongCanDauVaoTPDHSua').val(rs.DinhMucKhongDauVao);
+                    $('#dinhMucCaTraTPDHSua').val(rs.DinhMucCaTra);
+                    $('#codeIdTPDHSua').val(rs.CodeId);
+                    $('#isSuDungThoiGianGiuaLoaiThanhPhamTPDHSua').prop('checked', rs.IsSuDungThoiGianGiuaLoaiThanhPham);
+                    $('#isDauVaoBatBuocTPDHSua').prop('checked', rs.IsDauVaoBatBuoc);
+                    $('#isBaoCaoDauRotTPDHSua').prop('checked', rs.BaoCaoDauRot);
+                    $('#suDungTPDHSua').prop('checked', rs.SuDung);
+                    $('#modalSua').modal('show');
+                }
+                else {
+                    toastOptionNotyfi();
+                    toastr["warning"](rs.Mesages, "Thông báo");
+                }
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error, "Thông báo");
+            }
+        });
+    }
+    function update() {
+        var ma = $('#maTPDHSua').val();
+        var maCa = $('#maCaTPDHRowSelected').val();
+        var ten = $('#tenTPDHSua').val();
+        var dinhMuc = $('#dinhMucTPDHSua').val();
+        var min = $('#TLMinTPDHSua').val();
+        var max = $('#TLMaxTPDHSua').val();
+        var minOut = $('#TLMinOutTPDHSua').val();
+        var maxOut = $('#TLMaxOutTPDHSua').val();
+        var tyLeDinhMucDau = $('#TyLeDinhMucDauTPDHSua').val();
+        var tyLeDinhMucRot = $('#TyLeDinhMucRotTPDHSua').val();
+        var trongLuongTare = $('#TLTareTPDHSua').val();
+        var bravoId = $('#sanPhamTLTPDHHidden').val();
+        var dinhMucKhongCanDauVao = $('#dinhMucKhongCanDauVaoTPDHSua').val();
+        var dinhMucCaTra = $('#dinhMucCaTraTPDHSua').val();
+        var codeId = $('#codeIdTPDHSua').val();
+        var isSuDungThoiGianGiuaLoaiThanhPham = $('#isSuDungThoiGianGiuaLoaiThanhPhamTPDHSua').prop('checked');
+        var isDauVaoBatBuoc = $('#isDauVaoBatBuocTPDHSua').prop('checked');
+        var isBaoCaoDauRot = $('#isBaoCaoDauRotTPDHSua').prop('checked');
+        var suDung = $('#suDungTPDHSua').prop('checked');
+        document.getElementById("txtSua").style.visibility = "hidden";
+        document.getElementById("loadingIndicatorSua").style.display = "block";
+        $.ajax({
+            url: '/ThanhPhamDinhHinh/DoUpDate',
+            data: {
+                ma: ma,
+                ten: ten,
+                dinhMuc: dinhMuc,
+                min: min,
+                max: max,
+                minOut: minOut,
+                maxOut: maxOut,
+                tyLeDinhMucDau: tyLeDinhMucDau,
+                tyLeDinhMucRot: tyLeDinhMucRot,
+                trongLuongTare: trongLuongTare,
+                bravoId: bravoId,
+                dinhMucKhongCanDauVao: dinhMucKhongCanDauVao,
+                dinhMucCaTra: dinhMucCaTra,
+                codeId: codeId,
+                isSuDungThoiGianGiuaLoaiThanhPham: isSuDungThoiGianGiuaLoaiThanhPham,
+                isDauVaoBatBuoc: isDauVaoBatBuoc,
+                isBaoCaoDauRot: isBaoCaoDauRot,
+                suDung: suDung,
+                maCa: maCa
+            },
+            type: 'POST',
+            dataType: 'json',
+            success: function (rs) {
+                if (rs.isSuccess === true) {
+                    $('#modalSua').modal('hide');
+                    reloadData();
+                    toastOptionNotyfi();
+                    toastr["success"](rs.Messages, "Thông báo");
+                } else {
+                    toastOptionNotyfi();
+                    toastr["warning"](rs.Messages, "Thông báo");
+                }
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error.toString(), "Thông báo");
+            },
+            complete: function () {
+                document.getElementById("loadingIndicatorSua").style.display = "none";
+                document.getElementById("txtSua").style.visibility = "visible";
+            }
+        });
+    }
+</script>
+<script>
+    function showDelete() {
+        var ma = $('#maTPDHRowSelected').val();
+        var maCa = $('#maCaTPDHRowSelected').val();
+        $.ajax({
+            url: "/ThanhPhamDinhHinh/GetsByMa",
+            data: { ma: ma, maCa: maCa },
+            type: 'GET',
+            dataType: 'json',
+            success: function (rs) {
+                if (rs.isSuccess === true) {
+                    bootbox.confirm({
+                        title: "Thông báo!",
+                        message: "Bạn có chắc muốn xoá : " + rs.Ten,
+                        buttons: {
+                            confirm: {
+                                label: 'OK',
+                                className: 'btn btn-primary'
+                            }
+                        },
+                        callback: function (result) {
+                            if (result) {
+                                //Người dùng đã bấm OK, Gọi API xóa ở đây
+                                $.ajax({
+                                    url: '/ThanhPhamDinhHinh/DoDelete',
+                                    data: { ma: ma, maCa: maCa },
+                                    type: 'POST',
+                                    dataType: 'json',
+                                    success: function (rs) {
+                                        if (rs.isSuccess === true) {
+                                            reloadData();
+                                            toastOptionNotyfi();
+                                            toastr["success"](rs.Messages, "Thông báo");
+                                        } else {
+                                            toastOptionNotyfi();
+                                            toastr["warning"](rs.Messages, "Thông báo");
+                                        }
+                                    },
+                                    error: function (error) {
+                                        toastOptionNotyfi();
+                                        toastr["error"]('Đã xảy ra lỗi: ' + error.toString(), "Thông báo");
+                                    }
+                                });
+                            }
+                        }
+                    });
+                } else {
+                    toastOptionNotyfi();
+                    toastr["warning"]('Không tìm thấy thông tin!', "Thông báo");
+                }
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error.toString(), "Thông báo");
+            }
+        });
+
+    }
+</script>
+

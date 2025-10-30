@@ -1,0 +1,382 @@
+﻿@{
+    ViewData["Title"] = "DatabaseManagementView";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    //lấy danh sách roleid từ cookie
+    var roleIds = PMS.Middlewares.AuthenticationHelpers.GetRoleIdsFromCookie(Context);
+    // lấy danh sách fu func từ list roleId
+    var rolePermistions = await PMS.Middlewares.AuthenticationHelpers.GetRolePermistionsAsync(Context, roleIds);
+}
+<style>
+
+
+    .btn-primary:hover {
+        background-color: #c82333; /* Màu nút Primary khi di chuột qua */
+        border-color: #bd2130; /* Màu viền nút Primary khi di chuột qua */
+    }
+
+    .is-invalid {
+        border: 1px solid #dc3545 !important;
+    }
+</style>
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h2 class="mb-0">Quản Lý Dữ Liệu</h2>
+                    <button onclick="showFreeUp()" type="button" class="btn btn-warning">Giải phóng dung lượng</button>
+                </div>
+
+                <div class="card-body">
+                    <div id="Grid"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="warningModal" tabindex="-1" aria-labelledby="warningModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style=" background-color: #f8d7da;">
+            <div class="modal-header" style="border-bottom: 1px solid #dc3545;">
+                <h5 class="modal-title" id="warningModalLabel">Sao lưu dữ liệu / <span id="tableNameSpan"></span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Bạn đã sao lưu dữ liệu của mình từ cơ sở dữ liệu chưa?</p>
+                <p>Nếu chưa xin hãy nhấn vào Sao Lưu! mọi dữ liệu ở thao tác tiếp theo đều không thể khôi phục!</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-primary" style="background-color: #dc3545;border-color: #dc3545; " onclick="backupData()">Sao Lưu</button>
+                <button type="button" class="btn btn-primary" style="background-color: #dc3545;border-color: #dc3545; " onclick="continueProcess()">Tiếp tục</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="backUpDone" tabindex="-1" aria-labelledby="backUpDone" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-color: #4caf50;">
+            <div class="modal-header" style="background-color: #dff0d8; border-color: #dff0d8;;border-bottom: #1cb50e;">
+                <h5 class="modal-title" id="warningModalLabel" style="color: #4caf50;">Sao Lưu Dữ Liệu / <span id="tableNameSpan2"></span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" style="background-color: #dff0d8; border-color: #dff0d8;">
+                <p>Bạn đã Backup dữ liệu từ cơ sở dữ liệu thành công!</p>
+                <p>Hãy nhớ <span style="color:red">DỌN DẸP FILE LOG</span> để giảm dung lượng bộ nhớ nhé!</p>
+                <p>Nhấn <span style="color:green">TIẾP TỤC</span> để đến bước tiếp theo!</p>
+            </div>
+            <div class="modal-footer" style="background-color: #dff0d8; border-color: #dff0d8;">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-success" onclick="continueProcess()">Tiếp tục</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="modalFreeUpMemori" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Nhập số ngày cần giữ lại / <span id="tableNameSpanContinue" style="color:goldenrod"></span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-12 mb-12 ">
+                                <div class="form-outline">
+                                    <label for="inputNumber" class="form-label">Số ngày (nhỏ nhất 180):</label>
+                                    <input type="number" class="form-control" id="inputNumber">
+                                    <div class="invalid-feedback">
+                                        Số ngày bạn nhập đang nhỏ hơn 180.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-4 pt-2">
+                            <div class="col-12">
+                                <button onclick="freeUpMemotied()" class="btn btn-primary w-100 position-relative" type="submit" id="txtAccept">
+                                    <div class=" align-items-center">
+                                        <span id="">XÁC NHẬN</span>
+                                        <div id="loadingIndicatorSua" class=" spinner-border text-secondary position-absolute" role="status" style="left: 0;right: 0;top: 0;bottom: 0;margin: auto; display:none">
+                                            <span class="visually-hidden">Đang tải...</span>
+                                        </div>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="deleteOldDataDone" tabindex="-1" aria-labelledby="deleteOldDataDone" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-color: #4caf50;">
+            <div class="modal-header" style="background-color: #dff0d8; border-color: #dff0d8;;border-bottom: #1cb50e;">
+                <h5 class="modal-title" id="warningModalLabel" style="color: #4caf50;">Hoàn thành! / <span id="tableNameDeleteOldDoneSpan"></span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" style="background-color: #dff0d8; border-color: #dff0d8;">
+                <p>Bạn đã giải phóng dữ liệu cho Bảng <span id="tableNameDeleteOldDoneText"></span> thành công!</p>
+                <p><span id="messDeleteOldDataDone"></span></p>
+                <p>Hãy nhớ <span style="color:red">DỌN DẸP FILE LOG</span> để giảm dung lượng bộ nhớ nhé!</p>
+            </div>
+            <div class="modal-footer" style="background-color: #dff0d8; border-color: #dff0d8;">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hoàn tất</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="processingModal" class="modal" tabindex="-1" role="dialog" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-body text-center">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Đang xử lý...</span>
+                </div>
+                <p>Đang xử lý dữ liệu...</p>
+                <p><strong>Lưu ý:</strong> <span style="color:red">Vui lòng không tắt trình duyệt cho đến khi quá trình xử lý hoàn thành.</span></p>
+            </div>
+        </div>
+    </div>
+</div>
+<input type="hidden" id="tenDatabaseManagerRowSelected" />
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const inputNumber = document.getElementById('inputNumber');
+        const txtAccept = document.getElementById('txtAccept');
+
+        // Kiểm tra trạng thái ban đầu của inputNumber khi trang được load
+        if (inputNumber.value < 180 || inputNumber.value === "" || inputNumber.value === undefined) {
+            inputNumber.classList.add('is-invalid');
+            txtAccept.style.display = 'none';
+        } else {
+            inputNumber.classList.remove('is-invalid');
+            txtAccept.style.display = 'block';
+        }
+
+        // Thêm sự kiện input cho inputNumber
+        inputNumber.addEventListener('input', function () {
+            if (inputNumber.value < 180 || inputNumber.value === "" || inputNumber.value === undefined) {
+                inputNumber.classList.add('is-invalid');
+                txtAccept.style.display = 'none';
+            } else {
+                inputNumber.classList.remove('is-invalid');
+                txtAccept.style.display = 'block';
+            }
+        });
+    });
+</script>
+<script>
+    $(document).ready(function () {
+        loadGridData();
+    });
+    var grid;
+    function loadGridData() {
+        $.ajax({
+            url: '/DatabaseManagement/GetAllsFullField',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                var dataManager = new ej.data.DataManager({
+                    json: data,
+                    adaptor: new ej.data.JsonAdaptor()
+                });
+                if (grid) {
+                    grid.dataSource = dataManager;
+                    grid.refresh();
+                } else {
+                    grid = new ej.grids.Grid({
+                        dataSource: dataManager,
+                        allowPaging: true,
+                        pageSettings: { pageSize: 500 },
+                        allowFiltering: true,
+                        filterSettings: { type: 'Excel' },
+                        allowSorting: true,
+                        //frozenColumns: 3,
+                        allowResizing: true,
+                        rowSelected: onRowSelected,
+                        height: 400,
+                        columns: [
+                            { field: 'TableName', headerText: 'Tên Bảng', width: 150 },
+                            { field: 'RecordCount', headerText: 'Số Record', type: 'number', width: 150 },
+                            { field: 'CreationTime', headerText: 'Ngày Bất Đầu Phiếu Cân', width: 150 },
+                            { field: 'RecentTime', headerText: 'Ngày Gần Nhất Phiếu Cân', width: 150 },
+                            { field: 'TimeElapsed', headerText: 'Tổng Ngày', type: 'number', width: 150 },
+                            { field: 'SizeMB', headerText: 'Kích Thước (MB)', type: 'number', width: 150 },
+                        ],
+                        aggregates: [{
+                            columns: [{
+                                type: 'Sum',
+                                field: 'SizeMB',
+                                //format: 'C2',
+                                footerTemplate: 'Tổng kích thước: ${Sum}MB'
+                            }]
+                        }],
+                        // aggregates: [{
+                        //     columns: [{
+                        //         type: 'Sum',
+                        //         field: 'RecordCount',
+                        //         //format: 'C2',
+                        //         footerTemplate: 'Tổng record: ${Sum}'
+                        //     }]
+                        // }],
+                    });
+                    // Hiển thị Grid trên trang web
+                    grid.appendTo('#Grid');
+                }
+            },
+            error: function (error) {
+                console.error(error);
+            }
+        });
+    }
+    loadGridData();
+    function reloadData() {
+        loadGridData();
+    }
+    function onRowSelected(args) {
+        // Lấy dữ liệu của hàng được chọn
+        var selectedRecord = args.data;
+        // Lấy giá trị Id từ dữ liệu của hàng được chọn
+        var TableName = selectedRecord.TableName;
+        $('#tenDatabaseManagerRowSelected').val(TableName);
+    }
+</script>
+<script>
+
+    function showFreeUp() {
+        var tableName = $('#tenDatabaseManagerRowSelected').val();
+        if (tableName == null || tableName == "" || tableName == undefined) {
+            toastOptionNotyfi();
+            toastr["warning"]("Bạn chưa chọn Table!", "Thông báo");
+            return;
+        }
+        $('#warningModal').modal('show');
+        $('#tableNameSpan').text(tableName);
+    }
+
+    var backupInProgress = false; // Biến để theo dõi trạng thái của quá trình backup
+
+    $(document).ready(function () {
+        $('#processingModal').modal({
+            backdrop: 'static',
+            keyboard: false
+        });
+    });
+
+    function backupData() {
+        // Nếu quá trình backup đang diễn ra, không làm gì
+        if (backupInProgress) {
+            return;
+        }
+
+        backupInProgress = true; // Đặt biến backupInProgress thành true để chỉ ra rằng quá trình backup đang diễn ra
+
+        var tableName = $('#tenDatabaseManagerRowSelected').val();
+
+        // Hiển thị modal xử lý
+        $('#processingModal').modal('show');
+
+        $.ajax({
+            url: '/DatabaseManagement/BackupDatabase',
+            type: 'GET',
+            success: function (response) {
+                if (response.isSuccess) {
+                    $('#warningModal').modal('hide');
+                    $('#backUpDone').modal('show');
+                    $('#tableNameSpan2').text(tableName);
+                }
+                else {
+                    toastOptionNotyfi();
+                    toastr["error"]("Có lỗi xảy ra trong quá trình Backup! Vui lòng thử lại!", "Thông báo");
+                }
+
+                // Ẩn modal xử lý sau khi hoàn thành
+                $('#processingModal').modal('hide');
+                backupInProgress = false; // Đặt lại biến backupInProgress thành false sau khi hoàn thành
+            },
+            error: function (xhr, status, error) {
+                // Xử lý lỗi ở đây
+                toastOptionNotyfi();
+                toastr["error"]("Có lỗi xảy ra trong quá trình Backup! Vui lòng thử lại!", "Thông báo");
+
+                // Ẩn modal xử lý nếu có lỗi xảy ra
+                $('#processingModal').modal('hide');
+                backupInProgress = false; // Đặt lại biến backupInProgress thành false sau khi hoàn thành
+            }
+        });
+    }
+
+    function continueProcess() {
+        var tableName = $('#tenDatabaseManagerRowSelected').val();
+        if (tableName == null || tableName == "" || tableName == undefined) {
+            toastOptionNotyfi();
+            toastr["warning"]("Bạn chưa chọn Table!", "Thông báo");
+            return;
+        }
+        $('#warningModal').modal('hide');
+        $('#backUpDone').modal('hide');
+        $('#modalFreeUpMemori').modal('show');
+        $('#tableNameSpanContinue').text(tableName);
+    }
+    function freeUpMemotied() {
+        $('#modalFreeUpMemori').modal('hide');
+        var tableName = $('#tenDatabaseManagerRowSelected').val();
+        var dateKeep = $('#inputNumber').val();
+        bootbox.confirm({
+            title: "Thông báo!",
+            message: '<span style="color: red;">Bạn có chắc muốn giải phóng dữ liệu của Bảng: <strong>' + tableName + '</strong> hay không?</span> <br> <span><strong>Lưu ý:</strong> Khi bạn xác nhận thì dữ liệu sẽ <strong style="color: red;";>Không Thể Khôi Phục</strong></span>',
+            buttons: {
+                confirm: {
+                    label: 'OK',
+                    className: 'btn btn-primary'
+                }
+            },
+            callback: function (result) {
+                if (result) {
+                    // Hiển thị modal xử lý
+                    $('#processingModal').modal('show');
+
+                    $.ajax({
+                        url: '/DatabaseManagement/DeleteOldData',
+                        data: { tableName: tableName, dateKeep: dateKeep },
+                        type: 'POST',
+                        success: function (response) {
+                            if (response.isSuccess) {
+                                var mess = response.Mesages;
+                                $('#tableNameDeleteOldDoneSpan').text(tableName);
+                                $('#tableNameDeleteOldDoneText').text(tableName);
+                                $('#messDeleteOldDataDone').text(mess);
+                                $('#deleteOldDataDone').modal('show');
+                                $('#tableNameSpan2').text(tableName);
+                                reloadData();
+                            }
+                            else {
+                                toastOptionNotyfi();
+                                toastr["error"]("Có lỗi xảy ra trong quá trình xử lý dữ liệu! Vui lòng thử lại!", "Thông báo");
+                            }
+
+                            // Ẩn modal xử lý sau khi hoàn thành
+                            $('#processingModal').modal('hide');
+                            backupInProgress = false; // Đặt lại biến backupInProgress thành false sau khi hoàn thành
+                        },
+                        error: function (xhr, status, error) {
+                            // Xử lý lỗi ở đây
+                            toastOptionNotyfi();
+                            toastr["error"]("Có lỗi xảy ra trong quá trình xử lý dữ liệu! Vui lòng thử lại!", "Thông báo");
+
+                            // Ẩn modal xử lý nếu có lỗi xảy ra
+                            $('#processingModal').modal('hide');
+                            backupInProgress = false; // Đặt lại biến backupInProgress thành false sau khi hoàn thành
+                        }
+                    });
+                } else {
+                    $('#modalFreeUpMemori').modal('show');
+                }
+            }
+        });
+    }
+</script>

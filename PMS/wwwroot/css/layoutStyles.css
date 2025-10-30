@@ -1,0 +1,69 @@
+﻿/*div[style*="color: #222222"] {
+    display: none;
+}*/
+
+.app-brand {
+    display: flex;
+    justify-content: center; /* Canh giữa theo chiều ngang */
+    align-items: center; /* Canh giữa theo chiều dọc */
+    height: 100px; /* Điều chỉnh độ cao tùy theo thiết kế */
+    background-color: #f5f5f5; /* Màu nền cho phần chứa logo */
+}
+
+.app-brand-logo {
+    display: inline-block; /* Đảm bảo logo không chiếm toàn bộ chiều ngang */
+}
+
+    .app-brand-logo img {
+        max-width: 100%; /* Đảm bảo logo không vượt quá kích thước của phần tử chứa */
+    }
+
+#form-checkLayout {
+    display: flex;
+    flex-direction: column;
+}
+
+#form-switchLayout {
+    margin-top: 9px;
+    ; /* Khoảng cách giữa label và checkbox */
+}
+
+#isActiveInfoLayout {
+    width: 4.8em;
+    height: 2em;
+    margin-left: -2.9em;
+}
+
+#form-switchLayout #isActiveInfoLayout {
+    width: 4em;
+    margin-left: -2.5em;
+    background-position: left center;
+    border-radius: 2em;
+    transition: background-position 0.15s ease-in-out;
+}
+
+#isActiveInfoLayout:checked, #isActiveInfoLayout[type=checkbox]:indeterminate {
+    background-color: #6beb34;
+    border-color: #6beb34;
+    box-shadow: 0 2px 4px 0 rgba(105, 108, 255, 0.4);
+}
+
+.fixed-navbar {
+    will-change: transform;
+    position: -webkit-sticky; /* Safari */
+    position: sticky;
+    top: 9px;
+    z-index: 1000;
+    background-color: rgba(255, 255, 255, 0); /* Màu trắng có độ trong suốt 0.8 */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s ease-in-out;
+}
+
+/* Kiểu dáng cho màn hình nhỏ hơn 768px (điện thoại và máy tính bảng) */
+@media (max-width: 768px) {
+    .fixed-navbar {
+        background-color: rgba(255, 255, 255, 0); /* Cần phải đặt lại màu nền vì một số trình duyệt không hỗ trợ position: sticky cùng với transform */
+    }
+}
+
+

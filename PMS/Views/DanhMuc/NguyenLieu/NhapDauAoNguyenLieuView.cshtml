@@ -1,0 +1,976 @@
+﻿@{
+    ViewData["Title"] = "NhapDauAoNguyenLieuView";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var XuongId = @Context.Session.GetString("XuongId");
+
+    var listNhaCCs = ViewBag.listNhaCCs;
+    var listPhuongTiens = ViewBag.listPhuongTiens;
+    var listMaAos = ViewBag.listMaAos;
+    var listThuKy = ViewBag.listThuKy;
+    var listApTai = ViewBag.listApTai;
+    var listTai = ViewBag.listTai;
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h2 class="mb-0">Cân Nguyên Liệu - Nhập Trọng Lượng Tại Hầm</h2>
+                    @* <div class="d-flex align-items-center">
+                    <label class="form-label text-center mb-0 me-2">Ngày:</label>
+                    <input type="date" id="dateTimeNhapCaTra" class="form-control" style="width: auto;" disabled />
+                    <button onclick="insert()" style="margin-left:5px" class="btn btn-primary position-relative">
+                    <div class=" align-items-center">
+                    <span id="txtThem">Lưu</span>
+                    <div id="loadingIndicator" class=" spinner-border text-secondary position-absolute" role="status" style="left: 0;right: 0;top: 0;bottom: 0;margin: auto; display:none">
+                    <span class="visually-hidden">Đang tải...</span>
+                    </div>
+                    </div>
+                    </button>
+                    </div> *@
+                </div>
+
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 mb-2">
+                            <div class="row">
+                                <div class="col-sm-7 mb-2">
+                                    <div class="input-group">
+                                        <span class="input-group-text" id="ngaynxnhapdauaoSpan">Ngày NX</span>
+                                        <input type="date"
+                                               class="form-control"
+                                               aria-describedby="ngaynxnhapdauaoSpan" id="ngaynxnhapdauao" />
+                                    </div>
+                                </div>
+                                <div class="col-sm-5 mb-2">
+                                    <div class="input-group ">
+                                        <label class="input-group-text" for="aonhapcatra">Ao</label>
+                                        <select class="form-select" id="aonhapdauao">
+                                            <option selected>Chọn...</option>
+                                            @foreach (var item in listMaAos)
+                                            {
+                                                <option value="@item.Item1">@item.Item1</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-7 mb-2">
+                                    <div class="input-group">
+                                        <span class="input-group-text" id="ngayxpnhapdauaoSpan">Ngày XP</span>
+                                        <input type="date"
+                                               class="form-control"
+                                               aria-describedby="ngayxpnhapdauaoSpan" id="ngayxpnhapdauao" />
+                                    </div>
+                                </div>
+                                <div class="col-sm-5 mb-2">
+                                    <div class="input-group">
+                                        <span class="input-group-text" id="gioxpnhapdauaoSpan">Giờ XP</span>
+                                        <input type="time"
+                                               class="form-control"
+                                               aria-describedby="gioxpnhapdauaoSpan" id="gioxpnhapdauao" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-7 mb-2">
+                                    <div class="input-group">
+                                        <span class="input-group-text" id="gioxpnhapdauaoSpan">Ngày BC</span>
+                                        <input type="date"
+                                               class="form-control"
+                                               aria-describedby="ngaybcnhapdauaoSpan" id="ngaybcnhapdauao" />
+                                    </div>
+                                </div>
+                                <div class="col-sm-5 mb-2">
+                                    <div class="input-group ">
+                                        <label class="input-group-text" for="aonhapcatra">Thư Ký</label>
+                                        <select class="form-select" id="thukynhapdauao">
+                                            <option selected>Chọn...</option>
+                                            @foreach (var item in listThuKy)
+                                            {
+                                                <option value="@item">@item</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-4 mb-2">
+                                    <span>Nhà Cung Cấp</span>
+                                </div>
+                                <div class="col-sm-8 mb-2">
+                                    <select class="form-select" id="nccnhapdauao">
+                                        <option selected>Chọn...</option>
+                                        @foreach (var item in listNhaCCs)
+                                        {
+                                            <option value="@item.Ma">@item.Ten</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-4 mb-2">
+                                    <span>Cù Trước</span>
+                                </div>
+                                <div class="col-sm-8 mb-2">
+                                    <input type="number" class="form-control" placeholder="0.00" id="cutruocnhapdauao" />
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-4 mb-2">
+                                    <span>Cá Mạnh</span>
+                                </div>
+                                <div class="col-sm-8 mb-2">
+                                    <input type="number" class="form-control" placeholder="0.00" id="camanhnhapdauao" />
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-4 mb-2">
+                                    <span>Ngộp Muối</span>
+                                </div>
+                                <div class="col-sm-8 mb-2">
+                                    <input type="number" class="form-control" placeholder="0.00" id="ngopmuoinhapdauao" />
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-4 mb-2">
+                                    <span>Ngộp Bán Ngoài</span>
+                                </div>
+                                <div class="col-sm-8 mb-2">
+                                    <input type="number" class="form-control" placeholder="0.00" id="ngopngoainhapdauao" />
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-4 mb-2">
+                                    <span>Ngộp Xe</span>
+                                </div>
+                                <div class="col-sm-8 mb-2">
+                                    <input type="number" class="form-control" placeholder="0.00" id="ngopxenhapdauao" />
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-4 mb-2">
+                                    <span>Cù Sau</span>
+                                </div>
+                                <div class="col-sm-8 mb-2">
+                                    <input type="number" class="form-control" placeholder="0.00" id="cusaunhapdauao" />
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-4 mb-2">
+                                    <span>Tỷ Lệ Mồi</span>
+                                </div>
+                                <div class="col-sm-8 mb-2">
+                                    <input type="number" class="form-control" placeholder="0.00" id="tylemoinhapdauao" />
+                                </div>
+                            </div>
+                            <div class="row" style="margin-left: -5px; margin-right: -5px;">
+                                <div class="col-sm-6 mb-2" style="padding-left: 5px; padding-right: 5px;">
+                                    <button onclick="taiBaoCaoNgayBatCa()" class="btn btn-primary position-relative w-100 h-100 d-flex align-items-center justify-content-center" style="min-height: 50px;">
+                                        <span id="txtTaiLaiBC">Tải Lại BC</span>
+                                        <div id="loadingIndicatorTaiLaiBC" class="spinner-border text-secondary position-absolute" role="status" style="left: 0; right: 0; top: 0; bottom: 0; margin: auto; display: none;">
+                                            <span class="visually-hidden">Đang tải...</span>
+                                        </div>
+                                    </button>
+                                </div>
+                                <div class="col-sm-6 mb-2" style="padding-left: 5px; padding-right: 5px;">
+                                    <button onclick="taiBaoCaoNgayNhapXuong()" class="btn btn-primary position-relative w-100 h-100 d-flex align-items-center justify-content-center" style="min-height: 50px;">
+                                        <span id="txtTaiLaiXK">Tải Lại NX</span>
+                                        <div id="loadingIndicatorTaiLaiXK" class="spinner-border text-secondary position-absolute" role="status" style="left: 0; right: 0; top: 0; bottom: 0; margin: auto; display: none;">
+                                            <span class="visually-hidden">Đang tải...</span>
+                                        </div>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="row" style="margin-left: -5px; margin-right: -5px;">
+                                <div class="col-sm-6 mb-2" style="padding-left: 5px; padding-right: 5px;">
+                                    <button onclick="showUpdate()" class="btn btn-primary position-relative w-100 h-100 d-flex align-items-center justify-content-center" style="min-height: 50px;">
+                                        <span id="txtCapNhat">Cập Nhật</span>
+                                        <div id="loadingIndicatorCapNhat" class="spinner-border text-secondary position-absolute" role="status" style="left: 0; right: 0; top: 0; bottom: 0; margin: auto; display: none;">
+                                            <span class="visually-hidden">Đang tải...</span>
+                                        </div>
+                                    </button>
+                                </div>
+                                <div class="col-sm-6 mb-2" style="padding-left: 5px; padding-right: 5px;">
+                                    <button onclick="insert()" class="btn btn-primary position-relative w-100 h-100 d-flex align-items-center justify-content-center" style="min-height: 50px;">
+                                        <span id="txtThem">Thêm</span>
+                                        <div id="loadingIndicator" class="spinner-border text-secondary position-absolute" role="status" style="left: 0; right: 0; top: 0; bottom: 0; margin: auto; display: none;">
+                                            <span class="visually-hidden">Đang tải...</span>
+                                        </div>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-8 mb-2">
+                            <div class="row">
+                                <div class="col-sm-4 mb-2">
+                                    <input class="form-control" placeholder="Chọn Ghe..." id="phuongtiennhapdauao" />
+                                    @* <div class="input-group">
+                                    <span class="input-group-text" id="spanghenhapcatra">Ghe</span>
+                                    <input
+                                    class="form-control"
+                                    placeholder="Chọn..."
+                                    aria-describedby="spanghenhapcatra"
+                                    id="ghenhapcatra" />
+                                    </div> *@
+                                </div>
+                                <div class="col-sm-3 mb-2">
+                                    <div class="input-group ">
+                                        <label class="input-group-text" for="aptainhapdauao">Áp Tải</label>
+                                        <select class="form-select" id="aptainhapdauao">
+                                            <option selected>Chọn...</option>
+                                            @foreach (var item in listApTai)
+                                            {
+                                                <option value="@item">@item</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-sm-2 mb-2">
+                                    <div class="input-group ">
+                                        <label class="input-group-text" for="tainhapdauao">Tài</label>
+                                        <select class="form-select" id="tainhapdauao">
+                                            <option selected>Chọn...</option>
+                                            @foreach (var item in listTai)
+                                            {
+                                                <option value="@item">@item</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-sm-3 mb-2">
+                                    <div class="input-group ">
+                                        <label class="input-group-text" for="mslnhapcatra">Chuyến</label>
+                                        <select class="form-select" id="chuyennhapdauao">
+                                            <option selected>Chọn...</option>
+                                            @foreach (var item in listTai)
+                                            {
+                                                <option value="@item">@item</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-12 mb-2">
+                                    <div id="Grid"></div>
+                                </div>
+
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="modalSua" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Cập Nhật</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-sm-7 mb-2">
+                                <div class="input-group">
+                                    <span class="input-group-text" id="ngaynxnhapdauaoSpan">Ngày NX</span>
+                                    <input type="date"
+                                           class="form-control"
+                                           aria-describedby="ngaynxnhapdauaoSpan" id="ngaynxnhapdauaoSua" disabled />
+                                </div>
+                            </div>
+                            <div class="col-sm-5 mb-2">
+                                <div class="input-group ">
+                                    <label class="input-group-text" for="aonhapcatra">Ao</label>
+
+                                    <input type="number" class="form-control" id="aonhapdauaoSua" disabled />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-7 mb-2">
+                                <div class="input-group">
+                                    <span class="input-group-text" id="ngayxpnhapdauaoSpan">Ngày XP</span>
+                                    <input type="date"
+                                           class="form-control"
+                                           aria-describedby="ngayxpnhapdauaoSpan" id="ngayxpnhapdauaoSua" />
+                                </div>
+                            </div>
+                            <div class="col-sm-5 mb-2">
+                                <div class="input-group">
+                                    <span class="input-group-text" id="gioxpnhapdauaoSpan">Giờ XP</span>
+                                    <input type="time"
+                                           class="form-control"
+                                           aria-describedby="gioxpnhapdauaoSpan" id="gioxpnhapdauaoSua" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-7 mb-2">
+                                <div class="input-group">
+                                    <span class="input-group-text" id="gioxpnhapdauaoSpan">Ngày BC</span>
+                                    <input type="date"
+                                           class="form-control"
+                                           aria-describedby="ngaybcnhapdauaoSpan" id="ngaybcnhapdauaoSua" />
+                                </div>
+                            </div>
+                            <div class="col-sm-5 mb-2">
+                                <div class="input-group ">
+                                    <label class="input-group-text" for="aonhapcatra">Thư Ký</label>
+                                    <select class="form-select" id="thukynhapdauaoSua">
+                                        <option selected>Chọn...</option>
+                                        @foreach (var item in listThuKy)
+                                        {
+                                            <option value="@item">@item</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-12 mb-2">
+                                <div class="input-group">
+                                    <label class="input-group-text" for="phuongtiennhapdauaoSua">Ghe</label>
+                                    <input type="number" class="form-control" id="phuongtiennhapdauaoSua" disabled />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-12 mb-2">
+                                <div class="input-group ">
+                                    <label class="input-group-text" for="aptainhapdauao">Áp Tải</label>
+                                    <select class="form-select" id="aptainhapdauaoSua">
+                                        <option selected>Chọn...</option>
+                                        @foreach (var item in listApTai)
+                                        {
+                                            <option value="@item">@item</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-12 mb-2">
+                                <div class="input-group ">
+                                    <label class="input-group-text" for="tainhapdauao">Tài</label>
+                                    <select class="form-select" id="tainhapdauaoSua">
+                                        <option selected>Chọn...</option>
+                                        @foreach (var item in listTai)
+                                        {
+                                            <option value="@item">@item</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-12 mb-2">
+                                <div class="input-group ">
+                                    <label class="input-group-text" for="mslnhapcatra">Chuyến</label>
+                                    <select class="form-select" id="chuyennhapdauaoSua" disabled>
+                                        <option selected>Chọn...</option>
+                                        @foreach (var item in listTai)
+                                        {
+                                            <option value="@item">@item</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-4 mb-2">
+                            <span>Nhà Cung Cấp</span>
+                        </div>
+                        <div class="col-sm-8 mb-2">
+                            <select class="form-select" id="nccnhapdauaoSua" disabled>
+                                <option selected>Chọn...</option>
+                                @foreach (var item in listNhaCCs)
+                                {
+                                    <option value="@item.Ma">@item.Ten</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-4 mb-2">
+                            <span>Cù Trước</span>
+                        </div>
+                        <div class="col-sm-8 mb-2">
+                            <input type="number" class="form-control" placeholder="0.00" id="cutruocnhapdauaoSua" />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-4 mb-2">
+                            <span>Cá Mạnh</span>
+                        </div>
+                        <div class="col-sm-8 mb-2">
+                            <input type="number" class="form-control" placeholder="0.00" id="camanhnhapdauaoSua" />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-4 mb-2">
+                            <span>Ngộp Muối</span>
+                        </div>
+                        <div class="col-sm-8 mb-2">
+                            <input type="number" class="form-control" placeholder="0.00" id="ngopmuoinhapdauaoSua" />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-4 mb-2">
+                            <span>Ngộp Bán Ngoài</span>
+                        </div>
+                        <div class="col-sm-8 mb-2">
+                            <input type="number" class="form-control" placeholder="0.00" id="ngopngoainhapdauaoSua" />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-4 mb-2">
+                            <span>Ngộp Xe</span>
+                        </div>
+                        <div class="col-sm-8 mb-2">
+                            <input type="number" class="form-control" placeholder="0.00" id="ngopxenhapdauaoSua" />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-4 mb-2">
+                            <span>Cù Sau</span>
+                        </div>
+                        <div class="col-sm-8 mb-2">
+                            <input type="number" class="form-control" placeholder="0.00" id="cusaunhapdauaoSua" />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-4 mb-2">
+                            <span>Tỷ Lệ Mồi</span>
+                        </div>
+                        <div class="col-sm-8 mb-2">
+                            <input type="number" class="form-control" placeholder="0.00" id="tylemoinhapdauaoSua" />
+                        </div>
+                    </div>
+
+                    <div class="row mt-4 pt-2">
+                        <div class="col-12">
+                            <button onclick="update()" class="btn btn-primary w-100 position-relative" type="submit" id="">
+                                <div class=" align-items-center">
+                                    <span id="txtSua">Sửa</span>
+                                    <div id="loadingIndicatorSua" class=" spinner-border text-secondary position-absolute" role="status" style="left: 0;right: 0;top: 0;bottom: 0;margin: auto; display:none">
+                                        <span class="visually-hidden">Đang tải...</span>
+                                    </div>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+<input id="maPhuongTienNDARowSelected" hidden />
+<input id="ngayNDARowSelected" hidden />
+<input id="maAoNDARowSelected" hidden />
+<input id="maNhaCCNDARowSelected" hidden />
+<input id="chuyenNDARowSelected" hidden />
+
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
+<script src="~/assets/vendor/libs/inputpicker/jquery.inputpicker.js?v3"></script>
+<script>
+    function getCurrentTime() {
+        let now = new Date();
+
+        // Lấy các thành phần giờ, phút, giây và mili giây
+        let hours = String(now.getHours()).padStart(2, '0');
+        let minutes = String(now.getMinutes()).padStart(2, '0');
+        let seconds = String(now.getSeconds()).padStart(2, '0');
+        let milliseconds = String(now.getMilliseconds()).padStart(7, '0');
+
+        // Định dạng thời gian theo yêu cầu
+        let currentTime = `${hours}:${minutes}:${seconds}.${milliseconds}`;
+
+        return currentTime;
+    }
+    function setFormattedTime(timeString) {
+        // Chuyển đổi chuỗi thời gian sang đối tượng Date
+        var time = new Date("1970-01-01T" + timeString);
+
+        // Lấy giờ và phút
+        var hours = time.getHours().toString().padStart(2, '0');
+        var minutes = time.getMinutes().toString().padStart(2, '0');
+        var seconds = time.getSeconds().toString().padStart(2, '0');
+
+        // Định dạng lại chuỗi thời gian
+        var formattedTime = hours + ":" + minutes;
+
+        return formattedTime;
+    }
+
+
+
+
+    // Lấy ngày hiện tại
+    var today = new Date();
+
+    // Định dạng ngày thành yyyy-MM-dd (định dạng của trường input date)
+    var formattedDate = today.toISOString().substr(0, 10);
+
+    // Gán giá trị vào trường input
+    document.getElementById("ngaynxnhapdauao").value = formattedDate;
+    document.getElementById("ngayxpnhapdauao").value = formattedDate;
+    document.getElementById("ngaybcnhapdauao").value = formattedDate;
+    document.getElementById("gioxpnhapdauao").value = setFormattedTime(getCurrentTime());
+
+
+
+    function chuyenDoiNgay(inputDate) {
+        // Chuyển đổi kiểu dữ liệu của inputDate thành đối tượng Date
+        var dateObject = new Date(inputDate);
+
+        // Lấy ngày, tháng, năm từ đối tượng Date
+        var day = dateObject.getDate();
+        var month = dateObject.getMonth() + 1; // Tháng bắt đầu từ 0
+        var year = dateObject.getFullYear();
+
+        // Định dạng lại ngày, tháng, năm theo định dạng yyyy-MM-dd
+        var formattedDate = year + "-" + (month < 10 ? '0' : '') + month + "-" + (day < 10 ? '0' : '') + day;
+
+        // Trả về ngày đã định dạng
+        return formattedDate;
+    }
+    function layGioTuDate(dateString) {
+        // Khởi tạo một đối tượng Date từ chuỗi ngày
+        var date = new Date(dateString);
+
+        // Lấy giờ, phút và giây từ đối tượng Date
+        var gio = date.getHours();
+        var phut = date.getMinutes();
+        var giay = date.getSeconds();
+
+        // Định dạng lại chuỗi kết quả
+        var gioPhutGiayString = pad(gio, 2) + ":" + pad(phut, 2) + ":" + pad(giay, 2);
+
+        // Trả về chuỗi kết quả
+        return gioPhutGiayString;
+    }
+
+    // Hàm pad để thêm số 0 vào trước nếu cần
+    function pad(number, length) {
+        var str = '' + number;
+        while (str.length < length) {
+            str = '0' + str;
+        }
+        return str;
+    }
+
+    function setTimeInput(time) {
+        /// Kiểm tra định dạng thời gian hợp lệ
+        const timeParts = time.split(':');
+
+        // Nếu định dạng không đúng hoặc không đủ 3 phần, trả về thông báo lỗi
+        if (timeParts.length !== 3) {
+            console.error("Invalid time format. Please use hh:mm:ss.");
+            return;
+        }
+
+        // Lấy giờ, phút và giây từ chuỗi
+        let hours = timeParts[0].padStart(2, '0');
+        let minutes = timeParts[1].padStart(2, '0');
+        let seconds = timeParts[2].padStart(2, '0');
+
+        // Tạo chuỗi thời gian theo định dạng hh:mm:ss
+        let formattedTime = `${hours}:${minutes}:${seconds}`;
+
+        return formattedTime;
+    }
+</script>
+<script>
+    $(document).ready(function () {
+        //loadGridData();
+        $.ajax({
+            type: "GET",
+            url: "/PhuongTienNguyenLieu/GetAlls",
+            success: function (rs) {
+                if (rs != null) {
+                    $('#phuongtiennhapdauao').inputpicker({
+                        data: rs,
+                        fields: [
+                            { name: 'Ma', text: 'Mã' },
+                            { name: 'Ten', text: 'Tên' },
+                            { name: 'VungNuoiId', text: 'Vùng Nuôi' },
+                            { name: 'SoGhe', text: 'Số Ghê' },
+
+                        ],
+                        headShow: true,
+                        fieldText: 'Ten',
+                        fieldValue: 'Ma',
+                        filterOpen: true
+                    });
+                }
+                else {
+                    toastOptionNotyfi();
+                    toastr["warning"](rs.Mesages, "Thông báo");
+                }
+            },
+            error: function () {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error, "Thông báo");
+            }
+        });
+
+
+        taiBaoCaoNgayNhapXuong();
+    });
+</script>
+<script>
+
+    function loadGridData(data) {
+
+        var dataManager = new ej.data.DataManager({
+            json: data,
+            adaptor: new ej.data.JsonAdaptor()
+        });
+        document.getElementById('Grid').innerHTML = '';
+        var grid = new ej.grids.Grid({
+            dataSource: dataManager,
+            allowPaging: true,
+            pageSettings: { pageSize: 50 },
+            allowFiltering: true,
+            filterSettings: { type: 'Excel' },
+            allowSorting: true,
+            //frozenColumns: 3,
+            allowResizing: true,
+            rowSelected: onRowSelected,
+            height: 450,
+            columns: [
+                //{ field: 'STT', headerText: 'STT', width: 150 },
+                { field: 'MaPhuongTien', headerText: 'Mã Phương Tiện', width: 150 },
+                { field: 'PhuongTienName', headerText: 'Tên Phương Tiện', width: 150 },
+                { field: 'NhaCungCapName', headerText: 'Nhà Cung Cấp', width: 150 },
+                { field: 'MaAo', headerText: 'Mã Ao', width: 150 },
+                { field: 'NhaCungCapName', headerText: 'Nhà Cung Cấp', width: 150 },
+                { field: 'Tài', headerText: 'STTChuyen', width: 150 },
+                { field: 'CaNgayTruoc', headerText: 'Cù Trước', type: 'number', width: 150 },
+                { field: 'CaManh', headerText: 'Cá Mạnh', type: 'number', width: 150 },
+                { field: 'CaNgopAoGhe', headerText: 'Ngộp Ghe', type: 'number', width: 150 },
+                { field: 'CaNgopAoBanNgoai', headerText: 'Ngộp Ngoài', type: 'number', width: 150 },
+                { field: 'CaNgopAoXe', headerText: 'Ngộp Xe', type: 'number', width: 150 },
+                { field: 'TongHam', headerText: 'Tổng', type: 'number', width: 150 },
+                { field: 'CaConLai', headerText: 'Cù Sau', type: 'number', width: 150 },
+                { field: 'TyLeMoi', headerText: 'Tỷ Lệ Mồi', type: 'number', width: 150 },
+                { field: 'ThuKy', headerText: 'Thư Ký', width: 150 },
+                { field: 'ApTai', headerText: 'Áp Tải', width: 150 },
+                { field: 'CreateBy', headerText: 'Người Tạo', width: 150 },
+                { field: 'CreateDateTime', headerText: 'Thời Gian Tạo', width: 150 },
+                { field: 'ModifiedBy', headerText: 'Người Sửa', width: 150 },
+                { field: 'ModifiedDateTime', headerText: 'Thời Gian Sửa', width: 150 },
+                { field: 'IsVungNuoiBlocked', headerText: 'Khóa', width: 100, displayAsCheckBox: 'true', textAlign: 'Center' },
+                { field: 'GhiChu', headerText: 'Ghi Chú', width: 150 },
+
+            ],
+            aggregates: [{
+                columns: [
+                    {
+                        type: 'Sum',
+                        field: 'CaNgayTruoc',
+                        footerTemplate: 'Tổng Cù Trước: ${Sum} Kg'
+                    },
+                    {
+                        type: 'Sum',
+                        field: 'CaManh',
+                        footerTemplate: 'Tổng Cá Mạnh: ${Sum} Kg'
+                    },
+                    {
+                        type: 'Sum',
+                        field: 'CaNgopAoGhe',
+                        footerTemplate: 'Tổng Ngộp Ghe: ${Sum} Kg'
+                    },
+                    {
+                        type: 'Sum',
+                        field: 'CaNgopAoBanNgoai',
+                        footerTemplate: 'Tổng Ngộp Ngoài: ${Sum} Kg'
+                    },
+                    {
+                        type: 'Sum',
+                        field: 'CaNgopAoXe',
+                        footerTemplate: 'Tổng Ngộp Xe: ${Sum} Kg'
+                    },
+                    {
+                        type: 'Sum',
+                        field: 'TongHam',
+                        footerTemplate: 'Tổng Hầm: ${Sum} Kg'
+                    },
+                    {
+                        type: 'Sum',
+                        field: 'CaConLai',
+                        footerTemplate: 'Tổng Cù Sau: ${Sum} Kg'
+                    }
+                ]
+            }]
+        });
+        // Hiển thị Grid trên trang web
+        grid.appendTo('#Grid');
+    }
+    function onRowSelected(args) {
+        // Lấy dữ liệu của hàng được chọn
+        var selectedRecord = args.data;
+        // Lấy giá trị Id từ dữ liệu của hàng được chọn
+        var MaPhuongTien = selectedRecord.MaPhuongTien;
+        var Ngay = selectedRecord.Ngay;
+        var MaAo = selectedRecord.MaAo;
+        var MaNhaCungCap = selectedRecord.MaNhaCungCap;
+        var Chuyen = selectedRecord.Chuyen;
+
+        $('#maPhuongTienNDARowSelected').val(MaPhuongTien);
+        $('#ngayNDARowSelected').val(Ngay);
+        $('#maAoNDARowSelected').val(MaAo);
+        $('#maNhaCCNDARowSelected').val(MaNhaCungCap);
+        $('#chuyenNDARowSelected').val(Chuyen);
+    }
+    loadGridData();
+    function reloadData() {
+        loadGridData();
+    }
+
+    function taiBaoCaoNgayBatCa() {
+        var dateTime = document.getElementById("ngaybcnhapdauao").value;
+        var loaiNgay = "ngaybatca";
+        $.ajax({
+            url: "@Url.Action("LoadBaoCao", "NhapDauAoNguyenLieu")",
+            type: "POST",
+            data: { dateTime: dateTime, loaiNgay: loaiNgay },
+            success: function (response) {
+                // Kiểm tra trạng thái "Success" trong dữ liệu JSON từ máy chủ
+                if (response.Success) {
+                    loadGridData(response.Data);
+                } else {
+                    console.error(response.Messages);
+                    toastOptionNotyfi();
+                    toastr["error"](response.Messages, "Không có dữ liệu!");
+                }
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"](error, "Thông báo");
+            }
+
+        })
+    }
+    function taiBaoCaoNgayNhapXuong() {
+        var dateTime = document.getElementById("ngaynxnhapdauao").value;
+        var loaiNgay = "ngaynhapxuong";
+        $.ajax({
+            url: "@Url.Action("LoadBaoCao", "NhapDauAoNguyenLieu")",
+            type: "POST",
+            data: { dateTime: dateTime, loaiNgay: loaiNgay },
+            success: function (response) {
+                // Kiểm tra trạng thái "Success" trong dữ liệu JSON từ máy chủ
+                if (response.Success) {
+                    loadGridData(response.Data);
+                } else {
+                    console.error(response.Messages);
+                    toastOptionNotyfi();
+                    toastr["error"](response.Messages, "Không có dữ liệu!");
+                }
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"](error, "Thông báo");
+            }
+
+        })
+    }
+
+    function insert() {
+        var ngayNX = $('#ngaynxnhapdauao').val();
+        var ngayXP = $('#ngayxpnhapdauao').val();
+        var ngayBC = $('#ngaybcnhapdauao').val();
+        var ao = $('#aonhapdauao').val();
+        var gioXP = $('#gioxpnhapdauao').val();
+        var thuky = $('#thukynhapdauao').val();
+        var phuongtien = $('#phuongtiennhapdauao').val();
+        var aptai = $('#aptainhapdauao').val();
+        var tai = $('#tainhapdauao').val();
+        var chuyen = $('#chuyennhapdauao').val();
+        var ncc = $('#nccnhapdauao').val();
+        var cutruoc = $('#cutruocnhapdauao').val();
+        var camanh = $('#camanhnhapdauao').val();
+        var ngopmuoi = $('#ngopmuoinhapdauao').val();
+        var ngopngoai = $('#ngopngoainhapdauao').val();
+        var ngopxe = $('#ngopxenhapdauao').val();
+        var cusau = $('#cusaunhapdauao').val();
+        var tylemoi = $('#tylemoinhapdauao').val();
+
+        var xuongId = @XuongId;
+        document.getElementById("txtThem").style.visibility = "hidden";
+        document.getElementById("loadingIndicator").style.display = "block";
+        $.ajax({
+            type: 'POST',
+            url: '/NhapDauAoNguyenLieu/DoInsert',
+            data: {
+                ngayNX: ngayNX,
+                ngayXP: ngayXP,
+                ngayBC: ngayBC,
+                ao: ao,
+                gioXP: gioXP,
+                thuky: thuky,
+                phuongtien: phuongtien,
+                aptai: aptai,
+                tai: tai,
+                chuyen: chuyen,
+                ncc: ncc,
+                cutruoc: cutruoc,
+                camanh: camanh,
+                ngopmuoi: ngopmuoi,
+                ngopngoai: ngopngoai,
+                ngopxe: ngopxe,
+                cusau: cusau,
+                tylemoi: tylemoi
+            },
+            success: function (rs) {
+                if (rs.isSuccess === true) {
+                    toastOptionNotyfi();
+                    toastr["success"](rs.Messages, "Thông báo");
+                    $('#modalThem').modal('hide');
+                    taiBaoCaoNgayNhapXuong();
+                } else {
+                    toastOptionNotyfi();
+                    toastr["warning"](rs.Messages, "Thông báo");
+                }
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error, "Thông báo");
+            },
+            complete: function () {
+                document.getElementById("loadingIndicator").style.display = "none";
+                document.getElementById("txtThem").style.visibility = "visible";
+            }
+        });
+    }
+</script>
+<script>
+    function showUpdate() {
+        var phuongTien = $('#maPhuongTienNDARowSelected').val();
+        var ngay = $('#ngayNDARowSelected').val();
+        var maAo = $('#maAoNDARowSelected').val();
+        var maNhaCC = $('#maNhaCCNDARowSelected').val();
+        var chuyen = $('#chuyenNDARowSelected').val();
+        //$('#modalSua').modal('show');
+        $.ajax({
+            url: "/NhapDauAoNguyenLieu/GetsByMa",
+            data: { phuongTien: phuongTien, ngay: ngay, maAo: maAo, maNhaCC: maNhaCC, chuyen: chuyen },
+            type: 'GET',
+            dataType: 'json',
+            success: function (rs) {
+                if (rs.isSuccess === true) {
+                    $('#ngaynxnhapdauaoSua').val(chuyenDoiNgay(rs.Ngay));
+                    $('#ngayxpnhapdauaoSua').val(chuyenDoiNgay(rs.NgayXuatPhat));
+                    $('#ngaybcnhapdauaoSua').val(chuyenDoiNgay(rs.NgayBatCa));
+                    $('#aonhapdauaoSua').val(rs.MaAo);
+                    $('#gioxpnhapdauaoSua').val(setFormattedTime(rs.GioXuatPhat));
+                    $('#thukynhapdauaoSua').val(rs.ThuKy);
+                    $('#phuongtiennhapdauaoSua').val(rs.MaPhuongTien);
+                    $('#aptainhapdauaoSua').val(rs.ApTai);
+                    $('#tainhapdauaoSua').val(rs.STTChuyen);
+                    $('#chuyennhapdauaoSua').val(rs.Chuyen);
+                    $('#nccnhapdauaoSua').val(rs.MaNhaCungCap);
+                    $('#cutruocnhapdauaoSua').val(rs.CaNgayTruoc);
+                    $('#camanhnhapdauaoSua').val(rs.CaManh);
+                    $('#ngopmuoinhapdauaoSua').val(rs.CaNgopAoGhe);
+                    $('#ngopngoainhapdauaoSua').val(rs.CaNgopAoBanNgoai);
+                    $('#ngopxenhapdauaoSua').val(rs.CaNgopAoXe);
+                    $('#cusaunhapdauaoSua').val(rs.CaConLai);
+                    $('#tylemoinhapdauaoSua').val(rs.TyLeMoi);
+                    $('#modalSua').modal('show');
+                }
+                else {
+                    toastOptionNotyfi();
+                    toastr["warning"](rs.Mesages, "Thông báo");
+                }
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error, "Thông báo");
+            }
+        });
+    }
+    function update() {
+        var phuongTien = $('#maPhuongTienNDARowSelected').val();
+        var ngay = $('#ngayNDARowSelected').val();
+        var maAo = $('#maAoNDARowSelected').val();
+        var maNhaCC = $('#maNhaCCNDARowSelected').val();
+        var chuyen = $('#chuyenNDARowSelected').val();
+        var ngayXP = $('#ngayxpnhapdauaoSua').val();
+        var ngayBC = $('#ngaybcnhapdauaoSua').val();
+        var gioXP = $('#gioxpnhapdauaoSua').val();
+        var thuky = $('#thukynhapdauaoSua').val();
+        var aptai = $('#aptainhapdauaoSua').val();
+        var tai = $('#tainhapdauaoSua').val();
+        var cutruoc = $('#cutruocnhapdauaoSua').val();
+        var camanh = $('#camanhnhapdauaoSua').val();
+        var ngopmuoi = $('#ngopmuoinhapdauaoSua').val();
+        var ngopngoai = $('#ngopngoainhapdauaoSua').val();
+        var ngopxe = $('#ngopxenhapdauaoSua').val();
+        var cusau = $('#cusaunhapdauaoSua').val();
+        var tylemoi = $('#tylemoinhapdauaoSua').val();
+        document.getElementById("txtSua").style.visibility = "hidden";
+        document.getElementById("loadingIndicatorSua").style.display = "block";
+        $.ajax({
+            url: '/NhapDauAoNguyenLieu/DoUpDate',
+            data: {
+                phuongTien: phuongTien,
+                ngay: ngay,
+                maAo: maAo,
+                maNhaCC: maNhaCC,
+                chuyen: chuyen,
+                ngayXP: ngayXP,
+                ngayBC: ngayBC,
+                gioXP: gioXP,
+                thuky: thuky,
+                aptai: aptai,
+                tai: tai,
+                cutruoc: cutruoc,
+                camanh: camanh,
+                ngopmuoi: ngopmuoi,
+                ngopngoai: ngopngoai,
+                ngopxe: ngopxe,
+                cusau: cusau,
+                tylemoi: tylemoi
+            },
+            type: 'POST',
+            dataType: 'json',
+            success: function (rs) {
+                if (rs.isSuccess === true) {
+                    $('#modalSua').modal('hide');
+                    taiBaoCaoNgayNhapXuong();
+                    toastOptionNotyfi();
+                    toastr["success"](rs.Messages, "Thông báo");
+                } else {
+                    toastOptionNotyfi();
+                    toastr["warning"](rs.Messages, "Thông báo");
+                }
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error.toString(), "Thông báo");
+            },
+            complete: function () {
+                document.getElementById("loadingIndicatorSua").style.display = "none";
+                document.getElementById("txtSua").style.visibility = "visible";
+            }
+        });
+    }
+</script>
+
+
+

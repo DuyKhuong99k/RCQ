@@ -1,0 +1,681 @@
+﻿@{
+    ViewData["Title"] = "ThanhPhamNguyenLieuView";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    //lấy danh sách roleid từ cookie
+    var roleIds = PMS.Middlewares.AuthenticationHelpers.GetRoleIdsFromCookie(Context);
+    // lấy danh sách fu func từ list roleId
+    var rolePermistions = await PMS.Middlewares.AuthenticationHelpers.GetRolePermistionsAsync(Context, roleIds);
+}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h2 class="mb-0">Danh Sách Thành Phẩm Nguyên Liệu</h2>
+                    @{
+                        var themthanhphamnguyenlieu = rolePermistions.Where(x => x.Fu == "Danh Mục / Nguyên Liệu / Thành Phẩm" && x.Func == "Xem Nguyên Liệu / Thành Phẩm" && x.Status == 1).FirstOrDefault();
+                        if (themthanhphamnguyenlieu != null)
+                        {
+                            <button onclick="showInsert()" type="button" class="btn btn-primary">Thêm</button>
+                        }
+                    }
+                        
+                </div>
+                <div class="card-body">
+                    <div id="Grid"></div>
+                    <div style="margin-top:20px;">
+                        @{
+                            var suathanhphamnguyenlieu = rolePermistions.Where(x => x.Fu == "Danh Mục / Nguyên Liệu / Thành Phẩm" && x.Func == "Sửa Nguyên Liệu / Thành Phẩm" && x.Status == 1).FirstOrDefault();
+                            if (themthanhphamnguyenlieu != null)
+                            {
+                                <button onclick="showUpdate()" style="margin-right:5px" class="btn btn-outline-warning"><i class='bx bx-edit-alt'></i>Sửa</button>
+                            }
+                            var xoathanhphamnguyenlieu = rolePermistions.Where(x => x.Fu == "Danh Mục / Nguyên Liệu / Thành Phẩm" && x.Func == "Xoá Nguyên Liệu / Thành Phẩm" && x.Status == 1).FirstOrDefault();
+                            if (themthanhphamnguyenlieu != null)
+                            {
+                                <button onclick="showDelete()" style="margin-right:5px" class="btn btn-outline-danger"><i class='bx bx-trash'></i>Xoá</button>
+                            }
+                            var importthanhphamnguyenlieu = rolePermistions.Where(x => x.Fu == "Danh Mục / Nguyên Liệu / Thành Phẩm" && x.Func == "Import Nguyên Liệu / Thành Phẩm" && x.Status == 1).FirstOrDefault();
+                            if (themthanhphamnguyenlieu != null)
+                            {
+                                <button onclick="import()" style="margin-right:5px" class="btn btn-outline-info"><i class='bx bx-import'></i>Import</button>
+                            }
+                            var Exportthanhphamnguyenlieu = rolePermistions.Where(x => x.Fu == "Danh Mục / Nguyên Liệu / Thành Phẩm" && x.Func == "Export Nguyên Liệu / Thành Phẩm" && x.Status == 1).FirstOrDefault();
+                            if (themthanhphamnguyenlieu != null)
+                            {
+                                <button onclick="export()" style="margin-right:5px" class="btn btn-outline-secondary"><i class='bx bx-export'></i>Export Excel</button>
+                            }
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="modalThem" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Thêm Thành Phẩm Nguyên Liệu</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-12 mb-12 ">
+                                <div class="form-outline">
+                                    <label class="form-label" for="x1">Mã</label>
+                                    <input type="text" id="maTPNL" class="form-control form-control-lg" autocomplete="off" placeholder="Nhập Mã..." style="text-transform: uppercase;" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 mb-12 ">
+                                <div class="form-outline">
+                                    <label class="form-label" for="x1">Tên</label>
+                                    <input type="text" id="tenTPNL" class="form-control form-control-lg" autocomplete="off" placeholder="Nhập Tên..." />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 mb-12 ">
+                                <div class="form-outline">
+                                    <label class="form-label" for="x1">Tỷ Lệ Nước (%)</label>
+                                    <input type="number" min="0" step="0.01" id="tyLeNuocTPNL" class="form-control form-control-lg" autocomplete="off" placeholder="Nhập Tỷ Lệ Nước..." />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-12">
+                                <div class="list-group form-outline">
+                                    <label class="">
+                                        <input class="form-check-input me-1" type="checkbox" value="" id="suDungTPNL" />
+                                        Sử Dụng
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-4 ">
+                                <div class="list-group">
+                                    <label class="">
+                                        <input class="form-check-input me-1" type="checkbox" value="" id="isSNL" />
+                                        Sống
+                                    </label>
+                                    <label class="">
+                                        <input class="form-check-input me-1" type="checkbox" value="" id="isNgopGheMuoi" />
+                                        Ngộp Ghe Muối
+                                    </label>
+                                    <label class="">
+                                        <input class="form-check-input me-1" type="checkbox" value="" id="isNgopAoMuoi" />
+                                        Ngộp Ao Muối
+                                    </label>
+                                    <label class="">
+                                        <input class="form-check-input me-1" type="checkbox" value="" id="isDatNho" />
+                                        Dạt Nhỏ
+                                    </label>
+                                    <label class="">
+                                        <input class="form-check-input me-1" type="checkbox" value="" id="isCaCanTin" />
+                                        Căn Tin
+                                    </label>
+                                    <label class="">
+                                        <input class="form-check-input me-1" type="checkbox" value="" id="isNgopGhePhuPham" />
+                                        Ngộp Ghe Phụ Phẩm
+                                    </label>
+                                    <label class="">
+                                        <input class="form-check-input me-1" type="checkbox" value="" id="isNgopGheTuoiBanNgoai" />
+                                        Ngộp Ghe Tươi Bán Ngoài
+                                    </label>
+                                    <label class="">
+                                        <input class="form-check-input me-1" type="checkbox" value="" id="isManh" />
+                                        Mạnh
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <div class="list-group">
+                                    <label class="">
+                                        <input class="form-check-input me-1" type="checkbox" value="" id="isNgopGhe" />
+                                        Ngộp Ghe
+                                    </label>
+                                    <label class="">
+                                        <input class="form-check-input me-1" type="checkbox" value="" id="isMuoiGhePhuPham" />
+                                        Ngộp Ghe Phụ Phẩm
+                                    </label>
+                                    <label class="">
+                                        <input class="form-check-input me-1" type="checkbox" value="" id="isNgopAoPhuPham" />
+                                        Ngộp Ao Phụ Phẩm
+                                    </label>
+                                    <label class="">
+                                        <input class="form-check-input me-1" type="checkbox" value="" id="isPhuPhamCaTap" />
+                                        Phụ Phẩm Cá Tạp
+                                    </label>
+                                    <label class="">
+                                        <input class="form-check-input me-1" type="checkbox" value="" id="isCaNgopXeMuoi" />
+                                        Ngộp Xe Muối
+                                    </label>
+                                    <label class="">
+                                        <input class="form-check-input me-1" type="checkbox" value="" id="isNgopXePhuPham" />
+                                        Ngộp Xe Phụ Phẩm
+                                    </label>
+                                    <label class="">
+                                        <input class="form-check-input me-1" type="checkbox" value="" id="isCaNgopGheAoBanNgoai" />
+                                        Ngộp Ghe Ao Bán Ngoài
+                                    </label>
+                                </div>
+
+                            </div>
+                        
+                        </div>
+                        <div class="row mt-4 pt-2">
+                            <div class="col-12">
+                                <button onclick="insert()" class="btn btn-primary w-100 position-relative" type="submit" id="">
+                                    <div class=" align-items-center">
+                                        <span id="txtThem">Thêm</span>
+                                        <div id="loadingIndicator" class=" spinner-border text-secondary position-absolute" role="status" style="left: 0;right: 0;top: 0;bottom: 0;margin: auto; display:none">
+                                            <span class="visually-hidden">Đang tải...</span>
+                                        </div>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="modalSua" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Sửa Thành Phẩm Nguyên Liệu</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-12 mb-12 ">
+                                <div class="form-outline">
+                                    <label class="form-label" for="x1">Mã</label>
+                                    <input type="text" id="maTPNLSua" class="form-control form-control-lg" autocomplete="off" placeholder="Nhập Mã..." style="text-transform: uppercase;" disabled />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 mb-12 ">
+                                <div class="form-outline">
+                                    <label class="form-label" for="x1">Tên</label>
+                                    <input type="text" id="tenTPNLSua" class="form-control form-control-lg" autocomplete="off" placeholder="Nhập Tên..." />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 mb-12 ">
+                                <div class="form-outline">
+                                    <label class="form-label" for="x1">Tỷ Lệ Nước (%)</label>
+                                    <input type="number" id="tyLeNuocTPNLSua" min="0" step="0.01" class="form-control form-control-lg" autocomplete="off" placeholder="Nhập Tỷ Lệ Nước..." />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-12">
+                                <div class="list-group form-outline">
+                                    <label class="">
+                                        <input class="form-check-input me-1" type="checkbox" value="" id="suDungTPNLSua" />
+                                        Sử Dụng
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-4 ">
+                                <div class="list-group">
+                                    <label class="">
+                                        <input class="form-check-input me-1" type="checkbox" value="" id="isSNLSua" />
+                                        Sống
+                                    </label>
+                                    <label class="">
+                                        <input class="form-check-input me-1" type="checkbox" value="" id="isNgopGheMuoiSua" />
+                                        Ngộp Ghe Muối
+                                    </label>
+                                    <label class="">
+                                        <input class="form-check-input me-1" type="checkbox" value="" id="isNgopAoMuoiSua" />
+                                        Ngộp Ao Muối
+                                    </label>
+                                    <label class="">
+                                        <input class="form-check-input me-1" type="checkbox" value="" id="isDatNhoSua" />
+                                        Dạt Nhỏ
+                                    </label>
+                                    <label class="">
+                                        <input class="form-check-input me-1" type="checkbox" value="" id="isCaCanTinSua" />
+                                        Căn Tin
+                                    </label>
+                                    <label class="">
+                                        <input class="form-check-input me-1" type="checkbox" value="" id="isNgopGhePhuPhamSua" />
+                                        Ngộp Ghe Phụ Phẩm
+                                    </label>
+                                    <label class="">
+                                        <input class="form-check-input me-1" type="checkbox" value="" id="isNgopGheTuoiBanNgoaiSua" />
+                                        Ngộp Ghe Tươi Bán Ngoài
+                                    </label>
+                                    <label class="">
+                                        <input class="form-check-input me-1" type="checkbox" value="" id="isManhSua" />
+                                        Mạnh
+                                    </label>
+                                </div>
+                                
+                            </div>
+                            <div class="col-md-6 mb-4 ">
+                                <div class="list-group">
+                                    <label class="">
+                                        <input class="form-check-input me-1" type="checkbox" value="" id="isNgopGheSua" />
+                                        Ngộp Ghe
+                                    </label>
+                                    <label class="">
+                                        <input class="form-check-input me-1" type="checkbox" value="" id="isMuoiGhePhuPhamSua" />
+                                        Ngộp Ghe Phụ Phẩm
+                                    </label>
+                                    <label class="">
+                                        <input class="form-check-input me-1" type="checkbox" value="" id="isNgopAoPhuPhamSua" />
+                                        Ngộp Ao Phụ Phẩm
+                                    </label>
+                                    <label class="">
+                                        <input class="form-check-input me-1" type="checkbox" value="" id="isPhuPhamCaTapSua" />
+                                        Phụ Phẩm Cá Tạp
+                                    </label>
+                                    <label class="">
+                                        <input class="form-check-input me-1" type="checkbox" value="" id="isCaNgopXeMuoiSua" />
+                                        Ngộp Xe Muối
+                                    </label>
+                                    <label class="">
+                                        <input class="form-check-input me-1" type="checkbox" value="" id="isNgopXePhuPhamSua" />
+                                        Ngộp Xe Phụ Phẩm
+                                    </label>
+                                    <label class="">
+                                        <input class="form-check-input me-1" type="checkbox" value="" id="isCaNgopGheAoBanNgoaiSua" />
+                                        Ngọp Ghe Ao Bán Ngoài
+                                    </label>
+                                </div>
+                                
+                            </div>
+                        </div>
+                        
+                        <div class="row mt-4 pt-2">
+                            <div class="col-12">
+                                <button onclick="update()" class="btn btn-primary w-100 position-relative" type="submit" id="">
+                                    <div class=" align-items-center">
+                                        <span id="txtSua">Sửa</span>
+                                        <div id="loadingIndicatorSua" class=" spinner-border text-secondary position-absolute" role="status" style="left: 0;right: 0;top: 0;bottom: 0;margin: auto; display:none">
+                                            <span class="visually-hidden">Đang tải...</span>
+                                        </div>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<input type="hidden" id="maTPNLRowSelected" />
+<script>
+    $(document).ready(function () {
+        loadGridData();
+    });
+    var grid;
+    function loadGridData() {
+        $.ajax({
+            url: '/ThanhPhamNguyenLieu/GetAlls',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                var dataManager = new ej.data.DataManager({
+                    json: data,
+                    adaptor: new ej.data.JsonAdaptor()
+                });
+                if (grid) {
+                    grid.dataSource = dataManager;
+                    grid.refresh();
+                } else {
+                    grid = new ej.grids.Grid({
+                        dataSource: dataManager,
+                        allowPaging: true,
+                        pageSettings: { pageSize: 50 },
+                        allowFiltering: true,
+                        filterSettings: { type: 'Excel' },
+                        allowSorting: true,
+                        //frozenColumns: 3,
+                        allowResizing: true,
+                        rowSelected: onRowSelected,
+                        height: 400,
+                        columns: [
+                            { field: 'Ma', headerText: 'Mã', width: 150 },
+                            { field: 'Ten', headerText: 'Tên', width: 150 },
+                            { field: 'SuDung', headerText: 'Sử Dụng', width: 100, displayAsCheckBox: 'true', textAlign: 'Center' },
+                            { field: 'IsSNL', headerText: 'Sống', width: 100, displayAsCheckBox: 'true', textAlign: 'Center' },
+                            { field: 'IsNgopGhe', headerText: 'Ngộp Ghe', width: 150, displayAsCheckBox: 'true', textAlign: 'Center' },
+                            { field: 'IsNgopGheMuoi', headerText: 'Ngộp Ghe Muối', width: 150, displayAsCheckBox: 'true', textAlign: 'Center' },
+                            { field: 'IsMuoiGhePhuPham', headerText: 'Muối Ghe Phụ Phẩm', width: 150, displayAsCheckBox: 'true', textAlign: 'Center' },
+                            { field: 'IsNgopAoMuoi', headerText: 'Ngộp Ao Nuôi', width: 150, displayAsCheckBox: 'true', textAlign: 'Center' },
+                            { field: 'IsNgopAoPhuPham', headerText: 'Ngộp Ao Phụ Phẩm', width: 150, displayAsCheckBox: 'true', textAlign: 'Center' },
+                            { field: 'IsDatNho', headerText: 'Dạt Nhỏ', width: 150, displayAsCheckBox: 'true', textAlign: 'Center' },
+                            { field: 'IsPhuPhamCaTap', headerText: 'Phụ Phẩm Cá Tạp', width: 150, displayAsCheckBox: 'true', textAlign: 'Center' },
+                            { field: 'IsCaCanTin', headerText: 'Căn Tin', width: 150, displayAsCheckBox: 'true', textAlign: 'Center' },
+                            { field: 'IsCaNgopXeMuoi', headerText: 'Ngộp Xe Muối', width: 150, displayAsCheckBox: 'true', textAlign: 'Center' },
+                            { field: 'IsNgopGhePhuPham', headerText: 'Ngộp Ghe Phụ Phẩm', width: 150, displayAsCheckBox: 'true', textAlign: 'Center' },
+                            { field: 'IsNgopXePhuPham', headerText: 'Ngộp Xe Phụ Phẩm', width: 150, displayAsCheckBox: 'true', textAlign: 'Center' },
+                            { field: 'IsCaNgopGheTuoiBanNgoai', headerText: 'Ngộp Ghe Tươi Bán Ngoài', width: 150, displayAsCheckBox: 'true', textAlign: 'Center' },
+                            { field: 'IsCaNgopGheAoBanNgoai', headerText: 'Ngộp Ao Ghe Bán Ngoài', width: 150, displayAsCheckBox: 'true', textAlign: 'Center' },
+                            { field: 'IsManh', headerText: 'Mạnh', width: 150, displayAsCheckBox: 'true', textAlign: 'Center' },
+                            { field: 'TyLeNuoc', headerText: 'Tỷ Lệ Nước', type: 'number', width: 150 },
+                        ]
+                    });
+                    // Hiển thị Grid trên trang web
+                    grid.appendTo('#Grid');
+                }
+            },
+            error: function (error) {
+                console.error(error);
+            }
+        });
+    }
+    loadGridData();
+    function reloadData() {
+        loadGridData();
+    }
+    function onRowSelected(args) {
+        // Lấy dữ liệu của hàng được chọn
+        var selectedRecord = args.data;
+        // Lấy giá trị Id từ dữ liệu của hàng được chọn
+        var Ma = selectedRecord.Ma;
+
+        $('#maTPNLRowSelected').val(Ma);
+    }
+</script>
+<script>
+    function showInsert() {
+        $.ajax({
+            type: "GET",
+            url: "/ThanhPhamNguyenLieu/CreatDefautNew",
+            success: function (rs) {
+                if (rs.isSuccess === true) {
+                    $('#maTPNL').val(rs.Ma);
+                    $('#tenTPNL').val(rs.Ten);
+                    $('#tyLeNuocTPNL').val(rs.TyLeNuoc);
+                    $('#suDungTPNL').prop('checked', rs.SuDung);
+                    $('#isSNL').prop('checked', rs.IsSNL);
+                    $('#isNgopGheMuoi').prop('checked', rs.IsNgopGheMuoi);
+                    $('#isNgopAoMuoi').prop('checked', rs.IsNgopAoMuoi);
+                    $('#isDatNho').prop('checked', rs.IsDatNho);
+                    $('#isCaCanTin').prop('checked', rs.IsCaCanTin);
+                    $('#isNgopGhePhuPham').prop('checked', rs.IsNgopGhePhuPham);
+                    $('#isNgopGheTuoiBanNgoai').prop('checked', rs.IsCaNgopGheTuoiBanNgoai);
+                    $('#isManh').prop('checked', rs.IsManh);
+                    $('#isNgopGhe').prop('checked', rs.IsNgopGhe);
+                    $('#isMuoiGhePhuPham').prop('checked', rs.IsMuoiGhePhuPham);
+                    $('#isNgopAoPhuPham').prop('checked', rs.IsNgopAoPhuPham);
+                    $('#isPhuPhamCaTap').prop('checked', rs.IsPhuPhamCaTap);
+                    $('#isCaNgopXeMuoi').prop('checked', rs.IsCaNgopXeMuoi);
+                    $('#isNgopXePhuPham').prop('checked', rs.IsNgopXePhuPham);
+                    $('#isCaNgopGheAoBanNgoai').prop('checked', rs.IsCaNgopGheAoBanNgoai);
+                    $('#modalThem').modal('show');
+                }
+                else {
+                    toastOptionNotyfi();
+                    toastr["warning"](rs.Mesages, "Thông báo");
+                }
+            },
+            error: function () {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error, "Thông báo");
+            }
+        });
+    }
+    function insert() {
+        var ma = $('#maTPNL').val();
+        var ten = $('#tenTPNL').val();
+        var tyLeNuoc = $('#tyLeNuocTPNL').val();
+        var suDung = $('#suDungTPNL').prop('checked');
+        var isSNL = $('#isSNL').prop('checked');
+        var isNgopGheMuoi = $('#isNgopGheMuoi').prop('checked');
+        var isNgopAoMuoi = $('#isNgopAoMuoi').prop('checked');
+        var isDatNho = $('#isDatNho').prop('checked');
+        var isCaCanTin = $('#isCaCanTin').prop('checked');
+        var isNgopGhePhuPham = $('#isNgopGhePhuPham').prop('checked');
+        var isNgopGheTuoiBanNgoai = $('#isNgopGheTuoiBanNgoai').prop('checked');
+        var isManh = $('#isManh').prop('checked');
+        var isNgopGhe = $('#isNgopGhe').prop('checked');
+        var isMuoiGhePhuPham = $('#isMuoiGhePhuPham').prop('checked');
+        var isNgopAoPhuPham = $('#isNgopAoPhuPham').prop('checked');
+        var isPhuPhamCaTap = $('#isPhuPhamCaTap').prop('checked');
+        var isCaNgopXeMuoi = $('#isCaNgopXeMuoi').prop('checked');
+        var isNgopXePhuPham = $('#isNgopXePhuPham').prop('checked');
+        var isCaNgopGheAoBanNgoai = $('#isCaNgopGheAoBanNgoai').prop('checked');
+        document.getElementById("txtThem").style.visibility = "hidden";
+        document.getElementById("loadingIndicator").style.display = "block";
+        $.ajax({
+            type: 'POST',
+            url: '/ThanhPhamNguyenLieu/DoInsert',
+            data: {
+                ma: ma,
+                ten: ten,
+                tyLeNuoc: tyLeNuoc,
+                suDung: suDung,
+                isSNL: isSNL,
+                isNgopGhe: isNgopGhe,
+                isNgopGheMuoi: isNgopGheMuoi,
+                isMuoiGhePhuPham: isMuoiGhePhuPham,
+                isNgopAoMuoi: isNgopAoMuoi,
+                isNgopAoPhuPham: isNgopAoPhuPham,
+                isDatNho: isDatNho,
+                isPhuPhamCaTap: isPhuPhamCaTap,
+                isCaCanTin: isCaCanTin,
+                isCaNgopXeMuoi: isCaNgopXeMuoi,
+                isNgopGhePhuPham: isNgopGhePhuPham,
+                isNgopXePhuPham: isNgopXePhuPham,
+                isNgopGheTuoiBanNgoai: isNgopGheTuoiBanNgoai,
+                isCaNgopGheAoBanNgoai: isCaNgopGheAoBanNgoai,
+                isManh: isManh
+            },
+            success: function (rs) {
+                if (rs.isSuccess === true) {
+                    toastOptionNotyfi();
+                    toastr["success"](rs.Messages, "Thông báo");
+                    $('#modalThem').modal('hide');
+                    reloadData();
+                } else {
+                    toastOptionNotyfi();
+                    toastr["warning"](rs.Messages, "Thông báo");
+                }
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error, "Thông báo");
+            },
+            complete: function () {
+                document.getElementById("loadingIndicator").style.display = "none";
+                document.getElementById("txtThem").style.visibility = "visible";
+            }
+        });
+    }
+</script>
+<script>
+    function showUpdate() {
+        var ma = $('#maTPNLRowSelected').val();
+        $.ajax({
+            url: "/ThanhPhamNguyenLieu/GetsByMa",
+            data: { ma: ma },
+            type: 'GET',
+            dataType: 'json',
+            success: function (rs) {
+                if (rs.isSuccess === true) {
+                    $('#maTPNLSua').val(rs.Ma);
+                    $('#tenTPNLSua').val(rs.Ten);
+                    $('#tyLeNuocTPNLSua').val(rs.TyLeNuoc);
+                    $('#suDungTPNLSua').prop('checked', rs.SuDung);
+                    $('#isSNLSua').prop('checked', rs.IsSNL);
+                    $('#isNgopGheMuoiSua').prop('checked', rs.IsNgopGheMuoi);
+                    $('#isNgopAoMuoiSua').prop('checked', rs.IsNgopAoMuoi);
+                    $('#isDatNhoSua').prop('checked', rs.IsDatNho);
+                    $('#isCaCanTinSua').prop('checked', rs.IsCaCanTin);
+                    $('#isNgopGhePhuPhamSua').prop('checked', rs.IsNgopGhePhuPham);
+                    $('#isNgopGheTuoiBanNgoaiSua').prop('checked', rs.IsCaNgopGheTuoiBanNgoai);
+                    $('#isManhSua').prop('checked', rs.IsManh);
+                    $('#isNgopGheSua').prop('checked', rs.IsNgopGhe);
+                    $('#isMuoiGhePhuPhamSua').prop('checked', rs.IsMuoiGhePhuPham);
+                    $('#isNgopAoPhuPhamSua').prop('checked', rs.IsNgopAoPhuPham);
+                    $('#isPhuPhamCaTapSua').prop('checked', rs.IsPhuPhamCaTap);
+                    $('#isCaNgopXeMuoiSua').prop('checked', rs.IsCaNgopXeMuoi);
+                    $('#isNgopXePhuPhamSua').prop('checked', rs.IsNgopXePhuPham);
+                    $('#isCaNgopGheAoBanNgoaiSua').prop('checked', rs.IsCaNgopGheAoBanNgoai);
+                    $('#modalSua').modal('show');
+                }
+                else {
+                    toastOptionNotyfi();
+                    toastr["warning"](rs.Mesages, "Thông báo");
+                }
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error, "Thông báo");
+            }
+        });
+    }
+    function update() {
+        var ma = $('#maTPNLSua').val();
+        var ten = $('#tenTPNLSua').val();
+        var tyLeNuoc = $('#tyLeNuocTPNLSua').val();
+        var suDung = $('#suDungTPNLSua').prop('checked');
+        var isSNL = $('#isSNLSua').prop('checked');
+        var isNgopGheMuoi = $('#isNgopGheMuoiSua').prop('checked');
+        var isNgopAoMuoi = $('#isNgopAoMuoiSua').prop('checked');
+        var isDatNho = $('#isDatNhoSua').prop('checked');
+        var isCaCanTin = $('#isCaCanTinSua').prop('checked');
+        var isNgopGhePhuPham = $('#isNgopGhePhuPhamSua').prop('checked');
+        var isNgopGheTuoiBanNgoai = $('#isNgopGheTuoiBanNgoaiSua').prop('checked');
+        var isManh = $('#isManhSua').prop('checked');
+        var isNgopGhe = $('#isNgopGheSua').prop('checked');
+        var isMuoiGhePhuPham = $('#isMuoiGhePhuPhamSua').prop('checked');
+        var isNgopAoPhuPham = $('#isNgopAoPhuPhamSua').prop('checked');
+        var isPhuPhamCaTap = $('#isPhuPhamCaTapSua').prop('checked');
+        var isCaNgopXeMuoi = $('#isCaNgopXeMuoiSua').prop('checked');
+        var isNgopXePhuPham = $('#isNgopXePhuPhamSua').prop('checked');
+        var isCaNgopGheAoBanNgoai = $('#isCaNgopGheAoBanNgoaiSua').prop('checked');
+        document.getElementById("txtSua").style.visibility = "hidden";
+        document.getElementById("loadingIndicatorSua").style.display = "block";
+        $.ajax({
+            url: '/ThanhPhamNguyenLieu/DoUpdate',
+            data: {
+                ma: ma,
+                ten: ten,
+                tyLeNuoc: tyLeNuoc,
+                suDung: suDung,
+                isSNL: isSNL,
+                isNgopGhe: isNgopGhe,
+                isNgopGheMuoi: isNgopGheMuoi,
+                isMuoiGhePhuPham: isMuoiGhePhuPham,
+                isNgopAoMuoi: isNgopAoMuoi,
+                isNgopAoPhuPham: isNgopAoPhuPham,
+                isDatNho: isDatNho,
+                isPhuPhamCaTap: isPhuPhamCaTap,
+                isCaCanTin: isCaCanTin,
+                isCaNgopXeMuoi: isCaNgopXeMuoi,
+                isNgopGhePhuPham: isNgopGhePhuPham,
+                isNgopXePhuPham: isNgopXePhuPham,
+                isNgopGheTuoiBanNgoai: isNgopGheTuoiBanNgoai,
+                isCaNgopGheAoBanNgoai: isCaNgopGheAoBanNgoai,
+                isManh: isManh
+            },
+            type: 'POST',
+            dataType: 'json',
+            success: function (rs) {
+                if (rs.isSuccess === true) {
+                    $('#modalSua').modal('hide');
+                    reloadData();
+                    toastOptionNotyfi();
+                    toastr["success"](rs.Messages, "Thông báo");
+                } else {
+                    toastOptionNotyfi();
+                    toastr["warning"](rs.Messages, "Thông báo");
+                }
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error.toString(), "Thông báo");
+            },
+            complete: function () {
+                document.getElementById("loadingIndicatorSua").style.display = "none";
+                document.getElementById("txtSua").style.visibility = "visible";
+            }
+        });
+    }
+</script>
+<script>
+    function showDelete() {
+        var ma = $('#maTPNLRowSelected').val();
+        $.ajax({
+            url: "/ThanhPhamNguyenLieu/GetsByMa",
+            data: { ma: ma },
+            type: 'GET',
+            dataType: 'json',
+            success: function (rs) {
+                if (rs.isSuccess === true) {
+                    bootbox.confirm({
+                        title: "Thông báo!",
+                        message: "Bạn có chắc muốn xoá : " + rs.Ten,
+                        buttons: {
+                            confirm: {
+                                label: 'OK',
+                                className: 'btn btn-primary'
+                            }
+                        },
+                        callback: function (result) {
+                            if (result) {
+                                //Người dùng đã bấm OK, Gọi API xóa ở đây
+                                $.ajax({
+                                    url: '/ThanhPhamNguyenLieu/DoDelete',
+                                    data: { ma: ma },
+                                    type: 'POST',
+                                    dataType: 'json',
+                                    success: function (rs) {
+                                        if (rs.isSuccess === true) {
+                                            reloadData();
+                                            toastOptionNotyfi();
+                                            toastr["success"](rs.Messages, "Thông báo");
+                                        } else {
+                                            toastOptionNotyfi();
+                                            toastr["warning"](rs.Messages, "Thông báo");
+                                        }
+                                    },
+                                    error: function (error) {
+                                        toastOptionNotyfi();
+                                        toastr["error"]('Đã xảy ra lỗi: ' + error.toString(), "Thông báo");
+                                    }
+                                });
+                            }
+                        }
+                    });
+                } else {
+                    toastOptionNotyfi();
+                    toastr["warning"]('Không tìm thấy thông tin!', "Thông báo");
+                }
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"]('Đã xảy ra lỗi: ' + error.toString(), "Thông báo");
+            }
+        });
+
+    }
+</script>
+
+
+
+
+
+
