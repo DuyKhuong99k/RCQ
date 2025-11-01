@@ -11,7 +11,7 @@
     <PackageReference Include="Dapper" Version="2.1.35" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="8.0.6" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="8.0.3" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
     <PackageReference Include="Syncfusion.Blazor.Buttons" Version="25.1.41" />
     <PackageReference Include="Syncfusion.Blazor.Cards" Version="25.1.41" />
     <PackageReference Include="Syncfusion.Blazor.DropDowns" Version="25.1.41" />

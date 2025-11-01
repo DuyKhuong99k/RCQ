@@ -11,6 +11,7 @@ using ViewModels.Repos.Hubs;
 using ViewModels.Repos.Hubs.IServices;
 using Services;
 using Dapper;
+using Newtonsoft.Json;
 using PMSHub.Components.Pages;
 using ToolsEx;
 
@@ -54,6 +55,9 @@ builder.Services.AddControllers().AddNewtonsoftJson(o =>
             OverrideSpecifiedNames = false
         }
     };
+    o.SerializerSettings.DefaultValueHandling = DefaultValueHandling.Ignore;
+    o.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
+
 });
 builder.Services.AddCors(options =>
 {
