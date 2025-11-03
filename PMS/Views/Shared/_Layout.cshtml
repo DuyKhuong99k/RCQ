@@ -68,18 +68,18 @@ data-assets-path="~/assets/">
     <link rel="stylesheet" href="~/assets/vendor/fonts/boxicons.css" />
     <link href="~/assets/vendor/libs/inputpicker/jquery.inputpicker.css?v3" rel="stylesheet" />
     <!-- Core CSS -->
-    @if (AppViewModels.AppViewModel.Instance.Company == "PhanBach")
-    {
-        <link rel="stylesheet" href="~/assets/vendor/css/core-PhanBach.final.css" class="template-customizer-core-css" />
-        <link rel="stylesheet" href="~/assets/vendor/css/theme-default-PhanBach.final.css" class="template-customizer-theme-css" />
-        <link rel="stylesheet" href="~/assets/css/demo.css" />
-    }
-    else
-    {
+    @* @if (AppViewModels.AppViewModel.Instance.Company == "PhanBach") *@
+    @* { *@
+    @*     <link rel="stylesheet" href="~/assets/vendor/css/core-PhanBach.final.css" class="template-customizer-core-css" /> *@
+    @*     <link rel="stylesheet" href="~/assets/vendor/css/theme-default-PhanBach.final.css" class="template-customizer-theme-css" /> *@
+    @*     <link rel="stylesheet" href="~/assets/css/demo.css" /> *@
+    @* } *@
+    @* else *@
+    @* { *@
         <link rel="stylesheet" href="~/assets/vendor/css/core.css" class="template-customizer-core-css" />
         <link rel="stylesheet" href="~/assets/vendor/css/theme-default.css" class="template-customizer-theme-css" />
         <link rel="stylesheet" href="~/assets/css/demo.css" />
-    }
+    @* } *@
     
 
     <!-- Vendors CSS -->
@@ -186,53 +186,53 @@ data-assets-path="~/assets/">
         }
 
 
-        /* Overlay toàn trang */
-        #loading {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: #ffffff; /* nền trắng sạch */
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-            z-index: 9999;
-            transition: opacity 0.6s ease, visibility 0.6s ease;
-        }
-
-        #loading.hidden {
-            opacity: 0;
-            visibility: hidden;
-        }
-
-        /* Logo */
-        #loading img {
-            max-width: 220px;
-            margin-bottom: 30px;
-        }
-
-        /* Progress bar */
-        .progress-container {
-            width: 250px;
-            height: 6px;
-            background: #e5e7eb; /* xám nhạt */
-            border-radius: 4px;
-            overflow: hidden;
-        }
-
-        .progress-bar {
-            height: 100%;
-            width: 0%;
-            background: #ef4444; /* đỏ logo */
-            transition: width 0.3s ease;
-        }
-
-        /* Nội dung chính ẩn khi chưa load */
-        body:not(.loaded) main {
-            visibility: hidden;
-        }
+        /*!* Overlay toàn trang *!*/
+        /*#loading {*/
+        /*    position: fixed;*/
+        /*    top: 0;*/
+        /*    left: 0;*/
+        /*    width: 100%;*/
+        /*    height: 100%;*/
+        /*    background: #ffffff; !* nền trắng sạch *!*/
+        /*    display: flex;*/
+        /*    justify-content: center;*/
+        /*    align-items: center;*/
+        /*    flex-direction: column;*/
+        /*    z-index: 9999;*/
+        /*    transition: opacity 0.6s ease, visibility 0.6s ease;*/
+        /*}*/
+        
+        /*#loading.hidden {*/
+        /*    opacity: 0;*/
+        /*    visibility: hidden;*/
+        /*}*/
+        
+        /*!* Logo *!*/
+        /*#loading img {*/
+        /*    max-width: 220px;*/
+        /*    margin-bottom: 30px;*/
+        /*}*/
+        
+        /*!* Progress bar *!*/
+        /*.progress-container {*/
+        /*    width: 250px;*/
+        /*    height: 6px;*/
+        /*    background: #e5e7eb; !* xám nhạt *!*/
+        /*    border-radius: 4px;*/
+        /*    overflow: hidden;*/
+        /*}*/
+        
+        /*.progress-bar {*/
+        /*    height: 100%;*/
+        /*    width: 0%;*/
+        /*    background: #ef4444; !* đỏ logo *!*/
+        /*    transition: width 0.3s ease;*/
+        /*}*/
+        
+        /*!* Nội dung chính ẩn khi chưa load *!*/
+        /*body:not(.loaded) main {*/
+        /*    visibility: hidden;*/
+        /*}*/
 
 
 
@@ -366,21 +366,26 @@ data-assets-path="~/assets/">
                         <ul class="navbar-nav flex-row align-items-center ms-auto">
                             <!-- Place this tag where you want the button to render. -->
                             <li class="nav-item lh-1 me-3" style="position: relative; display: inline-block;">
-                                <select id="xuongs" name="xuongs"
-                                        style="appearance:none;-webkit-appearance:none;-moz-appearance:none;
-                                           padding:0px 0px 0px 15px;
-                                           border:0px solid #d03227;
-                                           border-radius:0px;
-                                           background:#fff;
-                                           color:#d03227;
-                                           font-weight:600;
-                                           cursor:pointer;
-                                           min-width:100px;">
+                                @* <select id="xuongs" name="xuongs" *@
+                                @*         style="appearance:none;-webkit-appearance:none;-moz-appearance:none; *@
+                                @*            padding:0px 0px 0px 15px; *@
+                                @*            border:0px solid #d03227; *@
+                                @*            border-radius:0px; *@
+                                @*            background:#fff; *@
+                                @*            color:#d03227; *@
+                                @*            font-weight:600; *@
+                                @*            cursor:pointer; *@
+                                @*            min-width:100px;"> *@
+                                @*     <option selected value="@XuongId">@XuongName</option> *@
+                                @* </select> *@
+                                <select id="xuongs" name="xuongs" class="form-control" ng-class="{'no-border': border}" style="border: none;width: 87px;color:#696cff">
                                     <option selected value="@XuongId">@XuongName</option>
                                 </select>
                                 <!-- icon mũi tên -->
+                                @* <span style="position:absolute; right:10px; top:50%; transform:translateY(-50%); *@
+                                @*         font-size:0.7rem; color:#d03227; pointer-events:none;">▼</span> *@
                                 <span style="position:absolute; right:10px; top:50%; transform:translateY(-50%);
-                                        font-size:0.7rem; color:#d03227; pointer-events:none;">▼</span>
+                                        font-size:0.7rem; color:#696cff; pointer-events:none;">▼</span>
                             </li>
                             <!-- User -->
                             <li class="nav-item navbar-dropdown dropdown-user dropdown">
@@ -447,12 +452,12 @@ data-assets-path="~/assets/">
                 <!-- Content wrapper -->
                 <div class="content-wrapper">
                     <!-- Spinner chung -->
-                    <div id="loading">
-                        <img src="~/assets/img/logo/PhanBachLogo.png" alt="Logo" />
-                        <div class="progress-container">
-                            <div class="progress-bar" id="progressBar"></div>
-                        </div>
-                    </div>
+                    @* <div id="loading"> *@
+                    @*     <img src="~/assets/img/logo/PhanBachLogo.png" alt="Logo" /> *@
+                    @*     <div class="progress-container"> *@
+                    @*         <div class="progress-bar" id="progressBar"></div> *@
+                    @*     </div> *@
+                    @* </div> *@
                     <!-- Content -->
                     <div class="container-fluid flex-grow-1 container-p-y">
                         <div class=" mt-1">
@@ -902,27 +907,27 @@ data-assets-path="~/assets/">
     <script src="~/js/toastoptionnotyfi.js"></script>
     <script src="~/js/covertjs.js"></script>
     <script src="~/assets/js/ui-popover.js"></script>
-    <script>
-        // Giả lập tiến trình load (progress bar chạy dần)
-        let progress = 0;
-        let interval = setInterval(() => {
-            if (progress < 90) { // chạy tới 90% trước khi trang load xong
-                progress += 5;
-                document.getElementById("progressBar").style.width = progress + "%";
-            }
-        }, 200);
-
-        // Khi toàn bộ trang tải xong
-        window.addEventListener("load", () => {
-            clearInterval(interval);
-            document.getElementById("progressBar").style.width = "100%";
-
-            setTimeout(() => {
-                document.getElementById("loading").classList.add("hidden");
-                document.body.classList.add("loaded");
-            }, 500); // chờ 0.5s cho progress full rồi ẩn overlay
-        });
-    </script>
+    @* <script> *@
+    @*     // Giả lập tiến trình load (progress bar chạy dần) *@
+    @*     let progress = 0; *@
+    @*     let interval = setInterval(() => { *@
+    @*         if (progress < 90) { // chạy tới 90% trước khi trang load xong *@
+    @*             progress += 5; *@
+    @*             document.getElementById("progressBar").style.width = progress + "%"; *@
+    @*         } *@
+    @*     }, 200); *@
+    @* *@
+    @*     // Khi toàn bộ trang tải xong *@
+    @*     window.addEventListener("load", () => { *@
+    @*         clearInterval(interval); *@
+    @*         document.getElementById("progressBar").style.width = "100%"; *@
+    @* *@
+    @*         setTimeout(() => { *@
+    @*             document.getElementById("loading").classList.add("hidden"); *@
+    @*             document.body.classList.add("loaded"); *@
+    @*         }, 500); // chờ 0.5s cho progress full rồi ẩn overlay *@
+    @*     }); *@
+    @* </script> *@
     <script>
         // Lấy ngày hiện tại
         var today = new Date();
@@ -1385,6 +1390,7 @@ data-assets-path="~/assets/">
         document.addEventListener("click", async function () {
             // var expiresTokenString = "@Context.Session.GetString("ExpiresJWTToken")";
             // var expiresTokenDate = new Date(expiresTokenString);
+            var valexs='@Context.Session.GetString("ExpiresSec")';
             var expiresTokenInSeconds = @Context.Session.GetString("ExpiresSec"); // Math.floor(expiresTokenDate.getTime() / 1000);
             var currentTime = new Date();
             var currentTimeUTC = new Date(currentTime.getUTCFullYear(), currentTime.getUTCMonth(), currentTime.getUTCDate(), currentTime.getUTCHours(), currentTime.getUTCMinutes(), currentTime.getUTCSeconds());

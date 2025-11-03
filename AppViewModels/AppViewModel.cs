@@ -164,7 +164,7 @@ namespace AppViewModels
             //Settings.ServerName = "10.10.26.50,1566";
             //Settings.ServerName = "data.pms-vn.com,4751";
             Settings.TimeOut = 30;
-            Settings.ServerName = "192.168.1.53";
+            Settings.ServerName = "192.168.1.163";
             setting.Db = "PMS_HQ";
             Base.Ins.SetConnectionStringCommand.Execute(setting);
             //Base.Ins.SetConnectionStringCommand.Execute(Settings.GetValues());

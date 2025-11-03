@@ -7,25 +7,25 @@
 let menu, animate;
 
 (function () {
-    // Giả lập tiến trình load (progress bar chạy dần)
-        let progress = 0;
-        let interval = setInterval(() => {
-            if (progress < 90) { // chạy tới 90% trước khi trang load xong
-                progress += 5;
-                document.getElementById("progressBar").style.width = progress + "%";
-            }
-        }, 200);
-
-        // Khi toàn bộ trang tải xong
-        window.addEventListener("load", () => {
-            clearInterval(interval);
-            document.getElementById("progressBar").style.width = "100%";
-
-            setTimeout(() => {
-                document.getElementById("loading").classList.add("hidden");
-                document.body.classList.add("loaded");
-            }, 500); // chờ 0.5s cho progress full rồi ẩn overlay
-        });
+    // // Giả lập tiến trình load (progress bar chạy dần)
+    //     let progress = 0;
+    //     let interval = setInterval(() => {
+    //         if (progress < 90) { // chạy tới 90% trước khi trang load xong
+    //             progress += 5;
+    //             document.getElementById("progressBar").style.width = progress + "%";
+    //         }
+    //     }, 200);
+    //
+    //     // Khi toàn bộ trang tải xong
+    //     window.addEventListener("load", () => {
+    //         clearInterval(interval);
+    //         document.getElementById("progressBar").style.width = "100%";
+    //
+    //         setTimeout(() => {
+    //             document.getElementById("loading").classList.add("hidden");
+    //             document.body.classList.add("loaded");
+    //         }, 500); // chờ 0.5s cho progress full rồi ẩn overlay
+    //     });
 
 
 

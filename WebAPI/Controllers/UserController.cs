@@ -1,4 +1,5 @@
-﻿using System.IdentityModel.Tokens.Jwt;
+﻿using System.Globalization;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
@@ -119,7 +120,7 @@ public class UserController : ControllerBase
                 new Claim("Id", nguoiDung.Id.ToString()),
                 new Claim("UserName", nguoiDung.UserName),
                 new Claim(ClaimTypes.Name, nguoiDung.HoTen),
-                new Claim("ExpiresSec", secs.ToString()),
+                new Claim("ExpiresSec", secs.ToString(CultureInfo.InvariantCulture)),
                 //new Claim(Jwt edClaimNames.Email, nguoiDung.Email),
                 //new Claim(JwtRegisteredClaimNames.Sub, nguoiDung.Email),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())

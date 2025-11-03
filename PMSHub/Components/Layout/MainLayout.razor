@@ -7,55 +7,55 @@
 @inject IHttpContextAccessor HttpContextAccessor
 @using Syncfusion.Blazor.Buttons
 @inject IJSRuntime JsRuntime
-<style>
-    /* Overlay toàn trang */
-    #loading {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: #ffffff; /* nền trắng sạch */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-    z-index: 9999;
-    transition: opacity 0.6s ease, visibility 0.6s ease;
-    }
-
-    #loading.hidden {
-    opacity: 0;
-    visibility: hidden;
-    }
-
-    /* Logo */
-    #loading img {
-    max-width: 220px;
-    margin-bottom: 30px;
-    }
-
-    /* Progress bar */
-    .progress-container {
-    width: 250px;
-    height: 6px;
-    background: #e5e7eb; /* xám nhạt */
-    border-radius: 4px;
-    overflow: hidden;
-    }
-
-    .progress-bar {
-    height: 100%;
-    width: 0%;
-    background: #ef4444; /* đỏ logo */
-    transition: width 0.3s ease;
-    }
-
-    /* Nội dung chính ẩn khi chưa load */
-    body:not(.loaded) main {
-    visibility: hidden;
-    }
-</style> 
+@* <style> *@
+@*     /* Overlay toàn trang */ *@
+@*     #loading { *@
+@*     position: fixed; *@
+@*     top: 0; *@
+@*     left: 0; *@
+@*     width: 100%; *@
+@*     height: 100%; *@
+@*     background: #ffffff; /* nền trắng sạch */ *@
+@*     display: flex; *@
+@*     justify-content: center; *@
+@*     align-items: center; *@
+@*     flex-direction: column; *@
+@*     z-index: 9999; *@
+@*     transition: opacity 0.6s ease, visibility 0.6s ease; *@
+@*     } *@
+@* *@
+@*     #loading.hidden { *@
+@*     opacity: 0; *@
+@*     visibility: hidden; *@
+@*     } *@
+@* *@
+@*     /* Logo */ *@
+@*     #loading img { *@
+@*     max-width: 220px; *@
+@*     margin-bottom: 30px; *@
+@*     } *@
+@* *@
+@*     /* Progress bar */ *@
+@*     .progress-container { *@
+@*     width: 250px; *@
+@*     height: 6px; *@
+@*     background: #e5e7eb; /* xám nhạt */ *@
+@*     border-radius: 4px; *@
+@*     overflow: hidden; *@
+@*     } *@
+@* *@
+@*     .progress-bar { *@
+@*     height: 100%; *@
+@*     width: 0%; *@
+@*     background: #ef4444; /* đỏ logo */ *@
+@*     transition: width 0.3s ease; *@
+@*     } *@
+@* *@
+@*     /* Nội dung chính ẩn khi chưa load */ *@
+@*     body:not(.loaded) main { *@
+@*     visibility: hidden; *@
+@*     } *@
+@* </style>  *@
 <!-- Layout wrapper -->
 <div class="layout-wrapper layout-content-navbar">
     <div class="layout-container">

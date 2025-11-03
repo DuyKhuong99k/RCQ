@@ -55,4 +55,9 @@
     </Content>
   </ItemGroup>
 
+  <ItemGroup>
+    <_ContentIncludedByDefault Remove="Components\Pages\Devices\Devices.razor" />
+    <_ContentIncludedByDefault Remove="Components\Pages\Dialogs\ChatLuongDialog.razor" />
+  </ItemGroup>
+
 </Project>
