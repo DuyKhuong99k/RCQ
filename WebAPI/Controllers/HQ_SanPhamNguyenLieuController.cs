@@ -131,10 +131,10 @@ namespace WebAPI.Controllers
         }
         [HttpPost("{id}")]
         [Authorize]
-        public async Task<IActionResult> Update(string id, [FromBody] HQ_SanPhamNguyenLieu model)
+        public async Task<IActionResult> Update(int id, [FromBody] HQ_SanPhamNguyenLieu model)
         {
             // Kiểm tra xem ID người dùng được cập nhật có hợp lệ không
-            if (string.IsNullOrEmpty(id))
+            if (id <= 0)
             {
                 return BadRequest(new ApiResponse
                 {
@@ -198,9 +198,9 @@ namespace WebAPI.Controllers
         }
         [HttpPost("{id}")]
         [Authorize]
-        public async Task<IActionResult> Delete(string id)
+        public async Task<IActionResult> Delete(int id)
         {
-            if (string.IsNullOrEmpty(id))
+            if (id <= 0)
             {
                 return BadRequest(new ApiResponse
                 {

@@ -65,14 +65,7 @@
             <div class="modal-body">
                 <div class="card">
                     <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-12 mb-12 ">
-                                <div class="form-outline">
-                                    <label class="form-label" for="x1">Id</label>
-                                    <input type="text" id="idSPNLHQ" class="form-control form-control-lg" autocomplete="off" placeholder="Nhập Id..." style="text-transform: uppercase;" />
-                                </div>
-                            </div>
-                        </div>
+
                         <div class="row">
                             <div class="col-md-12 mb-12 ">
                                 <div class="form-outline">
@@ -101,7 +94,7 @@
                             <div class="col-md-12 mb-12 ">
                                 <div class="form-outline">
                                     <label class="form-label">Quy Cách</label>
-                                    <select id="maQuyCachSPNL" class="form-control form-control-lg">
+                                    <select id="maQuyCachSPNLHQ" class="form-control form-control-lg">
                                         <option disabled selected>Chọn Quy Cách</option>
                                         @foreach (var item in quyCach)
                                         {
@@ -150,14 +143,7 @@
             <div class="modal-body">
                 <div class="card">
                     <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-12 mb-12 ">
-                                <div class="form-outline">
-                                    <label class="form-label" for="x1">Id</label>
-                                    <input type="text" id="idSPNLHQSua" class="form-control form-control-lg" autocomplete="off" placeholder="Nhập Id..." style="text-transform: uppercase;" disabled />
-                                </div>
-                            </div>
-                        </div>
+
                         <div class="row">
                             <div class="col-md-12 mb-12 ">
                                 <div class="form-outline">
@@ -186,7 +172,7 @@
                             <div class="col-md-12 mb-12 ">
                                 <div class="form-outline">
                                     <label class="form-label">Quy Cách</label>
-                                    <select id="maQuyCachSPNLSua" class="form-control form-control-lg">
+                                    <select id="maQuyCachSPNLHQSua" class="form-control form-control-lg">
                                         <option disabled selected>Chọn Quy Cách</option>
                                         @foreach (var item in quyCach)
                                         {
@@ -263,7 +249,7 @@
                             { field: 'Ten', headerText: 'Tên', width: 150 },
                             { field: 'Min', headerText: 'Min', width: 150 },
                             { field: 'Max', headerText: 'Max', width: 150 },
-                            { field: 'MaQuyCach', headerText: 'Mã Quy Cách', width: 150 },
+                            { field: 'TenQuyCach', headerText: 'Quy Cách', width: 150 },
                             { field: 'SuDung', headerText: 'Sử Dụng', width: 100, displayAsCheckBox: 'true', textAlign: 'Center' },
                         ]
                     });
@@ -301,8 +287,7 @@
             url: "/HQ_SanPhamNguyenLieu/CreatDefautNew",
             success: function (rs) {
                 if (rs.isSuccess === true) {
-                    $('#idSPNLHQ').val(rs.Id);
-                    $('#tenSPNLHQ').val(rs.Ten);
+                    
                     $('#suDungSPNLHQ').prop('checked', rs.SuDung);
                     $('#modalThem').modal('show');
                 }
@@ -318,7 +303,6 @@
         });
     }
     function insert() {
-        var id = $('#idSPNLHQ').val();
         var ten = $('#tenSPNLHQ').val();
         var suDung = $('#suDungSPNLHQ').prop('checked');
         var min = $('#minSPNLHQ').val();
@@ -330,7 +314,6 @@
             type: 'POST',
             url: '/HQ_SanPhamNguyenLieu/DoInsert',
             data: {
-                id: id,
                 ten: ten,
                 suDung: suDung,
                 min : min,
@@ -373,7 +356,7 @@
                     $('#tenSPNLHQSua').val(rs.Ten);
                     $('#suDungSPNLHQSua').prop('checked', rs.SuDung);
                     $('#minSPNLHQSua').val(rs.Min);
-                    $('#MaxSPNLHQSua').val(rs.Max);
+                    $('#maxSPNLHQSua').val(rs.Max);
                     $('#maQuyCachSPNLHQSua').val(rs.MaQuyCach);
                     $('#modalSua').modal('show');
                 }
@@ -389,7 +372,7 @@
         });
     }
     function update() {
-        var id = $('#idSPNLHQSua').val();
+        var id = $('#idSPNLHQRowSelected').val();
         var ten = $('#tenSPNLHQSua').val();
         var suDung = $('#suDungSPNLHQSua').prop('checked');
         var min = $('#minSPNLHQSua').val();

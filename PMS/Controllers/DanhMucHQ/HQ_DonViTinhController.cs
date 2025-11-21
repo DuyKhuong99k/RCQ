@@ -50,7 +50,7 @@ namespace PMS.Controllers.DanhMucHQ
             IEnumerable<HQ_DonViTinh> dataSource = ViewBag.dataSource;
             if (dataSource == null)
             {
-                var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/HQ_DonViTinhs/GetAlls";
+                var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/HQ_DonViTinh/GetAlls";
                 using var helper = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
                 ViewBag.dataSource = await helper.GetAsync<IEnumerable<HQ_DonViTinh>>(HttpContext, apiUrl);
                 dataSource = ViewBag.dataSource;
@@ -61,26 +61,13 @@ namespace PMS.Controllers.DanhMucHQ
         {
             try
             {
-                var dataSource = await GetAlls();
-                if (dataSource != null)
-                {
 
-                    var id = dataSource.Select(x => x.Id);
-                    return Json(new
-                    {
-                        isSuccess = true,
-                        Id = id,
-                        SuDung = true,
-                    });
-                }
-                else
+                return Json(new
                 {
-                    return Json(new
-                    {
-                        isSuccess = false,
-                        Mesages = "Lỗi!"
-                    });
-                }
+                    isSuccess = true,
+                    SuDung = true,
+                });
+
             }
             catch (Exception ex)
             {
@@ -90,7 +77,7 @@ namespace PMS.Controllers.DanhMucHQ
         [CustomAuthorize(Fu = "Danh Mục / Đơn Vị Tính HQ", Func = "Thêm Đơn Vị Tính HQ")]
         public async Task<IActionResult> DoInsert(string ten, bool suDung)
         {
-            var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/HQ_DonViTinhs/Insert";
+            var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/HQ_DonViTinh/Insert";
             try
             {
                 if (string.IsNullOrEmpty(ten))
@@ -148,7 +135,7 @@ namespace PMS.Controllers.DanhMucHQ
             IEnumerable<object> dataSource = ViewBag.dataSource;
             if (dataSource == null)
             {
-                var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/HQ_DonViTinhs/GetsByMa/{id}";
+                var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/HQ_DonViTinh/GetsByMa/{id}";
                 using var helper = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
                 var item = await helper.GetAsync<HQ_DonViTinh>(HttpContext, apiUrl);
                 if (item != null)
@@ -172,7 +159,7 @@ namespace PMS.Controllers.DanhMucHQ
         [CustomAuthorize(Fu = "Danh Mục / Đơn Vị Tính HQ", Func = "Sửa Đơn Vị Tính HQ")]
         public async Task<IActionResult> DoUpDate(int id, string ten, bool suDung)
         {
-            var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/HQ_DonViTinhs/Update/{id}";
+            var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/HQ_DonViTinh/Update/{id}";
             try
             {
                 // Kiểm tra dữ liệu đầu vào
@@ -223,7 +210,7 @@ namespace PMS.Controllers.DanhMucHQ
         {
             try
             {
-                var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/HQ_DonViTinhs/Delete/{id}";
+                var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/HQ_DonViTinh/Delete/{id}";
                 using var helper = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
                 var rl = await helper.PostAsync(HttpContext, apiUrl, null);
                 if (rl.Success)

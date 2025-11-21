@@ -1015,6 +1015,36 @@ app.UseEndpoints(endpoints =>
         "NhaAn/DanhMucNhaAn/HQ_ThucDon/{action}/{id?}",
         new { controller = "HQ_ThucDon" }
     );
+    endpoints.MapControllerRoute(
+        "DanhMucHQ_ChatLuongNguyenLieu",
+        "DanhMucHQ/HQ_ChatLuongNguyenLieu/{action}/{id?}",
+        new { controller = "HQ_ChatLuongNguyenLieu" }
+    );
+    endpoints.MapControllerRoute(
+        "DanhMucHQ_DonViTinh",
+        "DanhMucHQ/HQ_DonViTinh/{action}/{id?}",
+        new { controller = "HQ_DonViTinh" }
+    );
+    endpoints.MapControllerRoute(
+        "DanhMucHQ_KhoNguyenLieu",
+        "DanhMucHQ/HQ_KhoNguyenLieu/{action}/{id?}",
+        new { controller = "HQ_KhoNguyenLieu" }
+    );
+    endpoints.MapControllerRoute(
+        "DanhMucHQ_SanPhamNguyenLieu",
+        "DanhMucHQ/HQ_SanPhamNguyenLieu/{action}/{id?}",
+        new { controller = "HQ_SanPhamNguyenLieu" }
+    );
+    endpoints.MapControllerRoute(
+        "DanhMucHQ_QuyCachNguyenLieu",
+        "DanhMucHQ/HQ_QuyCachNguyenLieu/{action}/{id?}",
+        new { controller = "HQ_QuyCachNguyenLieu" }
+    );
+    endpoints.MapControllerRoute(
+        "DanhMucHQ_PhuongTienNguyenLieu",
+        "DanhMucHQ/HQ_PhuongTienNguyenLieu/{action}/{id?}",
+        new { controller = "HQ_PhuongTienNguyenLieu" }
+    );
     //endpoints.MapControllerRoute(
     //    "DuyetThucDon",
     //    "NhaAn/DanhMuc/HQ_ThucDon/DuyetThucDon{action}/{id?}",

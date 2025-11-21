@@ -64,14 +64,7 @@
             <div class="modal-body">
                 <div class="card">
                     <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-12 mb-12 ">
-                                <div class="form-outline">
-                                    <label class="form-label" for="x1">Id</label>
-                                    <input type="text" id="idKNLHQ" class="form-control form-control-lg" autocomplete="off" placeholder="Nhập Id..." style="text-transform: uppercase;" />
-                                </div>
-                            </div>
-                        </div>
+
                         <div class="row">
                             <div class="col-md-12 mb-12 ">
                                 <div class="form-outline">
@@ -127,14 +120,7 @@
             <div class="modal-body">
                 <div class="card">
                     <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-12 mb-12 ">
-                                <div class="form-outline">
-                                    <label class="form-label" for="x1">Id</label>
-                                    <input type="text" id="idKNLHQSua" class="form-control form-control-lg" autocomplete="off" placeholder="Nhập Id..." style="text-transform: uppercase;" disabled />
-                                </div>
-                            </div>
-                        </div>
+
                         <div class="row">
                             <div class="col-md-12 mb-12 ">
                                 <div class="form-outline">
@@ -254,10 +240,8 @@
             url: "/HQ_KhoNguyenLieu/CreatDefautNew",
             success: function (rs) {
                 if (rs.isSuccess === true) {
-                    $('#idKNLHQ').val(rs.Id);
-                    $('#tenKNLHQ').val(rs.Ten);
+                   
                     $('#suDungKNLHQ').prop('checked', rs.SuDung);
-                    $('#diaChiKNLHQ').val(rs.DiaChi);
                     $('#modalThem').modal('show');
                 }
                 else {
@@ -272,7 +256,6 @@
         });
     }
     function insert() {
-        var id = $('#idKNLHQ').val();
         var ten = $('#tenKNLHQ').val();
         var suDung = $('#suDungKNLHQ').prop('checked');
         var diaChi = $('#diaChiKNLHQ').val();
@@ -282,7 +265,6 @@
             type: 'POST',
             url: '/HQ_KhoNguyenLieu/DoInsert',
             data: {
-                id: id,
                 ten: ten,
                 suDung: suDung,
                 diaChi: diaChi
@@ -337,7 +319,7 @@
         });
     }
     function update() {
-        var id = $('#idKNLHQSua').val();
+        var id = $('#idKNLHQRowSelected').val();
         var ten = $('#tenKNLHQSua').val();
         var suDung = $('#suDungKNLHQSua').prop('checked');
         var diaChi =  $('#diaChiKNLHQSua').val();

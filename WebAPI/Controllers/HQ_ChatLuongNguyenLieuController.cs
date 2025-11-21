@@ -85,18 +85,17 @@ namespace WebAPI.Controllers
                     Errors = errors
                 });
             }
-            // ... kiểm tra mã nhân viên đã tồn tại chưa ...
-            if (_context.HQ_ChatLuongNguyenLieus.Any(u => u.Id == model.Id))
-            {
-                return BadRequest(new ApiResponse
-                {
-                    Success = false,
-                    Message = "Mã này đã tồn tại.",
-                });
-            }
+            //// ... kiểm tra mã nhân viên đã tồn tại chưa ...
+            //if (_context.HQ_ChatLuongNguyenLieus.Any(u => u.Id == model.Id))
+            //{
+            //    return BadRequest(new ApiResponse
+            //    {
+            //        Success = false,
+            //        Message = "Mã này đã tồn tại.",
+            //    });
+            //}
             var newItem = new HQ_ChatLuongNguyenLieu
             {
-                Id = model.Id,
                 Ten = model.Ten,
                 SuDung = model.SuDung,
             };

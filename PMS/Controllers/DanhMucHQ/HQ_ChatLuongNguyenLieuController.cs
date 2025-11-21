@@ -33,7 +33,7 @@ namespace PMS.Controllers.DanhMucHQ
         {
             _httpClientFactory = httpClientFactory;
         }
-        [CustomAuthorize(Fu = "Danh Mục / Chất Lượng HQ", Func = "Xem Chất Lượng HQ")]
+        [CustomAuthorize(Fu = "Danh Mục / Chất Lượng Nguyên Liệu HQ", Func = "Xem Chất Lượng Nguyên Liệu HQ")]
         public IActionResult Index()
         {
             var rl = Middlewares.AuthenticationHelpers.CheckAut(HttpContext, "HQ_ChatLuongNguyenLieu");
@@ -42,7 +42,7 @@ namespace PMS.Controllers.DanhMucHQ
             {
                 return Redirect(AppViewModels.AppViewModel.Instance.RedirectLoginUrl);
             }
-            ViewBag.TitlePage = "Chất Lượng";
+            ViewBag.TitlePage = "Chất Lượng Nguyên Liệu";
             return View("~/Views/DanhMucHQ/HQ_ChatLuongNguyenLieu/HQ_ChatLuongNguyenLieuView.cshtml");
         }
         public async Task<IEnumerable<HQ_ChatLuongNguyenLieu>> GetAlls()
@@ -50,7 +50,7 @@ namespace PMS.Controllers.DanhMucHQ
             IEnumerable<HQ_ChatLuongNguyenLieu> dataSource = ViewBag.dataSource;
             if (dataSource == null)
             {
-                var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/HQ_ChatLuongNguyenLieus/GetAlls";
+                var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/HQ_ChatLuongNguyenLieu/GetAlls";
                 using var helper = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
                 ViewBag.dataSource = await helper.GetAsync<IEnumerable<HQ_ChatLuongNguyenLieu>>(HttpContext, apiUrl);
                 dataSource = ViewBag.dataSource;
@@ -61,37 +61,24 @@ namespace PMS.Controllers.DanhMucHQ
         {
             try
             {
-                var dataSource = await GetAlls();
-                if (dataSource != null)
+                return Json(new
                 {
+                    isSuccess = true,
+                    SuDung = true,
+                    MNgay = DateTime.Now,
+                });
 
-                    var id = dataSource.Select(x => x.Id);
-                    return Json(new
-                    {
-                        isSuccess = true,
-                        Id = id,
-                        SuDung = true,
-                        MNgay = DateTime.Now,
-                    });
-                }
-                else
-                {
-                    return Json(new
-                    {
-                        isSuccess = false,
-                        Mesages = "Lỗi!"
-                    });
-                }
+
             }
             catch (Exception ex)
             {
                 throw;
             }
         }
-        [CustomAuthorize(Fu = "Danh Mục / Chất Lượng HQ", Func = "Thêm Chất Lượng HQ")]
+        [CustomAuthorize(Fu = "Danh Mục / Chất Lượng Nguyên Liệu HQ", Func = "Thêm Chất Lượng Nguyên Liệu HQ")]
         public async Task<IActionResult> DoInsert(string ten, bool suDung)
         {
-            var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/HQ_ChatLuongNguyenLieus/Insert";
+            var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/HQ_ChatLuongNguyenLieu/Insert";
             try
             {
                 if (string.IsNullOrEmpty(ten))
@@ -104,6 +91,7 @@ namespace PMS.Controllers.DanhMucHQ
                 }
                 var model = new HQ_ChatLuongNguyenLieu
                 {
+                    Id = 0,
                     Ten = ten,
                     SuDung = suDung,
                 };
@@ -170,10 +158,10 @@ namespace PMS.Controllers.DanhMucHQ
                 Mesages = "Lỗi!"
             });
         }
-        [CustomAuthorize(Fu = "Danh Mục / Chất Lượng HQ", Func = "Sửa Chất Lượng HQ")]
+        [CustomAuthorize(Fu = "Danh Mục / Chất Lượng Nguyên Liệu HQ", Func = "Sửa Chất Lượng Nguyên Liệu HQ")]
         public async Task<IActionResult> DoUpDate(int id, string ten, bool suDung)
         {
-            var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/HQ_ChatLuongNguyenLieus/Update/{id}";
+            var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/HQ_ChatLuongNguyenLieu/Update/{id}";
             try
             {
                 // Kiểm tra dữ liệu đầu vào
@@ -219,12 +207,12 @@ namespace PMS.Controllers.DanhMucHQ
                 });
             }
         }
-        [CustomAuthorize(Fu = "Danh Mục / Chất Lượng HQ", Func = "Xoá Chất Lượng HQ")]
+        [CustomAuthorize(Fu = "Danh Mục / Chất Lượng Nguyên Liệu HQ", Func = "Xoá Chất Lượng Nguyên Liệu HQ")]
         public async Task<IActionResult> DoDelete(string id)
         {
             try
             {
-                var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/HQ_ChatLuongNguyenLieus/Delete/{id}";
+                var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/HQ_ChatLuongNguyenLieu/Delete/{id}";
                 using var helper = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
                 var rl = await helper.PostAsync(HttpContext, apiUrl, null);
                 if (rl.Success)

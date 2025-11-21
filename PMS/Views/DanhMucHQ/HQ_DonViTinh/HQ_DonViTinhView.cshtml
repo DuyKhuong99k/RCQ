@@ -15,7 +15,7 @@
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h2 class="mb-0">Danh Sách Đơn Vị Tính Nguyên Liệu</h2>
                     @{
-                        var themHQ_DonViTinh = rolePermistions.Where(x => x.Fu == "Danh Mục / Đơn Vị Tính Nguyên Liệu HQ" && x.Func == "Thêm Đơn Vị Tính Nguyên Liệu HQ" && x.Status == 1).FirstOrDefault();
+                        var themHQ_DonViTinh = rolePermistions.Where(x => x.Fu == "Danh Mục / Đơn Vị Tính HQ" && x.Func == "Thêm Đơn Vị Tính HQ" && x.Status == 1).FirstOrDefault();
                         if (themHQ_DonViTinh != null)
                         {
                             <button onclick="showInsert()" type="button" class="btn btn-primary">Thêm</button>
@@ -27,22 +27,22 @@
                     <div id="Grid"></div>
                     <div style="margin-top:20px;">
                         @{
-                            var suaHQ_DonViTinh = rolePermistions.Where(x => x.Fu == "Danh Mục / Đơn Vị Tính Nguyên Liệu HQ" && x.Func == "Sửa Đơn Vị Tính Nguyên Liệu HQ" && x.Status == 1).FirstOrDefault();
+                            var suaHQ_DonViTinh = rolePermistions.Where(x => x.Fu == "Danh Mục / Đơn Vị Tính HQ" && x.Func == "Sửa Đơn Vị Tính HQ" && x.Status == 1).FirstOrDefault();
                             if (suaHQ_DonViTinh != null)
                             {
                                 <button onclick="showUpdate()" style="margin-right:5px" class="btn btn-outline-warning"><i class='bx bx-edit-alt'></i>Sửa</button>
                             }
-                            var xoaHQ_DonViTinh = rolePermistions.Where(x => x.Fu == "Danh Mục / Đơn Vị Tính Nguyên Liệu HQ" && x.Func == "Xóa Đơn Vị Tính Nguyên Liệu HQ" && x.Status == 1).FirstOrDefault();
+                            var xoaHQ_DonViTinh = rolePermistions.Where(x => x.Fu == "Danh Mục / Đơn Vị Tính HQ" && x.Func == "Xóa Đơn Vị Tính HQ" && x.Status == 1).FirstOrDefault();
                             if (xoaHQ_DonViTinh != null)
                             {
                                 <button onclick="showDelete()" style="margin-right:5px" class="btn btn-outline-danger"><i class='bx bx-trash'></i>Xoá</button>
                             }
-                            var importHQ_DonViTinh = rolePermistions.Where(x => x.Fu == "Danh Mục / Đơn Vị Tính Nguyên Liệu HQ" && x.Func == "Import Đơn Vị Tính Nguyên Liệu HQ" && x.Status == 1).FirstOrDefault();
+                            var importHQ_DonViTinh = rolePermistions.Where(x => x.Fu == "Danh Mục / Đơn Vị Tính HQ" && x.Func == "Import Đơn Vị Tính HQ" && x.Status == 1).FirstOrDefault();
                             if (importHQ_DonViTinh != null)
                             {
                                 <button onclick="import()" style="margin-right:5px" class="btn btn-outline-info"><i class='bx bx-import'></i>Import</button>
                             }
-                            // var exportHQ_DonViTinh = rolePermistions.Where(x => x.Fu == "Danh Mục / Đơn Vị Tính Nguyên Liệu HQ" && x.Func == "Export Đơn Vị Tính Nguyên Liệu HQ" && x.Status == 1).FirstOrDefault();
+                            // var exportHQ_DonViTinh = rolePermistions.Where(x => x.Fu == "Danh Mục / Đơn Vị Tính HQ" && x.Func == "Export Đơn Vị Tính HQ" && x.Status == 1).FirstOrDefault();
                             // if (exportHQ_DonViTinh != null)
                             // {
                             //     <button onclick="export()" style="margin-right:5px" class="btn btn-outline-secondary"><i class='bx bx-export'></i>Export Excel</button>
@@ -64,14 +64,6 @@
             <div class="modal-body">
                 <div class="card">
                     <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-12 mb-12 ">
-                                <div class="form-outline">
-                                    <label class="form-label" for="x1">Id</label>
-                                    <input type="text" id="idDVTHQ" class="form-control form-control-lg" autocomplete="off" placeholder="Nhập Id..." style="text-transform: uppercase;" />
-                                </div>
-                            </div>
-                        </div>
                         <div class="row">
                             <div class="col-md-12 mb-12 ">
                                 <div class="form-outline">
@@ -119,14 +111,7 @@
             <div class="modal-body">
                 <div class="card">
                     <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-12 mb-12 ">
-                                <div class="form-outline">
-                                    <label class="form-label" for="x1">Id</label>
-                                    <input type="text" id="idDVTHQSua" class="form-control form-control-lg" autocomplete="off" placeholder="Nhập Id..." style="text-transform: uppercase;" disabled />
-                                </div>
-                            </div>
-                        </div>
+
                         <div class="row">
                             <div class="col-md-12 mb-12 ">
                                 <div class="form-outline">
@@ -237,8 +222,6 @@
             url: "/HQ_DonViTinh/CreatDefautNew",
             success: function (rs) {
                 if (rs.isSuccess === true) {
-                    $('#idDVTHQ').val(rs.Id);
-                    $('#tenDVTHQ').val(rs.Ten);
                     $('#suDungDVTHQ').prop('checked', rs.SuDung);
                     $('#modalThem').modal('show');
                 }
@@ -254,7 +237,6 @@
         });
     }
     function insert() {
-        var id = $('#idDVTHQ').val();
         var ten = $('#tenDVTHQ').val();
         var suDung = $('#suDungDVTHQ').prop('checked');
         document.getElementById("txtThem").style.visibility = "hidden";
@@ -263,7 +245,6 @@
             type: 'POST',
             url: '/HQ_DonViTinh/DoInsert',
             data: {
-                id: id,
                 ten: ten,
                 suDung: suDung
             },
@@ -316,7 +297,7 @@
         });
     }
     function update() {
-        var id = $('#idDVTHQSua').val();
+        var id = $('#idDVTHQRowSelected').val();
         var ten = $('#tenDVTHQSua').val();
         var suDung = $('#suDungDVTHQSua').prop('checked');
         document.getElementById("txtSua").style.visibility = "hidden";
@@ -376,7 +357,7 @@
                                 //Người dùng đã bấm OK, Gọi API xóa ở đây
                                 $.ajax({
                                     url: '/HQ_DonViTinh/DoDelete',
-                                    data: { ma: ma },
+                                    data: { id: id },
                                     type: 'POST',
                                     dataType: 'json',
                                     success: function (rs) {

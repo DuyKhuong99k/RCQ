@@ -169,7 +169,6 @@ namespace AppViewModels
             Base.Ins.SetConnectionStringCommand.Execute(setting);
             //Base.Ins.SetConnectionStringCommand.Execute(Settings.GetValues());
             Base.Ins.ConnectionString2 = Base.Ins.ConnectionString;
-            //ComName ="CMX";
             ////Setting WebApp
             var modelWebAppSetting = GetJsonDataWebAppSetting();
             if (modelWebAppSetting != null)
@@ -181,7 +180,7 @@ namespace AppViewModels
                 HubsMayCanCODE = modelWebAppSetting.HubMayCanCODE;
                 LoKv = modelWebAppSetting.LoKv;
             }
-            ComName = nameof(ComNames.NV);
+            ComName = nameof(ComNames.RCQTG);
             LoKv = AppKV.Hq;
             ChiSoTyLeTangTrongRaCoi = 1.07m;
             MocThoiGian1 = 30;
@@ -192,7 +191,7 @@ namespace AppViewModels
             {
                 MessageExpityNotece = "Chúng tôi trân trọng đề nghị Quý khách xác nhận nghiệm thu dự án vào ngày 20/08/2025.<br>Vui lòng phản hồi để chúng tôi hoàn tất thủ tục";
             }
-            Company = "PMS";
+            Company = "PhanBach";
 #else
             //ComName = "RQTG";
             var modelDatabaseConnectSetting = GetJsonDatabaseConnectSetting();

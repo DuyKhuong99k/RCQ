@@ -43,7 +43,7 @@ namespace PMS.Controllers.DanhMucHQ
                 return Redirect(AppViewModels.AppViewModel.Instance.RedirectLoginUrl);
             }
 
-            var apiQCHQUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/HQ_QuyCachNguyenLieus/GetAlls";
+            var apiQCHQUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/HQ_QuyCachNguyenLieu/GetAlls";
             using var helperQCHQ = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
             var qcs = helperQCHQ.GetAsync<IEnumerable<HQ_QuyCachNguyenLieu>>(HttpContext, apiQCHQUrl);
             ViewBag.listQuyCach = qcs.Result.ToList();
@@ -52,14 +52,14 @@ namespace PMS.Controllers.DanhMucHQ
             ViewBag.TitlePage = "Sản Phẩm Nguyên Liệu";
             return View("~/Views/DanhMucHQ/HQ_SanPhamNguyenLieu/HQ_SanPhamNguyenLieuView.cshtml");
         }
-        public async Task<IEnumerable<HQ_SanPhamNguyenLieu>> GetAlls()
+        public async Task<IEnumerable<object>> GetAlls()
         {
-            IEnumerable<HQ_SanPhamNguyenLieu> dataSource = ViewBag.dataSource;
+            IEnumerable<object> dataSource = ViewBag.dataSource;
             if (dataSource == null)
             {
-                var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/HQ_SanPhamNguyenLieus/GetAllsFullField";
+                var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/HQ_SanPhamNguyenLieu/GetAllsFullField";
                 using var helper = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
-                ViewBag.dataSource = await helper.GetAsync<IEnumerable<HQ_SanPhamNguyenLieu>>(HttpContext, apiUrl);
+                ViewBag.dataSource = await helper.GetAsync<IEnumerable<object>>(HttpContext, apiUrl);
                 dataSource = ViewBag.dataSource;
             }
             return dataSource;
@@ -68,27 +68,14 @@ namespace PMS.Controllers.DanhMucHQ
         {
             try
             {
-                var dataSource = await GetAlls();
-                if (dataSource != null)
-                {
 
-                    var id = dataSource.Select(x => x.Id);
-                    return Json(new
-                    {
-                        isSuccess = true,
-                        Id = id,
-                        SuDung = true,
-                        DiaChi = "",    
-                    });
-                }
-                else
+                return Json(new
                 {
-                    return Json(new
-                    {
-                        isSuccess = false,
-                        Mesages = "Lỗi!"
-                    });
-                }
+                    isSuccess = true,
+                    SuDung = true,
+                    DiaChi = "",
+                });
+
             }
             catch (Exception ex)
             {
@@ -98,7 +85,7 @@ namespace PMS.Controllers.DanhMucHQ
         [CustomAuthorize(Fu = "Danh Mục / Sản Phẩm Nguyên Liệu HQ", Func = "Thêm Sản Phẩm Nguyên Liệu HQ")]
         public async Task<IActionResult> DoInsert(string ten, bool suDung, decimal min, decimal max, int maQuyCach)
         {
-            var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/HQ_SanPhamNguyenLieus/Insert";
+            var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/HQ_SanPhamNguyenLieu/Insert";
             try
             {
                 if (string.IsNullOrEmpty(ten))
@@ -147,9 +134,9 @@ namespace PMS.Controllers.DanhMucHQ
                 });
             }
         }
-        public async Task<IActionResult> GetsByMa(string id)
+        public async Task<IActionResult> GetsByMa(int id)
         {
-            if (string.IsNullOrEmpty(id))
+            if (id <= 0)
             {
                 return Json(new
                 {
@@ -160,7 +147,7 @@ namespace PMS.Controllers.DanhMucHQ
             IEnumerable<object> dataSource = ViewBag.dataSource;
             if (dataSource == null)
             {
-                var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/HQ_SanPhamNguyenLieus/GetsByMa/{id}";
+                var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/HQ_SanPhamNguyenLieu/GetsByMa/{id}";
                 using var helper = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
                 var item = await helper.GetAsync<HQ_SanPhamNguyenLieu>(HttpContext, apiUrl);
                 if (item != null)
@@ -187,7 +174,7 @@ namespace PMS.Controllers.DanhMucHQ
         [CustomAuthorize(Fu = "Danh Mục / Sản Phẩm Nguyên Liệu HQ", Func = "Sửa Sản Phẩm Nguyên Liệu HQ")]
         public async Task<IActionResult> DoUpDate(int id, string ten, bool suDung, decimal min, decimal max, int maQuyCach)
         {
-            var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/HQ_SanPhamNguyenLieus/Update/{id}";
+            var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/HQ_SanPhamNguyenLieu/Update/{id}";
             try
             {
                 // Kiểm tra dữ liệu đầu vào
@@ -237,11 +224,11 @@ namespace PMS.Controllers.DanhMucHQ
             }
         }
         [CustomAuthorize(Fu = "Danh Mục / Sản Phẩm Nguyên Liệu HQ", Func = "Xoá Sản Phẩm Nguyên Liệu HQ")]
-        public async Task<IActionResult> DoDelete(string id)
+        public async Task<IActionResult> DoDelete(int id)
         {
             try
             {
-                var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/HQ_SanPhamNguyenLieus/Delete/{id}";
+                var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/HQ_SanPhamNguyenLieu/Delete/{id}";
                 using var helper = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
                 var rl = await helper.PostAsync(HttpContext, apiUrl, null);
                 if (rl.Success)
