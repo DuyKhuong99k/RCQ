@@ -423,6 +423,59 @@
 
     }
     @{
+        var nhapXuatNguyenLieu = rolePermistions.Where(x => x.Fu.Contains("Nhà Ăn /")).FirstOrDefault();
+        if (nhapXuatNguyenLieu != null)
+        {
+            <li class="menu-header small text-uppercase">
+                <span class="menu-header-text">Quản Lý Nhập/Xuất Nguyên Liệu</span>
+            </li>
+        }
+        if (nhapXuatNguyenLieu != null)
+        {
+            <li class="menu-item @(Context.Request.Path.StartsWithSegments("/NhaAn/DanhMucNhaAn") ? "open active" : "")">
+                <a href="javascript:void(0);" class="menu-link menu-toggle ">
+                    <i class="menu-icon tf-icons bx bxs-truck"></i>
+                    <div>Danh Mục N/X Nguyên Liệu</div>
+                </a>
+                <ul class="menu-sub">
+                    @{
+                        var loaimonan = rolePermistions.Where(x => x.Fu == "Nhà Ăn / Loại Món Ăn" && x.Func == "Xem Loại Món Ăn" && x.Status == 1).FirstOrDefault();
+                        if (loaimonan != null)
+                        {
+                            <li class="menu-item @(Context.Request.Path == "/NhaAn/DanhMucNhaAn/HQ_LoaiMonAn/Index" ? "active" : "")">
+                                <a href="/NhaAn/DanhMucNhaAn/HQ_LoaiMonAn/Index" class="menu-link">
+                                    <div>Loại Món Ăn</div>
+                                </a>
+                            </li>
+                        }
+
+                        var monan = rolePermistions.Where(x => x.Fu == "Nhà Ăn / Món Ăn" && x.Func == "Xem Món Ăn" && x.Status == 1).FirstOrDefault();
+                        if (monan != null)
+                        {
+                            <li class="menu-item @(Context.Request.Path == "/NhaAn/DanhMucNhaAn/HQ_MonAn/Index" ? "active" : "")">
+                                <a href="/NhaAn/DanhMucNhaAn/HQ_MonAn/Index" class="menu-link">
+                                    <div>Món Ăn</div>
+                                </a>
+                            </li>
+                        }
+
+                        var thucdon = rolePermistions.Where(x => x.Fu == "Nhà Ăn / Thực Đơn" && x.Func == "Xem Thực Đơn" && x.Status == 1).FirstOrDefault();
+                        if (thucdon != null)
+                        {
+                            <li class="menu-item @(Context.Request.Path == "/NhaAn/DanhMucNhaAn/HQ_ThucDon/Index" ? "active" : "")">
+                                <a href="/NhaAn/DanhMucNhaAn/HQ_ThucDon/Index" class="menu-link">
+                                    <div>Thực Đơn</div>
+                                </a>
+                            </li>
+                        }
+
+                    }
+
+                </ul>
+            </li>
+        }
+    }
+    @{
 
         if (listHubmayCan != null)
         {

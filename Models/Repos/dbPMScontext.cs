@@ -747,6 +747,14 @@ public partial class dbPMScontext : DbContext
     public virtual DbSet<HQ_ThucDonChiTiet> HQThucDonChiTiets { get; set; }
     public virtual DbSet<CoiLeXepKhuon> CoiLeXepKhuons { get; set; }
     public virtual DbSet<TrongLuongCoiTheoSanPham> TrongLuongCoiTheoSanPhams { get; set; }
+    public virtual DbSet<HQ_PhieuCanNguyenLieu> HQ_PhieuCanNguyenLieus { get; set; }
+    public virtual DbSet<HQ_PhieuCanNhapNguyenLieu> HQ_PhieuCanNhapNguyenLieus { get; set; }
+    public virtual DbSet<HQ_PhieuCanXuatNguyenLieu> HQ_PhieuCanXuatNguyenLieus { get; set; }
+    public virtual DbSet<HQ_ChatLuongNguyenLieu> HQ_ChatLuongNguyenLieus { get; set; }
+    public virtual DbSet<HQ_DonViTinh> HQ_DonViTinhs { get; set; }
+    public virtual DbSet<HQ_KhoNguyenLieu> HQ_KhoNguyenLieus { get; set; }
+    public virtual DbSet<HQ_SanPhamNguyenLieu> HQ_SanPhamNguyenLieus { get; set; }
+    public virtual DbSet<HQ_QuyCachNguyenLieu> HQ_QuyCachNguyenLieus { get; set; }
 
 #if DEBUG
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

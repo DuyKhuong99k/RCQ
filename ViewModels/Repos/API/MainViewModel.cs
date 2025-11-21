@@ -295,6 +295,7 @@ public class MainViewModel : ObservableObject
     public HQ_ThucDonChiTietViewModel VmHq_ThucDonChiTiet => HQ_ThucDonChiTietViewModel.Instance;
     public CoiLeXepKhuonViewModel VmCoiLeXepKhuon => CoiLeXepKhuonViewModel.Instance;
     public TrongLuongCoiTheoSanPhamViewModel VmTrongLuongCoiTheoSanPham => TrongLuongCoiTheoSanPhamViewModel.Instance;
+    public HQ_SanPhamNguyenLieuViewModel VmHQ_SanPhamNguyenLieu => HQ_SanPhamNguyenLieuViewModel.Instance;
 
     private int MessageBoxShow(string message, string title, int button)
     {

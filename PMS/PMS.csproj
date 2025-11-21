@@ -211,6 +211,7 @@
     <Folder Include="Views\DanhMucHQ\HQ_LoaiNguyenLieu\" />
     <Folder Include="Views\DanhMucHQ\HQ_LoChiTiet\" />
     <Folder Include="Views\DanhMucHQ\HQ_ColorCor\" />
+    <Folder Include="Views\DanhMucHQ\HQ_PhuongTienChoNguyenLieu\" />
     <Folder Include="Views\NewFolder\" />
     <Folder Include="wwwroot\Authentication\less\master\images\" />
     <Folder Include="wwwroot\vendor\" />
