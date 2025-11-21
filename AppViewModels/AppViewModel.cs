@@ -192,7 +192,7 @@ namespace AppViewModels
             {
                 MessageExpityNotece = "Chúng tôi trân trọng đề nghị Quý khách xác nhận nghiệm thu dự án vào ngày 20/08/2025.<br>Vui lòng phản hồi để chúng tôi hoàn tất thủ tục";
             }
-            Company = "PhanBach";
+            Company = "PMS";
 #else
             //ComName = "RQTG";
             var modelDatabaseConnectSetting = GetJsonDatabaseConnectSetting();
