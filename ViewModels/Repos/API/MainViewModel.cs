@@ -296,6 +296,8 @@ public class MainViewModel : ObservableObject
     public CoiLeXepKhuonViewModel VmCoiLeXepKhuon => CoiLeXepKhuonViewModel.Instance;
     public TrongLuongCoiTheoSanPhamViewModel VmTrongLuongCoiTheoSanPham => TrongLuongCoiTheoSanPhamViewModel.Instance;
     public HQ_SanPhamNguyenLieuViewModel VmHQ_SanPhamNguyenLieu => HQ_SanPhamNguyenLieuViewModel.Instance;
+    public HQ_PhieuCanNhapNguyenLieuViewModel VmHQ_PhieuCanNhapNguyenLieu => HQ_PhieuCanNhapNguyenLieuViewModel.Instance;
+    public HQ_PhieuCanXuatNguyenLieuViewModel VmHQ_PhieuCanXuatNguyenLieu => HQ_PhieuCanXuatNguyenLieuViewModel.Instance;
 
     private int MessageBoxShow(string message, string title, int button)
     {
