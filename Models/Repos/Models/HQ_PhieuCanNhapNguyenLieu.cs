@@ -73,6 +73,13 @@ namespace Models.Repos.Models
         public int CanHang { get; set; }                        
 
         [Column("TruBi", TypeName = "bit")]
-        public bool TruBi { get; set; }                        
+        public bool TruBi { get; set; }   
+        
+        [Column("MaQuyCach", TypeName = "bigint")]
+        public long MaQuyCach { get; set; }
+
+        [Column("IsPhanLoaiNguyenLieu", TypeName = "bit")]
+        public bool IsPhanLoaiNguyenLieu { get; set; }  
+
     }
 }

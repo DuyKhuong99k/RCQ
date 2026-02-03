@@ -30,6 +30,12 @@
     <None Update="FileExcel\DanhSachNhomRauQuaTienGiang.xlsx">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="FileExcel\HQ_QUYCACHRCQTG.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="FileExcel\nhacungcapnguyenlieuRCQTG.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="FileExcel\PD_PhieuCan.xlsx">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

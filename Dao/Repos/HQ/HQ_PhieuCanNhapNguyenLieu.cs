@@ -13,6 +13,82 @@ namespace Dao.Repos.HQ
             connectionString = _connectionString ?? AppViewModels.Base.Ins.ConnectionString;
         }
 
+        public List<T> GetChiTietPhieuCanNhapNguyenLieus<T>(DateTime dateTime,string xuongId)
+        {
+            try
+            {
+                var query = @"
+SELECT 
+	-- tt chung
+    pc.MaLo AS LoNguyenLieu,
+    pc.Ngay AS NgayNguyenLieu,
+    pcnn.SoPhieuCanNhap AS SoPhieu,
+    pcnn.SoLanSua AS SoLanSuaDoi,
+    kho.Ten AS DiaDiem,
+    pt.Ten AS NguoiGiao,
+    pcnn.TaiXe,
+    pt.Ten AS SoXe,
+    pcnn.CCCD,
+    pc.NgayGio AS ThoiGian,
+    pcnn.SDT,
+    pcnn.NoiDungGiaoNhan,
+	-- tt sản phẩm
+    pcnn.STT,
+    sp.Ten AS TenHang,
+    qc.Ten AS QuyCachSanPham,
+    dvt.Ten AS DonViTinh,
+    cl.Ten AS ChatLuong,
+    CASE pcnn.CanHang 
+        WHEN 1 THEN N'Hợp Lý'
+        WHEN 0 THEN N'Không Hợp Lý'
+        ELSE NULL END AS CanHang,
+    pcnn.TruBi, 
+    CASE 
+        WHEN pcnn.MaChatLuong IS NOT NULL THEN N'Đúng'
+        ELSE N'Không Đúng'
+    END AS PhanLoaiNguyenLieu,
+    pc.GhiChu AS NhanXet,
+    pcnn.TrongLuongHang,
+    pcnn.TrongLuongXe,
+cast(
+    pcnn.TrongLuongHang * ctsp.TyLe / 100.0
+    as decimal(18, 3)
+) as TrongLuongPhanBo
+
+FROM HQ_PhieuCanNhapNguyenLieu pcnn
+JOIN HQ_PhieuCanNguyenLieu pc 
+    ON pcnn.IdPhieuCanNguyenLieu = pc.Id
+LEFT JOIN HQ_KhoNguyenLieu kho
+    ON pcnn.MaKho = kho.Id
+LEFT JOIN HQ_SanPhamNguyenLieu sp
+    ON pcnn.MaSanPham = sp.Id
+left join HQ_ChiTietPhanBoTyLeNguyenLieuNhap ctsp 
+                    on ctsp.SoPhieuCanNhap = pcnn.SoPhieuCanNhap
+                left join HQ_QuyCachNguyenLieu qc 
+                    on qc.Id = ctsp.MaQuyCach
+LEFT JOIN HQ_DonViTinh dvt
+    ON pcnn.MaDonVi = dvt.Id
+LEFT JOIN HQ_ChatLuongNguyenLieu cl
+    ON pcnn.MaChatLuong = cl.Id
+LEFT JOIN PhuongTienChoNguyenLieu pt
+    ON pcnn.MaPhuongTien = pt.Ma
+Where pc.MaXuong = @xuongId
+and pc.Ngay >= @dateTime
+	
+";
+                using var connection = new SqlConnection(connectionString);
+                connection.Open();
+                var items = connection.Query<T>(query, new { dateTime ,xuongId}).ToList();
+                return items;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                throw;
+            }
+        }
+
+
         public List<T> GetChiTietPhieuCanNhapNguyenLieus<T>(DateTime fromDate, DateTime toDate,string xuongId)
         {
             try
@@ -48,7 +124,11 @@ namespace Dao.Repos.HQ
     END AS PhanLoaiNguyenLieu,
     pc.GhiChu AS NhanXet,
     pcnn.TrongLuongHang,
-    pcnn.TrongLuongXe
+    pcnn.TrongLuongXe,
+cast(
+    pcnn.TrongLuongHang * ctsp.TyLe / 100.0
+    as decimal(18, 3)
+) as TrongLuongPhanBo
 
 FROM HQ_PhieuCanNhapNguyenLieu pcnn
 JOIN HQ_PhieuCanNguyenLieu pc 
@@ -57,8 +137,10 @@ LEFT JOIN HQ_KhoNguyenLieu kho
     ON pcnn.MaKho = kho.Id
 LEFT JOIN HQ_SanPhamNguyenLieu sp
     ON pcnn.MaSanPham = sp.Id
-LEFT JOIN HQ_QuyCachNguyenLieu qc
-    ON sp.MaQuyCach = qc.Id
+left join HQ_ChiTietPhanBoTyLeNguyenLieuNhap ctsp 
+                    on ctsp.SoPhieuCanNhap = p.SoPhieuCanNhap
+                left join HQ_QuyCachNguyenLieu qc 
+                    on qc.Id = ctsp.MaQuyCach
 LEFT JOIN HQ_DonViTinh dvt
     ON pcnn.MaDonVi = dvt.Id
 LEFT JOIN HQ_ChatLuongNguyenLieu cl

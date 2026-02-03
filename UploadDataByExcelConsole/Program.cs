@@ -12,8 +12,8 @@ class Program
 {
     static void Main()
     {
-        string excelFilePath = "FileExcel/DanhSachCongNhanRauQuaRV.xlsx";
-        string connectionString = "data source=.;initial catalog=PMS_HQ;user id=pmsvn;password=Sql@123456789;MultipleActiveResultSets=True;App=EntityFramework;TrustServerCertificate=True";
+        string excelFilePath = "FileExcel/nhacungcapnguyenlieuRCQTG.xlsx";
+        string connectionString = "data source=27.74.251.103,1755;initial catalog=PMS_HQ;user id=sa;password=sa123;MultipleActiveResultSets=True;App=EntityFramework;TrustServerCertificate=True";
 
         if (!File.Exists(excelFilePath))
         {
@@ -58,30 +58,29 @@ class Program
                             {
                                 try
                                 {
-                                    string maNhanVien = row["MaNhanVien"].ToString();
-                                    if (string.IsNullOrEmpty(maNhanVien))
+                                    string ma = row["Ma"].ToString();
+                                    if (string.IsNullOrEmpty(ma))
                                     {
                                         errorList.Add("Bo qua dong khong co MaNhanVien.");
                                         errorCount++;
                                         continue;
                                     }
 
-                                    var existing = connection.ExecuteScalar<int>("SELECT COUNT(*) FROM NhanVien WHERE cast( Id as NVARCHAR(MAX)) = @MaNhanVien", new { MaNhanVien = maNhanVien }, transaction);
+                                    var existing = connection.ExecuteScalar<int>("SELECT COUNT(*) FROM NhaCungCapNguyenLieu WHERE cast( Ma as NVARCHAR(MAX)) = @Ma", new { Ma = ma }, transaction);
                                     if (existing > 0)
                                     {
-                                        errorList.Add($"Bo qua MaNhanVien {maNhanVien} vi đa ton tai.");
+                                        errorList.Add($"Bo qua CCCD {ma} vi đa ton tai.");
                                         errorCount++;
                                         continue;
                                     }
 
-                                    var nhanVien = new
+                                    var nhaCungCapNguyenLieu = new
                                     {
-                                        Id = maNhanVien,
-                                        MaSo = row["MaHoSo"].ToString(),
-                                        Ten = row["Name"].ToString(),
-                                        IsPhucVu = 0,
-                                        IsBanKiem = 0,
-                                        NgayGioTao = DateTime.Now.ToString("yyyyMMddHHmmss")
+                                        Ma = ma,
+                                        Ten = row["Ten"].ToString(),
+                                        DiaChi = row["DiaChi"].ToString(),
+                                        CCCD = row["CCCD"].ToString(),
+                                        SuDung = 1
 
                                     };
                                     //var tenUnicode = );
@@ -89,10 +88,10 @@ class Program
                                     //string sql = @"INSERT INTO NhanVienDaiThanh (MaNhanVien,MaHoSo,Xuong,Name,DeptName0, IsShowDinhMuc, IsContracting, IsPhucVu, IsHuman, IsGiaCong, AC, IsChucNang, LoaiSanLuong, IsBanKiem, IsNhanVienCat, IsNhom, MNgay) 
                                     //                   VALUES (@MaNhanVien,@MaHoSo,@Xuong,@Name,@DeptName0, @IsShowDinhMuc, @IsContracting, @IsPhucVu, @IsHuman, @IsGiaCong, @AC, @IsChucNang, @LoaiSanLuong, @IsBanKiem, @IsNhanVienCat, @IsNhom, @MNgay)";
 
-                                    string sql = @"INSERT INTO NhanVien (Id,MaSo,Ten,IsPhucVu,IsBanKiem, NgayGioTao) 
-                                                       VALUES (@Id,@MaSo,@Ten,@IsPhucVu,@IsBanKiem, @NgayGioTao)";
+                                    string sql = @"INSERT INTO NhaCungCapNguyenLieu (Ma,Ten,SuDung,DiaChi,CCCD) 
+                                                       VALUES (@Ma,@Ten,@SuDung,@DiaChi,@CCCD)";
 
-                                    connection.Execute(sql, nhanVien, transaction);
+                                    connection.Execute(sql, nhaCungCapNguyenLieu, transaction);
                                     //                                    using (var cmd = new SqlCommand(@"INSERT INTO NhanVien (Id, MaSo, Ten, IsPhucVu, IsBanKiem, NgayGioTao) 
                                     //                                  VALUES (@Id, @MaSo, @Ten, @IsPhucVu, @IsBanKiem, @NgayGioTao)", connection, transaction))
                                     //{
@@ -126,7 +125,7 @@ class Program
                                 }
                                 catch (Exception ex)
                                 {
-                                    errorList.Add($"Loi khi xu ly dong {row["MaNhanVien"]}: {ex.Message}");
+                                    errorList.Add($"Loi khi xu ly dong {row["Ma"]}: {ex.Message}");
                                     errorCount++;
                                 }
                             }

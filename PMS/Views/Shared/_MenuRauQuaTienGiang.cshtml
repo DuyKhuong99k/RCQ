@@ -278,7 +278,7 @@
         if (baocao != null)
         {
             <!-- Báo Cáo -->
-            <li class="menu-item @(Context.Request.Path.StartsWithSegments("/BaoCao") || Context.Request.Path.StartsWithSegments("/HQ/BaoCaoHQ") ? "open active" : "" )" id="menuActiveBaoCao">
+            <li class="menu-item @(Context.Request.Path.StartsWithSegments("/BaoCao") || Context.Request.Path.StartsWithSegments("/HQ/BaoCaoHQ") || Context.Request.Path.StartsWithSegments("/HQ/BaoCaoCanNguyenLieuHQ") ? "open active" : "" )" id="menuActiveBaoCao">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
                     @* <i class="menu-icon tf-icons bx bx-pie-chart-alt-2"></i> *@
                     <i class='menu-icon tf-icons bx bx-chart'></i>
@@ -419,8 +419,29 @@
                         {
                             <li class="menu-item @(Context.Request.Path.StartsWithSegments("/XuLyPhieuCanHQ/Index") ? "active" : "")">
                                 <a href="/XuLyPhieuCanHQ/Index" class="menu-link">
-                                    <i class="menu-icon tf-icons bx bx-bar-chart-alt-2"></i>
-                                    <div data-i18n="Account Settings">Xử Lý Phiếu Cân HQ</div>
+                                    <div data-i18n="Account Settings">Xử Lý Phiếu Cân</div>
+                                </a>
+                            </li>
+                        }
+
+
+                        var xulyphieucanNhapNguyenLieu = rolePermistions.Where(x => x.Fu == "Xử Lý Phiếu Cân / Phiếu Cân Nhập HQ" && x.Func == "Xem Xử Lý Phiếu Cân / Phiếu Cân Nhập HQ" && x.Status == 1).FirstOrDefault();
+                        if (xulyphieucanNhapNguyenLieu != null)
+                        {
+                            <li class="menu-item @(Context.Request.Path.StartsWithSegments("/XuLyPhieuCanNguyenLieuHQ/XuLyPhieuCanNhapHQ") ? "active" : "")">
+                                <a href="/XuLyPhieuCanNguyenLieuHQ/XuLyPhieuCanNhapHQ" class="menu-link">
+
+                                    <div data-i18n="Account Settings">Xử Lý Phiếu Cân Nhập</div>
+                                </a>
+                            </li>
+                        }
+
+                        var xulyphieucanXuatNguyenLieu = rolePermistions.Where(x => x.Fu == "Xử Lý Phiếu Cân / Phiếu Cân Xuất HQ" && x.Func == "Xem Xử Lý Phiếu Cân / Phiếu Cân Xuất HQ" && x.Status == 1).FirstOrDefault();
+                        if (xulyphieucanXuatNguyenLieu != null)
+                        {
+                            <li class="menu-item @(Context.Request.Path.StartsWithSegments("/XuLyPhieuCanNguyenLieuHQ/XuLyPhieuCanXuatHQ") ? "active" : "")">
+                                <a href="/XuLyPhieuCanNguyenLieuHQ/XuLyPhieuCanXuatHQ" class="menu-link">
+                                    <div data-i18n="Account Settings">Xử Lý Phiếu Cân Xuất</div>
                                 </a>
                             </li>
                         }

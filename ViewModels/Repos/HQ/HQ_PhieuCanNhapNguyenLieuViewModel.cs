@@ -40,6 +40,11 @@ namespace ViewModels.Repos.HQ
             var dao = new Dao.Repos.HQ.HQ_PhieuCanNhapNguyenLieu(connStr);
             return dao.GetChiTietPhieuCanNhapNguyenLieus<T>(fromDate, toDate, xuongId);
         }
+        public List<T> GetChiTietPhieuCanNhapNguyenLieus<T>(DateTime dateTime, string xuongId, string? connStr = null)
+        {
+            var dao = new Dao.Repos.HQ.HQ_PhieuCanNhapNguyenLieu(connStr);
+            return dao.GetChiTietPhieuCanNhapNguyenLieus<T>(dateTime,xuongId);
+        }
         public List<T> GetTongHopSanPhamPhieuCanNguyenLieus<T>(DateTime fromDate, DateTime toDate, string xuongId, string? connStr = null)
         {
             var dao = new Dao.Repos.HQ.HQ_PhieuCanNhapNguyenLieu(connStr);

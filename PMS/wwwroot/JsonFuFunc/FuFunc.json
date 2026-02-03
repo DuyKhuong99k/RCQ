@@ -448,6 +448,26 @@
     "Func": "Kết Chuyển Báo Cáo / Thống Kê Sản Xuất HQ"
   },
   {
+    "Fu": "Báo Cáo Nguyên Liệu Nhập / Chi Tiết HQ",
+    "Func": "Xem Báo Cáo Nguyên Liệu Nhập / Chi Tiết HQ"
+  },
+  {
+    "Fu": "Báo Cáo Nguyên Liệu Nhập / Tổng Hợp Sản Phẩm HQ",
+    "Func": "Xem Báo Cáo Nguyên Liệu Nhập / Tổng Hợp Sản Phẩm HQ"
+  },
+  {
+    "Fu": "Báo Cáo Nguyên Liệu Xuất / Chi Tiết HQ",
+    "Func": "Xem Báo Cáo Nguyên Liệu Xuất / Chi Tiết HQ"
+  },
+  {
+    "Fu": "Báo Cáo Nguyên Liệu Xuất / Tổng Hợp Sản Phẩm HQ",
+    "Func": "Xem Báo Cáo Nguyên Liệu Xuất / Tổng Hợp Sản Phẩm HQ"
+  },
+  {
+    "Fu": "Báo Cáo Nguyên Liệu Xuất / Tồn Kho HQ",
+    "Func": "Xem Báo Cáo Nguyên Liệu Xuất / Tồn Kho HQ"
+  },
+  {
     "Fu": "Xử Lý Phiếu Cân / Phiếu Cân HQ",
     "Func": "Xem Xử Lý Phiếu Cân / Phiếu Cân HQ"
   },
@@ -506,6 +526,38 @@
   {
     "Fu": "Xử Lý Phiếu Cân / Phiếu Cân HQ",
     "Func": "Xem Sửa Xử Lý Phiếu Cân / Phiếu Cân HQ"
+  },
+  {
+    "Fu": "Xử Lý Phiếu Cân / Phiếu Cân Nhập HQ",
+    "Func": "Xem Xử Lý Phiếu Cân / Phiếu Cân Nhập HQ"
+  },
+  {
+    "Fu": "Xử Lý Phiếu Cân / Phiếu Cân Nhập HQ",
+    "Func": "Thêm Xử Lý Phiếu Cân / Phiếu Cân Nhập HQ"
+  },
+  {
+    "Fu": "Xử Lý Phiếu Cân / Phiếu Cân Nhập HQ",
+    "Func": "Xoá Xử Lý Phiếu Cân / Phiếu Cân Nhập HQ"
+  },
+  {
+    "Fu": "Xử Lý Phiếu Cân / Phiếu Cân Nhập HQ",
+    "Func": "Sửa Xử Lý Phiếu Cân / Phiếu Cân Nhập HQ"
+  },
+  {
+    "Fu": "Xử Lý Phiếu Cân / Phiếu Cân Xuất HQ",
+    "Func": "Xem Xử Lý Phiếu Cân / Phiếu Cân Xuất HQ"
+  },
+  {
+    "Fu": "Xử Lý Phiếu Cân / Phiếu Cân Xuất HQ",
+    "Func": "Thêm Xử Lý Phiếu Cân / Phiếu Cân Xuất HQ"
+  },
+  {
+    "Fu": "Xử Lý Phiếu Cân / Phiếu Cân Xuất HQ",
+    "Func": "Xoá Xử Lý Phiếu Cân / Phiếu Cân Xuất HQ"
+  },
+  {
+    "Fu": "Xử Lý Phiếu Cân / Phiếu Cân Xuất HQ",
+    "Func": "Sửa Xử Lý Phiếu Cân / Phiếu Cân Xuất HQ"
   },
   {
     "Fu": "Cài Đặt",

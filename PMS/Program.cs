@@ -941,6 +941,11 @@ app.UseEndpoints(endpoints =>
       new { controller = "BaoCaoNguyenLieu_KeToan" }
   );
     endpoints.MapControllerRoute(
+      "BaoCaoCanNguyenLieuHQ",
+      "HQ/BaoCaoCanNguyenLieuHQ/{action}/{id?}",
+      new { controller = "BaoCaoCanNguyenLieuHQ" }
+  );
+    endpoints.MapControllerRoute(
       "BaoCaoHQ",
       "HQ/BaoCaoHQ/{action}/{id?}",
       new { controller = "BaoCaoHQ" }

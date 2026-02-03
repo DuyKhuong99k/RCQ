@@ -4,7 +4,7 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
     var XuongId = @Context.Session.GetString("XuongId");
 }
-<div class="container mt-4">
+<div class="container-fluid mt-4">
     <div class="row">
         <div class="col-12">
             <div class="card">
@@ -155,7 +155,7 @@
             var toDate = $('#toDateBCHQ').val();
             var xuongId = @XuongId;
             $.ajax({
-                url: "@Url.Action("Reload", "BaoCaoNguyenLieuHQ")",
+                url: "@Url.Action("Reload", "BaoCaoCanNguyenLieuHQ")",
                 type: "POST",
                 data: { "fromDate": fromDate, "toDate": toDate, xuongId: xuongId },
                 success: function (response) {

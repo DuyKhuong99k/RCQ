@@ -496,7 +496,7 @@ data-assets-path="~/assets/">
                                     </div>
                                 </div>
                             </div>
-                            <div class="row @(Context.Request.Path.StartsWithSegments("/HQ/BaoCaoHQ") ? "" : "d-none")">
+                            <div class="row @(Context.Request.Path.StartsWithSegments("/HQ/BaoCaoHQ") || Context.Request.Path.StartsWithSegments("/HQ/BaoCaoCanNguyenLieuHQ") ? "" : "d-none")">
                                 <div class="col-12">
                                     <div class="d-flex justify-content-end align-items-center flex-wrap">
                                         <div class="mb-2 me-2" style="display: inline-flex;">
@@ -525,7 +525,7 @@ data-assets-path="~/assets/">
                                     </div>
                                 </div>
                             </div>
-                            <div class="row @(Context.Request.Path.StartsWithSegments("/XuLyPhieuCan") || Context.Request.Path.StartsWithSegments("/XuLyPhieuCanHQ") ? "" : "d-none")">
+                            <div class="row @(Context.Request.Path.StartsWithSegments("/XuLyPhieuCan") || Context.Request.Path.StartsWithSegments("/XuLyPhieuCanHQ") || Context.Request.Path.StartsWithSegments("/XuLyPhieuCanNguyenLieuHQ") ? "" : "d-none")">
                                 <div class="col-12">
                                     <div style="float:right" class="d-flex justify-content-between align-items-center">
                                         <div class="d-flex align-items-center">
@@ -2387,42 +2387,6 @@ data-assets-path="~/assets/">
             console.error("SignalR error: ", err.toString());
         });
     </script>
-    <script>
-        const body = document.body;
-        const toggleBtn = document.getElementById('darkModeToggle');
-
-        // Kiểm tra preference hệ thống + localStorage
-        function initTheme() {
-          const savedTheme = localStorage.getItem("theme");
-          if (savedTheme) {
-            body.classList.toggle("dark-mode", savedTheme === "dark");
-          } else {
-            if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
-              body.classList.add("dark-mode");
-              localStorage.setItem("theme", "dark");
-            }
-          }
-          updateBtnText();
-        }
-
-        // Cập nhật text trên nút
-        function updateBtnText() {
-          if (body.classList.contains("dark-mode")) {
-            toggleBtn.textContent = "☀️ Light Mode";
-          } else {
-            toggleBtn.textContent = "🌙 Dark Mode";
-          }
-        }
-
-        // Bấm nút để toggle
-        toggleBtn.addEventListener("click", () => {
-          body.classList.toggle("dark-mode");
-          const newTheme = body.classList.contains("dark-mode") ? "dark" : "light";
-          localStorage.setItem("theme", newTheme);
-          updateBtnText();
-        });
-
-        initTheme();
-    </script>
+    
 </body>
 </html>
