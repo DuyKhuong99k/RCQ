@@ -135,6 +135,8 @@ public class MainViewModel : ObservableObject, IMainService
     public AoViewModel VmAoNguyenLieu => AoViewModel.Instance;
     public TrongLuongCoiTheoThanhPhamViewModel VmTrongLuongCoiTheoThanhPham => TrongLuongCoiTheoThanhPhamViewModel.Instance;
     public LoaiCaXepKhuonViewModel VmLoaiCaXepKhuon => LoaiCaXepKhuonViewModel.Instance;
+
+    public LogGhiNhanLoiCanViewModel VmLogGhiNhanLoiCan => LogGhiNhanLoiCanViewModel.Instance;
     public event Action<string> AlertRequested;
 
     private int MessageBoxShow(string message, string title, int button)

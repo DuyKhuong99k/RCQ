@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Vars;
@@ -33,7 +34,9 @@ public sealed class ChatHub(
             else
             {
                 await  mayCansService.CommandSetUpdateTime(id);
+                //await mayCansService.CommandGetChiSanLuong(id);
             }
+            
         }
         catch (Exception e)
         {
@@ -48,6 +51,34 @@ public sealed class ChatHub(
         try
         {
             await Clients.Caller.SendAsync("CONNECTIONID", Context.ConnectionId);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            //throw;
+        }
+        
+    }
+
+    public async Task GetChiSanLuong(string id)
+    {
+        try
+        {
+            await mayCansService.CommandGetChiSanLuong(id);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            //throw;
+        }
+        
+    }
+
+    public async Task GetXacDinh(string id)
+    {
+        try
+        {
+            await mayCansService.CommandGetXacDinh(id);
         }
         catch (Exception e)
         {

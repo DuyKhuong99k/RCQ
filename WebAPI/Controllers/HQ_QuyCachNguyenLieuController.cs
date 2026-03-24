@@ -31,7 +31,7 @@ namespace WebAPI.Controllers
         [Authorize]
         public IActionResult GetAlls()
         {
-            var items = _context.HQ_QuyCachNguyenLieus.OrderByDescending(x => x.Id).ToList();
+            var items = _context.HQ_QuyCachNguyenLieus.OrderByDescending(x => x.MaNguyenLieu).ThenBy(x => x.Ten).ToList();
 
             return Ok(items);
         }
@@ -99,6 +99,11 @@ namespace WebAPI.Controllers
                 Id = model.Id,
                 Ten = model.Ten,
                 SuDung = model.SuDung,
+                MNgay = model.MNgay,
+                Index = model.Index,
+                NhomQuyCach = model.NhomQuyCach,
+                MaNguyenLieu = model.MaNguyenLieu,
+                DonViTinh = model.DonViTinh
             };
             _context.HQ_QuyCachNguyenLieus.Add(newItem);
             try
@@ -122,17 +127,8 @@ namespace WebAPI.Controllers
         }
         [HttpPost("{id}")]
         [Authorize]
-        public async Task<IActionResult> Update(string id, [FromBody] HQ_QuyCachNguyenLieu model)
+        public async Task<IActionResult> Update(long id, [FromBody] HQ_QuyCachNguyenLieu model)
         {
-            // Kiểm tra xem ID người dùng được cập nhật có hợp lệ không
-            if (string.IsNullOrEmpty(id))
-            {
-                return BadRequest(new ApiResponse
-                {
-                    Success = false,
-                    Message = "Mã này không hợp lệ."
-                });
-            }
 
             // Kiểm tra xem nhân viên có tồn tại trong cơ sở dữ liệu không
             var item = await _context.HQ_QuyCachNguyenLieus.FindAsync(id);
@@ -164,6 +160,11 @@ namespace WebAPI.Controllers
             item.Id = model.Id;
             item.Ten = model.Ten;
             item.SuDung = model.SuDung;
+            item.MNgay = model.MNgay;
+            item.Index = model.Index;
+            item.NhomQuyCach = model.NhomQuyCach;
+            item.MaNguyenLieu = model.MaNguyenLieu;
+            item.DonViTinh = model.DonViTinh;
             try
             {
                 await _context.SaveChangesAsync();
@@ -185,16 +186,9 @@ namespace WebAPI.Controllers
         }
         [HttpPost("{id}")]
         [Authorize]
-        public async Task<IActionResult> Delete(string id)
+        public async Task<IActionResult> Delete(long id)
         {
-            if (string.IsNullOrEmpty(id))
-            {
-                return BadRequest(new ApiResponse
-                {
-                    Success = false,
-                    Message = "Bạn chưa chọn thông tin!."
-                });
-            }
+
             var item = await _context.HQ_QuyCachNguyenLieus.FindAsync(id);
             if (item == null)
             {

@@ -1320,6 +1320,149 @@ public partial class MayCansService : ObservableObject, IMayCansService
 
         return rl;
     }
+    public async Task<bool> CommandSetChiSanLuong(string id, bool isChiSanLuong)
+    {
+        var rl = false;
+        var item = Find(id);
+        if (item != null)
+        {
+            try
+            {
+                //if (item.AType != AppType._type5)
+                //{
+                if (item.MType == "DESKTOP")
+                    await hubContext.Clients.Client(item.ConnectionId ?? "").SendAsync("SendAsync", $"{isChiSanLuong}");
+                else if (item.MType == "BOARD")
+                    await hubContext.Clients.Client(item.ConnectionId ?? "")
+                        .SendAsync("SETCHISANLUONG", $"{isChiSanLuong}");
+                //}
+                //else
+                //{
+
+                //    var url = $"http://{item.IPAddr}/api/size/posts";
+                //    var dataInsert = new { Id = sizeId,Ten = sizeName,SuDung=true,MNgay = DateTime.Now.ToString("yyyyMMdd"),Path="insert"};
+                //    var dataSelectedItem = new { Id = sizeId,Ten = sizeName,SuDung=true,MNgay = DateTime.Now.ToString("yyyyMMdd"),Path="selecteditem"};
+                //    var dataJsonInsert = JsonConvert.SerializeObject(dataInsert);
+                //    var dataJsonSelecteditem = JsonConvert.SerializeObject(dataSelectedItem);
+                //    var dJson1 = HttpPost($"{url}",dataJsonInsert);
+                //    var dJson2 = HttpPost($"{url}", dataJsonSelecteditem);
+                //    item.MaSize = sizeId;
+                //    //}
+                //}
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                //return false;
+                throw e;
+            }
+
+            rl = true;
+        }
+
+        return rl;
+    }
+    public async Task<bool> CommandGetChiSanLuong(string id)
+    {
+        var rl = false;
+        var item = Find(id);
+        if (item != null)
+        {
+            try
+            {
+                var isChiSanLuong = item.IsChiSangLuong;
+                //if (item.AType != AppType._type5)
+                //{
+                if (item.MType == "DESKTOP")
+                    await hubContext.Clients.Client(item.ConnectionId ?? "").SendAsync("SendAsync", $"{isChiSanLuong}");
+                else if (item.MType == "BOARD")
+                    await hubContext.Clients.Client(item.ConnectionId ?? "")
+                        .SendAsync("SETCHISANLUONG", $"{isChiSanLuong}");
+                //}
+                //else
+                //{
+
+                //    var url = $"http://{item.IPAddr}/api/size/posts";
+                //    var dataInsert = new { Id = sizeId,Ten = sizeName,SuDung=true,MNgay = DateTime.Now.ToString("yyyyMMdd"),Path="insert"};
+                //    var dataSelectedItem = new { Id = sizeId,Ten = sizeName,SuDung=true,MNgay = DateTime.Now.ToString("yyyyMMdd"),Path="selecteditem"};
+                //    var dataJsonInsert = JsonConvert.SerializeObject(dataInsert);
+                //    var dataJsonSelecteditem = JsonConvert.SerializeObject(dataSelectedItem);
+                //    var dJson1 = HttpPost($"{url}",dataJsonInsert);
+                //    var dJson2 = HttpPost($"{url}", dataJsonSelecteditem);
+                //    item.MaSize = sizeId;
+                //    //}
+                //}
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                //return false;
+                throw e;
+            }
+
+            rl = true;
+        }
+
+        return rl;
+    }
+    public async Task<bool> CommandSetXacDinh(string id, bool isXacDinh)
+    {
+        var rl = false;
+        var item = Find(id);
+        if (item != null)
+        {
+            try
+            {
+                //if (item.AType != AppType._type5)
+                //{
+                if (item.MType == "DESKTOP")
+                    await hubContext.Clients.Client(item.ConnectionId ?? "").SendAsync("SendAsync", $"{isXacDinh}");
+                else if (item.MType == "BOARD")
+                    await hubContext.Clients.Client(item.ConnectionId ?? "")
+                        .SendAsync("SETXACDINH", $"{isXacDinh}");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                //return false;
+                throw e;
+            }
+
+            rl = true;
+        }
+
+        return rl;
+    }
+
+    public async Task<bool> CommandGetXacDinh(string id)
+    {
+        var rl = false;
+        var item = Find(id);
+        if (item != null)
+        {
+            try
+            {
+                var isXacDinh = item.IsXacDinhLoaiThanhPham;
+                //if (item.AType != AppType._type5)
+                //{
+                if (item.MType == "DESKTOP")
+                    await hubContext.Clients.Client(item.ConnectionId ?? "").SendAsync("SendAsync", $"{isXacDinh}");
+                else if (item.MType == "BOARD")
+                    await hubContext.Clients.Client(item.ConnectionId ?? "")
+                        .SendAsync("SETXACDINH", $"{isXacDinh}");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                //return false;
+                throw e;
+            }
+
+            rl = true;
+        }
+
+        return rl;
+    }
 
     public async Task<bool> CommandSetChieuXa(string id, string chieuXaId, string chieuXaName)
     {
@@ -1588,8 +1731,13 @@ public partial class MayCansService : ObservableObject, IMayCansService
         {
             try
             {
+                 //var isChiSanLuong = item.IsChiSangLuong;
                 await hubContext.Clients.Client(item.ConnectionId ?? "")
-                    .SendAsync("SETTIME", DateTime.Now.ToString("yyyyMMddHHmmss"));
+                    .SendAsync("SETTIME", DateTime.Now.ToString("yyyyMMddHHmmss")); // isChiSanLuong dùng để check trạng thai SL của cân
+
+
+                //await hubContext.Clients.Client(item.ConnectionId ?? "")
+                //        .SendAsync("SETCHISANLUONG", $"{isChiSanLuong}");
             }
             catch (Exception e)
             {

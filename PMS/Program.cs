@@ -1050,6 +1050,11 @@ app.UseEndpoints(endpoints =>
         "DanhMucHQ/HQ_PhuongTienNguyenLieu/{action}/{id?}",
         new { controller = "HQ_PhuongTienNguyenLieu" }
     );
+    endpoints.MapControllerRoute(
+        "DanhMucHQ_NhaCungCapNguyenLieu",
+        "DanhMucHQ/HQ_NhaCungCapNguyenLieu/{action}/{id?}",
+        new { controller = "HQ_NhaCungCapNguyenLieu" }
+    );
     //endpoints.MapControllerRoute(
     //    "DuyetThucDon",
     //    "NhaAn/DanhMuc/HQ_ThucDon/DuyetThucDon{action}/{id?}",

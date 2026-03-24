@@ -37,5 +37,11 @@ namespace ViewModels.Repos.HQ
             var dao = new Dao.Repos.HQ.HQ_PhieuCanXuatNguyenLieu(connStr);
             return dao.GetTonKhoSanPhamPhieuCanXuatNguyenLieus<T>(fromDate, toDate, xuongId);
         }
+
+        public List<T> GetTyLeNguyenLieuHaoHut<T>(DateTime ngay, string? connStr = null)
+        {
+            var dao = new Dao.Repos.HQ.HQ_PhieuCanXuatNguyenLieu(connStr);
+            return dao.GetTyLeNguyenLieuHaoHut<T>(ngay);
+        }
     }
 }

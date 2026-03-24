@@ -165,7 +165,16 @@ public class CommunicationService(IUserService userService, ICommitService commi
 
                     break;
                 }
-
+                case "CHISANLUONG":
+                {
+                    await commitService.SetChiSanLuong(dataJson, client, cmd);
+                    break;
+                }
+                case "XACDINH":
+                {
+                    await commitService.SetXacDinh(dataJson, client, cmd);
+                    break;
+                }
                 case "WLOFFLINE":
                 {
                     break;

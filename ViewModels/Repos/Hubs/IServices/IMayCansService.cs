@@ -70,6 +70,11 @@ namespace ViewModels.Repos.Hubs.IServices
         public Task<bool> CommandSetNguyenLieu(string id, string nguyenLieuId, string nguyenLieuName);
         public Task<bool> CommandGetSize(string id);
         public Task<bool> CommandSetSize(string id, string sizeId, string sizeName);
+        public Task<bool> CommandSetChiSanLuong(string id, bool isChiSanLuong);
+        public Task<bool> CommandGetChiSanLuong(string id);
+
+        public Task<bool> CommandSetXacDinh(string id, bool isXacDinh);
+        public Task<bool> CommandGetXacDinh(string id);
         public Task<bool> CommandSetNhanVien(string id, string nhanVienId, string maHoSo, string nhanVienName);
         public Task<bool> CommandSetNhanVienPhucVu(string id, string nhanVienId, string maHoSo);
         public Task<bool> CommandGetNhanVien(string id);

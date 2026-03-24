@@ -18,62 +18,44 @@ namespace Dao.Repos.HQ
             try
             {
                 var query = @"
-SELECT 
-	-- tt chung
-    pc.MaLo AS LoNguyenLieu,
-    pc.Ngay AS NgayNguyenLieu,
-    pcnn.SoPhieuCanNhap AS SoPhieu,
-    pcnn.SoLanSua AS SoLanSuaDoi,
-    kho.Ten AS DiaDiem,
-    pt.Ten AS NguoiGiao,
-    pcnn.TaiXe,
-    pt.Ten AS SoXe,
-    pcnn.CCCD,
-    pc.NgayGio AS ThoiGian,
-    pcnn.SDT,
-    pcnn.NoiDungGiaoNhan,
-	-- tt sản phẩm
-    pcnn.STT,
-    sp.Ten AS TenHang,
-    qc.Ten AS QuyCachSanPham,
-    dvt.Ten AS DonViTinh,
-    cl.Ten AS ChatLuong,
-    CASE pcnn.CanHang 
-        WHEN 1 THEN N'Hợp Lý'
-        WHEN 0 THEN N'Không Hợp Lý'
-        ELSE NULL END AS CanHang,
-    pcnn.TruBi, 
-    CASE 
-        WHEN pcnn.MaChatLuong IS NOT NULL THEN N'Đúng'
-        ELSE N'Không Đúng'
-    END AS PhanLoaiNguyenLieu,
-    pc.GhiChu AS NhanXet,
-    pcnn.TrongLuongHang,
-    pcnn.TrongLuongXe,
-cast(
-    pcnn.TrongLuongHang * ctsp.TyLe / 100.0
-    as decimal(18, 3)
-) as TrongLuongPhanBo
-
-FROM HQ_PhieuCanNhapNguyenLieu pcnn
-JOIN HQ_PhieuCanNguyenLieu pc 
-    ON pcnn.IdPhieuCanNguyenLieu = pc.Id
-LEFT JOIN HQ_KhoNguyenLieu kho
-    ON pcnn.MaKho = kho.Id
-LEFT JOIN HQ_SanPhamNguyenLieu sp
-    ON pcnn.MaSanPham = sp.Id
-left join HQ_ChiTietPhanBoTyLeNguyenLieuNhap ctsp 
-                    on ctsp.SoPhieuCanNhap = pcnn.SoPhieuCanNhap
-                left join HQ_QuyCachNguyenLieu qc 
-                    on qc.Id = ctsp.MaQuyCach
-LEFT JOIN HQ_DonViTinh dvt
-    ON pcnn.MaDonVi = dvt.Id
-LEFT JOIN HQ_ChatLuongNguyenLieu cl
-    ON pcnn.MaChatLuong = cl.Id
-LEFT JOIN PhuongTienChoNguyenLieu pt
-    ON pcnn.MaPhuongTien = pt.Ma
-Where pc.MaXuong = @xuongId
-and pc.Ngay >= @dateTime
+SELECT
+    pnl.MaLo,
+    pn.NgayGio,
+    pn.SoPhieuCanNhap,
+    pn.MaSanPham,
+    pn.MaNhaCC,
+    ncc.Ten as TenNhaCC,
+    ncc.CCCD as CCCDNCC,
+    pn.TaiXe,
+    pn.CCCD,
+    pn.SDT,
+    ctn.MaQuyCach,
+    qc.MaNguyenLieu,
+    qc.DonViTinh,
+    qc.Ten AS TenQuyCach,
+    ctn.TyLe,
+    qc.NhomQuyCach,
+    pn.NoiDungGiaoNhan,
+    qc.[Index] AS ThuTu,
+    CAST(
+        pn.TrongLuongHang * ISNULL(ctn.TyLe, 0) / 100.0
+        AS DECIMAL(18,3)
+    ) AS KhoiLuongNhap
+FROM HQ_PhieuCanNhapNguyenLieu pn
+JOIN (
+    SELECT DISTINCT SoPhieuCanNhap, MaQuyCach, TyLe
+    FROM HQ_ChiTietPhanBoTyLeNguyenLieuNhap
+) ctn ON ctn.SoPhieuCanNhap = pn.SoPhieuCanNhap
+JOIN HQ_PhieuCanNguyenLieu pnl
+    ON pnl.Id = pn.IdPhieuCanNguyenLieu
+JOIN (
+    SELECT DISTINCT Id, Ten, [Index], MaNguyenLieu, DonViTinh, NhomQuyCach
+    FROM HQ_QuyCachNguyenLieu
+) qc ON qc.Id = ctn.MaQuyCach
+JOIN NhaCungCapNguyenLieu ncc 
+    ON pn.MaNhaCC = ncc.Ma 
+WHERE pn.NgayGio >= @fromDate
+  AND pn.NgayGio <= DATEADD(DAY, 1, @toDate)
 	
 ";
                 using var connection = new SqlConnection(connectionString);
@@ -93,62 +75,44 @@ and pc.Ngay >= @dateTime
         {
             try
             {
-                var query = @"SELECT 
-	-- tt chung
-    pc.MaLo AS LoNguyenLieu,
-    pc.Ngay AS NgayNguyenLieu,
-    pcnn.SoPhieuCanNhap AS SoPhieu,
-    pcnn.SoLanSua AS SoLanSuaDoi,
-    kho.Ten AS DiaDiem,
-    pt.Ten AS NguoiGiao,
-    pcnn.TaiXe,
-    pt.Ten AS SoXe,
-    pcnn.CCCD,
-    pc.NgayGio AS ThoiGian,
-    pcnn.SDT,
-    pcnn.NoiDungGiaoNhan,
-	-- tt sản phẩm
-    pcnn.STT,
-    sp.Ten AS TenHang,
-    qc.Ten AS QuyCachSanPham,
-    dvt.Ten AS DonViTinh,
-    cl.Ten AS ChatLuong,
-    CASE pcnn.CanHang 
-        WHEN 1 THEN N'Hợp Lý'
-        WHEN 0 THEN N'Không Hợp Lý'
-        ELSE NULL END AS CanHang,
-    pcnn.TruBi, 
-    CASE 
-        WHEN pcnn.MaChatLuong IS NOT NULL THEN N'Đúng'
-        ELSE N'Không Đúng'
-    END AS PhanLoaiNguyenLieu,
-    pc.GhiChu AS NhanXet,
-    pcnn.TrongLuongHang,
-    pcnn.TrongLuongXe,
-cast(
-    pcnn.TrongLuongHang * ctsp.TyLe / 100.0
-    as decimal(18, 3)
-) as TrongLuongPhanBo
-
-FROM HQ_PhieuCanNhapNguyenLieu pcnn
-JOIN HQ_PhieuCanNguyenLieu pc 
-    ON pcnn.IdPhieuCanNguyenLieu = pc.Id
-LEFT JOIN HQ_KhoNguyenLieu kho
-    ON pcnn.MaKho = kho.Id
-LEFT JOIN HQ_SanPhamNguyenLieu sp
-    ON pcnn.MaSanPham = sp.Id
-left join HQ_ChiTietPhanBoTyLeNguyenLieuNhap ctsp 
-                    on ctsp.SoPhieuCanNhap = p.SoPhieuCanNhap
-                left join HQ_QuyCachNguyenLieu qc 
-                    on qc.Id = ctsp.MaQuyCach
-LEFT JOIN HQ_DonViTinh dvt
-    ON pcnn.MaDonVi = dvt.Id
-LEFT JOIN HQ_ChatLuongNguyenLieu cl
-    ON pcnn.MaChatLuong = cl.Id
-LEFT JOIN PhuongTienChoNguyenLieu pt
-    ON pcnn.MaPhuongTien = pt.Ma
-Where pc.MaXuong = @xuongId
-and pc.NgayGio >= @fromDate and pc.NgayGio <= @toDate
+                var query = @"SELECT
+    pnl.MaLo,
+    pn.NgayGio,
+    pn.SoPhieuCanNhap,
+    pn.MaSanPham,
+    pn.MaNhaCC,
+    ncc.Ten as TenNhaCC,
+    ncc.CCCD as CCCDNCC,
+    pn.TaiXe,
+    pn.CCCD,
+    pn.SDT,
+    ctn.MaQuyCach,
+    qc.MaNguyenLieu,
+    qc.DonViTinh,
+    qc.Ten AS TenQuyCach,
+    ctn.TyLe,
+    qc.NhomQuyCach,
+    pn.NoiDungGiaoNhan,
+    qc.[Index] AS ThuTu,
+    CAST(
+        pn.TrongLuongHang * ISNULL(ctn.TyLe, 0) / 100.0
+        AS DECIMAL(18,1)
+    ) AS KhoiLuongNhap
+FROM HQ_PhieuCanNhapNguyenLieu pn
+JOIN (
+    SELECT DISTINCT SoPhieuCanNhap, MaQuyCach, TyLe
+    FROM HQ_ChiTietPhanBoTyLeNguyenLieuNhap
+) ctn ON ctn.SoPhieuCanNhap = pn.SoPhieuCanNhap
+JOIN HQ_PhieuCanNguyenLieu pnl
+    ON pnl.Id = pn.IdPhieuCanNguyenLieu
+JOIN (
+    SELECT DISTINCT Id, Ten, [Index], MaNguyenLieu, DonViTinh, NhomQuyCach
+    FROM HQ_QuyCachNguyenLieu
+) qc ON qc.Id = ctn.MaQuyCach
+JOIN NhaCungCapNguyenLieu ncc 
+    ON pn.MaNhaCC = ncc.Ma 
+WHERE pn.NgayGio >= @fromDate
+  AND pn.NgayGio <= DATEADD(DAY, 1, @toDate)
 	
 ";
                 using var connection = new SqlConnection(connectionString);

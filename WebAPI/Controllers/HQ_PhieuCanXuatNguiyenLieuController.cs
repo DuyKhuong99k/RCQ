@@ -62,6 +62,16 @@ namespace WebAPI.Controllers
             return Ok(items);
         }
 
+        [HttpGet("{dateTime}")]
+        [Authorize]
+        public IActionResult GetTyLeNguyenLieuHaoHut(string dateTime)
+        {
+            DateTime ngay = DateTime.ParseExact(dateTime, "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture);
+          
+            var items = Vm.VmHQ_PhieuCanXuatNguyenLieu.GetTyLeNguyenLieuHaoHut<object>(ngay,_context.Database.GetConnectionString());
+            return Ok(items);
+        }
+
         
     }
 }

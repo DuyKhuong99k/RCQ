@@ -83,6 +83,8 @@ namespace WebAPI.Controllers
                 Ten = model.Ten,
                 Ma = model.Ma,
                 SuDung = model.SuDung,
+                CCCD = model.CCCD,
+                DiaChi = model.DiaChi
             };
             _context.NhaCungCapNguyenLieu.Add(newNhaCungCap);
             try
@@ -146,6 +148,8 @@ namespace WebAPI.Controllers
             nhaCungCap.Ma = model.Ma;
             nhaCungCap.Ten = model.Ten;
             nhaCungCap.SuDung = model.SuDung;
+            nhaCungCap.CCCD = model.CCCD;
+            nhaCungCap.DiaChi = model.DiaChi;
             try
             {
                 await _context.SaveChangesAsync();

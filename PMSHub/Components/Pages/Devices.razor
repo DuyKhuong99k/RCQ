@@ -172,7 +172,9 @@ else
                                                 <div
                                                     style="display: grid; grid-column-gap: 0px; grid-template-columns: auto auto; align-items : center;">
                                                     <label>Sản Lượng</label>
-                                                    <SfSwitch @bind-Checked="@mayCan.IsChiSangLuong"></SfSwitch>
+                                                    <SfSwitch Checked="@mayCan.IsChiSangLuong" 
+                                                              CheckedChanged="@(async (bool value) => await OnChiSanLuongChanged(mayCan, value))">
+                                                    </SfSwitch>
                                                 </div>
                                                 <div
                                                     style="display: grid; grid-column-gap: 1px; grid-template-columns: auto auto;">
@@ -280,7 +282,10 @@ else
                                                 <div
                                                     style="display: grid; grid-column-gap: 0px; grid-template-columns: auto auto; align-items: center;">
                                                     <label>Xác Định</label>
-                                                    <SfSwitch @bind-Checked="@mayCan.IsXacDinhLoaiThanhPham"></SfSwitch>
+                                                    @*<SfSwitch @bind-Checked="@mayCan.IsXacDinhLoaiThanhPham"></SfSwitch>*@
+                                                    <SfSwitch Checked="@mayCan.IsXacDinhLoaiThanhPham"
+                                                              CheckedChanged="@(async (bool value) => await OnXacDinhChanged(mayCan, value))">
+                                                    </SfSwitch>
                                                 </div>
                                                 <div
                                                     style="display: grid; grid-column-gap: 1px; grid-template-columns: auto auto;">
@@ -1338,6 +1343,120 @@ else
     </DialogButtons>
 
 </SfDialog>
+
+<SfDialog Width="1000px" IsModal="true" CloseOnEscape="true" ShowCloseIcon="true" @bind-Visible="@IsVisibleNhatKyCanLoi">
+    <DialogEvents OnOverlayModalClick="@OverlayClick"></DialogEvents>
+    <DialogTemplates>
+        <Header>
+            <div>@SelectedItems.FirstOrDefault()?.SubTitle</div>
+        </Header>
+        <Content>
+
+            <SfGrid DataSource="@ListNhatKyCanLoi"
+                    AllowPaging="true"
+                    AllowSorting="true"
+                    AllowFiltering="true"
+                    Height="550px">
+
+                <GridPageSettings PageSize="20"></GridPageSettings>
+
+                <GridColumns>
+
+                    <!-- Thông tin chung -->
+                    <GridColumn Field="STT" HeaderText="STT" Width="70" TextAlign="TextAlign.Center" />
+                    <GridColumn Field=Ngay HeaderText="Ngày" Type="ColumnType.Date" Format="dd/MM/yyyy" Width="120" />
+                    <GridColumn Field="Gio" HeaderText="Giờ" Width="100" />
+                    <GridColumn Field="GioBTP" HeaderText="Giờ BTP" Width="100" />
+
+                    <!-- Máy - Ca -->
+                    <GridColumn Field="MaMayCan" HeaderText="Mã Máy Cân" Width="130" />
+                    <GridColumn Field="TenLoaiCa" HeaderText="Loại Ca" Width="140" />
+
+                    <!-- Sản phẩm -->
+                    <GridColumn Field="TenThanhPham" HeaderText="Thành Phẩm" Width="180" />
+                    <GridColumn Field="TenMau" HeaderText="Màu" Width="120" />
+                    <GridColumn Field="TenSize" HeaderText="Size" Width="100" />
+
+                    <!-- Lô - Thẻ -->
+                    <GridColumn Field="MaLo" HeaderText="Mã Lô" Width="140" />
+                    <GridColumn Field="MaThe" HeaderText="Mã Thẻ" Width="140" />
+
+                    <!-- Trọng lượng -->
+                    <GridColumn Field="TrongLuongNhan"
+                                HeaderText="TL Nhận"
+                                Format="N2"
+                                TextAlign="TextAlign.Right"
+                                Width="130" />
+
+                    <GridColumn Field="TrongLuongTra"
+                                HeaderText="TL Trả"
+                                Format="N2"
+                                TextAlign="TextAlign.Right"
+                                Width="130" />
+
+                    <GridColumn Field="TrongLuongTare"
+                                HeaderText="Tare"
+                                Format="N2"
+                                TextAlign="TextAlign.Right"
+                                Width="120" />
+
+                    <GridColumn Field="TrongLuongBu"
+                                HeaderText="Bù"
+                                Format="N2"
+                                TextAlign="TextAlign.Right"
+                                Width="120" />
+
+                    <!-- Định mức -->
+                    <GridColumn Field="DinhMucThucTe"
+                                HeaderText="ĐM Thực Tế"
+                                Format="N2"
+                                TextAlign="TextAlign.Right"
+                                Width="140" />
+
+                    <GridColumn Field="DinhMucYeuCau"
+                                HeaderText="ĐM Yêu Cầu"
+                                Format="N2"
+                                TextAlign="TextAlign.Right"
+                                Width="140" />
+
+                    <!-- Nhân viên -->
+                    <GridColumn Field="MaNhanVien" HeaderText="Mã Nhân Viên" Width="140" />
+                    <GridColumn Field="MaHoSo" HeaderText="Mã Hồ Sơ" Width="140" />
+                    <GridColumn Field="TenNhanVien" HeaderText="Nhân Viên" Width="200" />
+                   @*  <GridColumn Field="MaNhanVienPhucVu" HeaderText="NV Phục Vụ" Width="140" />
+                    <GridColumn Field="MaNhanVienBanKiem" HeaderText="NV Ban Kiểm" Width="150" /> *@
+
+                    <!-- Xưởng -->
+                    <GridColumn Field="TenXuong" HeaderText="Xưởng" Width="150" />
+
+                    <!-- Trạng thái -->
+                    <GridColumn Field="ChiSanLuong" HeaderText="Chỉ SL" Type="ColumnType.Boolean" Width="100" />
+                    <GridColumn Field="SuDung" HeaderText="Sử Dụng" Type="ColumnType.Boolean" Width="100" />
+                    <GridColumn Field="IsOffline" HeaderText="Offline" Type="ColumnType.Boolean" Width="100" />
+
+                    <!-- Lỗi -->
+                    <GridColumn Field="ThongBaoLoi"
+                                HeaderText="Thông Báo Lỗi"
+                                Width="300" />
+
+                    <GridColumn Field="GhiChu"
+                                HeaderText="Ghi Chú"
+                                Width="250" />
+
+                    <!-- ID -->
+                    <GridColumn Field="Id" HeaderText="ID" Width="120" />
+
+                </GridColumns>
+
+            </SfGrid>
+
+        </Content>
+    </DialogTemplates>
+    <DialogButtons>
+        <DialogButton Content="Đóng" IsPrimary="true" OnClick="@CloseDialogNhanKyCanLoi" />
+    </DialogButtons>
+
+</SfDialog>
 <SfDialog Width="400px" IsModal="true" CloseOnEscape="true" ShowCloseIcon="true" @bind-Visible="@IsVisibleSelectedDate">
     <DialogEvents OnOverlayModalClick="@OverlayClick"></DialogEvents>
     <DialogTemplates>
@@ -1524,6 +1643,9 @@ else
             <SfButton style="margin: 2px; width: 120px;" CssClass="e-primary"
                       @onmousedown="() => OpenDialogDoiKhuVuc(SelectedItems.FirstOrDefault())"> Đổi Khu Vực
             </SfButton>
+            <SfButton style="margin: 2px; width: 120px;" CssClass="e-primary"
+                      @onmousedown="() => OpenDialogNhatKyCanLoi(SelectedItems.FirstOrDefault())"> Nhật Ký Cân Lỗi
+            </SfButton>
         </Content>
     </DialogTemplates>
     <DialogButtons>
@@ -1568,7 +1690,9 @@ else
     private bool IsVisibleSizeHq { get; set; }
     private bool IsVisibleSizeNguyenLieu { get; set; }
     private bool IsVisibleDoiKhuVuc { get; set; }
+    private bool IsVisibleNhatKyCanLoi { get; set; }
     private List<MayCan> SelectedItems = new();
+    private List<VmLogGhiNhanLoiCan> ListNhatKyCanLoi = new();
     private MayCan item = new();
     private readonly string expand = "Chi Tiết";
     private readonly string collapse = "Thu Giọn";
@@ -1710,6 +1834,49 @@ else
         }
     }
 
+    private async Task OnChiSanLuongChanged(MayCan mayCan, bool newValue)
+    {
+        // Cập nhật UI ngay lập tức để người dùng thấy phản hồi
+        mayCan.IsChiSangLuong = newValue;
+        StateHasChanged(); // Bắt buộc UI refresh
+
+        try
+        {
+            await MayCanService.CommandSetChiSanLuong(mayCan.Id, newValue);
+        }
+        catch (Exception ex)
+        {
+            // Nếu service call thất bại, revert lại giá trị cũ
+            mayCan.IsChiSangLuong = !newValue;
+            StateHasChanged();
+
+            // Hiển thị thông báo lỗi nếu cần
+            // await ShowErrorMessage(ex.Message);
+        }
+    }
+
+    private async Task OnXacDinhChanged(MayCan mayCan, bool newValue)
+    {
+        // Cập nhật UI ngay lập tức để người dùng thấy phản hồi
+        mayCan.IsXacDinhLoaiThanhPham = newValue;
+        StateHasChanged(); // Bắt buộc UI refresh
+
+        try
+        {
+            await MayCanService.CommandSetXacDinh(mayCan.Id, newValue);
+        }
+        catch (Exception ex)
+        {
+            // Nếu service call thất bại, revert lại giá trị cũ
+            mayCan.IsXacDinhLoaiThanhPham = !newValue;
+            StateHasChanged();
+
+            // Hiển thị thông báo lỗi nếu cần
+            // await ShowErrorMessage(ex.Message);
+        }
+    }
+
+
     private async Task BeforeOpen()
 
     {
@@ -1778,6 +1945,28 @@ else
         }
 
         IsVisibleDoiKhuVuc = true;
+    }
+
+    private async Task OpenDialogNhatKyCanLoi(MayCan? mayCan)
+    {
+        if (mayCan == null)
+        {
+            ToastService.ShowToast("Vui lòng chọn máy cân", ToastType.Warning);
+            return;
+        }
+
+        var ngay = DateTime.Now;
+
+        ListNhatKyCanLoi = await Task.Run(() =>
+            MainService.VmLogGhiNhanLoiCan
+            .GetAllsFullField(ngay, mayCan.Id)
+        );
+
+        
+
+        IsVisibleNhatKyCanLoi = true;
+
+        StateHasChanged();
     }
 
     private void OpenDialogReload()
@@ -2228,6 +2417,10 @@ else
             // if (id != null) MayCanService.CommandSetChatLuong(id, MainService.VmChatLuong.SelectedItem?.Ma ?? "", MainService.VmChatLuong.SelectedItem?.Ten ?? "");
             IsVisibleDoiKhuVuc = false;
         }
+    }
+    private async void CloseDialogNhanKyCanLoi()
+    {
+        IsVisibleNhatKyCanLoi = false;
     }
 
     private async void CloseDialogNguyenLieu(MouseEventArgs obj)

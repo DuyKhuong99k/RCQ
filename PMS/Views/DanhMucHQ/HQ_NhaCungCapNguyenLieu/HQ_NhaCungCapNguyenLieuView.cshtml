@@ -1,23 +1,21 @@
-﻿@{
-    ViewData["Title"] = "HQ_QuyCachNguyenLieuView";
+﻿
+@{
+    ViewData["Title"] = "HQ_NhaCungCapNguyenLieuView";
     Layout = "~/Views/Shared/_Layout.cshtml";
     //lấy danh sách roleid từ cookie
     var roleIds = PMS.Middlewares.AuthenticationHelpers.GetRoleIdsFromCookie(Context);
     // lấy danh sách fu func từ list roleId
     var rolePermistions = await PMS.Middlewares.AuthenticationHelpers.GetRolePermistionsAsync(Context, roleIds);
 }
-<div class="container-fluid mt-4">
+
+<div class="container mt-4">
     <div class="row">
         <div class="col-12">
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h2 class="mb-0">Danh Sách Quy Cách Nguyên Liệu</h2>
+                    <h2 class="mb-0">Danh Sách Nhà Cung Cấp</h2>
                     @{
-                        var themHQ_QuyCachNguyenLieu = rolePermistions.Where(x => x.Fu == "Danh Mục / Quy Cách Nguyên Liệu HQ" && x.Func == "Thêm Quy Cách Nguyên Liệu HQ" && x.Status == 1).FirstOrDefault();
-                        if (themHQ_QuyCachNguyenLieu != null)
-                        {
-                            <button onclick="showInsert()" type="button" class="btn btn-primary">Thêm</button>
-                        }
+
                     }
 
                 </div>
@@ -25,23 +23,28 @@
                     <div id="Grid"></div>
                     <div style="margin-top:20px;">
                         @{
-                            var suaHQ_QuyCachNguyenLieu = rolePermistions.Where(x => x.Fu == "Danh Mục / Quy Cách Nguyên Liệu HQ" && x.Func == "Sửa Quy Cách Nguyên Liệu HQ" && x.Status == 1).FirstOrDefault();
-                            if (suaHQ_QuyCachNguyenLieu != null)
+                            var themnhacungcapnguyenlieu = rolePermistions.Where(x => x.Fu == "Danh Mục / Nhà Cung Cấp Nguyên Liệu HQ" && x.Func == "Thêm Nhà Cung Cấp Nguyên Liệu HQ" && x.Status == 1).FirstOrDefault();
+                            if (themnhacungcapnguyenlieu != null)
+                            {
+                                <button onclick="showInsert()" type="button" class="btn btn-primary">Thêm</button>
+                            }
+                            var suanhacungcapnguyenlieu = rolePermistions.Where(x => x.Fu == "Danh Mục / Nhà Cung Cấp Nguyên Liệu HQ" && x.Func == "Sửa Nhà Cung Cấp Nguyên Liệu HQ" && x.Status == 1).FirstOrDefault();
+                            if (suanhacungcapnguyenlieu != null)
                             {
                                 <button onclick="showUpdate()" style="margin-right:5px" class="btn btn-outline-warning"><i class='bx bx-edit-alt'></i>Sửa</button>
                             }
-                            var xoaHQ_QuyCachNguyenLieu = rolePermistions.Where(x => x.Fu == "Danh Mục / Quy Cách Nguyên Liệu HQ" && x.Func == "Xóa Quy Cách Nguyên Liệu HQ" && x.Status == 1).FirstOrDefault();
-                            if (xoaHQ_QuyCachNguyenLieu != null)
+                            var xoanhacungcapnguyenlieu = rolePermistions.Where(x => x.Fu == "Danh Mục / Nhà Cung Cấp Nguyên Liệu HQ" && x.Func == "Xóa Nhà Cung Cấp Nguyên Liệu HQ" && x.Status == 1).FirstOrDefault();
+                            if (xoanhacungcapnguyenlieu != null)
                             {
                                 <button onclick="showDelete()" style="margin-right:5px" class="btn btn-outline-danger"><i class='bx bx-trash'></i>Xoá</button>
                             }
-                            // var importHQ_QuyCachNguyenLieu = rolePermistions.Where(x => x.Fu == "Danh Mục / Quy Cách Nguyên Liệu HQ" && x.Func == "Import Quy Cách Nguyên Liệu HQ" && x.Status == 1).FirstOrDefault();
-                            // if (importHQ_QuyCachNguyenLieu != null)
+                            // var importnhacungcapnguyenlieu = rolePermistions.Where(x => x.Fu == "Danh Mục / Nhà Cung Cấp Nguyên Liệu HQ" && x.Func == "Import Nhà Cung Cấp Nguyên Liệu HQ" && x.Status == 1).FirstOrDefault();
+                            // if (importnhacungcapnguyenlieu != null)
                             // {
                             //     <button onclick="import()" style="margin-right:5px" class="btn btn-outline-info"><i class='bx bx-import'></i>Import</button>
                             // }
-                            // var exportHQ_QuyCachNguyenLieu = rolePermistions.Where(x => x.Fu == "Danh Mục / Quy Cách Nguyên Liệu HQ" && x.Func == "Export Quy Cách Nguyên Liệu HQ" && x.Status == 1).FirstOrDefault();
-                            // if (exportHQ_QuyCachNguyenLieu != null)
+                            // var exportnhacungcapnguyenlieu = rolePermistions.Where(x => x.Fu == "Danh Mục / Nhà Cung Cấp Nguyên Liệu HQ" && x.Func == "Export Nhà Cung Cấp Nguyên Liệu HQ" && x.Status == 1).FirstOrDefault();
+                            // if (exportnhacungcapnguyenlieu != null)
                             // {
                             //     <button onclick="export()" style="margin-right:5px" class="btn btn-outline-secondary"><i class='bx bx-export'></i>Export Excel</button>
                             // }
@@ -52,11 +55,11 @@
         </div>
     </div>
 </div>
-<div class="modal fade" id="modalThem" tabindex="-1" aria-hidden="true">
+<div class="modal fade" id="modalThemNhaCungCap" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Thêm Quy Cách Nguyên Liệu</h5>
+                <h5 class="modal-title">Thêm Nhà Cung Cấp</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
@@ -65,8 +68,8 @@
                         <div class="row">
                             <div class="col-md-12 mb-12 ">
                                 <div class="form-outline">
-                                    <label class="form-label" for="x1">Mã Nguyên Liệu</label>
-                                    <input type="text" id="nhomQuyCachQCNLHQ" class="form-control form-control-lg" autocomplete="off" placeholder="Nhập Mã Nguyên Liệu..." />
+                                    <label class="form-label" for="x1">Mã</label>
+                                    <input type="text" id="maNhaCungCap" class="form-control form-control-lg" autocomplete="off" placeholder="Nhập Mã..." style="text-transform: uppercase;" />
                                 </div>
                             </div>
                         </div>
@@ -74,31 +77,23 @@
                             <div class="col-md-12 mb-12 ">
                                 <div class="form-outline">
                                     <label class="form-label" for="x1">Tên</label>
-                                    <input type="text" id="tenQCNLHQ" class="form-control form-control-lg" autocomplete="off" placeholder="Nhập Tên..." />
+                                    <input type="text" id="tenNhaCungCap" class="form-control form-control-lg" autocomplete="off" placeholder="Nhập Tên..." />
                                 </div>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-md-12 mb-12 ">
                                 <div class="form-outline">
-                                    <label class="form-label" for="x1">Đơn Vị Tính</label>
-                                    <input type="text" id="donViTinhQCNLHQ" class="form-control form-control-lg" autocomplete="off" placeholder="Nhập Đơn Vị Tính..." />
+                                    <label class="form-label" for="x1">CCCD</label>
+                                    <input type="text" id="cCCDNhaCungCap" class="form-control form-control-lg" autocomplete="off" placeholder="Nhập CCCD..." />
                                 </div>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-md-12 mb-12 ">
                                 <div class="form-outline">
-                                    <label class="form-label" for="x1">Index</label>
-                                    <input type="text" id="indexQCNLHQ" class="form-control form-control-lg" autocomplete="off" placeholder="Nhập Index..." />
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-12 mb-12 ">
-                                <div class="form-outline">
-                                    <label class="form-label" for="x1">Nhóm Quy Cách</label>
-                                    <input type="text" id="nhomQuyCachQCNLHQ" class="form-control form-control-lg" autocomplete="off" placeholder="Nhập Nhóm Quy Cách..." />
+                                    <label class="form-label" for="x1">Địa Chỉ</label>
+                                    <input type="text" id="diaChiNhaCungCap" class="form-control form-control-lg" autocomplete="off" placeholder="Nhập Địa Chỉ..." />
                                 </div>
                             </div>
                         </div>
@@ -106,7 +101,7 @@
                             <div class="col-md-6 mb-12">
                                 <div class="list-group form-outline">
                                     <label class="">
-                                        <input class="form-check-input me-1" type="checkbox" value="" id="suDungQCNLHQ" />
+                                        <input class="form-check-input me-1" type="checkbox" value="" id="suDungNhaCungCap" />
                                         Sử Dụng
                                     </label>
                                 </div>
@@ -131,22 +126,21 @@
         </div>
     </div>
 </div>
-<div class="modal fade" id="modalSua" tabindex="-1" aria-hidden="true">
+<div class="modal fade" id="modalSuaNhaCungCap" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Sửa Quy Cách Nguyên Liệu</h5>
+                <h5 class="modal-title">Sửa Nhà Cung Cấp</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <div class="card">
                     <div class="card-body">
-
                         <div class="row">
                             <div class="col-md-12 mb-12 ">
                                 <div class="form-outline">
-                                    <label class="form-label" for="x1">Mã Nguyên Liệu</label>
-                                    <input type="text" id="nhomQuyCachQCNLHQSua" class="form-control form-control-lg" autocomplete="off" placeholder="Nhập Mã Nguyên Liệu..." />
+                                    <label class="form-label" for="x1">Mã</label>
+                                    <input type="text" id="maNhaCungCapSua" class="form-control form-control-lg" autocomplete="off" placeholder="Nhập Mã..." style="text-transform: uppercase;" disabled />
                                 </div>
                             </div>
                         </div>
@@ -154,31 +148,23 @@
                             <div class="col-md-12 mb-12 ">
                                 <div class="form-outline">
                                     <label class="form-label" for="x1">Tên</label>
-                                    <input type="text" id="tenQCNLHQSua" class="form-control form-control-lg" autocomplete="off" placeholder="Nhập Tên..." />
+                                    <input type="text" id="tenNhaCungCapSua" class="form-control form-control-lg" autocomplete="off" placeholder="Nhập Tên..." />
                                 </div>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-md-12 mb-12 ">
                                 <div class="form-outline">
-                                    <label class="form-label" for="x1">Đơn Vị Tính</label>
-                                    <input type="text" id="donViTinhQCNLHQSua" class="form-control form-control-lg" autocomplete="off" placeholder="Nhập Đơn Vị Tính..." />
+                                    <label class="form-label" for="x1">CCCD</label>
+                                    <input type="text" id="cCCDNhaCungCapSua" class="form-control form-control-lg" autocomplete="off" placeholder="Nhập CCCD..." />
                                 </div>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-md-12 mb-12 ">
                                 <div class="form-outline">
-                                    <label class="form-label" for="x1">Index</label>
-                                    <input type="text" id="indexQCNLHQSua" class="form-control form-control-lg" autocomplete="off" placeholder="Nhập Index..." />
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-12 mb-12 ">
-                                <div class="form-outline">
-                                    <label class="form-label" for="x1">Nhóm Quy Cách</label>
-                                    <input type="text" id="nhomQuyCachQCNLHQSua" class="form-control form-control-lg" autocomplete="off" placeholder="Nhập Nhóm Quy Cách..." />
+                                    <label class="form-label" for="x1">Địa Chỉ</label>
+                                    <input type="text" id="diaChiNhaCungCapSua" class="form-control form-control-lg" autocomplete="off" placeholder="Nhập Địa Chỉ..." />
                                 </div>
                             </div>
                         </div>
@@ -186,7 +172,7 @@
                             <div class="col-md-6 mb-12">
                                 <div class="list-group form-outline">
                                     <label class="">
-                                        <input class="form-check-input me-1" type="checkbox" value="" id="suDungQCNLHQSua" />
+                                        <input class="form-check-input me-1" type="checkbox" value="" id="suDungNhaCungCapSua" />
                                         Sử Dụng
                                     </label>
                                 </div>
@@ -211,7 +197,7 @@
         </div>
     </div>
 </div>
-<input type="hidden" id="idQCNLHQRowSelected" />
+<input type="hidden" id="maNhaCungCapRowSelected" />
 <script>
     $(document).ready(function () {
         loadGridData();
@@ -219,48 +205,51 @@
     var grid;
     function loadGridData() {
         $.ajax({
-            url: '/HQ_QuyCachNguyenLieu/GetAlls',
+            url: '/HQ_NhaCungCapNguyenLieu/GetAlls',
             type: 'GET',
             dataType: 'json',
             success: function (data) {
+                // Khởi tạo DataManager và gán dữ liệu từ API vào dataSource
                 var dataManager = new ej.data.DataManager({
                     json: data,
                     adaptor: new ej.data.JsonAdaptor()
                 });
+                // Kiểm tra xem Grid đã được tạo chưa
                 if (grid) {
+                    // Nếu Grid đã được tạo, chỉ cập nhật dữ liệu mới
                     grid.dataSource = dataManager;
                     grid.refresh();
                 } else {
+                    // Nếu Grid chưa được tạo, tạo mới Grid
                     grid = new ej.grids.Grid({
                         dataSource: dataManager,
                         allowPaging: true,
                         pageSettings: { pageSize: 50, pageSizes: [50, 100, 200, 500] },
                         allowFiltering: true,
-                        filterSettings: { type: 'Excel' },
                         allowSorting: true,
+                        filterSettings: { type: 'Excel' },
                         //frozenColumns: 3,
                         allowResizing: true,
-                        rowSelected: onRowSelected,
                         allowExcelExport: true,
                         toolbar: ['ExcelExport'],
+                        rowSelected: onRowSelected,
                         height: 400,
                         columns: [
-                            { field: 'MaNguyenLieu', headerText: 'Mã Nguyên Liệu', width: 150 },
+                            //{ field: 'STT', headerText: 'STT', width: 80, textAlign: 'Center' },
+                            { field: 'Ma', headerText: 'Mã', width: 150 },
                             { field: 'Ten', headerText: 'Tên', width: 150 },
-                            { field: 'Index', headerText: 'Index', width: 150 },
-                            { field: 'DonViTinh', headerText: 'Đơn Vị Tính', width: 150 },
-                            { field: 'NhomQuyCach', headerText: 'Nhóm Quy Cách', width: 150 },
+                            { field: 'CCCD', headerText: 'CCCD', width: 150 },
+                            { field: 'DiaChi', headerText: 'Địa Chỉ', width: 150 },
                             { field: 'SuDung', headerText: 'Sử Dụng', width: 100, displayAsCheckBox: 'true', textAlign: 'Center' },
                         ]
                     });
                     // Hiển thị Grid trên trang web
                     grid.appendTo('#Grid');
                     grid.toolbarClick = function (args) {
-                        if (args.item.id === 'Grid_excelexport') {
-                            grid.excelExport();
-                        }
-                    };
-               }
+             if (args.item.id === 'Grid_excelexport') {
+                grid.excelExport();
+             }};
+                }
             },
             error: function (error) {
                 console.error(error);
@@ -275,21 +264,21 @@
         // Lấy dữ liệu của hàng được chọn
         var selectedRecord = args.data;
         // Lấy giá trị Id từ dữ liệu của hàng được chọn
-        var Id = selectedRecord.Id;
-
-        $('#idQCNLHQRowSelected').val(Id);
+        var Ma = selectedRecord.Ma;
+        $('#maNhaCungCapRowSelected').val(Ma);
     }
 </script>
 <script>
     function showInsert() {
         $.ajax({
             type: "GET",
-            url: "/HQ_QuyCachNguyenLieu/CreatDefautNew",
+            url: "/HQ_NhaCungCapNguyenLieu/CreatDefautNew", // Đường dẫn đến action trong controller
             success: function (rs) {
                 if (rs.isSuccess === true) {
-
-                    $('#suDungQCNLHQ').prop('checked', rs.SuDung);
-                    $('#modalThem').modal('show');
+                    $('#maNhaCungCap').val(rs.Ma);
+                    $('#tenNhaCungCap').val(rs.Ten);
+                    $('#suDungNhaCungCap').prop('checked', rs.SuDung);
+                    $('#modalThemNhaCungCap').modal('show');
                 }
                 else {
                     toastOptionNotyfi();
@@ -303,33 +292,28 @@
         });
     }
     function insert() {
-
-        var ten = $('#tenQCNLHQ').val();
-
-        var suDung = $('#suDungQCNLHQ').prop('checked');
-        var index = $('#indexQCNLHQ').val();
-        var nhomQuyCach = $('#nhomQuyCachQCNLHQ').val();
-        var maNguyenLieu = $('#maNguyenLieuQCNLHQ').val();
-        var donViTinh = $('#donViTinhQCNLHQ').val();
+        var ma = $('#maNhaCungCap').val();
+        var ten = $('#tenNhaCungCap').val();
+        var suDung = $('#suDungNhaCungCap').prop('checked');
+        var cccd = $('#cCCDNhaCungCap').val();
+        var diaChi = $('#diaChiNhaCungCap').val();
         document.getElementById("txtThem").style.visibility = "hidden";
         document.getElementById("loadingIndicator").style.display = "block";
         $.ajax({
             type: 'POST',
-            url: '/HQ_QuyCachNguyenLieu/DoInsert',
+            url: '/HQ_NhaCungCapNguyenLieu/DoInsert',
             data: {
-
+                ma: ma,
                 ten: ten,
                 suDung: suDung,
-                index :index,
-                nhomQuyCach : nhomQuyCach,
-                maNguyenLieu : maNguyenLieu,
-                donViTinh: donViTinh
+                cccd:cccd,
+                diaChi:diaChi
             },
             success: function (rs) {
                 if (rs.isSuccess === true) {
                     toastOptionNotyfi();
                     toastr["success"](rs.Messages, "Thông báo");
-                    $('#modalThem').modal('hide');
+                    $('#modalThemNhaCungCap').modal('hide');
                     reloadData();
                 } else {
                     toastOptionNotyfi();
@@ -349,60 +333,54 @@
 </script>
 <script>
     function showUpdate() {
-        var id = $('#idQCNLHQRowSelected').val();
+        var ma = $('#maNhaCungCapRowSelected').val();
         $.ajax({
-            url: "/HQ_QuyCachNguyenLieu/GetsByMa",
-            data: { id: id },
+            url: "/HQ_NhaCungCapNguyenLieu/GetsByMa",
+            data: { ma: ma },
             type: 'GET',
             dataType: 'json',
             success: function (rs) {
                 if (rs.isSuccess === true) {
-                    $('#idQCNLHQSua').val(rs.Id);
-                    $('#tenQCNLHQSua').val(rs.Ten);
-                    $('#indexQCNLHQSua').val(rs.Index);
-                    $('#nhomQuyCachQCNLHQSua').val(rs.NhomQuyCach);
-                    $('#maNguyenLieuQCNLHQSua').val(rs.MaNguyenLieu);
-                    $('#donViTinhQCNLHQSua').val(rs.DonViTinh);
-                    $('#suDungQCNLHQSua').prop('checked', rs.SuDung);
-                    $('#modalSua').modal('show');
+                    $('#maNhaCungCapSua').val(rs.Ma);
+                    $('#tenNhaCungCapSua').val(rs.Ten);
+                    $('#cCCDNhaCungCapSua').val(rs.CCCD);
+                    $('#diaChiNhaCungCapSua').val(rs.DiaChi);
+                    $('#suDungNhaCungCapSua').prop('checked', rs.SuDung);
+                    $('#modalSuaNhaCungCap').modal('show');
                 }
                 else {
                     toastOptionNotyfi();
                     toastr["warning"](rs.Mesages, "Thông báo");
                 }
             },
-            error: function (error) {
+            error: function () {
                 toastOptionNotyfi();
                 toastr["error"]('Đã xảy ra lỗi: ' + error, "Thông báo");
             }
         });
     }
     function update() {
-        var id = $('#idQCNLHQRowSelected').val();
-        var ten = $('#tenQCNLHQSua').val();
-        var index = $('#indexQCNLHQSua').val();
-        var nhomQuyCach = $('#nhomQuyCachQCNLHQSua').val();
-        var maNguyenLieu = $('#maNguyenLieuQCNLHQSua').val();
-        var donViTinh = $('#donViTinhQCNLHQSua').val();
-        var suDung = $('#suDungQCNLHQSua').prop('checked');
+        var ma = $('#maNhaCungCapSua').val();
+        var ten = $('#tenNhaCungCapSua').val();
+        var cccd = $('#cCCDNhaCungCapSua').val();
+        var diaChi = $('#diaChiNhaCungCapSua').val();
+        var suDung = $('#suDungNhaCungCapSua').prop('checked');
         document.getElementById("txtSua").style.visibility = "hidden";
         document.getElementById("loadingIndicatorSua").style.display = "block";
         $.ajax({
-            url: '/HQ_QuyCachNguyenLieu/DoUpdate',
+            url: '/HQ_NhaCungCapNguyenLieu/DoUpdate',
             data: {
-                id: id,
+                ma: ma,
                 ten: ten,
-                suDung: suDung,
-                index :index,
-                nhomQuyCach : nhomQuyCach,
-                maNguyenLieu : maNguyenLieu,
-                donViTinh: donViTinh
+                cccd:cccd,
+                diaChi:diaChi,
+                suDung: suDung
             },
             type: 'POST',
             dataType: 'json',
             success: function (rs) {
                 if (rs.isSuccess === true) {
-                    $('#modalSua').modal('hide');
+                    $('#modalSuaNhaCungCap').modal('hide');
                     reloadData();
                     toastOptionNotyfi();
                     toastr["success"](rs.Messages, "Thông báo");
@@ -413,7 +391,7 @@
             },
             error: function (error) {
                 toastOptionNotyfi();
-                toastr["error"]('Đã xảy ra lỗi: ' + error.toString(), "Thông báo");
+                toastr["error"]('Đã xảy ra lỗi: ' + error, "Thông báo");
             },
             complete: function () {
                 document.getElementById("loadingIndicatorSua").style.display = "none";
@@ -424,17 +402,17 @@
 </script>
 <script>
     function showDelete() {
-        var id = $('#idQCNLHQRowSelected').val();
+        var ma = $('#maNhaCungCapRowSelected').val();
         $.ajax({
-            url: "/HQ_QuyCachNguyenLieu/GetsByMa",
-            data: { id: id },
+            url: '/HQ_NhaCungCapNguyenLieu/GetsByMa',
+            data: { ma: ma },
             type: 'GET',
             dataType: 'json',
             success: function (rs) {
                 if (rs.isSuccess === true) {
                     bootbox.confirm({
                         title: "Thông báo!",
-                        message: "Bạn có chắc muốn xoá : " + rs.Ten,
+                        message: "Bạn có chắc muốn xoá bàn cắt tiết: " + rs.Ten,
                         buttons: {
                             confirm: {
                                 label: 'OK',
@@ -445,8 +423,8 @@
                             if (result) {
                                 //Người dùng đã bấm OK, Gọi API xóa ở đây
                                 $.ajax({
-                                    url: '/HQ_QuyCachNguyenLieu/DoDelete',
-                                    data: { id: id },
+                                    url: '/HQ_NhaCungCapNguyenLieu/DoDelete',
+                                    data: { ma: ma },
                                     type: 'POST',
                                     dataType: 'json',
                                     success: function (rs) {
@@ -461,7 +439,7 @@
                                     },
                                     error: function (error) {
                                         toastOptionNotyfi();
-                                        toastr["error"]('Đã xảy ra lỗi: ' + error.toString(), "Thông báo");
+                                        toastr["error"]('Đã xảy ra lỗi: ' + error, "Thông báo");
                                     }
                                 });
                             }
@@ -474,7 +452,7 @@
             },
             error: function (error) {
                 toastOptionNotyfi();
-                toastr["error"]('Đã xảy ra lỗi: ' + error.toString(), "Thông báo");
+                toastr["error"]('Đã xảy ra lỗi: ' + error, "Thông báo");
             }
         });
 

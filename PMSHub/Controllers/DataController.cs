@@ -33,6 +33,9 @@ public class DataController(IMayCansService mayCansService, IMainService mainSer
             //"\"TheId\":\"%s\",\"TheChucNang\":\"%s\",\"Ngay\":\"%s\",\"MaLoaiNguyenLieu\":\"%s\"}"
             var jsonString = data.ToString() ?? "";
             var jObject = JObject.Parse(jsonString);
+
+            //var item = jObject["data"]?[0];
+
             var id = (string)(jObject["Id"] ?? "")!;
             var stt = (int)(jObject["STT"] ?? 0);
             var ngayGio = (string)(jObject["NgayGio"] ?? "")!;

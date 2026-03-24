@@ -32,6 +32,9 @@ namespace Models.Repos.Models
         public decimal Max { get; set; }
 
         [Column("MaQuyCach", TypeName = "bigint")]
-        public long MaQuyCach { get; set; }
+        public long? MaQuyCach { get; set; }
+
+        [Column("NhomQuyCach", TypeName = "nvarchar(50)")]
+        public string? NhomQuyCach { get; set; }
     }
 }

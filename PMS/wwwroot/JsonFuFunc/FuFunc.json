@@ -468,6 +468,10 @@
     "Func": "Xem Báo Cáo Nguyên Liệu Xuất / Tồn Kho HQ"
   },
   {
+    "Fu": "Báo Cáo Nguyên Liệu Xuất / Tỷ Lệ Hao Hụt HQ",
+    "Func": "Xem Báo Cáo Nguyên Liệu Xuất / Tỷ Lệ Hao Hụt HQ"
+  },
+  {
     "Fu": "Xử Lý Phiếu Cân / Phiếu Cân HQ",
     "Func": "Xem Xử Lý Phiếu Cân / Phiếu Cân HQ"
   },
@@ -817,6 +821,30 @@
   {
     "Fu": "Danh Mục / Phương Tiện Nguyên Liệu HQ",
     "Func": "Export Phương Tiện Nguyên Liệu HQ"
+  },
+  {
+    "Fu": "Danh Mục / Nhà Cung Cấp Nguyên Liệu HQ",
+    "Func": "Xem Nhà Cung Cấp Nguyên Liệu HQ"
+  },
+  {
+    "Fu": "Danh Mục / Nhà Cung Cấp Nguyên Liệu HQ",
+    "Func": "Thêm Nhà Cung Cấp Nguyên Liệu HQ"
+  },
+  {
+    "Fu": "Danh Mục / Nhà Cung Cấp Nguyên Liệu HQ",
+    "Func": "Sửa Nhà Cung Cấp Nguyên Liệu HQ"
+  },
+  {
+    "Fu": "Danh Mục / Nhà Cung Cấp Nguyên Liệu HQ",
+    "Func": "Xóa Nhà Cung Cấp Nguyên Liệu HQ"
+  },
+  {
+    "Fu": "Danh Mục / Nhà Cung Cấp Nguyên Liệu HQ",
+    "Func": "Import Nhà Cung Cấp Nguyên Liệu HQ"
+  },
+  {
+    "Fu": "Danh Mục / Nhà Cung Cấp Nguyên Liệu HQ",
+    "Func": "Export Nhà Cung Cấp Nguyên Liệu HQ"
   }
 
 

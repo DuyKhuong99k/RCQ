@@ -183,6 +183,32 @@ namespace PMS.Controllers.HQ
             return dataSource;
         }
         #endregion
+        #region Tỷ Lệ Hao Hụt
+        [CustomAuthorize(Fu = "Báo Cáo Nguyên Liệu Xuất / Tỷ Lệ Hao Hụt HQ", Func = "Xem Báo Cáo Nguyên Liệu Xuất / Tỷ Lệ Hao Hụt HQ")]
+        public IActionResult TyLeHaoHutXLNHQView()
+        {
+            var rl = Middlewares.AuthenticationHelpers.CheckAut(HttpContext, "TyLeHaoHutXLNHQView");
+
+            if (rl == false)
+            {
+                return Redirect(AppViewModels.AppViewModel.Instance.RedirectLoginUrl);
+            }
+            ViewBag.TitlePage = "Báo Cáo Tỷ Lệ Hao Hụt NL Xuất";
+            return View("~/Views/BaoCaoNguyenLieuHQ/TyLeHaoHutXLNHQView.cshtml");
+        }
+        public async Task<IEnumerable<object>> GetTyLeNguyenLieuHaoHut(DateTime? fromDate = null)
+        {
+            IEnumerable<object> dataSource = ViewBag.dataSource;
+            if (dataSource == null)
+            {
+                var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/HQ_PhieuCanXuatNguiyenLieu/GetTyLeNguyenLieuHaoHut/{fromDate?.ToString("yyyy-MM-dd")}";
+                using var helper = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+                ViewBag.dataSource = await helper.GetAsync<object>(HttpContext, apiUrl);
+                dataSource = ViewBag.dataSource;
+            }
+            return dataSource;
+        }
+        #endregion
         #endregion
 
         public async Task<ActionResult> Reload(DateTime fromDate, DateTime toDate, string xuongId)
@@ -209,6 +235,10 @@ namespace PMS.Controllers.HQ
             else if (reportType == "TonKhoXLNHQView")
             {
                 dataSource = await GetTonKhoSanPhamPhieuCanXuatNguyenLieus(fromDate, toDate, xuongId);
+            }
+            else if (reportType == "TyLeHaoHutXLNHQView")
+            {
+                dataSource = await GetTyLeNguyenLieuHaoHut(fromDate);
             }
             if (dataSource == null || !dataSource.Any())
             {

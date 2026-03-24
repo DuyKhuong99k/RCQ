@@ -523,6 +523,28 @@ public partial class PhieuCanTPDinhHinhViewModel : ObservableObject
         var dao = new Dao.Repos.HQ.PhieuCanTPDinhHinh();
         return dao.GetSoRoTongTrongLuongByNhanVienId(dateTime, nhanVienId);
     }
+    public decimal GetTongTrongLuongThanhPhamByNhanVienId(
+        DateTime dateTime, 
+        string nhanVienId,
+        string maThanhPham)
+    {
+        var dao = new Dao.Repos.HQ.PhieuCanTPDinhHinh();
+        return dao.GetTongTrongLuongThanhPhamByNhanVienId(
+            dateTime, 
+            nhanVienId, 
+            maThanhPham);
+    }
+    public decimal GetTongTrongLuongThanhPhamNhanByNhanVienId(
+        DateTime dateTime, 
+        string nhanVienId,
+        string maThanhPham)
+    {
+        var dao = new Dao.Repos.HQ.PhieuCanTPDinhHinh();
+        return dao.GetTongTrongLuongThanhPhamNhanByNhanVienId(
+            dateTime, 
+            nhanVienId, 
+            maThanhPham);
+    }
 
     // public List<T> GetsSanPhamTinhLuong<T>()
     //{

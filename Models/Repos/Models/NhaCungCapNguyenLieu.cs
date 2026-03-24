@@ -16,4 +16,8 @@ public partial class NhaCungCapNguyenLieu
     public string? Ten { get; set; }
 
     public bool? SuDung { get; set; }
+
+    public string? CCCD {get; set;}
+
+    public string? DiaChi {get;set;}
 }

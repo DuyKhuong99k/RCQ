@@ -3419,6 +3419,51 @@ where
         }
     }
 
+    public decimal GetTongTrongLuongThanhPhamByNhanVienId(
+    DateTime dateTime, 
+    string nhanVienId,
+    string maThanhPham)
+{
+    var query = @"
+        SELECT ISNULL(SUM(TrongLuongTra), 0)
+        FROM PhieuCanTPDinhHinh WITH (READPAST)
+        WHERE MaNhanVien = @nhanVienId
+          AND Ngay = @ngay
+          AND MaThanhPham = @maThanhPham";
+
+    using (var connection = new SqlConnection(connectionString))
+    {
+        connection.Open();
+        var result = connection.ExecuteScalar<decimal>(
+            query,
+            new { ngay = dateTime.Date, nhanVienId, maThanhPham });
+
+        return result;
+    }
+}
+    public decimal GetTongTrongLuongThanhPhamNhanByNhanVienId(
+    DateTime dateTime, 
+    string nhanVienId,
+    string maThanhPham)
+{
+    var query = @"
+        SELECT ISNULL(SUM(TrongLuongNhan), 0)
+        FROM PhieuCanTPDinhHinh WITH (READPAST)
+        WHERE MaNhanVien = @nhanVienId
+          AND Ngay = @ngay
+          AND MaThanhPham = @maThanhPham";
+
+    using (var connection = new SqlConnection(connectionString))
+    {
+        connection.Open();
+        var result = connection.ExecuteScalar<decimal>(
+            query,
+            new { ngay = dateTime.Date, nhanVienId, maThanhPham });
+
+        return result;
+    }
+}
+
     public Tuple<int, decimal, int, decimal> GetSoRoTongTrongLuongByNhanVienId(
         DateTime dateTime,
         string nhanVienId,

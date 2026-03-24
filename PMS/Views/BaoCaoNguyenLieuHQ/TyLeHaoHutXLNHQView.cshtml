@@ -1,6 +1,6 @@
 ﻿
 @{
-    ViewData["Title"] = "ChiTietNLNHQView";
+    ViewData["Title"] = "TyLeHaoHutXLNHQView";
     Layout = "~/Views/Shared/_Layout.cshtml";
     var XuongId = @Context.Session.GetString("XuongId");
 }
@@ -10,7 +10,7 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h2 class="mb-0">Chi Tiết</h2>
+                    <h2 class="mb-0">Tỷ Lệ Hao Hụt Nguyên Liệu</h2>
                 </div>
                 <div class="card-body">
                     <div id="Grid"></div>
@@ -84,37 +84,63 @@
                 toolbar: ['ExcelExport'],
                 height: 400,
                 columns: [
-                    
-                    { field: 'NgayGio', headerText: 'Ngày', width: 150, type: 'date', format: 'dd-MM-yyyy HH:mm:ss' },
-                    { field: 'MaNguyenLieu', headerText: 'Mã Nguyên Liệu', width: 150 },
-                    { field: 'DonViTinh', headerText: 'Đơn Vị Tính', width: 150 },
-                    { field: 'TenQuyCach', headerText: 'Tên Nguyên Liệu', width: 200 },
-                    { field: 'KhoiLuongNhap', headerText: 'Số Lượng', width: 150 },
-                    { field: 'TyLe', headerText: 'Tỷ Lệ %', width: 150 },
-                    { field: 'MaNhaCC', headerText: 'Mã Khách Hàng', width: 150 },
-                    { field: 'TenNhaCC', headerText: 'Tên Khách Hàng', width: 150 },
-                    { field: 'CCCDNCC', headerText: 'CCCD/MST', width: 150 },
-                    { field: 'TaiXe', headerText: 'Tài Xế', width: 150 },
-                    { field: 'SDT', headerText: 'SĐT Tài Xế', width: 150 },
-                    { field: 'CCCD', headerText: 'CCCD Tài Xế', width: 150 },
-                    { field: 'MaLo', headerText: 'Lô', width: 150 },
-                    { field: 'NhomQuyCach', headerText: 'Nhóm Vật Tư', width: 150 },
-                    { field: 'NoiDungGiaoNhan', headerText: 'Nội Dung', width: 300 },
+                    { field: 'TenQuyCach', headerText: 'Tên Quy Cách', width: 200 },
+                    { field: 'MaLo', headerText: 'Mã Lô', width: 150 },
+                    { field: 'KhoiLuongNhap', headerText: 'Lượng Nhập Ban Đầu', width: 180, type: 'number' },
+                    { field: 'TonKhoCu', headerText: 'Tồn Cũ', width: 120, type: 'number'},
+                    { field: 'TyLeKhongDat', headerText: 'Tỷ Lệ % Không Đạt', width: 150},
+                    { field: 'TyLeTinhTien', headerText: '% Tính Tiền', width: 150 },
+                    { field: 'TongLuongXuat', headerText: 'Cân Xuất Vào Xưởng', width: 150, type: 'number' },
+                    { field: 'TonConLai', headerText: 'Tồn Kho', width: 150, type: 'number' },
+                    { field: 'KhoiLuongIsCanHu', headerText: 'Hư Kho', width: 150, type: 'number' },
+                    { field: 'HaoHut', headerText: 'Hao Hụt', width: 150, type: 'number' },
+                    { field: 'TongDaXuat', headerText: 'Tổng Xuất', width: 150, type: 'number' },
                 ],
                 aggregates: [{
                     columns: [
                         {
                             type: 'Sum',
-                            field: 'TrongLuongHang',
+                            field: 'KhoiLuongNhap',
                             format: '####.000',
-                            footerTemplate: 'Tổng Trọng Lượng: ${Sum} Kg'
+                            footerTemplate: 'Tổng Nhập: ${Sum} Kg'
                         },
                         {
                             type: 'Sum',
-                            field: 'TrongLuongXe',
+                            field: 'TonKhoCu',
                             format: '####.000',
-                            footerTemplate: 'Tổng Trọng Lượng: ${Sum} Kg'
+                            footerTemplate: 'Tổng Tồn: ${Sum} Kg'
                         },
+                        {
+                            type: 'Sum',
+                            field: 'TongLuongXuat',
+                            format: '####.000',
+                            footerTemplate: 'Tổng Xuất Vào Xưởng: ${Sum} Kg'
+                        },
+                        {
+                            type: 'Sum',
+                            field: 'TonConLai',
+                            format: '####.000',
+                            footerTemplate: 'Tổng Tồn Còn Lại: ${Sum} Kg'
+                        },
+                        {
+                            type: 'Sum',
+                            field: 'KhoiLuongIsCanHu',
+                            format: '####.000',
+                            footerTemplate: 'Tổng Hư Kho: ${Sum} Kg'
+                        },
+                        {
+                            type: 'Sum',
+                            field: 'HaoHut',
+                            format: '####.000',
+                            footerTemplate: 'Tổng Hao Hụt: ${Sum} Kg'
+                        },
+                        {
+                            type: 'Sum',
+                            field: 'TongDaXuat',
+                            format: '####.000',
+                            footerTemplate: 'Tổng Cân Hôm Nay: ${Sum} Kg'
+                        },
+
                     ]
                 }]
             });
@@ -175,5 +201,4 @@
             });
         });
 </script>
-
 

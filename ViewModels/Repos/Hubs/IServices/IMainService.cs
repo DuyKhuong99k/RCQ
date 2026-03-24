@@ -160,4 +160,5 @@ public interface IMainService
     public AoViewModel VmAoNguyenLieu { get; }
     public TrongLuongCoiTheoThanhPhamViewModel VmTrongLuongCoiTheoThanhPham { get; }
     public LoaiCaXepKhuonViewModel VmLoaiCaXepKhuon { get; }
+    public LogGhiNhanLoiCanViewModel VmLogGhiNhanLoiCan { get; }
 }

@@ -22,21 +22,21 @@ namespace Dao.Repos.HQ
            ,[SuDung]
            ,[Min]
            ,[Max]
-           ,[MaQuyCach])
+           ,[MaQuyCach],[NhomQuyCach])
      VALUES
            (@Id 
            ,@Ten 
            ,@SuDung 
            ,@Min
            ,@Max
-           ,@MaQuyCach)";
+           ,@MaQuyCach,@NhomQuyCach)";
 
         private readonly string qrUpdate = @"UPDATE [dbo].[HQ_SanPhamNguyenLieu]
    SET [Ten] = @Ten  
       ,[SuDung] = @SuDung 
       ,[Min] = @Min
       ,[Max] = @Max
-      ,[MaQuyCach]
+      ,[MaQuyCach],[NhomQuyCach] = @NhomQuyCach
  WHERE  [Id] = @Id";
 
         private readonly string qrGetAll = "Select * from HQ_SanPhamNguyenLieu";

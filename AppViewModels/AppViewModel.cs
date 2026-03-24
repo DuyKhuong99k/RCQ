@@ -164,8 +164,8 @@ namespace AppViewModels
             //Settings.ServerName = "10.10.26.50,1566";
             //Settings.ServerName = "data.pms-vn.com,4751";
             Settings.TimeOut = 30;
-            Settings.ServerName = "192.168.1.163";
-            setting.Db = "PMS_HQ";
+            //Settings.ServerName = ".";
+            //setting.Db = "TEST_ADD";
             Base.Ins.SetConnectionStringCommand.Execute(setting);
             //Base.Ins.SetConnectionStringCommand.Execute(Settings.GetValues());
             Base.Ins.ConnectionString2 = Base.Ins.ConnectionString;
@@ -180,7 +180,7 @@ namespace AppViewModels
                 HubsMayCanCODE = modelWebAppSetting.HubMayCanCODE;
                 LoKv = modelWebAppSetting.LoKv;
             }
-            ComName = nameof(ComNames.RCQTG);
+            ComName = nameof(ComNames.NV);
             LoKv = AppKV.Hq;
             ChiSoTyLeTangTrongRaCoi = 1.07m;
             MocThoiGian1 = 30;
@@ -214,7 +214,7 @@ namespace AppViewModels
                 setting.ServerNameBravo = modelDatabaseConnectSetting.ServerNameBravo;
                 Settings = setting;
             }
-
+            
             Base.Ins.SetConnectionStringCommand.Execute(setting);
             //Base.Ins.SetConnectionStringCommand.Execute(Settings.GetValues());
             Base.Ins.ConnectionString2 = Base.Ins.ConnectionString;

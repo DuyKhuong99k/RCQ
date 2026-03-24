@@ -71,5 +71,13 @@ namespace Vars.Hubs
         public decimal TongTrongLuong { get; set; } = 0;
         [System.Text.Json.Serialization.JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
         public int TongSoRo { get; set; } = 0;
+        //[System.Text.Json.Serialization.JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+        //public decimal TongTLTPNhan { get; set; } = 0;
+        [System.Text.Json.Serialization.JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+        public decimal TongTLTP { get; set; } = 0;
+        [System.Text.Json.Serialization.JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+        public decimal DinhMucTP { get; set; } = 0;
+        [System.Text.Json.Serialization.JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+        public bool DanhGia { get; set; } = false;
     }
 }

@@ -30,7 +30,7 @@ namespace WebAPI.Controllers
         [Authorize]
         public IActionResult GetAlls()
         {
-            var items = _context.HQ_SanPhamNguyenLieus.OrderByDescending(x => x.Id).ToList();
+            var items = _context.HQ_SanPhamNguyenLieus.ToList();
 
             return Ok(items);
         }
@@ -42,7 +42,7 @@ namespace WebAPI.Controllers
         }
         [HttpGet("{id}")]
         [Authorize]
-        public IActionResult GetsByMa(int id)
+        public IActionResult GetsByMa(long id)
         {
             var item = _context.HQ_SanPhamNguyenLieus.FirstOrDefault(x => x.Id == id);
             if (item == null)
@@ -107,7 +107,8 @@ namespace WebAPI.Controllers
                 MNgay = model.MNgay,
                 Min = model.Min,
                 Max = model.Max,
-                MaQuyCach = model.MaQuyCach
+                MaQuyCach = model.MaQuyCach,
+                NhomQuyCach = model.NhomQuyCach
             };
             _context.HQ_SanPhamNguyenLieus.Add(newItem);
             try
@@ -131,7 +132,7 @@ namespace WebAPI.Controllers
         }
         [HttpPost("{id}")]
         [Authorize]
-        public async Task<IActionResult> Update(int id, [FromBody] HQ_SanPhamNguyenLieu model)
+        public async Task<IActionResult> Update(long id, [FromBody] HQ_SanPhamNguyenLieu model)
         {
             // Kiểm tra xem ID người dùng được cập nhật có hợp lệ không
             if (id <= 0)
@@ -176,7 +177,7 @@ namespace WebAPI.Controllers
             item.MNgay = model.MNgay;
             item.Min = model.Min;
             item.Max = model.Max;
-            item.MaQuyCach = model.MaQuyCach;
+            item.NhomQuyCach = model.NhomQuyCach;
             try
             {
                 await _context.SaveChangesAsync();
@@ -198,7 +199,7 @@ namespace WebAPI.Controllers
         }
         [HttpPost("{id}")]
         [Authorize]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> Delete(long id)
         {
             if (id <= 0)
             {

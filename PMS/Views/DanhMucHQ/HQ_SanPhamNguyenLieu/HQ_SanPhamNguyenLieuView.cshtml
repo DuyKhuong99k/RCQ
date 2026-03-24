@@ -6,7 +6,7 @@
     var roleIds = PMS.Middlewares.AuthenticationHelpers.GetRoleIdsFromCookie(Context);
     // lấy danh sách fu func từ list roleId
     var rolePermistions = await PMS.Middlewares.AuthenticationHelpers.GetRolePermistionsAsync(Context, roleIds);
-    var quyCach = ViewBag.listQuyCach;
+    // var quyCach = ViewBag.listQuyCach;
 }
 
 <div class="container-fluid mt-4">
@@ -38,11 +38,11 @@
                             {
                                 <button onclick="showDelete()" style="margin-right:5px" class="btn btn-outline-danger"><i class='bx bx-trash'></i>Xoá</button>
                             }
-                            var importHQ_SanPhamNguyenLieu = rolePermistions.Where(x => x.Fu == "Danh Mục / Sản Phẩm Nguyên Liệu HQ" && x.Func == "Import Sản Phẩm Nguyên Liệu HQ" && x.Status == 1).FirstOrDefault();
-                            if (importHQ_SanPhamNguyenLieu != null)
-                            {
-                                <button onclick="import()" style="margin-right:5px" class="btn btn-outline-info"><i class='bx bx-import'></i>Import</button>
-                            }
+                            // var importHQ_SanPhamNguyenLieu = rolePermistions.Where(x => x.Fu == "Danh Mục / Sản Phẩm Nguyên Liệu HQ" && x.Func == "Import Sản Phẩm Nguyên Liệu HQ" && x.Status == 1).FirstOrDefault();
+                            // if (importHQ_SanPhamNguyenLieu != null)
+                            // {
+                            //     <button onclick="import()" style="margin-right:5px" class="btn btn-outline-info"><i class='bx bx-import'></i>Import</button>
+                            // }
                             // var exportHQ_SanPhamNguyenLieu = rolePermistions.Where(x => x.Fu == "Danh Mục / Sản Phẩm Nguyên Liệu HQ" && x.Func == "Export Sản Phẩm Nguyên Liệu HQ" && x.Status == 1).FirstOrDefault();
                             // if (exportHQ_SanPhamNguyenLieu != null)
                             // {
@@ -93,8 +93,16 @@
                         <div class="row">
                             <div class="col-md-12 mb-12 ">
                                 <div class="form-outline">
+                                    <label class="form-label" for="x1">Nhóm Quy Cách</label>
+                                    <input type="text" id="nhomQuyCachSPNLHQ" class="form-control form-control-lg" autocomplete="off" placeholder="Nhập Tên..." />
+                                </div>
+                            </div>
+                        </div>
+                        @* <div class="row">
+                            <div class="col-md-12 mb-12 ">
+                                <div class="form-outline">
                                     <label class="form-label">Quy Cách</label>
-                                    <select id="maQuyCachSPNLHQ" class="form-control form-control-lg">
+                                    <select id="maQuyCachSPNLHQ"  class="form-control form-control-lg">
                                         <option disabled selected>Chọn Quy Cách</option>
                                         @foreach (var item in quyCach)
                                         {
@@ -103,7 +111,7 @@
                                     </select>
                                 </div>
                             </div>
-                        </div>
+                        </div> *@
                         <div class="row">
                             <div class="col-md-6 mb-12">
                                 <div class="list-group form-outline">
@@ -171,6 +179,14 @@
                         <div class="row">
                             <div class="col-md-12 mb-12 ">
                                 <div class="form-outline">
+                                    <label class="form-label" for="x1">Nhóm Quy Cách</label>
+                                    <input type="text" id="nhomQuyCachSPNLHQSua" class="form-control form-control-lg" autocomplete="off" placeholder="Nhập Tên..." />
+                                </div>
+                            </div>
+                        </div>
+                        @* <div class="row">
+                            <div class="col-md-12 mb-12 ">
+                                <div class="form-outline">
                                     <label class="form-label">Quy Cách</label>
                                     <select id="maQuyCachSPNLHQSua" class="form-control form-control-lg">
                                         <option disabled selected>Chọn Quy Cách</option>
@@ -181,7 +197,7 @@
                                     </select>
                                 </div>
                             </div>
-                        </div>
+                        </div> *@
                         <div class="row">
                             <div class="col-md-6 mb-12">
                                 <div class="list-group form-outline">
@@ -249,7 +265,7 @@
                             { field: 'Ten', headerText: 'Tên', width: 150 },
                             { field: 'Min', headerText: 'Min', width: 150 },
                             { field: 'Max', headerText: 'Max', width: 150 },
-                            { field: 'TenQuyCach', headerText: 'Quy Cách', width: 150 },
+                            { field: 'NhomQuyCach', headerText: 'Nhóm Quy Cách', width: 150 },
                             { field: 'SuDung', headerText: 'Sử Dụng', width: 100, displayAsCheckBox: 'true', textAlign: 'Center' },
                         ]
                     });
@@ -307,7 +323,7 @@
         var suDung = $('#suDungSPNLHQ').prop('checked');
         var min = $('#minSPNLHQ').val();
         var max = $('#maxSPNLHQ').val();
-        var maQuyCach = $('#maQuyCachSPNLHQ').val();
+        var nhomQuyCach = $('#nhomQuyCachSPNLHQ').val();
         document.getElementById("txtThem").style.visibility = "hidden";
         document.getElementById("loadingIndicator").style.display = "block";
         $.ajax({
@@ -318,7 +334,7 @@
                 suDung: suDung,
                 min : min,
                 max : max,
-                maQuyCach : maQuyCach
+                nhomQuyCach : nhomQuyCach
             },
             success: function (rs) {
                 if (rs.isSuccess === true) {
@@ -357,7 +373,7 @@
                     $('#suDungSPNLHQSua').prop('checked', rs.SuDung);
                     $('#minSPNLHQSua').val(rs.Min);
                     $('#maxSPNLHQSua').val(rs.Max);
-                    $('#maQuyCachSPNLHQSua').val(rs.MaQuyCach);
+                    $('#nhomQuyCachSPNLHQSua').val(rs.NhomQuyCach);
                     $('#modalSua').modal('show');
                 }
                 else {
@@ -377,7 +393,7 @@
         var suDung = $('#suDungSPNLHQSua').prop('checked');
         var min = $('#minSPNLHQSua').val();
         var max = $('#maxSPNLHQSua').val();
-        var maQuyCach = $('#maQuyCachSPNLHQSua').val();
+        var nhomQuyCach = $('#nhomQuyCachSPNLHQSua').val();
         document.getElementById("txtSua").style.visibility = "hidden";
         document.getElementById("loadingIndicatorSua").style.display = "block";
         $.ajax({
@@ -388,7 +404,7 @@
                 suDung: suDung,
                 min : min,
                 max : max,
-                maQuyCach : maQuyCach
+                nhomQuyCach : nhomQuyCach
             },
             type: 'POST',
             dataType: 'json',
