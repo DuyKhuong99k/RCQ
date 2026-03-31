@@ -299,6 +299,7 @@ public class MainViewModel : ObservableObject
     public HQ_PhieuCanNhapNguyenLieuViewModel VmHQ_PhieuCanNhapNguyenLieu => HQ_PhieuCanNhapNguyenLieuViewModel.Instance;
     public HQ_PhieuCanXuatNguyenLieuViewModel VmHQ_PhieuCanXuatNguyenLieu => HQ_PhieuCanXuatNguyenLieuViewModel.Instance;
 
+
     private int MessageBoxShow(string message, string title, int button)
     {
         return 0;

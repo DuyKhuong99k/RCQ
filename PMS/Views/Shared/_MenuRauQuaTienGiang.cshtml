@@ -405,6 +405,15 @@
                                 </a>
                             </li>
                         }
+                        var bckhoiluongxuongtheolopcxnlhq = rolePermistions.Where(x => x.Fu == "Báo Cáo Nguyên Liệu Xuất / Khối Lượng Xuất Xưởng Theo Lô HQ" && x.Func == "Xem Báo Cáo Nguyên Liệu Xuất / Khối Lượng Xuất Xưởng Theo Lô HQ" && x.Status == 1).FirstOrDefault();
+                        if (bckhoiluongxuongtheolopcxnlhq != null)
+                        {
+                            <li class="menu-item @(Context.Request.Path.StartsWithSegments("/HQ/BaoCaoCanNguyenLieuHQ/KhoiLuongXuatLoTheoXuongXLNHQView") ? "active" : "")">
+                                <a href="/HQ/BaoCaoCanNguyenLieuHQ/KhoiLuongXuatLoTheoXuongXLNHQView" class="menu-link">
+                                    <div>Khối Lướng Xưởng Theo Lô</div>
+                                </a>
+                            </li>
+                        }
                     }
                 </ul>
             </li>

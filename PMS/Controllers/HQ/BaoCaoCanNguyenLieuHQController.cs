@@ -209,6 +209,88 @@ namespace PMS.Controllers.HQ
             return dataSource;
         }
         #endregion
+
+
+        #region Khối Lượng Xuất Xưởng Theo Lô
+
+        public class ListLo
+        {
+
+            public string MaLo { get; set; }
+
+        }
+
+
+        [CustomAuthorize(Fu = "Báo Cáo Nguyên Liệu Xuất / Khối Lượng Xuất Xưởng Theo Lô HQ", Func = "Xem Báo Cáo Nguyên Liệu Xuất / Khối Lượng Xuất Xưởng Theo Lô HQ")]
+        public IActionResult KhoiLuongXuatLoTheoXuongXLNHQView()
+        {
+            var rl = Middlewares.AuthenticationHelpers.CheckAut(HttpContext, "KhoiLuongXuatLoTheoXuongXLNHQView");
+
+            if (rl == false)
+            {
+                return Redirect(AppViewModels.AppViewModel.Instance.RedirectLoginUrl);
+            }
+            //var apiListLoUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/HQ_PhieuCanXuatNguiyenLieu/GetListLo";
+            //using var helperListLo = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+            //var listLo = helperListLo.GetAsync<IEnumerable<ListLo>>(HttpContext, apiListLoUrl);
+            //ViewBag.listLo = listLo.Result.ToList();
+
+
+            var apiListLoUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/HQ_PhieuCanXuatNguiyenLieu/GetListLo";
+
+            using var helperListLo = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+
+            var listLo = helperListLo
+                            .GetAsync<IEnumerable<ListLo>>(HttpContext, apiListLoUrl)
+                            .Result;
+
+            ViewBag.listLo = listLo?.ToList() ?? new List<ListLo>();
+
+
+            ViewBag.TitlePage = "Báo Cáo Khối Lượng Xuất Lô Theo Xưởng";
+            return View("~/Views/BaoCaoNguyenLieuHQ/KhoiLuongXuatLoTheoXuongXLNHQView.cshtml");
+        }
+        public async Task<IEnumerable<object>> GetKhoiLuongXuatLoTheoXuong(string maLo = null)
+        {
+            IEnumerable<object> dataSource = ViewBag.dataSource;
+            if (dataSource == null)
+            {
+                var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/HQ_PhieuCanXuatNguiyenLieu/GetKhoiLuongXuatLoTheoXuong/{maLo}";
+                using var helper = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+                ViewBag.dataSource = await helper.GetAsync<object>(HttpContext, apiUrl);
+                dataSource = ViewBag.dataSource;
+            }
+            return dataSource;
+        }
+
+        public async Task<ActionResult> ReloadKhoiLuongXuatLoTheoXuong(string maLo)
+        {
+
+            if (maLo == "Chọn Lô" || maLo == null)
+            {
+                maLo = "'";
+            }
+            IEnumerable<object> dataSource = null;
+            string reportType = HttpContext.Session.GetString("reportType");
+            bool success = true;
+            if (reportType == "KhoiLuongXuatLoTheoXuongXLNHQView")
+            {
+                dataSource = await GetKhoiLuongXuatLoTheoXuong(maLo);
+            }
+            if (dataSource == null || !dataSource.Any())
+            {
+                success = false; // Đặt trạng thái thành không thành công nếu dataSource là null hoặc không có dữ liệu.
+            }
+            var result = new
+            {
+                Success = success, // Trạng thái thành công
+                Messages = success ? "Lấy dữ liệu Thành Công." : "Vui lòng kiểm tra lại!.", // Thông báo tùy thuộc vào trạng thái
+                Data = dataSource // Dữ liệu từ GetChiTiets, GetTongHopNhanViens hoặc GetTongHopThanhPhams
+            };
+            ViewBag.datasource = dataSource;
+            return Json(result);
+        }
+        #endregion
         #endregion
 
         public async Task<ActionResult> Reload(DateTime fromDate, DateTime toDate, string xuongId)

@@ -43,5 +43,17 @@ namespace ViewModels.Repos.HQ
             var dao = new Dao.Repos.HQ.HQ_PhieuCanXuatNguyenLieu(connStr);
             return dao.GetTyLeNguyenLieuHaoHut<T>(ngay);
         }
+
+
+        public List<T> GetKhoiLuongXuatLoTheoXuonget<T>(string maLo, string? connStr = null)
+        {
+            var dao = new Dao.Repos.HQ.HQ_PhieuCanXuatNguyenLieu(connStr);
+            return dao.GetKhoiLuongXuatLoTheoXuonget<T>(maLo);
+        }
+        public List<T> GetListLo<T>(string? connStr = null)
+        {
+            var dao = new Dao.Repos.HQ.HQ_PhieuCanXuatNguyenLieu(connStr);
+            return dao.GetListLo<T>();
+        }
     }
 }

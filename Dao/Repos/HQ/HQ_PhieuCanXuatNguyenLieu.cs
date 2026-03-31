@@ -178,535 +178,332 @@ ORDER BY LoNguyenLieu, TenSanPham;
         {
             try
             {
-//                var query = @"
-//------------------------------------------------
-//-- LÔ CÓ XUẤT HÔM NAY
-//------------------------------------------------
-//WITH LoXuatHomNay AS (
-//    SELECT DISTINCT pnl.MaLo
-//    FROM HQ_PhieuCanXuatNguyenLieu px
-//    JOIN HQ_PhieuCanNguyenLieu pnl
-//        ON pnl.Id = px.IdPhieuCanNguyenLieu
-//    WHERE px.NgayGio >= @ngay
-//      AND px.NgayGio < DATEADD(DAY,1,@ngay)
-//),
+                //                var query = @"
+                //                ------------------------------------------------
+                //                --LÔ CÓ XUẤT HÔM NAY
+                //------------------------------------------------
+                //WITH LoXuatHomNay AS(
+                //    SELECT DISTINCT pnl.MaLo
+                //    FROM HQ_PhieuCanXuatNguyenLieu px
+                //    JOIN HQ_PhieuCanNguyenLieu pnl
+                //        ON pnl.Id = px.IdPhieuCanNguyenLieu
+                //    WHERE px.NgayGio >= @ngay
+                //      AND px.NgayGio < DATEADD(DAY, 1, @ngay)
+                //),
 
-//------------------------------------------------
-//-- NHẬP THEO QUY CÁCH
-//------------------------------------------------
-//NhapTheoQuyCach AS (
-//    SELECT
-//        pnl.MaLo,
-//        pn.NgayGio,
-//        pn.SoPhieuCanNhap,
-//        pn.MaSanPham,
-//        ctn.MaQuyCach,
-//        qc.Ten AS TenQuyCach,
-//        ctn.TyLe,
-//        qc.[Index] AS ThuTu,
-//        CAST(
-//            pn.TrongLuongHang * ISNULL(ctn.TyLe, 0) / 100.0
-//            AS DECIMAL(18,3)
-//        ) AS KhoiLuongNhap
-//    FROM HQ_PhieuCanNhapNguyenLieu pn
-//    JOIN (
-//        SELECT DISTINCT SoPhieuCanNhap, MaQuyCach, TyLe
-//        FROM HQ_ChiTietPhanBoTyLeNguyenLieuNhap
-//    ) ctn ON ctn.SoPhieuCanNhap = pn.SoPhieuCanNhap
-//    JOIN HQ_PhieuCanNguyenLieu pnl
-//        ON pnl.Id = pn.IdPhieuCanNguyenLieu
-//    JOIN (
-//        SELECT DISTINCT Id, Ten, [Index]
-//        FROM HQ_QuyCachNguyenLieu
-//    ) qc ON qc.Id = ctn.MaQuyCach
-//    WHERE pnl.MaLo IN (SELECT MaLo FROM LoXuatHomNay)
-//),
+                //------------------------------------------------
+                //--NHẬP THEO QUY CÁCH
+                //------------------------------------------------
+                //NhapTheoQuyCach AS(
+                //    SELECT
+                //        pnl.MaLo,
+                //        pn.NgayGio,
+                //        pn.SoPhieuCanNhap,
+                //        pn.MaSanPham,
+                //        ctn.MaQuyCach,
+                //        qc.Ten AS TenQuyCach,
+                //        ctn.TyLe,
+                //        qc.[Index] AS ThuTu,
+                //        CAST(
+                //            pn.TrongLuongHang* ISNULL(ctn.TyLe, 0) / 100.0
+                //            AS DECIMAL(18,3)
+                //        ) AS KhoiLuongNhap
+                //    FROM HQ_PhieuCanNhapNguyenLieu pn
+                //    JOIN(
+                //        SELECT DISTINCT SoPhieuCanNhap, MaQuyCach, TyLe
+                //        FROM HQ_ChiTietPhanBoTyLeNguyenLieuNhap
+                //    ) ctn ON ctn.SoPhieuCanNhap = pn.SoPhieuCanNhap
+                //    JOIN HQ_PhieuCanNguyenLieu pnl
+                //        ON pnl.Id = pn.IdPhieuCanNguyenLieu
+                //    JOIN(
+                //        SELECT DISTINCT Id, Ten, [Index]
+                //        FROM HQ_QuyCachNguyenLieu
+                //    ) qc ON qc.Id = ctn.MaQuyCach
+                //    WHERE pnl.MaLo IN(SELECT MaLo FROM LoXuatHomNay)
+                //),
 
-//------------------------------------------------
-//-- XUẤT TRƯỚC NGÀY
-//------------------------------------------------
-//XuatTruoc AS (
-//    SELECT
-//        pnl.MaLo,
-//        SUM(CASE WHEN ISNULL(px.IsCanHu,0)=0 THEN px.TrongLuongHang ELSE 0 END) AS XuatThuongTruoc,
-//        SUM(CASE WHEN px.IsCanHu=1 THEN px.TrongLuongHang ELSE 0 END) AS XuatHuTruoc
-//    FROM HQ_PhieuCanXuatNguyenLieu px
-//    JOIN HQ_PhieuCanNguyenLieu pnl
-//        ON pnl.Id = px.IdPhieuCanNguyenLieu
-//    WHERE px.NgayGio < @ngay
-//    GROUP BY pnl.MaLo
-//),
+                //------------------------------------------------
+                //--XUẤT TRƯỚC NGÀY
+                //------------------------------------------------
+                //XuatTruoc AS(
+                //    SELECT
+                //        pnl.MaLo,
+                //        SUM(CASE WHEN ISNULL(px.IsCanHu, 0) = 0 THEN px.TrongLuongHang ELSE 0 END) AS XuatThuongTruoc,
+                //        SUM(CASE WHEN px.IsCanHu = 1 THEN px.TrongLuongHang ELSE 0 END) AS XuatHuTruoc
+                //    FROM HQ_PhieuCanXuatNguyenLieu px
+                //    JOIN HQ_PhieuCanNguyenLieu pnl
+                //        ON pnl.Id = px.IdPhieuCanNguyenLieu
+                //    WHERE px.NgayGio < @ngay
+                //    GROUP BY pnl.MaLo
+                //),
 
-//------------------------------------------------
-//-- XUẤT HÔM NAY
-//------------------------------------------------
-//XuatHomNay AS (
-//    SELECT
-//        pnl.MaLo,
-//        SUM(CASE WHEN ISNULL(px.IsCanHu,0)=0 THEN px.TrongLuongHang ELSE 0 END) AS XuatThuongHomNay,
-//        SUM(CASE WHEN px.IsCanHu=1 THEN px.TrongLuongHang ELSE 0 END) AS XuatHuHomNay,
-//        SUM(px.TrongLuongHang) AS TongDaXuat
-//    FROM HQ_PhieuCanXuatNguyenLieu px
-//    JOIN HQ_PhieuCanNguyenLieu pnl
-//        ON pnl.Id = px.IdPhieuCanNguyenLieu
-//    WHERE px.NgayGio >= @ngay
-//      AND px.NgayGio < DATEADD(DAY,1,@ngay)
-//      AND px.IsHuy = 0
-//    GROUP BY pnl.MaLo
-//),
+                //------------------------------------------------
+                //--XUẤT HÔM NAY
+                //------------------------------------------------
+                //XuatHomNay AS(
+                //    SELECT
+                //        pnl.MaLo,
+                //        SUM(CASE WHEN ISNULL(px.IsCanHu, 0) = 0 THEN px.TrongLuongHang ELSE 0 END) AS XuatThuongHomNay,
+                //        SUM(CASE WHEN px.IsCanHu = 1 THEN px.TrongLuongHang ELSE 0 END) AS XuatHuHomNay,
+                //        SUM(px.TrongLuongHang) AS TongDaXuat
+                //    FROM HQ_PhieuCanXuatNguyenLieu px
+                //    JOIN HQ_PhieuCanNguyenLieu pnl
+                //        ON pnl.Id = px.IdPhieuCanNguyenLieu
+                //    WHERE px.NgayGio >= @ngay
+                //      AND px.NgayGio < DATEADD(DAY, 1, @ngay)
+                //      AND px.IsHuy = 0
+                //    GROUP BY pnl.MaLo
+                //),
 
-//------------------------------------------------
-//-- GỘP XUẤT
-//------------------------------------------------
-//TongHop AS (
-//    SELECT
-//        n.*,
-//		ISNULL(t2.XuatThuongHomNay,0) AS XuatThuongHomNay,
-//		ISNULL(t2.XuatHuHomNay,0) AS XuatHuHomNay,
-//        ISNULL(t1.XuatThuongTruoc,0) + ISNULL(t2.XuatThuongHomNay,0) AS TongXuatThuong,
-//        ISNULL(t1.XuatHuTruoc,0) + ISNULL(t2.XuatHuHomNay,0) AS TongXuatHu
-//    FROM NhapTheoQuyCach n
-//    LEFT JOIN XuatTruoc t1 ON t1.MaLo = n.MaLo
-//    LEFT JOIN XuatHomNay t2 ON t2.MaLo = n.MaLo
-//),
+                //------------------------------------------------
+                //--GỘP XUẤT
+                //------------------------------------------------
+                //TongHop AS(
+                //    SELECT
+                //        n.*,
+                //		ISNULL(t2.XuatThuongHomNay, 0) AS XuatThuongHomNay,
+                //        ISNULL(t2.XuatHuHomNay, 0) AS XuatHuHomNay,
+                //        ISNULL(t1.XuatThuongTruoc, 0) +ISNULL(t2.XuatThuongHomNay, 0) AS TongXuatThuong,
+                //        ISNULL(t1.XuatHuTruoc, 0) +ISNULL(t2.XuatHuHomNay, 0) AS TongXuatHu
+                //    FROM NhapTheoQuyCach n
+                //    LEFT JOIN XuatTruoc t1 ON t1.MaLo = n.MaLo
+                //    LEFT JOIN XuatHomNay t2 ON t2.MaLo = n.MaLo
+                //),
 
-//------------------------------------------------
-//-- LŨY KẾ FIFO
-//------------------------------------------------
-//TinhLuyKe AS (
-//    SELECT
-//        t.*,
-//        SUM(
-//            CASE WHEN t.ThuTu >= 1 THEN t.KhoiLuongNhap ELSE 0 END
-//        ) OVER (
-//            PARTITION BY t.MaLo
-//            ORDER BY t.ThuTu
-//        ) AS LuyKeThuong
-//    FROM TongHop t
-//)
+                //------------------------------------------------
+                //--LŨY KẾ FIFO
+                //------------------------------------------------
+                //TinhLuyKe AS(
+                //    SELECT
+                //        t.*,
+                //        SUM(
+                //            CASE WHEN t.ThuTu >= 1 THEN t.KhoiLuongNhap ELSE 0 END
+                //        ) OVER(
+                //            PARTITION BY t.MaLo
+                //            ORDER BY t.ThuTu
+                //        ) AS LuyKeThuong
+                //    FROM TongHop t
+                //)
 
-//------------------------------------------------
-//-- FINAL
-//------------------------------------------------
-//SELECT
-//    TenQuyCach,
-//    MaLo,
-//    KhoiLuongNhap,
+                //------------------------------------------------
+                //-- FINAL
+                //------------------------------------------------
+                //SELECT
+                //    TenQuyCach,
+                //    MaLo,
+                //    KhoiLuongNhap,
 
-//    ------------------------------------------------
-//    -- TỒN KHO CŨ
-//    ------------------------------------------------
-//    --CAST(
-//    --    KhoiLuongNhap -
-//    --    (
-//    --        CASE
-//    --            WHEN ThuTu = 0 THEN
-//    --                CASE
-//    --                    WHEN TongXuatHu <= 0 THEN 0
-//    --                    WHEN TongXuatHu >= KhoiLuongNhap THEN KhoiLuongNhap
-//    --                    ELSE TongXuatHu
-//    --                END
-//    --            ELSE
-//    --                CASE
-//    --                    WHEN TongXuatThuong <= 0 THEN 0
-//    --                    WHEN TongXuatThuong >= LuyKeThuong THEN KhoiLuongNhap
-//    --                    ELSE TongXuatThuong - (LuyKeThuong - KhoiLuongNhap)
-//    --                END
-//    --        END
-//    --    )
-//    --    AS DECIMAL(18,3)
-//    --) AS TonKhoCu,
-//	CAST(
-//		KhoiLuongNhap -
-//		(
-//			CASE
-//				WHEN ThuTu = 0 THEN
-//					CASE
-//						WHEN (TongXuatHu - ISNULL(XuatHuHomNay,0)) <= 0 THEN 0
-//						WHEN (TongXuatHu - ISNULL(XuatHuHomNay,0)) >= KhoiLuongNhap THEN KhoiLuongNhap
-//						ELSE (TongXuatHu - ISNULL(XuatHuHomNay,0))
-//					END
-//				ELSE
-//					CASE
-//						WHEN (TongXuatThuong - ISNULL(XuatThuongHomNay,0)) <= 0 THEN 0
-//						WHEN (TongXuatThuong - ISNULL(XuatThuongHomNay,0)) >= LuyKeThuong THEN KhoiLuongNhap
-//						ELSE (TongXuatThuong - ISNULL(XuatThuongHomNay,0))
-//							 - (LuyKeThuong - KhoiLuongNhap)
-//					END
-//			END
-//		)
-//	AS DECIMAL(18,3)
-//	) AS TonKhoCu,
-//    CASE WHEN ThuTu = 0 THEN TyLe ELSE NULL END AS TyLeKhongDat,
+                //    ------------------------------------------------
+                //    --TỒN KHO CŨ
+                //    ------------------------------------------------
+                //    --CAST(
+                //    --KhoiLuongNhap -
+                //    --(
+                //    --CASE
+                //    --            WHEN ThuTu = 0 THEN
+                //    --                CASE
+                //    --                    WHEN TongXuatHu <= 0 THEN 0
+                //    --                    WHEN TongXuatHu >= KhoiLuongNhap THEN KhoiLuongNhap
+                //    --                    ELSE TongXuatHu
+                //    --                END
+                //    --            ELSE
+                //    --                CASE
+                //    --                    WHEN TongXuatThuong <= 0 THEN 0
+                //    --                    WHEN TongXuatThuong >= LuyKeThuong THEN KhoiLuongNhap
+                //    --                    ELSE TongXuatThuong - (LuyKeThuong - KhoiLuongNhap)
+                //    --                END
+                //    --        END
+                //    --)
+                //    --    AS DECIMAL(18,3)
+                //    --) AS TonKhoCu,
+                //    CAST(
+                //		KhoiLuongNhap -
+                //        (
+                //            CASE
 
-//    SUM(CASE WHEN ThuTu <> 0 THEN TyLe ELSE 0 END)
-//        OVER (PARTITION BY MaLo) AS TyLeTinhTien,
+                //                WHEN ThuTu = 0 THEN
 
-//    ------------------------------------------------
-//    -- TỔNG LƯỢNG XUẤT
-//    ------------------------------------------------
-//    CAST(
-//        CASE
-//            WHEN ThuTu = 0 THEN
-//                CASE
-//                    WHEN TongXuatHu <= 0 THEN 0
-//                    WHEN TongXuatHu >= KhoiLuongNhap THEN KhoiLuongNhap
-//                    ELSE TongXuatHu
-//                END
-//            ELSE
-//                CASE
-//                    WHEN TongXuatThuong <= 0 THEN 0
-//                    WHEN TongXuatThuong >= LuyKeThuong THEN KhoiLuongNhap
-//                    ELSE TongXuatThuong - (LuyKeThuong - KhoiLuongNhap)
-//                END
-//        END
-//        AS DECIMAL(18,3)
-//    ) AS TongLuongXuat,
+                //                    CASE
 
-//    ------------------------------------------------
-//    -- TỒN CÒN LẠI
-//    ------------------------------------------------
-//    CAST(
-//        KhoiLuongNhap -
-//        CASE
-//            WHEN ThuTu = 0 THEN
-//                CASE
-//                    WHEN TongXuatHu <= 0 THEN 0
-//                    WHEN TongXuatHu >= KhoiLuongNhap THEN KhoiLuongNhap
-//                    ELSE TongXuatHu
-//                END
-//            ELSE
-//                CASE
-//                    WHEN TongXuatThuong <= 0 THEN 0
-//                    WHEN TongXuatThuong >= LuyKeThuong THEN KhoiLuongNhap
-//                    ELSE TongXuatThuong - (LuyKeThuong - KhoiLuongNhap)
-//                END
-//        END
-//        AS DECIMAL(18,3)
-//    ) AS TonConLai,
+                //                        WHEN(TongXuatHu - ISNULL(XuatHuHomNay, 0)) <= 0 THEN 0
 
-//    ------------------------------------------------
-//    -- KHỐI LƯỢNG HƯ
-//    ------------------------------------------------
-//    CAST(
-//        CASE WHEN ThuTu = 0 THEN
-//            CASE
-//                WHEN TongXuatHu <= 0 THEN 0
-//                WHEN TongXuatHu >= KhoiLuongNhap THEN KhoiLuongNhap
-//                ELSE TongXuatHu
-//            END
-//        ELSE 0 END
-//        AS DECIMAL(18,3)
-//    ) AS KhoiLuongIsCanHu,
+                //                        WHEN(TongXuatHu - ISNULL(XuatHuHomNay, 0)) >= KhoiLuongNhap THEN KhoiLuongNhap
 
-//    ------------------------------------------------
-//    -- HAO HỤT
-//    ------------------------------------------------
-//    CAST(
-//        CASE WHEN ThuTu = 0 THEN
-//            CASE
-//                WHEN TongXuatHu <= 0 THEN 0
-//                WHEN TongXuatHu >= KhoiLuongNhap THEN KhoiLuongNhap
-//                ELSE TongXuatHu
-//            END
-//        ELSE 0 END
-//        AS DECIMAL(18,3)
-//    ) AS HaoHut,
+                //                        ELSE(TongXuatHu - ISNULL(XuatHuHomNay, 0))
 
-//    CAST(
-//    (
-//        KhoiLuongNhap -
-//		(
-//			CASE
-//				WHEN ThuTu = 0 THEN
-//					CASE
-//						WHEN (TongXuatHu - ISNULL(XuatHuHomNay,0)) <= 0 THEN 0
-//						WHEN (TongXuatHu - ISNULL(XuatHuHomNay,0)) >= KhoiLuongNhap THEN KhoiLuongNhap
-//						ELSE (TongXuatHu - ISNULL(XuatHuHomNay,0))
-//					END
-//				ELSE
-//					CASE
-//						WHEN (TongXuatThuong - ISNULL(XuatThuongHomNay,0)) <= 0 THEN 0
-//						WHEN (TongXuatThuong - ISNULL(XuatThuongHomNay,0)) >= LuyKeThuong THEN KhoiLuongNhap
-//						ELSE (TongXuatThuong - ISNULL(XuatThuongHomNay,0))
-//							 - (LuyKeThuong - KhoiLuongNhap)
-//					END
-//			END
-//		)
-//    )
-//    -
-//    (
-//        KhoiLuongNhap -
-//        CASE
-//            WHEN ThuTu = 0 THEN
-//                CASE
-//                    WHEN TongXuatHu <= 0 THEN 0
-//                    WHEN TongXuatHu >= KhoiLuongNhap THEN KhoiLuongNhap
-//                    ELSE TongXuatHu
-//                END
-//            ELSE
-//                CASE
-//                    WHEN TongXuatThuong <= 0 THEN 0
-//                    WHEN TongXuatThuong >= LuyKeThuong THEN KhoiLuongNhap
-//                    ELSE TongXuatThuong - (LuyKeThuong - KhoiLuongNhap)
-//                END
-//        END
-//    )
-//AS DECIMAL(18,3)
-//) AS TongDaXuat
+                //                    END
 
-//FROM TinhLuyKe
-//ORDER BY MaLo, ThuTu;
-	
-//";
-//                var query = @"
-//------------------------------------------------
-//-- LÔ CÓ XUẤT HÔM NAY (KHÔNG BỊ HUỶ)
-//------------------------------------------------
-//WITH LoXuatHomNay AS (
-//    SELECT DISTINCT pnl.MaLo
-//    FROM HQ_PhieuCanXuatNguyenLieu px
-//    JOIN HQ_PhieuCanNguyenLieu pnl
-//        ON pnl.Id = px.IdPhieuCanNguyenLieu
-//    WHERE px.NgayGio >= @ngay
-//      AND px.NgayGio < DATEADD(DAY,1,@ngay)
-//      AND px.IsHuy = 0
-//),
+                //                ELSE
 
-//------------------------------------------------
-//-- NHẬP THEO QUY CÁCH
-//------------------------------------------------
-//NhapTheoQuyCach AS (
-//    SELECT
-//        pnl.MaLo,
-//        pn.NgayGio,
-//        pn.SoPhieuCanNhap,
-//        pn.MaSanPham,
-//        ctn.MaQuyCach,
-//        qc.Ten AS TenQuyCach,
-//        ctn.TyLe,
-//        qc.[Index] AS ThuTu,
-//        CAST(
-//            pn.TrongLuongHang * ISNULL(ctn.TyLe,0) / 100.0
-//            AS DECIMAL(18,3)
-//        ) AS KhoiLuongNhap
-//    FROM HQ_PhieuCanNhapNguyenLieu pn
-//    JOIN (
-//        SELECT DISTINCT SoPhieuCanNhap, MaQuyCach, TyLe
-//        FROM HQ_ChiTietPhanBoTyLeNguyenLieuNhap
-//    ) ctn 
-//        ON ctn.SoPhieuCanNhap = pn.SoPhieuCanNhap
-//    JOIN HQ_PhieuCanNguyenLieu pnl
-//        ON pnl.Id = pn.IdPhieuCanNguyenLieu
-//    JOIN (
-//        SELECT DISTINCT Id, Ten, [Index]
-//        FROM HQ_QuyCachNguyenLieu
-//    ) qc 
-//        ON qc.Id = ctn.MaQuyCach
-//    WHERE pnl.MaLo IN (SELECT MaLo FROM LoXuatHomNay)
-//),
+                //                    CASE
 
-//------------------------------------------------
-//-- XUẤT TRƯỚC NGÀY (KHÔNG TÍNH PHIẾU HUỶ)
-//------------------------------------------------
-//XuatTruoc AS (
-//    SELECT
-//        pnl.MaLo,
-//        SUM(CASE WHEN ISNULL(px.IsCanHu,0)=0 THEN px.TrongLuongHang ELSE 0 END) AS XuatThuongTruoc,
-//        SUM(CASE WHEN px.IsCanHu=1 THEN px.TrongLuongHang ELSE 0 END) AS XuatHuTruoc
-//    FROM HQ_PhieuCanXuatNguyenLieu px
-//    JOIN HQ_PhieuCanNguyenLieu pnl
-//        ON pnl.Id = px.IdPhieuCanNguyenLieu
-//    WHERE px.NgayGio < @ngay
-//      AND px.IsHuy = 0
-//    GROUP BY pnl.MaLo
-//),
+                //                        WHEN(TongXuatThuong - ISNULL(XuatThuongHomNay, 0)) <= 0 THEN 0
 
-//------------------------------------------------
-//-- XUẤT HÔM NAY (KHÔNG TÍNH PHIẾU HUỶ)
-//------------------------------------------------
-//XuatHomNay AS (
-//    SELECT
-//        pnl.MaLo,
-//        SUM(CASE WHEN ISNULL(px.IsCanHu,0)=0 THEN px.TrongLuongHang ELSE 0 END) AS XuatThuongHomNay,
-//        SUM(CASE WHEN px.IsCanHu=1 THEN px.TrongLuongHang ELSE 0 END) AS XuatHuHomNay
-//    FROM HQ_PhieuCanXuatNguyenLieu px
-//    JOIN HQ_PhieuCanNguyenLieu pnl
-//        ON pnl.Id = px.IdPhieuCanNguyenLieu
-//    WHERE px.NgayGio >= @ngay
-//      AND px.NgayGio < DATEADD(DAY,1,@ngay)
-//      AND px.IsHuy = 0
-//    GROUP BY pnl.MaLo
-//),
+                //                        WHEN(TongXuatThuong - ISNULL(XuatThuongHomNay, 0)) >= LuyKeThuong THEN KhoiLuongNhap
 
-//------------------------------------------------
-//-- GỘP XUẤT
-//------------------------------------------------
-//TongHop AS (
-//    SELECT
-//        n.*,
-//        ISNULL(t2.XuatThuongHomNay,0) AS XuatThuongHomNay,
-//        ISNULL(t2.XuatHuHomNay,0) AS XuatHuHomNay,
-//        ISNULL(t1.XuatThuongTruoc,0) + ISNULL(t2.XuatThuongHomNay,0) AS TongXuatThuong,
-//        ISNULL(t1.XuatHuTruoc,0) + ISNULL(t2.XuatHuHomNay,0) AS TongXuatHu
-//    FROM NhapTheoQuyCach n
-//    LEFT JOIN XuatTruoc t1 
-//        ON t1.MaLo = n.MaLo
-//    LEFT JOIN XuatHomNay t2 
-//        ON t2.MaLo = n.MaLo
-//),
+                //                        ELSE(TongXuatThuong - ISNULL(XuatThuongHomNay, 0))
+                //                             - (LuyKeThuong - KhoiLuongNhap)
 
-//------------------------------------------------
-//-- LŨY KẾ FIFO
-//------------------------------------------------
-//TinhLuyKe AS (
-//    SELECT
-//        t.*,
-//        SUM(
-//            CASE WHEN t.ThuTu >= 1 THEN t.KhoiLuongNhap ELSE 0 END
-//        ) OVER (
-//            PARTITION BY t.MaLo
-//            ORDER BY t.ThuTu
-//        ) AS LuyKeThuong
-//    FROM TongHop t
-//)
+                //                    END
 
-//------------------------------------------------
-//-- FINAL
-//------------------------------------------------
-//SELECT
-//    TenQuyCach,
-//    MaLo,
-//    KhoiLuongNhap,
+                //            END
+                //		)
 
-//------------------------------------------------
-//-- TỒN KHO CŨ
-//------------------------------------------------
-//CAST(
-//    KhoiLuongNhap -
-//    (
-//        CASE
-//            WHEN ThuTu = 0 THEN
-//                CASE
-//                    WHEN (TongXuatHu - ISNULL(XuatHuHomNay,0)) <= 0 THEN 0
-//                    WHEN (TongXuatHu - ISNULL(XuatHuHomNay,0)) >= KhoiLuongNhap THEN KhoiLuongNhap
-//                    ELSE (TongXuatHu - ISNULL(XuatHuHomNay,0))
-//                END
-//            ELSE
-//                CASE
-//                    WHEN (TongXuatThuong - ISNULL(XuatThuongHomNay,0)) <= 0 THEN 0
-//                    WHEN (TongXuatThuong - ISNULL(XuatThuongHomNay,0)) >= LuyKeThuong THEN KhoiLuongNhap
-//                    ELSE (TongXuatThuong - ISNULL(XuatThuongHomNay,0))
-//                         - (LuyKeThuong - KhoiLuongNhap)
-//                END
-//        END
-//    )
-//AS DECIMAL(18,3)
-//) AS TonKhoCu,
+                //    AS DECIMAL(18,3)
+                //	) AS TonKhoCu,
+                //    CASE WHEN ThuTu = 0 THEN TyLe ELSE NULL END AS TyLeKhongDat,
 
-//CASE WHEN ThuTu = 0 THEN TyLe ELSE NULL END AS TyLeKhongDat,
+                //    SUM(CASE WHEN ThuTu<> 0 THEN TyLe ELSE 0 END)
+                //        OVER(PARTITION BY MaLo) AS TyLeTinhTien,
 
-//SUM(CASE WHEN ThuTu <> 0 THEN TyLe ELSE 0 END)
-//    OVER (PARTITION BY MaLo) AS TyLeTinhTien,
+                //    ------------------------------------------------
+                //    --TỔNG LƯỢNG XUẤT
+                //    ------------------------------------------------
+                //    CAST(
+                //        CASE
+                //            WHEN ThuTu = 0 THEN
+                //                CASE
+                //                    WHEN TongXuatHu <= 0 THEN 0
+                //                    WHEN TongXuatHu >= KhoiLuongNhap THEN KhoiLuongNhap
+                //                    ELSE TongXuatHu
+                //                END
+                //            ELSE
+                //                CASE
+                //                    WHEN TongXuatThuong <= 0 THEN 0
+                //                    WHEN TongXuatThuong >= LuyKeThuong THEN KhoiLuongNhap
+                //                    ELSE TongXuatThuong - (LuyKeThuong - KhoiLuongNhap)
+                //                END
+                //        END
+                //        AS DECIMAL(18, 3)
+                //    ) AS TongLuongXuat,
 
-//------------------------------------------------
-//-- TỔNG LƯỢNG XUẤT
-//------------------------------------------------
-//CAST(
-//    CASE
-//        WHEN ThuTu = 0 THEN
-//            CASE
-//                WHEN TongXuatHu <= 0 THEN 0
-//                WHEN TongXuatHu >= KhoiLuongNhap THEN KhoiLuongNhap
-//                ELSE TongXuatHu
-//            END
-//        ELSE
-//            CASE
-//                WHEN TongXuatThuong <= 0 THEN 0
-//                WHEN TongXuatThuong >= LuyKeThuong THEN KhoiLuongNhap
-//                ELSE TongXuatThuong - (LuyKeThuong - KhoiLuongNhap)
-//            END
-//    END
-//AS DECIMAL(18,3)
-//) AS TongLuongXuat,
+                //    ------------------------------------------------
+                //    --TỒN CÒN LẠI
+                //    ------------------------------------------------
+                //    CAST(
+                //        KhoiLuongNhap -
+                //        CASE
+                //            WHEN ThuTu = 0 THEN
+                //                CASE
+                //                    WHEN TongXuatHu <= 0 THEN 0
+                //                    WHEN TongXuatHu >= KhoiLuongNhap THEN KhoiLuongNhap
+                //                    ELSE TongXuatHu
+                //                END
+                //            ELSE
+                //                CASE
+                //                    WHEN TongXuatThuong <= 0 THEN 0
+                //                    WHEN TongXuatThuong >= LuyKeThuong THEN KhoiLuongNhap
+                //                    ELSE TongXuatThuong - (LuyKeThuong - KhoiLuongNhap)
+                //                END
+                //        END
+                //        AS DECIMAL(18, 3)
+                //    ) AS TonConLai,
 
-//------------------------------------------------
-//-- TỒN CÒN LẠI
-//------------------------------------------------
-//CAST(
-//    KhoiLuongNhap -
-//    CASE
-//        WHEN ThuTu = 0 THEN
-//            CASE
-//                WHEN TongXuatHu <= 0 THEN 0
-//                WHEN TongXuatHu >= KhoiLuongNhap THEN KhoiLuongNhap
-//                ELSE TongXuatHu
-//            END
-//        ELSE
-//            CASE
-//                WHEN TongXuatThuong <= 0 THEN 0
-//                WHEN TongXuatThuong >= LuyKeThuong THEN KhoiLuongNhap
-//                ELSE TongXuatThuong - (LuyKeThuong - KhoiLuongNhap)
-//            END
-//    END
-//AS DECIMAL(18,3)
-//) AS TonConLai,
+                //    ------------------------------------------------
+                //    --KHỐI LƯỢNG HƯ
+                //    ------------------------------------------------
+                //    CAST(
+                //        CASE WHEN ThuTu = 0 THEN
+                //            CASE
+                //                WHEN TongXuatHu <= 0 THEN 0
+                //                WHEN TongXuatHu >= KhoiLuongNhap THEN KhoiLuongNhap
+                //                ELSE TongXuatHu
+                //            END
+                //        ELSE 0 END
+                //        AS DECIMAL(18, 3)
+                //    ) AS KhoiLuongIsCanHu,
 
-//------------------------------------------------
-//-- KHỐI LƯỢNG HƯ
-//------------------------------------------------
-//CAST(
-//    CASE 
-//        WHEN ThuTu = 0 THEN
-//            CASE
-//                WHEN TongXuatHu <= 0 THEN 0
-//                WHEN TongXuatHu >= KhoiLuongNhap THEN KhoiLuongNhap
-//                ELSE TongXuatHu
-//            END
-//        ELSE 0
-//    END
-//AS DECIMAL(18,3)
-//) AS KhoiLuongIsCanHu,
+                //    ------------------------------------------------
+                //    --HAO HỤT
+                //    ------------------------------------------------
+                //    CAST(
+                //        CASE WHEN ThuTu = 0 THEN
+                //            CASE
+                //                WHEN TongXuatHu <= 0 THEN 0
+                //                WHEN TongXuatHu >= KhoiLuongNhap THEN KhoiLuongNhap
+                //                ELSE TongXuatHu
+                //            END
+                //        ELSE 0 END
+                //        AS DECIMAL(18, 3)
+                //    ) AS HaoHut,
 
-//------------------------------------------------
-//-- HAO HỤT
-//------------------------------------------------
-//CAST(
-//    CASE 
-//        WHEN ThuTu = 0 THEN
-//            CASE
-//                WHEN TongXuatHu <= 0 THEN 0
-//                WHEN TongXuatHu >= KhoiLuongNhap THEN KhoiLuongNhap
-//                ELSE TongXuatHu
-//            END
-//        ELSE 0
-//    END
-//AS DECIMAL(18,3)
-//) AS HaoHut
+                //    CAST(
+                //    (
+                //        KhoiLuongNhap -
+                //        (
+                //            CASE
 
-//FROM TinhLuyKe
-//ORDER BY MaLo, ThuTu;
-//";
+                //                WHEN ThuTu = 0 THEN
+
+                //                    CASE
+
+                //                        WHEN(TongXuatHu - ISNULL(XuatHuHomNay, 0)) <= 0 THEN 0
+
+                //                        WHEN(TongXuatHu - ISNULL(XuatHuHomNay, 0)) >= KhoiLuongNhap THEN KhoiLuongNhap
+
+                //                        ELSE(TongXuatHu - ISNULL(XuatHuHomNay, 0))
+
+                //                    END
+
+                //                ELSE
+
+                //                    CASE
+
+                //                        WHEN(TongXuatThuong - ISNULL(XuatThuongHomNay, 0)) <= 0 THEN 0
+
+                //                        WHEN(TongXuatThuong - ISNULL(XuatThuongHomNay, 0)) >= LuyKeThuong THEN KhoiLuongNhap
+
+                //                        ELSE(TongXuatThuong - ISNULL(XuatThuongHomNay, 0))
+                //                             - (LuyKeThuong - KhoiLuongNhap)
+
+                //                    END
+
+                //            END
+                //		)
+                //    )
+                //    -
+                //    (
+                //        KhoiLuongNhap -
+                //        CASE
+                //            WHEN ThuTu = 0 THEN
+                //                CASE
+                //                    WHEN TongXuatHu <= 0 THEN 0
+                //                    WHEN TongXuatHu >= KhoiLuongNhap THEN KhoiLuongNhap
+                //                    ELSE TongXuatHu
+                //                END
+                //            ELSE
+                //                CASE
+                //                    WHEN TongXuatThuong <= 0 THEN 0
+                //                    WHEN TongXuatThuong >= LuyKeThuong THEN KhoiLuongNhap
+                //                    ELSE TongXuatThuong -(LuyKeThuong - KhoiLuongNhap)
+                //                END
+                //        END
+                //    )
+                //AS DECIMAL(18,3)
+                //) AS TongDaXuat
+
+                //FROM TinhLuyKe
+                //ORDER BY MaLo, ThuTu;
+
+                //                ";
                 var query = @"
+                ------------------------------------------------
+                --LÔ CÓ XUẤT HÔM NAY(KHÔNG BỊ HUỶ)
 ------------------------------------------------
--- LÔ CÓ XUẤT HÔM NAY (KHÔNG HUỶ)
-------------------------------------------------
-;WITH LoXuatHomNay AS
-(
+WITH LoXuatHomNay AS(
     SELECT DISTINCT pnl.MaLo
     FROM HQ_PhieuCanXuatNguyenLieu px
     JOIN HQ_PhieuCanNguyenLieu pnl
         ON pnl.Id = px.IdPhieuCanNguyenLieu
     WHERE px.NgayGio >= @ngay
-      AND px.NgayGio < DATEADD(DAY,1,@ngay)
+      AND px.NgayGio < DATEADD(DAY, 1, @ngay)
       AND px.IsHuy = 0
 ),
 
 ------------------------------------------------
--- NHẬP THEO QUY CÁCH
+--NHẬP THEO QUY CÁCH
 ------------------------------------------------
-NhapTheoQuyCach AS
-(
+NhapTheoQuyCach AS(
     SELECT
         pnl.MaLo,
         pn.NgayGio,
@@ -716,137 +513,88 @@ NhapTheoQuyCach AS
         qc.Ten AS TenQuyCach,
         ctn.TyLe,
         qc.[Index] AS ThuTu,
-
         CAST(
-            pn.TrongLuongHang * ISNULL(ctn.TyLe,0) / 100.0
+            pn.TrongLuongHang* ISNULL(ctn.TyLe,0) / 100.0
             AS DECIMAL(18,3)
         ) AS KhoiLuongNhap
-
     FROM HQ_PhieuCanNhapNguyenLieu pn
-
-    JOIN
-    (
+    JOIN(
         SELECT DISTINCT SoPhieuCanNhap, MaQuyCach, TyLe
         FROM HQ_ChiTietPhanBoTyLeNguyenLieuNhap
     ) ctn
         ON ctn.SoPhieuCanNhap = pn.SoPhieuCanNhap
-
     JOIN HQ_PhieuCanNguyenLieu pnl
         ON pnl.Id = pn.IdPhieuCanNguyenLieu
-
-    JOIN
-    (
+    JOIN(
         SELECT DISTINCT Id, Ten, [Index]
         FROM HQ_QuyCachNguyenLieu
     ) qc
         ON qc.Id = ctn.MaQuyCach
-
-    WHERE pnl.MaLo IN (SELECT MaLo FROM LoXuatHomNay)
+    WHERE pnl.MaLo IN(SELECT MaLo FROM LoXuatHomNay) and pn.IsXoa = 0
 ),
 
 ------------------------------------------------
--- XUẤT TRƯỚC NGÀY
+--XUẤT TRƯỚC NGÀY(KHÔNG TÍNH PHIẾU HUỶ)
 ------------------------------------------------
-XuatTruoc AS
-(
+XuatTruoc AS(
     SELECT
         pnl.MaLo,
-
-        SUM(CASE WHEN ISNULL(px.IsCanHu,0)=0
-            THEN px.TrongLuongHang ELSE 0 END) AS XuatThuongTruoc,
-
-        SUM(CASE WHEN px.IsCanHu=1
-            THEN px.TrongLuongHang ELSE 0 END) AS XuatHuTruoc
-
+        SUM(CASE WHEN ISNULL(px.IsCanHu, 0) = 0 THEN px.TrongLuongHang ELSE 0 END) AS XuatThuongTruoc,
+        SUM(CASE WHEN px.IsCanHu = 1 THEN px.TrongLuongHang ELSE 0 END) AS XuatHuTruoc
     FROM HQ_PhieuCanXuatNguyenLieu px
-
     JOIN HQ_PhieuCanNguyenLieu pnl
         ON pnl.Id = px.IdPhieuCanNguyenLieu
-
     WHERE px.NgayGio < @ngay
       AND px.IsHuy = 0
-
     GROUP BY pnl.MaLo
 ),
 
 ------------------------------------------------
--- XUẤT HÔM NAY
+--XUẤT HÔM NAY(KHÔNG TÍNH PHIẾU HUỶ)
 ------------------------------------------------
-XuatHomNay AS
-(
+XuatHomNay AS(
     SELECT
         pnl.MaLo,
-
-        SUM(CASE WHEN ISNULL(px.IsCanHu,0)=0
-            THEN px.TrongLuongHang ELSE 0 END) AS XuatThuongHomNay,
-
-        SUM(CASE WHEN px.IsCanHu=1
-            THEN px.TrongLuongHang ELSE 0 END) AS XuatHuHomNay
-
+        SUM(CASE WHEN ISNULL(px.IsCanHu, 0) = 0 THEN px.TrongLuongHang ELSE 0 END) AS XuatThuongHomNay,
+        SUM(CASE WHEN px.IsCanHu = 1 THEN px.TrongLuongHang ELSE 0 END) AS XuatHuHomNay
     FROM HQ_PhieuCanXuatNguyenLieu px
-
     JOIN HQ_PhieuCanNguyenLieu pnl
         ON pnl.Id = px.IdPhieuCanNguyenLieu
-
     WHERE px.NgayGio >= @ngay
-      AND px.NgayGio < DATEADD(DAY,1,@ngay)
+      AND px.NgayGio < DATEADD(DAY, 1, @ngay)
       AND px.IsHuy = 0
-
     GROUP BY pnl.MaLo
 ),
 
 ------------------------------------------------
--- GỘP XUẤT
+--GỘP XUẤT
 ------------------------------------------------
-TongHop AS
-(
+TongHop AS(
     SELECT
         n.*,
-
-        ISNULL(t1.XuatThuongTruoc,0)
-        + ISNULL(t2.XuatThuongHomNay,0) AS TongXuatThuong,
-
-        ISNULL(t1.XuatHuTruoc,0)
-        + ISNULL(t2.XuatHuHomNay,0) AS TongXuatHu
-
+        ISNULL(t2.XuatThuongHomNay, 0) AS XuatThuongHomNay,
+        ISNULL(t2.XuatHuHomNay, 0) AS XuatHuHomNay,
+        ISNULL(t1.XuatThuongTruoc, 0) +ISNULL(t2.XuatThuongHomNay, 0) AS TongXuatThuong,
+        ISNULL(t1.XuatHuTruoc, 0) +ISNULL(t2.XuatHuHomNay, 0) AS TongXuatHu
     FROM NhapTheoQuyCach n
-
     LEFT JOIN XuatTruoc t1
         ON t1.MaLo = n.MaLo
-
     LEFT JOIN XuatHomNay t2
         ON t2.MaLo = n.MaLo
 ),
 
 ------------------------------------------------
--- LŨY KẾ FIFO
+--LŨY KẾ FIFO
 ------------------------------------------------
-TinhLuyKe AS
-(
+TinhLuyKe AS(
     SELECT
         t.*,
-
         SUM(
-            CASE WHEN t.ThuTu >= 1
-                THEN t.KhoiLuongNhap
-                ELSE 0
-            END
-        ) OVER
-        (
+            CASE WHEN t.ThuTu >= 1 THEN t.KhoiLuongNhap ELSE 0 END
+        ) OVER(
             PARTITION BY t.MaLo
             ORDER BY t.ThuTu
-        ) AS LuyKeThuong,
-
-        SUM(
-            CASE WHEN t.ThuTu >= 1
-                THEN t.KhoiLuongNhap
-                ELSE 0
-            END
-        ) OVER
-        (
-            PARTITION BY t.MaLo
-        ) AS TongNhapThuong
-
+        ) AS LuyKeThuong
     FROM TongHop t
 )
 
@@ -854,157 +602,436 @@ TinhLuyKe AS
 -- FINAL
 ------------------------------------------------
 SELECT
-
     TenQuyCach,
     MaLo,
     KhoiLuongNhap,
 
 ------------------------------------------------
--- PHẦN XUẤT THƯỜNG VƯỢT
+--TỒN KHO CŨ
 ------------------------------------------------
-DuXuatThuong =
-CASE
-    WHEN TongXuatThuong > TongNhapThuong
-    THEN TongXuatThuong - TongNhapThuong
-    ELSE 0
-END,
-
-------------------------------------------------
--- TỔNG LƯỢNG XUẤT
-------------------------------------------------
-TongLuongXuat =
-CAST
-(
-    CASE
-
-        ------------------------------------------------
-        -- THU TU 0
-        ------------------------------------------------
-        WHEN ThuTu = 0
-        THEN
-
-            CASE
-
-                WHEN
-                    (TongXuatHu
-                     + CASE
-                        WHEN TongXuatThuong > TongNhapThuong
-                        THEN TongXuatThuong - TongNhapThuong
-                        ELSE 0
-                      END) <= 0
-                THEN 0
-
-                WHEN
-                    (TongXuatHu
-                     + CASE
-                        WHEN TongXuatThuong > TongNhapThuong
-                        THEN TongXuatThuong - TongNhapThuong
-                        ELSE 0
-                      END) >= KhoiLuongNhap
-                THEN KhoiLuongNhap
-
-                ELSE
-                    (TongXuatHu
-                     + CASE
-                        WHEN TongXuatThuong > TongNhapThuong
-                        THEN TongXuatThuong - TongNhapThuong
-                        ELSE 0
-                      END)
-
-            END
-
-        ------------------------------------------------
-        -- THU TU 1..N FIFO
-        ------------------------------------------------
-        ELSE
-
-            CASE
-
-                WHEN TongXuatThuong <= 0
-                THEN 0
-
-                WHEN TongXuatThuong >= LuyKeThuong
-                THEN KhoiLuongNhap
-
-                ELSE
-                    TongXuatThuong
-                    - (LuyKeThuong - KhoiLuongNhap)
-
-            END
-
-    END
-
-AS DECIMAL(18,3)
-),
-
-------------------------------------------------
--- TỒN CÒN LẠI
-------------------------------------------------
-TonConLai =
-CAST
-(
+CAST(
     KhoiLuongNhap -
     (
         CASE
-
-            WHEN ThuTu = 0
-            THEN
-
+            WHEN ThuTu = 0 THEN
                 CASE
-
-                    WHEN
-                        (TongXuatHu
-                         + CASE
-                            WHEN TongXuatThuong > TongNhapThuong
-                            THEN TongXuatThuong - TongNhapThuong
-                            ELSE 0
-                          END) <= 0
-                    THEN 0
-
-                    WHEN
-                        (TongXuatHu
-                         + CASE
-                            WHEN TongXuatThuong > TongNhapThuong
-                            THEN TongXuatThuong - TongNhapThuong
-                            ELSE 0
-                          END) >= KhoiLuongNhap
-                    THEN KhoiLuongNhap
-
-                    ELSE
-                        (TongXuatHu
-                         + CASE
-                            WHEN TongXuatThuong > TongNhapThuong
-                            THEN TongXuatThuong - TongNhapThuong
-                            ELSE 0
-                          END)
-
+                    WHEN(TongXuatHu - ISNULL(XuatHuHomNay, 0)) <= 0 THEN 0
+                    WHEN(TongXuatHu - ISNULL(XuatHuHomNay, 0)) >= KhoiLuongNhap THEN KhoiLuongNhap
+                    ELSE(TongXuatHu - ISNULL(XuatHuHomNay, 0))
                 END
-
             ELSE
-
                 CASE
-
-                    WHEN TongXuatThuong <= 0
-                    THEN 0
-
-                    WHEN TongXuatThuong >= LuyKeThuong
-                    THEN KhoiLuongNhap
-
-                    ELSE
-                        TongXuatThuong
-                        - (LuyKeThuong - KhoiLuongNhap)
-
+                    WHEN(TongXuatThuong - ISNULL(XuatThuongHomNay, 0)) <= 0 THEN 0
+                    WHEN(TongXuatThuong - ISNULL(XuatThuongHomNay, 0)) >= LuyKeThuong THEN KhoiLuongNhap
+                    ELSE(TongXuatThuong - ISNULL(XuatThuongHomNay, 0))
+                         - (LuyKeThuong - KhoiLuongNhap)
                 END
-
         END
     )
-
 AS DECIMAL(18,3)
-)
+) AS TonKhoCu,
+
+CASE WHEN ThuTu = 0 THEN TyLe ELSE NULL END AS TyLeKhongDat,
+
+SUM(CASE WHEN ThuTu<> 0 THEN TyLe ELSE 0 END)
+    OVER(PARTITION BY MaLo) AS TyLeTinhTien,
+
+------------------------------------------------
+--TỔNG LƯỢNG XUẤT
+------------------------------------------------
+CAST(
+    CASE
+        WHEN ThuTu = 0 THEN
+            CASE
+                WHEN TongXuatHu <= 0 THEN 0
+                WHEN TongXuatHu >= KhoiLuongNhap THEN KhoiLuongNhap
+                ELSE TongXuatHu
+            END
+        ELSE
+            CASE
+                WHEN TongXuatThuong <= 0 THEN 0
+                WHEN TongXuatThuong >= LuyKeThuong THEN KhoiLuongNhap
+                ELSE TongXuatThuong - (LuyKeThuong - KhoiLuongNhap)
+            END
+    END
+AS DECIMAL(18, 3)
+) AS TongLuongXuat,
+
+------------------------------------------------
+--TỒN CÒN LẠI
+------------------------------------------------
+CAST(
+    KhoiLuongNhap -
+    CASE
+        WHEN ThuTu = 0 THEN
+            CASE
+                WHEN TongXuatHu <= 0 THEN 0
+                WHEN TongXuatHu >= KhoiLuongNhap THEN KhoiLuongNhap
+                ELSE TongXuatHu
+            END
+        ELSE
+            CASE
+                WHEN TongXuatThuong <= 0 THEN 0
+                WHEN TongXuatThuong >= LuyKeThuong THEN KhoiLuongNhap
+                ELSE TongXuatThuong - (LuyKeThuong - KhoiLuongNhap)
+            END
+    END
+AS DECIMAL(18, 3)
+) AS TonConLai,
+
+------------------------------------------------
+--KHỐI LƯỢNG HƯ
+------------------------------------------------
+CAST(
+    CASE
+        WHEN ThuTu = 0 THEN
+            CASE
+                WHEN TongXuatHu <= 0 THEN 0
+                WHEN TongXuatHu >= KhoiLuongNhap THEN KhoiLuongNhap
+                ELSE TongXuatHu
+            END
+        ELSE 0
+    END
+AS DECIMAL(18, 3)
+) AS KhoiLuongIsCanHu,
+
+------------------------------------------------
+--HAO HỤT
+------------------------------------------------
+CAST(
+    CASE
+        WHEN ThuTu = 0 THEN
+            CASE
+                WHEN TongXuatHu <= 0 THEN 0
+                WHEN TongXuatHu >= KhoiLuongNhap THEN KhoiLuongNhap
+                ELSE TongXuatHu
+            END
+        ELSE 0
+    END
+AS DECIMAL(18, 3)
+) AS HaoHut
 
 FROM TinhLuyKe
-ORDER BY MaLo, ThuTu
-";
+ORDER BY MaLo, ThuTu;
+                ";
+                //                var query = @"
+                //------------------------------------------------
+                //-- LÔ CÓ XUẤT HÔM NAY (KHÔNG HUỶ)
+                //------------------------------------------------
+                //;WITH LoXuatHomNay AS
+                //(
+                //    SELECT DISTINCT pnl.MaLo
+                //    FROM HQ_PhieuCanXuatNguyenLieu px
+                //    JOIN HQ_PhieuCanNguyenLieu pnl
+                //        ON pnl.Id = px.IdPhieuCanNguyenLieu
+                //    WHERE px.NgayGio >= @ngay
+                //      AND px.NgayGio < DATEADD(DAY,1,@ngay)
+                //      AND px.IsHuy = 0
+                //),
+
+                //------------------------------------------------
+                //-- NHẬP THEO QUY CÁCH
+                //------------------------------------------------
+                //NhapTheoQuyCach AS
+                //(
+                //    SELECT
+                //        pnl.MaLo,
+                //        pn.NgayGio,
+                //        pn.SoPhieuCanNhap,
+                //        pn.MaSanPham,
+                //        ctn.MaQuyCach,
+                //        qc.Ten AS TenQuyCach,
+                //        ctn.TyLe,
+                //        qc.[Index] AS ThuTu,
+
+                //        CAST(
+                //            pn.TrongLuongHang * ISNULL(ctn.TyLe,0) / 100.0
+                //            AS DECIMAL(18,3)
+                //        ) AS KhoiLuongNhap
+
+                //    FROM HQ_PhieuCanNhapNguyenLieu pn
+
+                //    JOIN
+                //    (
+                //        SELECT DISTINCT SoPhieuCanNhap, MaQuyCach, TyLe
+                //        FROM HQ_ChiTietPhanBoTyLeNguyenLieuNhap
+                //    ) ctn
+                //        ON ctn.SoPhieuCanNhap = pn.SoPhieuCanNhap
+
+                //    JOIN HQ_PhieuCanNguyenLieu pnl
+                //        ON pnl.Id = pn.IdPhieuCanNguyenLieu
+
+                //    JOIN
+                //    (
+                //        SELECT DISTINCT Id, Ten, [Index]
+                //        FROM HQ_QuyCachNguyenLieu
+                //    ) qc
+                //        ON qc.Id = ctn.MaQuyCach
+
+                //    WHERE pnl.MaLo IN (SELECT MaLo FROM LoXuatHomNay)
+                //),
+
+                //------------------------------------------------
+                //-- XUẤT TRƯỚC NGÀY
+                //------------------------------------------------
+                //XuatTruoc AS
+                //(
+                //    SELECT
+                //        pnl.MaLo,
+
+                //        SUM(CASE WHEN ISNULL(px.IsCanHu,0)=0
+                //            THEN px.TrongLuongHang ELSE 0 END) AS XuatThuongTruoc,
+
+                //        SUM(CASE WHEN px.IsCanHu=1
+                //            THEN px.TrongLuongHang ELSE 0 END) AS XuatHuTruoc
+
+                //    FROM HQ_PhieuCanXuatNguyenLieu px
+
+                //    JOIN HQ_PhieuCanNguyenLieu pnl
+                //        ON pnl.Id = px.IdPhieuCanNguyenLieu
+
+                //    WHERE px.NgayGio < @ngay
+                //      AND px.IsHuy = 0
+
+                //    GROUP BY pnl.MaLo
+                //),
+
+                //------------------------------------------------
+                //-- XUẤT HÔM NAY
+                //------------------------------------------------
+                //XuatHomNay AS
+                //(
+                //    SELECT
+                //        pnl.MaLo,
+
+                //        SUM(CASE WHEN ISNULL(px.IsCanHu,0)=0
+                //            THEN px.TrongLuongHang ELSE 0 END) AS XuatThuongHomNay,
+
+                //        SUM(CASE WHEN px.IsCanHu=1
+                //            THEN px.TrongLuongHang ELSE 0 END) AS XuatHuHomNay
+
+                //    FROM HQ_PhieuCanXuatNguyenLieu px
+
+                //    JOIN HQ_PhieuCanNguyenLieu pnl
+                //        ON pnl.Id = px.IdPhieuCanNguyenLieu
+
+                //    WHERE px.NgayGio >= @ngay
+                //      AND px.NgayGio < DATEADD(DAY,1,@ngay)
+                //      AND px.IsHuy = 0
+
+                //    GROUP BY pnl.MaLo
+                //),
+
+                //------------------------------------------------
+                //-- GỘP XUẤT
+                //------------------------------------------------
+                //TongHop AS
+                //(
+                //    SELECT
+                //        n.*,
+
+                //        ISNULL(t1.XuatThuongTruoc,0)
+                //        + ISNULL(t2.XuatThuongHomNay,0) AS TongXuatThuong,
+
+                //        ISNULL(t1.XuatHuTruoc,0)
+                //        + ISNULL(t2.XuatHuHomNay,0) AS TongXuatHu
+
+                //    FROM NhapTheoQuyCach n
+
+                //    LEFT JOIN XuatTruoc t1
+                //        ON t1.MaLo = n.MaLo
+
+                //    LEFT JOIN XuatHomNay t2
+                //        ON t2.MaLo = n.MaLo
+                //),
+
+                //------------------------------------------------
+                //-- LŨY KẾ FIFO
+                //------------------------------------------------
+                //TinhLuyKe AS
+                //(
+                //    SELECT
+                //        t.*,
+
+                //        SUM(
+                //            CASE WHEN t.ThuTu >= 1
+                //                THEN t.KhoiLuongNhap
+                //                ELSE 0
+                //            END
+                //        ) OVER
+                //        (
+                //            PARTITION BY t.MaLo
+                //            ORDER BY t.ThuTu
+                //        ) AS LuyKeThuong,
+
+                //        SUM(
+                //            CASE WHEN t.ThuTu >= 1
+                //                THEN t.KhoiLuongNhap
+                //                ELSE 0
+                //            END
+                //        ) OVER
+                //        (
+                //            PARTITION BY t.MaLo
+                //        ) AS TongNhapThuong
+
+                //    FROM TongHop t
+                //)
+
+                //------------------------------------------------
+                //-- FINAL
+                //------------------------------------------------
+                //SELECT
+
+                //    TenQuyCach,
+                //    MaLo,
+                //    KhoiLuongNhap,
+
+                //------------------------------------------------
+                //-- PHẦN XUẤT THƯỜNG VƯỢT
+                //------------------------------------------------
+                //DuXuatThuong =
+                //CASE
+                //    WHEN TongXuatThuong > TongNhapThuong
+                //    THEN TongXuatThuong - TongNhapThuong
+                //    ELSE 0
+                //END,
+
+                //------------------------------------------------
+                //-- TỔNG LƯỢNG XUẤT
+                //------------------------------------------------
+                //TongLuongXuat =
+                //CAST
+                //(
+                //    CASE
+
+                //        ------------------------------------------------
+                //        -- THU TU 0
+                //        ------------------------------------------------
+                //        WHEN ThuTu = 0
+                //        THEN
+
+                //            CASE
+
+                //                WHEN
+                //                    (TongXuatHu
+                //                     + CASE
+                //                        WHEN TongXuatThuong > TongNhapThuong
+                //                        THEN TongXuatThuong - TongNhapThuong
+                //                        ELSE 0
+                //                      END) <= 0
+                //                THEN 0
+
+                //                WHEN
+                //                    (TongXuatHu
+                //                     + CASE
+                //                        WHEN TongXuatThuong > TongNhapThuong
+                //                        THEN TongXuatThuong - TongNhapThuong
+                //                        ELSE 0
+                //                      END) >= KhoiLuongNhap
+                //                THEN KhoiLuongNhap
+
+                //                ELSE
+                //                    (TongXuatHu
+                //                     + CASE
+                //                        WHEN TongXuatThuong > TongNhapThuong
+                //                        THEN TongXuatThuong - TongNhapThuong
+                //                        ELSE 0
+                //                      END)
+
+                //            END
+
+                //        ------------------------------------------------
+                //        -- THU TU 1..N FIFO
+                //        ------------------------------------------------
+                //        ELSE
+
+                //            CASE
+
+                //                WHEN TongXuatThuong <= 0
+                //                THEN 0
+
+                //                WHEN TongXuatThuong >= LuyKeThuong
+                //                THEN KhoiLuongNhap
+
+                //                ELSE
+                //                    TongXuatThuong
+                //                    - (LuyKeThuong - KhoiLuongNhap)
+
+                //            END
+
+                //    END
+
+                //AS DECIMAL(18,3)
+                //),
+
+                //------------------------------------------------
+                //-- TỒN CÒN LẠI
+                //------------------------------------------------
+                //TonConLai =
+                //CAST
+                //(
+                //    KhoiLuongNhap -
+                //    (
+                //        CASE
+
+                //            WHEN ThuTu = 0
+                //            THEN
+
+                //                CASE
+
+                //                    WHEN
+                //                        (TongXuatHu
+                //                         + CASE
+                //                            WHEN TongXuatThuong > TongNhapThuong
+                //                            THEN TongXuatThuong - TongNhapThuong
+                //                            ELSE 0
+                //                          END) <= 0
+                //                    THEN 0
+
+                //                    WHEN
+                //                        (TongXuatHu
+                //                         + CASE
+                //                            WHEN TongXuatThuong > TongNhapThuong
+                //                            THEN TongXuatThuong - TongNhapThuong
+                //                            ELSE 0
+                //                          END) >= KhoiLuongNhap
+                //                    THEN KhoiLuongNhap
+
+                //                    ELSE
+                //                        (TongXuatHu
+                //                         + CASE
+                //                            WHEN TongXuatThuong > TongNhapThuong
+                //                            THEN TongXuatThuong - TongNhapThuong
+                //                            ELSE 0
+                //                          END)
+
+                //                END
+
+                //            ELSE
+
+                //                CASE
+
+                //                    WHEN TongXuatThuong <= 0
+                //                    THEN 0
+
+                //                    WHEN TongXuatThuong >= LuyKeThuong
+                //                    THEN KhoiLuongNhap
+
+                //                    ELSE
+                //                        TongXuatThuong
+                //                        - (LuyKeThuong - KhoiLuongNhap)
+
+                //                END
+
+                //        END
+                //    )
+
+                //AS DECIMAL(18,3)
+                //)
+
+                //FROM TinhLuyKe
+                //ORDER BY MaLo, ThuTu
+                //";
                 using var connection = new SqlConnection(connectionString);
                 connection.Open();
                 var items = connection.Query<T>(query, new { ngay = ngay.Date}).ToList();
@@ -1016,5 +1043,70 @@ ORDER BY MaLo, ThuTu
                 throw;
             }
         }
+
+        public List<T> GetKhoiLuongXuatLoTheoXuonget<T>(string maLo)
+        {
+            var MaLo = string.IsNullOrWhiteSpace(maLo) || maLo == "'" ? null : maLo;
+            try
+            {
+                var query = @"
+SELECT  
+    pnl.MaLo, 
+    pcx.MaXuongXuatDen, 
+    x.Ten AS TenXuongXuatDen, 
+    SUM(pcx.TrongLuongHang) AS TrongLuongXuat
+FROM HQ_PhieuCanXuatNguyenLieu pcx
+LEFT JOIN HQ_PhieuCanNguyenLieu pnl 
+    ON pnl.Id = pcx.IdPhieuCanNguyenLieu
+LEFT JOIN XiNghiep x 
+    ON x.Ma = pcx.MaXuongXuatDen
+WHERE  
+    (@MaLo IS NULL OR @MaLo = '' OR pnl.MaLo = @MaLo)
+    AND pcx.IsHuy = 0
+GROUP BY 
+    pnl.MaLo, 
+    pcx.MaXuongXuatDen, 
+    x.Ten
+	
+";
+                using var connection = new SqlConnection(connectionString);
+                connection.Open();
+                var items = connection.Query<T>(query, new { MaLo}).ToList();
+                return items;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                throw;
+            }
+        }
+
+
+        public List<T> GetListLo<T>()
+        {
+            try
+            {
+                var query = @"
+select DISTINCT 
+pnl.MaLo
+from HQ_PhieuCanXuatNguyenLieu p
+left join HQ_PhieuCanNguyenLieu pnl on pnl.Id = p.IdPhieuCanNguyenLieu
+order by pnl.MaLo desc
+	
+";
+                using var connection = new SqlConnection(connectionString);
+                connection.Open();
+                var items = connection.Query<T>(query).ToList();
+                return items;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                throw;
+            }
+        }
+
     }
+
+
 }

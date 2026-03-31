@@ -1,0 +1,181 @@
+﻿
+@{
+    ViewData["Title"] = "KhoiLuongXuatLoTheoXuongXLNHQView";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var XuongId = @Context.Session.GetString("XuongId");
+    var listLo = ViewBag.listLo;
+
+}
+
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h2 class="mb-0">Khối Lượng Xuất Xưởng Theo Lô</h2>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-12 mb-12">
+                            <div class="form-outline">
+                                <label class="form-label">Chọn Lô</label>
+                                <input id="MaLoBCHQ" />
+                            </div>
+                        </div>
+                    </div>
+                    <div id="Grid"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+
+    var listLo = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ViewBag.ListLo));
+    //alert(listLo);
+    var comboLo = new ej.dropdowns.ComboBox({
+        dataSource: listLo,
+        fields: { text: 'MaLo', value: 'MaLo' },
+        placeholder: "Chọn Lô",
+        allowFiltering: true,
+        popupHeight: "250px"
+    });
+
+    comboLo.appendTo("#MaLoBCHQ");
+
+    document.addEventListener("DOMContentLoaded", function () {
+        let fromDate = document.getElementById("fromDateBCHQ");
+        let toDate = document.getElementById("toDateBCHQ");
+
+        if (fromDate) {
+            fromDate.step = "1";
+            let now = new Date();
+            let year = now.getFullYear();
+            let month = String(now.getMonth() + 1).padStart(2, "0");
+            let day = String(now.getDate()).padStart(2, "0");
+            // 00:00:00
+            fromDate.value = `${year}-${month}-${day}T00:00:00`;
+        }
+
+        if (toDate) {
+            toDate.step = "1";
+            let now = new Date();
+            let year = now.getFullYear();
+            let month = String(now.getMonth() + 1).padStart(2, "0");
+            let day = String(now.getDate()).padStart(2, "0");
+            // 23:59:59
+            toDate.value = `${year}-${month}-${day}T23:59:59`;
+        }
+    });
+
+
+    var grid;
+    var datalength = 0;
+    function loadGridData(data) {
+        var dataManager = new ej.data.DataManager({
+            json: data,
+            adaptor: new ej.data.JsonAdaptor()
+        });
+        if(data != null && data.length !=null){
+            datalength = data.length;
+        }
+        else{
+            datalength = 0;
+        }
+        if (grid != null) {
+            grid.dataSource = dataManager;
+            grid.refresh();
+        } else {
+            ej.grids.Grid.Inject(ej.grids.Filter);
+            grid = new ej.grids.Grid({
+                dataSource: dataManager,
+                allowPaging: true,
+                pageSettings: { pageSize: 50, pageSizes: [50, 100, 200, 500] },
+                allowFiltering: true,
+                allowSorting: true,
+                filterSettings: { type: 'Excel' },
+                selectionSettings: { persistSelection: true },
+                actionBegin: function (args) {
+                    if (args.requestType == 'filterchoicerequest' || args.requestType == 'filtersearchbegin') {
+
+                        args.filterChoiceCount = datalength;
+                    }
+                },
+                allowResizing: true,
+                allowExcelExport: true,
+                toolbar: ['ExcelExport'],
+                height: 400,
+                columns: [
+                    { field: 'MaLo', headerText: 'Mã Lô', width: 150 },
+                    { field: 'TenXuongXuatDen', headerText: 'Xưởng', width: 150 },
+                    { field: 'TrongLuongXuat', headerText: 'Khối Lượng', width: 180, type: 'number' }
+                ],
+                aggregates: [{
+                    columns: [
+                        {
+                            type: 'Sum',
+                            field: 'TrongLuongXuat',
+                            format: '####.000',
+                            footerTemplate: 'Tổng: ${Sum} Kg'
+                        }
+
+                    ]
+                }]
+            });
+            grid.appendTo('#Grid');
+            grid.toolbarClick = function (args) {
+             if (args.item.id === 'Grid_excelexport') {
+                grid.excelExport();
+             }};
+
+            grid.refresh();
+        }
+    }
+    loadGridData();
+
+</script>
+<script>
+    function ClearData(GridId) {
+        try {
+            var gridObj = document.getElementById(GridId).ej2_instances[0];
+            if(gridObj)
+                gridObj.dataSource = [];
+        } catch (e) {
+            Console.log(e);
+        }
+
+    }
+    document.getElementById('RefreshButtonBCHQ').addEventListener("click",
+        function () {
+            var btn = document.getElementById('RefreshButtonBCHQ').ej2_instances[0];
+            var content = btn.content;
+            btn.content = "Đang Tải ...";
+            //var maLo = document.getElementById("MaLoBCHQ").value;
+            var maLo = comboLo.value;
+            $.ajax({
+                url: "@Url.Action("ReloadKhoiLuongXuatLoTheoXuong", "BaoCaoCanNguyenLieuHQ")",
+                type: "POST",
+                data: { maLo: maLo },
+                success: function (response) {
+                    // Kiểm tra trạng thái "Success" trong dữ liệu JSON từ máy chủ
+                    if (response.Success) {
+                        ClearData("Grid");
+                        loadGridData(response.Data);
+                    } else {
+                        loadGridData(response.Data);
+                        console.error(response.Messages);
+                        toastOptionNotyfi();
+                        toastr["error"](response.Messages, "Không có dữ liệu!");
+                    }
+                },
+                error: function (error) {
+                    toastOptionNotyfi();
+                    toastr["error"](error, "Thông báo");
+                }
+
+            }).always(function () {
+                btn.content = content;
+            });
+        });
+</script>
+

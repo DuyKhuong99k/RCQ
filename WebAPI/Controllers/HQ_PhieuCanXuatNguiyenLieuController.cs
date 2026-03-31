@@ -72,6 +72,22 @@ namespace WebAPI.Controllers
             return Ok(items);
         }
 
+
+        [HttpGet("{maLo}")]
+        [Authorize]
+        public IActionResult GetKhoiLuongXuatLoTheoXuong(string maLo)
+        {        
+            var items = Vm.VmHQ_PhieuCanXuatNguyenLieu.GetKhoiLuongXuatLoTheoXuonget<object>(maLo, _context.Database.GetConnectionString());
+            return Ok(items);
+        }
+
+        [HttpGet]
+        [Authorize]
+        public IActionResult GetListLo()
+        {        
+            var items = Vm.VmHQ_PhieuCanXuatNguyenLieu.GetListLo<object>(_context.Database.GetConnectionString());
+            return Ok(items);
+        }
         
     }
 }
