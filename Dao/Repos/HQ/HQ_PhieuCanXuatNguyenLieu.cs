@@ -1050,24 +1050,231 @@ ORDER BY MaLo, ThuTu;
             try
             {
                 var query = @"
-SELECT  
-    pnl.MaLo, 
-    pcx.MaXuongXuatDen, 
-    x.Ten AS TenXuongXuatDen, 
-    SUM(pcx.TrongLuongHang) AS TrongLuongXuat
-FROM HQ_PhieuCanXuatNguyenLieu pcx
-LEFT JOIN HQ_PhieuCanNguyenLieu pnl 
-    ON pnl.Id = pcx.IdPhieuCanNguyenLieu
-LEFT JOIN XiNghiep x 
-    ON x.Ma = pcx.MaXuongXuatDen
-WHERE  
-    (@MaLo IS NULL OR @MaLo = '' OR pnl.MaLo = @MaLo)
-    AND pcx.IsHuy = 0
-GROUP BY 
-    pnl.MaLo, 
-    pcx.MaXuongXuatDen, 
-    x.Ten
-	
+WITH NhapTheoQuyCach AS (
+    SELECT
+        pnl.MaLo,
+        pn.NgayGio,
+        pn.SoPhieuCanNhap,
+        pn.MaSanPham,
+        ctn.MaQuyCach,
+        qc.Ten AS TenQuyCach,
+        ctn.TyLe,
+        qc.[Index] AS ThuTu,
+        CAST(
+            pn.TrongLuongHang * ISNULL(ctn.TyLe,0) / 100.0
+            AS DECIMAL(18,3)
+        ) AS KhoiLuongNhap
+    FROM HQ_PhieuCanNhapNguyenLieu pn
+    JOIN (
+        SELECT DISTINCT SoPhieuCanNhap, MaQuyCach, TyLe
+        FROM HQ_ChiTietPhanBoTyLeNguyenLieuNhap
+    ) ctn ON ctn.SoPhieuCanNhap = pn.SoPhieuCanNhap
+    JOIN HQ_PhieuCanNguyenLieu pnl
+        ON pnl.Id = pn.IdPhieuCanNguyenLieu
+    JOIN (
+        SELECT DISTINCT Id,Ten,[Index]
+        FROM HQ_QuyCachNguyenLieu
+    ) qc ON qc.Id = ctn.MaQuyCach
+),
+
+------------------------------------------------
+-- TỔNG XUẤT THƯỜNG
+------------------------------------------------
+TongXuatThuongTheoLo AS (
+    SELECT
+        pnl.MaLo,
+        SUM(px.TrongLuongHang) AS TongXuatThuong
+    FROM HQ_PhieuCanXuatNguyenLieu px
+    JOIN HQ_PhieuCanNguyenLieu pnl
+        ON pnl.Id = px.IdPhieuCanNguyenLieu
+    WHERE
+        ISNULL(px.IsCanHu,0) = 0
+        AND ISNULL(px.IsHuy,0) = 0
+    GROUP BY pnl.MaLo
+),
+
+------------------------------------------------
+-- TỔNG XUẤT HƯ
+------------------------------------------------
+TongXuatHuTheoLo AS (
+    SELECT
+        pnl.MaLo,
+        SUM(px.TrongLuongHang) AS TongXuatHu
+    FROM HQ_PhieuCanXuatNguyenLieu px
+    JOIN HQ_PhieuCanNguyenLieu pnl
+        ON pnl.Id = px.IdPhieuCanNguyenLieu
+    WHERE
+        px.IsCanHu = 1
+        AND ISNULL(px.IsHuy,0) = 0
+    GROUP BY pnl.MaLo
+),
+
+------------------------------------------------
+-- PHÂN BỔ
+------------------------------------------------
+PhanBoXuat AS (
+    SELECT
+        n.*,
+        ISNULL(tx.TongXuatThuong,0) AS TongXuatThuong,
+        ISNULL(th.TongXuatHu,0) AS TongXuatHu,
+        SUM(
+            CASE
+                WHEN n.ThuTu >= 1
+                THEN n.KhoiLuongNhap
+                ELSE 0
+            END
+        ) OVER (
+            PARTITION BY n.MaLo
+            ORDER BY n.ThuTu
+        ) AS TongNhapLuyKeThuong,
+
+        SUM(
+            CASE
+                WHEN n.ThuTu >= 1
+                THEN n.KhoiLuongNhap
+                ELSE 0
+            END
+        ) OVER (
+            PARTITION BY n.MaLo
+        ) AS TongNhapThuong
+
+    FROM NhapTheoQuyCach n
+    LEFT JOIN TongXuatThuongTheoLo tx
+        ON tx.MaLo = n.MaLo
+    LEFT JOIN TongXuatHuTheoLo th
+        ON th.MaLo = n.MaLo
+)
+
+SELECT
+    p.NgayGio,
+    p.MaLo,
+    p.SoPhieuCanNhap,
+    p.MaSanPham,
+    sp.Ten AS TenSanPham,
+    p.MaQuyCach,
+    p.TenQuyCach,
+    p.ThuTu AS [Index],
+    p.KhoiLuongNhap,
+
+------------------------------------------------
+-- KHỐI LƯỢNG XUẤT
+------------------------------------------------
+CAST(
+CASE
+    ------------------------------------------------
+    -- INDEX 0
+    ------------------------------------------------
+    WHEN p.ThuTu = 0 THEN
+
+        CASE
+
+            WHEN
+                (p.TongXuatHu +
+                 CASE
+                    WHEN p.TongXuatThuong > p.TongNhapThuong
+                    THEN p.TongXuatThuong - p.TongNhapThuong
+                    ELSE 0
+                 END
+                ) <= 0
+            THEN 0
+
+            WHEN
+                (p.TongXuatHu +
+                 CASE
+                    WHEN p.TongXuatThuong > p.TongNhapThuong
+                    THEN p.TongXuatThuong - p.TongNhapThuong
+                    ELSE 0
+                 END
+                ) >= p.KhoiLuongNhap
+            THEN p.KhoiLuongNhap
+
+            ELSE
+                (p.TongXuatHu +
+                 CASE
+                    WHEN p.TongXuatThuong > p.TongNhapThuong
+                    THEN p.TongXuatThuong - p.TongNhapThuong
+                    ELSE 0
+                 END
+                )
+
+        END
+
+    ------------------------------------------------
+    -- FIFO INDEX >=1
+    ------------------------------------------------
+    ELSE
+
+        CASE
+
+            WHEN p.TongXuatThuong
+                 <= (p.TongNhapLuyKeThuong - p.KhoiLuongNhap)
+            THEN 0
+
+            WHEN p.TongXuatThuong
+                 >= p.TongNhapLuyKeThuong
+            THEN p.KhoiLuongNhap
+
+            ELSE
+                p.TongXuatThuong -
+                (p.TongNhapLuyKeThuong - p.KhoiLuongNhap)
+
+        END
+
+END
+AS DECIMAL(18,3)) AS KhoiLuongXuat,
+
+------------------------------------------------
+-- HAO HỤT
+------------------------------------------------
+CAST(
+    p.KhoiLuongNhap -
+    (
+        CASE
+
+            WHEN p.ThuTu = 0 THEN
+                CASE
+                    WHEN
+                        (p.TongXuatHu +
+                         CASE
+                            WHEN p.TongXuatThuong > p.TongNhapThuong
+                            THEN p.TongXuatThuong - p.TongNhapThuong
+                            ELSE 0
+                         END
+                        ) >= p.KhoiLuongNhap
+                    THEN p.KhoiLuongNhap
+                    ELSE
+                        (p.TongXuatHu +
+                         CASE
+                            WHEN p.TongXuatThuong > p.TongNhapThuong
+                            THEN p.TongXuatThuong - p.TongNhapThuong
+                            ELSE 0
+                         END
+                        )
+                END
+
+            ELSE
+                CASE
+                    WHEN p.TongXuatThuong <= 0 THEN 0
+                    WHEN p.TongXuatThuong >= p.TongNhapLuyKeThuong
+                    THEN p.KhoiLuongNhap
+                    ELSE
+                        p.TongXuatThuong -
+                        (p.TongNhapLuyKeThuong - p.KhoiLuongNhap)
+                END
+
+        END
+    )
+AS DECIMAL(18,3)) AS KhoiLuongHaoHut
+
+FROM PhanBoXuat p
+LEFT JOIN HQ_SanPhamNguyenLieu sp
+    ON sp.Id = p.MaSanPham
+
+WHERE p.MaLo = @MaLo
+
+ORDER BY
+    p.MaLo,
+    p.ThuTu ASC;
 ";
                 using var connection = new SqlConnection(connectionString);
                 connection.Open();
@@ -1086,14 +1293,13 @@ GROUP BY
         {
             try
             {
-                var query = @"
-select DISTINCT 
-pnl.MaLo
-from HQ_PhieuCanXuatNguyenLieu p
-left join HQ_PhieuCanNguyenLieu pnl on pnl.Id = p.IdPhieuCanNguyenLieu
-order by pnl.MaLo desc
-	
-";
+            var query = @"
+                select DISTINCT 
+                pnl.MaLo
+                from HQ_PhieuCanXuatNguyenLieu p
+                left join HQ_PhieuCanNguyenLieu pnl on pnl.Id = p.IdPhieuCanNguyenLieu
+                order by pnl.MaLo desc
+                ";
                 using var connection = new SqlConnection(connectionString);
                 connection.Open();
                 var items = connection.Query<T>(query).ToList();

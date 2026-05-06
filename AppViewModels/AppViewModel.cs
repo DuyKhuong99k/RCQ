@@ -180,7 +180,7 @@ namespace AppViewModels
                 HubsMayCanCODE = modelWebAppSetting.HubMayCanCODE;
                 LoKv = modelWebAppSetting.LoKv;
             }
-            //ComName = nameof(ComNames.NV);
+            ComName = nameof(ComNames.RCQTG);
             LoKv = AppKV.Hq;
             ChiSoTyLeTangTrongRaCoi = 1.07m;
             MocThoiGian1 = 30;

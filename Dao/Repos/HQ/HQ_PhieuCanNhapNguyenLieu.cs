@@ -109,7 +109,7 @@ JOIN (
     SELECT DISTINCT Id, Ten, [Index], MaNguyenLieu, DonViTinh, NhomQuyCach
     FROM HQ_QuyCachNguyenLieu
 ) qc ON qc.Id = ctn.MaQuyCach
-JOIN NhaCungCapNguyenLieu ncc 
+LEFT JOIN NhaCungCapNguyenLieu ncc 
     ON pn.MaNhaCC = ncc.Ma 
 WHERE pn.NgayGio >= @fromDate
   AND pn.NgayGio <= DATEADD(DAY, 1, @toDate)

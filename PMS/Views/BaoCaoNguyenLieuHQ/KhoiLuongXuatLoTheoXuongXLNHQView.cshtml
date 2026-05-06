@@ -19,7 +19,7 @@
                         <div class="col-md-12 mb-12">
                             <div class="form-outline">
                                 <label class="form-label">Chọn Lô</label>
-                                <input id="MaLoBCHQ" />
+                                <input id="MaLoBCHQ"/>
                             </div>
                         </div>
                     </div>
@@ -106,17 +106,26 @@
                 toolbar: ['ExcelExport'],
                 height: 400,
                 columns: [
-                    { field: 'MaLo', headerText: 'Mã Lô', width: 150 },
-                    { field: 'TenXuongXuatDen', headerText: 'Xưởng', width: 150 },
-                    { field: 'TrongLuongXuat', headerText: 'Khối Lượng', width: 180, type: 'number' }
+                    { field: 'TenSanPham', headerText: 'Tên sản phẩm', width: 150 },
+                    { field: 'TenQuyCach', headerText: 'Quy cách', width: 150 },
+                    { field: 'KhoiLuongNhap', headerText: 'Khối lượng nhập', width: 180, type: 'number'},
+                    { field: 'KhoiLuongXuat', headerText: 'Khối lượng xuất', width: 180, type: 'number' },
+                    { field: 'KhoiLuongHaoHut', headerText: 'Hao hụt', width: 180, type: 'number' }
                 ],
                 aggregates: [{
                     columns: [
                         {
                             type: 'Sum',
-                            field: 'TrongLuongXuat',
+                            field: 'KhoiLuongNhap',
                             format: '####.000',
-                            footerTemplate: 'Tổng: ${Sum} Kg'
+                            footerTemplate: 'Tổng Nhập: ${Sum} Kg'
+                            
+                        },
+                        {
+                            type: 'Sum',
+                            field: 'KhoiLuongXuat',
+                            format: '####.000',
+                            footerTemplate: 'Tổng Xuất: ${Sum} Kg'
                         }
 
                     ]

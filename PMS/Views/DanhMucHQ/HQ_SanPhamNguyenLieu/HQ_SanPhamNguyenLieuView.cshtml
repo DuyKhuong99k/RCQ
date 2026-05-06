@@ -15,19 +15,16 @@
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h2 class="mb-0">Danh Sách Sản Phẩm Nguyên Liệu</h2>
-                    @{
-                        var themHQ_SanPhamNguyenLieu = rolePermistions.Where(x => x.Fu == "Danh Mục / Sản Phẩm Nguyên Liệu HQ" && x.Func == "Thêm Sản Phẩm Nguyên Liệu HQ" && x.Status == 1).FirstOrDefault();
-                        if (themHQ_SanPhamNguyenLieu != null)
-                        {
-                            <button onclick="showInsert()" type="button" class="btn btn-primary">Thêm</button>
-                        }
-                    }
-
                 </div>
                 <div class="card-body">
                     <div id="Grid"></div>
                     <div style="margin-top:20px;">
                         @{
+                            var themHQ_SanPhamNguyenLieu = rolePermistions.Where(x => x.Fu == "Danh Mục / Sản Phẩm Nguyên Liệu HQ" && x.Func == "Thêm Sản Phẩm Nguyên Liệu HQ" && x.Status == 1).FirstOrDefault();
+                            if (themHQ_SanPhamNguyenLieu != null)
+                            {
+                                <button onclick="showInsert()" type="button" class="btn btn-primary">Thêm</button>
+                            }
                             var suaHQ_SanPhamNguyenLieu = rolePermistions.Where(x => x.Fu == "Danh Mục / Sản Phẩm Nguyên Liệu HQ" && x.Func == "Sửa Sản Phẩm Nguyên Liệu HQ" && x.Status == 1).FirstOrDefault();
                             if (suaHQ_SanPhamNguyenLieu != null)
                             {
