@@ -1155,6 +1155,10 @@ SELECT
     p.TenQuyCach,
     p.ThuTu AS [Index],
     p.KhoiLuongNhap,
+	    CASE 
+    WHEN p.ThuTu = 0 THEN ISNULL(p.TongXuatHu,0)
+    ELSE 0
+    END AS TongHuKho,
 
 ------------------------------------------------
 -- KHỐI LƯỢNG XUẤT

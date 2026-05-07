@@ -9,15 +9,33 @@
     <div class="row">
         <div class="col-12">
             <div class="card">
+
+                <!-- HEADER -->
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h2 class="mb-0">Chi Tiết</h2>
+                    <h5 class="mb-0 fw-bold">Chi Tiết Nguyên Liệu</h5>
+
+                    <div class="d-flex align-items-center gap-2">
+                        <label class="mb-0 small text-muted">Loại GD:</label>
+
+                        <select id="loaiGiaoDich"
+                                class="form-select form-select-sm"
+                                style="width:160px;">
+                            <option value="">Tất cả</option>
+                            <option value="Nhập">🟢 Nhập</option>
+                            <option value="Xuất">🔴 Xuất</option>
+                        </select>
+                    </div>
                 </div>
+
+                <!-- BODY -->
                 <div class="card-body">
                     <div id="Grid"></div>
                 </div>
+
             </div>
         </div>
     </div>
+</div>
 </div>
 <script>
 
@@ -86,18 +104,20 @@
                 columns: [
                     
                     { field: 'NgayGio', headerText: 'Ngày', width: 150, type: 'date', format: 'dd-MM-yyyy HH:mm:ss' },
+                    { field: 'MaLo', headerText: 'Lô', width: 150 },
                     { field: 'MaNguyenLieu', headerText: 'Mã Nguyên Liệu', width: 150 },
-                    { field: 'DonViTinh', headerText: 'Đơn Vị Tính', width: 150 },
                     { field: 'TenQuyCach', headerText: 'Tên Nguyên Liệu', width: 200 },
-                    { field: 'KhoiLuongNhap', headerText: 'Số Lượng', width: 150 },
                     { field: 'TyLe', headerText: 'Tỷ Lệ %', width: 150 },
+                    { field: 'KhoiLuongNhap', headerText: 'Số Lượng', width: 150 },
+                    { field: 'DonViTinh', headerText: 'Đơn Vị Tính', width: 150 },
+                    { field: 'LoaiGiaoDich', headerText: 'Loại Giao Dịch', width: 150 },
+                    { field: 'MaPhuongTien', headerText: 'Biển Số Xe', width: 150 },
                     { field: 'MaNhaCC', headerText: 'Mã Khách Hàng', width: 150 },
                     { field: 'TenNhaCC', headerText: 'Tên Khách Hàng', width: 150 },
                     { field: 'CCCDNCC', headerText: 'CCCD/MST', width: 150 },
                     { field: 'TaiXe', headerText: 'Tài Xế', width: 150 },
                     { field: 'SDT', headerText: 'SĐT Tài Xế', width: 150 },
                     { field: 'CCCD', headerText: 'CCCD Tài Xế', width: 150 },
-                    { field: 'MaLo', headerText: 'Lô', width: 150 },
                     { field: 'NhomQuyCach', headerText: 'Nhóm Vật Tư', width: 150 },
                     { field: 'NoiDungGiaoNhan', headerText: 'Nội Dung', width: 300 },
                 ],
@@ -125,6 +145,17 @@
              }};
 
             grid.refresh();
+            document.getElementById("loaiGiaoDich").addEventListener("change", function () {
+                let value = this.value;
+
+                if (!grid) return;
+
+                if (!value) {
+                    grid.clearFiltering();
+                } else {
+                    grid.filterByColumn("LoaiGiaoDich", "equal", value);
+                }
+            });
         }
     }
     loadGridData();
