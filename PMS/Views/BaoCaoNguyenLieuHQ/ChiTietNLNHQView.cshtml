@@ -104,37 +104,27 @@
                 columns: [
                     
                     { field: 'NgayGio', headerText: 'Ngày', width: 150, type: 'date', format: 'dd-MM-yyyy HH:mm:ss' },
-                    { field: 'MaLo', headerText: 'Lô', width: 150 },
-                    { field: 'MaNguyenLieu', headerText: 'Mã Nguyên Liệu', width: 150 },
+                    { field: 'MaLo', headerText: 'Lô', width: 150 },  
                     { field: 'TenQuyCach', headerText: 'Tên Nguyên Liệu', width: 200 },
                     { field: 'TyLe', headerText: 'Tỷ Lệ %', width: 150 },
                     { field: 'KhoiLuongNhap', headerText: 'Số Lượng', width: 150 },
-                    { field: 'DonViTinh', headerText: 'Đơn Vị Tính', width: 150 },
-                    { field: 'LoaiGiaoDich', headerText: 'Loại Giao Dịch', width: 150 },
-                    { field: 'MaPhuongTien', headerText: 'Biển Số Xe', width: 150 },
-                    { field: 'MaNhaCC', headerText: 'Mã Khách Hàng', width: 150 },
+                    { field: 'DonViTinh', headerText: 'Đơn Vị Tính', width: 150 },                   
+                    { field: 'MaPhuongTien', headerText: 'Biển Số Xe', width: 150 },                 
                     { field: 'TenNhaCC', headerText: 'Tên Khách Hàng', width: 150 },
                     { field: 'CCCDNCC', headerText: 'CCCD/MST', width: 150 },
                     { field: 'TaiXe', headerText: 'Tài Xế', width: 150 },
                     { field: 'SDT', headerText: 'SĐT Tài Xế', width: 150 },
-                    { field: 'CCCD', headerText: 'CCCD Tài Xế', width: 150 },
-                    { field: 'NhomQuyCach', headerText: 'Nhóm Vật Tư', width: 150 },
+                    { field: 'CCCD', headerText: 'CCCD Tài Xế', width: 150 },                   
                     { field: 'NoiDungGiaoNhan', headerText: 'Nội Dung', width: 300 },
                 ],
                 aggregates: [{
                     columns: [
                         {
                             type: 'Sum',
-                            field: 'TrongLuongHang',
+                            field: 'KhoiLuongNhap',
                             format: '####.000',
                             footerTemplate: 'Tổng Trọng Lượng: ${Sum} Kg'
-                        },
-                        {
-                            type: 'Sum',
-                            field: 'TrongLuongXe',
-                            format: '####.000',
-                            footerTemplate: 'Tổng Trọng Lượng: ${Sum} Kg'
-                        },
+                        }
                     ]
                 }]
             });
