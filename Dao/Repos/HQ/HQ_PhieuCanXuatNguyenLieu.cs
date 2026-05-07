@@ -20,38 +20,38 @@ namespace Dao.Repos.HQ
             try
             {
                 var query = @"
-SELECT
-    px.STT,
-    pc.NgayGio,
-    pc.MaLo AS LoNguyenLieu,
-    px.MaThuKho,
-	nv.Name as TenThuKho,
-    sp.Ten AS LoaiSanPham,
-	px.SoPhieuNhap,
-    px.SoPhieuXuat,
-    px.TrongLuongTong,
-    px.TrongLuongXe,
-    px.TrongLuongHang,
-    dvt.Ten AS DonViTinh,
-    x.Ten AS XuongXuatDen,
-    kho.Ten AS Kho
-FROM HQ_PhieuCanXuatNguyenLieu px
-JOIN HQ_PhieuCanNguyenLieu pc
-        ON px.IdPhieuCanNguyenLieu = pc.Id
-LEFT JOIN HQ_SanPhamNguyenLieu sp
-        ON px.MaSanPham = sp.Id
-LEFT JOIN HQ_DonViTinh dvt
-        ON px.MaDonVi = dvt.Id
-LEFT JOIN HQ_KhoNguyenLieu kho
-        ON px.MaKho = kho.Id
-LEFT JOIN XiNghiep x
-        ON px.MaXuongXuatDen = x.Ma
-Left join NhanVienDaiThanh nv on px.MaThuKho = nv.MaNhanVien and nv.IsThuKho =1 
-Where pc.MaXuong = @xuongId
-and pc.NgayGio >= @fromDate and pc.NgayGio <= @toDate
-ORDER BY pc.NgayGio, px.STT;
+                    SELECT
+                        px.STT,
+                        pc.NgayGio,
+                        pc.MaLo AS LoNguyenLieu,
+                        px.MaThuKho,
+	                    nv.Name as TenThuKho,
+                        sp.Ten AS LoaiSanPham,
+	                    px.SoPhieuNhap,
+                        px.SoPhieuXuat,
+                        px.TrongLuongTong,
+                        px.TrongLuongXe,
+                        px.TrongLuongHang,
+                        dvt.Ten AS DonViTinh,
+                        x.Ten AS XuongXuatDen,
+                        kho.Ten AS Kho
+                    FROM HQ_PhieuCanXuatNguyenLieu px
+                    JOIN HQ_PhieuCanNguyenLieu pc
+                            ON px.IdPhieuCanNguyenLieu = pc.Id
+                    LEFT JOIN HQ_SanPhamNguyenLieu sp
+                            ON px.MaSanPham = sp.Id
+                    LEFT JOIN HQ_DonViTinh dvt
+                            ON px.MaDonVi = dvt.Id
+                    LEFT JOIN HQ_KhoNguyenLieu kho
+                            ON px.MaKho = kho.Id
+                    LEFT JOIN XiNghiep x
+                            ON px.MaXuongXuatDen = x.Ma
+                    Left join NhanVienDaiThanh nv on px.MaThuKho = nv.MaNhanVien and nv.IsThuKho =1 
+                    Where pc.MaXuong = @xuongId
+                    and pc.NgayGio >= @fromDate and pc.NgayGio <= @toDate
+                    ORDER BY pc.NgayGio, px.STT;
 	
-";
+                    ";
                 using var connection = new SqlConnection(connectionString);
                 connection.Open();
                 var items = connection.Query<T>(query, new { fromDate, toDate ,xuongId}).ToList();
@@ -1056,25 +1056,63 @@ WITH NhapTheoQuyCach AS (
         pn.NgayGio,
         pn.SoPhieuCanNhap,
         pn.MaSanPham,
-        ctn.MaQuyCach,
+
+        ISNULL(bl.MaQuyCach, ctn.MaQuyCach) AS MaQuyCach,
+
         qc.Ten AS TenQuyCach,
+
         ctn.TyLe,
+
         qc.[Index] AS ThuTu,
+
         CAST(
-            pn.TrongLuongHang * ISNULL(ctn.TyLe,0) / 100.0
+            CASE
+                -- Có bao lụa
+                WHEN bl.TrongLuongBaoLua IS NOT NULL
+                    THEN bl.TrongLuongBaoLua
+
+                -- Phân bổ tỷ lệ
+                ELSE
+                    pn.TrongLuongHang * ISNULL(ctn.TyLe,0) / 100.0
+            END
             AS DECIMAL(18,3)
         ) AS KhoiLuongNhap
+
     FROM HQ_PhieuCanNhapNguyenLieu pn
-    JOIN (
-        SELECT DISTINCT SoPhieuCanNhap, MaQuyCach, TyLe
+
+    LEFT JOIN (
+        SELECT DISTINCT
+            SoPhieuCanNhap,
+            MaQuyCach,
+            TyLe
         FROM HQ_ChiTietPhanBoTyLeNguyenLieuNhap
-    ) ctn ON ctn.SoPhieuCanNhap = pn.SoPhieuCanNhap
+    ) ctn
+        ON ctn.SoPhieuCanNhap = pn.SoPhieuCanNhap
+
+    LEFT JOIN (
+        SELECT DISTINCT
+            SoPhieuCanNhap,
+            MaQuyCach,
+            TrongLuongBaoLua
+        FROM HQ_ChiTietPhanBoBaoLuaNguyenLieuNhap
+    ) bl
+        ON bl.SoPhieuCanNhap = pn.SoPhieuCanNhap
+        AND (
+            bl.MaQuyCach = ctn.MaQuyCach
+            OR ctn.MaQuyCach IS NULL
+        )
+
     JOIN HQ_PhieuCanNguyenLieu pnl
         ON pnl.Id = pn.IdPhieuCanNguyenLieu
+
     JOIN (
-        SELECT DISTINCT Id,Ten,[Index]
+        SELECT DISTINCT
+            Id,
+            Ten,
+            [Index]
         FROM HQ_QuyCachNguyenLieu
-    ) qc ON qc.Id = ctn.MaQuyCach
+    ) qc
+        ON qc.Id = ISNULL(bl.MaQuyCach, ctn.MaQuyCach)
 ),
 
 ------------------------------------------------
