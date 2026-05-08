@@ -82,14 +82,14 @@ WHERE pn.NgayGio >= @fromDate
     pn.SoPhieuCanNhap,
     pn.MaSanPham,
     pn.MaNhaCC,
-    ncc.Ten as TenNhaCC,
-    ncc.CCCD as CCCDNCC,
+    ncc.Ten AS TenNhaCC,
+    ncc.CCCD AS CCCDNCC,
     pn.TaiXe,
     pn.CCCD,
     pn.SDT,
     pn.MaPhuongTien,
     pn.LoaiGiaoDich,
-    ctn.MaQuyCach,
+    ISNULL(bl.MaQuyCach, ctn.MaQuyCach) AS MaQuyCach,
     qc.MaNguyenLieu,
     qc.DonViTinh,
     qc.Ten AS TenQuyCach,
@@ -97,26 +97,57 @@ WHERE pn.NgayGio >= @fromDate
     qc.NhomQuyCach,
     pn.NoiDungGiaoNhan,
     qc.[Index] AS ThuTu,
-    CAST(
-        pn.TrongLuongHang * ISNULL(ctn.TyLe, 0) / 100.0
-        AS DECIMAL(18,1)
-    ) AS KhoiLuongNhap
+    CASE 
+        WHEN bl.TrongLuongBaoLua IS NOT NULL
+            THEN CAST(bl.TrongLuongBaoLua AS DECIMAL(18,1))
+
+        ELSE 
+            CAST(
+                pn.TrongLuongHang * ISNULL(ctn.TyLe,0) / 100.0
+                AS DECIMAL(18,1)
+            )
+    END AS KhoiLuongNhap
+
 FROM HQ_PhieuCanNhapNguyenLieu pn
-JOIN (
-    SELECT DISTINCT SoPhieuCanNhap, MaQuyCach, TyLe
+
+LEFT JOIN (
+    SELECT DISTINCT 
+        SoPhieuCanNhap,
+        MaQuyCach,
+        TyLe
     FROM HQ_ChiTietPhanBoTyLeNguyenLieuNhap
-) ctn ON ctn.SoPhieuCanNhap = pn.SoPhieuCanNhap
+) ctn 
+    ON ctn.SoPhieuCanNhap = pn.SoPhieuCanNhap
+
+LEFT JOIN (
+    SELECT DISTINCT 
+        SoPhieuCanNhap,
+        MaQuyCach,
+        TrongLuongBaoLua
+    FROM HQ_ChiTietPhanBoBaoLuaNguyenLieuNhap
+) bl 
+    ON bl.SoPhieuCanNhap = pn.SoPhieuCanNhap
+
 JOIN HQ_PhieuCanNguyenLieu pnl
     ON pnl.Id = pn.IdPhieuCanNguyenLieu
+
 JOIN (
-    SELECT DISTINCT Id, Ten, [Index], MaNguyenLieu, DonViTinh, NhomQuyCach
+    SELECT DISTINCT 
+        Id,
+        Ten,
+        [Index],
+        MaNguyenLieu,
+        DonViTinh,
+        NhomQuyCach
     FROM HQ_QuyCachNguyenLieu
-) qc ON qc.Id = ctn.MaQuyCach
+) qc 
+    ON qc.Id = ISNULL(bl.MaQuyCach, ctn.MaQuyCach)
+
 LEFT JOIN NhaCungCapNguyenLieu ncc 
     ON pn.MaNhaCC = ncc.Ma 
+
 WHERE pn.NgayGio >= @fromDate
-  AND pn.NgayGio <= DATEADD(DAY, 1, @toDate)
-	
+  AND pn.NgayGio <= DATEADD(DAY, 1, @toDate)	
 ";
                 using var connection = new SqlConnection(connectionString);
                 connection.Open();
