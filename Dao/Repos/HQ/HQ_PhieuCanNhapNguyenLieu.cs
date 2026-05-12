@@ -40,7 +40,7 @@ namespace Dao.Repos.HQ
                     qc.[Index] AS ThuTu,
                     CAST(
                         pn.TrongLuongHang * ISNULL(ctn.TyLe, 0) / 100.0
-                        AS DECIMAL(18,3)
+                        AS DECIMAL(18,1)
                     ) AS KhoiLuongNhap
                 FROM HQ_PhieuCanNhapNguyenLieu pn
                 JOIN (
@@ -166,10 +166,11 @@ namespace Dao.Repos.HQ
             {
                 var query = @"SELECT 
                     pc.Ngay,
+                    pcn.LoaiGiaoDich,
                     pc.MaLo as LoNguyenLieu,
                     sp.Ten as TenHang,
                     dvt.Ten as DonViTinh,
-                    SUM(ISNULL(PCN.TrongLuongHang, 0)) as SoLuong
+                    ROUND(SUM(ISNULL(PCN.TrongLuongHang, 0)), 1)as SoLuong
                 FROM HQ_PhieuCanNhapNguyenLieu pcn
                 INNER JOIN HQ_PhieuCanNguyenLieu pc
                         ON PCN.IdPhieuCanNguyenLieu = pc.Id
@@ -180,6 +181,7 @@ namespace Dao.Repos.HQ
                 Where pc.MaXuong = @xuongId
                 and pc.NgayGio >= @fromDate and pc.NgayGio <= @toDate
                 GROUP BY 
+                    pcn.LoaiGiaoDich,
                     PC.Ngay,
                     PC.MaLo,
                     SP.Ten,

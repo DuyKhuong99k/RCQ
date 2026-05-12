@@ -107,8 +107,9 @@
                     { field: 'MaLo', headerText: 'Lô', width: 150 },  
                     { field: 'TenQuyCach', headerText: 'Tên Nguyên Liệu', width: 200 },
                     { field: 'TyLe', headerText: 'Tỷ Lệ %', width: 150 },
-                    { field: 'KhoiLuongNhap', headerText: 'Số Lượng', width: 150 },
-                    { field: 'DonViTinh', headerText: 'Đơn Vị Tính', width: 150 },                   
+                    { field: 'KhoiLuongNhap', headerText: 'Số Lượng', width: 150 },                 
+                    { field: 'DonViTinh', headerText: 'Đơn Vị Tính', width: 150 }, 
+                    { field: 'LoaiGiaoDich', headerText: 'Loại Giao Dịch', width: 150},
                     { field: 'MaPhuongTien', headerText: 'Biển Số Xe', width: 150 },                 
                     { field: 'TenNhaCC', headerText: 'Tên Khách Hàng', width: 150 },
                     { field: 'CCCDNCC', headerText: 'CCCD/MST', width: 150 },
@@ -122,7 +123,7 @@
                         {
                             type: 'Sum',
                             field: 'KhoiLuongNhap',
-                            format: '####.000',
+                            format: '####.0',
                             footerTemplate: 'Tổng Trọng Lượng: ${Sum} Kg'
                         }
                     ]

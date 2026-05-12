@@ -89,35 +89,40 @@
 
                     { field: 'LoNguyenLieu', headerText: 'Lô Nguyên Liệu', width: 150 },
 
-                    { field: 'MaThuKho', headerText: 'Mã Thủ Kho', width: 120 },
-                    { field: 'TenThuKho', headerText: 'Tên Thủ Kho', width: 160 },
-
                     { field: 'LoaiSanPham', headerText: 'Loại Sản Phẩm', width: 150 },
 
                     { field: 'SoPhieuNhap', headerText: 'Số Phiếu Nhập', width: 150 },
+
                     { field: 'SoPhieuXuat', headerText: 'Số Phiếu Xuất', width: 150 },
 
                     { field: 'TrongLuongTong', headerText: 'Trọng Lượng Tổng (Có bì)', width: 170, type: 'number' },
+
                     { field: 'TrongLuongXe', headerText: 'Trọng Lượng Xe (Bì)', width: 150, type: 'number' },
+
                     { field: 'TrongLuongHang', headerText: 'Trọng Lượng Hàng', width: 150, type: 'number' },
 
                     { field: 'DonViTinh', headerText: 'Đơn Vị Tính', width: 120 },
 
                     { field: 'XuongXuatDen', headerText: 'Xưởng Xuất Đến', width: 160 },
+
                     { field: 'Kho', headerText: 'Kho', width: 150 },
+
+                    { field: 'MaThuKho', headerText: 'Mã Thủ Kho', width: 120 },
+
+                    { field: 'TenThuKho', headerText: 'Tên Thủ Kho', width: 160 },
                 ],
                 aggregates: [{
                     columns: [
                         {
                             type: 'Sum',
                             field: 'TrongLuongHang',
-                            format: '####.000',
+                            format: '####.0',
                             footerTemplate: 'Tổng Trọng Lượng: ${Sum} Kg'
                         },
                         {
                             type: 'Sum',
                             field: 'TrongLuongXe',
-                            format: '####.000',
+                            format: '####.0',
                             footerTemplate: 'Tổng Trọng Lượng: ${Sum} Kg'
                         },
                     ]

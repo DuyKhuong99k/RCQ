@@ -227,7 +227,7 @@ namespace PMS.Controllers.DanhMucHQ
                 });
             }
         }
-        [CustomAuthorize(Fu = "Danh Mục / Nhà Cung Cấp Nguyên Liệu HQ", Func = "Xoá Nhà Cung Cấp Nguyên Liệu HQ")]
+        //[CustomAuthorize(Fu = "Danh Mục / Nhà Cung Cấp Nguyên Liệu HQ", Func = "Xóa Nhà Cung Cấp Nguyên Liệu HQ")]
         public async Task<IActionResult> DoDelete(string ma)
         {
             try

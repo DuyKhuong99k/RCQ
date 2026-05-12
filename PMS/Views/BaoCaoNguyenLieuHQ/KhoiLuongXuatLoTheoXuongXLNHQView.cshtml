@@ -110,7 +110,8 @@
             ej.grids.Filter,
             ej.grids.Edit,
             ej.grids.Toolbar,
-            ej.grids.Aggregate
+            ej.grids.Aggregate,
+            ej.grids.ExcelExport // thêm dòng này
         );
 
         //---------------------------------------------------
@@ -132,6 +133,15 @@
             allowExcelExport: true,
 
             toolbar: ['ExcelExport'],
+                toolbarClick: function (args) {
+
+                    if (args.item.id.includes('excelexport')) {
+
+                        grid.excelExport();
+
+                    }
+
+                },
 
             pageSettings: {
 
@@ -320,7 +330,7 @@
                     width: 180,
                     type: 'number',
                     editType: 'numericedit',
-                    format: 'N3',
+                    format: 'N1',
                     textAlign: 'Right',
                     allowEditing: true
                 },
@@ -330,7 +340,7 @@
                     headerText: 'Khối lượng xuất',
                     width: 180,
                     type: 'number',
-                    format: 'N3',
+                    format: 'N1',
                     textAlign: 'Right',
                     allowEditing: false
                 },
@@ -340,7 +350,7 @@
                     headerText: 'Hư kho',
                     width: 180,
                     type: 'number',
-                    format: 'N3',
+                    format: 'N1',
                     textAlign: 'Right',
                     allowEditing: false
                 },
@@ -350,7 +360,7 @@
                     headerText: 'Hao hụt',
                     width: 180,
                     type: 'number',
-                    format: 'N3',
+                    format: 'N1',
                     textAlign: 'Right',
                     allowEditing: false
                 }
@@ -373,7 +383,7 @@
 
                             field: 'KhoiLuongNhap',
 
-                            format: 'N3',
+                            format: 'N1',
 
                             footerTemplate: 'Tổng Nhập: ${Sum} Kg'
 
@@ -385,7 +395,7 @@
 
                             field: 'KhoiLuongXuat',
 
-                            format: 'N3',
+                            format: 'N1',
 
                             footerTemplate: 'Tổng Xuất: ${Sum} Kg'
 
