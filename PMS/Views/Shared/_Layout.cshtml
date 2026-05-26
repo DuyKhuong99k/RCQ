@@ -37,6 +37,11 @@
     };
     }
 
+    var path = Context.Request.Path.ToString();
+
+    bool hideToolbar =
+        path.Contains("/HQ/BaoCaoCanNguyenLieuHQ/KhoiLuongXuatLoTheoXuongXLNHQView");
+
 }
 <!DOCTYPE html>
 
@@ -496,8 +501,10 @@ data-assets-path="~/assets/">
                                     </div>
                                 </div>
                             </div>
+                            <div class="row @(hideToolbar ? "d-none" : "")">
                             <div class="row @(Context.Request.Path.StartsWithSegments("/HQ/BaoCaoHQ") || Context.Request.Path.StartsWithSegments("/HQ/BaoCaoCanNguyenLieuHQ") ? "" : "d-none")">
                                 <div class="col-12">
+                
                                     <div class="d-flex justify-content-end align-items-center flex-wrap">
                                         <div class="mb-2 me-2" style="display: inline-flex;">
                                             <label for="datepicker1" class="form-label text-center">Từ Ngày:</label>

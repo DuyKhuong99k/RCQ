@@ -29,9 +29,9 @@ namespace Dao.Repos.HQ
                         sp.Ten AS LoaiSanPham,
 	                    px.SoPhieuNhap,
                         px.SoPhieuXuat,
-                        px.TrongLuongTong,
-                        px.TrongLuongXe,
-                        px.TrongLuongHang,
+                        ROUND(px.TrongLuongTong, 1) AS TrongLuongTong,
+                        ROUND(px.TrongLuongXe, 1) AS TrongLuongXe,
+                        ROUND(px.TrongLuongHang, 1) AS TrongLuongHang,
                         dvt.Ten AS DonViTinh,
                         x.Ten AS XuongXuatDen,
                         kho.Ten AS Kho
@@ -46,7 +46,7 @@ namespace Dao.Repos.HQ
                             ON px.MaKho = kho.Id
                     LEFT JOIN XiNghiep x
                             ON px.MaXuongXuatDen = x.Ma
-                    Left join NhanVienDaiThanh nv on px.MaThuKho = nv.MaNhanVien and nv.IsThuKho =1 
+                    Left join NhanVienDaiThanh nv on px.MaThuKho = nv.MaNhanVien 
                     Where pc.MaXuong = @xuongId
                     and pc.NgayGio >= @fromDate and pc.NgayGio <= @toDate
                     ORDER BY pc.NgayGio, px.STT;
@@ -72,7 +72,7 @@ SELECT
     pc.Ngay AS Ngay,
     pc.MaLo AS LoNguyenLieu,
     sp.Ten AS SanPham,
-    SUM(px.TrongLuongHang) AS TrongLuong,
+    ROUND(SUM(px.TrongLuongHang),1) AS TrongLuong,
     COUNT(DISTINCT px.SoPhieuXuat) AS SoPhieuCan
 
 FROM HQ_PhieuCanXuatNguyenLieu px
@@ -114,15 +114,25 @@ ORDER BY
         pc.MaLo,
         pcn.MaSanPham,
         dvt.Ten AS DonViTinh,
-        SUM(ISNULL(pcn.TrongLuongHang, 0)) AS TongNhap
+
+        ROUND(SUM(ISNULL(pcn.TrongLuongHang, 0)), 1) AS TongNhap
+
     FROM HQ_PhieuCanNhapNguyenLieu pcn
+
     JOIN HQ_PhieuCanNguyenLieu pc
         ON pcn.IdPhieuCanNguyenLieu = pc.Id
+
     LEFT JOIN HQ_DonViTinh dvt
         ON pcn.MaDonVi = dvt.Id
+
     WHERE pc.MaXuong = @xuongId
-      AND pc.NgayGio >= @fromDate AND pc.NgayGio <= @toDate
-    GROUP BY pc.MaLo, pcn.MaSanPham, dvt.Ten
+        AND pc.NgayGio >= @fromDate
+        AND pc.NgayGio <= @toDate
+
+    GROUP BY
+        pc.MaLo,
+        pcn.MaSanPham,
+        dvt.Ten
 ),
 
 Xuat AS (
@@ -130,15 +140,25 @@ Xuat AS (
         pc.MaLo,
         pcx.MaSanPham,
         dvt.Ten AS DonViTinh,
-        SUM(ISNULL(pcx.TrongLuongHang,0)) AS TongXuat
+
+        ROUND(SUM(ISNULL(pcx.TrongLuongHang, 0)), 1) AS TongXuat
+
     FROM HQ_PhieuCanXuatNguyenLieu pcx
+
     JOIN HQ_PhieuCanNguyenLieu pc
         ON pcx.IdPhieuCanNguyenLieu = pc.Id
+
     LEFT JOIN HQ_DonViTinh dvt
         ON pcx.MaDonVi = dvt.Id
+
     WHERE pc.MaXuong = @xuongId
-      AND pc.NgayGio >= @fromDate AND pc.NgayGio <= @toDate
-    GROUP BY pc.MaLo, pcx.MaSanPham, dvt.Ten
+        AND pc.NgayGio >= @fromDate
+        AND pc.NgayGio <= @toDate
+
+    GROUP BY
+        pc.MaLo,
+        pcx.MaSanPham,
+        dvt.Ten
 )
 
 SELECT
@@ -147,17 +167,26 @@ SELECT
     sp.Ten AS TenSanPham,
     COALESCE(n.DonViTinh, x.DonViTinh) AS DonViTinh,
 
-    ISNULL(n.TongNhap, 0) AS TongNhap,
-    ISNULL(x.TongXuat, 0) AS TongXuat,
-    ISNULL(n.TongNhap, 0) - ISNULL(x.TongXuat, 0) AS TonKho
+    ROUND(ISNULL(n.TongNhap, 0), 1) AS TongNhap,
+    ROUND(ISNULL(x.TongXuat, 0), 1) AS TongXuat,
+
+    ROUND(
+        ISNULL(n.TongNhap, 0) - ISNULL(x.TongXuat, 0),
+        1
+    ) AS TonKho
 
 FROM Nhap n
+
 FULL OUTER JOIN Xuat x
-    ON n.MaLo = x.MaLo AND n.MaSanPham = x.MaSanPham
+    ON n.MaLo = x.MaLo
+    AND n.MaSanPham = x.MaSanPham
+
 LEFT JOIN HQ_SanPhamNguyenLieu sp
     ON sp.Id = COALESCE(n.MaSanPham, x.MaSanPham)
 
-ORDER BY LoNguyenLieu, TenSanPham;
+ORDER BY
+    LoNguyenLieu,
+    TenSanPham;
 	
 ";
                 using var connection = new SqlConnection(connectionString);
@@ -515,7 +544,7 @@ NhapTheoQuyCach AS(
         qc.[Index] AS ThuTu,
         CAST(
             pn.TrongLuongHang* ISNULL(ctn.TyLe,0) / 100.0
-            AS DECIMAL(18,3)
+            AS DECIMAL(18,1)
         ) AS KhoiLuongNhap
     FROM HQ_PhieuCanNhapNguyenLieu pn
     JOIN(
@@ -628,7 +657,7 @@ CAST(
                 END
         END
     )
-AS DECIMAL(18,3)
+AS DECIMAL(18,1)
 ) AS TonKhoCu,
 
 CASE WHEN ThuTu = 0 THEN TyLe ELSE NULL END AS TyLeKhongDat,
@@ -654,7 +683,7 @@ CAST(
                 ELSE TongXuatThuong - (LuyKeThuong - KhoiLuongNhap)
             END
     END
-AS DECIMAL(18, 3)
+AS DECIMAL(18, 1)
 ) AS TongLuongXuat,
 
 ------------------------------------------------
@@ -676,7 +705,7 @@ CAST(
                 ELSE TongXuatThuong - (LuyKeThuong - KhoiLuongNhap)
             END
     END
-AS DECIMAL(18, 3)
+AS DECIMAL(18, 1)
 ) AS TonConLai,
 
 ------------------------------------------------
@@ -692,7 +721,7 @@ CAST(
             END
         ELSE 0
     END
-AS DECIMAL(18, 3)
+AS DECIMAL(18, 1)
 ) AS KhoiLuongIsCanHu,
 
 ------------------------------------------------
@@ -708,7 +737,7 @@ CAST(
             END
         ELSE 0
     END
-AS DECIMAL(18, 3)
+AS DECIMAL(18, 1)
 ) AS HaoHut
 
 FROM TinhLuyKe
@@ -1066,17 +1095,22 @@ WITH NhapTheoQuyCach AS (
         qc.[Index] AS ThuTu,
 
         CAST(
-            CASE
-                -- Có bao lụa
-                WHEN bl.TrongLuongBaoLua IS NOT NULL
-                    THEN bl.TrongLuongBaoLua
+    CASE
 
-                -- Phân bổ tỷ lệ
-                ELSE
-                    pn.TrongLuongHang * ISNULL(ctn.TyLe,0) / 100.0
-            END
-            AS DECIMAL(18,3)
-        ) AS KhoiLuongNhap
+        -- Có bao lụa
+        WHEN bl.TrongLuongBaoLua IS NOT NULL
+            THEN bl.TrongLuongBaoLua
+
+        -- Có phân bổ tỷ lệ
+        WHEN ctn.MaQuyCach IS NOT NULL
+            THEN pn.TrongLuongHang * ISNULL(ctn.TyLe,0) / 100.0
+
+        -- Không có phân bổ gì hết
+        ELSE pn.TrongLuongHang
+
+         END
+       AS DECIMAL(18,1)
+   ) AS KhoiLuongNhap
 
     FROM HQ_PhieuCanNhapNguyenLieu pn
 
@@ -1105,7 +1139,7 @@ WITH NhapTheoQuyCach AS (
     JOIN HQ_PhieuCanNguyenLieu pnl
         ON pnl.Id = pn.IdPhieuCanNguyenLieu
 
-    JOIN (
+    LEFT JOIN (
         SELECT DISTINCT
             Id,
             Ten,
@@ -1263,7 +1297,7 @@ CASE
         END
 
 END
-AS DECIMAL(18,3)) AS KhoiLuongXuat,
+AS DECIMAL(18,1)) AS KhoiLuongXuat,
 
 ------------------------------------------------
 -- HAO HỤT
@@ -1306,7 +1340,7 @@ CAST(
 
         END
     )
-AS DECIMAL(18,3)) AS KhoiLuongHaoHut
+AS DECIMAL(18,1)) AS KhoiLuongHaoHut
 
 FROM PhanBoXuat p
 LEFT JOIN HQ_SanPhamNguyenLieu sp

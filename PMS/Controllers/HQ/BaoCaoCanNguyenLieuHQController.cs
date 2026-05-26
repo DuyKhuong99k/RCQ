@@ -6,11 +6,6 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.SqlClient;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
-using Models.Repos;
-using Models.Repos.Models;
 using Newtonsoft.Json;
 using PMS.Attrs;
 using PMS.Models;
@@ -37,6 +32,7 @@ namespace PMS.Controllers.HQ
     public class BaoCaoCanNguyenLieuHQController : Controller
     {
         private readonly IHttpClientFactory _httpClientFactory;
+
         public BaoCaoCanNguyenLieuHQController(IHttpClientFactory httpClientFactory)
         {
             _httpClientFactory = httpClientFactory;
@@ -402,6 +398,7 @@ END";
             ViewBag.TitlePage = "Báo Cáo Khối Lượng Xuất Lô Theo Xưởng";
             return View("~/Views/BaoCaoNguyenLieuHQ/KhoiLuongXuatLoTheoXuongXLNHQView.cshtml");
         }
+       
         public async Task<IEnumerable<object>> GetKhoiLuongXuatLoTheoXuong(string maLo = null)
         {
             IEnumerable<object> dataSource = ViewBag.dataSource;
@@ -441,6 +438,177 @@ END";
             };
             ViewBag.datasource = dataSource;
             return Json(result);
+        }
+        [HttpPost]
+        public IActionResult UpdateKhoiLuong(
+    string soPhieuCanNhap,
+    string maQuyCach,
+    decimal khoiLuongNhap)
+        {
+            try
+            {
+                var query = @"
+
+DECLARE @TongTrongLuong FLOAT
+DECLARE @KhoiLuongCu FLOAT
+DECLARE @ChenhLech FLOAT
+DECLARE @MaQuyCachBu VARCHAR(50)
+
+IF EXISTS (
+    SELECT 1
+    FROM HQ_ChiTietPhanBoTyLeNguyenLieuNhap
+    WHERE SoPhieuCanNhap = @SoPhieuCanNhap
+)
+BEGIN
+
+    ------------------------------------------------
+    -- Tổng phiếu
+    ------------------------------------------------
+
+    SELECT @TongTrongLuong = TrongLuongHang
+    FROM HQ_PhieuCanNhapNguyenLieu
+    WHERE SoPhieuCanNhap = @SoPhieuCanNhap
+
+    ------------------------------------------------
+    -- Khối lượng cũ
+    ------------------------------------------------
+
+    SELECT @KhoiLuongCu =
+        (TyLe * @TongTrongLuong) / 100.0
+    FROM HQ_ChiTietPhanBoTyLeNguyenLieuNhap
+    WHERE SoPhieuCanNhap = @SoPhieuCanNhap
+    AND MaQuyCach = @MaQuyCach
+
+    ------------------------------------------------
+    -- Chênh lệch
+    ------------------------------------------------
+
+    SET @ChenhLech = @KhoiLuongNhap - @KhoiLuongCu
+
+    ------------------------------------------------
+    -- Update dòng sửa
+    ------------------------------------------------
+
+    UPDATE HQ_ChiTietPhanBoTyLeNguyenLieuNhap
+    SET TyLe =
+        (@KhoiLuongNhap * 100.0)
+        / NULLIF(@TongTrongLuong,0)
+    WHERE SoPhieuCanNhap = @SoPhieuCanNhap
+    AND MaQuyCach = @MaQuyCach
+
+    ------------------------------------------------
+    -- Lấy dòng khác để bù
+    ------------------------------------------------
+
+    SELECT TOP 1
+        @MaQuyCachBu = MaQuyCach
+    FROM HQ_ChiTietPhanBoTyLeNguyenLieuNhap
+    WHERE SoPhieuCanNhap = @SoPhieuCanNhap
+    AND MaQuyCach <> @MaQuyCach
+
+    ------------------------------------------------
+    -- Update bù
+    ------------------------------------------------
+
+    UPDATE pn
+    SET pn.TyLe =
+    (
+        (
+            ((pn.TyLe * @TongTrongLuong) / 100.0)
+            - @ChenhLech
+        ) * 100.0
+    ) / NULLIF(@TongTrongLuong,0)
+
+    FROM HQ_ChiTietPhanBoTyLeNguyenLieuNhap pn
+    WHERE pn.SoPhieuCanNhap = @SoPhieuCanNhap
+    AND pn.MaQuyCach = @MaQuyCachBu
+
+END
+ELSE
+BEGIN
+
+    ------------------------------------------------
+    -- Tổng trọng lượng
+    ------------------------------------------------
+
+    SELECT @TongTrongLuong = TrongLuongHang
+    FROM HQ_PhieuCanNhapNguyenLieu
+    WHERE SoPhieuCanNhap = @SoPhieuCanNhap
+
+    ------------------------------------------------
+    -- Khối lượng cũ
+    ------------------------------------------------
+
+    SELECT @KhoiLuongCu = TrongLuongBaoLua
+    FROM HQ_ChiTietPhanBoBaoLuaNguyenLieuNhap
+    WHERE SoPhieuCanNhap = @SoPhieuCanNhap
+    AND MaQuyCach = @MaQuyCach
+
+    ------------------------------------------------
+    -- Chênh lệch
+    ------------------------------------------------
+
+    SET @ChenhLech = @KhoiLuongNhap - @KhoiLuongCu
+
+    ------------------------------------------------
+    -- Update dòng sửa
+    ------------------------------------------------
+
+    UPDATE bl
+    SET bl.TrongLuongBaoLua = @KhoiLuongNhap
+    FROM HQ_ChiTietPhanBoBaoLuaNguyenLieuNhap bl
+    WHERE bl.SoPhieuCanNhap = @SoPhieuCanNhap
+    AND bl.MaQuyCach = @MaQuyCach
+
+    ------------------------------------------------
+    -- Lấy dòng khác để bù
+    ------------------------------------------------
+
+    SELECT TOP 1
+        @MaQuyCachBu = MaQuyCach
+    FROM HQ_ChiTietPhanBoBaoLuaNguyenLieuNhap
+    WHERE SoPhieuCanNhap = @SoPhieuCanNhap
+    AND MaQuyCach <> @MaQuyCach
+
+    ------------------------------------------------
+    -- Update bù
+    ------------------------------------------------
+
+    UPDATE bl
+    SET bl.TrongLuongBaoLua =
+        bl.TrongLuongBaoLua - @ChenhLech
+    FROM HQ_ChiTietPhanBoBaoLuaNguyenLieuNhap bl
+    WHERE bl.SoPhieuCanNhap = @SoPhieuCanNhap
+    AND bl.MaQuyCach = @MaQuyCachBu
+
+END
+";
+
+                using var connection =
+                    new SqlConnection(AppViewModels.Base.Ins.ConnectionString);
+
+                connection.Open();
+
+                var rows = connection.Execute(query, new
+                {
+                    soPhieuCanNhap,
+                    maQuyCach,
+                    khoiLuongNhap
+                });
+
+                return Json(new
+                {
+                    success = true
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = ex.Message
+                });
+            }
         }
         #endregion
         #endregion

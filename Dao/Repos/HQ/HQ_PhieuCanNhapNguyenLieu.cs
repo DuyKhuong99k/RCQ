@@ -18,47 +18,47 @@ namespace Dao.Repos.HQ
             try
             {
                 var query = @"
-SELECT
-    pnl.MaLo,
-    pn.NgayGio,
-    pn.SoPhieuCanNhap,
-    pn.MaSanPham,
-    pn.MaNhaCC,
-    pn.MaPhuongTien,
-    ncc.Ten as TenNhaCC,
-    ncc.CCCD as CCCDNCC,
-    pn.TaiXe,
-    pn.CCCD,
-    pn.SDT,
-    ctn.MaQuyCach,
-    qc.MaNguyenLieu,
-    qc.DonViTinh,
-    qc.Ten AS TenQuyCach,
-    ctn.TyLe,
-    qc.NhomQuyCach,
-    pn.NoiDungGiaoNhan,
-    qc.[Index] AS ThuTu,
-    CAST(
-        pn.TrongLuongHang * ISNULL(ctn.TyLe, 0) / 100.0
-        AS DECIMAL(18,3)
-    ) AS KhoiLuongNhap
-FROM HQ_PhieuCanNhapNguyenLieu pn
-JOIN (
-    SELECT DISTINCT SoPhieuCanNhap, MaQuyCach, TyLe
-    FROM HQ_ChiTietPhanBoTyLeNguyenLieuNhap
-) ctn ON ctn.SoPhieuCanNhap = pn.SoPhieuCanNhap
-JOIN HQ_PhieuCanNguyenLieu pnl
-    ON pnl.Id = pn.IdPhieuCanNguyenLieu
-JOIN (
-    SELECT DISTINCT Id, Ten, [Index], MaNguyenLieu, DonViTinh, NhomQuyCach
-    FROM HQ_QuyCachNguyenLieu
-) qc ON qc.Id = ctn.MaQuyCach
-JOIN NhaCungCapNguyenLieu ncc 
-    ON pn.MaNhaCC = ncc.Ma 
-WHERE pn.NgayGio >= @fromDate
-  AND pn.NgayGio <= DATEADD(DAY, 1, @toDate)
+                SELECT
+                    pnl.MaLo,
+                    pn.NgayGio,
+                    pn.SoPhieuCanNhap,
+                    pn.MaSanPham,
+                    pn.MaNhaCC,
+                    pn.MaPhuongTien,
+                    ncc.Ten as TenNhaCC,
+                    ncc.CCCD as CCCDNCC,
+                    pn.TaiXe,
+                    pn.CCCD,
+                    pn.SDT,
+                    ctn.MaQuyCach,
+                    qc.MaNguyenLieu,
+                    qc.DonViTinh,
+                    qc.Ten AS TenQuyCach,
+                    ctn.TyLe,
+                    qc.NhomQuyCach,
+                    pn.NoiDungGiaoNhan,
+                    qc.[Index] AS ThuTu,
+                    CAST(
+                        pn.TrongLuongHang * ISNULL(ctn.TyLe, 0) / 100.0
+                        AS DECIMAL(18,1)
+                    ) AS KhoiLuongNhap
+                FROM HQ_PhieuCanNhapNguyenLieu pn
+                JOIN (
+                    SELECT DISTINCT SoPhieuCanNhap, MaQuyCach, TyLe
+                    FROM HQ_ChiTietPhanBoTyLeNguyenLieuNhap
+                ) ctn ON ctn.SoPhieuCanNhap = pn.SoPhieuCanNhap
+                JOIN HQ_PhieuCanNguyenLieu pnl
+                    ON pnl.Id = pn.IdPhieuCanNguyenLieu
+                JOIN (
+                    SELECT DISTINCT Id, Ten, [Index], MaNguyenLieu, DonViTinh, NhomQuyCach
+                    FROM HQ_QuyCachNguyenLieu
+                ) qc ON qc.Id = ctn.MaQuyCach
+                JOIN NhaCungCapNguyenLieu ncc 
+                    ON pn.MaNhaCC = ncc.Ma 
+                WHERE pn.NgayGio >= @fromDate
+                  AND pn.NgayGio <= DATEADD(DAY, 1, @toDate)
 	
-";
+                ";
                 using var connection = new SqlConnection(connectionString);
                 connection.Open();
                 var items = connection.Query<T>(query, new { dateTime ,xuongId}).ToList();
@@ -77,78 +77,78 @@ WHERE pn.NgayGio >= @fromDate
             try
             {
                 var query = @"SELECT
-    pnl.MaLo,
-    pn.NgayGio,
-    pn.SoPhieuCanNhap,
-    pn.MaSanPham,
-    pn.MaNhaCC,
-    ncc.Ten AS TenNhaCC,
-    ncc.CCCD AS CCCDNCC,
-    pn.TaiXe,
-    pn.CCCD,
-    pn.SDT,
-    pn.MaPhuongTien,
-    pn.LoaiGiaoDich,
-    ISNULL(bl.MaQuyCach, ctn.MaQuyCach) AS MaQuyCach,
-    qc.MaNguyenLieu,
-    qc.DonViTinh,
-    qc.Ten AS TenQuyCach,
-    ctn.TyLe,
-    qc.NhomQuyCach,
-    pn.NoiDungGiaoNhan,
-    qc.[Index] AS ThuTu,
-    CASE 
-        WHEN bl.TrongLuongBaoLua IS NOT NULL
-            THEN CAST(bl.TrongLuongBaoLua AS DECIMAL(18,1))
+                    pnl.MaLo,
+                    pn.NgayGio,
+                    pn.SoPhieuCanNhap,
+                    pn.MaSanPham,
+                    pn.MaNhaCC,
+                    ncc.Ten AS TenNhaCC,
+                    ncc.CCCD AS CCCDNCC,
+                    pn.TaiXe,
+                    pn.CCCD,
+                    pn.SDT,
+                    pn.MaPhuongTien,
+                    pn.LoaiGiaoDich,
+                    ISNULL(bl.MaQuyCach, ctn.MaQuyCach) AS MaQuyCach,
+                    qc.MaNguyenLieu,
+                    qc.DonViTinh,
+                    qc.Ten AS TenQuyCach,
+                    ctn.TyLe,
+                    qc.NhomQuyCach,
+                    pn.NoiDungGiaoNhan,
+                    qc.[Index] AS ThuTu,
+                    CASE 
+                        WHEN bl.TrongLuongBaoLua IS NOT NULL
+                            THEN CAST(bl.TrongLuongBaoLua AS DECIMAL(18,1))
 
-        ELSE 
-            CAST(
-                pn.TrongLuongHang * ISNULL(ctn.TyLe,0) / 100.0
-                AS DECIMAL(18,1)
-            )
-    END AS KhoiLuongNhap
+                        ELSE 
+                            CAST(
+                                pn.TrongLuongHang * ISNULL(ctn.TyLe,0) / 100.0
+                                AS DECIMAL(18,1)
+                            )
+                    END AS KhoiLuongNhap
 
-FROM HQ_PhieuCanNhapNguyenLieu pn
+                FROM HQ_PhieuCanNhapNguyenLieu pn
 
-LEFT JOIN (
-    SELECT DISTINCT 
-        SoPhieuCanNhap,
-        MaQuyCach,
-        TyLe
-    FROM HQ_ChiTietPhanBoTyLeNguyenLieuNhap
-) ctn 
-    ON ctn.SoPhieuCanNhap = pn.SoPhieuCanNhap
+                LEFT JOIN (
+                    SELECT DISTINCT 
+                        SoPhieuCanNhap,
+                        MaQuyCach,
+                        TyLe
+                    FROM HQ_ChiTietPhanBoTyLeNguyenLieuNhap
+                ) ctn 
+                    ON ctn.SoPhieuCanNhap = pn.SoPhieuCanNhap
 
-LEFT JOIN (
-    SELECT DISTINCT 
-        SoPhieuCanNhap,
-        MaQuyCach,
-        TrongLuongBaoLua
-    FROM HQ_ChiTietPhanBoBaoLuaNguyenLieuNhap
-) bl 
-    ON bl.SoPhieuCanNhap = pn.SoPhieuCanNhap
+                LEFT JOIN (
+                    SELECT DISTINCT 
+                        SoPhieuCanNhap,
+                        MaQuyCach,
+                        TrongLuongBaoLua
+                    FROM HQ_ChiTietPhanBoBaoLuaNguyenLieuNhap
+                ) bl 
+                    ON bl.SoPhieuCanNhap = pn.SoPhieuCanNhap
 
-JOIN HQ_PhieuCanNguyenLieu pnl
-    ON pnl.Id = pn.IdPhieuCanNguyenLieu
+                JOIN HQ_PhieuCanNguyenLieu pnl
+                    ON pnl.Id = pn.IdPhieuCanNguyenLieu
 
-JOIN (
-    SELECT DISTINCT 
-        Id,
-        Ten,
-        [Index],
-        MaNguyenLieu,
-        DonViTinh,
-        NhomQuyCach
-    FROM HQ_QuyCachNguyenLieu
-) qc 
-    ON qc.Id = ISNULL(bl.MaQuyCach, ctn.MaQuyCach)
+                JOIN (
+                    SELECT DISTINCT 
+                        Id,
+                        Ten,
+                        [Index],
+                        MaNguyenLieu,
+                        DonViTinh,
+                        NhomQuyCach
+                    FROM HQ_QuyCachNguyenLieu
+                ) qc 
+                    ON qc.Id = ISNULL(bl.MaQuyCach, ctn.MaQuyCach)
 
-LEFT JOIN NhaCungCapNguyenLieu ncc 
-    ON pn.MaNhaCC = ncc.Ma 
+                LEFT JOIN NhaCungCapNguyenLieu ncc 
+                    ON pn.MaNhaCC = ncc.Ma 
 
-WHERE pn.NgayGio >= @fromDate
-  AND pn.NgayGio <= DATEADD(DAY, 1, @toDate)	
-";
+                WHERE pn.NgayGio >= @fromDate
+                  AND pn.NgayGio <= DATEADD(DAY, 1, @toDate)	
+                ";
                 using var connection = new SqlConnection(connectionString);
                 connection.Open();
                 var items = connection.Query<T>(query, new { fromDate, toDate ,xuongId}).ToList();
@@ -165,31 +165,33 @@ WHERE pn.NgayGio >= @fromDate
             try
             {
                 var query = @"SELECT 
-    pc.Ngay,
-    pc.MaLo as LoNguyenLieu,
-    sp.Ten as TenHang,
-    dvt.Ten as DonViTinh,
-    SUM(ISNULL(PCN.TrongLuongHang, 0)) as SoLuong
-FROM HQ_PhieuCanNhapNguyenLieu pcn
-INNER JOIN HQ_PhieuCanNguyenLieu pc
-        ON PCN.IdPhieuCanNguyenLieu = pc.Id
-LEFT JOIN HQ_SanPhamNguyenLieu sp
-        ON PCN.MaSanPham = sp.Id
-LEFT JOIN HQ_DonViTinh dvt
-        ON PCN.MaDonVi = dvt.Id
-Where pc.MaXuong = @xuongId
-and pc.NgayGio >= @fromDate and pc.NgayGio <= @toDate
-GROUP BY 
-    PC.Ngay,
-    PC.MaLo,
-    SP.Ten,
-    DVT.Ten
-ORDER BY 
-    PC.Ngay,
-    PC.MaLo,
-    SP.Ten;
+                    pc.Ngay,
+                    pcn.LoaiGiaoDich,
+                    pc.MaLo as LoNguyenLieu,
+                    sp.Ten as TenHang,
+                    dvt.Ten as DonViTinh,
+                    ROUND(SUM(ISNULL(PCN.TrongLuongHang, 0)), 1)as SoLuong
+                FROM HQ_PhieuCanNhapNguyenLieu pcn
+                INNER JOIN HQ_PhieuCanNguyenLieu pc
+                        ON PCN.IdPhieuCanNguyenLieu = pc.Id
+                LEFT JOIN HQ_SanPhamNguyenLieu sp
+                        ON PCN.MaSanPham = sp.Id
+                LEFT JOIN HQ_DonViTinh dvt
+                        ON PCN.MaDonVi = dvt.Id
+                Where pc.MaXuong = @xuongId
+                and pc.NgayGio >= @fromDate and pc.NgayGio <= @toDate
+                GROUP BY 
+                    pcn.LoaiGiaoDich,
+                    PC.Ngay,
+                    PC.MaLo,
+                    SP.Ten,
+                    DVT.Ten
+                ORDER BY 
+                    PC.Ngay,
+                    PC.MaLo,
+                    SP.Ten;
 	
-";
+                ";
                 using var connection = new SqlConnection(connectionString);
                 connection.Open();
                 var items = connection.Query<T>(query, new { fromDate, toDate, xuongId }).ToList();

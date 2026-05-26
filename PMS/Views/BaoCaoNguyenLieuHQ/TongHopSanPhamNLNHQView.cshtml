@@ -92,20 +92,22 @@
 
                     { field: 'DonViTinh', headerText: 'Đơn Vị Tính', width: 120 },
 
-                    { field: 'SoLuong', headerText: 'Số Lượng', width: 150, type: 'number' }
+                    { field: 'SoLuong', headerText: 'Số Lượng', width: 150, type: 'number' },
+
+                    { field: 'LoaiGiaoDich', headerText: 'Loại Giao Dịch', width: 120 }
                 ],
                 aggregates: [{
                     columns: [
                         {
                             type: 'Sum',
                             field: 'TrongLuongHang',
-                            format: '####.000',
+                            format: '####.0',
                             footerTemplate: 'Tổng Trọng Lượng: ${Sum} Kg'
                         },
                         {
                             type: 'Sum',
                             field: 'TrongLuongXe',
-                            format: '####.000',
+                            format: '####.0',
                             footerTemplate: 'Tổng Trọng Lượng: ${Sum} Kg'
                         },
                     ]
