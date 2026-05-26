@@ -585,7 +585,7 @@ END
 ";
 
                 using var connection =
-                    new SqlConnection(AppViewModels.Base.Ins.ConnectionString);
+                    new sql(AppViewModels.Base.Ins.ConnectionString);
 
                 connection.Open();
 

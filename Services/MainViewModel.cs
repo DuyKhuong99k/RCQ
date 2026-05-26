@@ -152,7 +152,7 @@ public class MainViewModel : ObservableObject, IMainService
         //});
         try
         {
-            AlertRequested(message);
+            AlertRequested?.Invoke(message);
         }
         catch (Exception e)
         {
