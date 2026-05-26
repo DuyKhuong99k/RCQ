@@ -1,172 +1,64 @@
-﻿    @{
+    @{
         ViewData["Title"] = "KhoiLuongXuatLoTheoXuongXLNHQView";
         Layout = "~/Views/Shared/_Layout.cshtml";
+    }
 
-}
+    <div class="container-fluid mt-4">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+                        <h5 class="mb-0 fw-bold">Khối Lượng Xuất Xưởng Theo Lô</h5>
 
-<div class="container-fluid mt-4">
-    <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h2 class="mb-0">Khối Lượng Xuất Xưởng Theo Lô</h2>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-12 mb-12">
-                            <div class="form-outline">
-                                <label class="form-label">Chọn Lô</label>
-                                <input id="MaLoBCHQ"/>
+                        <div class="d-flex align-items-center gap-2 flex-wrap">
+                            <div style="min-width: 260px;">
+                                <input id="MaLoBCHQ" />
                             </div>
+
+                            <button id="RefreshButtonBCHQView" type="button" class="btn btn-outline-primary">
+                                <i class='bx bx-cloud-download mb-1'></i> Tải Dữ Liệu
+                            </button>
                         </div>
                     </div>
-                    <div id="Grid"></div>
+
+                    <div class="card-body">
+                        <div id="Grid"></div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
-<script>
 
-    var listLo = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ViewBag.ListLo));
-    //alert(listLo);
-    var comboLo = new ej.dropdowns.ComboBox({
-        dataSource: listLo,
-
+    <script>
+        var listLo = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ViewBag.listLo));
+        var comboLo = new ej.dropdowns.ComboBox({
+            dataSource: listLo,
             fields: {
                 text: 'MaLo',
                 value: 'MaLo'
             },
-
-    document.addEventListener("DOMContentLoaded", function () {
-        let fromDate = document.getElementById("fromDateBCHQ");
-        let toDate = document.getElementById("toDateBCHQ");
-
-        if (fromDate) {
-            fromDate.step = "1";
-            let now = new Date();
-            let year = now.getFullYear();
-            let month = String(now.getMonth() + 1).padStart(2, "0");
-            let day = String(now.getDate()).padStart(2, "0");
-            // 00:00:00
-            fromDate.value = `${year}-${month}-${day}T00:00:00`;
-        }
-
-        if (toDate) {
-            toDate.step = "1";
-            let now = new Date();
-            let year = now.getFullYear();
-            let month = String(now.getMonth() + 1).padStart(2, "0");
-            let day = String(now.getDate()).padStart(2, "0");
-            // 23:59:59
-            toDate.value = `${year}-${month}-${day}T23:59:59`;
-        }
-    });
-
-
-    var grid;
-    var datalength = 0;
-    function loadGridData(data) {
-        var dataManager = new ej.data.DataManager({
-            json: data,
-            adaptor: new ej.data.JsonAdaptor()
-
+            placeholder: 'Chọn Lô',
+            allowFiltering: true,
+            popupHeight: '250px'
         });
-        if(data != null && data.length !=null){
-            datalength = data.length;
-        }
-        else{
-            datalength = 0;
-        }
-        if (grid != null) {
-            grid.dataSource = dataManager;
+        comboLo.appendTo('#MaLoBCHQ');
 
-            grid.refresh();
-        } else {
-            ej.grids.Grid.Inject(ej.grids.Filter);
-            grid = new ej.grids.Grid({
-                dataSource: dataManager,
-                allowPaging: true,
-                pageSettings: { pageSize: 50, pageSizes: [50, 100, 200, 500] },
-                allowFiltering: true,
-                allowSorting: true,
-                filterSettings: { type: 'Excel' },
-                selectionSettings: { persistSelection: true },
-                actionBegin: function (args) {
-                    if (args.requestType == 'filterchoicerequest' || args.requestType == 'filtersearchbegin') {
+        var grid;
+        var datalength = 0;
 
-                        args.filterChoiceCount = datalength;
-                    }
-                },
-                allowResizing: true,
-                allowExcelExport: true,
-                toolbar: ['ExcelExport'],
-                height: 400,
-                columns: [
-                    { field: 'TenSanPham', headerText: 'Tên sản phẩm', width: 150 },
-                    { field: 'TenQuyCach', headerText: 'Quy cách', width: 150 },
-                    { field: 'KhoiLuongNhap', headerText: 'Khối lượng nhập', width: 180, type: 'number'},
-                    { field: 'KhoiLuongXuat', headerText: 'Khối lượng xuất', width: 180, type: 'number' },
-                    { field: 'TongHuKho', headerText: 'Hư kho', width: 180, type: 'number' },
-                    { field: 'KhoiLuongHaoHut', headerText: 'Hao hụt', width: 180, type: 'number' },
-                ],
-                aggregates: [{
-                    columns: [
-                        {
-                            type: 'Sum',
-                            field: 'KhoiLuongNhap',
-                            format: '####.000',
-                            footerTemplate: 'Tổng Nhập: ${Sum} Kg'
-                            
-                        },
-                        {
-                            type: 'Sum',
-                            field: 'KhoiLuongXuat',
-                            format: '####.000',
-                            footerTemplate: 'Tổng Xuất: ${Sum} Kg'
-                        }
+        function reloadGridFromServer() {
+            var button = document.getElementById('RefreshButtonBCHQView');
+            var originalContent = button.innerHTML;
+            button.innerHTML = 'Đang Tải ...';
 
-                    ]
-                }]
-            });
-            grid.appendTo('#Grid');
-            grid.toolbarClick = function (args) {
-             if (args.item.id === 'Grid_excelexport') {
-                grid.excelExport();
-             }};
+            var maLo = comboLo.value || null;
 
-            grid.refresh();
-        }
-    }
-    loadGridData();
-
-</script>
-<script>
-    function ClearData(GridId) {
-        try {
-            var gridObj = document.getElementById(GridId).ej2_instances[0];
-            if(gridObj)
-                gridObj.dataSource = [];
-        } catch (e) {
-            Console.log(e);
-        }
-
-    }
-    document.getElementById('RefreshButtonBCHQ').addEventListener("click",
-        function () {
-            var btn = document.getElementById('RefreshButtonBCHQ').ej2_instances[0];
-            var content = btn.content;
-            btn.content = "Đang Tải ...";
-            //var maLo = document.getElementById("MaLoBCHQ").value;
-            var maLo = comboLo.value;
-            $.ajax({
-                url: "@Url.Action("ReloadKhoiLuongXuatLoTheoXuong", "BaoCaoCanNguyenLieuHQ")",
-                type: "POST",
+            return $.ajax({
+                url: '@Url.Action("ReloadKhoiLuongXuatLoTheoXuong", "BaoCaoCanNguyenLieuHQ")',
+                type: 'POST',
                 data: { maLo: maLo },
                 success: function (response) {
-                    // Kiểm tra trạng thái "Success" trong dữ liệu JSON từ máy chủ
                     if (response.Success) {
-                        ClearData("Grid");
                         loadGridData(response.Data);
                     } else {
                         loadGridData(response.Data);
@@ -179,10 +71,230 @@
                     toastOptionNotyfi();
                     toastr["error"](error, "Thông báo");
                 }
-
             }).always(function () {
-                btn.content = content;
+                button.innerHTML = originalContent;
             });
-        });
-</script>
+        }
 
+        function loadGridData(data) {
+            var dataManager = new ej.data.DataManager({
+                json: data || [],
+                adaptor: new ej.data.JsonAdaptor()
+            });
+
+            datalength = Array.isArray(data) ? data.length : 0;
+
+            if (grid) {
+                grid.dataSource = dataManager;
+                grid.refresh();
+                return;
+            }
+
+            ej.grids.Grid.Inject(ej.grids.Filter, ej.grids.ExcelExport, ej.grids.Edit, ej.grids.Toolbar, ej.grids.Selection);
+
+            grid = new ej.grids.Grid({
+                dataSource: dataManager,
+                allowPaging: true,
+                pageSettings: { pageSize: 50, pageSizes: [50, 100, 200, 500] },
+                allowFiltering: true,
+                allowSorting: true,
+                filterSettings: { type: 'Excel' },
+                selectionSettings: { mode: 'Both', type: 'Single' },
+                allowResizing: true,
+                allowExcelExport: true,
+                toolbar: ['ExcelExport'],
+                height: 400,
+                editSettings: {
+                    allowEditing: true,
+                    allowAdding: false,
+                    allowDeleting: false,
+                    mode: 'Normal'
+                },
+                actionBegin: function (args) {
+                    if (args.requestType === 'filterchoicerequest' || args.requestType === 'filtersearchbegin') {
+                        args.filterChoiceCount = datalength;
+                    }
+                },
+                cellSelecting: function (args) {
+                    if (args.column.field !== 'KhoiLuongNhap') {
+                        return;
+                    }
+
+                    // chặn edit tự động
+                    args.cancel = true;
+
+                    if (confirm('Bạn có muốn sửa khối lượng nhập không?')) {
+                        grid.selectCell({ rowIndex: args.rowIndex, cellIndex: args.cellIndex });
+                        grid.startEdit();
+                    }
+                },
+                cellEdit: function (args) {
+                    // only handle KhoiLuongNhap edits
+                    if (args.column.field !== 'KhoiLuongNhap') {
+                        args.cancel = true;
+                        return;
+                    }
+
+                    try {
+                        var input = args.container && (args.container.querySelector('input') || args.container.querySelector('input.e-input'));
+                        if (!input) return;
+
+                        var saveHandler = function (ev) {
+                            if (ev.type === 'blur' || ev.key === 'Enter') {
+                                input.removeEventListener('blur', saveHandler);
+                                input.removeEventListener('keydown', saveHandler);
+
+                                // trigger grid save for this cell; actionComplete will handle persistence
+                                try {
+                                    grid.saveCell();
+                                } catch (e) {
+                                    console.error('saveCell failed', e);
+                                }
+                            }
+                        };
+
+                        input.addEventListener('blur', saveHandler);
+                        input.addEventListener('keydown', saveHandler);
+                    } catch (e) {
+                        console.error(e);
+                    }
+                },
+                actionComplete: async function (args) {
+                    try {
+                        if (args.requestType === 'batchSave' || args.requestType === 'batchsave') {
+                            var changedRecords = (args.batchChanges && args.batchChanges.changedRecords) ? args.batchChanges.changedRecords : [];
+
+                            if (!changedRecords.length) {
+                                return;
+                            }
+
+                            for (const row of changedRecords) {
+                                if (!row.SoPhieuCanNhap || !row.MaQuyCach) {
+                                    throw new Error('Thiếu dữ liệu định danh để cập nhật.');
+                                }
+
+                                await $.ajax({
+                                    url: '@Url.Action("UpdateKhoiLuong", "BaoCaoCanNguyenLieuHQ")',
+                                    type: 'POST',
+                                    data: {
+                                        soPhieuCanNhap: row.SoPhieuCanNhap,
+                                        maQuyCach: row.MaQuyCach,
+                                        khoiLuongNhap: row.KhoiLuongNhap
+                                    }
+                                });
+                            }
+
+                            toastOptionNotyfi();
+                            toastr["success"]('Cập nhật khối lượng thành công.', 'Thông báo');
+                            await reloadGridFromServer();
+                        } else if (args.requestType === 'save') {
+                            // single cell/row save
+                            var row = args.data || args.rowData;
+                            if (!row) return;
+                            if (!row.SoPhieuCanNhap || !row.MaQuyCach) {
+                                toastOptionNotyfi();
+                                toastr['error']('Thiếu dữ liệu định danh, không thể lưu.', 'Thông báo');
+                                return;
+                            }
+
+                            await $.ajax({
+                                url: '@Url.Action("UpdateKhoiLuong", "BaoCaoCanNguyenLieuHQ")',
+                                type: 'POST',
+                                data: {
+                                    soPhieuCanNhap: row.SoPhieuCanNhap,
+                                    maQuyCach: row.MaQuyCach,
+                                    khoiLuongNhap: row.KhoiLuongNhap
+                                }
+                            });
+
+                            toastOptionNotyfi();
+                            toastr['success']('Cập nhật khối lượng thành công.', 'Thông báo');
+                            await reloadGridFromServer();
+                        }
+                    } catch (error) {
+                        console.error(error);
+                        toastOptionNotyfi();
+                        toastr['error'](error?.message || 'Cập nhật thất bại.', 'Thông báo');
+                        await reloadGridFromServer();
+                    }
+                },
+                columns: [
+                    { field: 'SoPhieuCanNhap', visible: false },
+                    { field: 'MaLo', visible: false },
+                    { field: 'MaQuyCach', visible: false },
+                    { field: 'TenSanPham', headerText: 'Tên sản phẩm', width: 180, allowEditing: false },
+                    { field: 'TenQuyCach', headerText: 'Quy cách', width: 180, allowEditing: false },
+                    {
+                        field: 'KhoiLuongNhap',
+                        headerText: 'Khối lượng nhập',
+                        width: 180,
+                        type: 'number',
+                        editType: 'numericedit',
+                        format: 'N1',
+                        textAlign: 'Right',
+                        allowEditing: true
+                    },
+                    {
+                        field: 'KhoiLuongXuat',
+                        headerText: 'Khối lượng xuất',
+                        width: 180,
+                        type: 'number',
+                        format: 'N1',
+                        textAlign: 'Right',
+                        allowEditing: false
+                    },
+                    {
+                        field: 'TongHuKho',
+                        headerText: 'Hư kho',
+                        width: 180,
+                        type: 'number',
+                        format: 'N1',
+                        textAlign: 'Right',
+                        allowEditing: false
+                    },
+                    {
+                        field: 'KhoiLuongHaoHut',
+                        headerText: 'Hao hụt',
+                        width: 180,
+                        type: 'number',
+                        format: 'N1',
+                        textAlign: 'Right',
+                        allowEditing: false
+                    }
+                ],
+                aggregates: [
+                    {
+                        columns: [
+                            {
+                                type: 'Sum',
+                                field: 'KhoiLuongNhap',
+                                format: 'N1',
+                                footerTemplate: 'Tổng Nhập: ${Sum} Kg'
+                            },
+                            {
+                                type: 'Sum',
+                                field: 'KhoiLuongXuat',
+                                format: 'N1',
+                                footerTemplate: 'Tổng Xuất: ${Sum} Kg'
+                            }
+                        ]
+                    }
+                ]
+            });
+
+            grid.appendTo('#Grid');
+            grid.toolbarClick = function (args) {
+                if (args.item.id === 'Grid_excelexport') {
+                    grid.excelExport();
+                }
+            };
+
+            grid.refresh();
+        }
+
+        document.getElementById('RefreshButtonBCHQView').addEventListener('click', function () {
+            reloadGridFromServer();
+        });
+
+        loadGridData();
+    </script>
