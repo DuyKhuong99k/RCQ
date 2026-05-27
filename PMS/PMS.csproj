@@ -200,6 +200,7 @@
   <ItemGroup>
     <ProjectReference Include="..\AppViewModels\AppViewModels.csproj" />
     <ProjectReference Include="..\BravoModelV1\BravoModelV1.csproj" />
+    <ProjectReference Include="..\Dao\Dao.csproj" />
     <ProjectReference Include="..\EAD\EAD.csproj" />
     <ProjectReference Include="..\Models\Models.csproj" />
     <ProjectReference Include="..\ToolsEx\ToolsEx.csproj" />

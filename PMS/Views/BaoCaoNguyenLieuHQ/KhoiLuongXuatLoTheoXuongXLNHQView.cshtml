@@ -45,6 +45,28 @@
 
         var grid;
         var datalength = 0;
+        var editingField = null;
+
+        function toNumber(value) {
+            var parsed = parseFloat(value);
+            return Number.isFinite(parsed) ? parsed : 0;
+        }
+
+        function getQuantityColumnConfig(field) {
+            if (field === 'KhoiLuongXuat') {
+                return {
+                    valueField: 'KhoiLuongXuat',
+                    url: '@Url.Action("UpdateKhoiLuongXuat", "BaoCaoCanNguyenLieuHQ")',
+                    successMessage: 'Cập nhật khối lượng xuất thành công.'
+                };
+            }
+
+            return {
+                valueField: 'KhoiLuongNhap',
+                url: '@Url.Action("UpdateKhoiLuong", "BaoCaoCanNguyenLieuHQ")',
+                successMessage: 'Cập nhật khối lượng nhập thành công.'
+            };
+        }
 
         function reloadGridFromServer() {
             var button = document.getElementById('RefreshButtonBCHQView');
@@ -77,12 +99,35 @@
         }
 
         function loadGridData(data) {
+            var normalizedData = (Array.isArray(data) ? data : []).map(function (row) {
+                var khoiLuongNhap = toNumber(row.KhoiLuongNhap);
+                var khoiLuongXuat = toNumber(row.KhoiLuongXuat);
+                var tongXuatThuong = toNumber(row.TongXuatThuong);
+                var tongXuatHu = toNumber(row.TongXuatHu);
+                var tongNhapLuyKeThuong = toNumber(row.TongNhapLuyKeThuong);
+                var tongNhapThuong = toNumber(row.TongNhapThuong);
+                var maSanPham = row.MaSanPham;
+                var thuTu = toNumber(row.Index);
+
+                return Object.assign({}, row, {
+                    KhoiLuongNhap: khoiLuongNhap,
+                    KhoiLuongXuat: khoiLuongXuat,
+                    TongXuatThuong: tongXuatThuong,
+                    TongXuatHu: tongXuatHu,
+                    TongNhapLuyKeThuong: tongNhapLuyKeThuong,
+                    TongNhapThuong: tongNhapThuong,
+                    MaSanPham: maSanPham,
+                    Index: thuTu,
+                    KhoiLuongHaoHut: Math.round((khoiLuongNhap - khoiLuongXuat) * 10) / 10
+                });
+            });
+
             var dataManager = new ej.data.DataManager({
-                json: data || [],
+                json: normalizedData,
                 adaptor: new ej.data.JsonAdaptor()
             });
 
-            datalength = Array.isArray(data) ? data.length : 0;
+            datalength = normalizedData.length;
 
             if (grid) {
                 grid.dataSource = dataManager;
@@ -102,6 +147,7 @@
                 selectionSettings: { mode: 'Both', type: 'Single' },
                 allowResizing: true,
                 allowExcelExport: true,
+                allowEditOnDblClick: false,
                 toolbar: ['ExcelExport'],
                 height: 400,
                 editSettings: {
@@ -115,80 +161,100 @@
                         args.filterChoiceCount = datalength;
                     }
                 },
-                cellSelecting: function (args) {
-                    if (args.column.field !== 'KhoiLuongNhap') {
-                        return;
-                    }
+    recordClick: function (args) {
 
-                    // chặn edit tự động
-                    args.cancel = true;
+        var column = grid.getColumnByIndex(args.cellIndex);
 
-                    if (confirm('Bạn có muốn sửa khối lượng nhập không?')) {
-                        grid.selectCell({ rowIndex: args.rowIndex, cellIndex: args.cellIndex });
-                        grid.startEdit();
-                    }
-                },
-                cellEdit: function (args) {
-                    // only handle KhoiLuongNhap edits
-                    if (args.column.field !== 'KhoiLuongNhap') {
-                        args.cancel = true;
-                        return;
-                    }
+        if (!column) {
+            return;
+        }
+
+        if (column.field !== 'KhoiLuongNhap'
+            && column.field !== 'KhoiLuongXuat') {
+            return;
+        }
+
+    editingField = column.field;
+
+    var tr = args.row;
+
+    if (!tr) {
+        return;
+    }
+
+    tr.classList.add('e-editedrow');
+    tr.setAttribute('aria-selected', 'true');
+
+    grid.selectRow(args.rowIndex);
+
+    grid.startEdit();
+    },
+                    cellEdit: function (args) {
+
+        if (!args.column) {
+            console.log('args.column null');
+            return;
+        }
+
+        editingField = args.column.field;
+
+        console.log('cellEdit editingField', editingField);
+
+        if (args.column.field !== 'KhoiLuongNhap'
+            && args.column.field !== 'KhoiLuongXuat') {
+
+            args.cancel = true;
+            return;
+        }
+
+        try {
+
+            var input =
+                args.container &&
+                (
+                    args.container.querySelector('input')
+                    || args.container.querySelector('input.e-input')
+                );
+
+            if (!input) return;
+
+            var saveHandler = function (ev) {
+
+                if (ev.type === 'blur'
+                    || ev.key === 'Enter') {
+
+                    input.removeEventListener('blur', saveHandler);
+                    input.removeEventListener('keydown', saveHandler);
 
                     try {
-                        var input = args.container && (args.container.querySelector('input') || args.container.querySelector('input.e-input'));
-                        if (!input) return;
-
-                        var saveHandler = function (ev) {
-                            if (ev.type === 'blur' || ev.key === 'Enter') {
-                                input.removeEventListener('blur', saveHandler);
-                                input.removeEventListener('keydown', saveHandler);
-
-                                // trigger grid save for this cell; actionComplete will handle persistence
-                                try {
-                                    grid.saveCell();
-                                } catch (e) {
-                                    console.error('saveCell failed', e);
-                                }
-                            }
-                        };
-
-                        input.addEventListener('blur', saveHandler);
-                        input.addEventListener('keydown', saveHandler);
-                    } catch (e) {
+                        grid.saveCell();
+                    }
+                    catch (e) {
                         console.error(e);
                     }
-                },
+                }
+            };
+
+            input.addEventListener('blur', saveHandler);
+            input.addEventListener('keydown', saveHandler);
+        }
+        catch (e) {
+            console.error(e);
+        }
+    },
                 actionComplete: async function (args) {
+
+    if (args.requestType !== 'save') {
+        return;
+    }
+    console.log('args.columnName', args.columnName);
+    console.log('editingField cuối', editingField);
+    var field = editingField;
+    console.log('field cuối', field);
+    var config = getQuantityColumnConfig(field);
+        console.log('url', config.url);
                     try {
-                        if (args.requestType === 'batchSave' || args.requestType === 'batchsave') {
-                            var changedRecords = (args.batchChanges && args.batchChanges.changedRecords) ? args.batchChanges.changedRecords : [];
-
-                            if (!changedRecords.length) {
-                                return;
-                            }
-
-                            for (const row of changedRecords) {
-                                if (!row.SoPhieuCanNhap || !row.MaQuyCach) {
-                                    throw new Error('Thiếu dữ liệu định danh để cập nhật.');
-                                }
-
-                                await $.ajax({
-                                    url: '@Url.Action("UpdateKhoiLuong", "BaoCaoCanNguyenLieuHQ")',
-                                    type: 'POST',
-                                    data: {
-                                        soPhieuCanNhap: row.SoPhieuCanNhap,
-                                        maQuyCach: row.MaQuyCach,
-                                        khoiLuongNhap: row.KhoiLuongNhap
-                                    }
-                                });
-                            }
-
-                            toastOptionNotyfi();
-                            toastr["success"]('Cập nhật khối lượng thành công.', 'Thông báo');
-                            await reloadGridFromServer();
-                        } else if (args.requestType === 'save') {
-                            // single cell/row save
+                        if (args.requestType === 'save') {
                             var row = args.data || args.rowData;
                             if (!row) return;
                             if (!row.SoPhieuCanNhap || !row.MaQuyCach) {
@@ -197,18 +263,37 @@
                                 return;
                             }
 
-                            await $.ajax({
-                                url: '@Url.Action("UpdateKhoiLuong", "BaoCaoCanNguyenLieuHQ")',
+                            var payload = {
+                                soPhieuCanNhap: row.SoPhieuCanNhap,
+                                        maQuyCach: row.MaQuyCach,
+                                        maLo: row.MaLo,
+                                        maSanPham: row.MaSanPham,
+                                        thuTu: row.Index,
+                                        tongXuatThuong: row.TongXuatThuong,
+                                        tongXuatHu: row.TongXuatHu,
+                                        tongNhapLuyKeThuong: row.TongNhapLuyKeThuong,
+                                        tongNhapThuong: row.TongNhapThuong,
+                                        khoiLuongNhap: row.KhoiLuongNhap
+                            };
+
+                                    if (config.valueField === 'KhoiLuongXuat') {
+                                        payload.khoiLuongXuat = row.KhoiLuongXuat;
+                                    } else {
+                                        payload.khoiLuongNhap = row.KhoiLuongNhap;
+                                    }
+
+                            var response = await $.ajax({
+                                url: config.url,
                                 type: 'POST',
-                                data: {
-                                    soPhieuCanNhap: row.SoPhieuCanNhap,
-                                    maQuyCach: row.MaQuyCach,
-                                    khoiLuongNhap: row.KhoiLuongNhap
-                                }
+                                data: payload
                             });
 
+                            if (response && response.success === false) {
+                                throw new Error(response.message || 'Cập nhật thất bại.');
+                            }
+
                             toastOptionNotyfi();
-                            toastr['success']('Cập nhật khối lượng thành công.', 'Thông báo');
+                            toastr['success'](config.successMessage, 'Thông báo');
                             await reloadGridFromServer();
                         }
                     } catch (error) {
@@ -216,6 +301,8 @@
                         toastOptionNotyfi();
                         toastr['error'](error?.message || 'Cập nhật thất bại.', 'Thông báo');
                         await reloadGridFromServer();
+                    } finally {
+                        editingField = null;
                     }
                 },
                 columns: [
@@ -239,9 +326,10 @@
                         headerText: 'Khối lượng xuất',
                         width: 180,
                         type: 'number',
+                        editType: 'numericedit',
                         format: 'N1',
                         textAlign: 'Right',
-                        allowEditing: false
+                        allowEditing: true
                     },
                     {
                         field: 'TongHuKho',

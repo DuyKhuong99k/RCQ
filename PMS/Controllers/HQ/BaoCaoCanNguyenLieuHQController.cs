@@ -1,6 +1,7 @@
 ﻿using Azure;
 using Azure.Core;
 using Dapper;
+using Dao.Repos.HQ;
 using DocumentFormat.OpenXml.Spreadsheet;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
@@ -38,6 +39,149 @@ namespace PMS.Controllers.HQ
         {
             _httpClientFactory = httpClientFactory;
         }
+
+        private sealed class KhoiLuongXuatRowContext
+        {
+            public string? SoPhieuCanNhap { get; set; }
+            public string? MaQuyCach { get; set; }
+            public string? MaLo { get; set; }
+            public long MaSanPham { get; set; }
+            public int Index { get; set; }
+            public decimal KhoiLuongNhap { get; set; }
+            public decimal KhoiLuongXuat { get; set; }
+            public decimal TongXuatThuong { get; set; }
+            public decimal TongXuatHu { get; set; }
+            public decimal TongNhapLuyKeThuong { get; set; }
+            public decimal TongNhapThuong { get; set; }
+        }
+
+        private sealed class SourceRowInfo
+        {
+            public string Id { get; set; } = string.Empty;
+            public decimal TrongLuongHang { get; set; }
+        }
+
+        private static void AdjustSourceRows(
+            SqlConnection connection,
+            SqlTransaction transaction,
+            string maLo,
+            long maSanPham,
+            bool isCanHu,
+            decimal delta)
+        {
+            delta = Math.Round(delta, 1);
+            if (Math.Abs(delta) < 0.0001m)            {
+                return;
+            }
+
+            if (delta > 0)
+            {
+                const string pickSql = @"
+SELECT TOP (1)
+    px.Id
+FROM HQ_PhieuCanXuatNguyenLieu px
+JOIN HQ_PhieuCanNguyenLieu pc
+    ON pc.Id = px.IdPhieuCanNguyenLieu
+WHERE pc.MaLo = @MaLo
+  AND px.MaSanPham = @MaSanPham
+  AND ISNULL(px.IsCanHu,0) = @IsCanHu
+  AND ISNULL(px.IsHuy,0) = 0
+ORDER BY
+    pc.NgayGio DESC,
+    px.STT DESC,
+    px.Id DESC;";
+
+                var targetRowId = connection.QueryFirstOrDefault<string>(pickSql, new
+                {
+                    MaLo = maLo,
+                    MaSanPham = maSanPham,
+                    IsCanHu = isCanHu
+                }, transaction);
+
+                if (string.IsNullOrWhiteSpace(targetRowId))
+                {
+                    throw new InvalidOperationException("Không tìm thấy dòng nguồn để tăng.");
+                }
+
+                var updated = connection.Execute(@"
+UPDATE HQ_PhieuCanXuatNguyenLieu
+SET TrongLuongHang = TrongLuongHang + @Delta
+WHERE Id = @Id;", new
+                {
+                    Id = targetRowId,
+                    Delta = delta
+                }, transaction);
+
+                if (updated == 0)
+                {
+                    throw new InvalidOperationException("Cập nhật dòng nguồn thất bại.");
+                }
+
+                return;
+            }
+
+            var remaining = Math.Abs(delta);
+
+while (remaining > 0.0001m)            {
+                const string pickSql = @"
+SELECT TOP (1)
+    px.Id,
+    px.TrongLuongHang
+FROM HQ_PhieuCanXuatNguyenLieu px
+JOIN HQ_PhieuCanNguyenLieu pc
+    ON pc.Id = px.IdPhieuCanNguyenLieu
+WHERE pc.MaLo = @MaLo
+  AND px.MaSanPham = @MaSanPham
+  AND ISNULL(px.IsCanHu,0) = @IsCanHu
+  AND ISNULL(px.IsHuy,0) = 0
+  AND px.TrongLuongHang > 0
+ORDER BY
+    pc.NgayGio DESC,
+    px.STT DESC,
+    px.Id DESC;";
+
+                var sourceRow = connection.QueryFirstOrDefault<SourceRowInfo>(pickSql, new
+                {
+                    MaLo = maLo,
+                    MaSanPham = maSanPham,
+                    IsCanHu = isCanHu
+                }, transaction);
+
+                if (sourceRow == null)
+                {
+                    throw new InvalidOperationException("Không còn dòng nguồn để giảm.");
+                }
+
+                var applied = remaining < sourceRow.TrongLuongHang ? remaining : sourceRow.TrongLuongHang;
+
+                var updated = connection.Execute(@"
+UPDATE HQ_PhieuCanXuatNguyenLieu
+SET TrongLuongHang = TrongLuongHang - @Applied
+WHERE Id = @Id AND TrongLuongHang >= @Applied;", new
+                {
+                    Id = sourceRow.Id,
+                    Applied = applied
+                }, transaction);
+
+                if (updated == 0)
+                {
+                    throw new InvalidOperationException("Cập nhật dòng nguồn thất bại.");
+                }
+
+                remaining = Math.Round(remaining - applied, 1);
+            }
+        }
+
+        private KhoiLuongXuatRowContext? GetKhoiLuongXuatRowContext(string maLo, string soPhieuCanNhap, string maQuyCach)
+        {
+            var dao = new HQ_PhieuCanXuatNguyenLieu(AppViewModels.Base.Ins.ConnectionString);
+            var rows = dao.GetKhoiLuongXuatLoTheoXuonget<KhoiLuongXuatRowContext>(maLo);
+
+            return rows.FirstOrDefault(row =>
+                string.Equals(row.SoPhieuCanNhap, soPhieuCanNhap, StringComparison.OrdinalIgnoreCase) &&
+                string.Equals(row.MaQuyCach, maQuyCach, StringComparison.OrdinalIgnoreCase));
+        }
+
         #region Nhập Nguyên Liệu
         #region Chi Tiết Phiếu Cân Nhập Nguyên Liệu
         [CustomAuthorize(Fu = "Báo Cáo Nguyên Liệu Nhập / Chi Tiết HQ", Func = "Xem Báo Cáo Nguyên Liệu Nhập / Chi Tiết HQ")]
@@ -601,6 +745,117 @@ END
                 {
                     success = true
                 });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = ex.Message
+                });
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UpdateKhoiLuongXuat(
+            string soPhieuCanNhap,
+            string maQuyCach,
+            string maLo,
+            decimal khoiLuongXuat)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(soPhieuCanNhap) || string.IsNullOrWhiteSpace(maQuyCach))
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        message = "Thiếu dữ liệu định danh để cập nhật."
+                    });
+                }
+
+                if (string.IsNullOrWhiteSpace(maLo) )
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        message = "Thiếu dữ liệu lot để cập nhật."
+                    });
+                }
+
+                var context = GetKhoiLuongXuatRowContext(maLo.Trim(), soPhieuCanNhap.Trim(), maQuyCach.Trim());
+
+                if (context == null)
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        message = "Không tìm thấy dữ liệu nguồn để cập nhật."
+                    });
+                }
+
+                if (khoiLuongXuat < 0 || khoiLuongXuat > context.KhoiLuongNhap)
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        message = "Khối lượng xuất phải nằm trong khoảng từ 0 đến khối lượng nhập."
+                    });
+                }
+
+                using var connection = new SqlConnection(AppViewModels.Base.Ins.ConnectionString);
+
+                connection.Open();
+                using var transaction = connection.BeginTransaction();
+
+                try
+                {
+                    var delta = Math.Round(
+                        khoiLuongXuat - context.KhoiLuongXuat,
+                        1
+                    );
+                    if (Math.Abs(delta) < 0.0001m)
+{
+    return Json(new
+    {
+        success = true
+    });
+}
+
+if (context.Index == 0)
+{
+    AdjustSourceRows(
+        connection,
+        transaction,
+        context.MaLo!,
+        context.MaSanPham,
+        true,
+        delta
+    );
+}
+else
+{
+    AdjustSourceRows(
+        connection,
+        transaction,
+        context.MaLo!,
+        context.MaSanPham,
+        false,
+        delta
+    );
+}
+                    transaction.Commit();
+
+                return Json(new
+                {
+                    success = true
+                });
+                }
+                catch
+                {
+                    transaction.Rollback();
+                    throw;
+                }
             }
             catch (Exception ex)
             {

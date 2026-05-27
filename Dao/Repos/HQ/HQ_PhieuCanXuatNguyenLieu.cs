@@ -1189,6 +1189,7 @@ PhanBoXuat AS (
         n.*,
         ISNULL(tx.TongXuatThuong,0) AS TongXuatThuong,
         ISNULL(th.TongXuatHu,0) AS TongXuatHu,
+        -- TongNhapLuyKeThuong: lũy kế Khối lượng nhập của các dòng ThuTu >= 1 trong cùng MaLo.
         SUM(
             CASE
                 WHEN n.ThuTu >= 1
@@ -1226,6 +1227,12 @@ SELECT
     p.MaQuyCach,
     p.TenQuyCach,
     p.ThuTu AS [Index],
+    -- TongXuatThuong/TongXuatHu: tổng trọng lượng đã xuất của lô, tách theo xuất thường và xuất hư.
+    -- TongNhapLuyKeThuong/TongNhapThuong: tổng nhập thường theo thứ tự FIFO để tính phần phân bổ còn lại.
+    p.TongXuatThuong,
+    p.TongXuatHu,
+    p.TongNhapLuyKeThuong,
+    p.TongNhapThuong,
     p.KhoiLuongNhap,
 	    CASE 
     WHEN p.ThuTu = 0 THEN ISNULL(p.TongXuatHu,0)
@@ -1235,6 +1242,8 @@ SELECT
 ------------------------------------------------
 -- KHỐI LƯỢNG XUẤT
 ------------------------------------------------
+-- ThuTu = 0: Khối lượng xuất = XuatHư + phần normal vượt tổng nhập thường, chặn trong [0, Khối lượng nhập].
+-- ThuTu >= 1: Khối lượng xuất = TongXuatThuong - (TongNhapLuyKeThuong - Khối lượng nhập), chặn trong [0, Khối lượng nhập].
 CAST(
 CASE
     ------------------------------------------------
@@ -1302,6 +1311,7 @@ AS DECIMAL(18,1)) AS KhoiLuongXuat,
 ------------------------------------------------
 -- HAO HỤT
 ------------------------------------------------
+-- Hao hụt = Khối lượng nhập - Khối lượng xuất.
 CAST(
     p.KhoiLuongNhap -
     (
