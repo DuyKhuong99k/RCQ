@@ -105,7 +105,8 @@ ORDER BY
 
                 var updated = connection.Execute(@"
 UPDATE HQ_PhieuCanXuatNguyenLieu
-SET TrongLuongHang = TrongLuongHang + @Delta
+SET TrongLuongHang = TrongLuongHang + @Delta,
+    TrongLuongTong = TrongLuongHang + @Delta
 WHERE Id = @Id;", new
                 {
                     Id = targetRowId,
@@ -156,7 +157,8 @@ ORDER BY
 
                 var updated = connection.Execute(@"
 UPDATE HQ_PhieuCanXuatNguyenLieu
-SET TrongLuongHang = TrongLuongHang - @Applied
+SET TrongLuongHang = TrongLuongHang - @Applied,
+    TrongLuongTong = TrongLuongHang - @Applied
 WHERE Id = @Id AND TrongLuongHang >= @Applied;", new
                 {
                     Id = sourceRow.Id,
