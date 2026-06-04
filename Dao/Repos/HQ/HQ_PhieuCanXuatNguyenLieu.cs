@@ -1095,22 +1095,19 @@ WITH NhapTheoQuyCach AS (
         qc.[Index] AS ThuTu,
 
         CAST(
-    CASE
+            CASE
+                -- Có bao lụa
+                WHEN bl.TrongLuongBaoLua IS NOT NULL
+                    THEN bl.TrongLuongBaoLua
 
-        -- Có bao lụa
-        WHEN bl.TrongLuongBaoLua IS NOT NULL
-            THEN bl.TrongLuongBaoLua
+                -- Có phân bổ tỷ lệ
+                WHEN ctn.MaQuyCach IS NOT NULL
+                    THEN pn.TrongLuongHang * ISNULL(ctn.TyLe, 0) / 100.0
 
-        -- Có phân bổ tỷ lệ
-        WHEN ctn.MaQuyCach IS NOT NULL
-            THEN pn.TrongLuongHang * ISNULL(ctn.TyLe,0) / 100.0
-
-        -- Không có phân bổ gì hết
-        ELSE pn.TrongLuongHang
-
-         END
-       AS DECIMAL(18,1)
-   ) AS KhoiLuongNhap
+                -- Không có phân bổ gì hết
+                ELSE pn.TrongLuongHang
+            END
+        AS DECIMAL(18,1)) AS KhoiLuongNhap
 
     FROM HQ_PhieuCanNhapNguyenLieu pn
 
@@ -1160,8 +1157,8 @@ TongXuatThuongTheoLo AS (
     JOIN HQ_PhieuCanNguyenLieu pnl
         ON pnl.Id = px.IdPhieuCanNguyenLieu
     WHERE
-        ISNULL(px.IsCanHu,0) = 0
-        AND ISNULL(px.IsHuy,0) = 0
+        ISNULL(px.IsCanHu, 0) = 0
+        AND ISNULL(px.IsHuy, 0) = 0
     GROUP BY pnl.MaLo
 ),
 
@@ -1177,8 +1174,27 @@ TongXuatHuTheoLo AS (
         ON pnl.Id = px.IdPhieuCanNguyenLieu
     WHERE
         px.IsCanHu = 1
-        AND ISNULL(px.IsHuy,0) = 0
+        AND ISNULL(px.IsHuy, 0) = 0
     GROUP BY pnl.MaLo
+),
+
+------------------------------------------------
+-- XUẤT KHÓM DỨA THEO MÃ QUY CÁCH
+------------------------------------------------
+XuatKhomDuaTheoQuyCach AS (
+    SELECT
+        pnl.MaLo,
+        px.SoPhieuNhap,
+        px.MaQuyCach,
+        px.TrongLuongHang AS KhoiLuongXuatKhomDua
+    FROM HQ_PhieuCanXuatNguyenLieu px
+    JOIN HQ_PhieuCanNguyenLieu pnl
+        ON pnl.Id = px.IdPhieuCanNguyenLieu
+    WHERE
+        ISNULL(px.IsHuy, 0)   = 0
+        AND ISNULL(px.IsCanHu, 0) = 0
+        AND px.MaQuyCach IS NOT NULL
+        AND px.MaQuyCach != '0'
 ),
 
 ------------------------------------------------
@@ -1187,13 +1203,13 @@ TongXuatHuTheoLo AS (
 PhanBoXuat AS (
     SELECT
         n.*,
-        ISNULL(tx.TongXuatThuong,0) AS TongXuatThuong,
-        ISNULL(th.TongXuatHu,0) AS TongXuatHu,
-        -- TongNhapLuyKeThuong: lũy kế Khối lượng nhập của các dòng ThuTu >= 1 trong cùng MaLo.
+        ISNULL(tx.TongXuatThuong, 0) AS TongXuatThuong,
+        ISNULL(th.TongXuatHu, 0)     AS TongXuatHu,
+        xkd.KhoiLuongXuatKhomDua,
+
         SUM(
             CASE
-                WHEN n.ThuTu >= 1
-                THEN n.KhoiLuongNhap
+                WHEN n.ThuTu >= 1 THEN n.KhoiLuongNhap
                 ELSE 0
             END
         ) OVER (
@@ -1203,8 +1219,7 @@ PhanBoXuat AS (
 
         SUM(
             CASE
-                WHEN n.ThuTu >= 1
-                THEN n.KhoiLuongNhap
+                WHEN n.ThuTu >= 1 THEN n.KhoiLuongNhap
                 ELSE 0
             END
         ) OVER (
@@ -1216,6 +1231,10 @@ PhanBoXuat AS (
         ON tx.MaLo = n.MaLo
     LEFT JOIN TongXuatHuTheoLo th
         ON th.MaLo = n.MaLo
+    LEFT JOIN XuatKhomDuaTheoQuyCach xkd
+        ON  xkd.MaLo        = n.MaLo
+        AND xkd.SoPhieuNhap = n.SoPhieuCanNhap
+        AND xkd.MaQuyCach   = n.MaQuyCach
 )
 
 SELECT
@@ -1227,130 +1246,122 @@ SELECT
     p.MaQuyCach,
     p.TenQuyCach,
     p.ThuTu AS [Index],
-    -- TongXuatThuong/TongXuatHu: tổng trọng lượng đã xuất của lô, tách theo xuất thường và xuất hư.
-    -- TongNhapLuyKeThuong/TongNhapThuong: tổng nhập thường theo thứ tự FIFO để tính phần phân bổ còn lại.
     p.TongXuatThuong,
     p.TongXuatHu,
     p.TongNhapLuyKeThuong,
     p.TongNhapThuong,
     p.KhoiLuongNhap,
-	    CASE 
-    WHEN p.ThuTu = 0 THEN ISNULL(p.TongXuatHu,0)
-    ELSE 0
+
+    CASE
+        WHEN p.ThuTu = 0 THEN ISNULL(p.TongXuatHu, 0)
+        ELSE 0
     END AS TongHuKho,
 
-------------------------------------------------
--- KHỐI LƯỢNG XUẤT
-------------------------------------------------
--- ThuTu = 0: Khối lượng xuất = XuatHư + phần normal vượt tổng nhập thường, chặn trong [0, Khối lượng nhập].
--- ThuTu >= 1: Khối lượng xuất = TongXuatThuong - (TongNhapLuyKeThuong - Khối lượng nhập), chặn trong [0, Khối lượng nhập].
-CAST(
-CASE
     ------------------------------------------------
-    -- INDEX 0
+    -- KHỐI LƯỢNG XUẤT
     ------------------------------------------------
-    WHEN p.ThuTu = 0 THEN
+    CAST(
+    CASE
+        ------------------------------------------------
+        -- KHÓM DỨA: lấy thẳng theo MaQuyCach, không FIFO
+        ------------------------------------------------
+        WHEN sp.Ten LIKE N'%Khóm%' AND sp.Ten LIKE N'%dứa%'
+        THEN ISNULL(p.KhoiLuongXuatKhomDua, 0)
 
-        CASE
-
-            WHEN
-                (p.TongXuatHu +
-                 CASE
-                    WHEN p.TongXuatThuong > p.TongNhapThuong
-                    THEN p.TongXuatThuong - p.TongNhapThuong
-                    ELSE 0
-                 END
+        ------------------------------------------------
+        -- INDEX 0
+        ------------------------------------------------
+        WHEN p.ThuTu = 0 THEN
+            CASE
+                WHEN (
+                    p.TongXuatHu +
+                    CASE
+                        WHEN p.TongXuatThuong > p.TongNhapThuong
+                        THEN p.TongXuatThuong - p.TongNhapThuong
+                        ELSE 0
+                    END
                 ) <= 0
-            THEN 0
+                THEN 0
 
-            WHEN
-                (p.TongXuatHu +
-                 CASE
-                    WHEN p.TongXuatThuong > p.TongNhapThuong
-                    THEN p.TongXuatThuong - p.TongNhapThuong
-                    ELSE 0
-                 END
+                WHEN (
+                    p.TongXuatHu +
+                    CASE
+                        WHEN p.TongXuatThuong > p.TongNhapThuong
+                        THEN p.TongXuatThuong - p.TongNhapThuong
+                        ELSE 0
+                    END
                 ) >= p.KhoiLuongNhap
-            THEN p.KhoiLuongNhap
+                THEN p.KhoiLuongNhap
 
-            ELSE
-                (p.TongXuatHu +
-                 CASE
-                    WHEN p.TongXuatThuong > p.TongNhapThuong
-                    THEN p.TongXuatThuong - p.TongNhapThuong
-                    ELSE 0
-                 END
+                ELSE (
+                    p.TongXuatHu +
+                    CASE
+                        WHEN p.TongXuatThuong > p.TongNhapThuong
+                        THEN p.TongXuatThuong - p.TongNhapThuong
+                        ELSE 0
+                    END
                 )
+            END
 
-        END
+        ------------------------------------------------
+        -- FIFO INDEX >= 1
+        ------------------------------------------------
+        ELSE
+            CASE
+                WHEN p.TongXuatThuong <= (p.TongNhapLuyKeThuong - p.KhoiLuongNhap)
+                THEN 0
+
+                WHEN p.TongXuatThuong >= p.TongNhapLuyKeThuong
+                THEN p.KhoiLuongNhap
+
+                ELSE p.TongXuatThuong - (p.TongNhapLuyKeThuong - p.KhoiLuongNhap)
+            END
+
+    END
+    AS DECIMAL(18,1)) AS KhoiLuongXuat,
 
     ------------------------------------------------
-    -- FIFO INDEX >=1
+    -- HAO HỤT
     ------------------------------------------------
-    ELSE
+    CAST(
+        p.KhoiLuongNhap -
+        (
+            CASE
+                WHEN sp.Ten LIKE N'%Khóm%' AND sp.Ten LIKE N'%dứa%'
+                THEN ISNULL(p.KhoiLuongXuatKhomDua, 0)
 
-        CASE
-
-            WHEN p.TongXuatThuong
-                 <= (p.TongNhapLuyKeThuong - p.KhoiLuongNhap)
-            THEN 0
-
-            WHEN p.TongXuatThuong
-                 >= p.TongNhapLuyKeThuong
-            THEN p.KhoiLuongNhap
-
-            ELSE
-                p.TongXuatThuong -
-                (p.TongNhapLuyKeThuong - p.KhoiLuongNhap)
-
-        END
-
-END
-AS DECIMAL(18,1)) AS KhoiLuongXuat,
-
-------------------------------------------------
--- HAO HỤT
-------------------------------------------------
--- Hao hụt = Khối lượng nhập - Khối lượng xuất.
-CAST(
-    p.KhoiLuongNhap -
-    (
-        CASE
-
-            WHEN p.ThuTu = 0 THEN
-                CASE
-                    WHEN
-                        (p.TongXuatHu +
-                         CASE
-                            WHEN p.TongXuatThuong > p.TongNhapThuong
-                            THEN p.TongXuatThuong - p.TongNhapThuong
-                            ELSE 0
-                         END
+                WHEN p.ThuTu = 0 THEN
+                    CASE
+                        WHEN (
+                            p.TongXuatHu +
+                            CASE
+                                WHEN p.TongXuatThuong > p.TongNhapThuong
+                                THEN p.TongXuatThuong - p.TongNhapThuong
+                                ELSE 0
+                            END
                         ) >= p.KhoiLuongNhap
-                    THEN p.KhoiLuongNhap
-                    ELSE
-                        (p.TongXuatHu +
-                         CASE
-                            WHEN p.TongXuatThuong > p.TongNhapThuong
-                            THEN p.TongXuatThuong - p.TongNhapThuong
-                            ELSE 0
-                         END
+                        THEN p.KhoiLuongNhap
+
+                        ELSE (
+                            p.TongXuatHu +
+                            CASE
+                                WHEN p.TongXuatThuong > p.TongNhapThuong
+                                THEN p.TongXuatThuong - p.TongNhapThuong
+                                ELSE 0
+                            END
                         )
-                END
+                    END
 
-            ELSE
-                CASE
-                    WHEN p.TongXuatThuong <= 0 THEN 0
-                    WHEN p.TongXuatThuong >= p.TongNhapLuyKeThuong
-                    THEN p.KhoiLuongNhap
-                    ELSE
-                        p.TongXuatThuong -
-                        (p.TongNhapLuyKeThuong - p.KhoiLuongNhap)
-                END
-
-        END
-    )
-AS DECIMAL(18,1)) AS KhoiLuongHaoHut
+                ELSE
+                    CASE
+                        WHEN p.TongXuatThuong <= 0 THEN 0
+                        WHEN p.TongXuatThuong >= p.TongNhapLuyKeThuong
+                        THEN p.KhoiLuongNhap
+                        ELSE p.TongXuatThuong - (p.TongNhapLuyKeThuong - p.KhoiLuongNhap)
+                    END
+            END
+        )
+    AS DECIMAL(18,1)) AS KhoiLuongHaoHut
 
 FROM PhanBoXuat p
 LEFT JOIN HQ_SanPhamNguyenLieu sp

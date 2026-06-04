@@ -52,21 +52,53 @@
             return Number.isFinite(parsed) ? parsed : 0;
         }
 
-        function getQuantityColumnConfig(field) {
-            if (field === 'KhoiLuongXuat') {
+        // function getQuantityColumnConfig(field) {
+        //     if (field === 'KhoiLuongXuat') {
+        //         return {
+        //             valueField: 'KhoiLuongXuat',
+        //             url: '@Url.Action("UpdateKhoiLuongXuat", "BaoCaoCanNguyenLieuHQ")',
+        //             successMessage: 'Cập nhật khối lượng xuất thành công.'
+        //         };
+        //     }
+
+        //     return {
+        //         valueField: 'KhoiLuongNhap',
+        //         url: '@Url.Action("UpdateKhoiLuong", "BaoCaoCanNguyenLieuHQ")',
+        //         successMessage: 'Cập nhật khối lượng nhập thành công.'
+        //     };
+        // }
+
+        function getQuantityColumnConfig(field, rowData) {
+
+        const tenSanPham = (rowData?.TenSanPham || "")
+            .trim()
+            .toLowerCase();
+    const isKhomDua =
+        tenSanPham.includes("khóm") &&
+        tenSanPham.includes("dứa");
+        if (field === 'KhoiLuongXuat') {
+
+            if (isKhomDua) {
                 return {
                     valueField: 'KhoiLuongXuat',
-                    url: '@Url.Action("UpdateKhoiLuongXuat", "BaoCaoCanNguyenLieuHQ")',
-                    successMessage: 'Cập nhật khối lượng xuất thành công.'
+                    url: '@Url.Action("UpdateKhoiLuongXuatKhomDua", "BaoCaoCanNguyenLieuHQ")',
+                    successMessage: 'Cập nhật khối lượng xuất Khóm, dứa thành công.'
                 };
             }
 
             return {
-                valueField: 'KhoiLuongNhap',
-                url: '@Url.Action("UpdateKhoiLuong", "BaoCaoCanNguyenLieuHQ")',
-                successMessage: 'Cập nhật khối lượng nhập thành công.'
+                valueField: 'KhoiLuongXuat',
+                url: '@Url.Action("UpdateKhoiLuongXuat", "BaoCaoCanNguyenLieuHQ")',
+                successMessage: 'Cập nhật khối lượng xuất thành công.'
             };
         }
+
+        return {
+            valueField: 'KhoiLuongNhap',
+            url: '@Url.Action("UpdateKhoiLuong", "BaoCaoCanNguyenLieuHQ")',
+            successMessage: 'Cập nhật khối lượng nhập thành công.'
+        };
+    }
 
         function reloadGridFromServer() {
             var button = document.getElementById('RefreshButtonBCHQView');
@@ -250,9 +282,11 @@
     console.log('args.columnName', args.columnName);
     console.log('editingField cuối', editingField);
     var field = editingField;
+    var row = args.data || args.rowData; // ✅ Khai báo row TRƯỚC
     console.log('field cuối', field);
-    var config = getQuantityColumnConfig(field);
-        console.log('url', config.url);
+    if (!row) return;
+    var config = getQuantityColumnConfig(field, row);
+    console.log('url', config.url);
                     try {
                         if (args.requestType === 'save') {
                             var row = args.data || args.rowData;
@@ -308,7 +342,7 @@
                 columns: [
                     { field: 'SoPhieuCanNhap', visible: false },
                     { field: 'MaLo', visible: false },
-                    { field: 'MaQuyCach', visible: false },
+                    { field: 'MaQuyCach', visible: true },
                     { field: 'TenSanPham', headerText: 'Tên sản phẩm', width: 180, allowEditing: false },
                     { field: 'TenQuyCach', headerText: 'Quy cách', width: 180, allowEditing: false },
                     {
