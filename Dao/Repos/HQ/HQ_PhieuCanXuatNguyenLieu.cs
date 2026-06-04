@@ -1179,22 +1179,22 @@ TongXuatHuTheoLo AS (
 ),
 
 ------------------------------------------------
--- XUẤT KHÓM DỨA THEO MÃ QUY CÁCH
+-- XUẤT THEO MÃ QUY CÁCH (Khóm dứa + Thanh long)
 ------------------------------------------------
-XuatKhomDuaTheoQuyCach AS (
+XuatTheoQuyCach AS (
     SELECT
         pnl.MaLo,
         px.SoPhieuNhap,
         px.MaQuyCach,
-        px.TrongLuongHang AS KhoiLuongXuatKhomDua
+        px.TrongLuongHang AS KhoiLuongXuatTheoQuyCach
     FROM HQ_PhieuCanXuatNguyenLieu px
     JOIN HQ_PhieuCanNguyenLieu pnl
         ON pnl.Id = px.IdPhieuCanNguyenLieu
     WHERE
-        ISNULL(px.IsHuy, 0)   = 0
+        ISNULL(px.IsHuy, 0)      = 0
         AND ISNULL(px.IsCanHu, 0) = 0
         AND px.MaQuyCach IS NOT NULL
-        AND px.MaQuyCach != '0'
+        AND px.MaQuyCach          != 0
 ),
 
 ------------------------------------------------
@@ -1203,9 +1203,9 @@ XuatKhomDuaTheoQuyCach AS (
 PhanBoXuat AS (
     SELECT
         n.*,
-        ISNULL(tx.TongXuatThuong, 0) AS TongXuatThuong,
-        ISNULL(th.TongXuatHu, 0)     AS TongXuatHu,
-        xkd.KhoiLuongXuatKhomDua,
+        ISNULL(tx.TongXuatThuong, 0)  AS TongXuatThuong,
+        ISNULL(th.TongXuatHu, 0)      AS TongXuatHu,
+        xkd.KhoiLuongXuatTheoQuyCach,
 
         SUM(
             CASE
@@ -1231,7 +1231,7 @@ PhanBoXuat AS (
         ON tx.MaLo = n.MaLo
     LEFT JOIN TongXuatHuTheoLo th
         ON th.MaLo = n.MaLo
-    LEFT JOIN XuatKhomDuaTheoQuyCach xkd
+    LEFT JOIN XuatTheoQuyCach xkd
         ON  xkd.MaLo        = n.MaLo
         AND xkd.SoPhieuNhap = n.SoPhieuCanNhap
         AND xkd.MaQuyCach   = n.MaQuyCach
@@ -1263,10 +1263,11 @@ SELECT
     CAST(
     CASE
         ------------------------------------------------
-        -- KHÓM DỨA: lấy thẳng theo MaQuyCach, không FIFO
+        -- KHÓM DỨA + THANH LONG: lấy thẳng theo MaQuyCach, không FIFO
         ------------------------------------------------
-        WHEN sp.Ten LIKE N'%Khóm%' AND sp.Ten LIKE N'%dứa%'
-        THEN ISNULL(p.KhoiLuongXuatKhomDua, 0)
+        WHEN (sp.Ten LIKE N'%Khóm%' AND sp.Ten LIKE N'%dứa%')
+          OR sp.Ten LIKE N'%Thanh long%'
+        THEN ISNULL(p.KhoiLuongXuatTheoQuyCach, 0)
 
         ------------------------------------------------
         -- INDEX 0
@@ -1327,9 +1328,16 @@ SELECT
         p.KhoiLuongNhap -
         (
             CASE
-                WHEN sp.Ten LIKE N'%Khóm%' AND sp.Ten LIKE N'%dứa%'
-                THEN ISNULL(p.KhoiLuongXuatKhomDua, 0)
+                ------------------------------------------------
+                -- KHÓM DỨA + THANH LONG
+                ------------------------------------------------
+                WHEN (sp.Ten LIKE N'%Khóm%' AND sp.Ten LIKE N'%dứa%')
+                  OR sp.Ten LIKE N'%Thanh long%'
+                THEN ISNULL(p.KhoiLuongXuatTheoQuyCach, 0)
 
+                ------------------------------------------------
+                -- INDEX 0
+                ------------------------------------------------
                 WHEN p.ThuTu = 0 THEN
                     CASE
                         WHEN (
@@ -1352,11 +1360,17 @@ SELECT
                         )
                     END
 
+                ------------------------------------------------
+                -- FIFO INDEX >= 1
+                ------------------------------------------------
                 ELSE
                     CASE
-                        WHEN p.TongXuatThuong <= 0 THEN 0
+                        WHEN p.TongXuatThuong <= 0
+                        THEN 0
+
                         WHEN p.TongXuatThuong >= p.TongNhapLuyKeThuong
                         THEN p.KhoiLuongNhap
+
                         ELSE p.TongXuatThuong - (p.TongNhapLuyKeThuong - p.KhoiLuongNhap)
                     END
             END
