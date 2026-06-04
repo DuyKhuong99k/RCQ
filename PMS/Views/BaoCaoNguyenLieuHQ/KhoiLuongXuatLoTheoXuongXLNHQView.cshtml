@@ -73,12 +73,12 @@
         const tenSanPham = (rowData?.TenSanPham || "")
             .trim()
             .toLowerCase();
-    const isKhomDua =
-        tenSanPham.includes("khóm") &&
-        tenSanPham.includes("dứa");
+const isKhomDuaOrThanhLong =
+    (tenSanPham.includes("khóm") && tenSanPham.includes("dứa")) ||
+    tenSanPham.includes("thanh long");
         if (field === 'KhoiLuongXuat') {
 
-            if (isKhomDua) {
+            if (isKhomDuaOrThanhLong) {
                 return {
                     valueField: 'KhoiLuongXuat',
                     url: '@Url.Action("UpdateKhoiLuongXuatKhomDua", "BaoCaoCanNguyenLieuHQ")',
