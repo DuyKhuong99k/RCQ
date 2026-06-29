@@ -1,6 +1,7 @@
 ﻿using Azure;
 using Azure.Core;
 using Dapper;
+using Dao.Repos.HQ;
 using DocumentFormat.OpenXml.Spreadsheet;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
@@ -38,6 +39,165 @@ namespace PMS.Controllers.HQ
         {
             _httpClientFactory = httpClientFactory;
         }
+
+        private sealed class KhoiLuongXuatRowContext
+        {
+            public string? SoPhieuCanNhap { get; set; }
+            public string? MaQuyCach { get; set; }
+            public string? MaLo { get; set; }
+            public long MaSanPham { get; set; }
+            public int Index { get; set; }
+            public decimal KhoiLuongNhap { get; set; }
+            public decimal KhoiLuongXuat { get; set; }
+            public decimal TongXuatThuong { get; set; }
+            public decimal TongXuatHu { get; set; }
+            public decimal TongNhapLuyKeThuong { get; set; }
+            public decimal TongNhapThuong { get; set; }
+        }
+
+        private sealed class SourceRowInfo
+        {
+            public string Id { get; set; }
+            public string IdPhieuCanNguyenLieu { get; set; }
+            public int STT { get; set; }
+            public string SoPhieuXuat { get; set; }
+            public string MaThuKho { get; set; }
+            public long MaSanPham { get; set; }
+            public decimal TrongLuongHang { get; set; }
+            public decimal TrongLuongXe { get; set; }
+            public long MaDonVi { get; set; }
+            public string MaXuongXuatDen { get; set; }
+            public long MaKho { get; set; }
+            public string MaQuyCach { get; set; }
+            public int Status { get; set; }
+            public bool IsCanHu { get; set; }
+            public bool IsThuCong { get; set; }
+
+        }
+
+        private static void AdjustSourceRows(
+            SqlConnection connection,
+            SqlTransaction transaction,
+            string maLo,
+            long maSanPham,
+            bool isCanHu,
+            decimal delta)
+        {
+            delta = Math.Round(delta, 1);
+            if (Math.Abs(delta) < 0.0001m)            {
+                return;
+            }
+
+            if (delta > 0)
+            {
+                const string pickSql = @"
+SELECT TOP (1)
+    px.Id
+FROM HQ_PhieuCanXuatNguyenLieu px
+JOIN HQ_PhieuCanNguyenLieu pc
+    ON pc.Id = px.IdPhieuCanNguyenLieu
+WHERE pc.MaLo = @MaLo
+  AND px.MaSanPham = @MaSanPham
+  AND ISNULL(px.IsCanHu,0) = @IsCanHu
+  AND ISNULL(px.IsHuy,0) = 0
+ORDER BY
+    pc.NgayGio DESC,
+    px.STT DESC,
+    px.Id DESC;";
+
+                var targetRowId = connection.QueryFirstOrDefault<string>(pickSql, new
+                {
+                    MaLo = maLo,
+                    MaSanPham = maSanPham,
+                    IsCanHu = isCanHu
+                }, transaction);
+
+                if (string.IsNullOrWhiteSpace(targetRowId))
+                {
+                    throw new InvalidOperationException("Không tìm thấy dòng nguồn để tăng.");
+                }
+
+                var updated = connection.Execute(@"
+UPDATE HQ_PhieuCanXuatNguyenLieu
+SET TrongLuongHang = TrongLuongHang + @Delta,
+    TrongLuongTong = TrongLuongHang + @Delta
+WHERE Id = @Id;", new
+                {
+                    Id = targetRowId,
+                    Delta = delta
+                }, transaction);
+
+                if (updated == 0)
+                {
+                    throw new InvalidOperationException("Cập nhật dòng nguồn thất bại.");
+                }
+
+                return;
+            }
+
+            var remaining = Math.Abs(delta);
+
+while (remaining > 0.0001m)            {
+                const string pickSql = @"
+SELECT TOP (1)
+    px.Id,
+    px.TrongLuongHang
+FROM HQ_PhieuCanXuatNguyenLieu px
+JOIN HQ_PhieuCanNguyenLieu pc
+    ON pc.Id = px.IdPhieuCanNguyenLieu
+WHERE pc.MaLo = @MaLo
+  AND px.MaSanPham = @MaSanPham
+  AND ISNULL(px.IsCanHu,0) = @IsCanHu
+  AND ISNULL(px.IsHuy,0) = 0
+  AND px.TrongLuongHang > 0
+ORDER BY
+    pc.NgayGio DESC,
+    px.STT DESC,
+    px.Id DESC;";
+
+                var sourceRow = connection.QueryFirstOrDefault<SourceRowInfo>(pickSql, new
+                {
+                    MaLo = maLo,
+                    MaSanPham = maSanPham,
+                    IsCanHu = isCanHu
+                }, transaction);
+
+                if (sourceRow == null)
+                {
+                    throw new InvalidOperationException("Không còn dòng nguồn để giảm.");
+                }
+
+                var applied = remaining < sourceRow.TrongLuongHang ? remaining : sourceRow.TrongLuongHang;
+
+                var updated = connection.Execute(@"
+UPDATE HQ_PhieuCanXuatNguyenLieu
+SET TrongLuongHang = TrongLuongHang - @Applied,
+    TrongLuongTong = TrongLuongHang - @Applied
+WHERE Id = @Id AND TrongLuongHang >= @Applied;", new
+                {
+                    Id = sourceRow.Id,
+                    Applied = applied
+                }, transaction);
+
+                if (updated == 0)
+                {
+                    throw new InvalidOperationException("Cập nhật dòng nguồn thất bại.");
+                }
+
+                remaining = Math.Round(remaining - applied, 1);
+            }
+        }
+
+        private KhoiLuongXuatRowContext? GetKhoiLuongXuatRowContext(string maLo, string soPhieuCanNhap, string maQuyCach)
+        {
+            var dao = new HQ_PhieuCanXuatNguyenLieu(AppViewModels.Base.Ins.ConnectionString);
+            var rows = dao.GetKhoiLuongXuatLoTheoXuonget<KhoiLuongXuatRowContext>(maLo);
+
+            return rows.FirstOrDefault(row =>
+                string.Equals(row.SoPhieuCanNhap, soPhieuCanNhap, StringComparison.OrdinalIgnoreCase) &&
+                string.Equals(row.MaQuyCach, maQuyCach, StringComparison.OrdinalIgnoreCase));
+        }
+
         #region Nhập Nguyên Liệu
         #region Chi Tiết Phiếu Cân Nhập Nguyên Liệu
         [CustomAuthorize(Fu = "Báo Cáo Nguyên Liệu Nhập / Chi Tiết HQ", Func = "Xem Báo Cáo Nguyên Liệu Nhập / Chi Tiết HQ")]
@@ -53,7 +213,7 @@ namespace PMS.Controllers.HQ
             return View("~/Views/BaoCaoNguyenLieuHQ/ChiTietNLNHQView.cshtml");
         }
 //        [HttpPost]
-//        public IActionResult UpdateKhoiLuong(
+//        public IActionResult ongong(
 //    string soPhieuCanNhap,
 //    string maQuyCach,
 //    decimal khoiLuongNhap)
@@ -243,6 +403,7 @@ namespace PMS.Controllers.HQ
             }
             return dataSource;
         }
+
         #endregion
         #endregion
 
@@ -610,8 +771,394 @@ END
                 });
             }
         }
-        #endregion
-        #endregion
+
+        [HttpPost]
+        public async Task<IActionResult> UpdateKhoiLuongXuat(
+     string soPhieuCanNhap,
+     string maQuyCach,
+     string maLo,
+     decimal khoiLuongXuat,
+     decimal TongHuKho)
+        {
+            try
+            {
+                // ─── 1. Validate đầu vào ───────────────────────────────────────────
+                if (string.IsNullOrWhiteSpace(soPhieuCanNhap) || string.IsNullOrWhiteSpace(maQuyCach))
+                    return Json(new { success = false, message = "Thiếu dữ liệu định danh để cập nhật." });
+
+                if (string.IsNullOrWhiteSpace(maLo))
+                    return Json(new { success = false, message = "Thiếu dữ liệu lot để cập nhật." });
+
+                // ─── 2. Lấy context từ hàm hiện có ────────────────────────────────
+                var context = GetKhoiLuongXuatRowContext(
+                    maLo.Trim(),
+                    soPhieuCanNhap.Trim(),
+                    maQuyCach.Trim());
+
+                if (context == null)
+                    return Json(new { success = false, message = "Không tìm thấy dữ liệu nguồn để cập nhật." });
+
+                // ─── 3. Validate range ─────────────────────────────────────────────
+                if (khoiLuongXuat < 0 || (khoiLuongXuat + TongHuKho) > context.KhoiLuongNhap)
+                    return Json(new
+                    {
+                        success = false,
+                        message = "Khối lượng xuất phải nằm trong khoảng từ 0 đến khối lượng nhập."
+                    });
+
+                // ─── 4. Tính delta ─────────────────────────────────────────────────
+                // context.KhoiLuongXuat là giá trị FIFO đang hiển thị trên grid
+                var delta = Math.Round(khoiLuongXuat - context.KhoiLuongXuat, 1);
+                if (Math.Abs(delta) < 0.0001m)
+                    return Json(new { success = true });
+
+                // ─── 5. Mở connection + transaction ───────────────────────────────
+                using var connection = new SqlConnection(AppViewModels.Base.Ins.ConnectionString);
+                connection.Open();
+                using var transaction = connection.BeginTransaction();
+
+                try
+                {
+                    // ─── 6. Tìm dòng theo SoPhieuCanNhap + MaLo + MaQuyCach ───────
+                    const string pickSql = @"
+                SELECT TOP (1)
+                    px.Id,
+                    px.TrongLuongHang,
+                    px.MaQuyCach,
+                    px.IdPhieuCanNguyenLieu,
+                    px.STT,
+                    px.SoPhieuXuat,
+                    px.MaThuKho,
+                    px.MaSanPham,
+                    px.TrongLuongXe,
+                    px.MaDonVi,
+                    px.MaXuongXuatDen,
+                    px.MaKho,
+                    px.Status,
+                    px.IsCanHu,
+                    px.IsThuCong
+                FROM HQ_PhieuCanXuatNguyenLieu px
+                JOIN HQ_PhieuCanNguyenLieu pc
+                    ON pc.Id = px.IdPhieuCanNguyenLieu
+                WHERE pc.MaLo             = @MaLo
+                  AND px.SoPhieuNhap      = @SoPhieuCanNhap
+                  AND px.MaQuyCach        = @MaQuyCach
+                  AND ISNULL(px.IsHuy, 0) = 0
+                  AND ISNULL(px.IsCanHu, 0) = 0;";
+
+                    var targetRow = connection.QueryFirstOrDefault<SourceRowInfo>(pickSql, new
+                    {
+                        MaLo = maLo.Trim(),
+                        SoPhieuCanNhap = soPhieuCanNhap.Trim(),
+                        MaQuyCach = maQuyCach.Trim()
+                    }, transaction);
+
+                    // ─── 7. Không tìm thấy → INSERT mới ───────────────────────────
+                    if (targetRow == null)
+                    {
+                        // Lấy dòng tham chiếu (không lọc MaQuyCach) để copy metadata
+                        const string refSql = @"
+                    SELECT TOP (1)
+                        px.IdPhieuCanNguyenLieu,
+                        px.STT,
+                        px.SoPhieuXuat,
+                        px.MaThuKho,
+                        px.MaSanPham,
+                        px.TrongLuongXe,
+                        px.MaDonVi,
+                        px.MaXuongXuatDen,
+                        px.MaKho,
+                        px.Status,
+                        px.IsCanHu,
+                        px.IsThuCong
+                    FROM HQ_PhieuCanXuatNguyenLieu px
+                    JOIN HQ_PhieuCanNguyenLieu pc
+                        ON pc.Id = px.IdPhieuCanNguyenLieu
+                    WHERE pc.MaLo             = @MaLo
+                      AND px.SoPhieuNhap      = @SoPhieuCanNhap
+                      AND ISNULL(px.IsHuy, 0) = 0;";
+
+
+                        var refRow = connection.QueryFirstOrDefault<SourceRowInfo>(refSql, new
+                        {
+                            MaLo = maLo.Trim(),
+                            SoPhieuCanNhap = soPhieuCanNhap.Trim()
+                        }, transaction);
+
+                        if (refRow == null)
+                            return Json(new
+                            {
+                                success = false,
+                                message = "Không tìm thấy phiếu xuất gốc để tham chiếu khi tạo mới."
+                            });
+
+                        connection.Execute(@"
+                    INSERT INTO HQ_PhieuCanXuatNguyenLieu (
+                        Id, STT, IdPhieuCanNguyenLieu,
+                        SoPhieuNhap, SoPhieuXuat, MaThuKho, MaSanPham,
+                        TrongLuongTong, TrongLuongXe, TrongLuongHang,
+                        MaDonVi, MaXuongXuatDen, MaKho, MaQuyCach,
+                        Status, IsCanHu, IsHuy, NgayGio, IsThuCong
+                    ) VALUES (
+                        @Id, @STT, @IdPhieuCanNguyenLieu,
+                        @SoPhieuNhap, @SoPhieuXuat, @MaThuKho, @MaSanPham,
+                        @TrongLuongHang, @TrongLuongXe, @TrongLuongHang,
+                        @MaDonVi, @MaXuongXuatDen, @MaKho, @MaQuyCach,
+                        @Status, 0, 0, @NgayGio, @IsThuCong
+                    );",
+                            new
+                            {
+                                Id = Guid.NewGuid().ToString(),
+                                STT = refRow.STT,
+                                IdPhieuCanNguyenLieu = refRow.IdPhieuCanNguyenLieu,
+                                SoPhieuNhap = soPhieuCanNhap.Trim(),
+                                SoPhieuXuat = refRow.SoPhieuXuat,
+                                MaThuKho = refRow.MaThuKho,
+                                MaSanPham = refRow.MaSanPham,
+                                TrongLuongHang = khoiLuongXuat,
+                                TrongLuongXe = refRow.TrongLuongXe,
+                                MaDonVi = refRow.MaDonVi,
+                                MaXuongXuatDen = refRow.MaXuongXuatDen,
+                                MaKho = refRow.MaKho,
+                                MaQuyCach = int.Parse(maQuyCach.Trim()),
+                                Status = refRow.Status,
+                                NgayGio = DateTime.Now,
+                                IsThuCong = refRow.IsThuCong
+                            }, transaction);
+
+                        transaction.Commit();
+                        return Json(new { success = true });
+                    }
+
+                    // ─── 8. Tìm thấy → UPDATE trực tiếp ───────────────────────────
+                    var newTrongLuong = Math.Round(targetRow.TrongLuongHang + delta, 1);
+                    if (newTrongLuong < 0)
+                        return Json(new
+                        {
+                            success = false,
+                            message = "Khối lượng xuất vượt quá khối lượng hiện có trong phiếu."
+                        });
+
+                    var updated = connection.Execute(@"
+                UPDATE HQ_PhieuCanXuatNguyenLieu
+                SET    TrongLuongHang = @NewTrongLuong,
+                       TrongLuongTong = @NewTrongLuong
+                WHERE  Id        = @Id
+                  AND  MaQuyCach = @MaQuyCach;",
+                        new
+                        {
+                            Id = targetRow.Id,
+                            NewTrongLuong = newTrongLuong,
+                            MaQuyCach = int.Parse(maQuyCach.Trim())
+                        }, transaction);
+
+                    if (updated == 0)
+                        throw new InvalidOperationException("Cập nhật TrongLuongHang thất bại.");
+
+                    transaction.Commit();
+                    return Json(new { success = true });
+                }
+                catch
+                {
+                    transaction.Rollback();
+                    throw;
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpPost]
+public async Task<IActionResult> UpdateHuKho(
+    string soPhieuCanNhap,
+    string maQuyCach,
+    string maLo,
+    decimal TongHuKho)
+{
+    try
+    {
+        // ─── 1. Validate đầu vào ───────────────────────────────────────────
+        if (string.IsNullOrWhiteSpace(soPhieuCanNhap) || string.IsNullOrWhiteSpace(maQuyCach))
+            return Json(new { success = false, message = "Thiếu dữ liệu định danh để cập nhật." });
+
+        if (string.IsNullOrWhiteSpace(maLo))
+            return Json(new { success = false, message = "Thiếu dữ liệu lot để cập nhật." });
+
+        // ─── 2. Lấy context ────────────────────────────────────────────────
+        var context = GetKhoiLuongXuatRowContext(
+            maLo.Trim(),
+            soPhieuCanNhap.Trim(),
+            maQuyCach.Trim());
+
+        if (context == null)
+            return Json(new { success = false, message = "Không tìm thấy dữ liệu nguồn để cập nhật." });
+
+        // ─── 3. Validate range ─────────────────────────────────────────────
+        if (TongHuKho < 0 || (TongHuKho + context.KhoiLuongXuat)  > context.KhoiLuongNhap)
+            return Json(new
+            {
+                success = false,
+                message = "Khối lượng phải nằm trong khoảng từ 0 đến khối lượng nhập."
+            });
+
+        // ─── 4. Mở connection + transaction ───────────────────────────────
+        // Bỏ hoàn toàn delta — không cần thiết nữa
+        using var connection = new SqlConnection(AppViewModels.Base.Ins.ConnectionString);
+        connection.Open();
+        using var transaction = connection.BeginTransaction();
+
+        try
+        {
+            // ─── 5. Tìm dòng theo SoPhieuCanNhap + MaLo + MaQuyCach ───────
+            const string pickSql = @"
+                SELECT TOP (1)
+                    px.Id,
+                    px.TrongLuongHang,
+                    px.MaQuyCach,
+                    px.IdPhieuCanNguyenLieu,
+                    px.STT,
+                    px.SoPhieuXuat,
+                    px.MaThuKho,
+                    px.MaSanPham,
+                    px.TrongLuongXe,
+                    px.MaDonVi,
+                    px.MaXuongXuatDen,
+                    px.MaKho,
+                    px.Status,
+                    px.IsCanHu,
+                    px.IsThuCong
+                FROM HQ_PhieuCanXuatNguyenLieu px
+                JOIN HQ_PhieuCanNguyenLieu pc
+                    ON pc.Id = px.IdPhieuCanNguyenLieu
+                WHERE pc.MaLo             = @MaLo
+                  AND px.SoPhieuNhap      = @SoPhieuCanNhap
+                  AND px.MaQuyCach        = @MaQuyCach
+                  AND ISNULL(px.IsHuy, 0) = 0
+                  AND ISNULL(px.IsCanHu, 0) = 1;";
+
+            var targetRow = connection.QueryFirstOrDefault<SourceRowInfo>(pickSql, new
+            {
+                MaLo           = maLo.Trim(),
+                SoPhieuCanNhap = soPhieuCanNhap.Trim(),
+                MaQuyCach      = maQuyCach.Trim()
+            }, transaction);
+
+            // ─── 6. Không tìm thấy → INSERT mới ───────────────────────────
+            if (targetRow == null)
+            {
+                const string refSql = @"
+                    SELECT TOP (1)
+                        px.IdPhieuCanNguyenLieu,
+                        px.STT,
+                        px.SoPhieuXuat,
+                        px.MaThuKho,
+                        px.MaSanPham,
+                        px.TrongLuongXe,
+                        px.MaDonVi,
+                        px.MaXuongXuatDen,
+                        px.MaKho,
+                        px.Status,
+                        px.IsCanHu,
+                        px.IsThuCong
+                    FROM HQ_PhieuCanXuatNguyenLieu px
+                    JOIN HQ_PhieuCanNguyenLieu pc
+                        ON pc.Id = px.IdPhieuCanNguyenLieu
+                    WHERE pc.MaLo               = @MaLo
+                      AND px.SoPhieuNhap        = @SoPhieuCanNhap
+                      AND ISNULL(px.IsHuy,   0) = 0;";
+
+                var refRow = connection.QueryFirstOrDefault<SourceRowInfo>(refSql, new
+                {
+                    MaLo           = maLo.Trim(),
+                    SoPhieuCanNhap = soPhieuCanNhap.Trim()
+                }, transaction);
+
+                if (refRow == null)
+                    return Json(new
+                    {
+                        success = false,
+                        message = "Không tìm thấy phiếu xuất thường để tham chiếu khi tạo mới."
+                    });
+
+                connection.Execute(@"
+                    INSERT INTO HQ_PhieuCanXuatNguyenLieu (
+                        Id, STT, IdPhieuCanNguyenLieu,
+                        SoPhieuNhap, SoPhieuXuat, MaThuKho, MaSanPham,
+                        TrongLuongTong, TrongLuongXe, TrongLuongHang,
+                        MaDonVi, MaXuongXuatDen, MaKho, MaQuyCach,
+                        Status, IsCanHu, IsHuy, NgayGio, IsThuCong
+                    ) VALUES (
+                        @Id, @STT, @IdPhieuCanNguyenLieu,
+                        @SoPhieuNhap, @SoPhieuXuat, @MaThuKho, @MaSanPham,
+                        @TrongLuongHang, @TrongLuongXe, @TrongLuongHang,
+                        @MaDonVi, @MaXuongXuatDen, @MaKho, @MaQuyCach,
+                        @Status, 1 , 0, @NgayGio, @IsThuCong
+                    );",
+                    new
+                    {
+                        Id                   = Guid.NewGuid().ToString(),
+                        STT                  = refRow.STT,
+                        IdPhieuCanNguyenLieu = refRow.IdPhieuCanNguyenLieu,
+                        SoPhieuNhap          = soPhieuCanNhap.Trim(),
+                        SoPhieuXuat          = refRow.SoPhieuXuat,
+                        MaThuKho             = refRow.MaThuKho,
+                        MaSanPham            = refRow.MaSanPham,
+                        TrongLuongHang       = TongHuKho,
+                        TrongLuongXe         = refRow.TrongLuongXe,
+                        MaDonVi              = refRow.MaDonVi,
+                        MaXuongXuatDen       = refRow.MaXuongXuatDen,
+                        MaKho                = refRow.MaKho,
+                        MaQuyCach            = int.Parse(maQuyCach.Trim()),
+                        Status               = refRow.Status,
+                        NgayGio              = DateTime.Now,
+                        IsThuCong            = refRow.IsThuCong
+                    }, transaction);
+
+                transaction.Commit();
+                return Json(new { success = true });
+            }
+
+            // ─── 7. Tìm thấy → SET thẳng, không dùng delta ────────────────
+            if (TongHuKho == targetRow.TrongLuongHang)
+            {
+                transaction.Commit();
+                return Json(new { success = true });
+            }
+
+            var updated = connection.Execute(@"
+                UPDATE HQ_PhieuCanXuatNguyenLieu
+                SET    TrongLuongHang = @KhoiLuongXuat,
+                       TrongLuongTong = @KhoiLuongXuat
+                WHERE  Id        = @Id
+                  AND  MaQuyCach = @MaQuyCach;",
+                new
+                {
+                    Id            = targetRow.Id,
+                    KhoiLuongXuat = TongHuKho,  // ✅ SET thẳng
+                    MaQuyCach     = int.Parse(maQuyCach.Trim())
+                }, transaction);
+
+            if (updated == 0)
+                throw new InvalidOperationException("Cập nhật TrongLuongHang thất bại.");
+
+            transaction.Commit();
+            return Json(new { success = true });
+        }
+        catch
+        {
+            transaction.Rollback();
+            throw;
+        }
+    }
+    catch (Exception ex)
+    {
+        return Json(new { success = false, message = ex.Message });
+    }
+}
+
+        #endregion 
 
         public async Task<ActionResult> Reload(DateTime fromDate, DateTime toDate, string xuongId)
         {
@@ -657,3 +1204,4 @@ END
         }
     }
 }
+    #endregion
