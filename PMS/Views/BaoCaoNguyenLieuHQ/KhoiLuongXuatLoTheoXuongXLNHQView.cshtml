@@ -68,36 +68,30 @@
         //     };
         // }
 
-        function getQuantityColumnConfig(field, rowData) {
-
-        const tenSanPham = (rowData?.TenSanPham || "")
-            .trim()
-            .toLowerCase();
-const isKhomDuaOrThanhLong =
-    (tenSanPham.includes("khóm") && tenSanPham.includes("dứa")) ||
-    tenSanPham.includes("thanh long");
+    // Toàn bộ sản phẩm đều dùng cùng 1 endpoint khi user chỉnh sửa
+    function getQuantityColumnConfig(field) {
         if (field === 'KhoiLuongXuat') {
-
-            if (isKhomDuaOrThanhLong) {
-                return {
-                    valueField: 'KhoiLuongXuat',
-                    url: '@Url.Action("UpdateKhoiLuongXuatKhomDua", "BaoCaoCanNguyenLieuHQ")',
-                    successMessage: 'Cập nhật khối lượng xuất Khóm, dứa thành công.'
-                };
-            }
-
             return {
                 valueField: 'KhoiLuongXuat',
                 url: '@Url.Action("UpdateKhoiLuongXuat", "BaoCaoCanNguyenLieuHQ")',
                 successMessage: 'Cập nhật khối lượng xuất thành công.'
             };
         }
-
+            // ===== THÊM MỚI =====
+    if (field === 'TongHuKho') {
         return {
-            valueField: 'KhoiLuongNhap',
-            url: '@Url.Action("UpdateKhoiLuong", "BaoCaoCanNguyenLieuHQ")',
-            successMessage: 'Cập nhật khối lượng nhập thành công.'
+            valueField: 'TongHuKho',
+            url: '@Url.Action("UpdateHuKho", "BaoCaoCanNguyenLieuHQ")',
+            successMessage: 'Cập nhật hư kho thành công.'
         };
+        }
+        // ====================
+
+        // return {
+        //     valueField: 'KhoiLuongNhap',
+        //     url: '@Url.Action("UpdateKhoiLuong", "BaoCaoCanNguyenLieuHQ")',
+        //     successMessage: 'Cập nhật khối lượng nhập thành công.'
+        // };
     }
 
         function reloadGridFromServer() {
@@ -135,6 +129,8 @@ const isKhomDuaOrThanhLong =
                 var khoiLuongNhap = toNumber(row.KhoiLuongNhap);
                 var khoiLuongXuat = toNumber(row.KhoiLuongXuat);
                 var tongXuatThuong = toNumber(row.TongXuatThuong);
+                var tongHuKho = toNumber(row.TongHuKho);
+                var khoiLuongHaoHut = toNumber(row.KhoiLuongHaoHut);
                 var tongXuatHu = toNumber(row.TongXuatHu);
                 var tongNhapLuyKeThuong = toNumber(row.TongNhapLuyKeThuong);
                 var tongNhapThuong = toNumber(row.TongNhapThuong);
@@ -146,6 +142,8 @@ const isKhomDuaOrThanhLong =
                     KhoiLuongXuat: khoiLuongXuat,
                     TongXuatThuong: tongXuatThuong,
                     TongXuatHu: tongXuatHu,
+                    KhoiLuongHaoHut: khoiLuongHaoHut,
+                    TongHuKho: tongHuKho,
                     TongNhapLuyKeThuong: tongNhapLuyKeThuong,
                     TongNhapThuong: tongNhapThuong,
                     MaSanPham: maSanPham,
@@ -200,9 +198,10 @@ const isKhomDuaOrThanhLong =
         if (!column) {
             return;
         }
-
+    
         if (column.field !== 'KhoiLuongNhap'
-            && column.field !== 'KhoiLuongXuat') {
+            && column.field !== 'KhoiLuongXuat'
+            && column.field !== 'TongHuKho') {
             return;
         }
 
@@ -232,11 +231,11 @@ const isKhomDuaOrThanhLong =
 
         console.log('cellEdit editingField', editingField);
 
-        if (args.column.field !== 'KhoiLuongNhap'
-            && args.column.field !== 'KhoiLuongXuat') {
-
-            args.cancel = true;
-            return;
+    if (args.column.field !== 'KhoiLuongNhap'
+        && args.column.field !== 'KhoiLuongXuat'
+        && args.column.field !== 'TongHuKho') {
+        args.cancel = true;
+        return;
         }
 
         try {
@@ -285,7 +284,7 @@ const isKhomDuaOrThanhLong =
     var row = args.data || args.rowData; // ✅ Khai báo row TRƯỚC
     console.log('field cuối', field);
     if (!row) return;
-    var config = getQuantityColumnConfig(field, row);
+    var config = getQuantityColumnConfig(field);
     console.log('url', config.url);
                     try {
                         if (args.requestType === 'save') {
@@ -307,14 +306,17 @@ const isKhomDuaOrThanhLong =
                                         tongXuatHu: row.TongXuatHu,
                                         tongNhapLuyKeThuong: row.TongNhapLuyKeThuong,
                                         tongNhapThuong: row.TongNhapThuong,
+                                        KhoiLuongHaoHut: row.KhoiLuongHaoHut,
                                         khoiLuongNhap: row.KhoiLuongNhap
                             };
 
-                                    if (config.valueField === 'KhoiLuongXuat') {
-                                        payload.khoiLuongXuat = row.KhoiLuongXuat;
-                                    } else {
-                                        payload.khoiLuongNhap = row.KhoiLuongNhap;
-                                    }
+    if (config.valueField === 'KhoiLuongXuat') {
+        payload.khoiLuongXuat = row.KhoiLuongXuat;
+    } else if (config.valueField === 'TongHuKho') {
+        payload.tongHuKho = row.TongHuKho;
+    } else {
+        payload.khoiLuongNhap = row.KhoiLuongNhap;
+    }
 
                             var response = await $.ajax({
                                 url: config.url,
@@ -353,7 +355,7 @@ const isKhomDuaOrThanhLong =
                         editType: 'numericedit',
                         format: 'N1',
                         textAlign: 'Right',
-                        allowEditing: true
+                        allowEditing: false
                     },
                     {
                         field: 'KhoiLuongXuat',
@@ -370,9 +372,10 @@ const isKhomDuaOrThanhLong =
                         headerText: 'Hư kho',
                         width: 180,
                         type: 'number',
+                        editType: 'numericedit',
                         format: 'N1',
                         textAlign: 'Right',
-                        allowEditing: false
+                        allowEditing: true
                     },
                     {
                         field: 'KhoiLuongHaoHut',
