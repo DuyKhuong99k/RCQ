@@ -20,26 +20,36 @@ namespace Dao.Repos.HQ
            ([Id]
            ,[Ten]
            ,[SuDung]
+           ,[MNgay]
            ,[Min]
            ,[Max]
-           ,[MaQuyCach],[NhomQuyCach])
+           ,[NhomQuyCach])
      VALUES
            (@Id 
            ,@Ten 
            ,@SuDung 
+           ,@MNgay
            ,@Min
            ,@Max
-           ,@MaQuyCach,@NhomQuyCach)";
+           ,@NhomQuyCach)";
 
         private readonly string qrUpdate = @"UPDATE [dbo].[HQ_SanPhamNguyenLieu]
    SET [Ten] = @Ten  
       ,[SuDung] = @SuDung 
+      ,[MNgay] = @MNgay
       ,[Min] = @Min
       ,[Max] = @Max
-      ,[MaQuyCach],[NhomQuyCach] = @NhomQuyCach
+      ,[NhomQuyCach] = @NhomQuyCach
  WHERE  [Id] = @Id";
 
-        private readonly string qrGetAll = "Select * from HQ_SanPhamNguyenLieu";
+        private readonly string qrGetAll = @"SELECT [Id]
+      ,[Ten]
+      ,[SuDung]
+      ,[MNgay]
+      ,[Min]
+      ,[Max]
+      ,[NhomQuyCach]
+  FROM [dbo].[HQ_SanPhamNguyenLieu]";
 
         public HQ_SanPhamNguyenLieu()
         {
@@ -71,10 +81,9 @@ sp.SuDung,
 sp.MNgay,
 sp.Min,
 sp.Max,
-sp.MaQuyCach,
-qc.Ten as TenQuyCach
+sp.NhomQuyCach
 from HQ_SanPhamNguyenLieu sp
-left join HQ_QuyCachNguyenLieu qc on qc.Id = sp.MaQuyCach order by sp.MNgay desc";
+order by sp.MNgay desc";
             using var connection = new SqlConnection(connectionString);
             connection.Open();
             var items = connection.Query<T>(query)

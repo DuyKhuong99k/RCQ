@@ -107,7 +107,6 @@ namespace WebAPI.Controllers
                 MNgay = model.MNgay,
                 Min = model.Min,
                 Max = model.Max,
-                MaQuyCach = model.MaQuyCach,
                 NhomQuyCach = model.NhomQuyCach
             };
             _context.HQ_SanPhamNguyenLieus.Add(newItem);
@@ -174,7 +173,7 @@ namespace WebAPI.Controllers
             item.Id = model.Id;
             item.Ten = model.Ten;
             item.SuDung = model.SuDung;
-            item.MNgay = model.MNgay;
+            item.MNgay = MNgay;
             item.Min = model.Min;
             item.Max = model.Max;
             item.NhomQuyCach = model.NhomQuyCach;

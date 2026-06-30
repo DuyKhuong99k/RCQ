@@ -31,7 +31,7 @@ namespace Models.Repos.Models
         [Column("Max", TypeName = "decimal(18, 3)")]
         public decimal Max { get; set; }
 
-        [Column("MaQuyCach", TypeName = "bigint")]
+        [NotMapped]
         public long? MaQuyCach { get; set; }
 
         [Column("NhomQuyCach", TypeName = "nvarchar(50)")]

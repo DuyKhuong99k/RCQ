@@ -103,7 +103,6 @@ namespace PMS.Controllers.DanhMucHQ
                     MNgay = DateTime.Now,
                     Min = min,
                     Max = max,
-                    MaQuyCach = 0,
                     NhomQuyCach = nhomQuyCach
                 };
                 var jsonContent = new StringContent(JsonConvert.SerializeObject(model), Encoding.UTF8, "application/json");
@@ -173,7 +172,7 @@ namespace PMS.Controllers.DanhMucHQ
             });
         }
         [CustomAuthorize(Fu = "Danh Mục / Sản Phẩm Nguyên Liệu HQ", Func = "Sửa Sản Phẩm Nguyên Liệu HQ")]
-        public async Task<IActionResult> DoUpDate(int id, string ten, bool suDung, decimal min, decimal max, string nhomQuyCach)
+        public async Task<IActionResult> DoUpdate(int id, string ten, bool suDung, decimal min, decimal max, string nhomQuyCach)
         {
             var apiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/HQ_SanPhamNguyenLieu/Update/{id}";
             try
@@ -194,7 +193,6 @@ namespace PMS.Controllers.DanhMucHQ
                     SuDung = suDung,
                     Min = min,
                     Max = max,
-                    MaQuyCach = 0,
                     NhomQuyCach = nhomQuyCach
                 };
 
