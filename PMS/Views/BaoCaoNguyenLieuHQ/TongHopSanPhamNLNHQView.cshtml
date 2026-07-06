@@ -49,13 +49,115 @@
 
     var grid;
     var datalength = 0;
+    var originalLoNguyenLieu = null;
+
+    function normalizeDateForPost(value) {
+        if (!value) {
+            return '';
+        }
+
+        if (typeof value === 'string') {
+            return value.split('T')[0].split(' ')[0];
+        }
+
+        var date = new Date(value);
+        if (isNaN(date.getTime())) {
+            return '';
+        }
+
+        var year = date.getFullYear();
+        var month = String(date.getMonth() + 1).padStart(2, '0');
+        var day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+
+    function escapeHtml(value) {
+        return String(value || '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
+    function confirmUpdateLoNguyenLieu(loCu, loMoi) {
+        var message = 'Bạn có chắc muốn cập nhật Lô Nguyên Liệu từ <b>'
+            + escapeHtml(loCu)
+            + '</b> thành <b>'
+            + escapeHtml(loMoi)
+            + '</b>?';
+
+        return new Promise(function (resolve) {
+            if (typeof bootbox !== 'undefined' && bootbox.confirm) {
+                bootbox.confirm({
+                    title: 'Xác nhận cập nhật',
+                    message: message,
+                    buttons: {
+                        confirm: {
+                            label: 'Đồng ý',
+                            className: 'btn-primary'
+                        },
+                        cancel: {
+                            label: 'Hủy',
+                            className: 'btn-secondary'
+                        }
+                    },
+                    callback: function (result) {
+                        resolve(result === true);
+                    }
+                });
+            } else {
+                resolve(window.confirm(message.replace(/<[^>]*>/g, '')));
+            }
+        });
+    }
+
+    function reloadGridFromServer() {
+        var btn = document.getElementById('RefreshButtonBCHQ').ej2_instances[0];
+        var content = btn.content;
+        btn.content = "Đang Tải ...";
+        var fromDate = $('#fromDateBCHQ').val();
+        var toDate = $('#toDateBCHQ').val();
+        var xuongId = @XuongId;
+
+        return $.ajax({
+            url: "@Url.Action("Reload", "BaoCaoCanNguyenLieuHQ")",
+            type: "POST",
+            data: { "fromDate": fromDate, "toDate": toDate, xuongId: xuongId },
+            success: function (response) {
+                if (response.Success) {
+                    ClearData("Grid");
+                    loadGridData(response.Data);
+                } else {
+                    loadGridData(response.Data);
+                    console.error(response.Messages);
+                    toastOptionNotyfi();
+                    toastr["error"](response.Messages, "Không có dữ liệu!");
+                }
+            },
+            error: function (error) {
+                toastOptionNotyfi();
+                toastr["error"](error, "Thông báo");
+            }
+
+        }).always(function () {
+            btn.content = content;
+        });
+    }
+
     function loadGridData(data) {
+        var normalizedData = (Array.isArray(data) ? data : []).map(function (row) {
+            return Object.assign({}, row, {
+                LoNguyenLieuCu: row.LoNguyenLieu
+            });
+        });
+
         var dataManager = new ej.data.DataManager({
-            json: data,
+            json: normalizedData,
             adaptor: new ej.data.JsonAdaptor()
         });
-        if(data != null && data.length !=null){
-            datalength = data.length;
+        if(normalizedData != null && normalizedData.length !=null){
+            datalength = normalizedData.length;
         }
         else{
             datalength = 0;
@@ -64,7 +166,7 @@
             grid.dataSource = dataManager;
             grid.refresh();
         } else {
-            ej.grids.Grid.Inject(ej.grids.Filter);
+            ej.grids.Grid.Inject(ej.grids.Filter, ej.grids.Edit, ej.grids.Toolbar, ej.grids.ExcelExport);
             grid = new ej.grids.Grid({
                 dataSource: dataManager,
                 allowPaging: true,
@@ -81,20 +183,141 @@
                 },
                 allowResizing: true,
                 allowExcelExport: true,
+                allowEditOnDblClick: true,
                 toolbar: ['ExcelExport'],
                 height: 400,
+                editSettings: {
+                    allowEditing: true,
+                    allowAdding: false,
+                    allowDeleting: false,
+                    mode: 'Normal'
+                },
+                cellEdit: function (args) {
+                    if (!args.column || args.column.field !== 'LoNguyenLieu') {
+                        args.cancel = true;
+                        return;
+                    }
+
+                    originalLoNguyenLieu = args.rowData ? args.rowData.LoNguyenLieu : null;
+
+                    setTimeout(function () {
+                        var input = args.container
+                            && (args.container.querySelector('input') || args.container.querySelector('input.e-input'));
+
+                        if (!input) {
+                            return;
+                        }
+
+                        var isSaving = false;
+                        var saveHandler = function (ev) {
+                            if (isSaving) {
+                                return;
+                            }
+
+                            if (ev.type === 'blur' || ev.key === 'Enter') {
+                                isSaving = true;
+                                input.removeEventListener('blur', saveHandler);
+                                input.removeEventListener('keydown', saveHandler);
+
+                                try {
+                                    grid.endEdit();
+                                } catch (e) {
+                                    console.error(e);
+                                }
+                            }
+                        };
+
+                        input.addEventListener('blur', saveHandler);
+                        input.addEventListener('keydown', saveHandler);
+                    }, 0);
+                },
+                actionComplete: async function (args) {
+                    if (args.requestType !== 'save') {
+                        return;
+                    }
+
+                    var row = args.data || args.rowData;
+                    if (!row) {
+                        return;
+                    }
+
+                    var loMoi = (row.LoNguyenLieu || '').trim();
+                    var loCu = (originalLoNguyenLieu || row.LoNguyenLieuCu || '').trim();
+
+                    if (!loMoi) {
+                        toastOptionNotyfi();
+                        toastr['error']('Lô nguyên liệu không được để trống.', 'Thông báo');
+                        await reloadGridFromServer();
+                        return;
+                    }
+
+                    if (loMoi.length > 50) {
+                        toastOptionNotyfi();
+                        toastr['error']('Lô nguyên liệu không được vượt quá 50 ký tự.', 'Thông báo');
+                        await reloadGridFromServer();
+                        return;
+                    }
+
+                    if (loMoi === loCu) {
+                        originalLoNguyenLieu = null;
+                        return;
+                    }
+
+                    var confirmed = await confirmUpdateLoNguyenLieu(loCu, loMoi);
+                    if (!confirmed) {
+                        toastOptionNotyfi();
+                        toastr['warning']('Đã hủy cập nhật lô nguyên liệu.', 'Thông báo');
+                        await reloadGridFromServer();
+                        originalLoNguyenLieu = null;
+                        return;
+                    }
+
+                    try {
+                        var response = await $.ajax({
+                            url: '@Url.Action("UpdateLoNguyenLieuTongHop", "BaoCaoCanNguyenLieuHQ")',
+                            type: 'POST',
+                            data: {
+                                ngay: normalizeDateForPost(row.Ngay),
+                                loNguyenLieuCu: loCu,
+                                loNguyenLieuMoi: loMoi,
+                                maSanPham: row.MaSanPham,
+                                maDonVi: row.MaDonVi,
+                                loaiGiaoDich: row.LoaiGiaoDich,
+                                xuongId: @XuongId
+                            }
+                        });
+
+                        if (response && response.success === false) {
+                            throw new Error(response.message || 'Cập nhật thất bại.');
+                        }
+
+                        toastOptionNotyfi();
+                        toastr['success']('Cập nhật lô nguyên liệu thành công.', 'Thông báo');
+                        await reloadGridFromServer();
+                    } catch (error) {
+                        console.error(error);
+                        toastOptionNotyfi();
+                        toastr['error'](error?.message || 'Cập nhật thất bại.', 'Thông báo');
+                        await reloadGridFromServer();
+                    } finally {
+                        originalLoNguyenLieu = null;
+                    }
+                },
                 columns: [
-                    { field: 'Ngay', headerText: 'Ngày', width: 150, type: 'date', format: 'dd-MM-yyyy' },
+                    { field: 'LoNguyenLieuCu', visible: false },
+                    { field: 'MaSanPham', visible: false },
+                    { field: 'MaDonVi', visible: false },
+                    { field: 'Ngay', headerText: 'Ngày', width: 150, type: 'date', format: 'dd-MM-yyyy', allowEditing: false },
 
-                    { field: 'LoNguyenLieu', headerText: 'Lô Nguyên Liệu', width: 150 },
+                    { field: 'LoNguyenLieu', headerText: 'Lô Nguyên Liệu', width: 150, allowEditing: true },
 
-                    { field: 'TenHang', headerText: 'Tên Hàng', width: 180 },
+                    { field: 'TenHang', headerText: 'Tên Hàng', width: 180, allowEditing: false },
 
-                    { field: 'DonViTinh', headerText: 'Đơn Vị Tính', width: 120 },
+                    { field: 'DonViTinh', headerText: 'Đơn Vị Tính', width: 120, allowEditing: false },
 
-                    { field: 'SoLuong', headerText: 'Số Lượng', width: 150, type: 'number' },
+                    { field: 'SoLuong', headerText: 'Số Lượng', width: 150, type: 'number', allowEditing: false },
 
-                    { field: 'LoaiGiaoDich', headerText: 'Loại Giao Dịch', width: 120 }
+                    { field: 'LoaiGiaoDich', headerText: 'Loại Giao Dịch', width: 120, allowEditing: false }
                 ],
                 aggregates: [{
                     columns: [
@@ -138,36 +361,7 @@
     }
     document.getElementById('RefreshButtonBCHQ').addEventListener("click",
         function () {
-            var btn = document.getElementById('RefreshButtonBCHQ').ej2_instances[0];
-            var content = btn.content;
-            btn.content = "Đang Tải ...";
-            var fromDate =$('#fromDateBCHQ').val();
-            var toDate = $('#toDateBCHQ').val();
-            var xuongId = @XuongId;
-            $.ajax({
-                url: "@Url.Action("Reload", "BaoCaoCanNguyenLieuHQ")",
-                type: "POST",
-                data: { "fromDate": fromDate, "toDate": toDate, xuongId: xuongId },
-                success: function (response) {
-                    // Kiểm tra trạng thái "Success" trong dữ liệu JSON từ máy chủ
-                    if (response.Success) {
-                        ClearData("Grid");
-                        loadGridData(response.Data);
-                    } else {
-                        loadGridData(response.Data);
-                        console.error(response.Messages);
-                        toastOptionNotyfi();
-                        toastr["error"](response.Messages, "Không có dữ liệu!");
-                    }
-                },
-                error: function (error) {
-                    toastOptionNotyfi();
-                    toastr["error"](error, "Thông báo");
-                }
-
-            }).always(function () {
-                btn.content = content;
-            });
+            reloadGridFromServer();
         });
 </script>
 

@@ -404,6 +404,158 @@ WHERE Id = @Id AND TrongLuongHang >= @Applied;", new
             return dataSource;
         }
 
+        [HttpPost]
+        public IActionResult UpdateLoNguyenLieuTongHop(DateTime ngay, string loNguyenLieuCu, string loNguyenLieuMoi, long maSanPham, long maDonVi, string loaiGiaoDich, string xuongId)
+        {
+            var hasPermission = Middlewares.AuthenticationHelpers.CheckAut(HttpContext, "TongHopSanPhamNLNHQView");
+            if (hasPermission == false)
+            {
+                return Json(new { success = false, message = "Bạn không có quyền cập nhật báo cáo này." });
+            }
+
+            var sessionXuongId = HttpContext.Session.GetString("XuongId");
+            if (string.IsNullOrWhiteSpace(xuongId))
+            {
+                xuongId = sessionXuongId;
+            }
+
+            if (!string.IsNullOrWhiteSpace(sessionXuongId) && !string.Equals(sessionXuongId, xuongId, StringComparison.OrdinalIgnoreCase))
+            {
+                return Json(new { success = false, message = "Xưởng cập nhật không khớp với phiên đăng nhập." });
+            }
+
+            var loCu = (loNguyenLieuCu ?? string.Empty).Trim();
+            var loMoi = (loNguyenLieuMoi ?? string.Empty).Trim();
+            var loaiGiaoDichValue = (loaiGiaoDich ?? string.Empty).Trim();
+
+            if (string.IsNullOrWhiteSpace(loMoi))
+            {
+                return Json(new { success = false, message = "Lô nguyên liệu không được để trống." });
+            }
+
+            if (loMoi.Length > 50)
+            {
+                return Json(new { success = false, message = "Lô nguyên liệu không được vượt quá 50 ký tự." });
+            }
+
+            if (loMoi.Any(char.IsControl))
+            {
+                return Json(new { success = false, message = "Lô nguyên liệu có ký tự không hợp lệ." });
+            }
+
+            if (maSanPham <= 0 || maDonVi <= 0)
+            {
+                return Json(new { success = false, message = "Thiếu dữ liệu định danh sản phẩm hoặc đơn vị tính." });
+            }
+
+            if (string.IsNullOrWhiteSpace(xuongId))
+            {
+                return Json(new { success = false, message = "Thiếu thông tin xưởng." });
+            }
+
+            if (string.Equals(loCu, loMoi, StringComparison.OrdinalIgnoreCase))
+            {
+                return Json(new { success = true, message = "Lô nguyên liệu không thay đổi.", affectedRows = 0 });
+            }
+
+            const string candidateWhere = @"
+                pc.MaXuong = @xuongId
+                AND pc.Ngay = CAST(@ngay AS date)
+                AND ISNULL(pc.MaLo, '') = @loCu
+                AND EXISTS (
+                    SELECT 1
+                    FROM HQ_PhieuCanNhapNguyenLieu pcn
+                    WHERE CONVERT(varchar(50), pcn.IdPhieuCanNguyenLieu) = pc.Id
+                      AND pcn.MaSanPham = @maSanPham
+                      AND pcn.MaDonVi = @maDonVi
+                      AND ISNULL(pcn.LoaiGiaoDich, '') = @loaiGiaoDichValue
+                )";
+
+            const string hasOtherDetail = @"
+                EXISTS (
+                    SELECT 1
+                    FROM HQ_PhieuCanNhapNguyenLieu pcn
+                    WHERE CONVERT(varchar(50), pcn.IdPhieuCanNguyenLieu) = pc.Id
+                      AND (
+                            pcn.MaSanPham <> @maSanPham
+                         OR pcn.MaDonVi <> @maDonVi
+                         OR ISNULL(pcn.LoaiGiaoDich, '') <> @loaiGiaoDichValue
+                      )
+                )";
+
+            using var connection = new SqlConnection(AppViewModels.Base.Ins.ConnectionString);
+            connection.Open();
+            using var transaction = connection.BeginTransaction();
+
+            try
+            {
+                var parameters = new
+                {
+                    ngay = ngay.Date,
+                    loCu,
+                    loMoi,
+                    maSanPham,
+                    maDonVi,
+                    loaiGiaoDichValue,
+                    xuongId
+                };
+
+                var candidateCount = connection.ExecuteScalar<int>(
+                    $@"SELECT COUNT(DISTINCT pc.Id)
+                       FROM HQ_PhieuCanNguyenLieu pc
+                       WHERE {candidateWhere};",
+                    parameters,
+                    transaction);
+
+                if (candidateCount == 0)
+                {
+                    transaction.Rollback();
+                    return Json(new { success = false, message = "Không tìm thấy phiếu cân nguồn phù hợp để cập nhật." });
+                }
+
+                var blockedCount = connection.ExecuteScalar<int>(
+                    $@"SELECT COUNT(DISTINCT pc.Id)
+                       FROM HQ_PhieuCanNguyenLieu pc
+                       WHERE {candidateWhere}
+                         AND {hasOtherDetail};",
+                    parameters,
+                    transaction);
+
+                if (blockedCount > 0)
+                {
+                    transaction.Rollback();
+                    return Json(new
+                    {
+                        success = false,
+                        message = $"Có {blockedCount} phiếu cân chứa nhiều nhóm chi tiết khác nhau. Không cập nhật để tránh đổi lô sai cho dòng khác."
+                    });
+                }
+
+                var affectedRows = connection.Execute(
+                    $@"UPDATE pc
+                       SET pc.MaLo = @loMoi
+                       FROM HQ_PhieuCanNguyenLieu pc
+                       WHERE {candidateWhere}
+                         AND NOT {hasOtherDetail};",
+                    parameters,
+                    transaction);
+
+                if (affectedRows != candidateCount)
+                {
+                    transaction.Rollback();
+                    return Json(new { success = false, message = "Số dòng cập nhật không khớp dữ liệu nguồn. Vui lòng tải lại và thử lại." });
+                }
+
+                transaction.Commit();
+                return Json(new { success = true, message = "Cập nhật lô nguyên liệu thành công.", affectedRows });
+            }
+            catch (Exception ex)
+            {
+                transaction.Rollback();
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
         #endregion
         #endregion
 

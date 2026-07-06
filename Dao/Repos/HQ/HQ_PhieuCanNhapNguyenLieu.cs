@@ -168,6 +168,8 @@ namespace Dao.Repos.HQ
                     pc.Ngay,
                     pcn.LoaiGiaoDich,
                     pc.MaLo as LoNguyenLieu,
+                    pcn.MaSanPham,
+                    pcn.MaDonVi,
                     sp.Ten as TenHang,
                     dvt.Ten as DonViTinh,
                     ROUND(SUM(ISNULL(PCN.TrongLuongHang, 0)), 1)as SoLuong
@@ -184,6 +186,8 @@ namespace Dao.Repos.HQ
                     pcn.LoaiGiaoDich,
                     PC.Ngay,
                     PC.MaLo,
+                    pcn.MaSanPham,
+                    pcn.MaDonVi,
                     SP.Ten,
                     DVT.Ten
                 ORDER BY 
