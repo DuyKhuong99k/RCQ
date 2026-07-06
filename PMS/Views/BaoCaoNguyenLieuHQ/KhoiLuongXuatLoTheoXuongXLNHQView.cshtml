@@ -52,6 +52,60 @@
             return Number.isFinite(parsed) ? parsed : 0;
         }
 
+        function escapeHtml(value) {
+            return String(value || '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        function getQuantityColumnTitle(field) {
+            if (field === 'KhoiLuongXuat') {
+                return 'Khối lượng xuất';
+            }
+
+            if (field === 'TongHuKho') {
+                return 'Hư kho';
+            }
+
+            return 'Khối lượng';
+        }
+
+        function confirmUpdateQuantity(field, value) {
+            var title = getQuantityColumnTitle(field);
+            var message = 'Bạn có chắc muốn cập nhật <b>'
+                + escapeHtml(title)
+                + '</b> thành <b>'
+                + escapeHtml(value)
+                + '</b>?';
+
+            return new Promise(function (resolve) {
+                if (typeof bootbox !== 'undefined' && bootbox.confirm) {
+                    bootbox.confirm({
+                        title: 'Xác nhận cập nhật',
+                        message: message,
+                        buttons: {
+                            confirm: {
+                                label: 'Đồng ý',
+                                className: 'btn-primary'
+                            },
+                            cancel: {
+                                label: 'Hủy',
+                                className: 'btn-secondary'
+                            }
+                        },
+                        callback: function (result) {
+                            resolve(result === true);
+                        }
+                    });
+                } else {
+                    resolve(window.confirm(message.replace(/<[^>]*>/g, '')));
+                }
+            });
+        }
+
         // function getQuantityColumnConfig(field) {
         //     if (field === 'KhoiLuongXuat') {
         //         return {
@@ -199,8 +253,7 @@
             return;
         }
     
-        if (column.field !== 'KhoiLuongNhap'
-            && column.field !== 'KhoiLuongXuat'
+        if (column.field !== 'KhoiLuongXuat'
             && column.field !== 'TongHuKho') {
             return;
         }
@@ -231,8 +284,7 @@
 
         console.log('cellEdit editingField', editingField);
 
-    if (args.column.field !== 'KhoiLuongNhap'
-        && args.column.field !== 'KhoiLuongXuat'
+    if (args.column.field !== 'KhoiLuongXuat'
         && args.column.field !== 'TongHuKho') {
         args.cancel = true;
         return;
@@ -317,6 +369,18 @@
     } else {
         payload.khoiLuongNhap = row.KhoiLuongNhap;
     }
+
+                            var confirmValue = config.valueField === 'TongHuKho'
+                                ? row.TongHuKho
+                                : row.KhoiLuongXuat;
+                            var confirmed = await confirmUpdateQuantity(config.valueField, confirmValue);
+
+                            if (!confirmed) {
+                                toastOptionNotyfi();
+                                toastr['warning']('Đã hủy cập nhật ' + getQuantityColumnTitle(config.valueField).toLowerCase() + '.', 'Thông báo');
+                                await reloadGridFromServer();
+                                return;
+                            }
 
                             var response = await $.ajax({
                                 url: config.url,
