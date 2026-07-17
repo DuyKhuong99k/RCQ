@@ -182,8 +182,10 @@ namespace Dao.Repos.HQ
                         ON PCN.MaSanPham = sp.Id
                 LEFT JOIN HQ_DonViTinh dvt
                         ON PCN.MaDonVi = dvt.Id
-                Where pc.MaXuong = @xuongId
-                and pc.NgayGio >= @fromDate and pc.NgayGio <= @toDate
+                WHERE pc.MaXuong = @xuongId
+                  AND ISNULL(pcn.IsXoa, 0) = 0
+                  AND pc.NgayGio >= @fromDate
+                  AND pc.NgayGio <= @toDate
                 GROUP BY 
                     pcn.LoaiGiaoDich,
                     PC.Ngay,
