@@ -375,57 +375,6 @@ WHERE Id = @Id AND TrongLuongHang >= @Applied;", new
             }
             return dataSource;
         }
-
-        [HttpPost]
-        public IActionResult UpdateTenKhachHangChiTiet(string maNhaCC, string tenNhaCC)
-        {
-            var hasPermission = Middlewares.AuthenticationHelpers.CheckAut(HttpContext, "ChiTietNLNHQView");
-            if (hasPermission == false)
-            {
-                return Json(new { success = false, message = "Bạn không có quyền cập nhật báo cáo này." });
-            }
-
-            var maNhaCCValue = (maNhaCC ?? string.Empty).Trim();
-            var tenNhaCCValue = (tenNhaCC ?? string.Empty).Trim();
-
-            if (string.IsNullOrWhiteSpace(maNhaCCValue))
-            {
-                return Json(new { success = false, message = "Thiếu mã khách hàng." });
-            }
-
-            if (string.IsNullOrWhiteSpace(tenNhaCCValue))
-            {
-                return Json(new { success = false, message = "Tên khách hàng không được để trống." });
-            }
-
-            if (tenNhaCCValue.Length > 500)
-            {
-                return Json(new { success = false, message = "Tên khách hàng không được vượt quá 500 ký tự." });
-            }
-
-            if (tenNhaCCValue.Any(char.IsControl))
-            {
-                return Json(new { success = false, message = "Tên khách hàng có ký tự không hợp lệ." });
-            }
-
-            try
-            {
-                var dao = new NhaCungCapNguyenLieu();
-                var affectedRows = dao.UpdateTen(maNhaCCValue, tenNhaCCValue);
-
-                if (affectedRows == 0)
-                {
-                    return Json(new { success = false, message = "Không tìm thấy khách hàng để cập nhật." });
-                }
-
-                return Json(new { success = true, message = "Cập nhật tên khách hàng thành công." });
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex);
-                return Json(new { success = false, message = "Cập nhật tên khách hàng thất bại." });
-            }
-        }
         #endregion
         #region Tổng Hợp Sant Phẩm Phiếu Cân Nhập Nguyên Liệu
         [CustomAuthorize(Fu = "Báo Cáo Nguyên Liệu Nhập / Tổng Hợp Sản Phẩm HQ", Func = "Xem Báo Cáo Nguyên Liệu Nhập / Tổng Hợp Sản Phẩm HQ")]

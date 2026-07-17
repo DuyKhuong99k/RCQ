@@ -67,87 +67,6 @@
 
     var grid;
     var datalength = 0;
-    var originalTenNhaCC = null;
-
-    function escapeHtml(value) {
-        return String(value || '')
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#039;');
-    }
-
-    function confirmUpdateTenNhaCC(tenCu, tenMoi) {
-        var message = 'Bạn có chắc muốn cập nhật Tên Khách Hàng từ <b>'
-            + escapeHtml(tenCu)
-            + '</b> thành <b>'
-            + escapeHtml(tenMoi)
-            + '</b>?';
-
-        return new Promise(function (resolve) {
-            if (typeof bootbox !== 'undefined' && bootbox.confirm) {
-                bootbox.confirm({
-                    title: 'Xác nhận cập nhật',
-                    message: message,
-                    buttons: {
-                        confirm: {
-                            label: 'Đồng ý',
-                            className: 'btn-primary'
-                        },
-                        cancel: {
-                            label: 'Hủy',
-                            className: 'btn-secondary'
-                        }
-                    },
-                    callback: function (result) {
-                        resolve(result === true);
-                    }
-                });
-            } else {
-                resolve(window.confirm(message.replace(/<[^>]*>/g, '')));
-            }
-        });
-    }
-
-    function reloadGridFromServer() {
-        var button = document.getElementById('RefreshButtonBCHQ');
-        if (!button || !button.ej2_instances || !button.ej2_instances[0]) {
-            return Promise.resolve();
-        }
-
-        var btn = button.ej2_instances[0];
-        var content = btn.content;
-        btn.content = 'Đang Tải ...';
-        var fromDate = $('#fromDateBCHQ').val();
-        var toDate = $('#toDateBCHQ').val();
-        var xuongId = @XuongId;
-
-        return $.ajax({
-            url: '@Url.Action("Reload", "BaoCaoCanNguyenLieuHQ")',
-            type: 'POST',
-            data: { fromDate: fromDate, toDate: toDate, xuongId: xuongId },
-            success: function (response) {
-                if (response.Success) {
-                    ClearData('Grid');
-                    loadGridData(response.Data);
-                } else {
-                    loadGridData(response.Data);
-                    console.error(response.Messages);
-                    toastOptionNotyfi();
-                    toastr['error'](response.Messages, 'Không có dữ liệu!');
-                }
-            },
-            error: function (error) {
-                console.error(error);
-                toastOptionNotyfi();
-                toastr['error']('Không thể tải lại dữ liệu.', 'Thông báo');
-            }
-        }).always(function () {
-            btn.content = content;
-        });
-    }
-
     function loadGridData(data) {
         var dataManager = new ej.data.DataManager({
             json: data,
@@ -163,7 +82,7 @@
             grid.dataSource = dataManager;
             grid.refresh();
         } else {
-            ej.grids.Grid.Inject(ej.grids.Filter, ej.grids.Edit, ej.grids.Toolbar, ej.grids.ExcelExport);
+            ej.grids.Grid.Inject(ej.grids.Filter);
             grid = new ej.grids.Grid({
                 dataSource: dataManager,
                 allowPaging: true,
@@ -180,130 +99,10 @@
                 },
                 allowResizing: true,
                 allowExcelExport: true,
-                allowEditOnDblClick: true,
                 toolbar: ['ExcelExport'],
                 height: 400,
-                editSettings: {
-                    allowEditing: true,
-                    allowAdding: false,
-                    allowDeleting: false,
-                    mode: 'Normal'
-                },
-                cellEdit: function (args) {
-                    if (!args.column || args.column.field !== 'TenNhaCC') {
-                        args.cancel = true;
-                        return;
-                    }
-
-                    originalTenNhaCC = args.rowData ? args.rowData.TenNhaCC : null;
-
-                    setTimeout(function () {
-                        var input = args.container
-                            && (args.container.querySelector('input') || args.container.querySelector('input.e-input'));
-
-                        if (!input) {
-                            return;
-                        }
-
-                        var isSaving = false;
-                        var saveHandler = function (event) {
-                            if (isSaving) {
-                                return;
-                            }
-
-                            if (event.type === 'blur' || event.key === 'Enter') {
-                                isSaving = true;
-                                input.removeEventListener('blur', saveHandler);
-                                input.removeEventListener('keydown', saveHandler);
-
-                                try {
-                                    grid.endEdit();
-                                } catch (error) {
-                                    console.error(error);
-                                }
-                            }
-                        };
-
-                        input.addEventListener('blur', saveHandler);
-                        input.addEventListener('keydown', saveHandler);
-                    }, 0);
-                },
-                actionComplete: async function (args) {
-                    if (args.requestType !== 'save') {
-                        return;
-                    }
-
-                    var row = args.data || args.rowData;
-                    if (!row) {
-                        originalTenNhaCC = null;
-                        return;
-                    }
-
-                    var tenMoi = String(row.TenNhaCC || '').trim();
-                    var tenCu = String(originalTenNhaCC || '').trim();
-
-                    if (!tenMoi) {
-                        toastOptionNotyfi();
-                        toastr['error']('Tên khách hàng không được để trống.', 'Thông báo');
-                        await reloadGridFromServer();
-                        originalTenNhaCC = null;
-                        return;
-                    }
-
-                    if (tenMoi.length > 500) {
-                        toastOptionNotyfi();
-                        toastr['error']('Tên khách hàng không được vượt quá 500 ký tự.', 'Thông báo');
-                        await reloadGridFromServer();
-                        originalTenNhaCC = null;
-                        return;
-                    }
-
-                    if (tenMoi === tenCu) {
-                        originalTenNhaCC = null;
-                        return;
-                    }
-
-                    var confirmed = await confirmUpdateTenNhaCC(tenCu, tenMoi);
-                    if (!confirmed) {
-                        toastOptionNotyfi();
-                        toastr['warning']('Đã hủy cập nhật tên khách hàng.', 'Thông báo');
-                        await reloadGridFromServer();
-                        originalTenNhaCC = null;
-                        return;
-                    }
-
-                    try {
-                        var response = await $.ajax({
-                            url: '@Url.Action("UpdateTenKhachHangChiTiet", "BaoCaoCanNguyenLieuHQ")',
-                            type: 'POST',
-                            data: {
-                                maNhaCC: row.MaNhaCC,
-                                tenNhaCC: tenMoi
-                            }
-                        });
-
-                        if (!response || response.success !== true) {
-                            throw new Error(response && response.message
-                                ? response.message
-                                : 'Cập nhật tên khách hàng thất bại.');
-                        }
-
-                        toastOptionNotyfi();
-                        toastr['success']('Cập nhật tên khách hàng thành công.', 'Thông báo');
-                        await reloadGridFromServer();
-                    } catch (error) {
-                        console.error(error);
-                        toastOptionNotyfi();
-                        toastr['error'](error && error.message
-                            ? error.message
-                            : 'Cập nhật tên khách hàng thất bại.', 'Thông báo');
-                        await reloadGridFromServer();
-                    } finally {
-                        originalTenNhaCC = null;
-                    }
-                },
                 columns: [
-                    { field: 'MaNhaCC', visible: false },
+                    
                     { field: 'NgayGio', headerText: 'Ngày', width: 150, type: 'date', format: 'dd-MM-yyyy HH:mm:ss' },
                     { field: 'MaNguyenLieu', headerText: 'Mã', width: 150 },
                     { field: 'TenQuyCach', headerText: 'Tên Nguyên Liệu', width: 200 },
@@ -313,7 +112,7 @@
                     { field: 'KhoiLuongNhap', headerText: 'Số Lượng', width: 150 },                 
                     { field: 'LoaiGiaoDich', headerText: 'Loại Giao Dịch', width: 150},
                     { field: 'MaPhuongTien', headerText: 'Biển Số Xe', width: 150 },                 
-                    { field: 'TenNhaCC', headerText: 'Tên Khách Hàng', width: 150, allowEditing: true },
+                    { field: 'TenNhaCC', headerText: 'Tên Khách Hàng', width: 150 },
                     { field: 'CCCDNCC', headerText: 'CCCD/MST', width: 150 },
                     { field: 'TaiXe', headerText: 'Tài Xế', width: 150 },
                     { field: 'SDT', headerText: 'SĐT Tài Xế', width: 150 },
@@ -332,12 +131,12 @@
                 }]
             });
             grid.appendTo('#Grid');
-            grid.refresh();
             grid.toolbarClick = function (args) {
-                if (args.item.id === 'Grid_excelexport') {
-                    grid.excelExport();
-                }
-            };
+             if (args.item.id === 'Grid_excelexport') {
+                grid.excelExport();
+             }};
+
+            grid.refresh();
             document.getElementById("loaiGiaoDich").addEventListener("change", function () {
                 let value = this.value;
 
@@ -365,9 +164,39 @@
         }
 
     }
-    document.getElementById('RefreshButtonBCHQ').addEventListener("click", function () {
-        reloadGridFromServer();
-    });
+    document.getElementById('RefreshButtonBCHQ').addEventListener("click",
+        function () {
+            var btn = document.getElementById('RefreshButtonBCHQ').ej2_instances[0];
+            var content = btn.content;
+            btn.content = "Đang Tải ...";
+            var fromDate =$('#fromDateBCHQ').val();
+            var toDate = $('#toDateBCHQ').val();
+            var xuongId = @XuongId;
+            $.ajax({
+                url: "@Url.Action("Reload", "BaoCaoCanNguyenLieuHQ")",
+                type: "POST",
+                data: { "fromDate": fromDate, "toDate": toDate, xuongId: xuongId },
+                success: function (response) {
+                    // Kiểm tra trạng thái "Success" trong dữ liệu JSON từ máy chủ
+                    if (response.Success) {
+                        ClearData("Grid");
+                        loadGridData(response.Data);
+                    } else {
+                        loadGridData(response.Data);
+                        console.error(response.Messages);
+                        toastOptionNotyfi();
+                        toastr["error"](response.Messages, "Không có dữ liệu!");
+                    }
+                },
+                error: function (error) {
+                    toastOptionNotyfi();
+                    toastr["error"](error, "Thông báo");
+                }
+
+            }).always(function () {
+                btn.content = content;
+            });
+        });
 </script>
 
 
