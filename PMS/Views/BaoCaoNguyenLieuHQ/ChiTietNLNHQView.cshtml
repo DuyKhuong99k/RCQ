@@ -172,6 +172,12 @@
 
                         args.filterChoiceCount = datalength;
                     }
+
+                    if (args.requestType === 'beginEdit'
+                        && args.columnName
+                        && args.columnName !== 'TenNhaCC') {
+                        args.cancel = true;
+                    }
                 },
                 allowResizing: true,
                 allowExcelExport: true,
@@ -290,22 +296,22 @@
                     }
                 },
                 columns: [
-                    { field: 'IdPhieuCanNhapNguyenLieu', visible: false },
-                    { field: 'NgayGio', headerText: 'Ngày', width: 150, type: 'date', format: 'dd-MM-yyyy HH:mm:ss' },
-                    { field: 'MaNguyenLieu', headerText: 'Mã', width: 150 },
-                    { field: 'TenQuyCach', headerText: 'Tên Nguyên Liệu', width: 200 },
-                    { field: 'DonViTinh', headerText: 'Đơn Vị Tính', width: 150 },
-                    { field: 'MaLo', headerText: 'Lô', width: 150 },  
-                    { field: 'TyLe', headerText: 'Tỷ Lệ %', width: 150 },
-                    { field: 'KhoiLuongNhap', headerText: 'Số Lượng', width: 150 },                 
-                    { field: 'LoaiGiaoDich', headerText: 'Loại Giao Dịch', width: 150},
-                    { field: 'MaPhuongTien', headerText: 'Biển Số Xe', width: 150 },                 
+                    { field: 'IdPhieuCanNhapNguyenLieu', visible: false, allowEditing: false },
+                    { field: 'NgayGio', headerText: 'Ngày', width: 150, type: 'date', format: 'dd-MM-yyyy HH:mm:ss', allowEditing: false },
+                    { field: 'MaNguyenLieu', headerText: 'Mã', width: 150, allowEditing: false },
+                    { field: 'TenQuyCach', headerText: 'Tên Nguyên Liệu', width: 200, allowEditing: false },
+                    { field: 'DonViTinh', headerText: 'Đơn Vị Tính', width: 150, allowEditing: false },
+                    { field: 'MaLo', headerText: 'Lô', width: 150, allowEditing: false },
+                    { field: 'TyLe', headerText: 'Tỷ Lệ %', width: 150, allowEditing: false },
+                    { field: 'KhoiLuongNhap', headerText: 'Số Lượng', width: 150, allowEditing: false },
+                    { field: 'LoaiGiaoDich', headerText: 'Loại Giao Dịch', width: 150, allowEditing: false },
+                    { field: 'MaPhuongTien', headerText: 'Biển Số Xe', width: 150, allowEditing: false },
                     { field: 'TenNhaCC', headerText: 'Tên Khách Hàng', width: 150, allowEditing: true },
-                    { field: 'CCCDNCC', headerText: 'CCCD/MST', width: 150 },
-                    { field: 'TaiXe', headerText: 'Tài Xế', width: 150 },
-                    { field: 'SDT', headerText: 'SĐT Tài Xế', width: 150 },
-                    { field: 'CCCD', headerText: 'CCCD Tài Xế', width: 150 },                   
-                    { field: 'NoiDungGiaoNhan', headerText: 'Nội Dung', width: 300 },
+                    { field: 'CCCDNCC', headerText: 'CCCD/MST', width: 150, allowEditing: false },
+                    { field: 'TaiXe', headerText: 'Tài Xế', width: 150, allowEditing: false },
+                    { field: 'SDT', headerText: 'SĐT Tài Xế', width: 150, allowEditing: false },
+                    { field: 'CCCD', headerText: 'CCCD Tài Xế', width: 150, allowEditing: false },
+                    { field: 'NoiDungGiaoNhan', headerText: 'Nội Dung', width: 300, allowEditing: false },
                 ],
                 aggregates: [{
                     columns: [
