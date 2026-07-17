@@ -81,5 +81,9 @@ namespace Models.Repos.Models
         [Column("IsPhanLoaiNguyenLieu", TypeName = "bit")]
         public bool IsPhanLoaiNguyenLieu { get; set; }  
 
+        [Column("TenKhachHangCoDinh", TypeName = "nvarchar(500)")]
+        [MaxLength(500)]
+        public string? TenKhachHangCoDinh { get; set; }
+
     }
 }

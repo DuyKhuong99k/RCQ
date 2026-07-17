@@ -19,13 +19,14 @@ namespace Dao.Repos.HQ
             {
                 var query = @"
                 SELECT
+                    pn.Id AS IdPhieuCanNhapNguyenLieu,
                     pnl.MaLo,
                     pn.NgayGio,
                     pn.SoPhieuCanNhap,
                     pn.MaSanPham,
                     pn.MaNhaCC,
                     pn.MaPhuongTien,
-                    ncc.Ten as TenNhaCC,
+                    COALESCE(NULLIF(LTRIM(RTRIM(pn.TenKhachHangCoDinh)), ''), ncc.Ten) AS TenNhaCC,
                     ncc.CCCD as CCCDNCC,
                     pn.TaiXe,
                     pn.CCCD,
@@ -77,12 +78,13 @@ namespace Dao.Repos.HQ
             try
             {
                 var query = @"SELECT
+                    pn.Id AS IdPhieuCanNhapNguyenLieu,
                     pnl.MaLo,
                     pn.NgayGio,
                     pn.SoPhieuCanNhap,
                     pn.MaSanPham,
                     pn.MaNhaCC,
-                    ncc.Ten AS TenNhaCC,
+                    COALESCE(NULLIF(LTRIM(RTRIM(pn.TenKhachHangCoDinh)), ''), ncc.Ten) AS TenNhaCC,
                     ncc.CCCD AS CCCDNCC,
                     pn.TaiXe,
                     pn.CCCD,

@@ -375,6 +375,66 @@ WHERE Id = @Id AND TrongLuongHang >= @Applied;", new
             }
             return dataSource;
         }
+
+        [HttpPost]
+        public IActionResult UpdateTenKhachHangCoDinh(string idPhieuCanNhapNguyenLieu, string? tenKhachHangCoDinh)
+        {
+            var hasPermission = Middlewares.AuthenticationHelpers.CheckAut(HttpContext, "ChiTietNLNHQView");
+            if (hasPermission == false)
+            {
+                return Json(new { success = false, message = "Bạn không có quyền cập nhật báo cáo này." });
+            }
+
+            var idValue = (idPhieuCanNhapNguyenLieu ?? string.Empty).Trim();
+            var tenKhachHangValue = (tenKhachHangCoDinh ?? string.Empty).Trim();
+
+            if (string.IsNullOrWhiteSpace(idValue))
+            {
+                return Json(new { success = false, message = "Thiếu mã phiếu cân nhập nguyên liệu." });
+            }
+
+            if (tenKhachHangValue.Length > 500)
+            {
+                return Json(new { success = false, message = "Tên khách hàng không được vượt quá 500 ký tự." });
+            }
+
+            if (tenKhachHangValue.Any(char.IsControl))
+            {
+                return Json(new { success = false, message = "Tên khách hàng có ký tự không hợp lệ." });
+            }
+
+            try
+            {
+                using var connection = new SqlConnection(AppViewModels.Base.Ins.ConnectionString);
+                connection.Open();
+
+                var affectedRows = connection.Execute(@"
+UPDATE dbo.HQ_PhieuCanNhapNguyenLieu
+SET TenKhachHangCoDinh = @TenKhachHangCoDinh
+WHERE Id = @Id;", new
+                {
+                    Id = idValue,
+                    TenKhachHangCoDinh = string.IsNullOrWhiteSpace(tenKhachHangValue)
+                        ? null
+                        : tenKhachHangValue
+                });
+
+                if (affectedRows == 0)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy phiếu cân nhập nguyên liệu để cập nhật." });
+                }
+
+                var message = string.IsNullOrWhiteSpace(tenKhachHangValue)
+                    ? "Đã dùng lại tên khách hàng từ danh mục nhà cung cấp."
+                    : "Cập nhật tên khách hàng cố định thành công.";
+
+                return Json(new { success = true, message });
+            }
+            catch (Exception)
+            {
+                return Json(new { success = false, message = "Cập nhật tên khách hàng thất bại." });
+            }
+        }
         #endregion
         #region Tổng Hợp Sant Phẩm Phiếu Cân Nhập Nguyên Liệu
         [CustomAuthorize(Fu = "Báo Cáo Nguyên Liệu Nhập / Tổng Hợp Sản Phẩm HQ", Func = "Xem Báo Cáo Nguyên Liệu Nhập / Tổng Hợp Sản Phẩm HQ")]
