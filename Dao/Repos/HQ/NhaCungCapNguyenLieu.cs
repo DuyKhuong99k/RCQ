@@ -69,5 +69,17 @@ UPDATE [dbo].[NhaCungCapNguyenLieu]
             var rows = connection.Execute(qrUpdate, item);
             return rows;
         }
+
+        public int UpdateTen(string ma, string ten)
+        {
+            const string query = @"
+UPDATE [dbo].[NhaCungCapNguyenLieu]
+SET [Ten] = @Ten
+WHERE [Ma] = @Ma";
+
+            using var connection = new SqlConnection(connectionString);
+            connection.Open();
+            return connection.Execute(query, new { Ma = ma, Ten = ten });
+        }
     }
 }
