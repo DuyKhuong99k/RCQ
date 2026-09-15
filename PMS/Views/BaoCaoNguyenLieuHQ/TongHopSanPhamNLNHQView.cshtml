@@ -3,6 +3,12 @@
     ViewData["Title"] = "TongHopSanPhamNLNHQView";
     Layout = "~/Views/Shared/_Layout.cshtml";
     var XuongId = @Context.Session.GetString("XuongId");
+    var roleIds = PMS.Middlewares.AuthenticationHelpers.GetRoleIdsFromCookie(Context);
+    var rolePermistions = await PMS.Middlewares.AuthenticationHelpers.GetRolePermistionsAsync(Context, roleIds);
+    var canEditInline = rolePermistions.Any(x =>
+        x.Fu == "Báo Cáo Nguyên Liệu Nhập / Tổng Hợp Sản Phẩm HQ" &&
+        x.Func == "Sửa Báo Cáo Nguyên Liệu Nhập / Tổng Hợp Sản Phẩm HQ" &&
+        x.Status == 1);
 }
 
 <div class="container-fluid mt-4">
@@ -20,6 +26,7 @@
     </div>
 </div>
 <script>
+    const canEditInline = @canEditInline.ToString().ToLowerInvariant();
 
     document.addEventListener("DOMContentLoaded", function () {
         let fromDate = document.getElementById("fromDateBCHQ");
@@ -183,11 +190,11 @@
                 },
                 allowResizing: true,
                 allowExcelExport: true,
-                allowEditOnDblClick: true,
+                allowEditOnDblClick: canEditInline,
                 toolbar: ['ExcelExport'],
                 height: 400,
                 editSettings: {
-                    allowEditing: true,
+                    allowEditing: canEditInline,
                     allowAdding: false,
                     allowDeleting: false,
                     mode: 'Normal'

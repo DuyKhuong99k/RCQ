@@ -1,6 +1,12 @@
     @{
         ViewData["Title"] = "KhoiLuongXuatLoTheoXuongXLNHQView";
         Layout = "~/Views/Shared/_Layout.cshtml";
+        var roleIds = PMS.Middlewares.AuthenticationHelpers.GetRoleIdsFromCookie(Context);
+        var rolePermistions = await PMS.Middlewares.AuthenticationHelpers.GetRolePermistionsAsync(Context, roleIds);
+        var canEditInline = rolePermistions.Any(x =>
+            x.Fu == "Báo Cáo Nguyên Liệu Xuất / Khối Lượng Xuất Xưởng Theo Lô HQ" &&
+            x.Func == "Sửa Báo Cáo Nguyên Liệu Xuất / Khối Lượng Xuất Xưởng Theo Lô HQ" &&
+            x.Status == 1);
     }
 
     <div class="container-fluid mt-4">
@@ -30,6 +36,7 @@
     </div>
 
     <script>
+        const canEditInline = @canEditInline.ToString().ToLowerInvariant();
         var listLo = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ViewBag.listLo));
         var comboLo = new ej.dropdowns.ComboBox({
             dataSource: listLo,
@@ -235,7 +242,7 @@
                 toolbar: ['ExcelExport'],
                 height: 400,
                 editSettings: {
-                    allowEditing: true,
+                    allowEditing: canEditInline,
                     allowAdding: false,
                     allowDeleting: false,
                     mode: 'Normal'
@@ -246,6 +253,10 @@
                     }
                 },
     recordClick: function (args) {
+
+        if (!canEditInline) {
+            return;
+        }
 
         var column = grid.getColumnByIndex(args.cellIndex);
 

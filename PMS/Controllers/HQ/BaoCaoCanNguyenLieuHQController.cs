@@ -40,6 +40,18 @@ namespace PMS.Controllers.HQ
             _httpClientFactory = httpClientFactory;
         }
 
+        private async Task<bool> HasActivePermissionAsync(string fu, string func)
+        {
+            var roleIds = Middlewares.AuthenticationHelpers.GetRoleIdsFromCookie(HttpContext);
+            if (roleIds.Count == 0)
+            {
+                return false;
+            }
+
+            var rolePermissions = await Middlewares.AuthenticationHelpers.GetRolePermistionsAsync(HttpContext, roleIds);
+            return rolePermissions.Any(x => x.Fu == fu && x.Func == func && x.Status == 1);
+        }
+
         private sealed class KhoiLuongXuatRowContext
         {
             public string? SoPhieuCanNhap { get; set; }
@@ -377,9 +389,11 @@ WHERE Id = @Id AND TrongLuongHang >= @Applied;", new
         }
 
         [HttpPost]
-        public IActionResult UpdateTenKhachHangCoDinh(string idPhieuCanNhapNguyenLieu, string? tenKhachHangCoDinh)
+        public async Task<IActionResult> UpdateTenKhachHangCoDinh(string idPhieuCanNhapNguyenLieu, string? tenKhachHangCoDinh)
         {
-            var hasPermission = Middlewares.AuthenticationHelpers.CheckAut(HttpContext, "ChiTietNLNHQView");
+            var hasPermission = await HasActivePermissionAsync(
+                "Báo Cáo Nguyên Liệu Nhập / Chi Tiết HQ",
+                "Sửa Báo Cáo Nguyên Liệu Nhập / Chi Tiết HQ");
             if (hasPermission == false)
             {
                 return Json(new { success = false, message = "Bạn không có quyền cập nhật báo cáo này." });
@@ -465,9 +479,11 @@ WHERE Id = @Id;", new
         }
 
         [HttpPost]
-        public IActionResult UpdateLoNguyenLieuTongHop(DateTime ngay, string loNguyenLieuCu, string loNguyenLieuMoi, long maSanPham, long maDonVi, string loaiGiaoDich, string xuongId)
+        public async Task<IActionResult> UpdateLoNguyenLieuTongHop(DateTime ngay, string loNguyenLieuCu, string loNguyenLieuMoi, long maSanPham, long maDonVi, string loaiGiaoDich, string xuongId)
         {
-            var hasPermission = Middlewares.AuthenticationHelpers.CheckAut(HttpContext, "TongHopSanPhamNLNHQView");
+            var hasPermission = await HasActivePermissionAsync(
+                "Báo Cáo Nguyên Liệu Nhập / Tổng Hợp Sản Phẩm HQ",
+                "Sửa Báo Cáo Nguyên Liệu Nhập / Tổng Hợp Sản Phẩm HQ");
             if (hasPermission == false)
             {
                 return Json(new { success = false, message = "Bạn không có quyền cập nhật báo cáo này." });
@@ -994,6 +1010,14 @@ END
         {
             try
             {
+                var hasPermission = await HasActivePermissionAsync(
+                    "Báo Cáo Nguyên Liệu Xuất / Khối Lượng Xuất Xưởng Theo Lô HQ",
+                    "Sửa Báo Cáo Nguyên Liệu Xuất / Khối Lượng Xuất Xưởng Theo Lô HQ");
+                if (!hasPermission)
+                {
+                    return Json(new { success = false, message = "Bạn không có quyền sửa dữ liệu." });
+                }
+
                 // ─── 1. Validate đầu vào ───────────────────────────────────────────
                 if (string.IsNullOrWhiteSpace(soPhieuCanNhap) || string.IsNullOrWhiteSpace(maQuyCach))
                     return Json(new { success = false, message = "Thiếu dữ liệu định danh để cập nhật." });
@@ -1191,6 +1215,14 @@ public async Task<IActionResult> UpdateHuKho(
 {
     try
     {
+        var hasPermission = await HasActivePermissionAsync(
+            "Báo Cáo Nguyên Liệu Xuất / Khối Lượng Xuất Xưởng Theo Lô HQ",
+            "Sửa Báo Cáo Nguyên Liệu Xuất / Khối Lượng Xuất Xưởng Theo Lô HQ");
+        if (!hasPermission)
+        {
+            return Json(new { success = false, message = "Bạn không có quyền sửa dữ liệu." });
+        }
+
         // ─── 1. Validate đầu vào ───────────────────────────────────────────
         if (string.IsNullOrWhiteSpace(soPhieuCanNhap) || string.IsNullOrWhiteSpace(maQuyCach))
             return Json(new { success = false, message = "Thiếu dữ liệu định danh để cập nhật." });

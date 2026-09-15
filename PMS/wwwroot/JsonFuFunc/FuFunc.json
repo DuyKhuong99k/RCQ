@@ -452,8 +452,16 @@
     "Func": "Xem Báo Cáo Nguyên Liệu Nhập / Chi Tiết HQ"
   },
   {
+    "Fu": "Báo Cáo Nguyên Liệu Nhập / Chi Tiết HQ",
+    "Func": "Sửa Báo Cáo Nguyên Liệu Nhập / Chi Tiết HQ"
+  },
+  {
     "Fu": "Báo Cáo Nguyên Liệu Nhập / Tổng Hợp Sản Phẩm HQ",
     "Func": "Xem Báo Cáo Nguyên Liệu Nhập / Tổng Hợp Sản Phẩm HQ"
+  },
+  {
+    "Fu": "Báo Cáo Nguyên Liệu Nhập / Tổng Hợp Sản Phẩm HQ",
+    "Func": "Sửa Báo Cáo Nguyên Liệu Nhập / Tổng Hợp Sản Phẩm HQ"
   },
   {
     "Fu": "Báo Cáo Nguyên Liệu Xuất / Chi Tiết HQ",
@@ -474,6 +482,10 @@
   {
     "Fu": "Báo Cáo Nguyên Liệu Xuất / Khối Lượng Xuất Xưởng Theo Lô HQ",
     "Func": "Xem Báo Cáo Nguyên Liệu Xuất / Khối Lượng Xuất Xưởng Theo Lô HQ"
+  },
+  {
+    "Fu": "Báo Cáo Nguyên Liệu Xuất / Khối Lượng Xuất Xưởng Theo Lô HQ",
+    "Func": "Sửa Báo Cáo Nguyên Liệu Xuất / Khối Lượng Xuất Xưởng Theo Lô HQ"
   },
   {
     "Fu": "Xử Lý Phiếu Cân / Phiếu Cân HQ",
