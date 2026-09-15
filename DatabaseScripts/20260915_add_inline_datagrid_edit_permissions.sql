@@ -1,33 +1,27 @@
 /*
-    Cấp quyền sửa trực tiếp trên DataGrid cho một hoặc nhiều nhóm quyền.
-    Thay các RoleId mẫu bên dưới bằng Id nhóm quyền cần cấp trước khi chạy.
+    Cấp quyền sửa trực tiếp trên DataGrid theo các quyền Xem hiện có:
+    - RoleId 1002: cả ba màn.
+    - RoleId 1003: cả ba màn.
+    - RoleId 1004: chỉ màn Khối Lượng Xuất Xưởng Theo Lô.
 */
-
-DECLARE @RoleIds TABLE
-(
-    RoleId INT NOT NULL PRIMARY KEY
-);
-
-INSERT INTO @RoleIds (RoleId)
-VALUES
-    (0); -- Thay 0 bằng Id nhóm quyền, có thể thêm nhiều dòng: (2), (5)
-
-IF EXISTS (SELECT 1 FROM @RoleIds WHERE RoleId <= 0)
-BEGIN
-    THROW 50000, N'Vui lòng thay RoleId mẫu bằng Id nhóm quyền cần cấp.', 1;
-END;
 
 DECLARE @Permissions TABLE
 (
+    RoleId INT NOT NULL,
     Fu NVARCHAR(500) NOT NULL,
-    Func NVARCHAR(500) NOT NULL
+    Func NVARCHAR(500) NOT NULL,
+    PRIMARY KEY (RoleId, Fu, Func)
 );
 
-INSERT INTO @Permissions (Fu, Func)
+INSERT INTO @Permissions (RoleId, Fu, Func)
 VALUES
-    (N'Báo Cáo Nguyên Liệu Nhập / Chi Tiết HQ', N'Sửa Báo Cáo Nguyên Liệu Nhập / Chi Tiết HQ'),
-    (N'Báo Cáo Nguyên Liệu Nhập / Tổng Hợp Sản Phẩm HQ', N'Sửa Báo Cáo Nguyên Liệu Nhập / Tổng Hợp Sản Phẩm HQ'),
-    (N'Báo Cáo Nguyên Liệu Xuất / Khối Lượng Xuất Xưởng Theo Lô HQ', N'Sửa Báo Cáo Nguyên Liệu Xuất / Khối Lượng Xuất Xưởng Theo Lô HQ');
+    (1002, N'Báo Cáo Nguyên Liệu Nhập / Chi Tiết HQ', N'Sửa Báo Cáo Nguyên Liệu Nhập / Chi Tiết HQ'),
+    (1002, N'Báo Cáo Nguyên Liệu Nhập / Tổng Hợp Sản Phẩm HQ', N'Sửa Báo Cáo Nguyên Liệu Nhập / Tổng Hợp Sản Phẩm HQ'),
+    (1002, N'Báo Cáo Nguyên Liệu Xuất / Khối Lượng Xuất Xưởng Theo Lô HQ', N'Sửa Báo Cáo Nguyên Liệu Xuất / Khối Lượng Xuất Xưởng Theo Lô HQ'),
+    (1003, N'Báo Cáo Nguyên Liệu Nhập / Chi Tiết HQ', N'Sửa Báo Cáo Nguyên Liệu Nhập / Chi Tiết HQ'),
+    (1003, N'Báo Cáo Nguyên Liệu Nhập / Tổng Hợp Sản Phẩm HQ', N'Sửa Báo Cáo Nguyên Liệu Nhập / Tổng Hợp Sản Phẩm HQ'),
+    (1003, N'Báo Cáo Nguyên Liệu Xuất / Khối Lượng Xuất Xưởng Theo Lô HQ', N'Sửa Báo Cáo Nguyên Liệu Xuất / Khối Lượng Xuất Xưởng Theo Lô HQ'),
+    (1004, N'Báo Cáo Nguyên Liệu Xuất / Khối Lượng Xuất Xưởng Theo Lô HQ', N'Sửa Báo Cáo Nguyên Liệu Xuất / Khối Lượng Xuất Xưởng Theo Lô HQ');
 
 INSERT INTO dbo.RolePermistion
 (
@@ -38,18 +32,17 @@ INSERT INTO dbo.RolePermistion
     Status
 )
 SELECT
-    roleIds.RoleId,
+    permissions.RoleId,
     permissions.Fu,
     permissions.Func,
     GETDATE(),
     1
-FROM @RoleIds AS roleIds
-CROSS JOIN @Permissions AS permissions
+FROM @Permissions AS permissions
 WHERE NOT EXISTS
 (
     SELECT 1
     FROM dbo.RolePermistion AS existingPermission
-    WHERE existingPermission.RoleId = roleIds.RoleId
+    WHERE existingPermission.RoleId = permissions.RoleId
       AND existingPermission.Fu = permissions.Fu
       AND existingPermission.Func = permissions.Func
 );
@@ -60,10 +53,12 @@ SELECT
     Func,
     Status
 FROM dbo.RolePermistion
-WHERE (Fu = N'Báo Cáo Nguyên Liệu Nhập / Chi Tiết HQ'
-       AND Func = N'Sửa Báo Cáo Nguyên Liệu Nhập / Chi Tiết HQ')
-   OR (Fu = N'Báo Cáo Nguyên Liệu Nhập / Tổng Hợp Sản Phẩm HQ'
-       AND Func = N'Sửa Báo Cáo Nguyên Liệu Nhập / Tổng Hợp Sản Phẩm HQ')
-   OR (Fu = N'Báo Cáo Nguyên Liệu Xuất / Khối Lượng Xuất Xưởng Theo Lô HQ'
-       AND Func = N'Sửa Báo Cáo Nguyên Liệu Xuất / Khối Lượng Xuất Xưởng Theo Lô HQ')
+WHERE EXISTS
+(
+    SELECT 1
+    FROM @Permissions AS permissions
+    WHERE permissions.RoleId = dbo.RolePermistion.RoleId
+      AND permissions.Fu = dbo.RolePermistion.Fu
+      AND permissions.Func = dbo.RolePermistion.Func
+)
 ORDER BY RoleId, Fu, Func;
