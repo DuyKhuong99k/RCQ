@@ -1,8 +1,6 @@
 /*
-    Cấp quyền sửa trực tiếp trên DataGrid theo các quyền Xem hiện có:
-    - RoleId 1002: cả ba màn.
-    - RoleId 1003: cả ba màn.
-    - RoleId 1004: chỉ màn Khối Lượng Xuất Xưởng Theo Lô.
+    Chỉ cấp quyền sửa trực tiếp trên DataGrid cho nhóm HQ (RoleId 1002).
+    Các nhóm Kế Toán (1003) và Cân Nguyên Liệu (1004) vẫn chỉ có quyền Xem.
 */
 
 DECLARE @Permissions TABLE
@@ -17,11 +15,7 @@ INSERT INTO @Permissions (RoleId, Fu, Func)
 VALUES
     (1002, N'Báo Cáo Nguyên Liệu Nhập / Chi Tiết HQ', N'Sửa Báo Cáo Nguyên Liệu Nhập / Chi Tiết HQ'),
     (1002, N'Báo Cáo Nguyên Liệu Nhập / Tổng Hợp Sản Phẩm HQ', N'Sửa Báo Cáo Nguyên Liệu Nhập / Tổng Hợp Sản Phẩm HQ'),
-    (1002, N'Báo Cáo Nguyên Liệu Xuất / Khối Lượng Xuất Xưởng Theo Lô HQ', N'Sửa Báo Cáo Nguyên Liệu Xuất / Khối Lượng Xuất Xưởng Theo Lô HQ'),
-    (1003, N'Báo Cáo Nguyên Liệu Nhập / Chi Tiết HQ', N'Sửa Báo Cáo Nguyên Liệu Nhập / Chi Tiết HQ'),
-    (1003, N'Báo Cáo Nguyên Liệu Nhập / Tổng Hợp Sản Phẩm HQ', N'Sửa Báo Cáo Nguyên Liệu Nhập / Tổng Hợp Sản Phẩm HQ'),
-    (1003, N'Báo Cáo Nguyên Liệu Xuất / Khối Lượng Xuất Xưởng Theo Lô HQ', N'Sửa Báo Cáo Nguyên Liệu Xuất / Khối Lượng Xuất Xưởng Theo Lô HQ'),
-    (1004, N'Báo Cáo Nguyên Liệu Xuất / Khối Lượng Xuất Xưởng Theo Lô HQ', N'Sửa Báo Cáo Nguyên Liệu Xuất / Khối Lượng Xuất Xưởng Theo Lô HQ');
+    (1002, N'Báo Cáo Nguyên Liệu Xuất / Khối Lượng Xuất Xưởng Theo Lô HQ', N'Sửa Báo Cáo Nguyên Liệu Xuất / Khối Lượng Xuất Xưởng Theo Lô HQ');
 
 INSERT INTO dbo.RolePermistion
 (
