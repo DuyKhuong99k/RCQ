@@ -708,6 +708,8 @@ public partial class dbPMScontext : DbContext
     public virtual DbSet<HQ_MapSanPhamTinhLuong> HqMapSanPhamTinhLuongs { get; set; }
     public virtual DbSet<HQ_PhieuThongKeSanXuat> HqPhieuThongKeSanXuats { get; set; }
     public virtual DbSet<CheckInOut> CheckInOuts { get; set; }
+    public virtual DbSet<WorkshopDevice> ThietBiChamCongTaiXuongs { get; set; }
+    public virtual DbSet<WorkshopAttendance> ChamCongTaiXuongs { get; set; }
     public virtual DbSet<Ao> Aos { get; set; }
     public virtual DbSet<Ao_D> AoDs { get; set; }
     public virtual DbSet<Ao_U> AoUs { get; set; }

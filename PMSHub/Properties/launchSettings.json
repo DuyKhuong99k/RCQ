@@ -7,20 +7,18 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
       "dotnetRunMessages": true,
-      //"applicationUrl": "http://10.10.26.39:5152"
-      "applicationUrl": "http://192.168.1.39:5152"
+      "applicationUrl": "http://192.168.88.149:5153"
+
+
     },
     "https": {
       "commandName": "Project",
-      "launchBrowser": true,
+      "launchBrowser": false,
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
       "dotnetRunMessages": true,
-      //"applicationUrl": "https://192.168.1.5:7251;http://192.168.1.5:5152"
-      "applicationUrl": "https://192.168.1.39:7257;http://192.168.1.39:5157"
-
-      //"applicationUrl": "https://192.168.1.116:7251"
+      "applicationUrl": "https://192.168.88.149:7257;http://192.168.88.149:5157"
     },
     "IIS Express": {
       "commandName": "IISExpress",

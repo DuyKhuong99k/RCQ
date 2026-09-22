@@ -93,8 +93,8 @@ namespace ViewModels.Repos.Hubs.IServices
         public Task<bool> CommandGetPhuongTien(string id);
         public Task<bool> CommandSetPhuongTien(string id, string phuongTienId, string phuongTienName);
         public Task<bool> CommandSetKhachHang(string id, string khachHangId, string khachHangName);
-        public Task<bool> CommandSetNet(string id, string netId,string netName);
-        public Task<bool> CommandSetMau(string id, string mauId,string mauName);
+        public Task<bool> CommandSetNet(string id, string netId, string netName);
+        public Task<bool> CommandSetMau(string id, string mauId, string mauName);
         public Task<bool> CommandSetCongViec(string id, string congViecId, string congViecName);
         public Task<bool> CommandSetInfoCoi(string id, string dataCoiJson);
         public Task<bool> CommandBtnpTare(string id);
@@ -111,6 +111,7 @@ namespace ViewModels.Repos.Hubs.IServices
         public Task<bool> Commandrestartsystem(string id);
         public Task<bool> CommandGetDeviceInfos(string id);
         public Task<bool> CommandPhieuCanSync(string id, DateTime dateTime);
+        public Task<bool> CommandChamCongSync(string id, DateTime dateTime);
         public Task<bool> CommandGetPhieuCanCountStatus0(string id, DateTime dateTime);
         public Task<bool> CommandDoiKhuVuc(string id, AppKV khuVuc);
         public void Update(string id, AppKV wKv, AppType aType, string xuongId);

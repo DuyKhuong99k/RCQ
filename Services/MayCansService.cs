@@ -38,14 +38,14 @@ public partial class MayCansService : ObservableObject, IMayCansService
     // private CancellationTokenSource _debounceCancellationTokenSource;
     private Timer? _timer;
     private readonly HttpClient Http;
-   
+
     [ObservableProperty] private ConcurrentDictionary<string, MayCan> items = new();
 
     [ObservableProperty] private List<MayCan> selectedItems = new();
 
     public MayCansService(IMainService vmMain, IHubContext<ChatHub> hubContext,
         HighThroughputQueue<PhieuCanBTPDinhHinh> btpDinhHinhQueue,
-        HighThroughputQueue<PhieuCanTPDinhHinh> tpDinhHinhQueue, IHostApplicationLifetime appLifetime,IHttpClientFactory httpClientFactory)
+        HighThroughputQueue<PhieuCanTPDinhHinh> tpDinhHinhQueue, IHostApplicationLifetime appLifetime, IHttpClientFactory httpClientFactory)
     {
         _appLifetime = appLifetime;
         this.vmMain = vmMain;
@@ -68,7 +68,7 @@ public partial class MayCansService : ObservableObject, IMayCansService
         }
     }
 
-    
+
 
     private AppViewModel VmApp => AppViewModel.Instance;
     private MessageViewModel VmMessage => MessageViewModel.Instance;
@@ -380,94 +380,94 @@ public partial class MayCansService : ObservableObject, IMayCansService
                 switch (khuVuc)
                 {
                     case AppKV.Main:
-                    {
-                        
-                        break;
-                    }
+                        {
+
+                            break;
+                        }
                     case AppKV.DauAo:
                         break;
                     case AppKV.NguyenLieu:
-                    {
-                        _appKV = "NL";
-                        amode = "1DM";
-                        break;
-                    }
+                        {
+                            _appKV = "NL";
+                            amode = "1DM";
+                            break;
+                        }
                     case AppKV.BTPFillet:
-                    {
-                        _appKV = "BTP";
-                        amode = "1D0";
-                        break;
-                    }
+                        {
+                            _appKV = "BTP";
+                            amode = "1D0";
+                            break;
+                        }
                     case AppKV.TPFillet:
-                    {
-                        _appKV = "TP";
-                        amode = "1D0";
-                        break;
-                    }
+                        {
+                            _appKV = "TP";
+                            amode = "1D0";
+                            break;
+                        }
                     case AppKV.BTPFilletv2:
-                    {
-                        _appKV = "BTP";
-                        amode = "1D0";
-                        break;
-                    }
+                        {
+                            _appKV = "BTP";
+                            amode = "1D0";
+                            break;
+                        }
                     case AppKV.TPFilletv2:
-                    {
-                        _appKV = "TP";
-                        amode = "1D0";
-                        break;
-                    }
+                        {
+                            _appKV = "TP";
+                            amode = "1D0";
+                            break;
+                        }
                     case AppKV.PhuPham:
                         break;
                     case AppKV.BTPDinhHinh:
-                    {
-                        _appKV = "BTP";
-                        amode = "1D0";
-                        break;
-                    }
+                        {
+                            _appKV = "BTP";
+                            amode = "1D0";
+                            break;
+                        }
                     case AppKV.TPDinhHinh:
-                    {
-                        _appKV = "TP";
-                        amode = "1D0";
-                        break;
-                    }
+                        {
+                            _appKV = "TP";
+                            amode = "1D0";
+                            break;
+                        }
                     case AppKV.XepKhuon:
-                    {
-                        _appKV = "XK";
-                        amode = "1DM";
-                        break;
-                    }
+                        {
+                            _appKV = "XK";
+                            amode = "1DM";
+                            break;
+                        }
                     case AppKV.BaoTu:
                         break;
                     case AppKV.CaoThit:
                         break;
                     case AppKV.XepKhuonRaCoi:
-                    {
-                        _appKV = "XK";
-                        amode = "1DM";
-                        break;
-                    }
+                        {
+                            _appKV = "XK";
+                            amode = "1DM";
+                            break;
+                        }
                     case AppKV.XepKhuonPhu:
-                    {
-                        _appKV = "XKPHU";
-                        amode = "1D0";
-                        break;
-                    }
+                        {
+                            _appKV = "XKPHU";
+                            amode = "1D0";
+                            break;
+                        }
                     case AppKV.XepKhuonKXL:
                         break;
                     case AppKV.PhuPhamv2:
                         break;
                     case AppKV.Hq:
-                    {
-                        _appKV = "HQ";
-                        amode = "1D0";
-                        break;
-                    }
+                        {
+                            _appKV = "HQ";
+                            amode = "1D0";
+                            break;
+                        }
                     case AppKV.XepKhuonBlock:
-                    {
-                        _appKV = "XKBLOCK";
-                        amode = "1D0";
-                        break;
-                    }
+                        {
+                            _appKV = "XKBLOCK";
+                            amode = "1D0";
+                            break;
+                        }
                     default:
                         throw new ArgumentOutOfRangeException(nameof(khuVuc), khuVuc, null);
                 }
@@ -475,11 +475,11 @@ public partial class MayCansService : ObservableObject, IMayCansService
                 var _url = $"http://{url}/api/w/posts";
                 var data = new
                 {
-                    
+
                     Path = "appkv",
                     akv = _appKV,
                     amode = amode,
-                    KVName  = khuVuc.ToString()
+                    KVName = khuVuc.ToString()
                 };
                 var requestMessage = new HttpRequestMessage(HttpMethod.Post, _url)
                 {
@@ -492,9 +492,9 @@ public partial class MayCansService : ObservableObject, IMayCansService
                 {
                     throw new Exception(response.ReasonPhrase);
                 }
-                
 
-                
+
+
             }
             catch (Exception e)
             {
@@ -1105,7 +1105,7 @@ public partial class MayCansService : ObservableObject, IMayCansService
                 {
                     try
                     {
-                        var thanhPham = vmMain.VmThanhPhamChinhXepKhuon.Items.FirstOrDefault(x=>x.Ma == thanhPhamId);
+                        var thanhPham = vmMain.VmThanhPhamChinhXepKhuon.Items.FirstOrDefault(x => x.Ma == thanhPhamId);
                         if (thanhPham != null)
                         {
                             item.ThamSoTangTrong = thanhPham.ThamSoTangTrong;
@@ -1117,7 +1117,7 @@ public partial class MayCansService : ObservableObject, IMayCansService
                         Console.WriteLine(e);
                         // throw;
                     }
-                   
+
                 }
                 if (item.MType == "DESKTOP")
                     await hubContext.Clients.Client(item.ConnectionId ?? "")
@@ -1125,7 +1125,7 @@ public partial class MayCansService : ObservableObject, IMayCansService
                 else if (item.MType == "BOARD")
                     await hubContext.Clients.Client(item.ConnectionId ?? "")
                         .SendAsync("SETTHANHPHAM", $"{thanhPhamId}", $"{thanhPhamName}");
-                
+
                 //}
                 //else
                 //{
@@ -1543,7 +1543,7 @@ public partial class MayCansService : ObservableObject, IMayCansService
 
         return rl;
     }
-    public async Task<bool> CommandSetNhanVienPhucVu(string id,string nhanVienId, string maHoSo)
+    public async Task<bool> CommandSetNhanVienPhucVu(string id, string nhanVienId, string maHoSo)
     {
         var rl = false;
         var item = Find(id);
@@ -1552,7 +1552,7 @@ public partial class MayCansService : ObservableObject, IMayCansService
             try
             {
                 if (item.MType == "BOARD")
-                    await hubContext.Clients.Client(item.ConnectionId ?? "").SendAsync("SETNHANVIENPV",$"{nhanVienId}",
+                    await hubContext.Clients.Client(item.ConnectionId ?? "").SendAsync("SETNHANVIENPV", $"{nhanVienId}",
                         $"{maHoSo}");
             }
             catch (Exception e)
@@ -1731,7 +1731,7 @@ public partial class MayCansService : ObservableObject, IMayCansService
         {
             try
             {
-                 //var isChiSanLuong = item.IsChiSangLuong;
+                //var isChiSanLuong = item.IsChiSangLuong;
                 await hubContext.Clients.Client(item.ConnectionId ?? "")
                     .SendAsync("SETTIME", DateTime.Now.ToString("yyyyMMddHHmmss")); // isChiSanLuong dùng để check trạng thai SL của cân
 
@@ -1992,6 +1992,29 @@ public partial class MayCansService : ObservableObject, IMayCansService
         return rl;
     }
 
+    public async Task<bool> CommandChamCongSync(string id, DateTime dateTime)
+    {
+        var rl = false;
+        var item = Find(id);
+        if (item != null)
+        {
+            try
+            {
+                await hubContext.Clients.Client(item.ConnectionId ?? "")
+                    .SendAsync("chamcongsync", dateTime.ToString("yyyyMMdd"));
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
+
+            rl = true;
+        }
+
+        return rl;
+    }
+
     public async Task<bool> CommandGetPhieuCanCountStatus0(string id, DateTime dateTime)
     {
         var rl = false;
@@ -2067,111 +2090,111 @@ public partial class MayCansService : ObservableObject, IMayCansService
                     case AppKV.DauAo:
                         break;
                     case AppKV.NguyenLieu:
-                    {
-                        var _items = vmMain.VmPhieuCanNguyenLieu.GetsLast<PhieuCanNguyenLieu>(VmApp.DateTimeNow,
-                            VmApp.MaxRowsView);
-                        if (_items.Count > 0) itemsNguyenLieu.AddRange(_items);
-                        break;
-                    }
+                        {
+                            var _items = vmMain.VmPhieuCanNguyenLieu.GetsLast<PhieuCanNguyenLieu>(VmApp.DateTimeNow,
+                                VmApp.MaxRowsView);
+                            if (_items.Count > 0) itemsNguyenLieu.AddRange(_items);
+                            break;
+                        }
                     case AppKV.BTPFillet:
                         break;
                     case AppKV.TPFillet:
-                    {
-                        var _items = vmMain.VmPhieuCanTPFillet.GetsLast<PhieuCanTPFillet>(VmApp.DateTimeNow,
-                            VmApp.MaxRowsView);
-                        if (_items.Count > 0) itemsTPFillet.AddRange(_items);
-                        break;
-                    }
+                        {
+                            var _items = vmMain.VmPhieuCanTPFillet.GetsLast<PhieuCanTPFillet>(VmApp.DateTimeNow,
+                                VmApp.MaxRowsView);
+                            if (_items.Count > 0) itemsTPFillet.AddRange(_items);
+                            break;
+                        }
                     case AppKV.BTPFilletv2:
-                    {
-                        var _items = vmMain.VmPhieuCanBtpFilletv2.GetsLast<PhieuCanBTPFilletv2>(VmApp.DateTimeNow,
-                            VmApp.MaxRowsView);
-                        if (_items.Count > 0) itemsBTPFilletv2.AddRange(_items);
-                        break;
-                    }
+                        {
+                            var _items = vmMain.VmPhieuCanBtpFilletv2.GetsLast<PhieuCanBTPFilletv2>(VmApp.DateTimeNow,
+                                VmApp.MaxRowsView);
+                            if (_items.Count > 0) itemsBTPFilletv2.AddRange(_items);
+                            break;
+                        }
                     case AppKV.TPFilletv2:
-                    {
-                        var _items = vmMain.VmPhieuCanTpFilletv2.GetsLast<PhieuCanTPFilletv2>(VmApp.DateTimeNow,
-                            VmApp.MaxRowsView);
-                        if (_items.Count > 0) itemsTPFilletv2.AddRange(_items);
-                        break;
-                    }
+                        {
+                            var _items = vmMain.VmPhieuCanTpFilletv2.GetsLast<PhieuCanTPFilletv2>(VmApp.DateTimeNow,
+                                VmApp.MaxRowsView);
+                            if (_items.Count > 0) itemsTPFilletv2.AddRange(_items);
+                            break;
+                        }
                     case AppKV.PhuPham:
-                    {
-                        var _items = vmMain.VmPhieuCanPhuPham.GetsLast<PhieuCanPhuPham>(VmApp.DateTimeNow,
-                            VmApp.MaxRowsView);
-                        if (_items.Count > 0) itemsPhuPham.AddRange(_items);
-                        break;
-                    }
+                        {
+                            var _items = vmMain.VmPhieuCanPhuPham.GetsLast<PhieuCanPhuPham>(VmApp.DateTimeNow,
+                                VmApp.MaxRowsView);
+                            if (_items.Count > 0) itemsPhuPham.AddRange(_items);
+                            break;
+                        }
                     case AppKV.BTPDinhHinh:
-                    {
-                        var _items = vmMain.VmPhieuCanBTPDinhHinh.GetsLast<PhieuCanBTPDinhHinh>(VmApp.DateTimeNow,
-                            VmApp.MaxRowsView);
-                        if (_items.Count > 0) itemsBTPDinhHinh.AddRange(_items);
-                        break;
-                    }
+                        {
+                            var _items = vmMain.VmPhieuCanBTPDinhHinh.GetsLast<PhieuCanBTPDinhHinh>(VmApp.DateTimeNow,
+                                VmApp.MaxRowsView);
+                            if (_items.Count > 0) itemsBTPDinhHinh.AddRange(_items);
+                            break;
+                        }
                     case AppKV.TPDinhHinh:
-                    {
-                        var _items = vmMain.VmPhieuCanTPDinhHinh.GetsLast<PhieuCanTPDinhHinh>(VmApp.DateTimeNow,
-                            VmApp.MaxRowsView);
-                        if (_items.Count > 0) itemsTPDinhHinh.AddRange(_items);
-                        break;
-                    }
+                        {
+                            var _items = vmMain.VmPhieuCanTPDinhHinh.GetsLast<PhieuCanTPDinhHinh>(VmApp.DateTimeNow,
+                                VmApp.MaxRowsView);
+                            if (_items.Count > 0) itemsTPDinhHinh.AddRange(_items);
+                            break;
+                        }
                     case AppKV.XepKhuon:
-                    {
-                        var _items = vmMain.VmPhieuCanChinhXepKhuon.GetsLast<PhieuCanChinhXepKhuon>(VmApp.DateTimeNow,
-                            VmApp.MaxRowsView);
-                        if (_items.Count > 0) itemsXepKhuon.AddRange(_items);
-                        break;
-                    }
+                        {
+                            var _items = vmMain.VmPhieuCanChinhXepKhuon.GetsLast<PhieuCanChinhXepKhuon>(VmApp.DateTimeNow,
+                                VmApp.MaxRowsView);
+                            if (_items.Count > 0) itemsXepKhuon.AddRange(_items);
+                            break;
+                        }
                     case AppKV.BaoTu:
                         break;
                     case AppKV.CaoThit:
                         break;
                     case AppKV.XepKhuonRaCoi:
-                    {
-                        var _items = vmMain.VmPhieuCanRaCoi.GetsLast<PhieuCanRaCoi>(VmApp.DateTimeNow,
-                            VmApp.MaxRowsView);
-                        if (_items.Count > 0) itemsXepKhuonRaCoi.AddRange(_items);
+                        {
+                            var _items = vmMain.VmPhieuCanRaCoi.GetsLast<PhieuCanRaCoi>(VmApp.DateTimeNow,
+                                VmApp.MaxRowsView);
+                            if (_items.Count > 0) itemsXepKhuonRaCoi.AddRange(_items);
 
-                        break;
-                    }
+                            break;
+                        }
                     case AppKV.XepKhuonPhu:
-                    {
-                        var _items = vmMain.VmPhieuCanPhuXepKhuon.GetsLast<PhieuCanPhuXepKhuon>(VmApp.DateTimeNow,
-                            VmApp.MaxRowsView);
-                        if (_items.Count > 0) itemsXepKhuonPhu.AddRange(_items);
-                        break;
-                    }
+                        {
+                            var _items = vmMain.VmPhieuCanPhuXepKhuon.GetsLast<PhieuCanPhuXepKhuon>(VmApp.DateTimeNow,
+                                VmApp.MaxRowsView);
+                            if (_items.Count > 0) itemsXepKhuonPhu.AddRange(_items);
+                            break;
+                        }
                     case AppKV.XepKhuonKXL:
-                    {
-                        var _items = vmMain.VmPhieuCanXepKhuonKXL.GetsLast<PhieuCanXepKhuonKHC>(VmApp.DateTimeNow,
-                            VmApp.MaxRowsView);
-                        if (_items.Count > 0) itemsXepKhuonKXL.AddRange(_items);
-                        break;
-                    }
+                        {
+                            var _items = vmMain.VmPhieuCanXepKhuonKXL.GetsLast<PhieuCanXepKhuonKHC>(VmApp.DateTimeNow,
+                                VmApp.MaxRowsView);
+                            if (_items.Count > 0) itemsXepKhuonKXL.AddRange(_items);
+                            break;
+                        }
 
                     case AppKV.PhuPhamv2:
-                    {
-                        var _items = vmMain.VmPhieuCanPhuPhamv2.GetsLast<PhieuCanPhuPhamv2>(VmApp.DateTimeNow,
-                            VmApp.MaxRowsView);
-                        if (_items.Count > 0) itemsPhuPhamv2.AddRange(_items);
-                        break;
-                    }
+                        {
+                            var _items = vmMain.VmPhieuCanPhuPhamv2.GetsLast<PhieuCanPhuPhamv2>(VmApp.DateTimeNow,
+                                VmApp.MaxRowsView);
+                            if (_items.Count > 0) itemsPhuPhamv2.AddRange(_items);
+                            break;
+                        }
                     case AppKV.Hq:
-                    {
-                        var _items = vmMain.VmPhieuCanHq.GetsLast<HQ_PhieuCan>(VmApp.DateTimeNow,
-                            VmApp.MaxRowsView);
-                        if (_items.Count > 0) itemsHq.AddRange(_items);
-                        break;
-                    }
+                        {
+                            var _items = vmMain.VmPhieuCanHq.GetsLast<HQ_PhieuCan>(VmApp.DateTimeNow,
+                                VmApp.MaxRowsView);
+                            if (_items.Count > 0) itemsHq.AddRange(_items);
+                            break;
+                        }
                     case AppKV.XepKhuonBlock:
-                    {
-                        var _items = vmMain.VmPhieuCanXepKhuonBlock.GetsLast<PhieuCanXepKhuonBlock>(VmApp.DateTimeNow,
-                            VmApp.MaxRowsView);
-                        if (_items.Count > 0) itemsXepKhuonBlock.AddRange(_items);
-                        break;
-                    }
+                        {
+                            var _items = vmMain.VmPhieuCanXepKhuonBlock.GetsLast<PhieuCanXepKhuonBlock>(VmApp.DateTimeNow,
+                                VmApp.MaxRowsView);
+                            if (_items.Count > 0) itemsXepKhuonBlock.AddRange(_items);
+                            break;
+                        }
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
@@ -2184,180 +2207,180 @@ public partial class MayCansService : ObservableObject, IMayCansService
                     case AppKV.DauAo:
                         break;
                     case AppKV.NguyenLieu:
-                    {
-                        var _items = itemsNguyenLieu.Where(x => x.MaMayTinhCan == mayCan.Id).ToList();
-                        if (_items.Count > 0)
                         {
-                            mayCan.Items.AddRange(_items);
-                            mayCan.TongSoRo = itemsNguyenLieu.Count;
-                            mayCan.TongTrongLuong = itemsNguyenLieu.Sum(x => x.TrongLuong ?? 0);
-                        }
+                            var _items = itemsNguyenLieu.Where(x => x.MaMayTinhCan == mayCan.Id).ToList();
+                            if (_items.Count > 0)
+                            {
+                                mayCan.Items.AddRange(_items);
+                                mayCan.TongSoRo = itemsNguyenLieu.Count;
+                                mayCan.TongTrongLuong = itemsNguyenLieu.Sum(x => x.TrongLuong ?? 0);
+                            }
 
-                        break;
-                    }
+                            break;
+                        }
                     case AppKV.BTPFillet:
                         break;
                     case AppKV.TPFillet:
-                    {
-                        var _items = itemsTPFillet.Where(x => x.MaMayTinhCan == mayCan.Id).ToList();
-                        if (_items.Count > 0)
                         {
-                            mayCan.Items.AddRange(_items);
-                            mayCan.TongSoRo = itemsTPFillet.Count;
-                            mayCan.TongTrongLuong = itemsTPFillet.Sum(x => x.TrongLuong ?? 0);
-                        }
+                            var _items = itemsTPFillet.Where(x => x.MaMayTinhCan == mayCan.Id).ToList();
+                            if (_items.Count > 0)
+                            {
+                                mayCan.Items.AddRange(_items);
+                                mayCan.TongSoRo = itemsTPFillet.Count;
+                                mayCan.TongTrongLuong = itemsTPFillet.Sum(x => x.TrongLuong ?? 0);
+                            }
 
-                        break;
-                    }
+                            break;
+                        }
                     case AppKV.BTPFilletv2:
-                    {
-                        var _items = itemsBTPFilletv2.Where(x => x.MaMayCan == mayCan.Id).ToList();
-                        if (_items.Count > 0)
                         {
-                            mayCan.Items.AddRange(_items);
-                            mayCan.TongSoRo = itemsBTPFilletv2.Count;
-                            mayCan.TongTrongLuong = itemsBTPFilletv2.Sum(x => x.TrongLuong);
-                        }
+                            var _items = itemsBTPFilletv2.Where(x => x.MaMayCan == mayCan.Id).ToList();
+                            if (_items.Count > 0)
+                            {
+                                mayCan.Items.AddRange(_items);
+                                mayCan.TongSoRo = itemsBTPFilletv2.Count;
+                                mayCan.TongTrongLuong = itemsBTPFilletv2.Sum(x => x.TrongLuong);
+                            }
 
-                        break;
-                    }
+                            break;
+                        }
                     case AppKV.TPFilletv2:
-                    {
-                        var _items = itemsTPFilletv2.Where(x => x.MaMayCan == mayCan.Id).ToList();
-                        if (_items.Count > 0)
                         {
-                            mayCan.Items.AddRange(_items);
-                            mayCan.TongSoRo = itemsTPFilletv2.Count;
-                            mayCan.TongTrongLuong = itemsTPFilletv2.Sum(x => x.TrongLuongTra);
-                        }
+                            var _items = itemsTPFilletv2.Where(x => x.MaMayCan == mayCan.Id).ToList();
+                            if (_items.Count > 0)
+                            {
+                                mayCan.Items.AddRange(_items);
+                                mayCan.TongSoRo = itemsTPFilletv2.Count;
+                                mayCan.TongTrongLuong = itemsTPFilletv2.Sum(x => x.TrongLuongTra);
+                            }
 
-                        break;
-                    }
+                            break;
+                        }
                     case AppKV.PhuPham:
-                    {
-                        var _items = itemsPhuPham.Where(x => x.MaMayTinhCan == mayCan.Id).ToList();
-                        if (_items.Count > 0)
                         {
-                            mayCan.Items.AddRange(_items);
-                            mayCan.TongSoRo = itemsPhuPham.Count;
-                            mayCan.TongTrongLuong = itemsPhuPham.Sum(x => x.TrongLuong ?? 0);
-                        }
+                            var _items = itemsPhuPham.Where(x => x.MaMayTinhCan == mayCan.Id).ToList();
+                            if (_items.Count > 0)
+                            {
+                                mayCan.Items.AddRange(_items);
+                                mayCan.TongSoRo = itemsPhuPham.Count;
+                                mayCan.TongTrongLuong = itemsPhuPham.Sum(x => x.TrongLuong ?? 0);
+                            }
 
-                        break;
-                    }
+                            break;
+                        }
                     case AppKV.BTPDinhHinh:
-                    {
-                        var _items = itemsBTPDinhHinh.Where(x => x.MaMayCan == mayCan.Id).ToList();
-                        if (_items.Count > 0)
                         {
-                            mayCan.Items.AddRange(_items);
-                            mayCan.TongSoRo = itemsBTPDinhHinh.Count;
-                            mayCan.TongTrongLuong = itemsBTPDinhHinh.Sum(x => x.TrongLuong);
-                        }
+                            var _items = itemsBTPDinhHinh.Where(x => x.MaMayCan == mayCan.Id).ToList();
+                            if (_items.Count > 0)
+                            {
+                                mayCan.Items.AddRange(_items);
+                                mayCan.TongSoRo = itemsBTPDinhHinh.Count;
+                                mayCan.TongTrongLuong = itemsBTPDinhHinh.Sum(x => x.TrongLuong);
+                            }
 
-                        break;
-                    }
+                            break;
+                        }
                     case AppKV.TPDinhHinh:
-                    {
-                        var _items = itemsTPDinhHinh.Where(x => x.MaMayCan == mayCan.Id).ToList();
-                        if (_items.Count > 0)
                         {
-                            mayCan.Items.AddRange(_items);
-                            mayCan.TongSoRo = itemsTPDinhHinh.Count;
-                            mayCan.TongTrongLuong = itemsTPDinhHinh.Sum(x => x.TrongLuongTra);
-                        }
+                            var _items = itemsTPDinhHinh.Where(x => x.MaMayCan == mayCan.Id).ToList();
+                            if (_items.Count > 0)
+                            {
+                                mayCan.Items.AddRange(_items);
+                                mayCan.TongSoRo = itemsTPDinhHinh.Count;
+                                mayCan.TongTrongLuong = itemsTPDinhHinh.Sum(x => x.TrongLuongTra);
+                            }
 
-                        break;
-                    }
+                            break;
+                        }
                     case AppKV.XepKhuon:
-                    {
-                        var _items = itemsXepKhuon.Where(x => x.MaMayCan == mayCan.Id).ToList();
-                        if (_items.Count > 0)
                         {
-                            mayCan.Items.AddRange(_items);
-                            mayCan.TongSoRo = itemsXepKhuon.Count;
-                            mayCan.TongTrongLuong = itemsXepKhuon.Sum(x => x.TrongLuong);
-                        }
+                            var _items = itemsXepKhuon.Where(x => x.MaMayCan == mayCan.Id).ToList();
+                            if (_items.Count > 0)
+                            {
+                                mayCan.Items.AddRange(_items);
+                                mayCan.TongSoRo = itemsXepKhuon.Count;
+                                mayCan.TongTrongLuong = itemsXepKhuon.Sum(x => x.TrongLuong);
+                            }
 
-                        break;
-                    }
+                            break;
+                        }
 
                     case AppKV.BaoTu:
                         break;
                     case AppKV.CaoThit:
                         break;
                     case AppKV.XepKhuonRaCoi:
-                    {
-                        var _items = itemsXepKhuonRaCoi.Where(x => x.MayCan == mayCan.Id).ToList();
-                        if (_items.Count > 0)
                         {
-                            mayCan.Items.AddRange(_items);
-                            mayCan.TongSoRo = itemsXepKhuonRaCoi.Count;
-                            mayCan.TongTrongLuong = itemsXepKhuonRaCoi.Sum(x => x.TrongLuong);
-                        }
+                            var _items = itemsXepKhuonRaCoi.Where(x => x.MayCan == mayCan.Id).ToList();
+                            if (_items.Count > 0)
+                            {
+                                mayCan.Items.AddRange(_items);
+                                mayCan.TongSoRo = itemsXepKhuonRaCoi.Count;
+                                mayCan.TongTrongLuong = itemsXepKhuonRaCoi.Sum(x => x.TrongLuong);
+                            }
 
-                        break;
-                    }
+                            break;
+                        }
                     case AppKV.XepKhuonPhu:
-                    {
-                        var _items = itemsXepKhuonPhu.Where(x => x.MaMayCan == mayCan.Id).ToList();
-                        if (_items.Count > 0)
                         {
-                            mayCan.Items.AddRange(_items);
-                            mayCan.TongSoRo = itemsXepKhuonPhu.Count;
-                            mayCan.TongTrongLuong = itemsXepKhuonPhu.Sum(x => x.TrongLuong);
-                        }
+                            var _items = itemsXepKhuonPhu.Where(x => x.MaMayCan == mayCan.Id).ToList();
+                            if (_items.Count > 0)
+                            {
+                                mayCan.Items.AddRange(_items);
+                                mayCan.TongSoRo = itemsXepKhuonPhu.Count;
+                                mayCan.TongTrongLuong = itemsXepKhuonPhu.Sum(x => x.TrongLuong);
+                            }
 
-                        break;
-                    }
+                            break;
+                        }
                     case AppKV.XepKhuonKXL:
-                    {
-                        var _items = itemsXepKhuonKXL.Where(x => x.MaMayCan == mayCan.Id).ToList();
-                        if (_items.Count > 0)
                         {
-                            mayCan.Items.AddRange(_items);
-                            mayCan.TongSoRo = itemsXepKhuonKXL.Count;
-                            mayCan.TongTrongLuong = itemsXepKhuonKXL.Sum(x => x.TrongLuong);
-                        }
+                            var _items = itemsXepKhuonKXL.Where(x => x.MaMayCan == mayCan.Id).ToList();
+                            if (_items.Count > 0)
+                            {
+                                mayCan.Items.AddRange(_items);
+                                mayCan.TongSoRo = itemsXepKhuonKXL.Count;
+                                mayCan.TongTrongLuong = itemsXepKhuonKXL.Sum(x => x.TrongLuong);
+                            }
 
-                        break;
-                    }
+                            break;
+                        }
                     case AppKV.XepKhuonBlock:
-                    {
-                        var _items = itemsXepKhuonBlock.Where(x => x.MaMayCan == mayCan.Id).ToList();
-                        if (_items.Count > 0)
                         {
-                            mayCan.Items.AddRange(_items);
-                            mayCan.TongSoRo = itemsXepKhuonBlock.Count;
-                            mayCan.TongTrongLuong = itemsXepKhuonBlock.Sum(x => x.TrongLuong);
-                        }
+                            var _items = itemsXepKhuonBlock.Where(x => x.MaMayCan == mayCan.Id).ToList();
+                            if (_items.Count > 0)
+                            {
+                                mayCan.Items.AddRange(_items);
+                                mayCan.TongSoRo = itemsXepKhuonBlock.Count;
+                                mayCan.TongTrongLuong = itemsXepKhuonBlock.Sum(x => x.TrongLuong);
+                            }
 
-                        break;
-                    }
+                            break;
+                        }
                     case AppKV.PhuPhamv2:
-                    {
-                        var _items = itemsPhuPhamv2.Where(x => x.MaMayCan == mayCan.Id).ToList();
-                        if (_items.Count > 0)
                         {
-                            mayCan.Items.AddRange(_items);
-                            mayCan.TongSoRo = itemsPhuPhamv2.Count;
-                            mayCan.TongTrongLuong = itemsPhuPhamv2.Sum(x => x.TrongLuong);
-                        }
+                            var _items = itemsPhuPhamv2.Where(x => x.MaMayCan == mayCan.Id).ToList();
+                            if (_items.Count > 0)
+                            {
+                                mayCan.Items.AddRange(_items);
+                                mayCan.TongSoRo = itemsPhuPhamv2.Count;
+                                mayCan.TongTrongLuong = itemsPhuPhamv2.Sum(x => x.TrongLuong);
+                            }
 
-                        break;
-                    }
+                            break;
+                        }
                     case AppKV.Hq:
-                    {
-                        var _items = itemsHq.Where(x => x.MayCan == mayCan.Id).ToList();
-                        if (_items.Count > 0)
                         {
-                            mayCan.Items.AddRange(_items);
-                            mayCan.TongSoRo = itemsHq.Count;
-                            mayCan.TongTrongLuong = itemsHq.Sum(x => x.TrongLuong);
-                        }
+                            var _items = itemsHq.Where(x => x.MayCan == mayCan.Id).ToList();
+                            if (_items.Count > 0)
+                            {
+                                mayCan.Items.AddRange(_items);
+                                mayCan.TongSoRo = itemsHq.Count;
+                                mayCan.TongTrongLuong = itemsHq.Sum(x => x.TrongLuong);
+                            }
 
-                        break;
-                    }
+                            break;
+                        }
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
@@ -2405,14 +2428,14 @@ public partial class MayCansService : ObservableObject, IMayCansService
         }
     }
 
-    public void Update(string id,AppKV wKv, AppType aType, string xuongId)
+    public void Update(string id, AppKV wKv, AppType aType, string xuongId)
     {
         try
         {
             var context = vmMain._dbContext;
             var constr = context.Database.GetConnectionString();
             // var items = context.MayCans.AsNoTracking().OrderBy(x => x.Idx).ToList();
-            var item = context.MayCans.FirstOrDefault(x => x.Id == id );
+            var item = context.MayCans.FirstOrDefault(x => x.Id == id);
             if (item != null)
             {
                 item.WKv = wKv;
@@ -2422,7 +2445,7 @@ public partial class MayCansService : ObservableObject, IMayCansService
                 context.SaveChanges();
             }
         }
-        
+
         catch (Exception e)
         {
             Console.WriteLine(e);

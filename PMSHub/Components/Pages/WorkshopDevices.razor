@@ -1,0 +1,69 @@
+@page "/WorkshopDevices"
+@inherits AuthenticatedComponent
+@rendermode InteractiveServer
+@implements IAsyncDisposable
+@using Microsoft.EntityFrameworkCore
+@using Models.Repos
+@using Models.Repos.Models
+@using Microsoft.JSInterop
+@using Syncfusion.Blazor.Grids
+@inject IJSRuntime JS
+
+<PageTitle>Thiết bị tại xưởng</PageTitle>
+<div class="workshop-page">
+    <div class="workshop-heading">
+        <div><h1>Thiết bị tại xưởng</h1><div class="workshop-summary">Tổng máy: <b>@Devices.Count</b><span class="summary-online">Đang bật: <b>@Devices.Count(x => x.IsOnline)</b></span><span class="summary-offline">Đang tắt: <b>@Devices.Count(x => !x.IsOnline)</b></span></div></div>
+        <button class="e-btn e-primary" @onclick="LoadAsync">Tải lại</button>
+    </div>
+    @if (Devices.Count == 0)
+    { <div class="empty-workshop">Chưa có thiết bị tại xưởng kết nối.</div> }
+    else
+    {
+        <div class="device-card-grid">
+        @foreach (var device in Devices)
+        {
+            var records = Attendance.Where(x => x.ThietBi == device.DeviceCode).Take(10).ToList();
+            var latest = records.FirstOrDefault();
+            <section class="device-card">
+                <div class="device-card-header"><div><div class="device-code">@device.DeviceCode</div><div class="device-name">@device.DeviceName</div></div><div class="device-card-actions"><span class="status-dot @(device.IsOnline ? "online" : "offline")" title="@(device.IsOnline ? "Đang bật" : "Đang tắt")"></span><button class="device-settings" title="Cài đặt thiết bị" @onclick="() => OpenSettings(device)">⚙</button></div></div>
+                <div class="device-card-divider"></div>
+                <div class="device-info-row"><span>Xưởng</span><b>@device.WorkshopCode</b></div>
+                <div class="device-info-row"><span>Lần cuối</span><b>@(device.LastSeen?.ToString("dd/MM/yyyy HH:mm:ss") ?? "Chưa kết nối")</b></div>
+                <div class="device-info-row"><span>Mã thẻ</span><b>@(latest?.MaTheTu ?? "Chưa có")</b></div>
+                <div class="device-info-row"><span>Tên nhân viên</span><b>@(latest is null ? "Chưa có" : (string.IsNullOrWhiteSpace(latest.TenNhanVien) ? "Thẻ chưa đăng ký" : latest.TenNhanVien))</b></div>
+                <div class="device-info-row"><span>Trạng thái</span><b class="attendance-status">@(latest?.TrangThai ?? "Chưa có")</b></div>
+                <div class="device-card-divider"></div><div class="attendance-title">Phiếu Chấm Công</div>
+                <button class="detail-button" @onclick="() => OpenDetails(device)">Chi tiết (@Attendance.Count(x => x.ThietBi == device.DeviceCode))</button>
+                @if (DetailDevice?.DeviceCode == device.DeviceCode)
+                {
+                    var detailRecords = GetDetailRecords();
+                    <div class="inline-details"><div class="details-summary">Tổng: <b>@detailRecords.Count</b><span class="in-count">Vào: <b>@detailRecords.Count(x => x.TrangThai == "Vào")</b></span><span class="out-count">Ra: <b>@detailRecords.Count(x => x.TrangThai == "Ra")</b></span></div><SfGrid DataSource="@detailRecords" AllowFiltering="true" AllowPaging="true" AllowSorting="true" Height="360"><GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Excel"></GridFilterSettings><GridPageSettings PageSize="10" PageSizes="@(new string[] { "10", "20", "50", "100", "All" })"></GridPageSettings><GridColumns><GridColumn Field="MaTheTu" HeaderText="Mã thẻ" Width="130"></GridColumn><GridColumn Field="MaNhanVien" HeaderText="Mã NV" Width="120"></GridColumn><GridColumn Field="TenNhanVien" HeaderText="Tên nhân viên" Width="180"></GridColumn><GridColumn Field="TrangThai" HeaderText="Trạng thái" Width="110"></GridColumn><GridColumn Field="ThoiGian" HeaderText="Thời gian" Format="dd/MM/yyyy HH:mm:ss" Type="ColumnType.DateTime" Width="170"></GridColumn><GridColumn Field="Xuong" HeaderText="Xưởng" Width="100"></GridColumn></GridColumns></SfGrid></div>
+                }
+            </section>
+        }
+        </div>
+    }
+</div>
+@if (SettingsDevice is not null)
+{
+    <div class="settings-backdrop" @onclick="CloseSettings"><div class="settings-dialog" @onclick:stopPropagation="true"><button class="settings-close" @onclick="CloseSettings">×</button><h3>@SettingsDevice.DeviceName</h3><div class="device-info-row"><span>Địa chỉ IP</span><b>@(SettingsDevice.IpAddress ?? "Chưa có")</b></div><button class="open-ip-button" @onclick="() => OpenIpAsync(SettingsDevice.IpAddress)" disabled="@(string.IsNullOrWhiteSpace(SettingsDevice.IpAddress))">Mở trang thiết bị</button></div></div>
+}
+<style>
+ .workshop-page{padding:24px;background:#f7f7fb;min-height:calc(100vh - 80px)} .workshop-heading{display:flex;justify-content:space-between;align-items:end;border-bottom:1px solid #b9b9b9;padding-bottom:16px;margin-bottom:18px}.workshop-heading h1{margin:0 0 8px;color:#556b86;font-size:36px;font-weight:400}.workshop-summary{color:#555}.workshop-summary span{margin-left:18px}.summary-online,.online-text{color:#70b515}.summary-offline,.offline-text{color:#777}.device-card-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(390px,1fr));gap:20px 30px}.device-card{background:#fff;border-radius:10px;padding:16px 18px 14px;box-shadow:0 3px 10px #0002;min-height:270px}.device-card-header{display:flex;justify-content:space-between;align-items:center}.device-card-actions{display:flex;align-items:center;gap:14px}.device-settings{border:0;border-radius:4px;background:#5d45a3;color:#fff;width:42px;height:34px;font-size:18px;cursor:pointer}.device-code{font-size:20px;font-weight:600;color:#222}.device-name{margin-top:5px;color:#333}.status-dot{width:14px;height:14px;border-radius:50%;display:inline-block}.status-dot.online{background:#8ac926;box-shadow:0 0 0 3px #8ac92622}.status-dot.offline{background:#888;box-shadow:0 0 0 3px #8882}.device-card-divider{height:1px;background:#ddd;margin:14px 0 10px}.device-info-row{display:grid;grid-template-columns:130px 1fr;padding:5px 0;color:#222}.device-info-row b{font-weight:400}.attendance-title{color:#145b91;font-weight:600;margin-bottom:6px}.no-attendance{color:#888;font-size:14px;padding:6px 0}.attendance-list{max-height:245px;overflow:auto}.attendance-row{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid #eee;font-size:13px}.attendance-row small{display:block;color:#777;margin-top:3px}.attendance-time{text-align:right;white-space:nowrap}.attendance-time b{color:#5d45a3;font-weight:500}.empty-workshop{background:#fff;padding:30px;border-radius:8px;color:#777;text-align:center}@@media(max-width:600px){.device-card-grid{grid-template-columns:1fr}.workshop-heading{align-items:start;gap:10px;flex-direction:column}} .settings-backdrop{position:fixed;inset:0;background:#0008;display:flex;align-items:center;justify-content:center;z-index:1000}.settings-dialog{position:relative;background:#fff;border-radius:10px;padding:24px;width:420px;box-shadow:0 8px 30px #0005}.settings-close{position:absolute;right:12px;top:8px;border:0;background:none;font-size:24px;cursor:pointer}.open-ip-button{margin-top:14px;background:#5d45a3;color:#fff;border:0;border-radius:4px;padding:10px 16px;cursor:pointer}
+</style>
+<style>
+ .detail-button{border:0;border-radius:4px;background:#075c98;color:#fff;padding:8px 18px;cursor:pointer}.inline-details{margin-top:12px;width:100%;overflow:hidden}.details-summary{margin:10px 0 14px;color:#555}.details-summary span{margin-left:22px}.in-count{color:#238b45}.out-count{color:#a14b4b}
+</style>
+@code {
+ private List<WorkshopDevice> Devices{get;set;}=new(); private List<WorkshopAttendance> Attendance{get;set;}=new(); private WorkshopDevice? SettingsDevice; private WorkshopDevice? DetailDevice; private readonly CancellationTokenSource refreshCancellation=new();
+ protected override async Task OnInitializedAsync(){await LoadAsync();_=RefreshLoopAsync();}
+ private Task LoadAsync(){using var db=new dbPMScontext();Devices=db.ThietBiChamCongTaiXuongs.AsNoTracking().OrderBy(x=>x.WorkshopCode).ThenBy(x=>x.DeviceCode).ToList();Attendance=db.ChamCongTaiXuongs.AsNoTracking().OrderByDescending(x=>x.ThoiGian).Take(500).ToList();return Task.CompletedTask;}
+ private async Task OpenIpAsync(string? ip){if (string.IsNullOrWhiteSpace(ip)) return; if (!System.Net.IPAddress.TryParse(ip, out _)) return; await JS.InvokeVoidAsync("open", $"http://{ip}", "_blank");}
+ private void OpenSettings(WorkshopDevice device) => SettingsDevice = device;
+ private void CloseSettings() => SettingsDevice = null;
+ private void OpenDetails(WorkshopDevice device){DetailDevice=DetailDevice?.DeviceCode==device.DeviceCode?null:device;}
+ private void CloseDetails()=>DetailDevice=null;
+ private List<WorkshopAttendance> GetDetailRecords(){return DetailDevice is null?new():Attendance.Where(x=>x.ThietBi==DetailDevice.DeviceCode).OrderByDescending(x=>x.ThoiGian).ToList();}
+ private async Task RefreshLoopAsync(){using var timer=new PeriodicTimer(TimeSpan.FromSeconds(3));try{while(await timer.WaitForNextTickAsync(refreshCancellation.Token)){await LoadAsync();await InvokeAsync(StateHasChanged);}}catch(OperationCanceledException){}}
+ public ValueTask DisposeAsync(){refreshCancellation.Cancel();refreshCancellation.Dispose();return ValueTask.CompletedTask;}
+}

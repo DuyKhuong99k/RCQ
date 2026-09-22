@@ -31,5 +31,8 @@ namespace Models.Repos.Models
         [StringLength(500)]
         public string? GhiChu { get; set; }
 
+        [StringLength(100)]
+        public string? CongViec { get; set; }
+
     }
 }

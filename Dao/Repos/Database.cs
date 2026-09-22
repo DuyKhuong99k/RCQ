@@ -108,5 +108,53 @@ namespace Dao.Repos
             var item = connnection.Query<DateTime>(query).SingleOrDefault();
             return item;
         }
+        public bool UpdateDeviceHeartbeat(long device)
+        {
+            const string query = @"
+        UPDATE ThietBiChamCongTaiXuong
+        SET
+            IsOnline = 1,
+            LastSeen = SYSDATETIME()
+        WHERE DeviceCode = @DeviceCode;
+    ";
+
+            using var connection = new SqlConnection(ConnectionString);
+            connection.Open();
+
+            return connection.Execute(
+                query,
+                new
+                {
+                    DeviceCode = device.ToString()
+                }) > 0;
+        }
+
+        public int SetOfflineDevices(int timeoutSeconds = 40)
+        {
+            const string query = @"
+        UPDATE ThietBiChamCongTaiXuong
+        SET
+            IsOnline = 0,
+            ConnectionId = NULL
+        WHERE IsOnline = 1
+          AND LastSeen IS NOT NULL
+          AND LastSeen < DATEADD(
+              SECOND,
+              -@TimeoutSeconds,
+              SYSDATETIME()
+          );
+    ";
+
+            using var connection = new SqlConnection(ConnectionString);
+            connection.Open();
+
+            return connection.Execute(
+                query,
+                new
+                {
+                    TimeoutSeconds = timeoutSeconds
+                });
+        }
+
     }
 }

@@ -58,9 +58,9 @@ namespace AppViewModels
         ///     Connection String
         /// </summary>
         public string ConnectionString =>
-            $@"data source={ServerName};initial catalog={Db};user id={Usr};password={Pass};MultipleActiveResultSets=True;App=EntityFramework;Connection Timeout={TimeOut};TrustServerCertificate=True;";
+            $@"data source={ServerName};initial catalog={Db};user id={Usr};password={Pass};MultipleActiveResultSets=True;App=EntityFramework;Connection Timeout={TimeOut};Encrypt=False;TrustServerCertificate=True;";
         public string ConnectionStringBravo =>
-            $@"data source={ServerNameBravo};initial catalog={DbBravo};user id={UsrBravo};password={PassBravo};MultipleActiveResultSets=True;App=EntityFramework;Connection Timeout={TimeOut};TrustServerCertificate=True;";
+            $@"data source={ServerNameBravo};initial catalog={DbBravo};user id={UsrBravo};password={PassBravo};MultipleActiveResultSets=True;App=EntityFramework;Connection Timeout={TimeOut};Encrypt=False;TrustServerCertificate=True;";
 
         [ObservableProperty] private string? connectionString2 = null;
 

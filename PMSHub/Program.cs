@@ -14,8 +14,21 @@ using Dapper;
 using Newtonsoft.Json;
 using PMSHub.Components.Pages;
 using ToolsEx;
+using Microsoft.AspNetCore.DataProtection;
+using PMSHub.Middlewares;
+using Dao.Repos;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddScoped<Database>();
+builder.Services.AddHostedService<DeviceHeartbeatMonitor>();
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+builder.Logging.AddDebug();
+
+var dataProtectionKeysPath = Path.Combine(builder.Environment.ContentRootPath, "DataProtection-Keys");
+builder.Services.AddDataProtection()
+    .PersistKeysToFileSystem(new DirectoryInfo(dataProtectionKeysPath))
+    .SetApplicationName("PMSHub");
 // Đăng ký HttpClient factory
 builder.Services.AddHttpClient();
 // Add services to the container.
@@ -35,14 +48,10 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
 {
-#if DEBUG
-    options.IdleTimeout = TimeSpan.FromSeconds(3);
-#else
-    options.IdleTimeout = TimeSpan.FromMinutes(30);
-#endif
-    
+    options.IdleTimeout = TimeSpan.FromHours(8);
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
+    options.Cookie.SameSite = SameSiteMode.Lax;
 });
 builder.Services.AddControllers();
 builder.Services.AddControllers().AddNewtonsoftJson(o =>
@@ -148,11 +157,39 @@ app.UseRouting();
 app.UseStaticFiles();
 app.UseAntiforgery();
 app.UseSession(); 
+
+// Bảo vệ trực tiếp các trang quản trị ngay từ HTTP request đầu tiên.
+// Điều này tránh việc trang được render trước khi AuthenticatedComponent kiểm tra session.
+app.Use(async (context, next) =>
+{
+    var path = context.Request.Path.Value?.TrimEnd('/');
+    var requiresLogin = path?.Equals("/Devices", StringComparison.OrdinalIgnoreCase) == true
+                        || path?.Equals("/WorkshopDevices", StringComparison.OrdinalIgnoreCase) == true;
+
+    if (requiresLogin)
+    {
+        var userId = context.Session.GetString("UserId");
+        if (string.IsNullOrWhiteSpace(userId) || userId == "-1")
+        {
+            var returnUrl = context.Request.PathBase + context.Request.Path + context.Request.QueryString;
+            context.Response.Redirect($"/api/loginlocal/?returnUrl={Uri.EscapeDataString(returnUrl)}");
+            return;
+        }
+    }
+
+    await next();
+});
+
 app.UseAuthorization();
+
+// Giữ nguyên request body chấm công để có thể xem chính xác chuỗi máy đã gửi.
+// Sau khi đọc, middleware tua stream về đầu nên không làm thay đổi model binding.
+app.UseMiddleware<ChamCongRawBodyMiddleware>();
 
 // Th�m middleware session v�o pipeline
 app.MapControllers();
 app.MapHub<ChatHub>("chathub");
+app.MapHub<WorkshopHub>("workshophub");
 
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();

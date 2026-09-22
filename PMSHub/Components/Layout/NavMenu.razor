@@ -49,6 +49,12 @@
                     <i class="menu-icon tf-icons bx bx-devices"></i>
                     <div data-i18n="Analytics">Thiết Bị</div>
                 </NavLink>
+            </li>         
+            <li class="menu-item @(IsActive("WorkshopDevices") ? "active" : "")">
+                <NavLink href="WorkshopDevices" class="menu-link">
+                    <i class="menu-icon tf-icons bx bx-building"></i>
+                    <div data-i18n="Analytics">Thiết bị tại xưởng</div>
+                </NavLink>
             </li>
             <li class="menu-item @(IsActive("TheNhanVien") ? "active" : "")">
                 <NavLink href="TheNhanVien" class="menu-link">

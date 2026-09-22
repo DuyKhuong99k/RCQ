@@ -1468,9 +1468,25 @@ else
         </Content>
     </DialogTemplates>
     <DialogButtons>
-        <DialogButton Content="Lấy Số Lượn Sync" IsPrimary="true"
+        <DialogButton Content="Lấy Số Lượng Sync" IsPrimary="true"
                       OnClick="() => GetPhieuCanCountStatus0(SelectedItems.FirstOrDefault()?.Id)"/>
         <DialogButton Content="Sync" IsPrimary="true" OnClick="() => PhieuCanSync(SelectedItems.FirstOrDefault()?.Id)"/>
+    </DialogButtons>
+</SfDialog>
+<SfDialog Width="400px" IsModal="true" CloseOnEscape="true" ShowCloseIcon="true" @bind-Visible="@IsVisibleChamCongDate">
+    <DialogEvents OnOverlayModalClick="@OverlayClick"></DialogEvents>
+    <DialogTemplates>
+        <Header>
+            <div>@SelectedItems.FirstOrDefault()?.SubTitle</div>
+        </Header>
+        <Content>
+            <SfDatePicker TValue="DateTime?" @bind-Value="@DateValue" Placeholder="Chọn Ngày"></SfDatePicker>
+        </Content>
+    </DialogTemplates>
+    <DialogButtons>
+        <DialogButton Content="Lấy Số Lượng Sync" IsPrimary="true"
+                      OnClick="() => GetPhieuCanCountStatus0(SelectedItems.FirstOrDefault()?.Id)"/>
+        <DialogButton Content="Sync" IsPrimary="true" OnClick="() => ChamCongSync(SelectedItems.FirstOrDefault()?.Id)"/>
     </DialogButtons>
 </SfDialog>
 <SfDialog Width="400px" IsModal="true" CloseOnEscape="true" @bind-Visible="@IsVisibleReload">
@@ -1641,6 +1657,9 @@ else
                       @onmousedown="() => OpenDialogSelectedDate()">Sync PhieuCan
             </SfButton>
             <SfButton style="margin: 2px; width: 120px;" CssClass="e-primary"
+                      @onmousedown="() => OpenDialogChamCongDate()">Sync ChamCong
+            </SfButton>
+            <SfButton style="margin: 2px; width: 120px;" CssClass="e-primary"
                       @onmousedown="() => OpenDialogDoiKhuVuc(SelectedItems.FirstOrDefault())"> Đổi Khu Vực
             </SfButton>
             <SfButton style="margin: 2px; width: 120px;" CssClass="e-primary"
@@ -1666,6 +1685,7 @@ else
 
 @code {
     private bool IsVisibleSelectedDate { get; set; }
+    private bool IsVisibleChamCongDate { get; set; }
     private bool IsVisibleTare { get; set; }
     private bool IsVisibleThamSoTangTrong { get; set; }
     private bool IsVisibleLo { get; set; }
@@ -1926,6 +1946,11 @@ else
     private void OpenDialogSelectedDate()
     {
         IsVisibleSelectedDate = true;
+    }
+
+    private void OpenDialogChamCongDate()
+    {
+        IsVisibleChamCongDate = true;
     }
 
     private void OpenDialogDoiKhuVuc(MayCan? mayCan)
@@ -2475,6 +2500,8 @@ else
 
     private void HideAllDialogs()
     {
+        IsVisibleSelectedDate = false;
+        IsVisibleChamCongDate = false;
         IsVisibleSizeXepKhuon = false;
         IsVisibleSizeXepKhuonPhu = false;
         IsVisibleSizeFillet = false;
@@ -2838,6 +2865,24 @@ else
         }
     }
 
+    private async Task ChamCongSync(string? id)
+    {
+        IsVisibleChamCongDate = false;
+        try
+        {
+            await MayCanService.CommandChamCongSync(id ?? "", DateValue ?? DateTime.Now);
+            ToastService.ShowToast("Gửi Thành công!", ToastType.Success);
+        }
+        catch (TaskCanceledException)
+        {
+            ToastService.ShowToast("Request bị timeout!", ToastType.Error);
+        }
+        catch (Exception ex)
+        {
+            ToastService.ShowToast("Lỗi khi gọi API: " + ex.Message, ToastType.Error);
+        }
+    }
+
     private async Task GetPhieuCanCountStatus0(string? id)
     {
         // var data = new
@@ -2846,6 +2891,7 @@ else
         //     Path = "phieucansync"
         // };
         IsVisibleSelectedDate = false;
+        IsVisibleChamCongDate = false;
         try
         {
             // var _url = $"http:{url}/api/db/posts";
