@@ -96,7 +96,8 @@ namespace PMS.Controllers
                     var apiUrl3 = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/SettingWebApp/Get";
                     using var helper3 = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
                     var numberDate = await helper3.GetAsync<SettingDashboard>(HttpContext, apiUrl3);
-                    HttpContext.Session.SetString("NumberDate", numberDate.NumberDate.ToString());
+                    var numberDateValue = numberDate?.NumberDate ?? 0;
+                    HttpContext.Session.SetString("NumberDate", numberDateValue.ToString());
 
                     // Đăng nhập người dùng bằng cookie
                     var claims = new List<Claim>
@@ -106,7 +107,7 @@ namespace PMS.Controllers
                          new Claim("RefreshJWT", tokenData.RefreshToken),
                          new Claim("ExpiresJWT", tokenData.Expires.ToString()),
                          new Claim("XuongId", xuongId),
-                         new Claim("NumberDate", numberDate.NumberDate.ToString())
+                         new Claim("NumberDate", numberDateValue.ToString())
                             // Thêm các claims khác nếu cần
                     };
                     var apiListRoles = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/User/GetRolesFull/{username}";
