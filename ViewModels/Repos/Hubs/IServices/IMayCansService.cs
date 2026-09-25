@@ -112,6 +112,8 @@ namespace ViewModels.Repos.Hubs.IServices
         public Task<bool> CommandGetDeviceInfos(string id);
         public Task<bool> CommandPhieuCanSync(string id, DateTime dateTime);
         public Task<bool> CommandChamCongSync(string id, DateTime dateTime);
+        public Task<bool> CommandReSyncPhieuCan(string id, DateTime dateTime);
+        public Task<bool> CommandReSyncChamCong(string id, DateTime dateTime);
         public Task<bool> CommandGetPhieuCanCountStatus0(string id, DateTime dateTime);
         public Task<bool> CommandDoiKhuVuc(string id, AppKV khuVuc);
         public void Update(string id, AppKV wKv, AppType aType, string xuongId);

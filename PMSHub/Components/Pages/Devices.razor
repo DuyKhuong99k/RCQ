@@ -1489,6 +1489,36 @@ else
         <DialogButton Content="Sync" IsPrimary="true" OnClick="() => ChamCongSync(SelectedItems.FirstOrDefault()?.Id)"/>
     </DialogButtons>
 </SfDialog>
+<SfDialog Width="400px" IsModal="true" CloseOnEscape="true" ShowCloseIcon="true" @bind-Visible="@IsVisibleReSyncPhieuCanDate">
+    <DialogEvents OnOverlayModalClick="@OverlayClick"></DialogEvents>
+    <DialogTemplates>
+        <Header>
+            <div>Re Sync Phiếu Cân - @SelectedItems.FirstOrDefault()?.SubTitle</div>
+        </Header>
+        <Content>
+            <SfDatePicker TValue="DateTime?" @bind-Value="@DateValue" Placeholder="Chọn ngày cần đồng bộ lại"></SfDatePicker>
+        </Content>
+    </DialogTemplates>
+    <DialogButtons>
+        <DialogButton Content="Re Sync" IsPrimary="true"
+                      OnClick="() => ReSyncPhieuCan(SelectedItems.FirstOrDefault()?.Id)"/>
+    </DialogButtons>
+</SfDialog>
+<SfDialog Width="400px" IsModal="true" CloseOnEscape="true" ShowCloseIcon="true" @bind-Visible="@IsVisibleReSyncChamCongDate">
+    <DialogEvents OnOverlayModalClick="@OverlayClick"></DialogEvents>
+    <DialogTemplates>
+        <Header>
+            <div>Re Sync Chấm Công - @SelectedItems.FirstOrDefault()?.SubTitle</div>
+        </Header>
+        <Content>
+            <SfDatePicker TValue="DateTime?" @bind-Value="@DateValue" Placeholder="Chọn ngày cần đồng bộ lại"></SfDatePicker>
+        </Content>
+    </DialogTemplates>
+    <DialogButtons>
+        <DialogButton Content="Re Sync" IsPrimary="true"
+                      OnClick="() => ReSyncChamCong(SelectedItems.FirstOrDefault()?.Id)"/>
+    </DialogButtons>
+</SfDialog>
 <SfDialog Width="400px" IsModal="true" CloseOnEscape="true" @bind-Visible="@IsVisibleReload">
     <DialogEvents OnOverlayModalClick="@OverlayClick"></DialogEvents>
     <DialogTemplates>
@@ -1660,6 +1690,12 @@ else
                       @onmousedown="() => OpenDialogChamCongDate()">Sync ChamCong
             </SfButton>
             <SfButton style="margin: 2px; width: 120px;" CssClass="e-primary"
+                      @onmousedown="() => OpenDialogReSyncPhieuCanDate()">Re Sync PhieuCan
+            </SfButton>
+            <SfButton style="margin: 2px; width: 120px;" CssClass="e-primary"
+                      @onmousedown="() => OpenDialogReSyncChamCongDate()">Re Sync ChamCong
+            </SfButton>
+            <SfButton style="margin: 2px; width: 120px;" CssClass="e-primary"
                       @onmousedown="() => OpenDialogDoiKhuVuc(SelectedItems.FirstOrDefault())"> Đổi Khu Vực
             </SfButton>
             <SfButton style="margin: 2px; width: 120px;" CssClass="e-primary"
@@ -1686,6 +1722,8 @@ else
 @code {
     private bool IsVisibleSelectedDate { get; set; }
     private bool IsVisibleChamCongDate { get; set; }
+    private bool IsVisibleReSyncPhieuCanDate { get; set; }
+    private bool IsVisibleReSyncChamCongDate { get; set; }
     private bool IsVisibleTare { get; set; }
     private bool IsVisibleThamSoTangTrong { get; set; }
     private bool IsVisibleLo { get; set; }
@@ -1951,6 +1989,18 @@ else
     private void OpenDialogChamCongDate()
     {
         IsVisibleChamCongDate = true;
+    }
+
+    private void OpenDialogReSyncPhieuCanDate()
+    {
+        DateValue = null;
+        IsVisibleReSyncPhieuCanDate = true;
+    }
+
+    private void OpenDialogReSyncChamCongDate()
+    {
+        DateValue = null;
+        IsVisibleReSyncChamCongDate = true;
     }
 
     private void OpenDialogDoiKhuVuc(MayCan? mayCan)
@@ -2502,6 +2552,8 @@ else
     {
         IsVisibleSelectedDate = false;
         IsVisibleChamCongDate = false;
+        IsVisibleReSyncPhieuCanDate = false;
+        IsVisibleReSyncChamCongDate = false;
         IsVisibleSizeXepKhuon = false;
         IsVisibleSizeXepKhuonPhu = false;
         IsVisibleSizeFillet = false;
@@ -2880,6 +2932,62 @@ else
         catch (Exception ex)
         {
             ToastService.ShowToast("Lỗi khi gọi API: " + ex.Message, ToastType.Error);
+        }
+    }
+
+    private async Task ReSyncPhieuCan(string? id)
+    {
+        if (!DateValue.HasValue)
+        {
+            ToastService.ShowToast("Vui lòng chọn ngày cần đồng bộ lại.", ToastType.Warning);
+            return;
+        }
+
+        var confirmed = await jsRuntime.InvokeAsync<bool>("confirm",
+            $"Bạn có muốn đồng bộ lại các phiếu cân ngày {DateValue:dd/MM/yyyy} (khi các phiếu cân bị thiếu so với thực tế) và gửi xuống firmware?");
+        if (!confirmed)
+        {
+            return;
+        }
+
+        try
+        {
+            var sent = await MayCanService.CommandReSyncPhieuCan(id ?? "", DateValue.Value);
+            IsVisibleReSyncPhieuCanDate = false;
+            ToastService.ShowToast(sent ? "Đã gửi lệnh ReSyncPhieuCan!" : "Không tìm thấy thiết bị để gửi lệnh.",
+                sent ? ToastType.Success : ToastType.Error);
+        }
+        catch (Exception ex)
+        {
+            ToastService.ShowToast("Lỗi khi gửi lệnh: " + ex.Message, ToastType.Error);
+        }
+    }
+
+    private async Task ReSyncChamCong(string? id)
+    {
+        if (!DateValue.HasValue)
+        {
+            ToastService.ShowToast("Vui lòng chọn ngày cần đồng bộ lại.", ToastType.Warning);
+            return;
+        }
+
+        var confirmed = await jsRuntime.InvokeAsync<bool>("confirm",
+            $"Bạn có muốn đồng bộ lại dữ liệu chấm công ngày {DateValue:dd/MM/yyyy} (khi dữ liệu chấm công bị thiếu so với thực tế) và gửi xuống firmware?");
+        if (!confirmed)
+        {
+            return;
+        }
+
+        try
+        {
+            var sent = await MayCanService.CommandReSyncChamCong(id ?? "", DateValue.Value);
+            IsVisibleReSyncChamCongDate = false;
+            ToastService.ShowToast(sent ? "Đã gửi lệnh ReSyncChamCong!" : "Không tìm thấy thiết bị để gửi lệnh.",
+                sent ? ToastType.Success : ToastType.Error);
+        }
+        catch (Exception ex)
+        {
+            ToastService.ShowToast("Lỗi khi gửi lệnh: " + ex.Message, ToastType.Error);
         }
     }
 

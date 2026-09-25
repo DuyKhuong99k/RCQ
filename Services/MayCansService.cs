@@ -2015,6 +2015,34 @@ public partial class MayCansService : ObservableObject, IMayCansService
         return rl;
     }
 
+    public async Task<bool> CommandReSyncPhieuCan(string id, DateTime dateTime)
+    {
+        var result = false;
+        var item = Find(id);
+        if (item != null)
+        {
+            await hubContext.Clients.Client(item.ConnectionId ?? "")
+                .SendAsync("ReSyncPhieuCan", dateTime.ToString("yyyyMMdd"));
+            result = true;
+        }
+
+        return result;
+    }
+
+    public async Task<bool> CommandReSyncChamCong(string id, DateTime dateTime)
+    {
+        var result = false;
+        var item = Find(id);
+        if (item != null)
+        {
+            await hubContext.Clients.Client(item.ConnectionId ?? "")
+                .SendAsync("ReSyncChamCong", dateTime.ToString("yyyyMMdd"));
+            result = true;
+        }
+
+        return result;
+    }
+
     public async Task<bool> CommandGetPhieuCanCountStatus0(string id, DateTime dateTime)
     {
         var rl = false;

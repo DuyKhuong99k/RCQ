@@ -34,5 +34,8 @@ namespace Models.Repos.Models
         [StringLength(100)]
         public string? CongViec { get; set; }
 
+        [Required]
+        public int Isforget { get; set; } = 0;
+
     }
 }

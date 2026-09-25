@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Mvc;
 using Models.Repos;
 using Models.Repos.Models;
@@ -49,51 +50,91 @@ public sealed class ChamCongController(
             return BadRequest(new { message = "thoiGian không đúng định dạng." });
         }
 
+        if (request.Isforget is not 0 and not 1)
+        {
+            logger.LogWarning(
+                "[CHẤM CÔNG KHÔNG HỢP LỆ] Isforget={Isforget} không phải 0 hoặc 1. Id={Id}",
+                request.Isforget,
+                request.Id);
+            return BadRequest(new { message = "isforget chỉ nhận giá trị 0 hoặc 1." });
+        }
+
         // CheckInOut là bảng chấm công dùng chung trong PMS_HQ.
         // MaSoMay là số nếu firmware gửi số; nếu không, vẫn lưu được tên máy.
         _ = int.TryParse(request.MaThietBi, NumberStyles.Integer,
             CultureInfo.InvariantCulture, out var maSoMay);
 
+        // Firmware mới gửi ChamCongId là khóa duy nhất của lượt chấm công.
+        // Giữ fallback về Id để vẫn nhận được dữ liệu từ firmware cũ.
+        var maChamCong = string.IsNullOrWhiteSpace(request.ChamCongId)
+            ? request.Id.Trim()
+            : request.ChamCongId.Trim();
         var congViec = request.CongViec?.Trim();
         var ghiChu = $"Id={request.Id};TrangThai={request.TrangThai ?? ""};NgayTao={request.NgayTao ?? ""}";
         using var db = new dbPMScontext();
 
-        var daTonTai = db.CheckInOuts.Any(x =>
-            x.MaChamCong == request.Id &&
+        var banGhiDaTonTai = db.CheckInOuts.FirstOrDefault(x =>
+            x.MaChamCong == maChamCong &&
             x.MaSoMay == maSoMay &&
             x.ThoiGian == thoiGian &&
             x.CongViec == congViec);
-        if (daTonTai)
+        if (banGhiDaTonTai != null)
         {
+            var isforgetThayDoi = banGhiDaTonTai.Isforget != request.Isforget;
+            if (isforgetThayDoi)
+            {
+                banGhiDaTonTai.Isforget = request.Isforget;
+                db.SaveChanges();
+            }
+
             logger.LogInformation(
-                "[CHẤM CÔNG BỎ QUA] Bản ghi trùng. Id={Id}; Máy={MaThietBi}; ThờiGian={ThoiGian}; CôngViệc={CongViec}",
+                "[CHẤM CÔNG BỎ QUA] Bản ghi trùng. ChamCongId={ChamCongId}; Id={Id}; Máy={MaThietBi}; ThờiGian={ThoiGian}; CôngViệc={CongViec}; Isforget={Isforget}; IsforgetĐãCậpNhật={IsforgetDaCapNhat}",
+                maChamCong,
                 request.Id,
                 request.MaThietBi,
                 thoiGian,
-                congViec);
-            return Ok(new { message = "Bản ghi đã tồn tại.", id = request.Id, duplicated = true });
+                congViec,
+                request.Isforget,
+                isforgetThayDoi);
+            return Ok(new
+            {
+                message = isforgetThayDoi
+                    ? "Bản ghi đã tồn tại, Isforget đã được cập nhật."
+                    : "Bản ghi đã tồn tại.",
+                chamCongId = maChamCong,
+                isforget = request.Isforget,
+                duplicated = true
+            });
         }
 
         db.CheckInOuts.Add(new CheckInOut
         {
-            MaChamCong = request.Id,
+            MaChamCong = maChamCong,
             ThoiGian = thoiGian,
             MaSoMay = maSoMay,
             TenMay = request.MaThietBi,
             GhiChu = ghiChu,
-            CongViec = congViec
+            CongViec = congViec,
+            Isforget = request.Isforget
         });
         db.SaveChanges();
 
         logger.LogInformation(
-            "[CHẤM CÔNG ĐÃ LƯU] Id={Id}; Máy={MaThietBi}; ThờiGian={ThoiGian}; TrạngThái={TrangThai}; CôngViệc={CongViec}",
+            "[CHẤM CÔNG ĐÃ LƯU] ChamCongId={ChamCongId}; Id={Id}; Máy={MaThietBi}; ThờiGian={ThoiGian}; TrạngThái={TrangThai}; CôngViệc={CongViec}; Isforget={Isforget}",
+            maChamCong,
             request.Id,
             request.MaThietBi,
             thoiGian,
             request.TrangThai,
-            congViec);
+            congViec,
+            request.Isforget);
 
-        return Ok(new { message = "Đã nhận chấm công.", id = request.Id });
+        return Ok(new
+        {
+            message = "Đã nhận chấm công.",
+            chamCongId = maChamCong,
+            isforget = request.Isforget
+        });
     }
 
     [HttpPost("sync")]
@@ -153,12 +194,16 @@ public sealed class ChamCongController(
 
     public sealed class ChamCongPostRequest
     {
+        public string? ChamCongId { get; set; }
         public string Id { get; set; } = "";
         public string MaThietBi { get; set; } = "";
         public string ThoiGian { get; set; } = "";
         public string? TrangThai { get; set; }
         public string? NgayTao { get; set; }
         public string? CongViec { get; set; }
+
+        [JsonNumberHandling(JsonNumberHandling.AllowReadingFromString)]
+        public int Isforget { get; set; } = 0;
     }
 
     public sealed class ChamCongSyncRequest
