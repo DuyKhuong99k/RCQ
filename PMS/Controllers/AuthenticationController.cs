@@ -319,8 +319,12 @@ namespace PMS.Controllers
 
                     HttpContext.Session.SetString("ExpiresSec", token.Claims.FirstOrDefault(claim => claim.Type.ToUpper() == "ExpiresSec".ToUpper())?.Value);
                     HttpContext.Session.SetString("Id", token.Claims.FirstOrDefault(claim => claim.Type == "Id")?.Value);
-                    HttpContext.Session.SetString("Username", token.Claims.FirstOrDefault(claim => claim.Type == "unique_name")?.Value);
-                    HttpContext.Session.SetString("Roles", token.Claims.FirstOrDefault(claim => claim.Type == "role")?.Value);
+                    var tokenUserName = token.Claims.FirstOrDefault(claim => claim.Type == "UserName")?.Value
+                        ?? User.Identity?.Name;
+                    if (!string.IsNullOrWhiteSpace(tokenUserName))
+                    {
+                        HttpContext.Session.SetString("Username", tokenUserName);
+                    }
 
 
                     if (xuongIdSession == null)
