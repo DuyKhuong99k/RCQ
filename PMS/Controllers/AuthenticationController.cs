@@ -186,6 +186,20 @@ namespace PMS.Controllers
         public async Task<IActionResult> LoginBridge(string url, bool isUrl = false)
         {
             await CreateSession();
+            if (string.IsNullOrEmpty(HttpContext.Session.GetString("JWTToken")))
+            {
+                if (isUrl)
+                {
+                    return Json(new
+                    {
+                        isSuccess = false,
+                        Messages = "Không tải được thông tin xưởng. Vui lòng chọn lại xưởng và đăng nhập."
+                    });
+                }
+
+                return RedirectToAction("Login");
+            }
+
             if (isUrl)
             {
                 return Json(new
@@ -335,6 +349,14 @@ namespace PMS.Controllers
                     var apiUrl2 = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/XiNghieps/GetXuongById/{xuongId}";
                     using var helper2 = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
                     var item = await helper2.GetAsync<XiNghiep>(HttpContext, apiUrl2);
+                    if (item == null)
+                    {
+                        var publicApiUrl = $"{AppViewModels.AppViewModel.Instance.ApiHostUrl}/api/XiNghieps/GetAllXuongNoCheckAuth";
+                        using var publicHelper = new Middlewares.MethodRESTFulAPIHelpers(_httpClientFactory);
+                        var xuongs = await publicHelper.GetAsync<List<XiNghiep>>(HttpContext, publicApiUrl);
+                        item = xuongs?.FirstOrDefault(x => x.Ma == xuongId);
+                    }
+
                     if (item == null)
                     {
                         await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
