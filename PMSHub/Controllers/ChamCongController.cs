@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Models.Repos;
 using Models.Repos.Models;
 using PMSHub.Middlewares;
@@ -60,68 +61,61 @@ public sealed class ChamCongController(
         }
 
         // CheckInOut là bảng chấm công dùng chung trong PMS_HQ.
-        // MaSoMay là số nếu firmware gửi số; nếu không, vẫn lưu được tên máy.
-        _ = int.TryParse(request.MaThietBi, NumberStyles.Integer,
-            CultureInfo.InvariantCulture, out var maSoMay);
+        if (!int.TryParse(request.MaThietBi, NumberStyles.Integer,
+            CultureInfo.InvariantCulture, out var maSoMay) || maSoMay <= 0)
+            return BadRequest(new { message = "Mã máy phải là số nguyên dương." });
+        var recordId = AttendanceRecordId.Create(maSoMay.ToString(CultureInfo.InvariantCulture), thoiGian);
 
-        // Firmware mới gửi ChamCongId là khóa duy nhất của lượt chấm công.
-        // Giữ fallback về Id để vẫn nhận được dữ liệu từ firmware cũ.
-        var maChamCong = string.IsNullOrWhiteSpace(request.ChamCongId)
+        // Id là mã thẻ; ChamCongId là mã lượt quẹt. Firmware cũ có thể gửi
+        // Id dạng mãThẻ.yyyyMMddHHmmss, nên chuẩn hóa trước khi lưu.
+        var chamCongId = string.IsNullOrWhiteSpace(request.ChamCongId)
             ? request.Id.Trim()
             : request.ChamCongId.Trim();
+        var maChamCong = LayMaThe(request.Id);
+        if (string.IsNullOrWhiteSpace(maChamCong) || maChamCong.Length > 50)
+            return BadRequest(new { message = "Mã chấm công phải có từ 1 đến 50 ký tự." });
         var congViec = request.CongViec?.Trim();
-        var ghiChu = $"Id={request.Id};TrangThai={request.TrangThai ?? ""};NgayTao={request.NgayTao ?? ""}";
+        var ghiChu = $"Id={request.Id};ChamCongId={chamCongId};TrangThai={request.TrangThai ?? ""};NgayTao={request.NgayTao ?? ""}";
+        if (ghiChu.Length > 500)
+            return BadRequest(new { message = "Dữ liệu ghi chú vượt quá 500 ký tự." });
         using var db = new dbPMScontext();
+        var maThietBi = request.MaThietBi.Trim();
+        var displayName = db.MayCans
+            .Where(x => x.Id == maThietBi)
+            .Select(x => x.DisplayName)
+            .FirstOrDefault();
+        var tenMay = string.IsNullOrWhiteSpace(displayName) ? maThietBi : displayName.Trim();
 
-        var banGhiDaTonTai = db.CheckInOuts.FirstOrDefault(x =>
-            x.MaChamCong == maChamCong &&
-            x.MaSoMay == maSoMay &&
-            x.ThoiGian == thoiGian &&
-            x.CongViec == congViec);
-        if (banGhiDaTonTai != null)
-        {
-            var isforgetThayDoi = banGhiDaTonTai.Isforget != request.Isforget;
-            if (isforgetThayDoi)
-            {
-                banGhiDaTonTai.Isforget = request.Isforget;
-                db.SaveChanges();
-            }
-
-            logger.LogInformation(
-                "[CHẤM CÔNG BỎ QUA] Bản ghi trùng. ChamCongId={ChamCongId}; Id={Id}; Máy={MaThietBi}; ThờiGian={ThoiGian}; CôngViệc={CongViec}; Isforget={Isforget}; IsforgetĐãCậpNhật={IsforgetDaCapNhat}",
-                maChamCong,
-                request.Id,
-                request.MaThietBi,
-                thoiGian,
-                congViec,
-                request.Isforget,
-                isforgetThayDoi);
-            return Ok(new
-            {
-                message = isforgetThayDoi
-                    ? "Bản ghi đã tồn tại, Isforget đã được cập nhật."
-                    : "Bản ghi đã tồn tại.",
-                chamCongId = maChamCong,
-                isforget = request.Isforget,
-                duplicated = true
-            });
-        }
+        if (db.CheckInOuts.Any(x => x.Id == recordId))
+            return Ok(new { message = "Bản ghi đã tồn tại.", chamCongId,
+                isforget = request.Isforget, duplicated = true });
 
         db.CheckInOuts.Add(new CheckInOut
         {
+            Id = recordId,
             MaChamCong = maChamCong,
             ThoiGian = thoiGian,
             MaSoMay = maSoMay,
-            TenMay = request.MaThietBi,
+            TenMay = tenMay,
             GhiChu = ghiChu,
             CongViec = congViec,
             Isforget = request.Isforget
         });
-        db.SaveChanges();
+        try
+        {
+            db.SaveChanges();
+        }
+        catch (DbUpdateException error) when (AttendanceRecordId.IsDuplicate(error))
+        {
+            // PK bảo vệ cả trường hợp hai request cùng kiểm tra trước khi insert.
+            if (!db.CheckInOuts.AsNoTracking().Any(x => x.Id == recordId)) throw;
+            return Ok(new { message = "Bản ghi đã tồn tại.", chamCongId,
+                isforget = request.Isforget, duplicated = true });
+        }
 
         logger.LogInformation(
             "[CHẤM CÔNG ĐÃ LƯU] ChamCongId={ChamCongId}; Id={Id}; Máy={MaThietBi}; ThờiGian={ThoiGian}; TrạngThái={TrangThai}; CôngViệc={CongViec}; Isforget={Isforget}",
-            maChamCong,
+            chamCongId,
             request.Id,
             request.MaThietBi,
             thoiGian,
@@ -132,7 +126,7 @@ public sealed class ChamCongController(
         return Ok(new
         {
             message = "Đã nhận chấm công.",
-            chamCongId = maChamCong,
+            chamCongId,
             isforget = request.Isforget
         });
     }
@@ -177,6 +171,14 @@ public sealed class ChamCongController(
             deviceCount = thietBiOnline.Count,
             message = $"Đã gửi lệnh chamcongsync đến {thietBiOnline.Count} máy."
         });
+    }
+
+    private static string LayMaThe(string value)
+    {
+        var id = value.Trim();
+        var dauCham = id.IndexOf('.');
+        // Cùng quy tắc với báo cáo CheckInOut: phần trước dấu chấm là mã thẻ.
+        return dauCham >= 0 ? id.Substring(0, dauCham).Trim() : id;
     }
 
     private static bool TryParseDate(string value, out DateTime result)

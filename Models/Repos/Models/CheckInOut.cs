@@ -13,8 +13,10 @@ namespace Models.Repos.Models
     public partial class CheckInOut
     {
         [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public long Id { get; set; }
+        [DatabaseGenerated(DatabaseGeneratedOption.None)]
+        [StringLength(100)]
+        [Unicode(false)]
+        public string Id { get; set; } = "";
 
         [Required]
         [StringLength(50)]

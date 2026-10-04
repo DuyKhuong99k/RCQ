@@ -7,7 +7,10 @@ namespace Models.Repos.Models;
 public sealed class WorkshopAttendance
 {
     [Key]
-    public long Id { get; set; }
+    [DatabaseGenerated(DatabaseGeneratedOption.None)]
+    [MaxLength(100)]
+    [Microsoft.EntityFrameworkCore.Unicode(false)]
+    public string Id { get; set; } = "";
 
     public DateTime ThoiGian { get; set; }
 

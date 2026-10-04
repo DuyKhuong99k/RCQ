@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
 using Models.Repos;
 using Models.Repos.Models;
 using System.Globalization;
@@ -140,6 +141,9 @@ public static class AttendanceProcessor
         // ----------------------------------------------------
         // 2. Tìm mã thẻ -> mã nhân viên
         // ----------------------------------------------------
+        deviceCode = deviceCode.Trim();
+        maTheTu = maTheTu.Trim();
+        var recordId = AttendanceRecordId.Create(deviceCode, when);
         using var db = new dbPMScontext();
 
         var card = db.TheTu
@@ -156,34 +160,38 @@ public static class AttendanceProcessor
 
         var isRegistered = card is not null && employee is not null;
 
-        // ----------------------------------------------------
-        // 4. Nếu không gửi TrangThai thì tự xác định Vào / Ra
-        // ----------------------------------------------------
-        if (string.IsNullOrWhiteSpace(status))
+        // Xác nhận đã nhận lượt quẹt, nhưng không ghi phiếu nếu chưa có
+        // thẻ và nhân viên hợp lệ trong database (không tin tên do thiết bị gửi).
+        // Return trước truy vấn lịch sử/Add/SaveChanges: cả HTTP và SignalR.
+        if (!isRegistered)
         {
-            var startOfDay = when.Date;
-            var endOfDay = startOfDay.AddDays(1);
-
-            var count = db.ChamCongTaiXuongs.Count(x =>
-                x.MaTheTu == maTheTu &&
-                x.ThoiGian >= startOfDay &&
-                x.ThoiGian < endOfDay);
-
-            status = isRegistered
-                ? (count % 2 == 0 ? "Vào" : "Ra")
-                : "Thẻ chưa đăng ký";
+            return new
+            {
+                message = "Thẻ chưa đăng ký",
+                maTheTu
+            };
         }
 
-        // ----------------------------------------------------
-        // 5. Kiểm tra bản ghi trùng
-        // ----------------------------------------------------
-        var existing = db.ChamCongTaiXuongs.FirstOrDefault(x =>
-            x.MaTheTu == maTheTu &&
-            x.ThietBi == deviceCode &&
-            x.ThoiGian == when);
+        // Khóa theo mã thẻ trong SQL, dùng được khi chạy nhiều instance PMSHub.
+        // Giữ khóa từ lúc đọc trạng thái đến khi commit để hai request không
+        // cùng đọc một lượt trước đó và cùng ghi Vào (hoặc cùng ghi Ra).
+        using var transaction = db.Database.BeginTransaction();
+        var lockResource = "WorkshopAttendance:card:" + maTheTu.ToUpperInvariant();
+        db.Database.ExecuteSqlInterpolated($@"
+            DECLARE @lockResult int;
+            EXEC @lockResult = sys.sp_getapplock
+                @Resource = {lockResource}, @LockMode = 'Exclusive',
+                @LockOwner = 'Transaction', @LockTimeout = 5000;
+            IF @lockResult < 0
+                THROW 51001, N'Không thể khóa lượt chấm công. Vui lòng thử lại.', 1;");
+
+        // Kiểm tra trùng trước khi suy ra trạng thái; gửi lại không đảo Vào/Ra.
+        var existing = db.ChamCongTaiXuongs.AsNoTracking()
+            .FirstOrDefault(x => x.Id == recordId);
 
         if (existing != null)
         {
+            transaction.Commit();
             return new
             {
                 success = true,
@@ -198,11 +206,50 @@ public static class AttendanceProcessor
             };
         }
 
-        // ----------------------------------------------------
-        // 6. Tạo bản ghi mới
-        // ----------------------------------------------------
+        if (string.IsNullOrWhiteSpace(status))
+        {
+            // Không reset lúc 0 giờ. Chỉ xét các lượt Vào/Ra hợp lệ gần nhất,
+            // không tính bản ghi cũ "Thẻ chưa đăng ký" hoặc trạng thái khác.
+            var latest = db.ChamCongTaiXuongs.AsNoTracking()
+                .Where(x => x.MaTheTu == maTheTu &&
+                    (x.TrangThai == "Vào" || x.TrangThai == "Ra"))
+                .OrderByDescending(x => x.ThoiGian)
+                .ThenByDescending(x => x.Id)
+                .Select(x => new { x.ThoiGian, x.TrangThai })
+                .FirstOrDefault();
+
+            // Dữ liệu đến sai thứ tự không đủ thông tin để suy ra hướng.
+            // Không chèn giữa lịch sử rồi làm sai trạng thái các lượt đã lưu.
+            if (latest != null && latest.ThoiGian > when)
+            {
+                return new
+                {
+                    success = false,
+                    message = "Thời gian lượt quẹt cũ hơn lượt đã lưu. Kiểm tra giờ thiết bị.",
+                    maTheTu
+                };
+            }
+
+            status = NextStatus(latest?.TrangThai);
+        }
+        else
+        {
+            status = status.Trim();
+            if (status != "Vào" && status != "Ra")
+            {
+                return new
+                {
+                    success = false,
+                    message = "Trạng thái chấm công chỉ được là Vào hoặc Ra.",
+                    maTheTu
+                };
+            }
+        }
+
+        // Tạo bản ghi mới sau khi xác định trạng thái.
         var item = new WorkshopAttendance
         {
+            Id = recordId,
             ThoiGian = when,
             Xuong = xuong,
             ThietBi = deviceCode,
@@ -222,7 +269,23 @@ public static class AttendanceProcessor
                 }));
 
         db.ChamCongTaiXuongs.Add(item);
-        db.SaveChanges();
+        try
+        {
+            db.SaveChanges();
+            transaction.Commit();
+        }
+        catch (DbUpdateException error) when (AttendanceRecordId.IsDuplicate(error))
+        {
+            transaction.Rollback();
+            var saved = db.ChamCongTaiXuongs.AsNoTracking().FirstOrDefault(x => x.Id == recordId);
+            if (saved is null) throw;
+            return new
+            {
+                success = true, duplicated = true, maTheTu,
+                maNhanVien = employeeId ?? "", tenNhanVien = employee?.Name ?? "",
+                thoiGian = when, xuong, thietBi = deviceCode, trangThai = saved.TrangThai
+            };
+        }
 
         return new
         {
@@ -237,4 +300,7 @@ public static class AttendanceProcessor
             trangThai = status
         };
     }
+
+    internal static string NextStatus(string? previousStatus) =>
+        previousStatus == "Vào" ? "Ra" : "Vào";
 }
