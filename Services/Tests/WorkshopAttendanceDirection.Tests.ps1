@@ -18,15 +18,17 @@ function Assert-Direction($previous, $expected, $label) {
 }
 
 Assert-Direction $null 'Vào' 'Thẻ chưa có lịch sử hợp lệ'
-Assert-Direction 'Vào' 'Ra' 'Vào 22:00 hôm trước -> Ra 06:00 hôm sau'
+Assert-Direction 'Vào' 'Ra' 'Sau lượt Vào trong cùng ngày -> Ra'
+Assert-Direction $null 'Vào' 'Sang ngày mới không có lịch sử trong ngày -> Vào'
 Assert-Direction 'Ra' 'Vào' 'Sau lượt Ra -> lượt Vào tiếp theo'
 
-# Bảo vệ phần truy vấn: không giới hạn ngày, chỉ xét trạng thái hợp lệ.
+# Bảo vệ phần truy vấn: chỉ xét trạng thái hợp lệ trong ngày.
 $lookup = [regex]::Match($source, '(?s)var latest =.*?\.FirstOrDefault\(\);').Value
 if (-not $lookup.Contains('x.TrangThai == "Vào" || x.TrangThai == "Ra"') -or
     -not $lookup.Contains('.OrderByDescending(x => x.ThoiGian)') -or
-    $lookup.Contains('when.Date')) {
-    throw 'Truy vấn lịch sử không đúng quy tắc xuyên ngày.'
+    -not $lookup.Contains('x.ThoiGian >= dayStart && x.ThoiGian < dayEnd') -or
+    -not $source.Contains('var dayStart = when.Date;')) {
+    throw 'Truy vấn lịch sử phải giới hạn trong ngày.'
 }
 if ($source.IndexOf('if (existing != null)') -gt $source.IndexOf('var latest =')) {
     throw 'Phải kiểm tra gửi trùng trước khi xác định trạng thái.'
@@ -34,4 +36,7 @@ if ($source.IndexOf('if (existing != null)') -gt $source.IndexOf('var latest =')
 if (-not $source.Contains('latest.ThoiGian > when')) {
     throw 'Thiếu kiểm tra dữ liệu đến sai thứ tự.'
 }
-Write-Output 'PASS: truy vấn xuyên ngày; bỏ trạng thái không hợp lệ; trùng kiểm tra trước; kiểm tra giờ cũ.'
+if (-not $source.Contains('status == "Ra" && latest?.TrangThai != "Vào"')) {
+    throw 'Phải từ chối Ra khi không có Vào trong ngày.'
+}
+Write-Output 'PASS: reset theo ngày; bỏ trạng thái không hợp lệ; kiểm tra trùng và giờ cũ; Ra phải có Vào trong ngày.'

@@ -33,7 +33,7 @@
                 <div class="device-info-row"><span>Tên nhân viên</span><b>@(latest is null ? "Chưa có" : (string.IsNullOrWhiteSpace(latest.TenNhanVien) ? "Thẻ chưa đăng ký" : latest.TenNhanVien))</b></div>
                 <div class="device-info-row"><span>Trạng thái</span><b class="attendance-status">@(latest?.TrangThai ?? "Chưa có")</b></div>
                 <div class="device-card-divider"></div><div class="attendance-title">Phiếu Chấm Công</div>
-                <button class="detail-button" @onclick="() => OpenDetails(device)">Chi tiết (@Attendance.Count(x => x.ThietBi == device.DeviceCode))</button>
+                <button class="detail-button" @onclick="() => OpenDetails(device)">Chi tiết (@TodayAttendance.Count(x => x.ThietBi == device.DeviceCode))</button>
                 @if (DetailDevice?.DeviceCode == device.DeviceCode)
                 {
                     var detailRecords = GetDetailRecords();
@@ -57,13 +57,25 @@
 @code {
  private List<WorkshopDevice> Devices{get;set;}=new(); private List<WorkshopAttendance> Attendance{get;set;}=new(); private WorkshopDevice? SettingsDevice; private WorkshopDevice? DetailDevice; private readonly CancellationTokenSource refreshCancellation=new();
  protected override async Task OnInitializedAsync(){await LoadAsync();_=RefreshLoopAsync();}
- private Task LoadAsync(){using var db=new dbPMScontext();Devices=db.ThietBiChamCongTaiXuongs.AsNoTracking().OrderBy(x=>x.WorkshopCode).ThenBy(x=>x.DeviceCode).ToList();Attendance=db.ChamCongTaiXuongs.AsNoTracking().OrderByDescending(x=>x.ThoiGian).Take(500).ToList();return Task.CompletedTask;}
+ private List<WorkshopAttendance> TodayAttendance { get; set; } = new();
+ private Task LoadAsync()
+ {
+     using var db = new dbPMScontext();
+     var today = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.UtcNow, "SE Asia Standard Time").Date;
+     var tomorrow = today.AddDays(1);
+     Devices = db.ThietBiChamCongTaiXuongs.AsNoTracking().OrderBy(x => x.WorkshopCode).ThenBy(x => x.DeviceCode).ToList();
+     Attendance = db.ChamCongTaiXuongs.AsNoTracking().OrderByDescending(x => x.ThoiGian).Take(500).ToList();
+     TodayAttendance = db.ChamCongTaiXuongs.AsNoTracking()
+         .Where(x => x.ThoiGian >= today && x.ThoiGian < tomorrow)
+         .OrderByDescending(x => x.ThoiGian).ToList();
+     return Task.CompletedTask;
+ }
  private async Task OpenIpAsync(string? ip){if (string.IsNullOrWhiteSpace(ip)) return; if (!System.Net.IPAddress.TryParse(ip, out _)) return; await JS.InvokeVoidAsync("open", $"http://{ip}", "_blank");}
  private void OpenSettings(WorkshopDevice device) => SettingsDevice = device;
  private void CloseSettings() => SettingsDevice = null;
  private void OpenDetails(WorkshopDevice device){DetailDevice=DetailDevice?.DeviceCode==device.DeviceCode?null:device;}
  private void CloseDetails()=>DetailDevice=null;
- private List<WorkshopAttendance> GetDetailRecords(){return DetailDevice is null?new():Attendance.Where(x=>x.ThietBi==DetailDevice.DeviceCode).OrderByDescending(x=>x.ThoiGian).ToList();}
+ private List<WorkshopAttendance> GetDetailRecords(){return DetailDevice is null?new():TodayAttendance.Where(x=>x.ThietBi==DetailDevice.DeviceCode).OrderByDescending(x=>x.ThoiGian).ToList();}
  private async Task RefreshLoopAsync(){using var timer=new PeriodicTimer(TimeSpan.FromSeconds(3));try{while(await timer.WaitForNextTickAsync(refreshCancellation.Token)){await LoadAsync();await InvokeAsync(StateHasChanged);}}catch(OperationCanceledException){}}
  public ValueTask DisposeAsync(){refreshCancellation.Cancel();refreshCancellation.Dispose();return ValueTask.CompletedTask;}
 }

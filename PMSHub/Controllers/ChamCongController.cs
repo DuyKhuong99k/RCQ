@@ -75,9 +75,9 @@ public sealed class ChamCongController(
         if (string.IsNullOrWhiteSpace(maChamCong) || maChamCong.Length > 50)
             return BadRequest(new { message = "Mã chấm công phải có từ 1 đến 50 ký tự." });
         var congViec = request.CongViec?.Trim();
-        var ghiChu = $"Id={request.Id};ChamCongId={chamCongId};TrangThai={request.TrangThai ?? ""};NgayTao={request.NgayTao ?? ""}";
-        if (ghiChu.Length > 500)
-            return BadRequest(new { message = "Dữ liệu ghi chú vượt quá 500 ký tự." });
+        var trangThai = request.TrangThai?.Trim();
+        if (trangThai is not "Vào" and not "Ra")
+            return BadRequest(new { message = "TrangThai phải là Vào hoặc Ra." });
         using var db = new dbPMScontext();
         var maThietBi = request.MaThietBi.Trim();
         var displayName = db.MayCans
@@ -97,7 +97,7 @@ public sealed class ChamCongController(
             ThoiGian = thoiGian,
             MaSoMay = maSoMay,
             TenMay = tenMay,
-            GhiChu = ghiChu,
+            TrangThai = trangThai,
             CongViec = congViec,
             Isforget = request.Isforget
         });

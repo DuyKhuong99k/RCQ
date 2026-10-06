@@ -1,11 +1,13 @@
 ﻿using System.Text;
 using Newtonsoft.Json;
+using Microsoft.Extensions.Options;
 using Vars.Hubs;
 using ViewModels.Repos.Hubs.IServices;
 
 namespace Services;
 
-public class CommunicationService(IUserService userService, ICommitService commitService) : ICommunicationService
+public class CommunicationService(IUserService userService, ICommitService commitService,
+    IOptions<ScaleAttendanceOptions> attendanceOptions) : ICommunicationService
 {
     #region ICommunicationService Members
 
@@ -22,7 +24,10 @@ public class CommunicationService(IUserService userService, ICommitService commi
         var dataTranfer = new DataTranfer();
         var isError = true;
         var error = new DataError();
-        if (dataJson.Length != len)
+        // CHAMCONG chứa tiếng Việt: firmware có thể gửi độ dài byte UTF-8.
+        if (dataJson.Length != len &&
+            !(string.Equals(cmd, "CHAMCONG", StringComparison.OrdinalIgnoreCase) &&
+              Encoding.UTF8.GetByteCount(dataJson) == len))
         {
             error.ErrorString = "Dữ Liệu Không Toàn Vẹn";
             error.Cmd = cmd;
@@ -41,6 +46,14 @@ public class CommunicationService(IUserService userService, ICommitService commi
         {
             switch (cmd.ToUpper())
             {
+                case "CHAMCONG":
+                {
+                    var result = ScaleAttendanceProcessor.Process(client, dataJson, attendanceOptions.Value.MaxShiftHours);
+                    isError = !result.Success;
+                    if (result.Success) dataTranfer.Data = result.Json;
+                    else dataTranfer.DataError = result.Json;
+                    break;
+                }
                 case "PHIEUCANADD":
                 {
                     var val = commitService.Commit(dataJson, client, cmd);
@@ -190,7 +203,9 @@ public class CommunicationService(IUserService userService, ICommitService commi
             //}
         }
 
-        //dataTranfer.DataError = JsonConvert.SerializeObject(error);
+        // Không để lỗi độ dài/client/active biến thành phản hồi lỗi trống.
+        if (isError && dataTranfer.DataError == null && !string.IsNullOrWhiteSpace(error.ErrorString))
+            dataTranfer.DataError = JsonConvert.SerializeObject(error);
         dataTranfer.IsError = isError;
         var data = JsonConvert.SerializeObject(dataTranfer);
         // var lendata = ASCIIEncoding.Unicode.GetByteCount(data);

@@ -21,6 +21,8 @@ using Dao.Repos;
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddScoped<Database>();
 builder.Services.AddHostedService<DeviceHeartbeatMonitor>();
+builder.Services.AddHostedService<ScaleAttendanceDayCloseService>();
+builder.Services.AddHostedService<WorkshopAttendanceDayCloseService>();
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 builder.Logging.AddDebug();
@@ -94,6 +96,11 @@ builder.Services.AddSingleton<IMayCansService, MayCansService>();
 builder.Services.AddSingleton(typeof(HighThroughputQueue<>));
 
 builder.Services.AddSingleton<ICommunicationService, CommunicationService>();
+builder.Services.AddOptions<ScaleAttendanceOptions>()
+    .Bind(builder.Configuration.GetSection("ScaleAttendance"))
+    .Validate(x => x.MaxShiftHours >= 1 && x.MaxShiftHours <= 24,
+        "ScaleAttendance:MaxShiftHours phải từ 1 đến 24.")
+    .ValidateOnStart();
 builder.Services.AddSingleton<ICommitService, CommitService>();
 builder.Services.AddSingleton<IUserService, UserService>();
 

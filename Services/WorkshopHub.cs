@@ -206,32 +206,22 @@ public static class AttendanceProcessor
             };
         }
 
+        var dayStart = when.Date;
+        var dayEnd = dayStart.AddDays(1);
+        var latest = db.ChamCongTaiXuongs.AsNoTracking()
+            .Where(x => x.MaTheTu == maTheTu && x.ThoiGian >= dayStart && x.ThoiGian < dayEnd &&
+                (x.TrangThai == "Vào" || x.TrangThai == "Ra"))
+            .OrderByDescending(x => x.ThoiGian).ThenByDescending(x => x.Id)
+            .Select(x => new { x.ThoiGian, x.TrangThai }).FirstOrDefault();
+        if (latest != null && latest.ThoiGian > when)
+            return new { success = false, message = "Thời gian lượt quẹt cũ hơn lượt đã lưu. Kiểm tra giờ thiết bị.", maTheTu };
+
         if (string.IsNullOrWhiteSpace(status))
         {
-            // Không reset lúc 0 giờ. Chỉ xét các lượt Vào/Ra hợp lệ gần nhất,
-            // không tính bản ghi cũ "Thẻ chưa đăng ký" hoặc trạng thái khác.
-            var latest = db.ChamCongTaiXuongs.AsNoTracking()
-                .Where(x => x.MaTheTu == maTheTu &&
-                    (x.TrangThai == "Vào" || x.TrangThai == "Ra"))
-                .OrderByDescending(x => x.ThoiGian)
-                .ThenByDescending(x => x.Id)
-                .Select(x => new { x.ThoiGian, x.TrangThai })
-                .FirstOrDefault();
-
-            // Dữ liệu đến sai thứ tự không đủ thông tin để suy ra hướng.
-            // Không chèn giữa lịch sử rồi làm sai trạng thái các lượt đã lưu.
-            if (latest != null && latest.ThoiGian > when)
-            {
-                return new
-                {
-                    success = false,
-                    message = "Thời gian lượt quẹt cũ hơn lượt đã lưu. Kiểm tra giờ thiết bị.",
-                    maTheTu
-                };
-            }
-
+            // Mỗi ngày bắt đầu lại từ Vào, không ghép với ngày trước.
             status = NextStatus(latest?.TrangThai);
         }
+
         else
         {
             status = status.Trim();
@@ -245,6 +235,11 @@ public static class AttendanceProcessor
                 };
             }
         }
+
+        if (status == "Ra" && latest?.TrangThai != "Vào")
+            return new { success = false, message = "Chưa có lượt Vào trong ngày. Vui lòng quẹt Vào trước.", maTheTu };
+        if (status == "Vào" && latest?.TrangThai == "Vào")
+            return new { success = false, message = "Đã có lượt Vào trong ngày chưa Ra.", maTheTu };
 
         // Tạo bản ghi mới sau khi xác định trạng thái.
         var item = new WorkshopAttendance

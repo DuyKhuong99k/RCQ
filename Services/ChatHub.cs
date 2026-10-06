@@ -13,7 +13,8 @@ public sealed class ChatHub(
     IUserService userService,
     ICommunicationService communicationService,
     ICommitService commitService,
-    IMayCansService mayCansService, IConverterService converterService)
+    IMayCansService mayCansService, IConverterService converterService,
+    ILogger<ChatHub> logger)
     : Hub
 {
     public async Task Auth(string id, int wType, string dataJson)
@@ -144,23 +145,57 @@ public sealed class ChatHub(
 
     public async Task SendData(string command, int len, string dataJson)
     {
+        var traceId = string.Equals(command, "CHAMCONG", StringComparison.OrdinalIgnoreCase)
+            ? Guid.NewGuid().ToString("N") : null;
         try
         {
             var client = userService.GetByConnectedId(Context.ConnectionId);
-            if (client == null || client.IsMayCan == false) return;
+            if (traceId != null)
+            {
+                string? scanId = null;
+                try
+                {
+                    var token = JObject.Parse(dataJson)["ChamCongId"];
+                    if (token?.Type == JTokenType.String) scanId = token.Value<string>();
+                }
+                catch (JsonException) { /* Router sẽ trả lỗi JSON. */ }
+                logger.LogInformation(
+                    "[CHAMCONG RX] UTC={Utc:O} Host={Host} PID={Pid} Trace={Trace} Connection={Connection} Machine={Machine} ChamCongId={ScanId} Len={Length} Hash={Hash}",
+                    DateTimeOffset.UtcNow, Environment.MachineName, Environment.ProcessId,
+                    traceId, Context.ConnectionId, client?.Id, scanId, len, TraceHash(dataJson));
+            }
+            if (client == null || client.IsMayCan == false)
+            {
+                if (traceId != null)
+                    logger.LogWarning("[CHAMCONG REJECT] Trace={Trace} Connection={Connection}: kết nối chưa xác định là máy cân.",
+                        traceId, Context.ConnectionId);
+                return;
+            }
             var dataToSend = await communicationService.Route(client, command, len, dataJson);
             //await Task.Delay(300);
             //dataToSend=   $"\"{ dataToSend.Replace("\\", "")}\"";
             await Clients.Caller.SendAsync("ReceiveData",command, dataToSend);
+            if (traceId != null)
+                logger.LogInformation(
+                    "[CHAMCONG TX] UTC={Utc:O} PID={Pid} Trace={Trace} Connection={Connection} Hash={Hash}",
+                    DateTimeOffset.UtcNow, Environment.ProcessId, traceId,
+                    Context.ConnectionId, TraceHash(dataToSend));
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
+            if (traceId != null)
+                logger.LogError(e, "[CHAMCONG ERROR] Trace={Trace} Connection={Connection}",
+                    traceId, Context.ConnectionId);
+            else Console.WriteLine(e);
             
             //throw;
         }
        
     }
+
+    private static string TraceHash(string value) =>
+        Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(
+            System.Text.Encoding.UTF8.GetBytes(value)));
 
     /// <summary>
     ///     Gửi dữ liệu khu vực cối xếp khuôn

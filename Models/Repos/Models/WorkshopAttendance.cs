@@ -14,6 +14,8 @@ public sealed class WorkshopAttendance
 
     public DateTime ThoiGian { get; set; }
 
+    public int Isforget { get; set; }
+
     [MaxLength(100)]
     public string? Xuong { get; set; }
 

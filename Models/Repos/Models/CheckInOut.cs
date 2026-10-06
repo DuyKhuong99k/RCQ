@@ -33,6 +33,10 @@ namespace Models.Repos.Models
         [StringLength(500)]
         public string? GhiChu { get; set; }
 
+        // GhiChu dành cho người dùng, không chứa metadata chấm công.
+        [StringLength(20)]
+        public string? TrangThai { get; set; }
+
         [StringLength(100)]
         public string? CongViec { get; set; }
 
