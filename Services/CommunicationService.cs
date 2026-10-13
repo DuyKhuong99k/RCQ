@@ -24,9 +24,9 @@ public class CommunicationService(IUserService userService, ICommitService commi
         var dataTranfer = new DataTranfer();
         var isError = true;
         var error = new DataError();
-        // CHAMCONG chứa tiếng Việt: firmware có thể gửi độ dài byte UTF-8.
+        // Attendance and weight backups may contain Vietnamese: accept exact UTF-8 byte length too.
         if (dataJson.Length != len &&
-            !(string.Equals(cmd, "CHAMCONG", StringComparison.OrdinalIgnoreCase) &&
+            !(new[] { "CHAMCONG", "PHIEUCANADD", "PHIEUCANADDS" }.Contains(cmd, StringComparer.OrdinalIgnoreCase) &&
               Encoding.UTF8.GetByteCount(dataJson) == len))
         {
             error.ErrorString = "Dữ Liệu Không Toàn Vẹn";
@@ -74,7 +74,13 @@ public class CommunicationService(IUserService userService, ICommitService commi
                 }
                 case "PHIEUCANADDS":
                 {
-                    var dataComs = JsonConvert.DeserializeObject<List<DataCoummunication>>(dataJson);
+                    List<DataCoummunication>? dataComs;
+                    try { dataComs = JsonConvert.DeserializeObject<List<DataCoummunication>>(dataJson); }
+                    catch (JsonException) {
+                        error.ErrorString = "JSON danh sách phiếu backup không hợp lệ";
+                        error.Cmd = cmd;
+                        break;
+                    }
                     if (dataComs == null)
                     {
                         error.ErrorString = "Data không đúng chuẩn";

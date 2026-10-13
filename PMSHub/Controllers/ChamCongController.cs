@@ -99,7 +99,8 @@ public sealed class ChamCongController(
             TenMay = tenMay,
             TrangThai = trangThai,
             CongViec = congViec,
-            Isforget = request.Isforget
+            Isforget = request.Isforget,
+            CaDem = request.Cadem
         });
         try
         {
@@ -206,6 +207,7 @@ public sealed class ChamCongController(
 
         [JsonNumberHandling(JsonNumberHandling.AllowReadingFromString)]
         public int Isforget { get; set; } = 0;
+        public bool Cadem { get; set; }
     }
 
     public sealed class ChamCongSyncRequest

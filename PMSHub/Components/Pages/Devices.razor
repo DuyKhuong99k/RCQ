@@ -45,6 +45,7 @@
 
 @*     <div class="container-xxl flex-grow-1 container-p-y"> *@
 <h1>Danh Sách Thiết Bị</h1>
+<a href="/ScaleAttendanceTransfers" class="btn btn-outline-primary" style="margin:2px">Chuyển máy chấm công</a>
 <div>
     <SfButton style="margin: 2px;" CssClass="e-primary" @onclick="() => OpenDialogReload()">Tải Lại</SfButton>
 
@@ -2900,10 +2901,11 @@ else
             // {
             //     throw new Exception(response.ReasonPhrase);
             // }
-            await MayCanService.CommandPhieuCanSync(id ?? "", DateValue ?? DateTime.Now);
+            var sent = await MayCanService.CommandPhieuCanSync(id ?? "", DateValue ?? DateTime.Now);
 
             // await jsRuntime.InvokeVoidAsync("alert", "Gửi Thành công!");
-            ToastService.ShowToast("Gửi Thành công!", ToastType.Success);
+            ToastService.ShowToast(sent ? "Đã gửi lệnh Sync phiếu cân. Chờ kết quả Backup trên máy; chưa xác nhận đủ phiếu trong SQL." : "Không tìm thấy kết nối máy để gửi lệnh Sync.",
+                sent ? ToastType.Success : ToastType.Error);
         }
         catch (TaskCanceledException)
         {
@@ -2954,7 +2956,7 @@ else
         {
             var sent = await MayCanService.CommandReSyncPhieuCan(id ?? "", DateValue.Value);
             IsVisibleReSyncPhieuCanDate = false;
-            ToastService.ShowToast(sent ? "Đã gửi lệnh ReSyncPhieuCan!" : "Không tìm thấy thiết bị để gửi lệnh.",
+            ToastService.ShowToast(sent ? "Đã gửi lệnh ReSync phiếu cân. Chờ kết quả Backup trên máy; chưa xác nhận đủ phiếu trong SQL." : "Không tìm thấy kết nối máy để gửi lệnh.",
                 sent ? ToastType.Success : ToastType.Error);
         }
         catch (Exception ex)

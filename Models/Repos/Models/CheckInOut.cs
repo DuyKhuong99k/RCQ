@@ -43,5 +43,14 @@ namespace Models.Repos.Models
         [Required]
         public int Isforget { get; set; } = 0;
 
+        public bool CaDem { get; set; }
+
+        [StringLength(100), Unicode(false)]
+        public string? VaoId { get; set; }
+        [StringLength(100)]
+        public string? NguoiXacNhan { get; set; }
+        [StringLength(500)]
+        public string? LyDo { get; set; }
+
     }
 }

@@ -47,7 +47,7 @@ Assert(Transition("Ra", "Ra") is not null, "Ra liên tiếp bị từ chối");
 var timingMethod = typeof(ScaleAttendanceProcessor).GetMethod("BuildTiming",
     BindingFlags.NonPublic | BindingFlags.Static)!;
 JsonElement Timing(DateTime start, DateTime? end) =>
-    JsonSerializer.SerializeToElement(timingMethod.Invoke(null, new object?[] { start, end }));
+    JsonSerializer.SerializeToElement(timingMethod.Invoke(null, new object?[] { start, end, false }));
 var shiftStart = new DateTime(2026, 10, 5, 8, 0, 0);
 var checkInTiming = Timing(shiftStart, null);
 Assert(checkInTiming.GetProperty("ThoiGianVao").GetString() == "2026-10-05 08:00:00" &&
@@ -93,7 +93,7 @@ Assert(repeatedOut.GetProperty("MessStr").GetString() == "Đã quẹt Ra rồi."
 var expirationMethod = typeof(ScaleAttendanceProcessor).GetMethod("IsShiftExpired",
     BindingFlags.NonPublic | BindingFlags.Static)!;
 bool Expired(DateTime start, DateTime end, int limit) =>
-    (bool)expirationMethod.Invoke(null, new object[] { start, end, limit })!;
+    (bool)expirationMethod.Invoke(null, new object[] { start, end, limit, false })!;
 Assert(!Expired(shiftStart, shiftStart.AddHours(8), 16), "Ca 8 giờ cùng ngày còn hợp lệ");
 Assert(!Expired(shiftStart.Date, shiftStart.Date.AddHours(16), 16), "Đúng 16 giờ vẫn hợp lệ");
 Assert(Expired(shiftStart.Date, shiftStart.Date.AddHours(16).AddSeconds(1), 16), "Quá giới hạn một giây là ca quá hạn");
@@ -133,3 +133,47 @@ var closeSql = (string)typeof(ScaleAttendanceDayCloseService).GetField("CloseSql
 Assert(!closeSql.Contains("GhiChu") && !closeSql.Contains("MaLoi") && closeSql.Contains("SET Isforget = 1") && closeSql.Contains("TrangThai AS Direction"),
     "Chốt ngày chỉ đánh dấu Isforget, không đọc hoặc sửa ghi chú người dùng");
 Console.WriteLine("Không thực hiện ghi hoặc truy vấn SQL trong các test này.");
+var productionValidate = typeof(ScaleProductionAttendancePolicy).GetMethod("Validate",
+    BindingFlags.NonPublic | BindingFlags.Static)!;
+var productionNow = new DateTime(2026, 10, 13, 11, 0, 0);
+var oldOtherMachine = new Models.Repos.Models.CheckInOut {
+    Id="14149084.20261003070009", MaChamCong="0003132217", MaSoMay=14149084,
+    ThoiGian=new DateTime(2026,10,3,7,0,9), TrangThai="Vào", Isforget=1, CaDem=false
+};
+var closedAtCurrent = new Models.Repos.Models.CheckInOut {
+    Id="7779520.20261013104154", MaChamCong="0003132217", MaSoMay=7779520,
+    ThoiGian=new DateTime(2026,10,13,10,41,54), TrangThai="Ra", VaoId="7779520.20261013102837"
+};
+string? Production(Models.Repos.Models.CheckInOut[] open, Models.Repos.Models.CheckInOut? latest = null,
+    DateTime? at = null, int hours = 16) => (string?)productionValidate.Invoke(null,
+        new object?[] {open,7779520,at ?? productionNow,hours,latest});
+const string closedMessage = "Quẹt Vào lại để tiếp tục cân.";
+Assert(Production(new[]{oldOtherMachine},closedAtCurrent)==closedMessage,"Ca test hết hạn máy khác không che thông báo đã Ra máy hiện tại");
+Assert(Production(Array.Empty<Models.Repos.Models.CheckInOut>(),closedAtCurrent)==closedMessage,"Thẻ không có ca test cũng nhận cùng thông báo đã Ra");
+Assert(Production(new[]{oldOtherMachine})=="Chưa quẹt Vào tại cân.","Ca cũ máy khác không làm máy chưa Vào báo hết hạn");
+Assert(Production(Array.Empty<Models.Repos.Models.CheckInOut>())=="Chưa quẹt Vào tại cân.","Thẻ chưa có lịch sử nhận thông báo chưa Vào");
+var expiredHere = new Models.Repos.Models.CheckInOut {MaSoMay=7779520,ThoiGian=new DateTime(2026,10,12,7,0,0),TrangThai="Vào"};
+Assert(Production(new[]{expiredHere},expiredHere)=="Chưa quẹt Vào tại cân.","Không xét ca thiếu Ra hôm qua tại máy hiện tại");
+var expiredToday = new Models.Repos.Models.CheckInOut {MaSoMay=7779520,ThoiGian=productionNow.Date.AddHours(6),TrangThai="Vào"};
+Assert(Production(new[]{expiredToday},expiredToday,productionNow.Date.AddHours(23))=="Ca đã hết hạn. Quẹt Vào lại tại cân.","Ca hết hạn trong ngày vẫn bị chặn");
+var yesterdayOut = new Models.Repos.Models.CheckInOut {MaSoMay=7779520,ThoiGian=productionNow.Date.AddDays(-1).AddHours(17),TrangThai="Ra"};
+Assert(Production(Array.Empty<Models.Repos.Models.CheckInOut>(),yesterdayOut)=="Chưa quẹt Vào tại cân.","Giờ Ra hôm qua không thay trạng thái hôm nay");
+Assert(!ScaleAttendanceTransferService.IsInOperationalDay(oldOtherMachine,productionNow,16)
+    && !ScaleAttendanceTransferService.IsInOperationalDay(expiredHere,productionNow,16),"Bỏ lịch sử ngày 3/10 và hôm qua khỏi quyết định Vào mới");
+var overnight = new Models.Repos.Models.CheckInOut {MaSoMay=7779520,ThoiGian=productionNow.Date.AddDays(-1).AddHours(22),TrangThai="Vào",CaDem=true};
+Assert(ScaleAttendanceTransferService.IsInOperationalDay(overnight,productionNow,16)
+    && Production(new[]{overnight},overnight)==null,"Giữ ca đêm 22 giờ đến 11 giờ còn hạn");
+Assert(!ScaleAttendanceTransferService.IsInOperationalDay(overnight,productionNow.Date.AddHours(15),16),"Không xét ca đêm ngày cũ khi đã hết hạn");
+var activeHere = new Models.Repos.Models.CheckInOut {MaSoMay=7779520,ThoiGian=productionNow.AddHours(-1),TrangThai="Vào"};
+Assert(Production(new[]{oldOtherMachine,activeHere},activeHere)==null,"Ca hợp lệ hiện tại không bị ca test cũ chặn");
+activeHere.Isforget=1;
+Assert(Production(new[]{activeHere},activeHere)=="Ca đang lỗi. Nhờ quản lý kiểm tra.","Không bỏ kiểm tra cờ lỗi ca hiện tại");
+activeHere.Isforget=0;
+var activeElsewhere = new Models.Repos.Models.CheckInOut {MaSoMay=14149084,ThoiGian=productionNow.AddHours(-1),TrangThai="Vào"};
+var otherMachineMessage = (string)typeof(ScaleAttendanceProcessor).GetMethod("OtherMachineMessage",
+    BindingFlags.NonPublic | BindingFlags.Static)!.Invoke(null,new object[]{14149084})!;
+Assert(Production(new[]{activeElsewhere},closedAtCurrent)==otherMachineMessage,"Ca máy khác còn hạn vẫn chặn cân sai máy");
+Assert(Production(new[]{activeHere,activeElsewhere},activeHere)=="Có ca mở tại nhiều máy. Nhờ quản lý kiểm tra.","Nhiều ca đang mở vẫn cần kiểm tra");
+Assert(Production(new[]{activeHere},activeHere,productionNow,hours:0)=="Cấu hình ca không hợp lệ. Nhờ quản lý kiểm tra.","Giữ kiểm tra cấu hình ca");
+Assert(Production(new[]{activeHere},activeHere,activeHere.ThoiGian.AddSeconds(-1))=="Giờ cân trước lượt Vào. Kiểm tra giờ máy.","Giữ kiểm tra đồng hồ trước giờ Vào");
+Assert(oldOtherMachine.Isforget==1 && oldOtherMachine.TrangThai=="Vào" && closedAtCurrent.VaoId=="7779520.20261013102837","Không sửa ca nguồn khi chọn thông báo");

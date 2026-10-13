@@ -3253,6 +3253,27 @@ order by
                 throw;
             }
         }
+        public sealed class OnlineTotals
+        {
+            public int MachineCount { get; set; }
+            public decimal MachineWeight { get; set; }
+            public int EmployeeCount { get; set; }
+            public decimal EmployeeWeight { get; set; }
+        }
+
+        public OnlineTotals GetOnlineTotals(DateTime day, string machineId, string? employeeId)
+        {
+            const string sql = @"
+                SELECT COUNT(*) AS MachineCount,
+                    COALESCE(SUM(TrongLuong), 0) AS MachineWeight,
+                    COALESCE(SUM(CASE WHEN MaNhanVien = @employeeId THEN 1 ELSE 0 END), 0) AS EmployeeCount,
+                    COALESCE(SUM(CASE WHEN MaNhanVien = @employeeId THEN TrongLuong ELSE 0 END), 0) AS EmployeeWeight
+                FROM dbo.HQ_PhieuCan
+                WHERE Ngay = @day AND MayCan = @machineId AND TrongLuong > 0;";
+            using var connection = new SqlConnection(connectionString);
+            return connection.QuerySingle<OnlineTotals>(sql, new { day = day.Date, machineId, employeeId });
+        }
+
         public int Insert<T>(T item)
         {
             try

@@ -1174,6 +1174,11 @@ namespace ViewModels.Repos.HQ
             var dao = new Dao.Repos.HQ.HQ_PhieuCan();
             return dao.GetsLast<T>(dateTime, num);
         }
+        public Dao.Repos.HQ.HQ_PhieuCan.OnlineTotals GetOnlineTotals(DateTime day, string machineId, string? employeeId)
+        {
+            return new Dao.Repos.HQ.HQ_PhieuCan().GetOnlineTotals(day, machineId, employeeId);
+        }
+
         public int Insert<T>(T item, string? connStr = null)
         {
             var dao = new Dao.Repos.HQ.HQ_PhieuCan(connStr);

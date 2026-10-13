@@ -16,7 +16,9 @@ namespace Vars.Hubs
         public int STT { get; set; } = 0;
         [System.Text.Json.Serialization.JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
         public string NgayGio { get; set; } = DateTime.Now.ToString("yyyyMMddHHmmss");
-        [System.Text.Json.Serialization.JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+        // Chỉ bỏ khỏi phản hồi gửi firmware, không thay đổi model lưu phiếu cân.
+        [Newtonsoft.Json.JsonIgnore]
+        [System.Text.Json.Serialization.JsonIgnore]
         public string? MayCan { get; set; } = "";
         [System.Text.Json.Serialization.JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
         public string? MaLo { get; set; } = "";
@@ -34,13 +36,16 @@ namespace Vars.Hubs
         public decimal DinhMucThucTe { get; set; } = 0;
         [System.Text.Json.Serialization.JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
         public decimal TrongLuongTare { get; set; } = 0;
-        [System.Text.Json.Serialization.JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+        [Newtonsoft.Json.JsonIgnore]
+        [System.Text.Json.Serialization.JsonIgnore]
         public int ChiSanLuong { get; set; } =0;
         [System.Text.Json.Serialization.JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
         public string? MaNhanVien { get; set; }= "";
-        [System.Text.Json.Serialization.JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+        [Newtonsoft.Json.JsonIgnore]
+        [System.Text.Json.Serialization.JsonIgnore]
         public string? MaNhanVienPhucVu { get; set; } = "";
-        [System.Text.Json.Serialization.JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+        [Newtonsoft.Json.JsonIgnore]
+        [System.Text.Json.Serialization.JsonIgnore]
         public string? MaNhanVienBanKiem { get; set; } = "";
         [System.Text.Json.Serialization.JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
         public string? TheId { get; set; } = "";
@@ -48,7 +53,8 @@ namespace Vars.Hubs
         public string? TheIdChucNang { get; set; } = "";
         [System.Text.Json.Serialization.JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
         public string? Ngay { get; set; } = DateTime.Now.ToString("yyyyMMdd");
-        [System.Text.Json.Serialization.JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+        [Newtonsoft.Json.JsonIgnore]
+        [System.Text.Json.Serialization.JsonIgnore]
         public int? Status { get; set; } = 0;
         [System.Text.Json.Serialization.JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
         public string? Id2 { get; set; } = "";
@@ -73,11 +79,14 @@ namespace Vars.Hubs
         public int TongSoRo { get; set; } = 0;
         //[System.Text.Json.Serialization.JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
         //public decimal TongTLTPNhan { get; set; } = 0;
-        [System.Text.Json.Serialization.JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+        [Newtonsoft.Json.JsonIgnore]
+        [System.Text.Json.Serialization.JsonIgnore]
         public decimal TongTLTP { get; set; } = 0;
-        [System.Text.Json.Serialization.JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+        [Newtonsoft.Json.JsonIgnore]
+        [System.Text.Json.Serialization.JsonIgnore]
         public decimal DinhMucTP { get; set; } = 0;
-        [System.Text.Json.Serialization.JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+        [Newtonsoft.Json.JsonIgnore]
+        [System.Text.Json.Serialization.JsonIgnore]
         public bool DanhGia { get; set; } = false;
     }
 }

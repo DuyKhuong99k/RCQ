@@ -52,6 +52,7 @@ public static class ScaleAttendanceProcessor
                 return Failure("INVALID_DEVICE_NAME", "Tên máy vượt quá độ dài cho phép của CheckInOut.TenMay.", request);
 
             using var transaction = db.Database.BeginTransaction();
+            ScaleAttendanceTransferService.LockCard(db, request.TheId);
             // Khóa tại SQL theo máy: chống đua trạng thái và đua Id cùng giây.
             var resource = "ScaleAttendance:device:" + device;
             db.Database.ExecuteSqlInterpolated($@"
@@ -65,29 +66,46 @@ public static class ScaleAttendanceProcessor
             {
                 if (existing.MaChamCong != request.TheId || existing.TrangThai != request.TrangThai)
                     return Failure("ID_CONFLICT", "Id đã được dùng cho lượt quẹt khác. Giữ nguyên bản ghi đã lưu.", request);
-                var duplicate = Success(db, request, existing.ThoiGian, machine, device, employee, name, true, maxShiftHours);
+                request.Cadem = existing.CaDem;
+                var duplicate = Success(db, request, existing.ThoiGian, existing.MaSoMay,
+                    existing.MaSoMay.ToString(CultureInfo.InvariantCulture), employee, existing.TenMay, true, maxShiftHours);
                 transaction.Commit();
                 return duplicate;
             }
 
-            var dayStart = time.Date;
-            var dayEnd = dayStart.AddDays(1);
-            // Sang ngày mới bắt đầu lại trạng thái, không ghép với ngày trước.
-            var latest = db.CheckInOuts.AsNoTracking()
-                .Where(x => x.MaChamCong == request.TheId && x.MaSoMay == machine &&
-                    x.ThoiGian >= dayStart && x.ThoiGian < dayEnd &&
-                    (x.TrangThai == "Vào" || x.TrangThai == "Ra"))
+            // Kiểm tra ca trên mọi máy trước khi mở ca mới.
+            var newestTime = db.CheckInOuts.AsNoTracking().Where(x => x.MaChamCong == request.TheId &&
+                (x.TrangThai == "Vào" || x.TrangThai == "Ra"))
+                .Select(x => (DateTime?)x.ThoiGian).Max();
+            if (newestTime > time)
+                return Failure("OUT_OF_ORDER", "Lượt quẹt cũ hơn lịch sử. Kiểm tra giờ thiết bị.", request);
+            var openShifts = ScaleAttendanceTransferService.OpenShifts(db, request.TheId);
+            if (openShifts.Any(x => x.ThoiGian > time))
+                return Failure("OUT_OF_ORDER", "Lượt quẹt cũ hơn ca đang mở. Kiểm tra giờ thiết bị.", request);
+            var active = openShifts.Where(x => !IsShiftExpired(x.ThoiGian,
+                time, maxShiftHours, x.CaDem)).ToList();
+            if (active.Count > 1)
+                return Failure("MULTIPLE_OPEN_SHIFTS", "Có ca mở tại nhiều máy. Nhờ quản lý kiểm tra.", request);
+            // Cả Vào và Ra đều phải thực hiện tại máy có ca đang mở.
+            if (active.Any(x => x.MaSoMay != machine))
+                return Failure("SHIFT_ON_OTHER_MACHINE", OtherMachineMessage(active[0].MaSoMay), request);
+
+            // Ca thiếu Ra ngày cũ dành cho quản lý, không nhắc lại khi Vào ngày mới.
+            // Giữ ca đêm còn hạn để không ngắt ca hợp lệ qua nửa đêm.
+            var latest = ScaleAttendanceTransferService.OperationalEvents(db, request.TheId, machine, time, maxShiftHours)
                 .OrderByDescending(x => x.ThoiGian).ThenByDescending(x => x.Id)
-                .Select(x => new { x.Id, x.ThoiGian, x.TrangThai }).FirstOrDefault();
+                .Select(x => new { x.Id, x.ThoiGian, x.TrangThai, x.CaDem }).FirstOrDefault();
             if (latest != null && latest.ThoiGian > time)
                 return Failure("OUT_OF_ORDER", "Lượt quẹt cũ hơn lịch sử. Kiểm tra giờ thiết bị.", request);
-            var previousStatus = latest?.TrangThai;
+            var previousStatus = latest?.TrangThai == "Ra" && latest.ThoiGian.Date != time.Date
+                ? null : latest?.TrangThai;
             var expiredOpenShift = latest != null && previousStatus == "Vào" &&
-                IsShiftExpired(latest.ThoiGian, time, maxShiftHours);
+                IsShiftExpired(latest.ThoiGian, time, maxShiftHours, latest.CaDem);
             if (expiredOpenShift && request.TrangThai == "Ra")
                 return ExpiredShift(request, latest!.ThoiGian, time, maxShiftHours);
             if (!expiredOpenShift && latest != null && previousStatus == request.TrangThai)
             {
+                request.Cadem = latest.CaDem;
                 // Quẹt lại cùng hướng: trả ca đã lưu, tuyệt đối không lấy giờ
                 // quẹt lặp làm giờ Vào/Ra hoặc kéo dài tổng thời gian của ca.
                 var recorded = Success(db, request, latest.ThoiGian, machine, device, employee, name, false, maxShiftHours);
@@ -100,6 +118,9 @@ public static class ScaleAttendanceProcessor
             var error = ValidateTransition(expiredOpenShift ? null : previousStatus, request.TrangThai);
             if (error != null) return Failure("INVALID_TRANSITION", error, request);
 
+            // Không dùng cờ lúc Ra để thay đổi chính sách của ca đã mở.
+            if (request.TrangThai == "Ra") request.Cadem = latest!.CaDem;
+
             // Tính kết quả trước khi ghi: lỗi tra sản lượng không tạo phiếu nửa chừng.
             var response = Success(db, request, time, machine, device, employee, name, false, maxShiftHours);
             if (!response.Success) return response;
@@ -109,7 +130,8 @@ public static class ScaleAttendanceProcessor
             {
                 Id = id, MaChamCong = request.TheId, ThoiGian = time, MaSoMay = machine,
                 TenMay = name, CongViec = name, Isforget = 0,
-                TrangThai = request.TrangThai
+                TrangThai = request.TrangThai, CaDem = request.Cadem,
+                VaoId = request.TrangThai == "Ra" ? latest!.Id : null
             });
             try { db.SaveChanges(); transaction.Commit(); }
             catch (DbUpdateException errorDb) when (AttendanceRecordId.IsDuplicate(errorDb))
@@ -119,6 +141,7 @@ public static class ScaleAttendanceProcessor
                 if (saved is null) throw;
                 if (saved.MaChamCong != request.TheId || saved.TrangThai != request.TrangThai)
                     return Failure("ID_CONFLICT", "Id đã được dùng cho lượt quẹt khác.", request);
+                request.Cadem = saved.CaDem;
                 return Success(db, request, saved.ThoiGian, machine, device, employee, name, true, maxShiftHours);
             }
             return response;
@@ -138,22 +161,31 @@ public static class ScaleAttendanceProcessor
         var totalBaskets = 0;
         var totalWeight = 0m;
         var start = time;
+        var shiftStart = time;
         DateTime? end = null;
+        var stored = db.CheckInOuts.AsNoTracking().FirstOrDefault(x => x.Id == request.ChamCongId)
+            ?? db.CheckInOuts.AsNoTracking().Where(x => x.MaChamCong == request.TheId && x.MaSoMay == machine &&
+                x.ThoiGian == time && x.TrangThai == request.TrangThai)
+                .OrderByDescending(x => x.Id).FirstOrDefault();
+        if (stored != null) shiftStart = stored.ThoiGian;
         if (request.TrangThai == "Ra")
         {
-            var dayStart = time.Date;
-            var checkIn = db.CheckInOuts.AsNoTracking()
+            var checkIn = stored?.VaoId != null
+                ? db.CheckInOuts.AsNoTracking().FirstOrDefault(x => x.Id == stored.VaoId)
+                : db.CheckInOuts.AsNoTracking()
                 .Where(x => x.MaChamCong == request.TheId && x.MaSoMay == machine &&
-                    x.ThoiGian >= dayStart && x.ThoiGian <= time &&
-                    x.TrangThai == "Vào")
-                .OrderByDescending(x => x.ThoiGian).Select(x => (DateTime?)x.ThoiGian)
+                    x.ThoiGian <= time && x.Id != (stored != null ? stored.Id : request.ChamCongId) &&
+                    (x.TrangThai == "Vào" || x.TrangThai == "Ra"))
+                .OrderByDescending(x => x.ThoiGian).ThenByDescending(x => x.Id)
                 .FirstOrDefault();
-            if (checkIn is null)
-                return Failure("MISSING_CHECK_IN", "Chưa có lượt Vào trong ngày. Vui lòng quẹt Vào trước.", request);
-            start = checkIn.Value;
+            if (checkIn is null || checkIn.TrangThai != "Vào")
+                return Failure("MISSING_CHECK_IN", "Chưa có ca Vào đang mở. Vui lòng quẹt Vào trước.", request);
+            start = checkIn.ThoiGian;
+            shiftStart = start;
+            request.Cadem = checkIn.CaDem;
             // Kiểm tra cả dữ liệu đã lưu/gửi lại để phiếu Ra sai trước đây
             // không tiếp tục trả tổng thời gian hoặc sản lượng nhiều ngày.
-            if (IsShiftExpired(start, time, maxShiftHours))
+            if (IsShiftExpired(start, time, maxShiftHours, checkIn.CaDem))
                 return ExpiredShift(request, start, time, maxShiftHours);
             end = time;
             var totals = db.HqPhieuCans.AsNoTracking()
@@ -165,7 +197,8 @@ public static class ScaleAttendanceProcessor
             totalBaskets = totals?.Count ?? 0;
             totalWeight = totals?.Weight ?? 0m;
         }
-        var timing = BuildTiming(start, end);
+        var timing = BuildTiming(start, end, request.Cadem);
+        var shiftTiming = BuildTiming(shiftStart, end, request.Cadem);
         return (true, JsonConvert.SerializeObject(new
         {
             request.ChamCongId, request.TheId, MaNhanVien = employee.MaNhanVien,
@@ -173,13 +206,23 @@ public static class ScaleAttendanceProcessor
             TongTrongLuong = totalWeight, TenCongViec = job,
             timing.ThoiGianVao, timing.ThoiGianRa,
             timing.TongThoiGianGiay, timing.TongThoiGian,
-            request.TrangThai, IsValid = true, Duplicated = duplicated,
-            MessStr = duplicated ? $"Đã quẹt {request.TrangThai} rồi." : "Chấm công hợp lệ."
+            ThoiGianBatDauCa = shiftTiming.ThoiGianVao,
+            TongThoiGianCaGiay = shiftTiming.TongThoiGianGiay,
+            TongThoiGianCa = shiftTiming.TongThoiGian,
+            // Giữ khóa JSON cũ để firmware tương thích; không cần cột SQL MayQuetRa.
+            MayDangLam = machine, MayQuetRa = (int?)null, WarningCode = (string?)null,
+            request.TrangThai, request.Cadem, IsValid = true, Duplicated = duplicated,
+            MessStr = duplicated
+                ? $"Đã quẹt {request.TrangThai}{(request.Cadem ? " ca đêm" : "")} rồi."
+                : $"Đã chấm công {request.TrangThai}{(request.Cadem ? " ca đêm" : "")} thành công."
         }));
     }
 
-    internal static bool IsShiftExpired(DateTime start, DateTime end, int maxShiftHours) =>
-        start.Date != end.Date || end - start > TimeSpan.FromHours(maxShiftHours);
+    internal static bool IsShiftExpired(DateTime start, DateTime end, int maxShiftHours, bool caDem = false) =>
+        (!caDem && start.Date != end.Date) || end - start > TimeSpan.FromHours(maxShiftHours);
+
+    internal static string OtherMachineMessage(int machine) =>
+        $"Đang Vào tại {machine}. Ra tại máy cũ hoặc xác nhận chuyển máy.";
 
     internal static (bool Success, string Json) ExpiredShift(Request request, DateTime start,
         DateTime scanTime, int maxShiftHours) =>
@@ -191,7 +234,7 @@ public static class ScaleAttendanceProcessor
             ThoiGianQuet = scanTime.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture),
             ThoiGianRa = (string?)null, TongThoiGianGiay = (long?)null,
             TongThoiGian = (string?)null, MaxShiftHours = maxShiftHours,
-            MessStr = $"Ca đã quá {maxShiftHours} giờ, cần kiểm tra giờ Ra. Quẹt Vào để bắt đầu ca mới."
+            MessStr = $"Ca đã hết hạn (ca thường chốt cuối ngày, tối đa {maxShiftHours} giờ). Cần bổ sung giờ Ra; quẹt Vào để bắt đầu ca mới."
         }));
 
     internal static string MarkRestarted(string responseJson, DateTime previousStart)
@@ -200,7 +243,9 @@ public static class ScaleAttendanceProcessor
         result["WarningCode"] = "PREVIOUS_SHIFT_MISSING_OUT";
         result["CanBoSungGioRa"] = true;
         result["ThoiGianVaoCaTruoc"] = previousStart.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture);
-        result["MessStr"] = "Đã quẹt Vào ca mới. Ca trước thiếu giờ Ra, cần bổ sung.";
+        result["MessStr"] = result.Value<bool>("Cadem")
+            ? "Đã quẹt Vào ca đêm mới. Ca trước thiếu giờ Ra, cần bổ sung."
+            : "Đã quẹt Vào ca mới. Ca trước thiếu giờ Ra, cần bổ sung.";
         return result.ToString(Formatting.None);
     }
 
@@ -210,16 +255,15 @@ public static class ScaleAttendanceProcessor
         result["IsValid"] = false;
         result["AlreadyRecorded"] = true;
         result["Code"] = status == "Vào" ? "ALREADY_CHECKED_IN" : "ALREADY_CHECKED_OUT";
-        result["MessStr"] = $"Đã quẹt {status} rồi.";
+        result["MessStr"] = $"Đã quẹt {status}{(result.Value<bool>("Cadem") ? " ca đêm" : "")} rồi.";
         return result.ToString(Formatting.None);
     }
 
-    // Chính sách theo ngày: tuyệt đối không cộng giờ từ ngày hôm trước.
-    internal static AttendanceTiming BuildTiming(DateTime start, DateTime? end)
+    internal static AttendanceTiming BuildTiming(DateTime start, DateTime? end, bool caDem = false)
     {
         if (end.HasValue && end.Value < start)
             throw new ArgumentException("Giờ Ra không được trước giờ Vào.");
-        if (end.HasValue && end.Value.Date != start.Date)
+        if (!caDem && end.HasValue && end.Value.Date != start.Date)
             throw new ArgumentException("Không tính thời gian chấm công qua ngày.");
         var seconds = end.HasValue ? (end.Value - start).Ticks / TimeSpan.TicksPerSecond : 0L;
         return new AttendanceTiming(
@@ -250,5 +294,6 @@ public static class ScaleAttendanceProcessor
         public string? TheId { get; set; }
         public string? NgayGio { get; set; }
         public string? TrangThai { get; set; }
+        public bool Cadem { get; set; }
     }
 }

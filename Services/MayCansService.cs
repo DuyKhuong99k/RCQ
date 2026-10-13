@@ -1972,7 +1972,7 @@ public partial class MayCansService : ObservableObject, IMayCansService
     {
         var rl = false;
         var item = Find(id);
-        if (item != null)
+        if (item != null && !string.IsNullOrWhiteSpace(item.ConnectionId))
         {
             try
             {
@@ -2019,7 +2019,7 @@ public partial class MayCansService : ObservableObject, IMayCansService
     {
         var result = false;
         var item = Find(id);
-        if (item != null)
+        if (item != null && !string.IsNullOrWhiteSpace(item.ConnectionId))
         {
             await hubContext.Clients.Client(item.ConnectionId ?? "")
                 .SendAsync("ReSyncPhieuCan", dateTime.ToString("yyyyMMdd"));

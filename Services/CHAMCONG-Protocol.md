@@ -38,7 +38,7 @@ Thành công (Data sau khi parse):
   "TongThoiGian": "00:00:00",
   "IsValid": true,
   "Duplicated": false,
-  "MessStr": "Chấm công hợp lệ."
+  "MessStr": " ."
 }
 ```
 
@@ -179,6 +179,14 @@ Trace chỉ nằm trong log server, không thay đổi nội dung phản hồi f
 
 
 ## Tách ghi chú người dùng khỏi dữ liệu hệ thống
+
+### Ca độc lập theo máy (08/10/2026)
+- Chuyển máy có xác nhận: ghi Ra máy A và Vào máy B tại cùng thời điểm; VaoId của phiếu Ra nối đúng phiếu Vào máy A.
+- Ca máy B tính thời gian, ngày báo cáo và giới hạn giờ từ ThoiGian của phiếu Vào máy B. Không nối giới hạn giờ với ca máy A.
+- Không tự chuyển/đóng ca đã hết hạn. Ca đó phải được quản lý xử lý giờ Ra thực tế.
+- Code không còn phụ thuộc các cột SQL CaBatDau và MayQuetRa. Giữ VaoId, CaDem, Isforget, NguoiXacNhan và LyDo; GhiChu vẫn dành cho người dùng.
+- Cập nhật PMSHub và ChamCongSanXuat cùng đợt. Không thêm cột mới. Chỉ xóa hai cột cũ sau khi sao lưu, dừng bản code cũ và kiểm tra phụ thuộc.
+- Giới hạn giờ hiện áp dụng cho từng ca tại máy; không phải giới hạn tổng giờ làm của nhân viên qua nhiều máy.
 - Với bảng đã chuyển đổi trước đây: chạy database/SimplifyCheckInOutColumns.sql trong project ChamCongSanXuat.
 - Dừng cả PMSHub và web báo cáo khi chuyển đổi; cập nhật cả hai ứng dụng cùng đợt.
 - Chỉ thêm TrangThai để lưu Vào/Ra; Isforget có sẵn dùng đánh dấu thiếu Ra.

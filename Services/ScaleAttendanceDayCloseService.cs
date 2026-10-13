@@ -1,13 +1,15 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Models.Repos;
 
 namespace Services;
 
 /// <summary>Ghi nhận lượt Vào thiếu Ra sau khi ngày kết thúc, không tạo giờ Ra giả.</summary>
 public sealed class ScaleAttendanceDayCloseService(
-    ILogger<ScaleAttendanceDayCloseService> logger) : BackgroundService
+    ILogger<ScaleAttendanceDayCloseService> logger,
+    IOptions<ScaleAttendanceOptions> options) : BackgroundService
 {
     // Dùng UTC+7 rõ ràng, không phụ thuộc múi giờ cài trên Windows/server.
     internal static DateTime BusinessDate(DateTimeOffset utc) =>
@@ -16,7 +18,7 @@ public sealed class ScaleAttendanceDayCloseService(
     internal const string CloseSql = """
         ;WITH Events AS
         (
-            SELECT Id, ThoiGian, MaSoMay,
+            SELECT Id, ThoiGian, ThoiGian AS ShiftStart, MaSoMay, CaDem,
                 CASE WHEN CHARINDEX('.', MaChamCong) > 0
                     THEN LEFT(MaChamCong, CHARINDEX('.', MaChamCong) - 1)
                     ELSE MaChamCong END AS Card,
@@ -27,9 +29,11 @@ public sealed class ScaleAttendanceDayCloseService(
         ),
         Ordered AS
         (
-            SELECT Id, Direction,
+            SELECT Id, Direction, ThoiGian, ShiftStart, CaDem,
+                LEAD(ThoiGian) OVER (
+                    PARTITION BY Card, MaSoMay ORDER BY ThoiGian, Id) AS NextTime,
                 LEAD(Direction) OVER (
-                    PARTITION BY Card, MaSoMay, CONVERT(date, ThoiGian)
+                    PARTITION BY Card, MaSoMay
                     ORDER BY ThoiGian, Id) AS NextDirection
             FROM Events
         )
@@ -37,7 +41,12 @@ public sealed class ScaleAttendanceDayCloseService(
         SET Isforget = 1
         FROM dbo.CheckInOut c
         JOIN Ordered e ON e.Id = c.Id
-        WHERE e.Direction = N'Vào' AND (e.NextDirection IS NULL OR e.NextDirection <> N'Ra')
+        WHERE e.Direction = N'Vào'
+          AND ({0} > DATEADD(HOUR, {1}, e.ShiftStart)
+               OR (e.CaDem = 0 AND CONVERT(date, e.ShiftStart) < CONVERT(date, {0})))
+          AND NOT (COALESCE(e.NextDirection, N'') = N'Ra'
+               AND e.NextTime <= DATEADD(HOUR, {1}, e.ShiftStart)
+               AND (e.CaDem = 1 OR CONVERT(date, e.NextTime) = CONVERT(date, e.ShiftStart)))
           AND COALESCE(c.Isforget, 0) <> 1;
         """;
 
@@ -45,15 +54,15 @@ public sealed class ScaleAttendanceDayCloseService(
     {
         while (!stoppingToken.IsCancellationRequested)
         {
-            var today = BusinessDate(DateTimeOffset.UtcNow);
+            var now = DateTimeOffset.UtcNow.ToOffset(TimeSpan.FromHours(7)).DateTime;
             try
             {
                 using var db = new dbPMScontext();
                 db.Database.SetCommandTimeout(120);
                 var count = await db.Database.ExecuteSqlRawAsync(
-                    CloseSql, new object[] { today }, stoppingToken);
+                    CloseSql, new object[] { now, options.Value.MaxShiftHours }, stoppingToken);
                 logger.LogInformation("[CHAMCONG DAY CLOSE] Ngay={Day:yyyy-MM-dd}, phieu ghi loi={Count}",
-                    today, count);
+                    now, count);
             }
             catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
             {
@@ -67,11 +76,8 @@ public sealed class ScaleAttendanceDayCloseService(
                 continue;
             }
 
-            // Quét bù ngay khi khởi động; sau đó chạy đúng ranh giới ngày UTC+7.
-            var nextMidnight = new DateTimeOffset(today.AddDays(1), TimeSpan.FromHours(7));
-            var delay = nextMidnight - DateTimeOffset.UtcNow;
-            if (delay <= TimeSpan.Zero) continue;
-            try { await Task.Delay(delay, stoppingToken); }
+            // Quét bù khi khởi động và mỗi phút để phát hiện cả ca đêm hết hạn.
+            try { await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken); }
             catch (OperationCanceledException) { return; }
         }
     }
