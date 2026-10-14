@@ -133,6 +133,25 @@ var closeSql = (string)typeof(ScaleAttendanceDayCloseService).GetField("CloseSql
 Assert(!closeSql.Contains("GhiChu") && !closeSql.Contains("MaLoi") && closeSql.Contains("SET Isforget = 1") && closeSql.Contains("TrangThai AS Direction"),
     "Chốt ngày chỉ đánh dấu Isforget, không đọc hoặc sửa ghi chú người dùng");
 Console.WriteLine("Không thực hiện ghi hoặc truy vấn SQL trong các test này.");
+var jobResolver = typeof(ScaleAttendanceProcessor).GetMethod("ResolveJobName",BindingFlags.NonPublic | BindingFlags.Static)!;
+var productNames = new Dictionary<string,string>(StringComparer.OrdinalIgnoreCase) {
+    ["001"]="Lột vỏ", ["LVT2"]="LỘT VỎ TẢI 2", ["CKTL 20x20"]="Cắt khuôn thanh long 20x20",
+    ["CHICHMAT"]="Chích mắt khóm ", ["XAY"]="XAY "
+};
+var lookedUp = new List<string>();
+Func<string,string?> findJob = code => { lookedUp.Add(code); return productNames.TryGetValue(code,out var value)?value:null; };
+string ResolveJob(string? code) => (string)jobResolver.Invoke(null,new object?[]{code,findJob})!;
+Assert(ResolveJob("LVT2")=="LỘT VỎ TẢI 2","Công việc lấy tên thành phẩm thay tên máy");
+Assert(ResolveJob("001")=="Lột vỏ" && lookedUp.Last()=="001","Mã thành phẩm giữ số 0 đầu");
+Assert(ResolveJob(" CKTL 20x20 ")=="Cắt khuôn thanh long 20x20","Giữ khoảng trắng bên trong mã thành phẩm");
+Assert(ResolveJob("CHICHMAT")=="Chích mắt khóm" && ResolveJob("XAY")=="XAY","Tên thành phẩm bỏ khoảng trắng thừa ở đầu cuối");
+Assert(ResolveJob("UNKNOWN")=="","Không tìm thấy thành phẩm không trả tên cân");
+var lookupCount=lookedUp.Count;
+Assert(ResolveJob(null)=="" && ResolveJob("")=="" && ResolveJob("  ")=="" && lookedUp.Count==lookupCount,"Chưa chọn thành phẩm không query SQL hoặc gán tên máy");
+var protocolSource=File.ReadAllText(Path.GetFullPath(Path.Combine(AppContext.BaseDirectory,"../../../../../Services/ScaleAttendanceProcessor.cs")));
+Assert(protocolSource.Contains("TenCongViec = job"),"Giữ khóa JSON TenCongViec để firmware không phải đổi parser");
+Assert(protocolSource.Contains("TenMay = name, CongViec = name"),"Không thay đổi tên máy và lịch sử SQL trong yêu cầu đổi nhãn WSS");
+Assert(protocolSource.Split("employee, jobName,").Length-1==4,"Tên thành phẩm dùng cả Vào, Ra, quẹt lặp và gửi lại Id");
 var productionValidate = typeof(ScaleProductionAttendancePolicy).GetMethod("Validate",
     BindingFlags.NonPublic | BindingFlags.Static)!;
 var productionNow = new DateTime(2026, 10, 13, 11, 0, 0);

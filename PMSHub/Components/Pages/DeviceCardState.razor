@@ -1,0 +1,16 @@
+@* Trạng thái thuộc component con để template ListBox không giữ nội dung cũ
+   khi người dùng mở/đóng Chi tiết. Mỗi thẻ và mỗi phiên có trạng thái riêng. *@
+@ChildContent(this)
+
+@code {
+    [Parameter, EditorRequired]
+    public RenderFragment<DeviceCardState> ChildContent { get; set; } = default!;
+
+    public bool Expanded { get; private set; }
+
+    public void Toggle()
+    {
+        Expanded = !Expanded;
+        StateHasChanged();
+    }
+}

@@ -45,8 +45,7 @@
                             <label class="form-label" for="password">Xưởng</label>
                         </div>
                         <div class="input-group input-group-merge">
-                            <SfDropDownList TValue="XiNghiep" Placeholder="Xí Nghiệp" FloatLabelType="FloatLabelType.Auto" TItem="XiNghiep" @bind-Value="@MainService.VmXiNghiep.SelectedItem" DataSource="@MainService.VmXiNghiep.Items">
-                                <DropDownListEvents TItem="XiNghiep" TValue="XiNghiep" ValueChange="xiNghiepValueChange"/>
+                            <SfDropDownList TValue="string" Placeholder="Xí Nghiệp" FloatLabelType="FloatLabelType.Auto" TItem="XiNghiep" @bind-Value="selectedWorkshopCode" DataSource="@AvailableWorkshops">
                                 <DropDownListFieldSettings Value="Ma" Text="Ten"></DropDownListFieldSettings>
                             </SfDropDownList>
                         </div>
@@ -119,6 +118,9 @@
     private string userName { get; set; }
     private string passWord { get; set; }
     private string returnUrl;
+    private string selectedWorkshopCode = "";
+    private List<XiNghiep> AvailableWorkshops => MainService.VmXiNghiep.Items
+        .Where(x => x.SuDung == true).ToList();
     
     // protected override void OnInitialized()
     // {
@@ -159,29 +161,12 @@
             if (!string.IsNullOrEmpty(xuongId))
             {
                 // Gán giá trị vào SelectedItem trong ViewModel
-              var xiNghiep =  MainService.VmXiNghiep.Items.FirstOrDefault(x => x.Ma == xuongId);
-              MainService.VmXiNghiep.SelectedItem = xiNghiep;
+                selectedWorkshopCode = AvailableWorkshops.FirstOrDefault(x => x.Ma == xuongId)?.Ma ?? "";
+                await InvokeAsync(StateHasChanged);
             }
         }
     }
 
-
-
-    private async void xiNghiepValueChange(ChangeEventArgs<XiNghiep, XiNghiep> obj)
-    {
-
-        try
-        {
-            //await JsRuntime.InvokeVoidAsync("SetXuongId", obj.Value.Ma);
-            SessionService.Set("XuongId", obj.Value.Ma);
-            await LocalStorage.SetItemAsync("XuongId", obj.Value.Ma);
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e);
-            //throw;
-        }
-    }
 
 
     private async Task DoLogin()
@@ -189,9 +174,17 @@
         try
         {
             
+            var workshop = AvailableWorkshops.FirstOrDefault(x => x.Ma == selectedWorkshopCode);
+            if (workshop == null)
+            {
+                ToastService.ShowToast("Vui lòng chọn xưởng trước khi đăng nhập.", ToastType.Error);
+                return;
+            }
             var loginResult = loginService.LoginLocal(userName, passWord);
             if (loginResult)
             {
+                SessionService.Set("XuongId", workshop.Ma);
+                await LocalStorage.SetItemAsync("XuongId", workshop.Ma);
                 // MainService.VmApp.ComName = "RCQTG";
                 //MainService.VmApp.ComName = MainService.VmXiNghiep.SelectedItem?.CodeId??"";
                 await LocalStorage.SetItemAsync("PageReloadKey", "false");

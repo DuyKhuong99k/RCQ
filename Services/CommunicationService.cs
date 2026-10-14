@@ -7,7 +7,7 @@ using ViewModels.Repos.Hubs.IServices;
 namespace Services;
 
 public class CommunicationService(IUserService userService, ICommitService commitService,
-    IOptions<ScaleAttendanceOptions> attendanceOptions) : ICommunicationService
+    IOptions<ScaleAttendanceOptions> attendanceOptions, IMayCansService? mayCansService = null) : ICommunicationService
 {
     #region ICommunicationService Members
 
@@ -48,7 +48,8 @@ public class CommunicationService(IUserService userService, ICommitService commi
             {
                 case "CHAMCONG":
                 {
-                    var result = ScaleAttendanceProcessor.Process(client, dataJson, attendanceOptions.Value.MaxShiftHours);
+                    var productCode = mayCansService?.Find(client.Id)?.MaThanhPham;
+                    var result = ScaleAttendanceProcessor.Process(client, dataJson, attendanceOptions.Value.MaxShiftHours, productCode);
                     isError = !result.Success;
                     if (result.Success) dataTranfer.Data = result.Json;
                     else dataTranfer.DataError = result.Json;

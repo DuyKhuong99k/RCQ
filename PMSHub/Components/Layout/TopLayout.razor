@@ -72,7 +72,7 @@
                         }
                         else
                         {
-                            <p>Không có người dùng đăng nhập.</p>
+                            <p>Phiên đăng nhập đã kết thúc</p>
                         }
                     </div>
                 </a>
@@ -81,19 +81,13 @@
                         <div class="dropdown-divider"></div>
                     </li>
                     <li>
-                        @if (loginService.IsUserAuthenticated())
-                        {
-                            <button class="dropdown-item btn-link" @onclick="Logout">
+                        <form method="post" action="api/session/logout" data-enhance="false">
+                            <AntiforgeryToken />
+                            <button type="submit" class="dropdown-item btn-link">
                                 <i class="bx bx-power-off me-2"></i>
-                                <span class="align-middle">Đăng Xuất</span>
+                                <span class="align-middle">Đăng xuất / Đổi xưởng</span>
                             </button>
-
-                            @* <SfButton style="margin: 2px;" CssClass="e-primary" @onclick="Logout">Đăng xuất</SfButton> *@
-                        }
-                        else
-                        {
-                            <p>Vui lòng đăng nhập</p>
-                        }
+                        </form>
                     </li>
                 </ul>
             </li>
@@ -106,13 +100,6 @@
 
 @code {
     private bool isInitialized = false;
-
-    private async Task Logout()
-    {
-        await loginService.Logout();
-        Navigation.NavigateTo("/", true);
-        StateHasChanged();
-    }
 
     private void ReloadPage()
     {

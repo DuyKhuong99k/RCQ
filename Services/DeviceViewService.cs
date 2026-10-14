@@ -18,6 +18,8 @@ public partial class DeviceViewService(IMayCansService mayCansService,IUserServi
     [ObservableProperty] private MayCan? deviceCard;
     [ObservableProperty] private XiNghiep? xiNghiep;
     public List<MayCan> SelectedItems { get; set; }
+    private HashSet<AppKV> _allowedAreas = new();
+    private string? _workshopCode;
     
 
     public void Load(int userId)
@@ -32,29 +34,23 @@ public partial class DeviceViewService(IMayCansService mayCansService,IUserServi
         {
             Items.Clear();
         }
-        var userAreas = userService.UserAreas.Where(x=>x.UserId == userId).Select(x=>x.WKv).Distinct().ToList();
-        foreach (var userArea in userAreas)
-        {
-            //var items = mayCansService.Items.Where(x=>x.WKv == (AppKV)userArea);
-             var items = new List<MayCan>();
-            // if (XiNghiep != null)
-            // {
-            //     items = mayCansService.Items.Values.Where(x => x.WKv == (AppKV)userArea && x.MaXuong == XiNghiep.Ma).ToList();
-            // }
-            items = mayCansService.Items.Values.Where(x => x.WKv == (AppKV)userArea ).ToList();
-            foreach (var mayCan in items)
-            {
-                lock (Items)
-                {
-
-
-                    Items.Add(mayCan);
-                }
-            }
-        }
+        _allowedAreas = userService.UserAreas.Where(x => x.UserId == userId)
+            .Select(x => (AppKV)x.WKv).ToHashSet();
+        _workshopCode = XiNghiep?.Ma?.Trim();
+        // Load có thể được gọi nhiều lần. Không đăng ký sự kiện trùng.
+        mayCansService.ItemUpdated -= MayCansServiceOnItemUpdated;
+        mayCansService.ItemAdded -= MayCansServiceOnItemAdded;
+        mayCansService.ItemRemoved -= MayCansServiceOnItemRemoved;
        mayCansService.ItemUpdated += MayCansServiceOnItemUpdated;
        mayCansService.ItemAdded += MayCansServiceOnItemAdded; 
        mayCansService.ItemRemoved+= MayCansServiceOnItemRemoved;
+        lock (Items)
+        {
+            foreach (var item in mayCansService.Items.Values.Where(IsVisible))
+                if (!Items.Any(x => x.Id == item.Id)) Items.Add(item);
+            ClearHiddenSelection();
+        }
+        OnDevicesChanged();
 //#else 
 //            var items = mayCansService.Items.Where(x => x.MaXuong == xuongId && x.WKv == kv);
 //            foreach (var mayCan in items)
@@ -66,32 +62,51 @@ public partial class DeviceViewService(IMayCansService mayCansService,IUserServi
 
     private void MayCansServiceOnItemRemoved(string id)
     {
-        var toRemove = Items.FirstOrDefault(x => x.Id == id);
-        if (toRemove != null)
+        lock (Items)
         {
+            var toRemove = Items.FirstOrDefault(x => x.Id == id);
+            if (toRemove == null) return;
             Items.Remove(toRemove);
-            OnDevicesChanged();
+            ClearHiddenSelection();
         }
+        OnDevicesChanged();
         
     }
 
     private void MayCansServiceOnItemAdded(MayCan obj)
     {
-        Items.Add(obj);
-        OnDevicesChanged();
+        MayCansServiceOnItemUpdated(obj);
+    }
+
+    private bool IsVisible(MayCan item) =>
+        !string.IsNullOrEmpty(_workshopCode) &&
+        string.Equals(item.MaXuong?.Trim(), _workshopCode, StringComparison.OrdinalIgnoreCase) &&
+        _allowedAreas.Contains(item.WKv);
+
+    private void ClearHiddenSelection()
+    {
+        SelectedItems?.RemoveAll(x => !IsVisible(x) || !Items.Any(item => item.Id == x.Id));
+        if (DeviceCard != null && (!IsVisible(DeviceCard) || !Items.Any(x => x.Id == DeviceCard.Id))) DeviceCard = null;
+        if (!Items.Any(x => x.Id == DeviceSelectedId)) DeviceSelectedId = "";
     }
 
     private void MayCansServiceOnItemUpdated(MayCan? obj)
     {
         if (obj != null && Items != null)
         {
-            var existing = Items.FirstOrDefault(x => x.Id == obj.Id);
-            if (existing != null)
+            lock (Items)
             {
-                existing.CopyFrom(obj);
-                // Nếu MayCan implement INotifyPropertyChanged thì UI tự cập nhật
-                OnDevicesChanged();
+                var existing = Items.FirstOrDefault(x => x.Id == obj.Id);
+                if (!IsVisible(obj))
+                {
+                    if (existing == null) return;
+                    Items.Remove(existing);
+                }
+                else if (existing == null) Items.Add(obj);
+                else if (!ReferenceEquals(existing, obj)) existing.CopyFrom(obj);
+                ClearHiddenSelection();
             }
+            OnDevicesChanged();
         }
     }
 

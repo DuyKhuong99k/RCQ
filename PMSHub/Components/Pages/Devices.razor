@@ -45,16 +45,22 @@
 
 @*     <div class="container-xxl flex-grow-1 container-p-y"> *@
 <h1>Danh Sách Thiết Bị</h1>
+@if (DeviceViewService.XiNghiep != null)
+{
+    <p>Xưởng: <strong>@DeviceViewService.XiNghiep.Ten</strong></p>
+}
 <a href="/ScaleAttendanceTransfers" class="btn btn-outline-primary" style="margin:2px">Chuyển máy chấm công</a>
 <div>
     <SfButton style="margin: 2px;" CssClass="e-primary" @onclick="() => OpenDialogReload()">Tải Lại</SfButton>
 
 </div>
 
-@if (MayCanService.Items.Count <= 0)
+@if (DeviceViewService.Items.Count <= 0)
 {
     <p>
-        <em>Loading... </em>
+        <em>@(DeviceViewService.XiNghiep == null
+            ? "Chưa chọn xưởng. Vui lòng đăng xuất và chọn xưởng khi đăng nhập lại."
+            : "Không có cân thuộc xưởng đã chọn trong khu vực tài khoản được phép xem.")</em>
     </p>
 }
 else
@@ -67,7 +73,7 @@ else
             <ItemTemplate>
                 @{
                     var mayCan = context;
-                    var _buttonContent = buttonRefs.FirstOrDefault(x => x.Id == mayCan.Id)?.Content;
+                    <DeviceCardState @key="mayCan.Id" Context="cardState">
                     <SfCard class="sf-card ">
                         <CardHeader Title="@mayCan.Id">
                             <SubTitle>
@@ -549,7 +555,7 @@ else
                                     </td>
                                 </tr>
                             </table>
-                            @if (_buttonContent == collapse)
+                            @if (cardState.Expanded)
                             {
                                 <div>
                                     <table>
@@ -852,11 +858,13 @@ else
                         <CardContent EnableSeparator="true"></CardContent>
                         <CardFooter>
                             <CardFooterContent>
-                                <SfButton style="margin-top: 10px; width: 100px;" CssClass="e-info"
-                                          @onclick="() => ExpandHandler(mayCan.Id)">@(_buttonContent)</SfButton>
+                                <button type="button" style="margin-top: 10px; width: 100px;"
+                                        class="e-control e-btn e-lib e-info"
+                                        @onclick="cardState.Toggle" @onclick:stopPropagation="true">@(cardState.Expanded ? collapse : expand)</button>
                             </CardFooterContent>
                         </CardFooter>
                     </SfCard>
+                    </DeviceCardState>
                 }
 
             </ItemTemplate>
@@ -1755,8 +1763,6 @@ else
     private MayCan item = new();
     private readonly string expand = "Chi Tiết";
     private readonly string collapse = "Thu Giọn";
-    private string buttonContent = "";
-    private List<ButtonModel> buttonRefs;
     decimal trongLuongTare = 0;
     private int userId = -1;
     public DateTime? DateValue { get; set; } = DateTime.Now;
@@ -1776,12 +1782,6 @@ else
     private XiNghiep SelectedXiNghiep { get; set; }
 
 
-    private class ButtonModel
-    {
-        public string Id { get; set; }
-        public string Content { get; set; }
-    }
-
     private void Load()
     {
         MayCanService.Load();
@@ -1797,12 +1797,8 @@ else
     {
         var _userId = SessionService.Get("UserId");
         var xuongId = SessionService.Get("XuongId");
-        if (!string.IsNullOrEmpty(xuongId))
-        {
-            // Gán giá trị vào SelectedItem trong ViewModel
-            var xiNghiep = MainService.VmXiNghiep.Items.FirstOrDefault(x => x.Ma == xuongId);
-            DeviceViewService.XiNghiep = xiNghiep;
-        }
+        DeviceViewService.XiNghiep = MainService.VmXiNghiep.Items
+            .FirstOrDefault(x => x.Ma == xuongId && x.SuDung == true);
 
         if (_userId != null)
         {
@@ -1819,18 +1815,6 @@ else
             DeviceViewService.Load(userId);
         }
 
-
-        buttonContent = expand;
-        buttonRefs = new List<ButtonModel>();
-        for (var i = 0; i < DeviceViewService.Items.Count; i++)
-        {
-            var item = DeviceViewService.Items[i];
-            buttonRefs.Add(new ButtonModel
-            {
-                Id = item.Id,
-                Content = buttonContent
-            });
-        }
 
         KhuVucs = Enum.GetValues(typeof(AppKV)).Cast<AppKV>().ToList();
         AppTypes = Enum.GetValues(typeof(AppType)).Cast<AppType>().ToList();
@@ -1860,18 +1844,6 @@ else
 
         _lastUpdate = now;
         await InvokeAsync(StateHasChanged);
-    }
-
-    void ExpandHandler(string id)
-    {
-        var button = buttonRefs.FirstOrDefault(x => x.Id == id);
-        if (button != null)
-        {
-            var content = button.Content;
-            button.Content = "";
-            buttonContent = content == expand ? collapse : expand;
-            button.Content = buttonContent;
-        }
     }
 
     void SetThamSoTangTrong(MayCan _mayCan)
@@ -2523,7 +2495,6 @@ else
         DeviceViewService.DevicesChanged -= MayCanChangedHandler;
         MainService.AlertRequested -= AlertRequestedHandler;
         SelectedItems?.Clear();
-        buttonRefs?.Clear();
     }
 
     private async void OverlayClick(OverlayModalClickEventArgs args)

@@ -11,7 +11,8 @@ namespace Services;
 /// <summary>Chấm công online tại cân; độc lập với phiếu chấm công tại xưởng.</summary>
 public static class ScaleAttendanceProcessor
 {
-    public static (bool Success, string Json) Process(ClientInfo client, string payload, int maxShiftHours = 16)
+    public static (bool Success, string Json) Process(ClientInfo client, string payload, int maxShiftHours = 16,
+        string? selectedProductCode = null)
     {
         if (maxShiftHours is < 1 or > 24)
             return Failure("INVALID_CONFIGURATION", "Giới hạn ca chấm công phải từ 1 đến 24 giờ.");
@@ -50,6 +51,10 @@ public static class ScaleAttendanceProcessor
             name = string.IsNullOrWhiteSpace(name) ? device : name.Trim();
             if (name.Length > 200)
                 return Failure("INVALID_DEVICE_NAME", "Tên máy vượt quá độ dài cho phép của CheckInOut.TenMay.", request);
+            // Chỉ đổi nhãn Công việc gửi xuống WSS. Không lấy DisplayName của
+            // máy làm tên thành phẩm, không sửa tên máy hoặc lịch sử chấm công.
+            var jobName = ResolveJobName(selectedProductCode, code => db.HqThanhPhams.AsNoTracking()
+                .Where(product => product.Id == code).Select(product => product.Ten).FirstOrDefault());
 
             using var transaction = db.Database.BeginTransaction();
             ScaleAttendanceTransferService.LockCard(db, request.TheId);
@@ -68,7 +73,7 @@ public static class ScaleAttendanceProcessor
                     return Failure("ID_CONFLICT", "Id đã được dùng cho lượt quẹt khác. Giữ nguyên bản ghi đã lưu.", request);
                 request.Cadem = existing.CaDem;
                 var duplicate = Success(db, request, existing.ThoiGian, existing.MaSoMay,
-                    existing.MaSoMay.ToString(CultureInfo.InvariantCulture), employee, existing.TenMay, true, maxShiftHours);
+                    existing.MaSoMay.ToString(CultureInfo.InvariantCulture), employee, jobName, true, maxShiftHours);
                 transaction.Commit();
                 return duplicate;
             }
@@ -108,7 +113,7 @@ public static class ScaleAttendanceProcessor
                 request.Cadem = latest.CaDem;
                 // Quẹt lại cùng hướng: trả ca đã lưu, tuyệt đối không lấy giờ
                 // quẹt lặp làm giờ Vào/Ra hoặc kéo dài tổng thời gian của ca.
-                var recorded = Success(db, request, latest.ThoiGian, machine, device, employee, name, false, maxShiftHours);
+                var recorded = Success(db, request, latest.ThoiGian, machine, device, employee, jobName, false, maxShiftHours);
                 transaction.Commit();
                 return recorded.Success
                     ? (false, MarkRepeated(recorded.Json, request.TrangThai))
@@ -122,7 +127,7 @@ public static class ScaleAttendanceProcessor
             if (request.TrangThai == "Ra") request.Cadem = latest!.CaDem;
 
             // Tính kết quả trước khi ghi: lỗi tra sản lượng không tạo phiếu nửa chừng.
-            var response = Success(db, request, time, machine, device, employee, name, false, maxShiftHours);
+            var response = Success(db, request, time, machine, device, employee, jobName, false, maxShiftHours);
             if (!response.Success) return response;
             if (expiredOpenShift)
                 response = (true, MarkRestarted(response.Json, latest!.ThoiGian));
@@ -142,7 +147,7 @@ public static class ScaleAttendanceProcessor
                 if (saved.MaChamCong != request.TheId || saved.TrangThai != request.TrangThai)
                     return Failure("ID_CONFLICT", "Id đã được dùng cho lượt quẹt khác.", request);
                 request.Cadem = saved.CaDem;
-                return Success(db, request, saved.ThoiGian, machine, device, employee, name, true, maxShiftHours);
+                return Success(db, request, saved.ThoiGian, machine, device, employee, jobName, true, maxShiftHours);
             }
             return response;
         }
@@ -152,6 +157,13 @@ public static class ScaleAttendanceProcessor
             Console.Error.WriteLine($"[CHAMCONG] Máy={device}; Id={id}; Lỗi={ex.GetType().Name}");
             return Failure("SERVER_ERROR", "Không thể xử lý chấm công. Vui lòng thử lại.", request);
         }
+    }
+
+    internal static string ResolveJobName(string? selectedProductCode, Func<string, string?> findName)
+    {
+        var code = selectedProductCode?.Trim();
+        if (string.IsNullOrEmpty(code)) return string.Empty;
+        return findName(code)?.Trim() ?? string.Empty;
     }
 
     private static (bool Success, string Json) Success(dbPMScontext db, Request request,

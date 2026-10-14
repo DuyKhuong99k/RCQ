@@ -55,8 +55,9 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
     options.Cookie.SameSite = SameSiteMode.Lax;
 });
-builder.Services.AddControllers();
-builder.Services.AddControllers().AddNewtonsoftJson(o =>
+// ValidateAntiForgeryToken của form đăng xuất cần dịch vụ MVC ViewFeatures;
+// AddControllers() riêng lẻ không đăng ký authorization filter này.
+builder.Services.AddControllersWithViews().AddNewtonsoftJson(o =>
 {
     o.SerializerSettings.ContractResolver = new DefaultContractResolver
     {
