@@ -7517,7 +7517,7 @@ public class CommitService(IMayCansService mayCansService, ICoiService coiServic
         if (!machine.IsStated)
         {
             var attendanceError = ScaleProductionAttendancePolicy.GetError(attendanceDb, data.TheId,
-                machineNumber, time, attendanceOptions.Value.MaxShiftHours, employee);
+                machineNumber, time, attendanceOptions.Value.MaxShiftHours, employee, machine.MaThanhPham);
             if (attendanceError != null) return Fail(attendanceError);
 
             machine.MaNhanVien = employee.MaNhanVien;
@@ -7563,7 +7563,7 @@ public class CommitService(IMayCansService mayCansService, ICoiService coiServic
         using var attendanceTransaction = attendanceDb.Database.BeginTransaction();
         ScaleAttendanceTransferService.LockCard(attendanceDb, data.TheId);
         var attendanceCheckInTx = ScaleProductionAttendancePolicy.GetError(attendanceDb, data.TheId,
-            machineNumber, time, attendanceOptions.Value.MaxShiftHours, employee);
+            machineNumber, time, attendanceOptions.Value.MaxShiftHours, employee, machine.MaThanhPham);
         if (attendanceCheckInTx != null) return Fail(attendanceCheckInTx);
         // Dùng chung khóa giữa các request online trong instance; database bảo vệ Id bằng khóa chính.
         lock (_lockItems)

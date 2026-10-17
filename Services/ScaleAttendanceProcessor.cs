@@ -46,8 +46,8 @@ public static class ScaleAttendanceProcessor
                 db.NhanVienDaiThanh.AsNoTracking().FirstOrDefault(x => x.MaNhanVien == card.MaNhanVien);
             if (employee is null)
                 return Failure("CARD_NOT_REGISTERED", "Thẻ chưa đăng ký", request);
-            var name = db.MayCans.AsNoTracking().Where(x => x.Id == device)
-                .Select(x => x.DisplayName).FirstOrDefault();
+            var registeredDevice = db.MayCans.AsNoTracking().FirstOrDefault(x => x.Id == device);
+            var name = registeredDevice?.DisplayName;
             name = string.IsNullOrWhiteSpace(name) ? device : name.Trim();
             if (name.Length > 200)
                 return Failure("INVALID_DEVICE_NAME", "Tên máy vượt quá độ dài cho phép của CheckInOut.TenMay.", request);
@@ -58,6 +58,17 @@ public static class ScaleAttendanceProcessor
 
             using var transaction = db.Database.BeginTransaction();
             ScaleAttendanceTransferService.LockCard(db, request.TheId);
+            if (registeredDevice?.WKv == Vars.AppKV.Hq)
+            {
+                var machines = ScaleAttendanceTransferService.OpenShifts(db, request.TheId)
+                    .Where(x => !ScaleAttendanceTransferService.IsExpired(x, time, maxShiftHours))
+                    .Select(x => x.MaSoMay).Append(machine);
+                ScaleSharedAttendanceService.LockMachines(db, machines);
+                var shared = ScaleSharedAttendanceService.Process(db, request, machine, name, time,
+                    selectedProductCode, employee, job: jobName, maxShiftHours: maxShiftHours);
+                if (shared.Success) transaction.Commit();
+                return shared;
+            }
             // Khóa tại SQL theo máy: chống đua trạng thái và đua Id cùng giây.
             var resource = "ScaleAttendance:device:" + device;
             db.Database.ExecuteSqlInterpolated($@"
@@ -173,9 +184,9 @@ public static class ScaleAttendanceProcessor
             .Select(code => ResolveJobName(code, findName)).Where(name => name.Length > 0)
             .Distinct(StringComparer.OrdinalIgnoreCase));
 
-    private static (bool Success, string Json) Success(dbPMScontext db, Request request,
+    internal static (bool Success, string Json) Success(dbPMScontext db, Request request,
         DateTime time, int machine, string device, NhanVienDaiThanh employee, string job, bool duplicated,
-        int maxShiftHours)
+        int maxShiftHours, CheckInOut? sharedShift = null)
     {
         var totalBaskets = 0;
         var totalWeight = 0m;
@@ -187,16 +198,17 @@ public static class ScaleAttendanceProcessor
                 x.ThoiGian == time && x.TrangThai == request.TrangThai)
                 .OrderByDescending(x => x.Id).FirstOrDefault();
         if (stored != null) shiftStart = stored.ThoiGian;
+        if (sharedShift != null) start = shiftStart = sharedShift.ThoiGian;
         if (request.TrangThai == "Ra")
         {
-            var checkIn = stored?.VaoId != null
+            var checkIn = sharedShift ?? (stored?.VaoId != null
                 ? db.CheckInOuts.AsNoTracking().FirstOrDefault(x => x.Id == stored.VaoId)
                 : db.CheckInOuts.AsNoTracking()
                 .Where(x => x.MaChamCong == request.TheId && x.MaSoMay == machine &&
                     x.ThoiGian <= time && x.Id != (stored != null ? stored.Id : request.ChamCongId) &&
                     (x.TrangThai == "Vào" || x.TrangThai == "Ra"))
                 .OrderByDescending(x => x.ThoiGian).ThenByDescending(x => x.Id)
-                .FirstOrDefault();
+                .FirstOrDefault());
             if (checkIn is null || checkIn.TrangThai != "Vào")
                 return Failure("MISSING_CHECK_IN", "Chưa có ca Vào đang mở. Vui lòng quẹt Vào trước.", request);
             start = checkIn.ThoiGian;
@@ -207,11 +219,17 @@ public static class ScaleAttendanceProcessor
             if (IsShiftExpired(start, time, maxShiftHours, checkIn.CaDem))
                 return ExpiredShift(request, start, time, maxShiftHours);
             end = time;
+        }
+        if (request.TrangThai == "Ra" || (sharedShift != null && time > start))
+        {
             // Cùng tập phiếu với tổng số rổ/kg; gom mã theo thứ tự phát sinh
             // trong ca, không lấy thành phẩm đang chọn lúc Ra hoặc của người khác.
-            var products = db.HqPhieuCans.AsNoTracking()
+            var weights = sharedShift == null ? db.HqPhieuCans.AsNoTracking()
                 .Where(x => x.MayCan == device && x.TheIdNhanVien == request.TheId &&
                     x.NgayGio >= start && x.NgayGio <= time && x.ChiSanLuong && x.Status == 1)
+                : ScaleSharedAttendancePolicy.ShiftWeights(db.HqPhieuCans.AsNoTracking(),
+                    db.ScaleAttendanceScans.AsNoTracking(), sharedShift, time);
+            var products = weights
                 .GroupBy(x => x.MaThanhPham)
                 .Select(g => new { Code = g.Key, FirstTime = g.Min(x => x.NgayGio),
                     Count = g.Count(), Weight = g.Sum(x => x.TrongLuong - x.TrongLuongTare) })
@@ -224,7 +242,8 @@ public static class ScaleAttendanceProcessor
                 .Select(product => new { product.Id, product.Ten }).ToList()
                 .GroupBy(product => product.Id.Trim(), StringComparer.OrdinalIgnoreCase)
                 .ToDictionary(group => group.Key, group => group.First().Ten, StringComparer.OrdinalIgnoreCase);
-            job = ResolveShiftJobNames(products.Select(x => x.Code), code => names.GetValueOrDefault(code));
+            if (request.TrangThai == "Ra")
+                job = ResolveShiftJobNames(products.Select(x => x.Code), code => names.GetValueOrDefault(code));
         }
         var timing = BuildTiming(start, end, request.Cadem);
         var shiftTiming = BuildTiming(shiftStart, end, request.Cadem);
@@ -310,7 +329,7 @@ public static class ScaleAttendanceProcessor
         current == "Ra" && previous != "Vào" ? "Chưa Vào. Quẹt Vào trước." :
         current == "Vào" && previous == "Vào" ? "Đã chấm Vào, chưa chấm Ra." : null;
 
-    private static (bool Success, string Json) Failure(string code, string message, Request? request = null) =>
+    internal static (bool Success, string Json) Failure(string code, string message, Request? request = null) =>
         (false, JsonConvert.SerializeObject(new
         {
             ChamCongId = request?.ChamCongId ?? "", TheId = request?.TheId ?? "",

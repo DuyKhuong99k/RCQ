@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Models.Repos.Models;
 using Services;
+using System.Reflection;
 
 var checks = 0;
 void Assert(bool condition, string label)
@@ -66,6 +67,28 @@ using var translationDb = new TranslationDb();
 var sql = ScaleSharedAttendancePolicy.ShiftWeights(translationDb.Set<HQ_PhieuCan>(),
     translationDb.Set<ScaleAttendanceScan>(), shift, start.AddHours(2)).ToQueryString();
 Assert(sql.Contains("EXISTS") && sql.Contains("ScaleAttendanceScan"), "Tổng ca được dịch thành truy vấn SQL tại server");
+var validate = typeof(ScaleProductionAttendancePolicy).GetMethod("ValidateShared", BindingFlags.Static | BindingFlags.NonPublic)!;
+string? Production(CheckInOut[] roots, ScaleAttendanceScan[] members, int machine = 102,
+    string product = "001", DateTime? time = null) => (string?)validate.Invoke(null,
+        new object?[] { roots, members, machine, time ?? start.AddHours(2), 16, null, product });
+Assert(Production(new[] { shift }, scans) == null, "Ca chung cho phép cân B ghi phiếu");
+Assert(Production(new[] { shift }, scans, product: "002") != null, "Cân B đổi mã phải quẹt Vào chuyển ca");
+Assert(Production(new[] { shift }, scans, machine: 103) != null, "Không mở quyền cho mọi cân cùng mã");
+Assert(Production(Array.Empty<CheckInOut>(), scans) != null, "Lượt tham gia cũ không mở lại ca đã đóng");
+Assert(Production(new[] { shift }, scans, time: start.AddMinutes(59)) != null, "Không dùng lượt Vào tương lai để cân");
+shift.Isforget = 1;
+Assert(Production(new[] { shift }, scans) == "Ca đang lỗi. Nhờ quản lý kiểm tra.", "Cân B không bỏ qua cờ lỗi ca gốc");
+shift.Isforget = 0;
+Assert(Production(new[] { shift }, scans, time: start.AddHours(17)) != null, "Đổi cân không kéo dài ca quá hạn");
+var secondRoot = new CheckInOut { Id = "103.20261017090000", MaSoMay = 103, ThoiGian = start.AddHours(1), TrangThai = "Vào" };
+Assert(Production(new[] { shift, secondRoot }, scans) == "Trùng ca nhiều cân. Báo quản lý.", "Không tự gộp dữ liệu trùng thật");
+var service = typeof(ScaleSharedAttendancePolicy).Assembly.GetType("Services.ScaleSharedAttendanceService")!;
+var checkout = (CheckInOut)service.GetMethod("Checkout", BindingFlags.Static | BindingFlags.NonPublic)!
+    .Invoke(null, new object[] { shift, "102.20261017100000", start.AddHours(2) })!;
+Assert(checkout.VaoId == shift.Id && checkout.MaSoMay == shift.MaSoMay && checkout.TrangThai == "Ra",
+    "Ra từ cân B đóng ca gốc, giữ cách ghép giờ theo máy cũ");
+Assert(checkout.ThoiGian - shift.ThoiGian == TimeSpan.FromHours(2), "Giờ công chỉ tính một lần từ Vào A");
+Assert(shift.TrangThai == "Vào" && shift.ThoiGian == start, "Đóng ca bằng phiếu Ra mới, không sửa phiếu Vào cũ");
 Console.WriteLine($"PASS: {checks} kiểm tra ca chung; không kết nối SQL hoặc gửi lệnh cân.");
 
 sealed class TranslationDb : DbContext

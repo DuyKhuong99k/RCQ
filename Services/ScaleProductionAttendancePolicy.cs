@@ -14,7 +14,8 @@ public static class ScaleProductionAttendancePolicy
     public static bool RequiresAttendance(NhanVienDaiThanh? employee) =>
         !IsProductionCard(employee) || !employee!.IsNhom;
 
-    public static string? GetError(dbPMScontext db, string card, int machine, DateTime time, int maxShiftHours, NhanVienDaiThanh? preloadedEmployee = null)
+    public static string? GetError(dbPMScontext db, string card, int machine, DateTime time, int maxShiftHours,
+        NhanVienDaiThanh? preloadedEmployee = null, string? selectedProductCode = null)
     {
         var employee = preloadedEmployee;
         if (employee == null)
@@ -30,17 +31,33 @@ public static class ScaleProductionAttendancePolicy
         var latestTime = db.CheckInOuts.AsNoTracking()
             .Where(x => x.MaChamCong == card && (x.TrangThai == "Vào" || x.TrangThai == "Ra"))
             .Select(x => (DateTime?)x.ThoiGian).Max();
-        if (latestTime > time)
+        if (latestTime > time || ScaleSharedAttendanceService.LatestScanTime(db, card) > time)
             return "Giờ cân trước lượt chấm công. Kiểm tra giờ máy.";
         var latestAtMachine = ScaleAttendanceTransferService.OperationalEvents(db, card, machine, time, maxShiftHours)
             .OrderByDescending(x => x.ThoiGian).ThenByDescending(x => x.Id)
             .FirstOrDefault();
         var shifts = ScaleAttendanceTransferService.OpenShifts(db, card);
-        var error = Validate(shifts, machine, time, maxShiftHours, latestAtMachine);
+        var rootIds = shifts.Select(x => x.Id).ToArray();
+        var scans = db.ScaleAttendanceScans.AsNoTracking().Where(x => rootIds.Contains(x.VaoId) &&
+            x.MaSoMay == machine && x.TrangThai == "Vào" && x.ThoiGian <= time).ToList();
+        var error = ValidateShared(shifts, scans, machine, time, maxShiftHours, latestAtMachine, selectedProductCode);
         if (error != null) return error;
         // Máy chậm giờ không được dùng giờ cũ để tiếp tục ca đã hết hạn.
         var now = DateTimeOffset.UtcNow.ToOffset(TimeSpan.FromHours(7)).DateTime;
-        return Validate(shifts, machine, now > time ? now : time, maxShiftHours, latestAtMachine);
+        return ValidateShared(shifts, scans, machine, now > time ? now : time, maxShiftHours, latestAtMachine, selectedProductCode);
+    }
+
+    internal static string? ValidateShared(IReadOnlyList<CheckInOut> shifts, IReadOnlyList<ScaleAttendanceScan> scans,
+        int machine, DateTime time, int maxShiftHours, CheckInOut? latestAtMachine, string? product)
+    {
+        var active = shifts.Where(x => !ScaleAttendanceTransferService.IsExpired(x, time, maxShiftHours)).ToList();
+        if (active.Count == 1 && active[0].MaSoMay != machine)
+        {
+            if (!ScaleSharedAttendancePolicy.CanUseMachine(active[0], scans, machine, time, product))
+                return "Chưa quẹt Vào ca chung với thành phẩm này tại cân.";
+            machine = active[0].MaSoMay;
+        }
+        return Validate(shifts, machine, time, maxShiftHours, latestAtMachine);
     }
 
     internal static string? Validate(IReadOnlyList<CheckInOut> openShifts, int machine, DateTime time,
