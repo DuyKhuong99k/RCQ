@@ -106,7 +106,7 @@ public static class HqWeightBackupProcessor
             using var db=new dbPMScontext();
             var machine=db.MayCans.AsNoTracking().FirstOrDefault(x=>x.Id==client.Id);
             if (machine?.WKv != AppKV.Hq) throw new ArgumentException("Máy backup không phải máy HQ đã đăng ký.");
-            using var transaction=db.Database.BeginTransaction(IsolationLevel.Serializable);
+            using var transaction=db.Database.BeginTransaction(IsolationLevel.ReadCommitted);
             foreach(var card in items.Select(x=>x.TheIdNhanVien).Distinct().OrderBy(x=>x,StringComparer.Ordinal))
                 ScaleAttendanceTransferService.LockCard(db,card);
             // Id-level serialization shared by concurrent Sync/Resync requests.
@@ -118,21 +118,50 @@ public static class HqWeightBackupProcessor
             }
             var inserted=0; var existing=0;
             var acknowledgedItems=new List<HQ_PhieuCan>();
+
+            var itemIds = items.Select(x => x.Id).ToList();
+            var savedMap = db.HqPhieuCans.AsNoTracking()
+                .Where(x => itemIds.Contains(x.Id))
+                .ToDictionary(x => x.Id, StringComparer.Ordinal);
+
+            var cardCodes = items.Select(x => x.TheIdNhanVien).Distinct().ToList();
+            var cardsMap = db.TheTu.AsNoTracking()
+                .Where(x => cardCodes.Contains(x.MaTheTu))
+                .ToDictionary(x => x.MaTheTu, StringComparer.Ordinal);
+
+            var empCodes = cardsMap.Values.Select(x => x.MaNhanVien).Where(x => !string.IsNullOrWhiteSpace(x)).Distinct().ToList();
+            var employeesMap = db.NhanVienDaiThanh.AsNoTracking()
+                .Where(x => empCodes.Contains(x.MaNhanVien))
+                .ToDictionary(x => x.MaNhanVien, StringComparer.Ordinal);
+
+            var workshopHistory = db.LichSuXuongMayCans.AsNoTracking()
+                .Where(x => x.MayCan == client.Id)
+                .OrderByDescending(x => x.TuThoiGian)
+                .ToList();
+
+            var minTime = items.Min(x => x.NgayGio).AddHours(-maxHours);
+            var maxTime = items.Max(x => x.NgayGio);
+            var preloadedScans = db.CheckInOuts.AsNoTracking()
+                .Where(x => cardCodes.Contains(x.MaChamCong)
+                    && (x.TrangThai == "Vào" || x.TrangThai == "Ra")
+                    && x.ThoiGian >= minTime && x.ThoiGian <= maxTime)
+                .OrderByDescending(x => x.ThoiGian).ThenByDescending(x => x.Id)
+                .ToList();
+
             foreach(var item in items) {
-                var saved=db.HqPhieuCans.AsNoTracking().FirstOrDefault(x=>x.Id==item.Id);
-                if(saved!=null) {
+                if(savedMap.TryGetValue(item.Id, out var saved)) {
                     if(!MatchesExisting(saved,item)) throw new ArgumentException($"Id {item.Id} đã có dữ liệu khác. Không ghi đè.");
                     acknowledgedItems.Add(saved); existing++; continue;
                 }
-                var card=db.TheTu.AsNoTracking().FirstOrDefault(x=>x.MaTheTu==item.TheIdNhanVien);
+                cardsMap.TryGetValue(item.TheIdNhanVien, out var card);
                 if(string.IsNullOrWhiteSpace(card?.MaNhanVien)) throw new ArgumentException($"Thẻ {item.TheIdNhanVien} chưa gán nhân viên.");
                 if(!string.IsNullOrEmpty(item.MaNhanVien) && item.MaNhanVien!=card.MaNhanVien)
                     throw new ArgumentException($"Phiếu {item.Id}: mã nhân viên không khớp thẻ; cần đối chiếu lịch sử.");
-                var employee=db.NhanVienDaiThanh.AsNoTracking().FirstOrDefault(x=>x.MaNhanVien==card.MaNhanVien);
+                employeesMap.TryGetValue(card.MaNhanVien, out var employee);
                 if(!ScaleProductionAttendancePolicy.IsProductionCard(employee))
                     throw new ArgumentException($"Thẻ {item.TheIdNhanVien} không thuộc nhân viên hoặc nhóm sản xuất hợp lệ.");
                 item.MaNhanVien=card.MaNhanVien;
-                var historicalWorkshop = ScaleWorkshopHistory.Resolve(db, item.MayCan, item.NgayGio);
+                var historicalWorkshop = ScaleWorkshopHistory.Resolve(workshopHistory, item.MayCan, item.NgayGio);
                 if (!string.IsNullOrWhiteSpace(historicalWorkshop)) {
                     if (!string.IsNullOrEmpty(item.MaXuong) && !CodeEquals(item.MaXuong,historicalWorkshop))
                         throw new ArgumentException($"Phiếu {item.Id}: xưởng gửi lên khác lịch sử chuyển cân. Cần đối chiếu.");
@@ -147,9 +176,15 @@ public static class HqWeightBackupProcessor
                     ResolveHistoricalMetadata(item,references.Select(x=>new HistoricalMetadata(x.MaLoaiNguyenLieu,x.MaXuong)).ToArray());
                 }
                 if(ScaleProductionAttendancePolicy.RequiresAttendance(employee)) {
-                    var scan=db.CheckInOuts.AsNoTracking().Where(x=>x.MaChamCong==item.TheIdNhanVien
-                        && (x.TrangThai=="Vào" || x.TrangThai=="Ra") && x.ThoiGian<=item.NgayGio)
-                        .OrderByDescending(x=>x.ThoiGian).ThenByDescending(x=>x.Id).FirstOrDefault();
+                    var scan = preloadedScans
+                        .Where(x => x.MaChamCong == item.TheIdNhanVien && x.ThoiGian <= item.NgayGio)
+                        .OrderByDescending(x => x.ThoiGian).ThenByDescending(x => x.Id)
+                        .FirstOrDefault();
+                    if (scan == null) {
+                        scan = db.CheckInOuts.AsNoTracking().Where(x => x.MaChamCong == item.TheIdNhanVien
+                            && (x.TrangThai == "Vào" || x.TrangThai == "Ra") && x.ThoiGian <= item.NgayGio)
+                            .OrderByDescending(x => x.ThoiGian).ThenByDescending(x => x.Id).FirstOrDefault();
+                    }
                     var error=ValidateHistoricalScan(scan,int.Parse(client.Id,CultureInfo.InvariantCulture),item.NgayGio,maxHours);
                     if(error!=null) throw new ArgumentException($"Phiếu {item.Id}: {error}");
                 }
