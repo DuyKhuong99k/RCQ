@@ -26,6 +26,14 @@
     {
         <p>Chọn một hoặc nhiều nhân viên đang có ca mở và máy mới. Giờ chuyển tự ghi theo máy chủ khi xử lý từng nhân viên (giờ Việt Nam), không cho nhập hoặc sửa; giữ loại ca thường/đêm.</p>
         <button class="btn btn-secondary" disabled="@busy" @onclick="() => Load(1, true)">Tải lại</button>
+        <form class="d-flex align-items-end gap-2 flex-wrap mt-3" @onsubmit="Search" @onsubmit:preventDefault>
+            <label>Thẻ / Nhân viên
+                <input class="form-control" type="search" placeholder="Nhập mã thẻ hoặc tên nhân viên" maxlength="200"
+                       @bind="searchText" @bind:event="oninput" disabled="@busy" />
+            </label>
+            <button class="btn btn-primary" type="submit" disabled="@busy">Tìm kiếm</button>
+            <button class="btn btn-secondary" type="button" disabled="@(busy || (string.IsNullOrEmpty(searchText) && string.IsNullOrEmpty(appliedSearch)))" @onclick="ClearSearch">Xóa tìm kiếm</button>
+        </form>
         @if (!string.IsNullOrEmpty(message))
         {
             <p role="status" class="@(isError ? "text-danger" : "text-success")">@message</p>
@@ -68,11 +76,14 @@
             <button class="btn btn-secondary" disabled="@(busy || pageNumber <= 1)" @onclick="() => Load(pageNumber - 1)">Trang trước</button>
             <button class="btn btn-secondary" disabled="@(busy || pageNumber >= TotalPages)" @onclick="() => Load(pageNumber + 1)">Trang sau</button>
         </div>
-        @if (!busy && totalRows == 0) { <p>Không có ca còn hạn để chuyển máy.</p> }
+        @if (!busy && totalRows == 0)
+        {
+            <p>@(string.IsNullOrEmpty(appliedSearch) ? "Không có ca còn hạn để chuyển máy." : "Không tìm thấy ca phù hợp với thẻ hoặc nhân viên.")</p>
+        }
         @if (selectedRows.Count > 0)
         {
             <div style="display:grid;gap:12px;max-width:600px">
-                <p>Đã chọn @selectedRows.Count ca (giữ lựa chọn khi đổi trang).
+                <p>Đã chọn @selectedRows.Count ca (giữ lựa chọn khi đổi trang hoặc tìm kiếm).
                     <button class="btn btn-link" disabled="@busy" @onclick="ClearSelection">Bỏ chọn tất cả</button>
                 </p>
                 <label>Máy mới
@@ -103,6 +114,7 @@
     private Dictionary<string, CheckInOut> selectedRows = new();
     private List<string> transferErrors = new();
     private string reason = "", message = "";
+    private string searchText = "", appliedSearch = "";
     private List<CheckInOut> rows = new();
     private List<MayCan> machines = new();
     private Dictionary<string, string> names = new();
@@ -143,6 +155,19 @@
         pageSize = size;
         await Load();
     }
+    private async Task Search()
+    {
+        if (busy) return;
+        appliedSearch = searchText.Trim();
+        await Load();
+    }
+    private async Task ClearSearch()
+    {
+        if (busy) return;
+        searchText = "";
+        appliedSearch = "";
+        await Load();
+    }
     private async Task Load(int requestedPage = 1, bool clearSelection = false)
     {
         if (!authorized || busy) return;
@@ -170,6 +195,14 @@
             var now = DateTimeOffset.UtcNow.ToOffset(TimeSpan.FromHours(7)).DateTime;
             var query = ScaleAttendanceTransferService.TransferableShifts(db.CheckInOuts.AsNoTracking(),
                 now, AttendanceOptions.Value.MaxShiftHours);
+            if (!string.IsNullOrEmpty(appliedSearch))
+            {
+                var matchingCards = from card in db.TheTu.AsNoTracking()
+                                    join employee in db.NhanVienDaiThanh.AsNoTracking() on card.MaNhanVien equals employee.MaNhanVien
+                                    where employee.Name != null && employee.Name.Contains(appliedSearch)
+                                    select card.MaTheTu;
+                query = query.Where(x => x.MaChamCong.Contains(appliedSearch) || matchingCards.Contains(x.MaChamCong));
+            }
             var count = await query.CountAsync();
             var page = Math.Clamp(requestedPage, 1, Math.Max(1, (int)Math.Ceiling((double)count / pageSize)));
             var pageRows = await query.OrderByDescending(x => x.ThoiGian).ThenBy(x => x.Id)
