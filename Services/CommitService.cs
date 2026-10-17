@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+using System.Globalization;
 using Models.Repos.Models;
 using Microsoft.Extensions.Options;
 using Microsoft.EntityFrameworkCore;
@@ -7513,9 +7513,29 @@ public class CommitService(IMayCansService mayCansService, ICoiService coiServic
         if (!int.TryParse(machine.Id, NumberStyles.None, CultureInfo.InvariantCulture, out var machineNumber))
             return Fail("Mã máy cân không hợp lệ.");
         using var attendanceDb = new dbPMScontext();
-        var attendanceError = ScaleProductionAttendancePolicy.GetError(attendanceDb, data.TheId,
-            machineNumber, time, attendanceOptions.Value.MaxShiftHours);
-        if (attendanceError != null) return Fail(attendanceError);
+
+        if (!machine.IsStated)
+        {
+            var attendanceError = ScaleProductionAttendancePolicy.GetError(attendanceDb, data.TheId,
+                machineNumber, time, attendanceOptions.Value.MaxShiftHours, employee);
+            if (attendanceError != null) return Fail(attendanceError);
+
+            machine.MaNhanVien = employee.MaNhanVien;
+            machine.TheNhanVien = data.TheId;
+            machine.MaHoSo = employee.MaHoSo;
+            machine.NhanVienName = employee.Name;
+            machine.TheNhanVienAddDateTime = DateTime.Now;
+            if (!data.IsWaiting)
+                await mayCansService.CommandSetNhanVien(machine.Id, employee.MaNhanVien,
+                    employee.MaHoSo ?? "", employee.Name ?? "");
+
+            if (!data.IsWaiting) await mayCansService.CommandSetWaiting(machine.Id);
+            machine.ThongBao = "CHỜ CÂN BẰNG";
+            return Tuple.Create(true, JsonConvert.SerializeObject(new DataLiteRes
+            {
+                Id = data.Id, TheId = data.TheId, IsDataAction = 0, MessStr = machine.ThongBao
+            }));
+        }
 
         machine.MaNhanVien = employee.MaNhanVien;
         machine.TheNhanVien = data.TheId;
@@ -7526,15 +7546,6 @@ public class CommitService(IMayCansService mayCansService, ICoiService coiServic
             await mayCansService.CommandSetNhanVien(machine.Id, employee.MaNhanVien,
                 employee.MaHoSo ?? "", employee.Name ?? "");
 
-        if (!machine.IsStated)
-        {
-            if (!data.IsWaiting) await mayCansService.CommandSetWaiting(machine.Id);
-            machine.ThongBao = "CHỜ CÂN BẰNG";
-            return Tuple.Create(true, JsonConvert.SerializeObject(new DataLiteRes
-            {
-                Id = data.Id, TheId = data.TheId, IsDataAction = 0, MessStr = machine.ThongBao
-            }));
-        }
         if (data.TrongLuongTare < 0) return Fail("Trọng lượng tare không được âm.");
         if (string.IsNullOrWhiteSpace(machine.MaLo)) return Fail("Chưa chọn lô.");
         if (string.IsNullOrWhiteSpace(machine.MaSize)) return Fail("Chưa chọn size.");
@@ -7551,9 +7562,9 @@ public class CommitService(IMayCansService mayCansService, ICoiService coiServic
         // cân ổn định và giữ khóa đến khi DAO lưu phiếu xong (kết nối riêng).
         using var attendanceTransaction = attendanceDb.Database.BeginTransaction();
         ScaleAttendanceTransferService.LockCard(attendanceDb, data.TheId);
-        attendanceError = ScaleProductionAttendancePolicy.GetError(attendanceDb, data.TheId,
-            machineNumber, time, attendanceOptions.Value.MaxShiftHours);
-        if (attendanceError != null) return Fail(attendanceError);
+        var attendanceCheckInTx = ScaleProductionAttendancePolicy.GetError(attendanceDb, data.TheId,
+            machineNumber, time, attendanceOptions.Value.MaxShiftHours, employee);
+        if (attendanceCheckInTx != null) return Fail(attendanceCheckInTx);
         // Dùng chung khóa giữa các request online trong instance; database bảo vệ Id bằng khóa chính.
         lock (_lockItems)
         {
