@@ -51,7 +51,7 @@ public static class ScaleProductionAttendancePolicy
         int machine, DateTime time, int maxShiftHours, CheckInOut? latestAtMachine, string? product)
     {
         var active = shifts.Where(x => !ScaleAttendanceTransferService.IsExpired(x, time, maxShiftHours)).ToList();
-        if (active.Count == 1 && active[0].MaSoMay != machine)
+        if (active.Count == 1)
         {
             if (!ScaleSharedAttendancePolicy.CanUseMachine(active[0], scans, machine, time, product))
                 return "Chưa quẹt Vào ca chung với thành phẩm này tại cân.";

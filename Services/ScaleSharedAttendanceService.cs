@@ -7,9 +7,9 @@ using static Services.ScaleAttendanceProcessor;
 namespace Services;
 
 /// <summary>Lưu một ca tính giờ và các lượt tham gia ca trên nhiều cân HQ.</summary>
-internal static class ScaleSharedAttendanceService
+public static class ScaleSharedAttendanceService
 {
-    internal static void LockMachines(dbPMScontext db, IEnumerable<int> machines)
+    public static void LockMachines(dbPMScontext db, IEnumerable<int> machines)
     {
         foreach (var machine in machines.Distinct().OrderBy(x => x))
         {
@@ -43,9 +43,9 @@ internal static class ScaleSharedAttendanceService
     }
 
     // Caller giữ transaction và khóa card -> các máy theo thứ tự tăng dần.
-    internal static (bool Success, string Json) Process(dbPMScontext db, Request request,
+    public static (bool Success, string Json) Process(dbPMScontext db, Request request,
         int machine, string name, DateTime time, string? selectedProduct,
-        NhanVienDaiThanh employee, string job, int maxShiftHours)
+        NhanVienDaiThanh employee, string job, int maxShiftHours, int isforget = 0)
     {
         var id = request.ChamCongId!;
         var card = request.TheId!;
@@ -84,6 +84,8 @@ internal static class ScaleSharedAttendanceService
 
         if (shift != null)
         {
+            if (isforget != 0)
+                return Failure("INVALID_SHIFT", "Lượt chấm công đang lỗi. Nhờ quản lý kiểm tra.", request);
             if (shift.Isforget != 0)
                 return Failure("INVALID_SHIFT", "Ca đang lỗi. Nhờ quản lý kiểm tra.", request);
             if (request.TrangThai == "Ra")
@@ -101,9 +103,8 @@ internal static class ScaleSharedAttendanceService
                 return response;
             }
             var oldProduct = ProductAtStart(db, shift, time);
-            if (shift.MaSoMay == machine &&
-                (string.IsNullOrWhiteSpace(oldProduct) || string.IsNullOrWhiteSpace(product) ||
-                 ScaleSharedAttendancePolicy.SameProduct(oldProduct, product)))
+            var action = ScaleSharedAttendancePolicy.SelectCheckInAction(shift, machine, oldProduct, product);
+            if (action == ScaleSharedAttendancePolicy.CheckInAction.Repeat)
             {
                 request.Cadem = shift.CaDem;
                 var repeated = Success(db, request, time, machine, device, employee, job, false, maxShiftHours, shift);
@@ -115,7 +116,7 @@ internal static class ScaleSharedAttendanceService
                 return Failure("INVALID_PRODUCT", "Thành phẩm đang chọn không có trong danh mục HQ.", request);
             RememberLegacyProduct(db, shift, oldProduct!);
             request.Cadem = shift.CaDem;
-            if (ScaleSharedAttendancePolicy.SameProduct(oldProduct, product))
+            if (action == ScaleSharedAttendancePolicy.CheckInAction.Continue)
             {
                 var response = Success(db, request, time, machine, device, employee, job, false, maxShiftHours, shift);
                 if (!response.Success) return response;
@@ -167,7 +168,7 @@ internal static class ScaleSharedAttendanceService
         var newShift = new CheckInOut
         {
             Id = id, MaChamCong = card, ThoiGian = time, MaSoMay = machine,
-            TenMay = name, CongViec = name, Isforget = 0, TrangThai = "Vào", CaDem = request.Cadem,
+            TenMay = name, CongViec = name, Isforget = isforget, TrangThai = "Vào", CaDem = request.Cadem,
             MaXuong = ScaleWorkshopHistory.Resolve(db, device, time)
         };
         var started = Success(db, request, time, machine, device, employee, job, false, maxShiftHours, newShift);
@@ -178,6 +179,42 @@ internal static class ScaleSharedAttendanceService
         db.ScaleAttendanceScans.Add(Scan(request, id, machine, time, product));
         db.SaveChanges();
         return started;
+    }
+
+    internal static string? HistoricalWeightError(dbPMScontext db, string card, int machine,
+        DateTime time, string product, int maxShiftHours)
+    {
+        if (maxShiftHours is < 1 or > 24) return "Giới hạn ca chấm công không hợp lệ.";
+        var oldest = time.AddHours(-maxShiftHours);
+        var day = time.Date;
+        var roots = ScaleSharedAttendancePolicy.ShiftsAtTime(db.CheckInOuts.AsNoTracking(), card, time)
+            .Where(x => x.ThoiGian >= oldest && (x.CaDem || x.ThoiGian >= day)).Take(2).ToList();
+        var active = roots.Where(x => !ScaleAttendanceTransferService.IsExpired(x, time, maxShiftHours)).ToList();
+        if (active.Count > 1) return "Trùng ca tại thời điểm cân. Cần đối chiếu chấm công.";
+        var shift = active.SingleOrDefault();
+        var error = shift == null ? "Không có ca Vào hợp lệ tại thời điểm cân. Đồng bộ chấm công trước."
+            : HistoricalPermission(db, shift, machine, time, product, maxShiftHours);
+        if (error == null) return null;
+        // Độ chính xác firmware là giây. Ở đúng giây chuyển, phiếu mã cũ
+        // vẫn thuộc ca cũ nếu máy/mã đó không thuộc ca mới (cùng tập tổng kết).
+        var before = ScaleSharedAttendancePolicy.ShiftsAtTime(db.CheckInOuts.AsNoTracking(), card, time.AddTicks(-1))
+            .Where(x => x.ThoiGian >= oldest && (x.CaDem || x.ThoiGian >= day) &&
+                db.CheckInOuts.Any(checkout => checkout.VaoId == x.Id && checkout.TrangThai == "Ra" && checkout.ThoiGian == time))
+            .Take(2).ToList();
+        if (before.Count > 1) return "Trùng ca tại thời điểm cân. Cần đối chiếu chấm công.";
+        if (before.Count == 1 && HistoricalPermission(db, before[0], machine, time, product, maxShiftHours) == null)
+            return null;
+        return error;
+    }
+
+    private static string? HistoricalPermission(dbPMScontext db, CheckInOut shift, int machine,
+        DateTime time, string product, int maxShiftHours)
+    {
+        var scans = db.ScaleAttendanceScans.AsNoTracking().Where(x => x.VaoId == shift.Id &&
+            x.MaSoMay == machine && x.TrangThai == "Vào" && x.ThoiGian <= time).ToList();
+        if (!ScaleSharedAttendancePolicy.CanUseMachine(shift, scans, machine, time, product))
+            return "Chưa Vào ca chung với thành phẩm này tại thời điểm cân.";
+        return HqWeightBackupProcessor.ValidateHistoricalScan(shift, shift.MaSoMay, time, maxShiftHours);
     }
 
     internal static CheckInOut Checkout(CheckInOut shift, string id, DateTime time) => new()

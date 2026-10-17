@@ -228,7 +228,7 @@ public static class ScaleAttendanceProcessor
                 .Where(x => x.MayCan == device && x.TheIdNhanVien == request.TheId &&
                     x.NgayGio >= start && x.NgayGio <= time && x.ChiSanLuong && x.Status == 1)
                 : ScaleSharedAttendancePolicy.ShiftWeights(db.HqPhieuCans.AsNoTracking(),
-                    db.ScaleAttendanceScans.AsNoTracking(), sharedShift, time);
+                    db.ScaleAttendanceScans.AsNoTracking(), sharedShift, time, db.CheckInOuts.AsNoTracking());
             var products = weights
                 .GroupBy(x => x.MaThanhPham)
                 .Select(g => new { Code = g.Key, FirstTime = g.Min(x => x.NgayGio),

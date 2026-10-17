@@ -185,7 +185,12 @@ public static class HqWeightBackupProcessor
                             && (x.TrangThai == "Vào" || x.TrangThai == "Ra") && x.ThoiGian <= item.NgayGio)
                             .OrderByDescending(x => x.ThoiGian).ThenByDescending(x => x.Id).FirstOrDefault();
                     }
-                    var error=ValidateHistoricalScan(scan,int.Parse(client.Id,CultureInfo.InvariantCulture),item.NgayGio,maxHours);
+                    // Dữ liệu cũ đúng cân giữ đường kiểm tra đã có; ca chung cần
+                    // đối chiếu cả máy tham gia và mốc đóng/mở tại giờ cân gốc.
+                    var error = ValidateHistoricalScan(scan, int.Parse(client.Id, CultureInfo.InvariantCulture), item.NgayGio, maxHours);
+                    if (error != null || scan?.ThoiGian == item.NgayGio)
+                        error = ScaleSharedAttendanceService.HistoricalWeightError(db, item.TheIdNhanVien,
+                            int.Parse(client.Id, CultureInfo.InvariantCulture), item.NgayGio, item.MaThanhPham, maxHours);
                     if(error!=null) throw new ArgumentException($"Phiếu {item.Id}: {error}");
                 }
                 db.HqPhieuCans.Add(item); acknowledgedItems.Add(item); inserted++;

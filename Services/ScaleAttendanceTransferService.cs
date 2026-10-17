@@ -92,7 +92,8 @@ public static class ScaleAttendanceTransferService
             x.ThoiGian, time, maxShiftHours, x.CaDem)))
             throw new InvalidOperationException("Có nhiều ca đang mở. Cần đối chiếu trước khi chuyển máy.");
         if (source.MaSoMay == targetMachine) throw new ArgumentException("Máy mới phải khác máy đang làm.");
-        if (db.CheckInOuts.Any(x => x.MaChamCong == source.MaChamCong && x.ThoiGian > time))
+        if (db.CheckInOuts.Any(x => x.MaChamCong == source.MaChamCong && x.ThoiGian > time) ||
+            ScaleSharedAttendanceService.LatestScanTime(db, source.MaChamCong) > time)
             throw new InvalidOperationException("Đã có lượt quẹt sau giờ chuyển. Cần tải lại và kiểm tra.");
         var target = db.MayCans.AsNoTracking().FirstOrDefault(x => x.Id == targetMachine.ToString());
         if (target == null || target.WKv != Vars.AppKV.Hq)

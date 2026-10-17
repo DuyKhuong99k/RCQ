@@ -2,6 +2,7 @@ using System.Globalization;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Models.Repos;
 using Models.Repos.Models;
 using Services;
@@ -19,7 +20,8 @@ namespace PMSHub.Controllers;
 [Route("api/chamcong")]
 public sealed class ChamCongController(
     IMayCansService mayCansService,
-    ILogger<ChamCongController> logger) : ControllerBase
+    ILogger<ChamCongController> logger,
+    IOptions<ScaleAttendanceOptions> attendanceOptions) : ControllerBase
 {
     [HttpPost("post")]
     public IActionResult Post([FromBody] ChamCongPostRequest request)
@@ -81,11 +83,44 @@ public sealed class ChamCongController(
             return BadRequest(new { message = "TrangThai phải là Vào hoặc Ra." });
         using var db = new dbPMScontext();
         var maThietBi = request.MaThietBi.Trim();
-        var displayName = db.MayCans
-            .Where(x => x.Id == maThietBi)
-            .Select(x => x.DisplayName)
-            .FirstOrDefault();
+        var registeredDevice = db.MayCans.AsNoTracking().FirstOrDefault(x => x.Id == maThietBi);
+        var displayName = registeredDevice?.DisplayName;
         var tenMay = string.IsNullOrWhiteSpace(displayName) ? maThietBi : displayName.Trim();
+
+        if (registeredDevice?.WKv == Vars.AppKV.Hq)
+        {
+            if (tenMay.Length > 200) return BadRequest(new { message = "Tên máy vượt quá 200 ký tự." });
+            var employeeCode = db.TheTu.AsNoTracking().Where(x => x.MaTheTu == maChamCong)
+                .Select(x => x.MaNhanVien).FirstOrDefault();
+            var employee = string.IsNullOrWhiteSpace(employeeCode) ? null : db.NhanVienDaiThanh.AsNoTracking()
+                .FirstOrDefault(x => x.MaNhanVien == employeeCode);
+            if (employee == null) return BadRequest(new { message = "Thẻ chưa đăng ký." });
+            var product = request.MaThanhPham?.Trim();
+            if (!string.IsNullOrEmpty(product) &&
+                (product.Length > 50 || !db.HqThanhPhams.AsNoTracking().Any(x => x.Id == product)))
+                return BadRequest(new { message = "Mã thành phẩm đồng bộ không hợp lệ." });
+            using var transaction = db.Database.BeginTransaction();
+            ScaleAttendanceTransferService.LockCard(db, maChamCong);
+            var maxHours = attendanceOptions.Value.MaxShiftHours;
+            var machines = ScaleAttendanceTransferService.OpenShifts(db, maChamCong)
+                .Where(x => !ScaleAttendanceTransferService.IsExpired(x, thoiGian, maxHours))
+                .Select(x => x.MaSoMay).Append(maSoMay);
+            ScaleSharedAttendanceService.LockMachines(db, machines);
+            // Không lấy thành phẩm hiện tại của máy để suy đoán lượt offline cũ.
+            var result = ScaleSharedAttendanceService.Process(db, new ScaleAttendanceProcessor.Request
+            {
+                ChamCongId = recordId, TheId = maChamCong, TrangThai = trangThai, Cadem = request.Cadem,
+                NgayGio = thoiGian.ToString("yyyyMMddHHmmss", CultureInfo.InvariantCulture)
+            }, maSoMay, tenMay, thoiGian, product, employee, "", maxHours, request.Isforget);
+            using var response = System.Text.Json.JsonDocument.Parse(result.Json);
+            var body = response.RootElement;
+            if (!result.Success)
+                return Conflict(new { message = body.GetProperty("MessStr").GetString(),
+                    code = body.GetProperty("Code").GetString(), chamCongId, isforget = request.Isforget });
+            transaction.Commit();
+            return Ok(new { message = body.GetProperty("MessStr").GetString(), chamCongId,
+                isforget = request.Isforget, duplicated = body.GetProperty("Duplicated").GetBoolean() });
+        }
 
         if (db.CheckInOuts.Any(x => x.Id == recordId))
             return Ok(new { message = "Bản ghi đã tồn tại.", chamCongId,
@@ -206,6 +241,8 @@ public sealed class ChamCongController(
         public string? TrangThai { get; set; }
         public string? NgayTao { get; set; }
         public string? CongViec { get; set; }
+        // Mã tại thời điểm quẹt; không gửi tên thành phẩm hoặc cấu hình hiện tại thay lịch sử.
+        public string? MaThanhPham { get; set; }
 
         [JsonNumberHandling(JsonNumberHandling.AllowReadingFromString)]
         public int Isforget { get; set; } = 0;

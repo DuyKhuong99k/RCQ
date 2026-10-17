@@ -89,6 +89,83 @@ Assert(checkout.VaoId == shift.Id && checkout.MaSoMay == shift.MaSoMay && checko
     "Ra từ cân B đóng ca gốc, giữ cách ghép giờ theo máy cũ");
 Assert(checkout.ThoiGian - shift.ThoiGian == TimeSpan.FromHours(2), "Giờ công chỉ tính một lần từ Vào A");
 Assert(shift.TrangThai == "Vào" && shift.ThoiGian == start, "Đóng ca bằng phiếu Ra mới, không sửa phiếu Vào cũ");
+Assert(ScaleSharedAttendancePolicy.SelectCheckInAction(shift, 102, "001", "001") ==
+    ScaleSharedAttendancePolicy.CheckInAction.Continue, "Vào B cùng mã chỉ tiếp tục ca");
+Assert(ScaleSharedAttendancePolicy.SelectCheckInAction(shift, 102, "001", "002") ==
+    ScaleSharedAttendancePolicy.CheckInAction.Switch, "Vào B khác mã đóng/mở ca");
+Assert(ScaleSharedAttendancePolicy.SelectCheckInAction(shift, 101, "001", "001") ==
+    ScaleSharedAttendancePolicy.CheckInAction.Repeat, "Giữ cách xử lý Vào lặp tại máy gốc");
+Assert(ScaleSharedAttendancePolicy.SelectCheckInAction(shift, 101, "001", "002") ==
+    ScaleSharedAttendancePolicy.CheckInAction.Switch, "Trở lại máy gốc khác mã vẫn chuyển ca");
+var switched = new CheckInOut { Id = "102.20261017100000", MaChamCong = shift.MaChamCong,
+    MaSoMay = 102, ThoiGian = start.AddHours(2), TrangThai = "Vào", TenMay = "B" };
+var automaticOut = new CheckInOut { Id = shift.Id + ".AUTO.20261017100000", MaChamCong = shift.MaChamCong,
+    MaSoMay = shift.MaSoMay, ThoiGian = switched.ThoiGian, TrangThai = "Ra", VaoId = shift.Id };
+var ended = new CheckInOut { Id = "102.20261017110000", MaChamCong = shift.MaChamCong,
+    MaSoMay = switched.MaSoMay, ThoiGian = start.AddHours(3), TrangThai = "Ra", VaoId = switched.Id };
+var events = new[] { shift, automaticOut, switched, ended }.AsQueryable();
+CheckInOut[] At(DateTime time) => ScaleSharedAttendancePolicy.ShiftsAtTime(events, "card1", time).ToArray();
+Assert(At(start.AddHours(1)).Single().Id == shift.Id, "Backup trước chuyển vẫn thuộc ca A");
+Assert(At(switched.ThoiGian).Single().Id == switched.Id, "Đúng giây chuyển chỉ thuộc ca B, không phụ thuộc thứ tự Id");
+Assert(At(start.AddMinutes(150)).Single().Id == switched.Id, "Backup sau chuyển thuộc ca mới");
+Assert(At(ended.ThoiGian).Length == 0, "Không ghi backup sau thời điểm Ra");
+Assert(ScaleSharedAttendancePolicy.ShiftsAtTime(events, "other-card", start.AddHours(1)).Count() == 0,
+    "Không lấy ca lịch sử của thẻ khác");
+var duplicateRoots = new[] { shift, new CheckInOut { Id = "103.old", MaChamCong = "card1", MaSoMay = 103,
+    ThoiGian = start.AddMinutes(10), TrangThai = "Vào" } }.AsQueryable();
+Assert(ScaleSharedAttendancePolicy.ShiftsAtTime(duplicateRoots, "card1", start.AddHours(1)).Count() == 2,
+    "Phát hiện hai ca lịch sử chưa đóng, không tự chọn một ca");
+var boundary = Weight("boundary", "102", switched.ThoiGian);
+Assert(ScaleSharedAttendancePolicy.ShiftWeights(new[] { boundary }.AsQueryable(), scans.AsQueryable(),
+    shift, switched.ThoiGian, events).Count() == 0, "Giây chuyển không cộng trùng phiếu vào ca cũ");
+Assert(ScaleSharedAttendancePolicy.ShiftWeights(new[] { boundary }.AsQueryable(), scans.AsQueryable(),
+    switched, ended.ThoiGian, events).Count() == 1, "Giây chuyển tính phiếu cho ca mới");
+var legacyOut = new CheckInOut { Id = "legacy-out", MaChamCong = "card1", MaSoMay = 101,
+    ThoiGian = start.AddHours(2), TrangThai = "Ra" };
+Assert(!ScaleSharedAttendancePolicy.ShiftsAtTime(new[] { shift, legacyOut }.AsQueryable(), "card1", start.AddHours(3)).Any(),
+    "Giữ ghép Ra lịch sử chưa có VaoId");
+var lateOldOut = new CheckInOut { Id = "late-old-out", MaChamCong = "card1", MaSoMay = 101,
+    ThoiGian = start.AddHours(3), TrangThai = "Ra", VaoId = shift.Id };
+var newAtOrigin = new CheckInOut { Id = "101.new", MaChamCong = "card1", MaSoMay = 101,
+    ThoiGian = start.AddHours(2), TrangThai = "Vào" };
+Assert(ScaleSharedAttendancePolicy.ShiftsAtTime(new[] { shift, newAtOrigin, lateOldOut }.AsQueryable(),
+    "card1", start.AddHours(4)).Single().Id == newAtOrigin.Id, "Ra bổ sung ca trước không đóng nhầm ca sau");
+Assert(ScaleSharedAttendancePolicy.ShiftsAtTime(translationDb.Set<CheckInOut>(), "card1", start.AddHours(2))
+    .ToQueryString().Contains("NOT EXISTS"), "Tra ca lịch sử được lọc tại SQL");
+Assert(ScaleSharedAttendancePolicy.ShiftWeights(translationDb.Set<HQ_PhieuCan>(), translationDb.Set<ScaleAttendanceScan>(),
+    shift, start.AddHours(2), translationDb.Set<CheckInOut>()).ToQueryString().Contains("NOT EXISTS"),
+    "SQL tổng ca loại ranh giới chuyển ca để tránh cộng trùng");
+var initialOld = new ScaleAttendanceScan { Id = shift.Id, VaoId = shift.Id, MaSoMay = 101,
+    ThoiGian = start, TrangThai = "Vào", MaThanhPham = "001" };
+var initialNew = new ScaleAttendanceScan { Id = switched.Id, VaoId = switched.Id, MaSoMay = 102,
+    ThoiGian = switched.ThoiGian, TrangThai = "Vào", MaThanhPham = "002" };
+var boundaryScans = new[] { initialOld, joined, initialNew }.AsQueryable();
+var boundaryWeights = new[] {
+    Weight("old-at-A", "101", switched.ThoiGian),
+    Weight("old-at-B", "102", switched.ThoiGian),
+    Weight("new-at-B", "102", switched.ThoiGian, "002") }.AsQueryable();
+var oldPart = ScaleSharedAttendancePolicy.ShiftWeights(boundaryWeights, boundaryScans, shift, switched.ThoiGian, events).ToArray();
+var newPart = ScaleSharedAttendancePolicy.ShiftWeights(boundaryWeights, boundaryScans, switched, ended.ThoiGian, events).ToArray();
+Assert(oldPart.Select(x => x.Id).SequenceEqual(new[] { "old-at-A", "old-at-B" }),
+    "Giây chuyển không bỏ mất phiếu mã cũ tại A/B");
+Assert(newPart.Single().Id == "new-at-B", "Giây chuyển mã mới chỉ thuộc ca mới");
+Assert(oldPart.Length + newPart.Length == boundaryWeights.Count(), "Mỗi phiếu ranh giới được cộng đúng một lần");
+Assert(!ScaleSharedAttendancePolicy.CanUseMachine(switched, boundaryScans, 102, switched.ThoiGian, "001"),
+    "Đúng giây Vào mới không dùng mã cũ làm sản lượng ca mới");
+Assert(ScaleSharedAttendancePolicy.CanUseMachine(switched, boundaryScans, 102, switched.ThoiGian, "002"),
+    "Đúng giây Vào mới chấp nhận đúng mã mới");
+Assert(!ScaleSharedAttendancePolicy.CanUseMachine(switched, boundaryScans, 102, switched.ThoiGian.AddTicks(-1), "002"),
+    "Không nhận phiếu trước giờ Vào máy gốc");
+var originScan = new ScaleAttendanceScan { Id = newAtOrigin.Id, VaoId = newAtOrigin.Id, MaSoMay = 101,
+    ThoiGian = newAtOrigin.ThoiGian, TrangThai = "Vào", MaThanhPham = "002" };
+var sameMachineEvents = new[] { shift, automaticOut, newAtOrigin }.AsQueryable();
+var sameMachineScans = new[] { initialOld, originScan }.AsQueryable();
+var sameMachineWeights = new[] { Weight("old", "101", newAtOrigin.ThoiGian),
+    Weight("new", "101", newAtOrigin.ThoiGian, "002") }.AsQueryable();
+Assert(ScaleSharedAttendancePolicy.ShiftWeights(sameMachineWeights, sameMachineScans, shift,
+    newAtOrigin.ThoiGian, sameMachineEvents).Single().Id == "old", "Đổi mã tại máy gốc giữ phiếu mã cũ cùng giây");
+Assert(ScaleSharedAttendancePolicy.ShiftWeights(sameMachineWeights, sameMachineScans, newAtOrigin,
+    newAtOrigin.ThoiGian.AddHours(1), sameMachineEvents).Single().Id == "new", "Đổi mã tại máy gốc không cộng trùng mã mới");
 Console.WriteLine($"PASS: {checks} kiểm tra ca chung; không kết nối SQL hoặc gửi lệnh cân.");
 
 sealed class TranslationDb : DbContext
@@ -99,5 +176,6 @@ sealed class TranslationDb : DbContext
     {
         model.Entity<HQ_PhieuCan>();
         model.Entity<ScaleAttendanceScan>();
+        model.Entity<CheckInOut>();
     }
 }

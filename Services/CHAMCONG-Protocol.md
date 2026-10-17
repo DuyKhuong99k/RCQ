@@ -1,5 +1,10 @@
 # Chấm công online tại cân
 
+**Cập nhật HQ 17/10/2026:** dùng một ca chung khi Vào cân khác cùng mã thành phẩm;
+khác mã thì tự đóng/mở ca. Các quy tắc cố định một máy và tổng chỉ một máy bên dưới
+chỉ còn áp dụng luồng cũ/ngoài HQ. Xem quy tắc, đồng bộ và script triển khai tại
+[Ca chung theo thành phẩm HQ](../docs/Ca-chung-theo-thanh-pham-HQ.md).
+
 Firmware đã Auth thành công gọi SignalR:
 
 ```text
