@@ -1,4 +1,4 @@
-﻿using Dapper;
+using Dapper;
 using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
@@ -36,7 +36,7 @@ UPDATE [dbo].[UserArea]
 ";
 
         private readonly string qrGetAll = "Select * from UserArea";
-        private readonly string qrGetsByUserId = @"select * from UserArea where UserId = @userId";
+        private readonly string qrGetsByUserId = @"select * from UserArea WITH (NOLOCK) where UserId = @userId";
 
         public UserArea(string? _connectionString = null)
         {

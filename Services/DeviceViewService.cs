@@ -1,4 +1,4 @@
-﻿using System.Timers;
+using System.Timers;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Models.Repos.Models;
 using MvvmHelpers;
@@ -34,8 +34,11 @@ public partial class DeviceViewService(IMayCansService mayCansService,IUserServi
         {
             Items.Clear();
         }
-        _allowedAreas = userService.UserAreas.Where(x => x.UserId == userId)
-            .Select(x => (AppKV)x.WKv).ToHashSet();
+        lock (userService.UserAreas)
+        {
+            _allowedAreas = userService.UserAreas.Where(x => x.UserId == userId)
+                .Select(x => (AppKV)x.WKv).ToHashSet();
+        }
         _workshopCode = XiNghiep?.Ma?.Trim();
         // Load có thể được gọi nhiều lần. Không đăng ký sự kiện trùng.
         mayCansService.ItemUpdated -= MayCansServiceOnItemUpdated;

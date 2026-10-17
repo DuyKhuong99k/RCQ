@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
@@ -169,6 +169,8 @@ public sealed class ChatHub(
                 if (traceId != null)
                     logger.LogWarning("[CHAMCONG REJECT] Trace={Trace} Connection={Connection}: kết nối chưa xác định là máy cân.",
                         traceId, Context.ConnectionId);
+                var rejectError = JsonConvert.SerializeObject(new DataError { Cmd = command, ErrorString = "Kết nối chưa xác định là máy cân." });
+                await Clients.Caller.SendAsync("ReceiveData", command, rejectError);
                 return;
             }
             var dataToSend = await communicationService.Route(client, command, len, dataJson);
@@ -187,8 +189,17 @@ public sealed class ChatHub(
                 logger.LogError(e, "[CHAMCONG ERROR] Trace={Trace} Connection={Connection}",
                     traceId, Context.ConnectionId);
             else Console.WriteLine(e);
-            
-            //throw;
+
+            try
+            {
+                var errorResponse = JsonConvert.SerializeObject(new DataError
+                {
+                    Cmd = command,
+                    ErrorString = "Máy chủ bận hoặc lỗi xử lý: " + e.Message
+                });
+                await Clients.Caller.SendAsync("ReceiveData", command, errorResponse);
+            }
+            catch { /* tránh ngoại lệ lồng */ }
         }
        
     }

@@ -18,6 +18,9 @@ using Microsoft.AspNetCore.DataProtection;
 using PMSHub.Middlewares;
 using Dao.Repos;
 
+// Đảm bảo thread pool có sẵn ít nhất 100 worker/IO threads để xử lý tải đột biến khi nhiều cân kết nối/quẹt thẻ đồng thời
+ThreadPool.SetMinThreads(100, 100);
+
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddScoped<Database>();
 builder.Services.AddHostedService<DeviceHeartbeatMonitor>();

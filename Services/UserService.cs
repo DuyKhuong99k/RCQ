@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -44,7 +44,9 @@ namespace Services
         public void AddUserArea(int userId)
         {
             var items = mainService.VmUserArea.Gets<UserArea>(userId);
-            if(items != null && items.Any()) {
+            if (items != null && items.Any())
+            {
+                lock (UserAreas)
                 {
                     RemoveUserArea(userId);
                     foreach (var item in items)
@@ -56,12 +58,15 @@ namespace Services
         }
         public void RemoveUserArea(int userId)
         {
-            var findItems = UserAreas.Where(x => x.UserId == userId).ToList();
-            if(findItems != null && findItems.Any())
+            lock (UserAreas)
             {
-                foreach (var item in findItems)
+                var findItems = UserAreas.Where(x => x.UserId == userId).ToList();
+                if (findItems != null && findItems.Any())
                 {
-                    UserAreas.Remove(item);
+                    foreach (var item in findItems)
+                    {
+                        UserAreas.Remove(item);
+                    }
                 }
             }
         }

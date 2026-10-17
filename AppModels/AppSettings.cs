@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using Newtonsoft.Json;
 
 namespace AppModels;
@@ -15,7 +15,7 @@ public partial class AppSettings : ObservableObject
     //[ObservableProperty] private string _serverName = "data.pms-vn.com,4751";
     [ObservableProperty] private string _serverName = ".";
 
-    [ObservableProperty] private int _timeOut = 3;
+    [ObservableProperty] private int _timeOut = 30;
 
     [ObservableProperty] private string _usr = "pmsvn";
 
@@ -33,7 +33,7 @@ public partial class AppSettings : ObservableObject
             ReaderPort = ReaderPort,
             Usr = Usr,
             ServerName = "115.74.218.101,2400",
-            TimeOut = 10,
+            TimeOut = 30,
             DbBravo = DbBravo,
             PassBravo = PassBravo,
             UsrBravo = UsrBravo,

@@ -25,6 +25,7 @@ public sealed class ScaleAttendanceDayCloseService(
                 TrangThai AS Direction
             FROM dbo.CheckInOut
             WHERE ThoiGian < {0}
+              AND ThoiGian >= DATEADD(DAY, -7, {0})
               AND TrangThai IN (N'Vào', N'Ra')
         ),
         Ordered AS

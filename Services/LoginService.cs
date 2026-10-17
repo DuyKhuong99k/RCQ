@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
@@ -59,31 +59,40 @@ namespace Services
             else
                 return string.Empty;
         }
+        private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, (NguoiDung? User, DateTime Expired)> _userCache = new();
+
         public bool LoginLocal(string userName, string passWord)
         {
             var isLoginSuccess = false;
             var result = Handlers.ErrorHandler.Handle(() =>
             {
-                var user = mainService.VmNguoiDung.GetByUserName(userName).FirstOrDefault();
+                NguoiDung? user = null;
+                var now = DateTime.UtcNow;
+                if (!string.IsNullOrWhiteSpace(userName) && _userCache.TryGetValue(userName, out var cached) && cached.Expired > now)
+                {
+                    user = cached.User;
+                }
+                else
+                {
+                    user = mainService.VmNguoiDung.GetByUserName(userName).FirstOrDefault();
+                    if (!string.IsNullOrWhiteSpace(userName))
+                    {
+                        _userCache[userName] = (user, now.AddSeconds(user != null ? 60 : 10));
+                    }
+                }
+
                 isLoginSuccess = LoginLocalUser(user, passWord);
-                
-                
+                if (!isLoginSuccess && !string.IsNullOrWhiteSpace(userName))
+                {
+                    _userCache.TryRemove(userName, out _);
+                }
             });
             if (!result.IsSuccess)
             {
                 Console.WriteLine(result.Error?.Message);
                 isLoginSuccess = false;
             }
-            // Kiểm tra lại session đã được tạo hay chưa
-            //if (!IsSessionCreated())
-            //{
-            //    Console.WriteLine("Session không được tạo thành công. Thử lại.");
-            //    isLoginSuccess = false;
-            //}
             return isLoginSuccess;
-            
-                
-
         }
 
         // Dùng cùng nhánh này trong kiểm thử cô lập, không cần truy cập SQL.

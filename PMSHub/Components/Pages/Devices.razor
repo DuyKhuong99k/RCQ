@@ -1,4 +1,4 @@
-﻿@page "/Devices"
+@page "/Devices"
 @rendermode InteractiveServer
 @inject IJSRuntime jsRuntime
 @inject NavigationManager Navigation
@@ -2478,6 +2478,7 @@ else
         DeviceViewService.DevicesChanged -= MayCanChangedHandler;
         MainService.AlertRequested -= AlertRequestedHandler;
         SelectedItems?.Clear();
+        DeviceViewService.Dispose();
     }
 
     private async void OverlayClick(OverlayModalClickEventArgs args)

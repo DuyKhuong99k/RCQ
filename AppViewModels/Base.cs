@@ -1,4 +1,4 @@
-﻿using AppModels;
+using AppModels;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System;
@@ -28,7 +28,7 @@ namespace AppViewModels
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(ConnectionString))]
-        private int _timeOut = 3;
+        private int _timeOut = 30;
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(ConnectionString))]
@@ -58,9 +58,9 @@ namespace AppViewModels
         ///     Connection String
         /// </summary>
         public string ConnectionString =>
-            $@"data source={ServerName};initial catalog={Db};user id={Usr};password={Pass};MultipleActiveResultSets=True;App=EntityFramework;Connection Timeout={TimeOut};Encrypt=False;TrustServerCertificate=True;";
+            $@"data source={ServerName};initial catalog={Db};user id={Usr};password={Pass};MultipleActiveResultSets=True;App=EntityFramework;Connection Timeout={TimeOut};Encrypt=False;TrustServerCertificate=True;Max Pool Size=200;";
         public string ConnectionStringBravo =>
-            $@"data source={ServerNameBravo};initial catalog={DbBravo};user id={UsrBravo};password={PassBravo};MultipleActiveResultSets=True;App=EntityFramework;Connection Timeout={TimeOut};Encrypt=False;TrustServerCertificate=True;";
+            $@"data source={ServerNameBravo};initial catalog={DbBravo};user id={UsrBravo};password={PassBravo};MultipleActiveResultSets=True;App=EntityFramework;Connection Timeout={TimeOut};Encrypt=False;TrustServerCertificate=True;Max Pool Size=200;";
 
         [ObservableProperty] private string? connectionString2 = null;
 
@@ -76,7 +76,7 @@ namespace AppViewModels
             this.Db = settings.Db;
             this.Pass = settings.Pass;
             this.ServerName = settings.ServerName;
-            this.TimeOut = settings.TimeOut;
+            this.TimeOut = settings.TimeOut > 0 ? Math.Max(30, settings.TimeOut) : 30;
             this.Usr = settings.Usr;
             this.DbBravo = settings.DbBravo;
             this.PassBravo = settings.PassBravo;

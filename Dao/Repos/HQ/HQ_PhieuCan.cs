@@ -1,4 +1,4 @@
-﻿using Dapper;
+using Dapper;
 using Microsoft.Data.SqlClient;
 using System;
 using System.Data;
@@ -3268,7 +3268,7 @@ order by
                     COALESCE(SUM(TrongLuong), 0) AS MachineWeight,
                     COALESCE(SUM(CASE WHEN MaNhanVien = @employeeId THEN 1 ELSE 0 END), 0) AS EmployeeCount,
                     COALESCE(SUM(CASE WHEN MaNhanVien = @employeeId THEN TrongLuong ELSE 0 END), 0) AS EmployeeWeight
-                FROM dbo.HQ_PhieuCan
+                FROM dbo.HQ_PhieuCan WITH (NOLOCK)
                 WHERE Ngay = @day AND MayCan = @machineId AND TrongLuong > 0;";
             using var connection = new SqlConnection(connectionString);
             return connection.QuerySingle<OnlineTotals>(sql, new { day = day.Date, machineId, employeeId });

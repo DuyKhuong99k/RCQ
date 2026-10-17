@@ -1,4 +1,4 @@
-﻿@page "/api/loginlocal/"
+@page "/api/loginlocal/"
 @using Blazored.LocalStorage
 @using Models.Repos.Models
 @using PMSHub.Components.Layout
@@ -78,7 +78,7 @@
                             </span>
                         </div>
                     </div>
-                    @* 
+                    @*
                     <div class="mb-3">
                         <div class="form-check">
                             <input class="form-check-input" type="checkbox" id="remember-me" />
@@ -121,7 +121,7 @@
     private string selectedWorkshopCode = "";
     private List<XiNghiep> AvailableWorkshops => MainService.VmXiNghiep.Items
         .Where(x => x.SuDung == true).ToList();
-    
+
     // protected override void OnInitialized()
     // {
     //     // Lấy query string từ URL
@@ -148,7 +148,7 @@
         {
             Navigation.NavigateTo(returnUrl ?? "/", forceLoad: true);
         }
-        
+
         await base.OnInitializedAsync();
     }
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -169,50 +169,26 @@
 
 
 
+    private bool isLoggingIn = false;
+
     private async Task DoLogin()
     {
+        if (isLoggingIn) return;
+        isLoggingIn = true;
         try
         {
-            
             var workshop = AvailableWorkshops.FirstOrDefault(x => x.Ma == selectedWorkshopCode);
             if (workshop == null)
             {
                 ToastService.ShowToast("Vui lòng chọn xưởng trước khi đăng nhập.", ToastType.Error);
                 return;
             }
-            var loginResult = loginService.LoginLocal(userName, passWord);
+            var loginResult = await Task.Run(() => loginService.LoginLocal(userName, passWord));
             if (loginResult)
             {
                 SessionService.Set("XuongId", workshop.Ma);
                 await LocalStorage.SetItemAsync("XuongId", workshop.Ma);
-                // MainService.VmApp.ComName = "RCQTG";
-                //MainService.VmApp.ComName = MainService.VmXiNghiep.SelectedItem?.CodeId??"";
                 await LocalStorage.SetItemAsync("PageReloadKey", "false");
-                // try
-                // {
-                //     var xuongId = await LocalStorage.GetItemAsync<string>("XuongId");
-                //     if (xuongId != null)
-                //     {
-                //         SessionService.Set("XuongId", xuongId);
-                //     }
-                //     else
-                //     {
-                //         var xiNghiep = MainService.VmXiNghiep.SelectedItem;
-                //         if (xiNghiep != null)
-                //         {
-                //             SessionService.Set("XuongId", xiNghiep.Ma);
-                //             await LocalStorage.SetItemAsync("XuongId", xiNghiep.Ma);
-                //         }
-                //     }
-                // }
-                // catch (Exception e)
-                // {
-                //     // Console.WriteLine(e);
-                //     // throw;
-                // }
-                
-                
-                //Navigation.NavigateTo("/", true);
                 var userId = loginService.GetSessionVal("Username");
                 var o = new ToastOption
                 {
@@ -227,25 +203,10 @@
             }
             else
             {
-                
-
-                // await ToastService.ShowConfirmationToast("Are you sure you want to proceed?", "Confirmation", (result) =>
-                // {
-                //     if (result)
-                //     {
-                //         Console.WriteLine("User clicked Yes");
-                //     }
-                //     else
-                //     {
-                //         Console.WriteLine("User clicked No");
-                //     }
-
-                //     return Task.CompletedTask;
-                // });
                 var o = new ToastOption
                     {
                         Title = "Thông Báo",
-                        Content = $"Tên đăng nhập hoặc mật khẩu không chính xác.-{returnUrl} - {loginResult}" 
+                        Content = $"Tên đăng nhập hoặc mật khẩu không chính xác."
                     };
                 o.SetType(ToastType.Error);
 
@@ -255,6 +216,10 @@
         catch (Exception e)
         {
             Console.WriteLine(e);
+        }
+        finally
+        {
+            isLoggingIn = false;
         }
     }
 

@@ -362,27 +362,31 @@
 
     private async void BatchTimerOnElapsed(object? sender, ElapsedEventArgs e)
     {
-        // InvokeAsync(FlushBatch);
-        // await InvokeAsync(async () => await btpGrid.Refresh());
-        // await InvokeAsync(async () => await tpGrid.Refresh());
+        if (!isRunning) return;
         try
         {
-            batchTimer.Stop();
+            batchTimer?.Stop();
+            if (!isRunning) return;
             await InvokeAsync(async () =>
             {
+                if (!isRunning) return;
                 await FlushBatch();
-                //StateHasChanged();
-                // return Task.CompletedTask;
             });
         }
         catch (Exception ex)
         {
             Console.WriteLine(ex);
-            // throw;
         }
         finally
         {
-            batchTimer.Start();
+            if (isRunning)
+            {
+                try
+                {
+                    batchTimer?.Start();
+                }
+                catch { }
+            }
         }
     }
 
@@ -530,13 +534,13 @@
 
     public void Dispose()
     {
-        batchTimer?.Stop();
-        batchTimer?.Dispose();
-        // MayCanService.ItemUpdated -= MayCanServiceOnItemUpdated;
-        // MayCanService.ItemAdded -= MayCanServiceOnItemAdded;
-        // MayCanService.ItemRemoved -= MayCanServiceOnItemRemoved;
         isRunning = false;
-        // MayCanService.ItemChanged -= MayCanChangedHandler;
+        try
+        {
+            batchTimer?.Stop();
+            batchTimer?.Dispose();
+        }
+        catch { }
     }
 
     private void OnRowDataBound(RowDataBoundEventArgs<PhieuCanTPDinhHinh> args)

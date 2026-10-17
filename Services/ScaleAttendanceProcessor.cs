@@ -6,11 +6,57 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Vars.Hubs;
 
+using System.Collections.Concurrent;
+
 namespace Services;
 
 /// <summary>Chấm công online tại cân; độc lập với phiếu chấm công tại xưởng.</summary>
 public static class ScaleAttendanceProcessor
 {
+    private static readonly ConcurrentDictionary<string, (TheTu? Card, NhanVienDaiThanh? Employee, DateTime Expired)> _cardEmployeeCache = new();
+    private static readonly ConcurrentDictionary<string, (MayCan? Device, DateTime Expired)> _deviceCache = new();
+    private static readonly ConcurrentDictionary<string, string?> _productNameCache = new();
+
+    private static (TheTu? Card, NhanVienDaiThanh? Employee) GetCardAndEmployee(dbPMScontext db, string cardId)
+    {
+        var now = DateTime.UtcNow;
+        if (_cardEmployeeCache.TryGetValue(cardId, out var cached) && cached.Expired > now)
+            return (cached.Card, cached.Employee);
+
+        var card = db.TheTu.AsNoTracking().FirstOrDefault(x => x.MaTheTu == cardId);
+        var employee = string.IsNullOrWhiteSpace(card?.MaNhanVien) ? null :
+            db.NhanVienDaiThanh.AsNoTracking().FirstOrDefault(x => x.MaNhanVien == card.MaNhanVien);
+
+        var ttl = employee != null ? TimeSpan.FromSeconds(60) : TimeSpan.FromSeconds(10);
+        _cardEmployeeCache[cardId] = (card, employee, now.Add(ttl));
+        return (card, employee);
+    }
+
+    private static MayCan? GetRegisteredDevice(dbPMScontext db, string deviceId)
+    {
+        var now = DateTime.UtcNow;
+        if (_deviceCache.TryGetValue(deviceId, out var cached) && cached.Expired > now)
+            return cached.Device;
+
+        var device = db.MayCans.AsNoTracking().FirstOrDefault(x => x.Id == deviceId);
+        _deviceCache[deviceId] = (device, now.AddSeconds(60));
+        return device;
+    }
+
+    private static string? LookupProductName(dbPMScontext db, string? productCode)
+    {
+        if (string.IsNullOrWhiteSpace(productCode)) return null;
+        if (_productNameCache.TryGetValue(productCode, out var name)) return name;
+
+        var productName = db.HqThanhPhams.AsNoTracking()
+            .Where(product => product.Id == productCode)
+            .Select(product => product.Ten)
+            .FirstOrDefault();
+
+        _productNameCache[productCode] = productName;
+        return productName;
+    }
+
     public static (bool Success, string Json) Process(ClientInfo client, string payload, int maxShiftHours = 16,
         string? selectedProductCode = null)
     {
@@ -41,20 +87,17 @@ public static class ScaleAttendanceProcessor
         try
         {
             using var db = new dbPMScontext();
-            var card = db.TheTu.AsNoTracking().FirstOrDefault(x => x.MaTheTu == request.TheId);
-            var employee = string.IsNullOrWhiteSpace(card?.MaNhanVien) ? null :
-                db.NhanVienDaiThanh.AsNoTracking().FirstOrDefault(x => x.MaNhanVien == card.MaNhanVien);
+            var (card, employee) = GetCardAndEmployee(db, request.TheId);
             if (employee is null)
                 return Failure("CARD_NOT_REGISTERED", "Thẻ chưa đăng ký", request);
-            var registeredDevice = db.MayCans.AsNoTracking().FirstOrDefault(x => x.Id == device);
+            var registeredDevice = GetRegisteredDevice(db, device);
             var name = registeredDevice?.DisplayName;
             name = string.IsNullOrWhiteSpace(name) ? device : name.Trim();
             if (name.Length > 200)
                 return Failure("INVALID_DEVICE_NAME", "Tên máy vượt quá độ dài cho phép của CheckInOut.TenMay.", request);
             // Chỉ đổi nhãn Công việc gửi xuống WSS. Không lấy DisplayName của
             // máy làm tên thành phẩm, không sửa tên máy hoặc lịch sử chấm công.
-            var jobName = ResolveJobName(selectedProductCode, code => db.HqThanhPhams.AsNoTracking()
-                .Where(product => product.Id == code).Select(product => product.Ten).FirstOrDefault());
+            var jobName = ResolveJobName(selectedProductCode, code => LookupProductName(db, code));
 
             using var transaction = db.Database.BeginTransaction();
             ScaleAttendanceTransferService.LockCard(db, request.TheId);

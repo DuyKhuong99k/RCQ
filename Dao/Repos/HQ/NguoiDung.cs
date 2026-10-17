@@ -1,4 +1,4 @@
-﻿using Dapper;
+using Dapper;
 using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
@@ -91,7 +91,7 @@ UPDATE [dbo].[NguoiDung]
         {
             using var connection = new SqlConnection(connectionString);
             connection.Open();
-            var rows = connection.Query<int?>($"select Id from NguoiDung where UserName = '{userName}'").FirstOrDefault();
+            var rows = connection.Query<int?>($"select Id from NguoiDung WITH (NOLOCK) where UserName = '{userName}'").FirstOrDefault();
             return rows;
         }
 
@@ -99,7 +99,7 @@ UPDATE [dbo].[NguoiDung]
         {
             using var connection = new SqlConnection(connectionString);
             connection.Open();
-            var rows = connection.Query<T>("select * from NguoiDung where UserName = @UserName",
+            var rows = connection.Query<T>("select * from NguoiDung WITH (NOLOCK) where UserName = @UserName",
                 new { UserName = userName }).ToList();
             return rows;
         }
