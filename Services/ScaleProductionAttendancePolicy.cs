@@ -14,12 +14,16 @@ public static class ScaleProductionAttendancePolicy
     public static bool RequiresAttendance(NhanVienDaiThanh? employee) =>
         !IsProductionCard(employee) || !employee!.IsNhom;
 
-    public static string? GetError(dbPMScontext db, string card, int machine, DateTime time, int maxShiftHours)
+    public static string? GetError(dbPMScontext db, string card, int machine, DateTime time, int maxShiftHours, NhanVienDaiThanh? preloadedEmployee = null)
     {
-        var employeeCode = db.TheTu.AsNoTracking().Where(x => x.MaTheTu == card)
-            .Select(x => x.MaNhanVien).FirstOrDefault();
-        var employee = string.IsNullOrWhiteSpace(employeeCode) ? null : db.NhanVienDaiThanh.AsNoTracking()
-            .FirstOrDefault(x => x.MaNhanVien == employeeCode);
+        var employee = preloadedEmployee;
+        if (employee == null)
+        {
+            var employeeCode = db.TheTu.AsNoTracking().Where(x => x.MaTheTu == card)
+                .Select(x => x.MaNhanVien).FirstOrDefault();
+            employee = string.IsNullOrWhiteSpace(employeeCode) ? null : db.NhanVienDaiThanh.AsNoTracking()
+                .FirstOrDefault(x => x.MaNhanVien == employeeCode);
+        }
         if (!IsProductionCard(employee)) return "Thẻ không thuộc nhân viên hoặc nhóm sản xuất hợp lệ.";
         if (!RequiresAttendance(employee)) return null;
 

@@ -39,10 +39,11 @@ public static class ScaleAttendanceTransferService
         db.CheckInOuts.AsNoTracking().Where(x => x.TrangThai == "Vào" &&
             (card == null || x.MaChamCong == card) &&
             !db.CheckInOuts.Any(next =>
-                next.VaoId == x.Id ||
-                (next.MaChamCong == x.MaChamCong && next.MaSoMay == x.MaSoMay &&
-                 (next.TrangThai == "Vào" || next.TrangThai == "Ra") &&
-                 (next.ThoiGian > x.ThoiGian || (next.ThoiGian == x.ThoiGian && next.Id.CompareTo(x.Id) > 0)))))
+                (card == null || next.MaChamCong == card) &&
+                (next.VaoId == x.Id ||
+                 (next.MaChamCong == x.MaChamCong && next.MaSoMay == x.MaSoMay &&
+                  (next.TrangThai == "Vào" || next.TrangThai == "Ra") &&
+                  (next.ThoiGian > x.ThoiGian || (next.ThoiGian == x.ThoiGian && next.Id.CompareTo(x.Id) > 0))))))
             .OrderByDescending(x => x.ThoiGian).ToList();
 
     internal static DateTime ServerTransferTime(DateTimeOffset utcNow)
