@@ -7,9 +7,9 @@
 @using Services
 @using Microsoft.Extensions.Options
 @using ViewModels.Repos.Hubs.IServices
-@using System.Globalization
 @inject ISessionService SessionService
 @inject IOptions<ScaleAttendanceOptions> AttendanceOptions
+@inject ILogger<ScaleAttendanceTransfers> Logger
 
 <PageTitle>Chuyển máy chấm công</PageTitle>
 <div style="padding:24px;max-width:1100px">
@@ -24,20 +24,29 @@
     }
     else
     {
-        <p>Chọn ca đang mở và máy mới. Giờ chuyển tự ghi theo máy chủ lúc bấm xác nhận (giờ Việt Nam), không cho nhập hoặc sửa; giữ loại ca thường/đêm.</p>
-        <button class="btn btn-secondary" disabled="@busy" @onclick="Load">Tải lại</button>
+        <p>Chọn một hoặc nhiều nhân viên đang có ca mở và máy mới. Giờ chuyển tự ghi theo máy chủ khi xử lý từng nhân viên (giờ Việt Nam), không cho nhập hoặc sửa; giữ loại ca thường/đêm.</p>
+        <button class="btn btn-secondary" disabled="@busy" @onclick="() => Load(1, true)">Tải lại</button>
         @if (!string.IsNullOrEmpty(message))
         {
             <p role="status" class="@(isError ? "text-danger" : "text-success")">@message</p>
         }
+        @if (transferErrors.Count > 0)
+        {
+            <ul class="text-danger">
+                @foreach (var error in transferErrors)
+                {
+                    <li>@error</li>
+                }
+            </ul>
+        }
         <div class="table-responsive" style="margin-top:16px">
             <table class="table table-bordered">
-                <thead><tr><th>Chọn</th><th>Thẻ / Nhân viên</th><th>Máy đang làm</th><th>Giờ Vào máy</th><th>Loại ca</th></tr></thead>
+                <thead><tr><th><label><input type="checkbox" checked="@(rows.Count > 0 && rows.All(x => selectedRows.ContainsKey(x.Id)))" @onchange="SelectPage" disabled="@(busy || rows.Count == 0)" /> Chọn trang</label></th><th>Thẻ / Nhân viên</th><th>Máy đang làm</th><th>Giờ Vào máy</th><th>Loại ca</th></tr></thead>
                 <tbody>
                     @foreach (var row in rows)
                     {
-                        <tr>
-                            <td><input type="radio" name="shift" checked="@(selectedId == row.Id)" @onchange="() => Select(row)" disabled="@busy" /></td>
+                        <tr @key="row.Id">
+                            <td><input type="checkbox" aria-label="@($"Chọn thẻ {row.MaChamCong}")" checked="@selectedRows.ContainsKey(row.Id)" @onchange="e => Select(row, e.Value is true)" disabled="@busy" /></td>
                             <td>@row.MaChamCong<br />@EmployeeName(row.MaChamCong)</td>
                             <td>@row.MaSoMay — @row.TenMay</td>
                             <td>@row.ThoiGian.ToString("dd/MM/yyyy HH:mm:ss")</td>
@@ -47,10 +56,25 @@
                 </tbody>
             </table>
         </div>
-        @if (rows.Count == 0) { <p>Không có ca còn hạn để chuyển máy.</p> }
-        @if (selectedId != null)
+        <div class="d-flex align-items-center gap-3 flex-wrap">
+            <label>Số dòng mỗi trang
+                <select class="form-select" value="@pageSize" @onchange="ChangePageSize" disabled="@busy">
+                    <option value="20">20</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                </select>
+            </label>
+            <span>Trang @pageNumber / @TotalPages — Tổng @totalRows ca</span>
+            <button class="btn btn-secondary" disabled="@(busy || pageNumber <= 1)" @onclick="() => Load(pageNumber - 1)">Trang trước</button>
+            <button class="btn btn-secondary" disabled="@(busy || pageNumber >= TotalPages)" @onclick="() => Load(pageNumber + 1)">Trang sau</button>
+        </div>
+        @if (!busy && totalRows == 0) { <p>Không có ca còn hạn để chuyển máy.</p> }
+        @if (selectedRows.Count > 0)
         {
             <div style="display:grid;gap:12px;max-width:600px">
+                <p>Đã chọn @selectedRows.Count ca (giữ lựa chọn khi đổi trang).
+                    <button class="btn btn-link" disabled="@busy" @onclick="ClearSelection">Bỏ chọn tất cả</button>
+                </p>
                 <label>Máy mới
                     <select class="form-select" @bind="targetMachine" disabled="@busy">
                         <option value="0">Chọn máy HQ</option>
@@ -60,12 +84,12 @@
                         }
                     </select>
                 </label>
-                <p>Thời điểm chuyển: tự động lấy giờ máy chủ khi xác nhận, không thể chỉnh sửa.</p>
+                <p>Thời điểm chuyển: tự động lấy giờ máy chủ cho từng nhân viên, không thể chỉnh sửa. Khi chọn nhiều người, hệ thống xử lý lần lượt để tránh trùng mã chấm công trong cùng giây.</p>
                 <label>Lý do chuyển
                     <textarea class="form-control" maxlength="500" @bind="reason" disabled="@busy"></textarea>
                 </label>
                 <p>Thao tác ghi Ra ở máy cũ và Vào ở máy mới cùng một thời điểm thực hiện, kèm tài khoản quản trị xác nhận và lý do.</p>
-                <button class="btn btn-primary" disabled="@(busy || targetMachine == 0 || string.IsNullOrWhiteSpace(reason))" @onclick="Confirm">Xác nhận chuyển máy</button>
+                <button class="btn btn-primary" disabled="@(busy || targetMachine == 0 || string.IsNullOrWhiteSpace(reason))" @onclick="Confirm">Xác nhận chuyển máy cho @selectedRows.Count ca</button>
             </div>
         }
     }
@@ -74,68 +98,139 @@
 @code {
     private bool ready, authorized, busy, isError;
     private int userId, targetMachine;
-    private string? selectedId;
+    private int pageNumber = 1, pageSize = 20, totalRows;
+    private int TotalPages => Math.Max(1, (int)Math.Ceiling((double)totalRows / pageSize));
+    private Dictionary<string, CheckInOut> selectedRows = new();
+    private List<string> transferErrors = new();
     private string reason = "", message = "";
     private List<CheckInOut> rows = new();
     private List<MayCan> machines = new();
     private Dictionary<string, string> names = new();
 
-    protected override Task OnAuthenticatedAsync()
+    protected override async Task OnAuthenticatedAsync()
     {
         if (int.TryParse(SessionService.Get("UserId"), out userId))
         {
             using var db = new dbPMScontext();
-            authorized = db.NguoiDungs.AsNoTracking().Any(x => x.Id == userId && x.IsAdmin == true && x.IsActive != false);
+            authorized = await db.NguoiDungs.AsNoTracking().AnyAsync(x => x.Id == userId && x.IsAdmin == true && x.IsActive != false);
         }
         ready = true;
-        if (authorized) Load();
+        if (authorized) await Load(1, true);
         StateHasChanged();
-        return Task.CompletedTask;
     }
 
     private string EmployeeName(string card) => names.GetValueOrDefault(card, "Chưa xác định");
-    private void Select(CheckInOut row)
+    private void Select(CheckInOut row, bool selected)
     {
-        selectedId = row.Id;
+        if (busy) return;
+        if (selected) selectedRows[row.Id] = row;
+        else selectedRows.Remove(row.Id);
+    }
+    private void SelectPage(ChangeEventArgs e)
+    {
+        foreach (var row in rows) Select(row, e.Value is true);
+    }
+    private void ClearSelection()
+    {
+        if (busy) return;
+        selectedRows.Clear();
         targetMachine = 0;
         reason = "";
     }
-    private void Load()
+    private async Task ChangePageSize(ChangeEventArgs e)
     {
-        if (!authorized) return;
+        if (busy || !int.TryParse(e.Value?.ToString(), out var size) || size is not (20 or 50 or 100)) return;
+        pageSize = size;
+        await Load();
+    }
+    private async Task Load(int requestedPage = 1, bool clearSelection = false)
+    {
+        if (!authorized || busy) return;
+        busy = true;
+        try
+        {
+            isError = false;
+            message = "";
+            if (clearSelection)
+            {
+                selectedRows.Clear();
+                targetMachine = 0;
+                reason = "";
+                transferErrors.Clear();
+            }
+            await LoadPage(requestedPage);
+        }
+        finally { busy = false; }
+    }
+    private async Task LoadPage(int requestedPage)
+    {
         try
         {
             using var db = new dbPMScontext();
             var now = DateTimeOffset.UtcNow.ToOffset(TimeSpan.FromHours(7)).DateTime;
-            rows = ScaleAttendanceTransferService.OpenShifts(db).Where(x => !ScaleAttendanceTransferService.IsExpired(
-                x, now, AttendanceOptions.Value.MaxShiftHours)).ToList();
-            machines = db.MayCans.AsNoTracking().Where(x => x.WKv == Vars.AppKV.Hq).OrderBy(x => x.Id).ToList();
-            names = (from card in db.TheTu.AsNoTracking()
+            var query = ScaleAttendanceTransferService.TransferableShifts(db.CheckInOuts.AsNoTracking(),
+                now, AttendanceOptions.Value.MaxShiftHours);
+            var count = await query.CountAsync();
+            var page = Math.Clamp(requestedPage, 1, Math.Max(1, (int)Math.Ceiling((double)count / pageSize)));
+            var pageRows = await query.OrderByDescending(x => x.ThoiGian).ThenBy(x => x.Id)
+                .Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
+            var cards = pageRows.Select(x => x.MaChamCong).Distinct().ToList();
+            var employeeNames = await (from card in db.TheTu.AsNoTracking()
                      join employee in db.NhanVienDaiThanh.AsNoTracking() on card.MaNhanVien equals employee.MaNhanVien
-                     select new { card.MaTheTu, employee.Name }).ToList()
+                     where cards.Contains(card.MaTheTu)
+                     select new { card.MaTheTu, employee.Name }).ToListAsync();
+            var pageMachines = await db.MayCans.AsNoTracking().Where(x => x.WKv == Vars.AppKV.Hq).OrderBy(x => x.Id).ToListAsync();
+            rows = pageRows;
+            totalRows = count;
+            pageNumber = page;
+            machines = pageMachines;
+            names = employeeNames
                 .GroupBy(x => x.MaTheTu).ToDictionary(g => g.Key, g => g.First().Name ?? "");
-            selectedId = null;
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            Logger.LogError(ex, "Không tải được danh sách chuyển máy chấm công.");
             isError = true;
-            message = "Không tải được danh sách. Kiểm tra kết nối SQL và script bổ sung cột chuyển máy.";
+            message = (string.IsNullOrEmpty(message) ? "" : message + " ") +
+                "Không tải được danh sách. Kiểm tra kết nối SQL và script bổ sung cột chuyển máy.";
         }
     }
     private async Task Confirm()
     {
-        if (!authorized || busy || selectedId == null) return;
+        if (!authorized || busy || selectedRows.Count == 0 || targetMachine == 0 || string.IsNullOrWhiteSpace(reason)) return;
         busy = true;
+        isError = false;
+        transferErrors.Clear();
+        var selected = selectedRows.Values.ToList();
+        var succeeded = 0;
         try
         {
-            message = ScaleAttendanceTransferService.Transfer(userId, selectedId, targetMachine,
-                reason, AttendanceOptions.Value.MaxShiftHours);
-            isError = false;
-            Load();
+            for (var index = 0; index < selected.Count; index++)
+            {
+                var row = selected[index];
+                message = $"Đang chuyển {index + 1}/{selected.Count} ca…";
+                await InvokeAsync(StateHasChanged);
+                try
+                {
+                    await Task.Run(() => ScaleAttendanceTransferService.Transfer(userId, row.Id, targetMachine,
+                        reason, AttendanceOptions.Value.MaxShiftHours));
+                    selectedRows.Remove(row.Id);
+                    succeeded++;
+                }
+                catch (ArgumentException ex) { transferErrors.Add($"Thẻ {row.MaChamCong}: {ex.Message}"); }
+                catch (InvalidOperationException ex) { transferErrors.Add($"Thẻ {row.MaChamCong}: {ex.Message}"); }
+                catch (Exception ex)
+                {
+                    Logger.LogError(ex, "Không chuyển được ca {OpenId}.", row.Id);
+                    transferErrors.Add($"Thẻ {row.MaChamCong}: Không chuyển được máy. Kiểm tra kết nối SQL và tải lại.");
+                }
+                // Mỗi máy chỉ có một mã chấm công trong mỗi giây; không đổi định dạng mã hoặc tạo giờ tương lai.
+                if (index + 1 < selected.Count) await Task.Delay(TimeSpan.FromSeconds(1));
+            }
+            isError = transferErrors.Count > 0;
+            message = $"Đã chuyển {succeeded}/{selected.Count} ca. Không chuyển được: {transferErrors.Count}.";
+            await LoadPage(pageNumber);
         }
-        catch (ArgumentException ex) { isError = true; message = ex.Message; }
-        catch (InvalidOperationException ex) { isError = true; message = ex.Message; }
-        catch (Exception) { isError = true; message = "Không chuyển được máy. Kiểm tra kết nối SQL và tải lại."; }
         finally { busy = false; }
         await InvokeAsync(StateHasChanged);
     }

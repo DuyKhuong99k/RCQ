@@ -5,7 +5,9 @@ $expiry = [regex]::Match($processor, '(?s)internal static bool IsShiftExpired\(.
 $message = [regex]::Match($processor, '(?s)internal static string OtherMachineMessage\(.*?;').Value.Replace('internal', 'public')
 $open = [regex]::Match($transfer, '(?s)public static List<CheckInOut> OpenShifts\(.*?\.ToList\(\);').Value
 $open = $open.Replace('dbPMScontext', 'TestDb').Replace('.AsNoTracking()', '')
-if (!$expiry -or !$message -or !$open) { throw 'Không tìm thấy quy tắc cần kiểm tra.' }
+$query = [regex]::Match($transfer, '(?s)private static IQueryable<CheckInOut> OpenShiftsQuery\(.*?;').Value
+$transferable = [regex]::Match($transfer, '(?s)public static IQueryable<CheckInOut> TransferableShifts\(.*?\r?\n    }').Value
+if (!$expiry -or !$message -or !$open -or !$query -or !$transferable) { throw 'Không tìm thấy quy tắc cần kiểm tra.' }
 if (-not ('TransferPolicyTest' -as [type])) {
     $stub = @'
 #nullable enable
@@ -14,11 +16,12 @@ public class CheckInOut {
  public string Id {get;set;} = ""; public string MaChamCong {get;set;} = "";
  public int MaSoMay {get;set;} public DateTime ThoiGian {get;set;}
  public string? TrangThai {get;set;} public string? VaoId {get;set;}
+ public bool CaDem {get;set;}
 }
 public class TestDb { public IQueryable<CheckInOut> CheckInOuts {get;set;} = new List<CheckInOut>().AsQueryable(); }
 public static class TransferPolicyTest {
 '@
-    Add-Type -TypeDefinition ($stub + $expiry + $message + $open + '}')
+    Add-Type -TypeDefinition ($stub + $expiry + $message + $open + $query + $transferable + '}')
 }
 function Assert-Equal($actual, $expected, $label) {
     if ($actual -ne $expected) { throw "$label : expected=$expected actual=$actual" }
@@ -59,3 +62,25 @@ $newMachineStart = [datetime]'2026-10-07T02:00:00'
 Assert-Equal ([TransferPolicyTest]::IsShiftExpired($newMachineStart, [datetime]'2026-10-07T14:00:01', 16, $true)) $false 'Ca máy mới tính giới hạn từ phiếu Vào mới'
 Assert-Equal ([TransferPolicyTest]::IsShiftExpired($root, [datetime]'2026-10-07T06:00:00', 16, $true)) $false 'Ca đêm chuyển máy còn hạn đến sáng'
 Assert-Equal ([TransferPolicyTest]::OtherMachineMessage(7779520)) 'Đang ở cân 7779520. Ra cân cũ.' 'Thông báo ngắn cho firmware'
+
+$now = [datetime]'2026-10-07T14:00:00'
+$events = [System.Collections.Generic.List[CheckInOut]]::new()
+foreach ($row in @($a, $outA, $inB)) { $events.Add($row) }
+for ($index = 1; $index -le 45; $index++) {
+    $events.Add((Event "page$('{0:D2}' -f $index)" "employee$index" 7779520 '2026-10-07T09:00:00' 'Vào'))
+}
+$nightBoundary = Event 'night-boundary' 'night' 7779520 '2026-10-06T22:00:00' 'Vào'
+$nightBoundary.CaDem = $true
+$events.Add($nightBoundary)
+$expiredNight = Event 'night-expired' 'expired-night' 7779520 '2026-10-06T21:59:59' 'Vào'
+$expiredNight.CaDem = $true
+$events.Add($expiredNight)
+$events.Add((Event 'old-day' 'old-day' 7779520 '2026-10-06T23:00:00' 'Vào'))
+$events.Add((Event 'old-history' 'old-history' 7779520 '2026-10-01T08:00:00' 'Vào'))
+$db = Database $events
+$expected = @([TransferPolicyTest]::OpenShifts($db) | Where-Object {
+    ![TransferPolicyTest]::IsShiftExpired($_.ThoiGian, $now, 16, $_.CaDem)
+} | Sort-Object Id)
+$actual = @([TransferPolicyTest]::TransferableShifts($db.CheckInOuts, $now, 16) | Sort-Object Id)
+Assert-Equal ($actual.Id -join ',') ($expected.Id -join ',') 'Lọc tại SQL tương đương quy tắc ca còn hạn cũ'
+Assert-Equal $actual.Count 47 'Chỉ lấy ca còn hạn, kể cả ca đêm đúng giới hạn 16 giờ'

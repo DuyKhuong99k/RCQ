@@ -36,15 +36,28 @@ public static class ScaleAttendanceTransferService
     }
 
     public static List<CheckInOut> OpenShifts(dbPMScontext db, string? card = null) =>
-        db.CheckInOuts.AsNoTracking().Where(x => x.TrangThai == "Vào" &&
+        OpenShiftsQuery(db.CheckInOuts.AsNoTracking(), card)
+            .OrderByDescending(x => x.ThoiGian).ToList();
+
+    public static IQueryable<CheckInOut> TransferableShifts(IQueryable<CheckInOut> events,
+        DateTime time, int maxShiftHours)
+    {
+        var earliest = time.AddHours(-maxShiftHours);
+        var dayStart = time.Date;
+        var dayEnd = dayStart.AddDays(1);
+        return OpenShiftsQuery(events).Where(x => x.ThoiGian >= earliest &&
+            (x.CaDem || (x.ThoiGian >= dayStart && x.ThoiGian < dayEnd)));
+    }
+
+    private static IQueryable<CheckInOut> OpenShiftsQuery(IQueryable<CheckInOut> events, string? card = null) =>
+        events.Where(x => x.TrangThai == "Vào" &&
             (card == null || x.MaChamCong == card) &&
-            !db.CheckInOuts.Any(next =>
+            !events.Any(next =>
                 (card == null || next.MaChamCong == card) &&
                 (next.VaoId == x.Id ||
                  (next.MaChamCong == x.MaChamCong && next.MaSoMay == x.MaSoMay &&
                   (next.TrangThai == "Vào" || next.TrangThai == "Ra") &&
-                  (next.ThoiGian > x.ThoiGian || (next.ThoiGian == x.ThoiGian && next.Id.CompareTo(x.Id) > 0))))))
-            .OrderByDescending(x => x.ThoiGian).ToList();
+                  (next.ThoiGian > x.ThoiGian || (next.ThoiGian == x.ThoiGian && next.Id.CompareTo(x.Id) > 0))))));
 
     internal static DateTime ServerTransferTime(DateTimeOffset utcNow)
     {

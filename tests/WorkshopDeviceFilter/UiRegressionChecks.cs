@@ -6,8 +6,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Models.Repos.Models;
 using PMSHub.Components.Pages;
 using PMSHub.Controllers;
+using System.Reflection;
 
 internal static class UiRegressionChecks
 {
@@ -53,6 +55,42 @@ internal static class UiRegressionChecks
             "Thanh công cụ dùng form HTTP thay vì sửa session trong circuit");
         var devices = File.ReadAllText(Path.Combine(root, "PMSHub/Components/Pages/Devices.razor"));
         var transferPage=File.ReadAllText(Path.Combine(root,"PMSHub/Components/Pages/ScaleAttendanceTransfers.razor"));
+        var transferComponent = new ScaleAttendanceTransfers();
+        const BindingFlags flags = BindingFlags.Instance | BindingFlags.NonPublic;
+        var transferType = typeof(ScaleAttendanceTransfers);
+        void SetTransferField(string name, object value) => transferType.GetField(name, flags)!.SetValue(transferComponent, value);
+        void SelectTransfer(CheckInOut row, bool selected) => transferType.GetMethod("Select", flags)!.Invoke(transferComponent, [row, selected]);
+        void SelectTransferPage(bool selected) => transferType.GetMethod("SelectPage", flags)!.Invoke(transferComponent,
+            [new ChangeEventArgs { Value = selected }]);
+        var selectedTransfers = (Dictionary<string, CheckInOut>)transferType.GetField("selectedRows", flags)!.GetValue(transferComponent)!;
+        var firstShift = new CheckInOut { Id = "shift1", MaChamCong = "card1" };
+        var secondShift = new CheckInOut { Id = "shift2", MaChamCong = "card2" };
+        var thirdShift = new CheckInOut { Id = "shift3", MaChamCong = "card3" };
+        SetTransferField("rows", new List<CheckInOut> { firstShift, secondShift });
+        SelectTransferPage(true);
+        SelectTransfer(firstShift, true);
+        check(selectedTransfers.Count == 2, "Chọn cả trang không trùng ca khi chọn lại từng dòng");
+        SetTransferField("rows", new List<CheckInOut> { thirdShift });
+        SelectTransferPage(true);
+        check(selectedTransfers.Count == 3, "Giữ lựa chọn trang trước khi chọn thêm ở trang sau");
+        SelectTransferPage(false);
+        check(selectedTransfers.Count == 2 && !selectedTransfers.ContainsKey(thirdShift.Id), "Bỏ chọn trang hiện tại không mất lựa chọn trang khác");
+        SelectTransfer(firstShift, false);
+        check(selectedTransfers.Count == 1 && selectedTransfers.ContainsKey(secondShift.Id), "Bỏ chọn từng nhân viên độc lập");
+        SetTransferField("busy", true);
+        SelectTransfer(thirdShift, true);
+        transferType.GetMethod("ClearSelection", flags)!.Invoke(transferComponent, null);
+        check(selectedTransfers.Count == 1, "Khóa thay đổi lựa chọn khi đang xử lý chuyển máy");
+        SetTransferField("busy", false);
+        SetTransferField("targetMachine", 7779521);
+        SetTransferField("reason", "Chuyển tổ");
+        transferType.GetMethod("ClearSelection", flags)!.Invoke(transferComponent, null);
+        check(selectedTransfers.Count == 0 && (int)transferType.GetField("targetMachine", flags)!.GetValue(transferComponent)! == 0
+            && (string)transferType.GetField("reason", flags)!.GetValue(transferComponent)! == "", "Bỏ chọn tất cả xóa máy đích và lý do cũ");
+        SetTransferField("totalRows", 41);
+        check((int)transferType.GetProperty("TotalPages", flags)!.GetValue(transferComponent)! == 3, "41 ca chia thành 3 trang với 20 dòng mỗi trang");
+        SetTransferField("totalRows", 0);
+        check((int)transferType.GetProperty("TotalPages", flags)!.GetValue(transferComponent)! == 1, "Danh sách rỗng vẫn hiển thị trang 1 hợp lệ");
         check(!transferPage.Contains("datetime-local") && !transferPage.Contains("transferTime") && transferPage.Contains("giờ máy chủ"),
             "Không có ô nhập giờ chuyển hoặc biến giờ do người dùng kiểm soát");
         var transferSource=File.ReadAllText(Path.Combine(root,"Services/ScaleAttendanceTransferService.cs"));

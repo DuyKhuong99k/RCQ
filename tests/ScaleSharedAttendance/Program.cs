@@ -67,6 +67,12 @@ using var translationDb = new TranslationDb();
 var sql = ScaleSharedAttendancePolicy.ShiftWeights(translationDb.Set<HQ_PhieuCan>(),
     translationDb.Set<ScaleAttendanceScan>(), shift, start.AddHours(2)).ToQueryString();
 Assert(sql.Contains("EXISTS") && sql.Contains("ScaleAttendanceScan"), "Tổng ca được dịch thành truy vấn SQL tại server");
+var transferQuery = ScaleAttendanceTransferService.TransferableShifts(translationDb.Set<CheckInOut>(), start.AddHours(8), 16);
+var transferSql = transferQuery.OrderByDescending(x => x.ThoiGian).ThenBy(x => x.Id).Skip(20).Take(20).ToQueryString();
+Assert(transferSql.Contains("NOT EXISTS") && transferSql.Contains("OFFSET") && transferSql.Contains("FETCH NEXT")
+    && transferSql.Contains("ORDER BY"), "Lọc ca mở, sắp xếp và phân trang chuyển máy được thực hiện tại SQL");
+var transferCountSql = transferQuery.GroupBy(x => 1).Select(group => group.Count()).ToQueryString();
+Assert(transferCountSql.Contains("COUNT(*)") && transferCountSql.Contains("NOT EXISTS"), "Đếm tổng ca chuyển máy không tải toàn bộ bản ghi");
 var validate = typeof(ScaleProductionAttendancePolicy).GetMethod("ValidateShared", BindingFlags.Static | BindingFlags.NonPublic)!;
 string? Production(CheckInOut[] roots, ScaleAttendanceScan[] members, int machine = 102,
     string product = "001", DateTime? time = null) => (string?)validate.Invoke(null,
