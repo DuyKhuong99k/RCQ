@@ -1,8 +1,11 @@
 ﻿using System.Globalization;
 using Handlers;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Models.Repos;
 using Newtonsoft.Json.Linq;
 using PMSHub.Components;
+using Services;
 using Vars;
 using ViewModels.Repos.Hubs.IServices;
 
@@ -25,6 +28,7 @@ public class DataController(IMayCansService mayCansService, IMainService mainSer
     public IActionResult Post([FromBody] object data)
     {
         var errorCode = "";
+        string? hqWeightError = null;
         var result = ErrorHandler.Handle(() =>
         {
             //"{\"Id\":\"%s\",\"STT\":%d,\"NgayGio\":\"%s\",\"MayCan\":\"%s\",\"MaLo\":\"%s\","
@@ -87,6 +91,11 @@ public class DataController(IMayCansService mayCansService, IMainService mainSer
                 {
                     case AppKV.Hq:
                     {
+                        hqWeightError = GetHqWeightError(jObject, trongLuongNhan);
+                        if (hqWeightError != null) throw new ArgumentException(hqWeightError);
+                        using var db = new dbPMScontext();
+                        using var transaction = db.Database.BeginTransaction();
+                        ScaleAttendanceTransferService.LockCard(db, theId);
                         var phieuCan = mainService.VmPhieuCanHq.Get<object>(id);
                         if (phieuCan == null)
                         {
@@ -96,8 +105,11 @@ public class DataController(IMayCansService mayCansService, IMainService mainSer
                                 maNhanVien, trongLuongNhan, trongLuongTra, trongLuongTare, theId, theChucNang, _ngayGio,
                                 maycan ?? "", mayCan?.MaXuong ?? "");
 
+                            if (HqWeightDuplicatePolicy.HasDuplicate(db, item))
+                                throw new ArgumentException(HqWeightDuplicatePolicy.ErrorMessage);
                             var rl = mainService.VmPhieuCanHq.Insert(item);
                             if (rl == 0) throw new Exception("Insert failed");
+                            transaction.Commit();
                             if (mayCan != null) mayCansService.AddItem(mayCan, item);
                         }
                         else
@@ -364,7 +376,7 @@ public class DataController(IMayCansService mayCansService, IMainService mainSer
             //        return Conflict(new { message = "Dữ liệu đã tồn tại." });
             //        break;
             //    default:
-                    return BadRequest(new { message = $"Error: {DateTime.Now.ToString("yyyyMMddHHmmss")}" });
+                    return BadRequest(new { message = hqWeightError ?? $"Error: {DateTime.Now.ToString("yyyyMMddHHmmss")}" });
             //} 
             
         }
@@ -376,6 +388,7 @@ public class DataController(IMayCansService mayCansService, IMainService mainSer
     [HttpPost]
     public IActionResult PostSilent([FromBody] object yourData)
     {
+        string? hqWeightError = null;
         var result = ErrorHandler.Handle(() =>
         {
             //"{\"Id\":\"%s\",\"STT\":%d,\"NgayGio\":\"%s\",\"MayCan\":\"%s\",\"MaLo\":\"%s\","
@@ -404,6 +417,12 @@ public class DataController(IMayCansService mayCansService, IMainService mainSer
             //var theId = (string)jObject["TheId"];
             //var ngayGio = (string)jObject["NgayGio"];
             var mayCan = mayCansService.Find(maycan ?? "");
+            // PostSilent ghi phiếu HQ; thiếu trạng thái không được coi là đã cân bằng.
+            hqWeightError = GetHqWeightError(jObject, trongLuongNhan);
+            if (hqWeightError != null) throw new ArgumentException(hqWeightError);
+            using var db = new dbPMScontext();
+            using var transaction = db.Database.BeginTransaction();
+            ScaleAttendanceTransferService.LockCard(db, theId);
             var phieuCan = mainService.VmPhieuCanHq.Get<object>(id);
             if (phieuCan == null)
             {
@@ -412,10 +431,12 @@ public class DataController(IMayCansService mayCansService, IMainService mainSer
                     maNhanVien, trongLuongNhan, trongLuongTra, trongLuongTare, theId, theChucNang, _ngayGio,
                     maycan ?? "", mayCan?.MaXuong ?? "");
 
+                if (HqWeightDuplicatePolicy.HasDuplicate(db, item))
+                    throw new ArgumentException(HqWeightDuplicatePolicy.ErrorMessage);
                 var rl = mainService.VmPhieuCanHq.Insert(item);
                 if (rl == 0) throw new Exception("Insert failed");
             }
-
+            transaction.Commit();
 
             if (mayCan != null)
             {
@@ -428,8 +449,15 @@ public class DataController(IMayCansService mayCansService, IMainService mainSer
             mayCansService.NotifyItemChanged(mayCan);
         });
         if (!result.IsSuccess)
-            return BadRequest(new { Status = $"Error: {DateTime.Now.ToString("yyyyMMddHHmmss")}" });
+            return BadRequest(new { Status = hqWeightError ?? $"Error: {DateTime.Now.ToString("yyyyMMddHHmmss")}" });
         // Process the received data
         return Ok(new { Status = $"Data received {DateTime.Now.ToString("yyyyMMddHHmmss")}" });
+    }
+
+    private static string? GetHqWeightError(JObject data, decimal weight)
+    {
+        if ((string?)data["Stated"] != "ST" || weight <= 0)
+            return "CÂN CHƯA CÂN BẰNG. CHỜ CÂN BẰNG RỒI QUẸT LẠI THẺ";
+        return null;
     }
 }

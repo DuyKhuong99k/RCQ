@@ -7492,6 +7492,10 @@ public class CommitService(IMayCansService mayCansService, ICoiService coiServic
         if (string.IsNullOrWhiteSpace(data.Id) || data.Id.Length > 100)
             return Fail("Thiếu hoặc sai Id phiếu cân.");
 
+        // Không dùng trạng thái máy dùng chung để nhận phiếu; request phải báo cân ổn định.
+        if (data.Stated != "ST" || data.TrongLuong <= 0)
+            return Fail("CÂN CHƯA CÂN BẰNG. CHỜ CÂN BẰNG RỒI QUẸT LẠI THẺ");
+
         // Chỉ xác nhận dữ liệu đã lưu; gửi lại không tăng tổng hay tạo phiếu mới.
         var saved = mainService.VmPhieuCanHq.Get<HQ_PhieuCan>(data.Id);
         if (saved != null)
@@ -7513,29 +7517,6 @@ public class CommitService(IMayCansService mayCansService, ICoiService coiServic
         if (!int.TryParse(machine.Id, NumberStyles.None, CultureInfo.InvariantCulture, out var machineNumber))
             return Fail("Mã máy cân không hợp lệ.");
         using var attendanceDb = new dbPMScontext();
-
-        if (!machine.IsStated)
-        {
-            var attendanceError = ScaleProductionAttendancePolicy.GetError(attendanceDb, data.TheId,
-                machineNumber, time, attendanceOptions.Value.MaxShiftHours, employee, machine.MaThanhPham);
-            if (attendanceError != null) return Fail(attendanceError);
-
-            machine.MaNhanVien = employee.MaNhanVien;
-            machine.TheNhanVien = data.TheId;
-            machine.MaHoSo = employee.MaHoSo;
-            machine.NhanVienName = employee.Name;
-            machine.TheNhanVienAddDateTime = DateTime.Now;
-            if (!data.IsWaiting)
-                await mayCansService.CommandSetNhanVien(machine.Id, employee.MaNhanVien,
-                    employee.MaHoSo ?? "", employee.Name ?? "");
-
-            if (!data.IsWaiting) await mayCansService.CommandSetWaiting(machine.Id);
-            machine.ThongBao = "CHỜ CÂN BẰNG";
-            return Tuple.Create(true, JsonConvert.SerializeObject(new DataLiteRes
-            {
-                Id = data.Id, TheId = data.TheId, IsDataAction = 0, MessStr = machine.ThongBao
-            }));
-        }
 
         machine.MaNhanVien = employee.MaNhanVien;
         machine.TheNhanVien = data.TheId;
@@ -7571,6 +7552,8 @@ public class CommitService(IMayCansService mayCansService, ICoiService coiServic
             saved = mainService.VmPhieuCanHq.Get<HQ_PhieuCan>(data.Id);
             if (saved == null)
             {
+                if (HqWeightDuplicatePolicy.HasDuplicate(attendanceDb, item))
+                    return Fail(HqWeightDuplicatePolicy.ErrorMessage);
                 if (mainService.VmPhieuCanHq.Insert(item) <= 0) return Fail("Không lưu được phiếu cân HQ.");
                 mayCansService.AddItem(machine, item);
             }

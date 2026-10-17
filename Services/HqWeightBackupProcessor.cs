@@ -193,6 +193,8 @@ public static class HqWeightBackupProcessor
                             int.Parse(client.Id, CultureInfo.InvariantCulture), item.NgayGio, item.MaThanhPham, maxHours);
                     if(error!=null) throw new ArgumentException($"Phiếu {item.Id}: {error}");
                 }
+                if (HqWeightDuplicatePolicy.HasDuplicate(db, item))
+                    throw new ArgumentException($"Phiếu {item.Id}: {HqWeightDuplicatePolicy.ErrorMessage}");
                 db.HqPhieuCans.Add(item); acknowledgedItems.Add(item); inserted++;
             }
             db.SaveChanges(); transaction.Commit();
