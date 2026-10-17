@@ -1,3 +1,4 @@
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Models.Repos;
 using Models.Repos.Models;
@@ -105,9 +106,17 @@ public static class ScaleAttendanceTransferService
             x.ThoiGian, time, maxShiftHours, x.CaDem)))
             throw new InvalidOperationException("Có nhiều ca đang mở. Cần đối chiếu trước khi chuyển máy.");
         if (source.MaSoMay == targetMachine) throw new ArgumentException("Máy mới phải khác máy đang làm.");
-        if (db.CheckInOuts.Any(x => x.MaChamCong == source.MaChamCong && x.ThoiGian > time) ||
-            ScaleSharedAttendanceService.LatestScanTime(db, source.MaChamCong) > time)
-            throw new InvalidOperationException("Đã có lượt quẹt sau giờ chuyển. Cần tải lại và kiểm tra.");
+        try
+        {
+            if (db.CheckInOuts.Any(x => x.MaChamCong == source.MaChamCong && x.ThoiGian > time) ||
+                ScaleSharedAttendanceService.LatestScanTime(db, source.MaChamCong) > time)
+                throw new InvalidOperationException("Đã có lượt quẹt sau giờ chuyển. Cần tải lại và kiểm tra.");
+        }
+        catch (SqlException ex) when (ex.Number == 208)
+        {
+            throw new InvalidOperationException("Cơ sở dữ liệu chưa được cập nhật bảng ScaleAttendanceScan. " +
+                "Cần chạy script 20261017-ScaleAttendanceScan.sql trước khi chuyển máy.", ex);
+        }
         var target = db.MayCans.AsNoTracking().FirstOrDefault(x => x.Id == targetMachine.ToString());
         if (target == null || target.WKv != Vars.AppKV.Hq)
             throw new ArgumentException("Máy mới phải là máy cân HQ đã đăng ký.");
