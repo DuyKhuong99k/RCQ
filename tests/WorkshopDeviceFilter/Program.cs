@@ -69,6 +69,7 @@ Check(!login.Contains("@bind-Value=\"@MainService.VmXiNghiep.SelectedItem\"") &&
     login.Contains("SessionService.Set(\"XuongId\", workshop.Ma)"), "Lựa chọn đăng nhập riêng từng trang và lưu vào phiên");
 Check(login.Contains("x.SuDung == true") && login.Contains("if (workshop == null)"), "Bắt buộc chọn xưởng hợp lệ đang sử dụng");
 await UiRegressionChecks.Run(Check);
+LoginAccountChecks.Run(Check);
 Console.WriteLine($"PASS: {checks} checks. No SQL connection or firmware commands.");
 
 public class MemoryProxy : DispatchProxy

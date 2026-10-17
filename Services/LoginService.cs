@@ -24,12 +24,6 @@ namespace Services
     {
         [ObservableProperty] private ObservableRangeCollection<UserArea> userAreas = new();
         private string _defaultKey = "PMS";
-        public bool Login(string username, string tocken)
-        {
-            //_deviceViewService.Load(AppKV.Main,"");
-            Login(username);
-            return true;
-        }
 
 
         public bool IsUserAuthenticated()
@@ -52,23 +46,6 @@ namespace Services
             return result is { IsSuccess: true, Result: true };
         }
 
-        public void Login(string username)
-        {
-            var result = Handlers.ErrorHandler.Handle(() =>
-            {
-                var userId = mainService.VmNguoiDung.GetId(username);
-                if (userId != null)
-                {
-                    userService.AddUserArea(userId??-1);
-                    httpContextAccessor.HttpContext?.Session.SetString("Username", username);
-                    httpContextAccessor.HttpContext?.Session.SetString("UserId", (userId??-1).ToString());
-                     //var val = _httpContextAccessor.HttpContext?.Session.GetString("UserId");
-                }
-            });
-            if (!result.IsSuccess)
-                Console.WriteLine(result.Error?.Message);
-
-        }
 
         public string GetSessionVal(string key)
         {
@@ -88,15 +65,7 @@ namespace Services
             var result = Handlers.ErrorHandler.Handle(() =>
             {
                 var user = mainService.VmNguoiDung.GetByUserName(userName).FirstOrDefault();
-              
-                    if (user != null && ED.DecryptString(user.Password, _defaultKey).Equals(passWord))
-                    {
-                        userService.AddUserArea(user.Id);
-                        httpContextAccessor.HttpContext?.Session.SetString("Username", userName);
-                        httpContextAccessor.HttpContext?.Session.SetString("UserId", (user.Id).ToString());
-
-                        isLoginSuccess = IsUserAuthenticated(); //true;
-                    }
+                isLoginSuccess = LoginLocalUser(user, passWord);
                 
                 
             });
@@ -115,6 +84,22 @@ namespace Services
             
                 
 
+        }
+
+        // Dùng cùng nhánh này trong kiểm thử cô lập, không cần truy cập SQL.
+        internal bool LoginLocalUser(NguoiDung? user, string passWord)
+        {
+            // NULL chưa được xác nhận hoạt động: không cho tạo phiên.
+            if (user?.IsActive != true || string.IsNullOrEmpty(passWord)
+                || string.IsNullOrEmpty(user.Password)) return false;
+            var storedPassword = ED.DecryptString(user.Password, _defaultKey);
+            if (string.IsNullOrEmpty(storedPassword) || !storedPassword.Equals(passWord)) return false;
+            var session = httpContextAccessor.HttpContext?.Session;
+            if (session == null) return false;
+            userService.AddUserArea(user.Id);
+            session.SetString("Username", user.UserName);
+            session.SetString("UserId", user.Id.ToString());
+            return IsUserAuthenticated();
         }
 
         public async Task Logout()

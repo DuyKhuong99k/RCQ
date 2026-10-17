@@ -52,6 +52,22 @@ internal static class UiRegressionChecks
         check(top.Contains("action=\"api/session/logout\"") && top.Contains("<AntiforgeryToken") && !top.Contains("await loginService.Logout()"),
             "Thanh công cụ dùng form HTTP thay vì sửa session trong circuit");
         var devices = File.ReadAllText(Path.Combine(root, "PMSHub/Components/Pages/Devices.razor"));
+        var transferPage=File.ReadAllText(Path.Combine(root,"PMSHub/Components/Pages/ScaleAttendanceTransfers.razor"));
+        check(!transferPage.Contains("datetime-local") && !transferPage.Contains("transferTime") && transferPage.Contains("giờ máy chủ"),
+            "Không có ô nhập giờ chuyển hoặc biến giờ do người dùng kiểm soát");
+        var transferSource=File.ReadAllText(Path.Combine(root,"Services/ScaleAttendanceTransferService.cs"));
+        check(transferSource.Contains("ServerTransferTime(DateTimeOffset.UtcNow)") && transferSource.Contains("var actor = user.UserName;")
+            && transferSource.Contains("NguoiXacNhan = actor") && transferSource.Contains("user?.IsAdmin != true"),
+            "Server tự ghi giờ và tài khoản quản trị đang đăng nhập, không lấy người xác nhận từ client");
+        var move = devices[devices.IndexOf("private async Task CloseDialogDoiKhuVuc()", StringComparison.Ordinal)..];
+        move = move[..move.IndexOf("private async void CloseDialogNhanKyCanLoi", StringComparison.Ordinal)];
+        check(move.Contains("var doiKhuVuc = mayCan.WKv != SelectedKhuVuc;") && move.IndexOf("if (doiKhuVuc)",StringComparison.Ordinal)<move.IndexOf("await MayCanService.CommandDoiKhuVuc",StringComparison.Ordinal),
+            "Đổi xưởng đơn thuần không gửi HTTP cấu hình khu vực xuống cân");
+        check(move.IndexOf("MayCanService.Update(",StringComparison.Ordinal)<move.IndexOf("mayCan.MaXuong =",StringComparison.Ordinal)
+            && move.Contains("Đã chuyển cân thành công.",StringComparison.Ordinal) && move.Contains("ToastType.Success"),
+            "Chỉ cập nhật giao diện và báo chuyển thành công sau khi lưu SQL");
+        check(move.Contains("ToastType.Warning") && move.Contains("Chưa chuyển được cân:") && !move.Contains("Navigation.NavigateTo"),
+            "Phân biệt lỗi lưu xưởng với cảnh báo gửi cấu hình, không reload che thông báo");
         check(devices.Contains("<DeviceCardState @key=\"mayCan.Id\"") && devices.Contains("@onclick:stopPropagation=\"true\"") && !devices.Contains("buttonRefs"),
             "Template cân mới có trạng thái riêng, nút không kích hoạt chọn dòng ListBox");
         await LogoutHttpChecks.Run(root, check);

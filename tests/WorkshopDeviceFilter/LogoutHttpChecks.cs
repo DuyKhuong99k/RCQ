@@ -9,6 +9,9 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using PMSHub.Controllers;
+using PMSHub.Middlewares;
+using Services;
+using ViewModels.Repos.Hubs.IServices;
 
 internal static class LogoutHttpChecks
 {
@@ -17,6 +20,16 @@ internal static class LogoutHttpChecks
         var production = File.ReadAllText(Path.Combine(root, "PMSHub/Program.cs"));
         check(production.Contains("builder.Services.AddControllersWithViews().AddNewtonsoftJson"),
             "Production đăng ký MVC ViewFeatures cần cho ValidateAntiForgeryToken");
+        check(production.IndexOf("app.UseMiddleware<LegacyLoginRedirectMiddleware>();", StringComparison.Ordinal)
+            < production.IndexOf("app.UseSession();", StringComparison.Ordinal)
+            && production.Contains("app.UseMiddleware<LegacyLoginRedirectMiddleware>();"),
+            "Chặn URL cũ trước middleware session");
+        check(!typeof(LoginService).GetMethods().Any(x => x.Name == "Login")
+            && !typeof(ILoginService).GetMethods().Any(x => x.Name == "Login"),
+            "Không còn API tạo phiên chỉ bằng username/token chưa xác thực");
+        var legacyPage = File.ReadAllText(Path.Combine(root, "PMSHub/Components/Pages/Login.razor"));
+        check(!legacyPage.Contains("loginService") && legacyPage.Contains("/api/loginlocal/"),
+            "Điều hướng Blazor nội bộ qua trang cũ cũng không đăng nhập");
 
         // Host cô lập: chỉ MVC/session/antiforgery; không chạy Program của Hub,
         // không SQL, hosted service, kết nối WSS hoặc lệnh tới thiết bị.
@@ -32,6 +45,7 @@ internal static class LogoutHttpChecks
         builder.Services.AddSession();
         builder.Services.AddControllersWithViews().AddApplicationPart(typeof(SessionController).Assembly);
         await using var app = builder.Build();
+        app.UseMiddleware<LegacyLoginRedirectMiddleware>();
         app.UseRouting();
         app.UseSession();
         app.UseAntiforgery();
@@ -52,8 +66,24 @@ internal static class LogoutHttpChecks
                 .Get<IServerAddressesFeature>()!.Addresses.Single();
             using var handler = new HttpClientHandler {AllowAutoRedirect = false, CookieContainer = new CookieContainer()};
             using var client = new HttpClient(handler) {BaseAddress = new Uri(address), Timeout = TimeSpan.FromSeconds(15)};
+            foreach(var path in new[] {"/api/login/test-user/not-a-token", "/API/LOGIN/test-user/anything?returnUrl=https://example.invalid", "/api/login"}) {
+                using var legacy = await client.GetAsync(path);
+                check(legacy.StatusCode == HttpStatusCode.Redirect
+                    && legacy.Headers.Location?.OriginalString == "/api/loginlocal/",
+                    "HTTP: URL token cũ chỉ về đăng nhập, không nhận returnUrl bên ngoài");
+                check(!legacy.Headers.Contains("Set-Cookie") && legacy.Headers.CacheControl?.NoStore == true,
+                    "HTTP: URL cũ không tạo cookie phiên và không cache phản hồi");
+            }
+            check(await client.GetStringAsync("/test/state") == "||", "HTTP: URL cũ không tạo danh tính hoặc xưởng");
+            using var loginLocal = await client.GetAsync("/api/loginlocal/");
+            check(loginLocal.StatusCode == HttpStatusCode.NotFound,
+                "HTTP: middleware không chặn /api/loginlocal/ (host test không map trang Blazor)");
             var token = await client.GetStringAsync("/test/seed");
             check(await client.GetStringAsync("/test/state") == "1|test-user|1", "HTTP: tạo và đọc phiên thật qua cookie");
+            using var legacyPost = await client.PostAsync("/api/login/other-user/fake", new StringContent(""));
+            check(legacyPost.StatusCode == HttpStatusCode.Redirect
+                && await client.GetStringAsync("/test/state") == "1|test-user|1",
+                "HTTP: URL cũ không thay danh tính/xưởng của phiên đã đăng nhập");
             using var noToken = await client.PostAsync("/api/session/logout", new FormUrlEncodedContent(new Dictionary<string, string>()));
             check(noToken.StatusCode == HttpStatusCode.BadRequest, "HTTP: thiếu antiforgery token trả 400, không lỗi 500 thiếu dịch vụ");
             check(await client.GetStringAsync("/test/state") == "1|test-user|1", "HTTP: yêu cầu không hợp lệ không xóa phiên");

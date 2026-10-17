@@ -24,7 +24,7 @@
     }
     else
     {
-        <p>Chọn ca đang mở, máy mới và giờ chuyển. Đóng ca tại máy cũ, bắt đầu ca độc lập tại máy mới; giữ loại ca thường/đêm.</p>
+        <p>Chọn ca đang mở và máy mới. Giờ chuyển tự ghi theo máy chủ lúc bấm xác nhận (giờ Việt Nam), không cho nhập hoặc sửa; giữ loại ca thường/đêm.</p>
         <button class="btn btn-secondary" disabled="@busy" @onclick="Load">Tải lại</button>
         @if (!string.IsNullOrEmpty(message))
         {
@@ -60,14 +60,11 @@
                         }
                     </select>
                 </label>
-                <label>Giờ chuyển (giờ Việt Nam)
-                    <input class="form-control" type="datetime-local" step="1" value="@transferTime"
-                        @onchange="e => transferTime = e.Value?.ToString() ?? string.Empty" disabled="@busy" />
-                </label>
+                <p>Thời điểm chuyển: tự động lấy giờ máy chủ khi xác nhận, không thể chỉnh sửa.</p>
                 <label>Lý do chuyển
                     <textarea class="form-control" maxlength="500" @bind="reason" disabled="@busy"></textarea>
                 </label>
-                <p>Thao tác sẽ ghi Ra ở máy cũ và Vào ở máy mới tại giờ đã chọn, kèm người xác nhận và lý do.</p>
+                <p>Thao tác ghi Ra ở máy cũ và Vào ở máy mới cùng một thời điểm thực hiện, kèm tài khoản quản trị xác nhận và lý do.</p>
                 <button class="btn btn-primary" disabled="@(busy || targetMachine == 0 || string.IsNullOrWhiteSpace(reason))" @onclick="Confirm">Xác nhận chuyển máy</button>
             </div>
         }
@@ -78,7 +75,7 @@
     private bool ready, authorized, busy, isError;
     private int userId, targetMachine;
     private string? selectedId;
-    private string reason = "", message = "", transferTime = "";
+    private string reason = "", message = "";
     private List<CheckInOut> rows = new();
     private List<MayCan> machines = new();
     private Dictionary<string, string> names = new();
@@ -102,7 +99,6 @@
         selectedId = row.Id;
         targetMachine = 0;
         reason = "";
-        transferTime = DateTimeOffset.UtcNow.ToOffset(TimeSpan.FromHours(7)).ToString("yyyy-MM-ddTHH:mm:ss");
     }
     private void Load()
     {
@@ -132,10 +128,8 @@
         busy = true;
         try
         {
-            if (!DateTime.TryParseExact(transferTime, "yyyy-MM-ddTHH:mm:ss", CultureInfo.InvariantCulture,
-                DateTimeStyles.None, out var time)) throw new ArgumentException("Giờ chuyển không hợp lệ.");
             message = ScaleAttendanceTransferService.Transfer(userId, selectedId, targetMachine,
-                time, reason, AttendanceOptions.Value.MaxShiftHours);
+                reason, AttendanceOptions.Value.MaxShiftHours);
             isError = false;
             Load();
         }

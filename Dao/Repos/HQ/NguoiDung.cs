@@ -99,7 +99,8 @@ UPDATE [dbo].[NguoiDung]
         {
             using var connection = new SqlConnection(connectionString);
             connection.Open();
-            var rows = connection.Query<T>($"select * from NguoiDung where UserName = '{userName}'").ToList();
+            var rows = connection.Query<T>("select * from NguoiDung where UserName = @UserName",
+                new { UserName = userName }).ToList();
             return rows;
         }
 

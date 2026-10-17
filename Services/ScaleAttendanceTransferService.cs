@@ -45,18 +45,24 @@ public static class ScaleAttendanceTransferService
                  (next.ThoiGian > x.ThoiGian || (next.ThoiGian == x.ThoiGian && next.Id.CompareTo(x.Id) > 0)))))
             .OrderByDescending(x => x.ThoiGian).ToList();
 
-    public static string Transfer(int userId, string openId, int targetMachine, DateTime time,
+    internal static DateTime ServerTransferTime(DateTimeOffset utcNow)
+    {
+        var local = utcNow.ToOffset(TimeSpan.FromHours(7)).DateTime;
+        return local.AddTicks(-(local.Ticks % TimeSpan.TicksPerSecond));
+    }
+
+    // Time is deliberately NOT an argument: even an administrator cannot backdate a transfer.
+    public static string Transfer(int userId, string openId, int targetMachine,
         string reason, int maxShiftHours)
     {
+        var time = ServerTransferTime(DateTimeOffset.UtcNow);
         using var db = new dbPMScontext();
         var user = db.NguoiDungs.AsNoTracking().FirstOrDefault(x => x.Id == userId);
         if (user?.IsAdmin != true || user.IsActive == false)
             throw new InvalidOperationException("Chỉ tài khoản quản trị được xác nhận chuyển máy.");
         reason = reason.Trim();
         if (reason.Length is 0 or > 500) throw new ArgumentException("Nhập lý do chuyển máy, tối đa 500 ký tự.");
-        time = new DateTime(time.Year, time.Month, time.Day, time.Hour, time.Minute, time.Second);
-        var now = DateTimeOffset.UtcNow.ToOffset(TimeSpan.FromHours(7)).DateTime;
-        if (time > now) throw new ArgumentException("Giờ chuyển không được nằm trong tương lai.");
+        var now = time;
         if (maxShiftHours is < 1 or > 24) throw new ArgumentException("Giới hạn ca không hợp lệ.");
         var original = db.CheckInOuts.AsNoTracking().FirstOrDefault(x => x.Id == openId);
         if (original == null) throw new InvalidOperationException("Không tìm thấy phiếu Vào.");
@@ -93,7 +99,7 @@ public static class ScaleAttendanceTransferService
         var outId = AttendanceRecordId.Create(source.MaSoMay.ToString(CultureInfo.InvariantCulture), time);
         var inId = AttendanceRecordId.Create(targetMachine.ToString(CultureInfo.InvariantCulture), time);
         if (db.CheckInOuts.Any(x => x.Id == outId || x.Id == inId))
-            throw new InvalidOperationException("Đã có phiếu tại giây chuyển này. Chọn thời điểm khác.");
+            throw new InvalidOperationException("Đã có phiếu tại giây chuyển này. Vui lòng đợi một giây rồi bấm lại.");
         var targetName = string.IsNullOrWhiteSpace(target.DisplayName) ? target.Id : target.DisplayName.Trim();
         if (targetName.Length > 200) throw new ArgumentException("Tên máy mới vượt quá 200 ký tự.");
         var actor = user.UserName;
@@ -103,6 +109,7 @@ public static class ScaleAttendanceTransferService
                 Id = outId, MaChamCong = source.MaChamCong, MaSoMay = source.MaSoMay,
                 ThoiGian = time, TenMay = source.TenMay, CongViec = source.CongViec,
                 TrangThai = "Ra", CaDem = source.CaDem, VaoId = source.Id,
+                MaXuong = source.MaXuong,
                 NguoiXacNhan = actor, LyDo = reason
             },
             new CheckInOut
@@ -110,10 +117,11 @@ public static class ScaleAttendanceTransferService
                 Id = inId, MaChamCong = source.MaChamCong, MaSoMay = targetMachine,
                 ThoiGian = time, TenMay = targetName, CongViec = targetName,
                 TrangThai = "Vào", CaDem = source.CaDem,
+                MaXuong = ScaleWorkshopHistory.Resolve(db, target.Id, time),
                 NguoiXacNhan = actor, LyDo = reason
             });
         db.SaveChanges();
         transaction.Commit();
-        return $"Đã chuyển thẻ {source.MaChamCong} từ {source.MaSoMay} sang {targetMachine} lúc {time:dd/MM HH:mm:ss}.";
+        return $"Đã chuyển thẻ {source.MaChamCong} từ {source.MaSoMay} sang {targetMachine} lúc {time:dd/MM/yyyy HH:mm:ss}. Người xác nhận: {actor}.";
     }
 }

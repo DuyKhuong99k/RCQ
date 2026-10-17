@@ -471,8 +471,7 @@ public partial class MayCansService : ObservableObject, IMayCansService
                     default:
                         throw new ArgumentOutOfRangeException(nameof(khuVuc), khuVuc, null);
                 }
-                var url = item.IPAddr;
-                var _url = $"http://{url}/api/w/posts";
+                var settingsUri = DeviceSettingsAddress.Parse(item.IPAddr);
                 var data = new
                 {
 
@@ -481,12 +480,13 @@ public partial class MayCansService : ObservableObject, IMayCansService
                     amode = amode,
                     KVName = khuVuc.ToString()
                 };
-                var requestMessage = new HttpRequestMessage(HttpMethod.Post, _url)
+                using var requestMessage = new HttpRequestMessage(HttpMethod.Post, settingsUri)
                 {
                     Content = new StringContent(System.Text.Json.JsonSerializer.Serialize(data), Encoding.UTF8, "application/json")
                 };
 
-                var response = await Http.SendAsync(requestMessage);
+                using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+                using var response = await Http.SendAsync(requestMessage, timeout.Token);
 
                 if (!response.IsSuccessStatusCode)
                 {
@@ -2460,17 +2460,32 @@ public partial class MayCansService : ObservableObject, IMayCansService
     {
         try
         {
-            var context = vmMain._dbContext;
-            var constr = context.Database.GetConnectionString();
-            // var items = context.MayCans.AsNoTracking().OrderBy(x => x.Idx).ToList();
+            using var context = new Models.Repos.dbPMScontext();
+            context.Database.SetConnectionString(vmMain._dbContext.Database.GetConnectionString());
+            using var transaction = context.Database.BeginTransaction();
+            var resource = "ScaleWorkshop:" + id;
+            context.Database.ExecuteSqlInterpolated($@"DECLARE @result int;
+                EXEC @result=sys.sp_getapplock @Resource={resource},@LockMode='Exclusive',@LockOwner='Transaction',@LockTimeout=5000;
+                IF @result<0 THROW 51001,N'Không thể khóa lịch sử xưởng của cân.',1;");
             var item = context.MayCans.FirstOrDefault(x => x.Id == id);
             if (item != null)
             {
+                var previous = context.LichSuXuongMayCans.Where(x => x.MayCan == id)
+                    .OrderByDescending(x => x.TuThoiGian).FirstOrDefault();
+                if (previous == null || !string.Equals(previous.MaXuong, xuongId, StringComparison.OrdinalIgnoreCase))
+                {
+                    var now = ScaleWorkshopHistory.BusinessNow();
+                    now = now.AddTicks(-(now.Ticks % TimeSpan.TicksPerSecond));
+                    if (previous != null && previous.TuThoiGian >= now)
+                        throw new InvalidOperationException("Cân vừa đổi xưởng trong giây này. Vui lòng thử lại sau.");
+                    context.LichSuXuongMayCans.Add(new LichSuXuongMayCan { MayCan = id, MaXuong = xuongId, TuThoiGian = now });
+                }
                 item.WKv = wKv;
                 item.AType = aType;
                 item.MaXuong = xuongId;
                 context.MayCans.Update(item);
                 context.SaveChanges();
+                transaction.Commit();
             }
         }
 

@@ -58,4 +58,4 @@ Assert-Equal ([TransferPolicyTest]::IsShiftExpired($root, [datetime]'2026-10-07T
 $newMachineStart = [datetime]'2026-10-07T02:00:00'
 Assert-Equal ([TransferPolicyTest]::IsShiftExpired($newMachineStart, [datetime]'2026-10-07T14:00:01', 16, $true)) $false 'Ca máy mới tính giới hạn từ phiếu Vào mới'
 Assert-Equal ([TransferPolicyTest]::IsShiftExpired($root, [datetime]'2026-10-07T06:00:00', 16, $true)) $false 'Ca đêm chuyển máy còn hạn đến sáng'
-Assert-Equal ([TransferPolicyTest]::OtherMachineMessage(7779520)) 'Đang Vào tại 7779520. Ra tại máy cũ hoặc xác nhận chuyển máy.' 'Thông báo ngắn cho firmware'
+Assert-Equal ([TransferPolicyTest]::OtherMachineMessage(7779520)) 'Đang ở cân 7779520. Ra cân cũ.' 'Thông báo ngắn cho firmware'

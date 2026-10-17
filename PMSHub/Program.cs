@@ -156,6 +156,8 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
+// Chặn URL đăng nhập không xác thực trước khi tạo session/render component.
+app.UseMiddleware<LegacyLoginRedirectMiddleware>();
 app.UseWebSockets();
 app.UseRouting();
 //app.UseResponseCompression();

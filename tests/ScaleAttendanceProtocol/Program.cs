@@ -39,7 +39,9 @@ var method = typeof(ScaleAttendanceProcessor).GetMethod("ValidateTransition",
 string? Transition(string? previous, string current) =>
     (string?)method.Invoke(null, new object?[] { previous, current });
 Assert(Transition(null, "Vào") is null, "Lượt Vào đầu tiên hợp lệ");
-Assert(Transition(null, "Ra") is not null, "Ra khi chưa Vào bị từ chối");
+Assert(Transition(null, "Ra") == "Chưa Vào. Quẹt Vào trước.", "Ra khi chưa Vào trả thông báo ngắn");
+Assert((string?)typeof(ScaleAttendanceProcessor).GetMethod("OtherMachineMessage", BindingFlags.NonPublic | BindingFlags.Static)!
+    .Invoke(null, new object[] {7779520}) == "Đang ở cân 7779520. Ra cân cũ.", "Thông báo ngắn giữ mã cân cần quay lại");
 Assert(Transition("Vào", "Vào") is not null, "Vào liên tiếp bị từ chối");
 Assert(Transition("Vào", "Ra") is null, "Vào -> Ra đúng thứ tự trong ngày");
 Assert(Transition("Ra", "Vào") is null, "Ra -> Vào hợp lệ");
@@ -152,6 +154,18 @@ var protocolSource=File.ReadAllText(Path.GetFullPath(Path.Combine(AppContext.Bas
 Assert(protocolSource.Contains("TenCongViec = job"),"Giữ khóa JSON TenCongViec để firmware không phải đổi parser");
 Assert(protocolSource.Contains("TenMay = name, CongViec = name"),"Không thay đổi tên máy và lịch sử SQL trong yêu cầu đổi nhãn WSS");
 Assert(protocolSource.Split("employee, jobName,").Length-1==4,"Tên thành phẩm dùng cả Vào, Ra, quẹt lặp và gửi lại Id");
+var shiftJobResolver = typeof(ScaleAttendanceProcessor).GetMethod("ResolveShiftJobNames", BindingFlags.NonPublic | BindingFlags.Static)!;
+productNames["LV"] = "LỘT VỎ"; productNames["BV"] = "BÀO VỎ"; productNames["002"] = "LỘT VỎ ";
+string ShiftJobs(params string?[] codes) => (string)shiftJobResolver.Invoke(null, new object[] {codes, findJob})!;
+Assert(ShiftJobs("LV", "BV") == "LỘT VỎ, BÀO VỎ", "Ra tổng kết cả Lột vỏ rồi Bào vỏ");
+Assert(ShiftJobs("LV", "BV", "LV", "002") == "LỘT VỎ, BÀO VỎ", "Không lặp mã hoặc lặp tên thành phẩm trong tổng kết");
+Assert(ShiftJobs(" BV ", "lv") == "BÀO VỎ, LỘT VỎ", "Giữ thứ tự thành phẩm phát sinh, không dùng thứ tự từ điển");
+Assert(ShiftJobs("001", "CKTL 20x20") == "Lột vỏ, Cắt khuôn thanh long 20x20", "Tổng kết giữ mã có số 0 đầu và khoảng trắng nội bộ");
+Assert(ShiftJobs(null, "", "UNKNOWN") == "", "Không có sản lượng có tên thì không lấy thành phẩm hiện tại hoặc tên máy thay thế");
+Assert(protocolSource.Contains(".GroupBy(x => x.MaThanhPham)") && protocolSource.Contains(".OrderBy(x => x.FirstTime)")
+    && protocolSource.Contains("job = ResolveShiftJobNames(products.Select"), "Nhánh Ra và gửi lại Ra gom sản phẩm lịch sử theo thời gian");
+Assert(protocolSource.Contains("x.MayCan == device && x.TheIdNhanVien == request.TheId")
+    && protocolSource.Contains("x.NgayGio >= start && x.NgayGio <= time && x.ChiSanLuong && x.Status == 1"), "Tổng kết giới hạn đúng máy/thẻ/ca và phiếu hợp lệ");
 var productionValidate = typeof(ScaleProductionAttendancePolicy).GetMethod("Validate",
     BindingFlags.NonPublic | BindingFlags.Static)!;
 var productionNow = new DateTime(2026, 10, 13, 11, 0, 0);
@@ -192,7 +206,7 @@ var activeElsewhere = new Models.Repos.Models.CheckInOut {MaSoMay=14149084,ThoiG
 var otherMachineMessage = (string)typeof(ScaleAttendanceProcessor).GetMethod("OtherMachineMessage",
     BindingFlags.NonPublic | BindingFlags.Static)!.Invoke(null,new object[]{14149084})!;
 Assert(Production(new[]{activeElsewhere},closedAtCurrent)==otherMachineMessage,"Ca máy khác còn hạn vẫn chặn cân sai máy");
-Assert(Production(new[]{activeHere,activeElsewhere},activeHere)=="Có ca mở tại nhiều máy. Nhờ quản lý kiểm tra.","Nhiều ca đang mở vẫn cần kiểm tra");
+Assert(Production(new[]{activeHere,activeElsewhere},activeHere)=="Trùng ca nhiều cân. Báo quản lý.","Nhiều ca đang mở vẫn cần kiểm tra");
 Assert(Production(new[]{activeHere},activeHere,productionNow,hours:0)=="Cấu hình ca không hợp lệ. Nhờ quản lý kiểm tra.","Giữ kiểm tra cấu hình ca");
 Assert(Production(new[]{activeHere},activeHere,activeHere.ThoiGian.AddSeconds(-1))=="Giờ cân trước lượt Vào. Kiểm tra giờ máy.","Giữ kiểm tra đồng hồ trước giờ Vào");
 Assert(oldOtherMachine.Isforget==1 && oldOtherMachine.TrangThai=="Vào" && closedAtCurrent.VaoId=="7779520.20261013102837","Không sửa ca nguồn khi chọn thông báo");

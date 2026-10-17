@@ -47,6 +47,9 @@ namespace Models.Repos.Models
 
         [StringLength(100), Unicode(false)]
         public string? VaoId { get; set; }
+        // Snapshot at event time. NULL means historical workshop is not known.
+        [StringLength(100)]
+        public string? MaXuong { get; set; }
         [StringLength(100)]
         public string? NguoiXacNhan { get; set; }
         [StringLength(500)]

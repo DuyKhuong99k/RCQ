@@ -11,11 +11,9 @@ namespace ViewModels.Repos.Hubs.IServices
 {
     public interface ILoginService: INotifyPropertyChanged
     {
-        public bool Login(string username,string tocken);
         bool IsUserAuthenticated();
         public string GetSessionVal(string key);
         public bool IsSessionCreated();
-        void Login(string username);
         bool LoginLocal(string userName,string passWord);
         Task Logout();
         void CreateDefaultSession();

@@ -7507,8 +7507,8 @@ public class CommitService(IMayCansService mayCansService, ICoiService coiServic
         var employee = card == null ? null : mainService.VmNhanVien.Items
             .FirstOrDefault(x => x.MaNhanVien == card.MaNhanVien);
         if (employee == null) return Fail("Không tìm thấy thẻ nhân viên hoặc nhân viên.");
-        if (!employee.IsHuman || employee.IsChucNang || employee.IsPhucVu)
-            return Fail("HQ cần quẹt thẻ nhân viên sản xuất.");
+        if (!ScaleProductionAttendancePolicy.IsProductionCard(employee))
+            return Fail("HQ cần thẻ nhân viên hoặc nhóm sản xuất.");
 
         if (!int.TryParse(machine.Id, NumberStyles.None, CultureInfo.InvariantCulture, out var machineNumber))
             return Fail("Mã máy cân không hợp lệ.");
@@ -7541,9 +7541,12 @@ public class CommitService(IMayCansService mayCansService, ICoiService coiServic
         if (string.IsNullOrWhiteSpace(machine.MaThanhPham)) return Fail("Chưa chọn thành phẩm.");
         if (string.IsNullOrWhiteSpace(machine.MaLoaiNguyenLieu)) return Fail("Chưa chọn loại nguyên liệu.");
 
+        var historicalWorkshop = ScaleWorkshopHistory.Resolve(attendanceDb, machine.Id, time);
+        if (string.IsNullOrWhiteSpace(historicalWorkshop))
+            return Fail("Chưa xác định xưởng tại giờ cân. Kiểm tra lịch sử chuyển xưởng.");
         var item = mainService.VmPhieuCanHq.CreateNew(data.Id, 0, machine.MaLo,
             machine.MaLoaiNguyenLieu, machine.MaSize, machine.MaThanhPham, employee.MaNhanVien,
-            data.TrongLuong, 0, data.TrongLuongTare, data.TheId, "", time, machine.Id, machine.MaXuong ?? "");
+            data.TrongLuong, 0, data.TrongLuongTare, data.TheId, "", time, machine.Id, historicalWorkshop);
         // Cùng khóa SQL theo thẻ với Vào/Ra/chuyển máy. Kiểm tra lại sau khi
         // cân ổn định và giữ khóa đến khi DAO lưu phiếu xong (kết nối riêng).
         using var attendanceTransaction = attendanceDb.Database.BeginTransaction();

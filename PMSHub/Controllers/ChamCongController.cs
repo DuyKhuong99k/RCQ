@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Models.Repos;
 using Models.Repos.Models;
+using Services;
 using PMSHub.Middlewares;
 using ViewModels.Repos.Hubs.IServices;
 
@@ -100,7 +101,8 @@ public sealed class ChamCongController(
             TrangThai = trangThai,
             CongViec = congViec,
             Isforget = request.Isforget,
-            CaDem = request.Cadem
+            CaDem = request.Cadem,
+            MaXuong = ScaleWorkshopHistory.Resolve(db, maThietBi, thoiGian)
         });
         try
         {

@@ -128,22 +128,31 @@ public static class HqWeightBackupProcessor
                 if(string.IsNullOrWhiteSpace(card?.MaNhanVien)) throw new ArgumentException($"Thẻ {item.TheIdNhanVien} chưa gán nhân viên.");
                 if(!string.IsNullOrEmpty(item.MaNhanVien) && item.MaNhanVien!=card.MaNhanVien)
                     throw new ArgumentException($"Phiếu {item.Id}: mã nhân viên không khớp thẻ; cần đối chiếu lịch sử.");
-                if(!db.NhanVienDaiThanh.AsNoTracking().Any(x=>x.MaNhanVien==card.MaNhanVien
-                    && x.IsHuman && !x.IsChucNang && !x.IsPhucVu))
-                    throw new ArgumentException($"Thẻ {item.TheIdNhanVien} không thuộc nhân viên sản xuất hợp lệ.");
+                var employee=db.NhanVienDaiThanh.AsNoTracking().FirstOrDefault(x=>x.MaNhanVien==card.MaNhanVien);
+                if(!ScaleProductionAttendancePolicy.IsProductionCard(employee))
+                    throw new ArgumentException($"Thẻ {item.TheIdNhanVien} không thuộc nhân viên hoặc nhóm sản xuất hợp lệ.");
                 item.MaNhanVien=card.MaNhanVien;
+                var historicalWorkshop = ScaleWorkshopHistory.Resolve(db, item.MayCan, item.NgayGio);
+                if (!string.IsNullOrWhiteSpace(historicalWorkshop)) {
+                    if (!string.IsNullOrEmpty(item.MaXuong) && !CodeEquals(item.MaXuong,historicalWorkshop))
+                        throw new ArgumentException($"Phiếu {item.Id}: xưởng gửi lên khác lịch sử chuyển cân. Cần đối chiếu.");
+                    item.MaXuong = historicalWorkshop;
+                }
                 // Missing legacy fields may only come from one unambiguous matching historical tuple.
                 if(string.IsNullOrEmpty(item.MaLoaiNguyenLieu) || string.IsNullOrEmpty(item.MaXuong)) {
                     var references=db.HqPhieuCans.AsNoTracking().Where(x=>x.MayCan==item.MayCan && x.Ngay==item.Ngay
-                        && x.MaLo==item.MaLo && x.MaSize==item.MaSize && x.MaThanhPham==item.MaThanhPham && x.Status==1)
+                        && x.MaLo==item.MaLo && x.MaSize==item.MaSize && x.MaThanhPham==item.MaThanhPham && x.Status==1
+                        && (item.MaXuong=="" || x.MaXuong==item.MaXuong))
                         .Select(x=>new {x.MaLoaiNguyenLieu,x.MaXuong}).Distinct().ToList();
                     ResolveHistoricalMetadata(item,references.Select(x=>new HistoricalMetadata(x.MaLoaiNguyenLieu,x.MaXuong)).ToArray());
                 }
-                var scan=db.CheckInOuts.AsNoTracking().Where(x=>x.MaChamCong==item.TheIdNhanVien
-                    && (x.TrangThai=="Vào" || x.TrangThai=="Ra") && x.ThoiGian<=item.NgayGio)
-                    .OrderByDescending(x=>x.ThoiGian).ThenByDescending(x=>x.Id).FirstOrDefault();
-                var error=ValidateHistoricalScan(scan,int.Parse(client.Id,CultureInfo.InvariantCulture),item.NgayGio,maxHours);
-                if(error!=null) throw new ArgumentException($"Phiếu {item.Id}: {error}");
+                if(ScaleProductionAttendancePolicy.RequiresAttendance(employee)) {
+                    var scan=db.CheckInOuts.AsNoTracking().Where(x=>x.MaChamCong==item.TheIdNhanVien
+                        && (x.TrangThai=="Vào" || x.TrangThai=="Ra") && x.ThoiGian<=item.NgayGio)
+                        .OrderByDescending(x=>x.ThoiGian).ThenByDescending(x=>x.Id).FirstOrDefault();
+                    var error=ValidateHistoricalScan(scan,int.Parse(client.Id,CultureInfo.InvariantCulture),item.NgayGio,maxHours);
+                    if(error!=null) throw new ArgumentException($"Phiếu {item.Id}: {error}");
+                }
                 db.HqPhieuCans.Add(item); acknowledgedItems.Add(item); inserted++;
             }
             db.SaveChanges(); transaction.Commit();

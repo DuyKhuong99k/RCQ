@@ -90,7 +90,7 @@ public static class ScaleAttendanceProcessor
             var active = openShifts.Where(x => !IsShiftExpired(x.ThoiGian,
                 time, maxShiftHours, x.CaDem)).ToList();
             if (active.Count > 1)
-                return Failure("MULTIPLE_OPEN_SHIFTS", "Có ca mở tại nhiều máy. Nhờ quản lý kiểm tra.", request);
+                return Failure("MULTIPLE_OPEN_SHIFTS", "Trùng ca nhiều cân. Báo quản lý.", request);
             // Cả Vào và Ra đều phải thực hiện tại máy có ca đang mở.
             if (active.Any(x => x.MaSoMay != machine))
                 return Failure("SHIFT_ON_OTHER_MACHINE", OtherMachineMessage(active[0].MaSoMay), request);
@@ -99,7 +99,7 @@ public static class ScaleAttendanceProcessor
             // Giữ ca đêm còn hạn để không ngắt ca hợp lệ qua nửa đêm.
             var latest = ScaleAttendanceTransferService.OperationalEvents(db, request.TheId, machine, time, maxShiftHours)
                 .OrderByDescending(x => x.ThoiGian).ThenByDescending(x => x.Id)
-                .Select(x => new { x.Id, x.ThoiGian, x.TrangThai, x.CaDem }).FirstOrDefault();
+                .Select(x => new { x.Id, x.ThoiGian, x.TrangThai, x.CaDem, x.MaXuong }).FirstOrDefault();
             if (latest != null && latest.ThoiGian > time)
                 return Failure("OUT_OF_ORDER", "Lượt quẹt cũ hơn lịch sử. Kiểm tra giờ thiết bị.", request);
             var previousStatus = latest?.TrangThai == "Ra" && latest.ThoiGian.Date != time.Date
@@ -135,6 +135,7 @@ public static class ScaleAttendanceProcessor
             {
                 Id = id, MaChamCong = request.TheId, ThoiGian = time, MaSoMay = machine,
                 TenMay = name, CongViec = name, Isforget = 0,
+                MaXuong = request.TrangThai == "Ra" ? latest!.MaXuong : ScaleWorkshopHistory.Resolve(db, device, time),
                 TrangThai = request.TrangThai, CaDem = request.Cadem,
                 VaoId = request.TrangThai == "Ra" ? latest!.Id : null
             });
@@ -165,6 +166,12 @@ public static class ScaleAttendanceProcessor
         if (string.IsNullOrEmpty(code)) return string.Empty;
         return findName(code)?.Trim() ?? string.Empty;
     }
+
+    internal static string ResolveShiftJobNames(IEnumerable<string?> productCodes, Func<string, string?> findName) =>
+        string.Join(", ", productCodes.Select(code => code?.Trim() ?? string.Empty)
+            .Where(code => code.Length > 0).Distinct(StringComparer.OrdinalIgnoreCase)
+            .Select(code => ResolveJobName(code, findName)).Where(name => name.Length > 0)
+            .Distinct(StringComparer.OrdinalIgnoreCase));
 
     private static (bool Success, string Json) Success(dbPMScontext db, Request request,
         DateTime time, int machine, string device, NhanVienDaiThanh employee, string job, bool duplicated,
@@ -200,14 +207,24 @@ public static class ScaleAttendanceProcessor
             if (IsShiftExpired(start, time, maxShiftHours, checkIn.CaDem))
                 return ExpiredShift(request, start, time, maxShiftHours);
             end = time;
-            var totals = db.HqPhieuCans.AsNoTracking()
+            // Cùng tập phiếu với tổng số rổ/kg; gom mã theo thứ tự phát sinh
+            // trong ca, không lấy thành phẩm đang chọn lúc Ra hoặc của người khác.
+            var products = db.HqPhieuCans.AsNoTracking()
                 .Where(x => x.MayCan == device && x.TheIdNhanVien == request.TheId &&
                     x.NgayGio >= start && x.NgayGio <= time && x.ChiSanLuong && x.Status == 1)
-                .GroupBy(x => 1)
-                .Select(g => new { Count = g.Count(), Weight = g.Sum(x => x.TrongLuong - x.TrongLuongTare) })
-                .FirstOrDefault();
-            totalBaskets = totals?.Count ?? 0;
-            totalWeight = totals?.Weight ?? 0m;
+                .GroupBy(x => x.MaThanhPham)
+                .Select(g => new { Code = g.Key, FirstTime = g.Min(x => x.NgayGio),
+                    Count = g.Count(), Weight = g.Sum(x => x.TrongLuong - x.TrongLuongTare) })
+                .OrderBy(x => x.FirstTime).ThenBy(x => x.Code).ToList();
+            totalBaskets = products.Sum(x => x.Count);
+            totalWeight = products.Sum(x => x.Weight);
+            var codes = products.Select(x => x.Code?.Trim()).Where(code => !string.IsNullOrEmpty(code))
+                .Distinct(StringComparer.OrdinalIgnoreCase).ToArray();
+            var names = db.HqThanhPhams.AsNoTracking().Where(product => codes.Contains(product.Id))
+                .Select(product => new { product.Id, product.Ten }).ToList()
+                .GroupBy(product => product.Id.Trim(), StringComparer.OrdinalIgnoreCase)
+                .ToDictionary(group => group.Key, group => group.First().Ten, StringComparer.OrdinalIgnoreCase);
+            job = ResolveShiftJobNames(products.Select(x => x.Code), code => names.GetValueOrDefault(code));
         }
         var timing = BuildTiming(start, end, request.Cadem);
         var shiftTiming = BuildTiming(shiftStart, end, request.Cadem);
@@ -234,7 +251,7 @@ public static class ScaleAttendanceProcessor
         (!caDem && start.Date != end.Date) || end - start > TimeSpan.FromHours(maxShiftHours);
 
     internal static string OtherMachineMessage(int machine) =>
-        $"Đang Vào tại {machine}. Ra tại máy cũ hoặc xác nhận chuyển máy.";
+        $"Đang ở cân {machine}. Ra cân cũ.";
 
     internal static (bool Success, string Json) ExpiredShift(Request request, DateTime start,
         DateTime scanTime, int maxShiftHours) =>
@@ -290,7 +307,7 @@ public static class ScaleAttendanceProcessor
         string ThoiGianVao, string? ThoiGianRa, long TongThoiGianGiay, string TongThoiGian);
 
     internal static string? ValidateTransition(string? previous, string current) =>
-        current == "Ra" && previous != "Vào" ? "Chưa có lượt Vào trong ngày. Vui lòng quẹt Vào trước." :
+        current == "Ra" && previous != "Vào" ? "Chưa Vào. Quẹt Vào trước." :
         current == "Vào" && previous == "Vào" ? "Đã chấm Vào, chưa chấm Ra." : null;
 
     private static (bool Success, string Json) Failure(string code, string message, Request? request = null) =>

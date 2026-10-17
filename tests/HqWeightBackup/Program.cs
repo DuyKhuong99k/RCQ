@@ -12,6 +12,23 @@ using ViewModels.Repos.Hubs.IServices;
 var checks=0;
 void Assert(bool ok,string name) { if(!ok) throw new Exception(name); checks++; }
 void Reject(Action action,string name) { try {action();} catch(ArgumentException){checks++;return;} throw new Exception(name); }
+Assert(!ScaleProductionAttendancePolicy.IsProductionCard(null),"Unregistered card rejected");
+Assert(ScaleProductionAttendancePolicy.RequiresAttendance(null),"Missing identity cannot bypass attendance");
+for(var flags=0;flags<16;flags++) {
+    var identity=new NhanVienDaiThanh {MaNhanVien="GROUP_TEST",IsHuman=(flags&1)!=0,
+        IsNhom=(flags&2)!=0,IsChucNang=(flags&4)!=0,IsPhucVu=(flags&8)!=0};
+    var eligible=(identity.IsHuman || identity.IsNhom) && !identity.IsChucNang && !identity.IsPhucVu;
+    Assert(ScaleProductionAttendancePolicy.IsProductionCard(identity)==eligible,$"Production identity flags {flags}");
+    Assert(ScaleProductionAttendancePolicy.RequiresAttendance(identity)==(!eligible || !identity.IsNhom),
+        $"Only valid SQL group bypasses attendance, flags {flags}");
+}
+var groupCard=new NhanVienDaiThanh {MaNhanVien="MAYCAT2",IsNhom=true,IsHuman=false};
+Assert(ScaleProductionAttendancePolicy.IsProductionCard(groupCard)
+    && !ScaleProductionAttendancePolicy.RequiresAttendance(groupCard),"MAYCAT2 group weighs without Vao/Ra");
+groupCard.IsHuman=true;
+Assert(!ScaleProductionAttendancePolicy.RequiresAttendance(groupCard),"Group with IsHuman=true also needs no Vao/Ra");
+groupCard.IsNhom=false;
+Assert(ScaleProductionAttendancePolicy.RequiresAttendance(groupCard),"Normal human still requires Vao/Ra");
 var now=new DateTime(2026,10,12,14,0,0);
 DataCoummunication Record(int seconds=0)=>new() {Id="7779520."+new DateTime(2026,10,12,11,0,0).AddSeconds(seconds).ToString("yyyyMMddHHmmss"),
  NgayGio=new DateTime(2026,10,12,11,0,0).AddSeconds(seconds).ToString("yyyyMMddHHmmss"),TheId="0000000001",MayCan="7779520",
@@ -80,7 +97,39 @@ Assert(response.MayCan=="7779520" && response.Status==1 && response.ChiSanLuong=
 var defaultPayload=JObject.Parse(JsonConvert.SerializeObject(new DataLiteRes()));
 foreach(var removed in new[]{"MayCan","MaNhanVienPhucVu","MaNhanVienBanKiem","ChiSanLuong","Status","TongTLTP","DinhMucTP","DanhGia"})
     Assert(defaultPayload.Property(removed)==null,"Default firmware payload omits "+removed);
-Console.WriteLine($"PASS: {checks} HQ backup and firmware payload checks. In-memory reconciliation only; no SQL connection or firmware commands.");
+var baseline=new DateTime(2026,10,16,6,0,0);
+var workshopHistory=new[] {
+    new Models.Repos.Models.LichSuXuongMayCan {MayCan="7779520",MaXuong="2",TuThoiGian=baseline},
+    new Models.Repos.Models.LichSuXuongMayCan {MayCan="7779520",MaXuong="1",TuThoiGian=baseline.AddHours(4)},
+    new Models.Repos.Models.LichSuXuongMayCan {MayCan="7779520",MaXuong="2",TuThoiGian=baseline.AddDays(1)},
+    new Models.Repos.Models.LichSuXuongMayCan {MayCan="999",MaXuong="9",TuThoiGian=baseline}
+};
+Assert(ScaleWorkshopHistory.Resolve(workshopHistory,"7779520",baseline.AddSeconds(-1))==null,"Before baseline: do not guess current workshop for old attendance");
+Assert(ScaleWorkshopHistory.Resolve(workshopHistory,"7779520",baseline)=="2","Exact baseline captures original workshop");
+Assert(ScaleWorkshopHistory.Resolve(workshopHistory,"7779520",baseline.AddHours(4).AddSeconds(-1))=="2","Offline event before move remains in old workshop");
+Assert(ScaleWorkshopHistory.Resolve(workshopHistory,"7779520",baseline.AddHours(4))=="1","Exact move boundary uses new workshop");
+Assert(ScaleWorkshopHistory.Resolve(workshopHistory.Reverse(),"7779520",baseline.AddHours(6))=="1","Unordered history still resolves by event time");
+Assert(ScaleWorkshopHistory.Resolve(workshopHistory,"7779520",baseline.AddDays(2))=="2","Moving back creates separate interval");
+Assert(ScaleWorkshopHistory.Resolve(workshopHistory,"missing",baseline.AddDays(2))==null,"Missing scale has unknown historical workshop");
+Assert(ScaleWorkshopHistory.Resolve(workshopHistory,"999",baseline.AddHours(6))=="9","Do not mix history of different scales");
+var unknownPeriod=workshopHistory.Append(new Models.Repos.Models.LichSuXuongMayCan {MayCan="7779520",MaXuong=null,TuThoiGian=baseline.AddDays(3)});
+Assert(ScaleWorkshopHistory.Resolve(unknownPeriod,"7779520",baseline.AddDays(4))==null,"Unassigned interval does not fall through to previous workshop");
+Assert(typeof(Models.Repos.Models.CheckInOut).GetProperty("MaXuong")!=null,"CheckInOut can persist workshop snapshot");
+var transferMethod=typeof(ScaleAttendanceTransferService).GetMethod("Transfer")!;
+Assert(!transferMethod.GetParameters().Any(p=>p.ParameterType==typeof(DateTime)||p.ParameterType==typeof(DateTimeOffset)),"Transfer API has no client-controlled timestamp parameter");
+var clockMethod=typeof(ScaleAttendanceTransferService).GetMethod("ServerTransferTime",BindingFlags.Static|BindingFlags.NonPublic)!;
+var clockResult=(DateTime)clockMethod.Invoke(null,new object[]{new DateTimeOffset(2026,10,16,18,30,15,987,TimeSpan.Zero)})!;
+Assert(clockResult==new DateTime(2026,10,17,1,30,15),"Transfer clock uses UTC+7 and floors to firmware-second precision across midnight");
+foreach (var pair in new[] {
+    ("192.168.0.234","http://192.168.0.234/api/w/posts"),
+    ("http://192.168.0.234","http://192.168.0.234/api/w/posts"),
+    (" https://scale.local:5153/ ","https://scale.local:5153/api/w/posts")
+}) Assert(DeviceSettingsAddress.Parse(pair.Item1).AbsoluteUri==pair.Item2,"Device settings URI handles IP, scheme and port: "+pair.Item1);
+foreach(var invalid in new string?[]{null,""," ","http://","http://http://192.168.0.234","ftp://scale.local","http://user:pass@scale.local","http://scale.local/path"}) {
+    var rejected=false;try{DeviceSettingsAddress.Parse(invalid);}catch(ArgumentException){rejected=true;}
+    Assert(rejected,"Invalid device address gets clear validation, not raw URI exception");
+}
+Console.WriteLine($"PASS: {checks} HQ backup, workshop-history, device-address and firmware payload checks. In-memory only; no SQL connection or firmware commands.");
 
 public class MockCommit : DispatchProxy {
     protected override object? Invoke(MethodInfo? method,object?[]? args) => method?.Name=="Commit"

@@ -4,11 +4,25 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Services;
 
-/// <summary>Phiếu cân online phải thuộc ca Vào còn mở tại chính máy cân.</summary>
+/// <summary>Nhân viên cần ca Vào tại cân; thẻ nhóm chỉ ghi sản lượng, không cần Vào/Ra.</summary>
 public static class ScaleProductionAttendancePolicy
 {
+    // Chỉ tin cờ trong danh mục SQL, không tin mã/tên nhóm do firmware gửi lên.
+    public static bool IsProductionCard(NhanVienDaiThanh? employee) => employee != null
+        && (employee.IsHuman || employee.IsNhom) && !employee.IsChucNang && !employee.IsPhucVu;
+
+    public static bool RequiresAttendance(NhanVienDaiThanh? employee) =>
+        !IsProductionCard(employee) || !employee!.IsNhom;
+
     public static string? GetError(dbPMScontext db, string card, int machine, DateTime time, int maxShiftHours)
     {
+        var employeeCode = db.TheTu.AsNoTracking().Where(x => x.MaTheTu == card)
+            .Select(x => x.MaNhanVien).FirstOrDefault();
+        var employee = string.IsNullOrWhiteSpace(employeeCode) ? null : db.NhanVienDaiThanh.AsNoTracking()
+            .FirstOrDefault(x => x.MaNhanVien == employeeCode);
+        if (!IsProductionCard(employee)) return "Thẻ không thuộc nhân viên hoặc nhóm sản xuất hợp lệ.";
+        if (!RequiresAttendance(employee)) return null;
+
         var latestTime = db.CheckInOuts.AsNoTracking()
             .Where(x => x.MaChamCong == card && (x.TrangThai == "Vào" || x.TrangThai == "Ra"))
             .Select(x => (DateTime?)x.ThoiGian).Max();
@@ -37,7 +51,7 @@ public static class ScaleProductionAttendancePolicy
             latestAtMachine = null;
         var active = openShifts.Where(x => !ScaleAttendanceTransferService.IsExpired(x, time, maxShiftHours)).ToList();
         if (active.Count > 1)
-            return "Có ca mở tại nhiều máy. Nhờ quản lý kiểm tra.";
+            return "Trùng ca nhiều cân. Báo quản lý.";
         if (active.Count == 0)
         {
             // Ca cũ tại máy khác vẫn còn để đối soát, nhưng không dùng làm

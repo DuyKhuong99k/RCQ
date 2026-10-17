@@ -4,16 +4,18 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <HubBuildConfiguration Condition="'$(HubBuildConfiguration)' == ''">Debug</HubBuildConfiguration>
   </PropertyGroup>
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
-    <Reference Include="Services"><HintPath>../../PMSHub/bin/Debug/net8.0/Services.dll</HintPath></Reference>
-    <Reference Include="PMSHub"><HintPath>../../PMSHub/bin/Debug/net8.0/PMSHub.dll</HintPath></Reference>
-    <Reference Include="Vars"><HintPath>../../PMSHub/bin/Debug/net8.0/Vars.dll</HintPath></Reference>
-    <Reference Include="ViewModels"><HintPath>../../PMSHub/bin/Debug/net8.0/ViewModels.dll</HintPath></Reference>
-    <Reference Include="Models"><HintPath>../../PMSHub/bin/Debug/net8.0/Models.dll</HintPath></Reference>
-    <Reference Include="MvvmHelpers"><HintPath>../../PMSHub/bin/Debug/net8.0/MvvmHelpers.dll</HintPath></Reference>
-    <Reference Include="CommunityToolkit.Mvvm"><HintPath>../../PMSHub/bin/Debug/net8.0/CommunityToolkit.Mvvm.dll</HintPath></Reference>
-    <Content Include="../../PMSHub/bin/Debug/net8.0/*.dll" Link="%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <Reference Include="Services"><HintPath>../../PMSHub/bin/$(HubBuildConfiguration)/net8.0/Services.dll</HintPath></Reference>
+    <Reference Include="EAD"><HintPath>../../PMSHub/bin/$(HubBuildConfiguration)/net8.0/EAD.dll</HintPath></Reference>
+    <Reference Include="PMSHub"><HintPath>../../PMSHub/bin/$(HubBuildConfiguration)/net8.0/PMSHub.dll</HintPath></Reference>
+    <Reference Include="Vars"><HintPath>../../PMSHub/bin/$(HubBuildConfiguration)/net8.0/Vars.dll</HintPath></Reference>
+    <Reference Include="ViewModels"><HintPath>../../PMSHub/bin/$(HubBuildConfiguration)/net8.0/ViewModels.dll</HintPath></Reference>
+    <Reference Include="Models"><HintPath>../../PMSHub/bin/$(HubBuildConfiguration)/net8.0/Models.dll</HintPath></Reference>
+    <Reference Include="MvvmHelpers"><HintPath>../../PMSHub/bin/$(HubBuildConfiguration)/net8.0/MvvmHelpers.dll</HintPath></Reference>
+    <Reference Include="CommunityToolkit.Mvvm"><HintPath>../../PMSHub/bin/$(HubBuildConfiguration)/net8.0/CommunityToolkit.Mvvm.dll</HintPath></Reference>
+    <Content Include="../../PMSHub/bin/$(HubBuildConfiguration)/net8.0/*.dll" Link="%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>
