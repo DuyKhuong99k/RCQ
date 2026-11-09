@@ -10,6 +10,7 @@
 @inject ISessionService SessionService
 @inject IOptions<ScaleAttendanceOptions> AttendanceOptions
 @inject ILogger<ScaleAttendanceTransfers> Logger
+@inject IAttendanceMode AttendanceMode
 
 <PageTitle>Chuyển máy chấm công</PageTitle>
 <div style="padding:24px;max-width:1100px">
@@ -230,6 +231,12 @@
     }
     private async Task Confirm()
     {
+        if (!AttendanceMode.Current.Enabled)
+        {
+            isError = true;
+            message = AttendanceModeMessages.TransferDisabled;
+            return;
+        }
         if (!authorized || busy || selectedRows.Count == 0 || targetMachine == 0 || string.IsNullOrWhiteSpace(reason)) return;
         busy = true;
         isError = false;
@@ -246,7 +253,7 @@
                 try
                 {
                     await Task.Run(() => ScaleAttendanceTransferService.Transfer(userId, row.Id, targetMachine,
-                        reason, AttendanceOptions.Value.MaxShiftHours));
+                        reason, AttendanceOptions.Value.MaxShiftHours, AttendanceMode.Current.Enabled));
                     selectedRows.Remove(row.Id);
                     succeeded++;
                 }

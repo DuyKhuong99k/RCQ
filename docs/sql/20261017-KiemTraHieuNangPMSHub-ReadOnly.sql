@@ -122,4 +122,7 @@ ELSE
     SELECT N'QueryStore' AS DiagnosticSection,
            N'Catalog Query Store không có hoặc tài khoản không nhìn thấy.' AS DiagnosticMessage;
 
-SET LOCK_TIMEOUT @PreviousLockTimeout;
+-- SQL Server yêu cầu số nguyên literal ở SET LOCK_TIMEOUT.
+DECLARE @RestoreLockTimeoutSql nvarchar(80) = N'SET LOCK_TIMEOUT '
+    + CONVERT(nvarchar(12), @PreviousLockTimeout) + N';';
+EXEC sys.sp_executesql @RestoreLockTimeoutSql;

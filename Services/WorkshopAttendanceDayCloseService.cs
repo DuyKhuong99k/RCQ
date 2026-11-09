@@ -7,7 +7,7 @@ namespace Services;
 
 /// <summary>Đánh dấu Vào thiếu Ra khi kết thúc ngày UTC+7, quét bù khi khởi động.</summary>
 public sealed class WorkshopAttendanceDayCloseService(
-    ILogger<WorkshopAttendanceDayCloseService> logger) : BackgroundService
+    ILogger<WorkshopAttendanceDayCloseService> logger, IAttendanceMode? attendanceMode = null) : BackgroundService
 {
     internal const string CloseSql = """
         ;WITH Ordered AS
@@ -29,6 +29,12 @@ public sealed class WorkshopAttendanceDayCloseService(
     {
         while (!stoppingToken.IsCancellationRequested)
         {
+            if (attendanceMode?.Current.Enabled == false)
+            {
+                try { await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken); }
+                catch (OperationCanceledException) { return; }
+                continue;
+            }
             var today = ScaleAttendanceDayCloseService.BusinessDate(DateTimeOffset.UtcNow);
             try
             {

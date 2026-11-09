@@ -22,6 +22,15 @@ using Dao.Repos;
 ThreadPool.SetMinThreads(100, 100);
 
 var builder = WebApplication.CreateBuilder(args);
+// Private, persisted operator setting; never place credentials/settings under wwwroot.
+builder.Services.AddSingleton(_ => new AttendanceModeStore(
+    Path.Combine(builder.Environment.ContentRootPath, "App_Data", "attendance-mode.json")));
+builder.Services.AddSingleton<IAttendanceMode>(services => services.GetRequiredService<AttendanceModeStore>());
+builder.Services.AddSingleton<IAttendanceAdministratorVerifier, SqlAttendanceAdministratorVerifier>();
+builder.Services.AddSingleton<AttendanceModeManager>();
+// Initialize both DAO/EF before hosted services can issue their first query.
+// Fail before accepting firmware traffic when settings/SQL are unavailable.
+await HqDatabaseStartup.InitializeAsync(builder.Environment.ContentRootPath);
 builder.Services.AddScoped<Database>();
 builder.Services.AddHostedService<DeviceHeartbeatMonitor>();
 builder.Services.AddHostedService<ScaleAttendanceDayCloseService>();
@@ -95,6 +104,7 @@ builder.Services.AddSignalR(options =>
 });
 builder.Services.AddSingleton<MainViewModel>();
 builder.Services.AddSingleton<IMainService, MainViewModel>();
+builder.Services.AddSingleton<IHubEmployeeCardCatalog, HubEmployeeCardCatalog>();
 builder.Services.AddSingleton<ICoiService, CoiService>();
 builder.Services.AddSingleton<IMayCansService, MayCansService>();
 builder.Services.AddSingleton(typeof(HighThroughputQueue<>));
@@ -112,6 +122,7 @@ builder.Services.AddScoped<IDeviceViewService, DeviceViewService>();
 builder.Services.AddScoped<ICoiViewService, CoiViewService>();
 builder.Services.AddScoped<ILoginService, LoginService>();
 builder.Services.AddScoped<ISessionService, SesssionService>();
+builder.Services.AddScoped<HubEmployeeManager>();
 builder.Services.AddScoped<ICardService, CardService>();
 builder.Services.AddScoped<IMessageService, MessageService>();
 builder.Services.AddScoped<IToastService,ToastService>();
@@ -137,6 +148,7 @@ builder.WebHost.ConfigureKestrel(o =>
 //    );
 //});
 var app = builder.Build();
+_ = app.Services.GetRequiredService<IAttendanceMode>().Current; // Validate persisted state before accepting traffic.
 // #if DEBUG
 // if (Environment.MachineName== "NP")
 // {

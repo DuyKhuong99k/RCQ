@@ -15,5 +15,10 @@ public static class ScaleWorkshopHistory
         history.Where(x => x.MayCan == machine && x.TuThoiGian <= time)
             .OrderByDescending(x => x.TuThoiGian).Select(x => x.MaXuong).FirstOrDefault();
 
+    public static Task<string?> ResolveAsync(dbPMScontext db, string machine, DateTime time,
+        CancellationToken cancellation) => db.LichSuXuongMayCans.AsNoTracking()
+            .Where(x => x.MayCan == machine && x.TuThoiGian <= time)
+            .OrderByDescending(x => x.TuThoiGian).Select(x => x.MaXuong).FirstOrDefaultAsync(cancellation);
+
     public static DateTime BusinessNow() => DateTimeOffset.UtcNow.ToOffset(TimeSpan.FromHours(7)).DateTime;
 }

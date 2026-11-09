@@ -25,6 +25,7 @@
 @inject IDeviceViewService DeviceViewService
 @inject IJSRuntime JsRuntime
 @inject IToastService ToastService
+@inject Microsoft.Extensions.Logging.ILogger<TheChucNang> Logger
 <link rel="stylesheet" href="styles/grid.css" />
 <PageTitle>Thẻ Chức Năng</PageTitle>
 <!-- Navbar -->
@@ -629,7 +630,7 @@
     private string TheId = "";
     private string ThongBao = "";
 
-    private async void Edit()
+    private async Task Edit()
     {
         var edit = async () =>
         {
@@ -640,6 +641,8 @@
                 // {
                 if (MainService.VmApp.ComName?.ToUpper() == nameof(ComNames.RCQTG))
                 {
+                    // Stage edits on copies. Failed SQL must not mutate the live card cache.
+                    values = values.Select(MainService.VmTheThanhPham.CopyItem).ToList();
                     var tp = MainService.VmThanhPhamHq.Items.FirstOrDefault(x => x.Id == cardService.ItemChucNang.MaThanhPham);
                     var s = MainService.VmSizeHq.Items.FirstOrDefault(x => x.Id == cardService.ItemChucNang.MaSize);
                     var lnl = MainService.VmNguyenLieuHq.Items.FirstOrDefault(x => x.Id == cardService.ItemChucNang.MaLoaiNguyenLieu);
@@ -662,6 +665,8 @@
                         val.STTPhieuPhanCoChiTietT = cardService.ItemChucNang.STTPhieuPhanCoChiTietT;
                         val.TrongLuongTare = cardService.ItemChucNang.TrongLuongTare;
                         val.MaThanhPham = cardService.ItemChucNang.MaThanhPham;
+                        val.MaSize = cardService.ItemChucNang.MaSize;
+                        val.MaLoaiNguyenLieu = cardService.ItemChucNang.MaLoaiNguyenLieu;
                         val.MaSizeDinhHinh = cardService.ItemChucNang.MaSizeDinhHinh;
                         val.MaThanhPhamFillet = cardService.ItemChucNang.MaThanhPhamFillet;
                         val.MaMayLangDa = cardService.ItemChucNang.MaMayLangDa;
@@ -813,13 +818,13 @@
         }
     }
 
-    private async void CloseDialogAdd()
+    private void CloseDialogAdd()
     {
         IsVisibleAdd = false;
         IsVisibleEdit = false;
     }
 
-    private async void MayCanStartStop(string id)
+    private async Task MayCanStartStop(string id)
     {
         // if (cardService.ItemRo.ColorCode == null && isXoa == false)
         // {
@@ -851,6 +856,40 @@
     }
 
     private void ValueChangeHandler(ChangedEventArgs args)
+    {
+        if (string.IsNullOrWhiteSpace(args.Value) || args.Value.Length < 10) return;
+
+        try
+        {
+            ProcessScannedCard(args);
+        }
+        catch (Microsoft.Data.SqlClient.SqlException ex)
+        {
+            var message = ex.Number is 2601 or 2627
+                ? "Thẻ đã tồn tại. Tải lại danh sách."
+                : ex.Number == 207
+                    ? "Cấu trúc SQL chưa phù hợp. Báo quản lý."
+                    : "Chưa xác nhận lưu thẻ. Tải lại để kiểm tra.";
+            ReportCardError(ex, message);
+        }
+        catch (Exception ex)
+        {
+            ReportCardError(ex, "Không xử lý được thẻ. Tải lại danh sách để kiểm tra.");
+        }
+        finally
+        {
+            TheId = "";
+        }
+    }
+
+    private void ReportCardError(Exception error, string message)
+    {
+        ThongBao = message;
+        try { Logger.LogError(error, "[FUNCTION CARD ERROR] Delete={Delete}", isXoa); }
+        catch { /* Logging must not terminate the browser circuit either. */ }
+    }
+
+    private void ProcessScannedCard(ChangedEventArgs args)
     {
         if (args.Value.Length >= 10)
         {

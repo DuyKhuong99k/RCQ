@@ -18,25 +18,22 @@
 @using SelectionType = Syncfusion.Blazor.Grids.SelectionType
 @rendermode InteractiveServer
 @inherits AuthenticatedComponent
+@implements IDisposable
 @attribute [StreamRendering]
-@inject NavigationManager Navigation
 @inject IMainService MainService
 @inject IMayCansService MayCansService
 @inject ICardService cardService
 @inject IDeviceViewService DeviceViewService
+@inject ISessionService SessionService
+@inject Services.IHubEmployeeCardCatalog EmployeeCardCatalog
+@inject ILogger<TheNhanVien> Logger
 @inject IJSRuntime JsRuntime
 @inject IToastService ToastService
 <link rel="stylesheet" href="styles/grid.css"/>
 <PageTitle>Thẻ Nhân Viên</PageTitle>
-<!-- Navbar -->
-@* <TopLayout /> *@
-<!-- / Navbar -->
-<!-- Content wrapper -->
-@* <div class="content-wrapper"> *@
-@*     <!-- Content --> *@
 
-@*     <div class="container-xxl flex-grow-1 container-p-y"> *@
 <h3>Thẻ Nhân Viên</h3>
+<div class="mb-3"><a class="btn btn-outline-primary" href="NhanVien">Thêm / Sửa / Xóa nhân viên</a></div>
 <SfGrid DataSource="MainService.VmThe.Items" Height="500" @ref="Grid" AllowExcelExport="true" AllowSorting="true" AllowMultiSorting="true" TValue="TheTu" AllowFiltering="true" AllowPaging="true" AllowSelection="true">
     <GridPageSettings PageCount="10" PageSize="10" PageSizes="@(new[] { "5", "10", "15", "20", "100", "200", "500" })"></GridPageSettings>
     <GridTemplates>
@@ -115,12 +112,11 @@
 
                     </DropDownListTemplates>
 
-
                 </SfDropDownList>
             }
             <div class="grid-container">
                 <div class="grid-item">
-                    <SfDropDownList EnableVirtualization="true" TValue="string" Placeholder="Máy Cân" FloatLabelType="FloatLabelType.Auto" AllowFiltering="true" CssClass="e-multi-column" TItem="MayCan" DataSource="@filteredItems" @bind-Value="DeviceViewService.DeviceSelectedId">
+                    <SfDropDownList Enabled="@(_enrollmentDevice == null && !_enrollmentBusy)" EnableVirtualization="true" TValue="string" Placeholder="Máy Cân" FloatLabelType="FloatLabelType.Auto" AllowFiltering="true" CssClass="e-multi-column" TItem="MayCan" DataSource="@filteredItems" @bind-Value="DeviceViewService.DeviceSelectedId">
                         <DropDownListFieldSettings Value="Id" Text="SubTitle"></DropDownListFieldSettings>
                         <DropDownListTemplates TItem="MayCan">
 
@@ -151,10 +147,10 @@
                     </SfDropDownList>
                 </div>
                 <div class="grid-item">
-                    <SfButton style="margin: 2px; width: 100%;" Disabled="@(DeviceViewService.DeviceCard == null ? false : DeviceViewService.DeviceCard.IsNapThe)" @onclick="() => MayCanStartStop(DeviceViewService.DeviceSelectedId)" CssClass="e-primary">Bắt Đầu</SfButton>
+                    <SfButton style="margin: 2px; width: 100%;" Disabled="@(_enrollmentBusy || _enrollmentDevice != null)" @onclick="() => MayCanStartStop(DeviceViewService.DeviceSelectedId)" CssClass="e-primary">Bắt Đầu</SfButton>
                 </div>
                 <div class="grid-item">
-                    <SfButton style="margin: 2px; width: 100%;" Disabled="@(DeviceViewService.DeviceCard == null ? true : !DeviceViewService.DeviceCard.IsNapThe)" @onclick="() => MayCanStartStop(DeviceViewService.DeviceSelectedId)" CssClass="e-primary">Dừng</SfButton>
+                    <SfButton style="margin: 2px; width: 100%;" Disabled="@(_enrollmentBusy || _enrollmentDevice == null)" @onclick="() => MayCanStartStop(DeviceViewService.DeviceSelectedId)" CssClass="e-primary">Dừng</SfButton>
                 </div>
             </div>
             <SfTextBox Placeholder="Thẻ Id" Value="@TheId" ValueChange="@ValueChangeHandler"></SfTextBox>
@@ -177,9 +173,7 @@
 
         </Content>
     </DialogTemplates>
-    @* <DialogButtons>
-            <DialogButton Content="Close" IsPrimary="true" OnClick="@CloseDialogAdd"/>
-            </DialogButtons> *@
+
 </SfDialog>
 <SfDialog Width="500px" ShowCloseIcon="true" IsModal="true" CloseOnEscape="true" @bind-Visible="@IsVisibleEdit">
     <DialogEvents OnOverlayModalClick="@OverlayClick"></DialogEvents>
@@ -223,9 +217,7 @@
 
                 </DropDownListTemplates>
 
-
             </SfDropDownList>
-
 
         </Content>
     </DialogTemplates>
@@ -234,379 +226,3 @@
         <DialogButton Content="Close" IsPrimary="true" OnClick="@CloseDialogAdd"/>
     </DialogButtons>
 </SfDialog>
-
-@*     </div> *@
-
-@*     <!-- / Content --> *@
-@*     <!-- Footer --> *@
-@*     <FooterLayout /> *@
-@*     <!-- / Footer --> *@
-@*     <div class="content-backdrop fade"></div> *@
-@* </div> *@
-<!-- Content wrapper -->
-
-
-@code {
-    private SfGrid<TheTu> Grid;
-    private bool IsVisibleAdd;
-    private bool IsVisibleEdit;
-    private bool isXoa;
-    SfDropDownList<string, NhanVienDaiThanh> DropNhanVien;
-    private readonly Query LocalDataQuery = new Query().Take(10);
-    private string TheId = "";
-    private string ThongBao = "";
-    private IEnumerable<MayCan> filteredItems => MayCansService.Items.Values.Where(x => x.AType != AppType._type5);
-    private async void Edit()
-    {
-        var edit = async () =>
-        {
-            var values = await Grid.GetSelectedRecordsAsync();
-            if (values != null && values.Count >= 1)
-            {
-                if (cardService.ItemNhanVien.MaNhanVien != null && cardService.ItemNhanVien.MaNhanVien.Trim() != "")
-                {
-                    var nv = MainService.VmNhanVien.Items.FirstOrDefault(x => x.MaNhanVien == cardService.ItemNhanVien.MaNhanVien);
-                    if (nv != null)
-                    {
-                        foreach (var val in values)
-                        {
-                            val.MaNhanVien = nv.MaNhanVien;
-                            val.MaSo = nv.MaHoSo;
-                            val.NhanVienName = nv.Name;
-                            val.NgayGio = DateTime.Now;
-                            val.PCName = MainService.VmApp.PCName;
-                        }
-
-                        try
-                        {
-                            if (MainService.VmThe.Update(values) > 0)
-                            {
-                                foreach (var val in values)
-                                {
-                                    var item = MainService.VmThe.Items.FirstOrDefault(x => x.MaTheTu == val.MaTheTu);
-                                    if (item != null)
-                                    {
-                                        var index = MainService.VmThe.Items.IndexOf(item);
-                                        MainService.VmThe.Items.RemoveAt(index);
-                                        MainService.VmThe.Items.Insert(index, val);
-                                    }
-                                }
-
-                                IsVisibleEdit = false;
-                                await Grid.Refresh();
-                            }
-                            else
-                            {
-                                // await JsRuntime.InvokeVoidAsync("alert", "Không Thể Cập Nhật!"); Alert
-                                ToastService.ShowToast("Không Thể Cập Nhật!", ToastType.Warning);
-                            }
-                        }
-                        catch (Exception e)
-                        {
-                            Console.WriteLine(e);
-                            // await JsRuntime.InvokeVoidAsync("alert", e.ToString()); Alert
-                            ToastService.ShowToast(e.ToString(), ToastType.Error);
-                        }
-                    }
-                    else
-                    {
-                        // await JsRuntime.InvokeVoidAsync("alert", "Nhân Viên Không Tồn Tại!"); Alert
-                        ToastService.ShowToast("Nhân Viên Không Tồn Tại!", ToastType.Warning);
-                    }
-                }
-                else
-                {
-                    // await JsRuntime.InvokeVoidAsync("alert", "Chưa chọn nhân viên!"); Alert
-                    ToastService.ShowToast("Chưa chọn nhân viên!", ToastType.Warning);
-                }
-            }
-            else
-            {
-                // await JsRuntime.InvokeVoidAsync("alert", "Không có dữ liệu được chọn!"); Alert
-                ToastService.ShowToast("Không có dữ liệu được chọn!", ToastType.Warning);
-            }
-        };
-        var result = await ErrorHandler.HandleAsync(edit);
-        await Grid.ClearSelectionAsync();
-        if (!result.IsSuccess)
-        {
-            var e = result.Error;
-            Console.WriteLine(e);
-            // await JsRuntime.InvokeVoidAsync("alert", e?.ToString()); Alert
-            ToastService.ShowToast(e?.ToString(), ToastType.Error);
-        }
-    }
-
-    private void MayCanChangedHandler(object? sender, EventArgs args)
-    {
-        if (DeviceViewService.DeviceCard != null)
-        {
-            TheId = DeviceViewService.DeviceCard.NapTheId;
-            InvokeAsync(StateHasChanged);
-        }
-    }
-
-    private async void CloseDialogAdd()
-    {
-        IsVisibleAdd = false;
-        IsVisibleEdit = false;
-    }
-
-    private async void MayCanStartStop(string id)
-    {
-        if (cardService.ItemNhanVien.MaNhanVien == null && isXoa == false)
-        {
-            // await JsRuntime.InvokeVoidAsync("alert", "Chưa chọn nhân viên!"); Alert
-            ToastService.ShowToast("Chưa chọn nhân viên!", ToastType.Warning);
-            return;
-        }
-
-        DeviceViewService.DeviceCard = MayCansService.Find(id);//MayCansService.Items.FirstOrDefault(x => x.Id == id);
-        DeviceViewService.DeviceSelectedId = id;
-
-        if (DeviceViewService.DeviceCard != null)
-        {
-            DeviceViewService.DeviceCard.IsNapThe = !DeviceViewService.DeviceCard.IsNapThe;
-            if (DeviceViewService.DeviceCard.IsNapThe)
-            {
-                // MayCansService.ItemChanged -= MayCanChangedHandler;
-                // MayCansService.ItemChanged += MayCanChangedHandler;
-                await MayCansService.CommandSendMess(DeviceViewService.DeviceCard.Id, "Nạp Thẻ");
-            }
-            else
-            {
-                // MayCansService.ItemChanged -= MayCanChangedHandler;
-                await MayCansService.CommandSendMess(DeviceViewService.DeviceCard.Id, "");
-            }
-
-
-            MayCansService.NotifyItemChanged(DeviceViewService.DeviceCard);
-        }
-    }
-
-    private void ValueChangeHandler(ChangedEventArgs args)
-    {
-        if (args.Value.Length >= 10)
-        {
-            ThongBao = "";
-            //JsRuntime.InvokeVoidAsync("alert", args.Value); // Alert
-            var nv = MainService.VmNhanVien.Items.FirstOrDefault(x => x.MaNhanVien == cardService.ItemNhanVien.MaNhanVien);
-            var the = new TheTu
-            {
-                MaTheTu = args.Value,
-                NgayGio = DateTime.Now,
-                PCName = MainService.VmApp.PCName,
-                MaNhanVien = cardService.ItemNhanVien.MaNhanVien,
-                MaSo = nv?.MaHoSo,
-                NhanVienName = nv?.Name
-            };
-            var mes = cardService.Find(args.Value);
-            if (mes == "")
-            {
-                if (isXoa == false)
-                {
-                    if (MainService.VmThe.Insert(the) > 0)
-                    {
-                        cardService.ItemsByNhanVien.Insert(0, the);
-                        MainService.VmThe.Items.Add(the);
-                        ThongBao = $"Đã Thêm Thẻ! {the.MaTheTu}";
-                    }
-                    else
-                    {
-                        ThongBao = $"Không Thể Thêm Thẻ! {the.MaTheTu}";
-                    }
-                }
-                else
-                {
-                    ThongBao = $"Không Tìm Thấy Thẻ! {the.MaTheTu}";
-                }
-            }
-            else
-            {
-                if (isXoa == false)
-                {
-                    ThongBao = mes;
-                }
-                else
-                {
-                    if (MainService.VmThe.Delete(the) > 0)
-                    {
-                        
-                        cardService.ItemsByNhanVien.Insert(0, the);
-                        var item = MainService.VmThe.Items.FirstOrDefault(x => x.MaTheTu == the.MaTheTu);
-                        if (item != null)
-                        {
-                            MainService.VmThe.Items.Remove(item);
-                        }
-
-                        ThongBao = $"Đã Xóa Thẻ! {the.MaTheTu}";
-                    }
-                    else
-                    {
-                        ThongBao = $"Không Thể Xóa Thẻ! {the.MaTheTu}";
-                    }
-                }
-            }
-
-            TheId = "";
-        }
-        //JsRuntime.InvokeVoidAsync("alert", args.Value); // Alert
-        //TheId = "ádasd";
-    }
-
-    private async Task ToolbarClickHandler(ClickEventArgs args)
-    {
-        if (args.Item.Id == "refresh")
-        {
-            MainService.VmThe.Reload();
-            await Grid.Refresh();
-            // await JsRuntime.InvokeVoidAsync("alert", "Thực hiện xong!"); Alert
-            ToastService.ShowToast("Thực hiện xong!", ToastType.Success);
-        }
-
-        if (args.Item.Id == "add")
-        {
-            ThongBao = "";
-            isXoa = false;
-            cardService.ItemNhanVien = new TheTu();
-            if (DeviceViewService.DeviceCard != null && DeviceViewService.DeviceSelectedId != "")
-            {
-                //var mayCan = MayCansService.Items.FirstOrDefault(x => x.Id == DeviceViewService.DeviceCard.Id);
-                var mayCan = MayCansService.Find(DeviceViewService.DeviceCard.Id);
-                DeviceViewService.DeviceCard.IsNapThe = mayCan.IsNapThe;
-            }
-
-            IsVisibleAdd = true;
-        }
-
-        if (args.Item.Id == "edit")
-        {
-            cardService.ItemNhanVien = new TheTu();
-            var value = await Grid.GetSelectedRecordsAsync();
-            if (value != null && value.Count >= 1)
-            {
-                IsVisibleEdit = true;
-            }
-            else
-            {
-                // await JsRuntime.InvokeVoidAsync("alert", "Không có dữ liệu được chọn!"); Alert
-                ToastService.ShowToast("Không có dữ liệu được chọn!", ToastType.Warning);
-            }
-        }
-
-        if (args.Item.Id == "delete")
-        {
-            var value = await Grid.GetSelectedRecordsAsync();
-            if (value != null && value.Count >= 1)
-            {
-                var result = await JsRuntime.InvokeAsync<bool>("confirm", $"Xóa {value.Count} thẻ");
-                if (result)
-                {
-                    if (MainService.VmThe.Delete(value) > 0)
-                    {
-                        foreach (var val in value)
-                        {
-                            var item = MainService.VmThe.Items.FirstOrDefault(x => x.MaTheTu == val.MaTheTu);
-                            if (item != null)
-                            {
-                                var index = MainService.VmThe.Items.IndexOf(item);
-                                MainService.VmThe.Items.RemoveAt(index);
-                            }
-                        }
-                        // Xóa số lượng select record
-                        await Grid.ClearSelectionAsync();
-                        
-                    }
-                    else
-                    {
-                        ThongBao = "Không Thể Xóa Thẻ!";
-                    }
-                }
-            }
-            else
-            {
-                ThongBao = "";
-                isXoa = true;
-                cardService.ItemNhanVien = new TheTu();
-                if (DeviceViewService.DeviceCard != null && DeviceViewService.DeviceSelectedId != "")
-                {
-                    //var mayCan = MayCansService.Items.FirstOrDefault(x => x.Id == DeviceViewService.DeviceCard.Id);
-                    var mayCan = MayCansService.Find(DeviceViewService.DeviceCard.Id);
-                    DeviceViewService.DeviceCard.IsNapThe = mayCan.IsNapThe;
-                }
-
-                cardService.ItemsByNhanVien.Clear();
-                IsVisibleAdd = true;
-                //await JsRuntime.InvokeVoidAsync("alert", "Không có dữ liệu được chọn!"); // Alert
-            }
-        }
-
-        if (args.Item.Id == "ExcelExport") //Id is combination of Grid's ID and itemname
-        {
-            var ExportProperties = new ExcelExportProperties();
-            ExportProperties.ExportType = ExportType.AllPages;
-            ExportProperties.IncludeTemplateColumn = true;
-            await Grid.ExportToExcelAsync(ExportProperties);
-        }
-    }
-
-    private void OverlayClick(OverlayModalClickEventArgs args)
-    {
-        IsVisibleAdd = false;
-        IsVisibleEdit = false;
-        // MayCansService.ItemChanged -= MayCanChangedHandler;
-
-        if (DeviceViewService.DeviceCard != null)
-        {
-            DeviceViewService.DeviceCard.IsNapThe = false;
-            MayCansService.NotifyItemChanged(DeviceViewService.DeviceCard);
-        }
-    }
-
-    private async Task OnFiltering_NhanVien(FilteringEventArgs args)
-
-    {
-        args.PreventDefaultAction = true;
-
-        var pre = new WhereFilter();
-
-        var predicate = new List<WhereFilter>();
-
-        predicate.Add(new WhereFilter { Condition = "or", Field = "Name", value = args.Text, Operator = "startswith", IgnoreAccent = true, IgnoreCase = true });
-        predicate.Add(new WhereFilter { Condition = "or", Field = "MaHoSo", value = args.Text, Operator = "startswith", IgnoreAccent = true, IgnoreCase = true });
-        predicate.Add(new WhereFilter { Condition = "or", Field = "MaNhanVien", value = args.Text, Operator = "startswith", IgnoreAccent = true, IgnoreCase = true });
-        pre = WhereFilter.Or(predicate);
-
-        var query = new Query().Where(pre);
-
-        await DropNhanVien.FilterAsync(MainService.VmNhanVien.Items, query);
-    }
-
-    public async void ChangeNhanVien(ChangeEventArgs<string, NhanVienDaiThanh> args)
-    {
-        var result = ErrorHandler.Handle(() => { cardService.LoadByNhanVien(args.Value); });
-        if (!result.IsSuccess)
-        {
-            var e = result.Error;
-            Console.WriteLine(e);
-            // await JsRuntime.InvokeVoidAsync("alert", e?.ToString()); Alert
-            ToastService.ShowToast(e?.ToString(), ToastType.Error);
-        }
-
-        ;
-    }
-
-    private void Closed(CloseEventArgs obj)
-    {
-        IsVisibleAdd = false;
-        IsVisibleEdit = false;
-        // MayCansService.ItemChanged -= MayCanChangedHandler;
-
-        if (DeviceViewService.DeviceCard != null)
-        {
-            DeviceViewService.DeviceCard.IsNapThe = false;
-            MayCansService.NotifyItemChanged(DeviceViewService.DeviceCard);
-        }
-    }
-
-}

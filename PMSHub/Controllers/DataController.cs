@@ -3,6 +3,7 @@ using Handlers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Models.Repos;
+using Models.Repos.Models;
 using Newtonsoft.Json.Linq;
 using PMSHub.Components;
 using Services;
@@ -27,7 +28,7 @@ public class DataController(IMayCansService mayCansService, IMainService mainSer
     [HttpPost]
     public IActionResult Post([FromBody] object data)
     {
-        var errorCode = "";
+        IActionResult? hqResponse = null;
         string? hqWeightError = null;
         var result = ErrorHandler.Handle(() =>
         {
@@ -37,6 +38,20 @@ public class DataController(IMayCansService mayCansService, IMainService mainSer
             //"\"TheId\":\"%s\",\"TheChucNang\":\"%s\",\"Ngay\":\"%s\",\"MaLoaiNguyenLieu\":\"%s\"}"
             var jsonString = data.ToString() ?? "";
             var jObject = JObject.Parse(jsonString);
+
+            // HQ HTTP backup is historical, not live LITE. Route before legacy field conversions.
+            var backupMachineId = (string?)jObject["MayCan"];
+            var backupMachine = mayCansService.Find(backupMachineId ?? "");
+            if (backupMachine == null)
+            {
+                hqWeightError = "Máy gửi phiếu chưa được đăng ký trên Hub.";
+                throw new ArgumentException(hqWeightError);
+            }
+            if (backupMachine.WKv == AppKV.Hq)
+            {
+                hqResponse = SaveHqHttp(jObject, backupMachine, false);
+                return;
+            }
 
             //var item = jObject["data"]?[0];
 
@@ -81,7 +96,7 @@ public class DataController(IMayCansService mayCansService, IMainService mainSer
             var maChatLuong = (string)(jObject["MaChatLuong"] ?? "")!;
             var maChieuXa = (string)(jObject["MaChieuXa"] ?? "")!;
             
-            var mayCan = mayCansService.Find(maycan ?? "");
+            var mayCan = backupMachine;
             
             if (mayCan != null)
             {
@@ -89,36 +104,6 @@ public class DataController(IMayCansService mayCansService, IMainService mainSer
 
                 switch (mayCan.WKv)
                 {
-                    case AppKV.Hq:
-                    {
-                        hqWeightError = GetHqWeightError(jObject, trongLuongNhan);
-                        if (hqWeightError != null) throw new ArgumentException(hqWeightError);
-                        using var db = new dbPMScontext();
-                        using var transaction = db.Database.BeginTransaction();
-                        ScaleAttendanceTransferService.LockCard(db, theId);
-                        var phieuCan = mainService.VmPhieuCanHq.Get<object>(id);
-                        if (phieuCan == null)
-                        {
-                            var _ngayGio = DateTime.ParseExact(ngayGio, "yyyyMMddHHmmss", CultureInfo.InvariantCulture);
-                            var item = mainService.VmPhieuCanHq.CreateNew(id, stt, maLo, maLoaiNguyenLieu, maSize,
-                                maThanhPham,
-                                maNhanVien, trongLuongNhan, trongLuongTra, trongLuongTare, theId, theChucNang, _ngayGio,
-                                maycan ?? "", mayCan?.MaXuong ?? "");
-
-                            if (HqWeightDuplicatePolicy.HasDuplicate(db, item))
-                                throw new ArgumentException(HqWeightDuplicatePolicy.ErrorMessage);
-                            var rl = mainService.VmPhieuCanHq.Insert(item);
-                            if (rl == 0) throw new Exception("Insert failed");
-                            transaction.Commit();
-                            if (mayCan != null) mayCansService.AddItem(mayCan, item);
-                        }
-                        else
-                        {
-                            errorCode = "EXITS";
-                        }
-
-                        break;
-                    }
                     case AppKV.NguyenLieu:
                     {
                         var phieuCan = mainService.VmPhieuCanNguyenLieu.Get<object>(id);
@@ -368,8 +353,10 @@ public class DataController(IMayCansService mayCansService, IMainService mainSer
 
             mayCansService.NotifyItemChanged(mayCan);
         });
+        if (hqResponse != null) return hqResponse;
         if (!result.IsSuccess)
         {
+            Console.WriteLine($"[HTTP TICKET ERROR] {result.Error}");
             //switch (errorCode)
             //{
             //    case "EXITS":
@@ -388,76 +375,65 @@ public class DataController(IMayCansService mayCansService, IMainService mainSer
     [HttpPost]
     public IActionResult PostSilent([FromBody] object yourData)
     {
-        string? hqWeightError = null;
-        var result = ErrorHandler.Handle(() =>
+        try
         {
-            //"{\"Id\":\"%s\",\"STT\":%d,\"NgayGio\":\"%s\",\"MayCan\":\"%s\",\"MaLo\":\"%s\","
-            //"\"MaSize\":\"%s\",\"MaThanhPham\":\"%s\",\"MaNhanVien\":\"%s\","
-            //"\"TrongLuongNhan\":\"%s\",\"TrongLuongTra\":\"%s\",\"TrongLuongTare\":\"%s\","
-            //"\"TheId\":\"%s\",\"TheChucNang\":\"%s\",\"Ngay\":\"%s\",\"MaLoaiNguyenLieu\":\"%s\"}"
-            var jsonString = yourData.ToString() ?? "";
-            var jObject = JObject.Parse(jsonString);
-            var id = (string)(jObject["Id"] ?? "")!;
-            var stt = (int)(jObject["STT"] ?? 0);
-            var ngayGio = (string)(jObject["NgayGio"] ?? "")!;
-            var maycan = (string)(jObject["MayCan"] ?? "")!;
-            var maLo = (string)(jObject["MaLo"] ?? "")!;
-            var maSize = (string)(jObject["MaSize"] ?? "")!;
-            var maThanhPham = (string)(jObject["MaThanhPham"] ?? "")!;
-            var maNhanVien = (string)(jObject["MaNhanVien"] ?? "")!;
-            var trongLuongNhan = (decimal)(jObject["TrongLuongNhan"] ?? 0);
-            var trongLuongTra = (decimal)(jObject["TrongLuongTra"] ?? 0);
-            var trongLuongTare = (decimal)(jObject["TrongLuongTare"] ?? 0);
-            var theId = (string)(jObject["TheId"] ?? "")!;
-            var theChucNang = (string)(jObject["TheChucNang"] ?? "")!;
-            var ngay = (string)(jObject["Ngay"] ?? "")!;
-            var maLoaiNguyenLieu = (string)(jObject["MaLoaiNguyenLieu"] ?? "")!;
-            //var mayCanId = (string)jObject["MayCan"];
-            //var trongLuong = (decimal)jObject["TrongLuongNhan"];
-            //var theId = (string)jObject["TheId"];
-            //var ngayGio = (string)jObject["NgayGio"];
-            var mayCan = mayCansService.Find(maycan ?? "");
-            // PostSilent ghi phiếu HQ; thiếu trạng thái không được coi là đã cân bằng.
-            hqWeightError = GetHqWeightError(jObject, trongLuongNhan);
-            if (hqWeightError != null) throw new ArgumentException(hqWeightError);
-            using var db = new dbPMScontext();
-            using var transaction = db.Database.BeginTransaction();
-            ScaleAttendanceTransferService.LockCard(db, theId);
-            var phieuCan = mainService.VmPhieuCanHq.Get<object>(id);
-            if (phieuCan == null)
-            {
-                var _ngayGio = DateTime.ParseExact(ngayGio, "yyyyMMddHHmmss", CultureInfo.InvariantCulture);
-                var item = mainService.VmPhieuCanHq.CreateNew(id, stt, maLo, maLoaiNguyenLieu, maSize, maThanhPham,
-                    maNhanVien, trongLuongNhan, trongLuongTra, trongLuongTare, theId, theChucNang, _ngayGio,
-                    maycan ?? "", mayCan?.MaXuong ?? "");
-
-                if (HqWeightDuplicatePolicy.HasDuplicate(db, item))
-                    throw new ArgumentException(HqWeightDuplicatePolicy.ErrorMessage);
-                var rl = mainService.VmPhieuCanHq.Insert(item);
-                if (rl == 0) throw new Exception("Insert failed");
-            }
-            transaction.Commit();
-
-            if (mayCan != null)
-            {
-                mayCan.TrongLuong = trongLuongNhan;
-                mayCan.IsStated = true;
-                mayCan.TheView = theId;
-                mayCan.ThongBao = "Đã Hoàn Thành - " + ngayGio;
-            }
-
-            mayCansService.NotifyItemChanged(mayCan);
-        });
-        if (!result.IsSuccess)
-            return BadRequest(new { Status = hqWeightError ?? $"Error: {DateTime.Now.ToString("yyyyMMddHHmmss")}" });
-        // Process the received data
-        return Ok(new { Status = $"Data received {DateTime.Now.ToString("yyyyMMddHHmmss")}" });
+            var json = JObject.Parse(yourData?.ToString() ?? "");
+            if (json["MayCan"]?.Type != JTokenType.String || string.IsNullOrWhiteSpace((string?)json["MayCan"]))
+                return BadRequest(new { Status = "Thiếu hoặc sai mã máy backup." });
+            var machine = mayCansService.Find((string?)json["MayCan"] ?? "");
+            if (machine?.WKv != AppKV.Hq)
+                return BadRequest(new { Status = "Máy backup không phải máy HQ đã đăng ký." });
+            return SaveHqHttp(json, machine, true);
+        }
+        catch (Newtonsoft.Json.JsonException)
+        {
+            return BadRequest(new { Status = "JSON phiếu backup không hợp lệ." });
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[HQ HTTP BACKUP ROUTE ERROR] {ex}");
+            return StatusCode(503, new { Status = "Chưa xác nhận lưu backup. Kiểm tra log Hub." });
+        }
     }
 
-    private static string? GetHqWeightError(JObject data, decimal weight)
+    // Overridable only for isolated database tests; production still uses normal server configuration.
+    protected virtual dbPMScontext CreateHqBackupDb() => new();
+
+    private IActionResult SaveHqHttp(JObject json, MayCan machine, bool silent)
     {
-        if ((string?)data["Stated"] != "ST" || weight <= 0)
-            return "CÂN CHƯA CÂN BẰNG. CHỜ CÂN BẰNG RỒI QUẸT LẠI THẺ";
-        return null;
+        string? ticketId = null;
+        IActionResult Error(int status, string message, string saveStatus) =>
+            StatusCode(status, silent ? (object)new { Status = message, SaveStatus = saveStatus }
+                                     : new { message, SaveStatus = saveStatus });
+        try
+        {
+            var requested = HqHttpBackupWriter.Parse(json, machine.Id);
+            ticketId = requested.Id;
+            HqHttpBackupWriter.Result saved;
+            using (var db = CreateHqBackupDb()) saved = HqHttpBackupWriter.Save(db, requested);
+            // UI failure after COMMIT must not turn a stored ticket into HTTP 400.
+            try
+            {
+                if (saved.Inserted && !silent) mayCansService.AddItem(machine, saved.Item);
+                machine.TrongLuong = saved.Item.TrongLuong;
+                machine.TheView = saved.Item.TheIdNhanVien;
+                machine.ThongBao = "Đã Hoàn Thành - " + saved.Item.NgayGio.ToString("yyyyMMddHHmmss");
+                mayCansService.NotifyItemChanged(machine);
+            }
+            catch (Exception ex) { Console.WriteLine($"[HQ HTTP BACKUP UI ERROR] Id={saved.Item.Id}; {ex}"); }
+            return Ok(silent
+                ? (object)new { Status = $"Data received {DateTime.Now:yyyyMMddHHmmss}", Id = saved.Item.Id, duplicated = !saved.Inserted }
+                : new { message = $"Data received: {DateTime.Now:yyyyMMddHHmmss}", Id = saved.Item.Id, duplicated = !saved.Inserted });
+        }
+        catch (ArgumentException ex)
+        {
+            Console.WriteLine($"[HQ HTTP BACKUP REJECTED] Machine={machine.Id}; Id={ticketId}; {ex.Message}");
+            return Error(400, ex.Message, HqOnlineResponse.NotSaved);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[HQ HTTP BACKUP ERROR] Machine={machine.Id}; Id={ticketId}; {ex}");
+            return Error(503, "Chưa xác nhận lưu backup. Kiểm tra log Hub.", HqOnlineResponse.Unknown);
+        }
     }
 }

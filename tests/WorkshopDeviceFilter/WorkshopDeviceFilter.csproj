@@ -8,9 +8,12 @@
   </PropertyGroup>
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <Reference Include="ClosedXML"><HintPath>../../PMSHub/bin/$(HubBuildConfiguration)/net8.0/ClosedXML.dll</HintPath></Reference>
     <Reference Include="Services"><HintPath>../../PMSHub/bin/$(HubBuildConfiguration)/net8.0/Services.dll</HintPath></Reference>
     <Reference Include="EAD"><HintPath>../../PMSHub/bin/$(HubBuildConfiguration)/net8.0/EAD.dll</HintPath></Reference>
     <Reference Include="PMSHub"><HintPath>../../PMSHub/bin/$(HubBuildConfiguration)/net8.0/PMSHub.dll</HintPath></Reference>
+    <Reference Include="Syncfusion.Blazor.Grids"><HintPath>../../PMSHub/bin/$(HubBuildConfiguration)/net8.0/Syncfusion.Blazor.Grids.dll</HintPath></Reference>
+    <Reference Include="Syncfusion.Blazor.Core"><HintPath>../../PMSHub/bin/$(HubBuildConfiguration)/net8.0/Syncfusion.Blazor.Core.dll</HintPath></Reference>
     <Reference Include="Vars"><HintPath>../../PMSHub/bin/$(HubBuildConfiguration)/net8.0/Vars.dll</HintPath></Reference>
     <Reference Include="ViewModels"><HintPath>../../PMSHub/bin/$(HubBuildConfiguration)/net8.0/ViewModels.dll</HintPath></Reference>
     <Reference Include="Models"><HintPath>../../PMSHub/bin/$(HubBuildConfiguration)/net8.0/Models.dll</HintPath></Reference>

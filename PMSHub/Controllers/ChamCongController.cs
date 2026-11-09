@@ -21,11 +21,13 @@ namespace PMSHub.Controllers;
 public sealed class ChamCongController(
     IMayCansService mayCansService,
     ILogger<ChamCongController> logger,
-    IOptions<ScaleAttendanceOptions> attendanceOptions) : ControllerBase
+    IOptions<ScaleAttendanceOptions> attendanceOptions, IAttendanceMode? attendanceMode = null) : ControllerBase
 {
     [HttpPost("post")]
     public IActionResult Post([FromBody] ChamCongPostRequest request)
     {
+        if (attendanceMode?.Current.Enabled == false)
+            return Conflict(new { message = AttendanceModeMessages.Disabled, code = AttendanceModeMessages.DisabledCode });
         var ipNguon = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "không xác định";
         var rawPayload = HttpContext.Items[ChamCongRawBodyMiddleware.RawPayloadItemKey]?.ToString()
             ?? "<không đọc được request body>";

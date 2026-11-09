@@ -23,4 +23,12 @@ public class ScaleAttendanceScan
 
     [StringLength(50), Unicode(false)]
     public string? MaThanhPham { get; set; }
+
+    // Snapshot online tại giờ Vào, không lấy lại cấu hình hiện tại của máy.
+    // NULL trên dữ liệu cũ/offline: giữ nguyên để đối chiếu, không tự suy đoán.
+    [StringLength(50), Unicode(false)]
+    public string? MaLoaiNguyenLieu { get; set; }
+
+    [StringLength(50), Unicode(false)]
+    public string? MaXuong { get; set; }
 }

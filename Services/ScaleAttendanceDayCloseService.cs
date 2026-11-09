@@ -9,7 +9,7 @@ namespace Services;
 /// <summary>Ghi nhận lượt Vào thiếu Ra sau khi ngày kết thúc, không tạo giờ Ra giả.</summary>
 public sealed class ScaleAttendanceDayCloseService(
     ILogger<ScaleAttendanceDayCloseService> logger,
-    IOptions<ScaleAttendanceOptions> options) : BackgroundService
+    IOptions<ScaleAttendanceOptions> options, IAttendanceMode? attendanceMode = null) : BackgroundService
 {
     // Dùng UTC+7 rõ ràng, không phụ thuộc múi giờ cài trên Windows/server.
     internal static DateTime BusinessDate(DateTimeOffset utc) =>
@@ -55,6 +55,12 @@ public sealed class ScaleAttendanceDayCloseService(
     {
         while (!stoppingToken.IsCancellationRequested)
         {
+            if (attendanceMode?.Current.Enabled == false)
+            {
+                try { await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken); }
+                catch (OperationCanceledException) { return; }
+                continue;
+            }
             var now = DateTimeOffset.UtcNow.ToOffset(TimeSpan.FromHours(7)).DateTime;
             try
             {

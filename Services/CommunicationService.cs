@@ -1,13 +1,16 @@
 ﻿using System.Text;
 using Newtonsoft.Json;
 using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Logging;
+using Newtonsoft.Json.Linq;
 using Vars.Hubs;
 using ViewModels.Repos.Hubs.IServices;
 
 namespace Services;
 
 public class CommunicationService(IUserService userService, ICommitService commitService,
-    IOptions<ScaleAttendanceOptions> attendanceOptions, IMayCansService? mayCansService = null) : ICommunicationService
+    IOptions<ScaleAttendanceOptions> attendanceOptions, IMayCansService? mayCansService = null,
+    ILogger<CommunicationService>? logger = null, IAttendanceMode? attendanceMode = null) : ICommunicationService
 {
     #region ICommunicationService Members
 
@@ -24,6 +27,7 @@ public class CommunicationService(IUserService userService, ICommitService commi
         var dataTranfer = new DataTranfer();
         var isError = true;
         var error = new DataError();
+        string? liteSaveStatus = null;
         // Attendance and weight backups may contain Vietnamese: accept exact UTF-8 byte length too.
         if (dataJson.Length != len &&
             !(new[] { "CHAMCONG", "PHIEUCANADD", "PHIEUCANADDS" }.Contains(cmd, StringComparer.OrdinalIgnoreCase) &&
@@ -48,8 +52,17 @@ public class CommunicationService(IUserService userService, ICommitService commi
             {
                 case "CHAMCONG":
                 {
-                    var productCode = mayCansService?.Find(client.Id)?.MaThanhPham;
-                    var result = ScaleAttendanceProcessor.Process(client, dataJson, attendanceOptions.Value.MaxShiftHours, productCode);
+                    if (attendanceMode?.Current.Enabled == false)
+                    {
+                        var disabled = ScaleAttendanceProcessor.Failure(AttendanceModeMessages.DisabledCode, AttendanceModeMessages.Disabled);
+                        dataTranfer.DataError = disabled.Json;
+                        break;
+                    }
+                    var selected = mayCansService?.Find(client.Id);
+                    var result = selected?.WKv == Vars.AppKV.Hq
+                        ? await ProcessHqAttendance(client, dataJson, selected)
+                        : ScaleAttendanceProcessor.Process(client, dataJson, attendanceOptions.Value.MaxShiftHours,
+                            selected?.MaThanhPham, selected?.MaLoaiNguyenLieu);
                     isError = !result.Success;
                     if (result.Success) dataTranfer.Data = result.Json;
                     else dataTranfer.DataError = result.Json;
@@ -142,10 +155,19 @@ public class CommunicationService(IUserService userService, ICommitService commi
                             dataTranfer.DataError = val.Item2;
                         }
                     }
+                    catch (JsonException e)
+                    {
+                        HqFirmwareSend.Log($"[LITE JSON ERROR] Machine={client.Id}; {e}");
+                        error.Cmd = cmd;
+                        error.ErrorString = ScaleOnlineMessages.InvalidPayload;
+                        liteSaveStatus = HqOnlineResponse.NotSaved;
+                    }
                     catch (Exception e)
                     {
-                        Console.WriteLine(e);
-                        // throw;
+                        HqFirmwareSend.Log(e.ToString());
+                        error.Cmd = cmd;
+                        error.ErrorString = ScaleOnlineMessages.ProcessingError;
+                        liteSaveStatus = HqOnlineResponse.Unknown;
                     }
 
 
@@ -213,6 +235,23 @@ public class CommunicationService(IUserService userService, ICommitService commi
         // Không để lỗi độ dài/client/active biến thành phản hồi lỗi trống.
         if (isError && dataTranfer.DataError == null && !string.IsNullOrWhiteSpace(error.ErrorString))
             dataTranfer.DataError = JsonConvert.SerializeObject(error);
+        if (isError && string.Equals(cmd, "LITE", StringComparison.OrdinalIgnoreCase) &&
+            (client?.WKv == Vars.AppKV.Hq || (client != null && mayCansService?.Find(client.Id)?.WKv == Vars.AppKV.Hq)))
+        {
+            DataError? detail = null;
+            if (!string.IsNullOrWhiteSpace(dataTranfer.DataError))
+            {
+                try { detail = JsonConvert.DeserializeObject<DataError>(dataTranfer.DataError); }
+                catch (JsonException) { /* Never forward an empty/unstructured HQ error to the scale. */ }
+            }
+            var message = !string.IsNullOrWhiteSpace(detail?.ErrorString) ? detail.ErrorString :
+                !string.IsNullOrWhiteSpace(error.ErrorString) ? error.ErrorString : ScaleOnlineMessages.ProcessingError;
+            var correlated = HqOnlineResponse.Error(cmd, message, HqOnlineResponse.Correlation(dataJson), client?.Id,
+                detail?.SaveStatus ?? liteSaveStatus ??
+                (!string.IsNullOrWhiteSpace(error.ErrorString) ? HqOnlineResponse.NotSaved : HqOnlineResponse.Unknown));
+            correlated.ErrorCode = detail?.ErrorCode ?? 0;
+            dataTranfer.DataError = JsonConvert.SerializeObject(correlated);
+        }
         dataTranfer.IsError = isError;
         var data = JsonConvert.SerializeObject(dataTranfer);
         // var lendata = ASCIIEncoding.Unicode.GetByteCount(data);
@@ -220,4 +259,39 @@ public class CommunicationService(IUserService userService, ICommitService commi
     }
 
     #endregion
+
+    private async Task<(bool Success, string Json)> ProcessHqAttendance(ClientInfo client, string json,
+        Models.Repos.Models.MayCan machine)
+    {
+        ScaleAttendanceProcessor.Request? request;
+        try { request = JsonConvert.DeserializeObject<ScaleAttendanceProcessor.Request>(json); }
+        catch (JsonException) { return ScaleAttendanceProcessor.Failure("INVALID_JSON", "JSON chấm công không hợp lệ."); }
+        if (request == null) return ScaleAttendanceProcessor.Failure("INVALID_JSON", "JSON chấm công không hợp lệ.");
+        var captured = HqScaleSelection.Capture(machine);
+        (bool Success, string Json) result;
+        try
+        {
+            result = await HqOnlineWeightWriter.ForMachine(machine.Id, () =>
+            {
+                // Ra must remain usable while a new work context is pending.
+                var selectionError = HqScaleSelection.CheckAttendance(machine, captured, request.TrangThai);
+                return Task.FromResult(selectionError != null
+                    ? ScaleAttendanceProcessor.Failure("WORK_CONTEXT_PENDING", selectionError, request)
+                    : ScaleAttendanceProcessor.Process(client, json, attendanceOptions.Value.MaxShiftHours,
+                        captured.Product, captured.Material));
+            });
+        }
+        catch (HqOnlineWeightWriter.QueueTimeoutException)
+        { result = ScaleAttendanceProcessor.Failure("BUSY", "Cân bận. Chưa ghi chấm công", request); }
+        var code = JObject.Parse(result.Json).Value<string>("Code") ?? (result.Success ? "SAVED" : "REJECTED");
+        var card = request.TheId?.Trim() ?? "";
+        try
+        {
+            logger?.LogInformation("[HQ ATTENDANCE RESULT] Machine={Machine} Id={Id} CardTail={CardTail} Direction={Direction} DeviceTime={Time} Product={Product} Material={Material} Revision={Revision} Success={Success} Code={Code}",
+                machine.Id, request.ChamCongId, card.Length > 4 ? card[^4..] : card, request.TrangThai,
+                request.NgayGio, captured.Product, captured.Material, captured.Revision, result.Success, code);
+        }
+        catch { /* Diagnostics must never turn a committed Vao into a failed response. */ }
+        return result;
+    }
 }

@@ -23,7 +23,7 @@ namespace Services
         : ObservableObject, ILoginService
     {
         [ObservableProperty] private ObservableRangeCollection<UserArea> userAreas = new();
-        private string _defaultKey = "PMS";
+        private static readonly string _defaultKey = "PMS";
 
 
         public bool IsUserAuthenticated()
@@ -98,17 +98,24 @@ namespace Services
         // Dùng cùng nhánh này trong kiểm thử cô lập, không cần truy cập SQL.
         internal bool LoginLocalUser(NguoiDung? user, string passWord)
         {
-            // NULL chưa được xác nhận hoạt động: không cho tạo phiên.
-            if (user?.IsActive != true || string.IsNullOrEmpty(passWord)
-                || string.IsNullOrEmpty(user.Password)) return false;
-            var storedPassword = ED.DecryptString(user.Password, _defaultKey);
-            if (string.IsNullOrEmpty(storedPassword) || !storedPassword.Equals(passWord)) return false;
+            if (!VerifyPassword(user, passWord)) return false;
             var session = httpContextAccessor.HttpContext?.Session;
             if (session == null) return false;
             userService.AddUserArea(user.Id);
             session.SetString("Username", user.UserName);
             session.SetString("UserId", user.Id.ToString());
             return IsUserAuthenticated();
+        }
+
+        internal static bool VerifyPassword([System.Diagnostics.CodeAnalysis.NotNullWhen(true)] NguoiDung? user, string password)
+        {
+            if (user?.IsActive != true || string.IsNullOrEmpty(password) || string.IsNullOrEmpty(user.Password)) return false;
+            try
+            {
+                var stored = ED.DecryptString(user.Password, _defaultKey);
+                return !string.IsNullOrEmpty(stored) && string.Equals(stored, password, StringComparison.Ordinal);
+            }
+            catch { return false; }
         }
 
         public async Task Logout()

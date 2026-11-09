@@ -1,0 +1,105 @@
+@using Services
+@using ViewModels.Repos.Hubs.IServices
+@inject IAttendanceMode Mode
+@inject AttendanceModeManager Manager
+@inject ILoginService Login
+@implements IDisposable
+
+<section class="attendance-mode" aria-label="Chế độ chấm công">
+    <div>
+        <strong>Chấm công: @(Mode.Current.Enabled ? "ĐANG BẬT" : "ĐANG TẮT")</strong>
+        <p>@(Mode.Current.Enabled ? "Cân sản lượng phải có ca Vào hợp lệ." : "Cân sản lượng bình thường, không yêu cầu Vào/Ra tại cân hoặc xưởng.")</p>
+        @if (Mode.Current.ChangedAtUtc is { } changed)
+        {
+            <small>Đổi bởi @Mode.Current.ChangedBy — @changed.ToOffset(TimeSpan.FromHours(7)).ToString("dd/MM/yyyy HH:mm:ss")</small>
+        }
+    </div>
+    <button type="button" class="btn @(Mode.Current.Enabled ? "btn-outline-danger" : "btn-success")"
+            @onclick="Open" disabled="@busy">@(Mode.Current.Enabled ? "Tắt chấm công" : "Bật chấm công")</button>
+</section>
+@if (!editing && !string.IsNullOrEmpty(message))
+{
+    <p role="status" class="@(failed ? "text-danger" : "text-success")">@message</p>
+}
+@if (editing)
+{
+    <div class="mode-backdrop">
+        <section class="mode-dialog" role="dialog" aria-modal="true" aria-labelledby="mode-title">
+            <h3 id="mode-title">Xác nhận @(desired ? "bật" : "tắt") chấm công</h3>
+            <p>Áp dụng cho tất cả cân và thiết bị xưởng của Hub này. Lịch sử và ca cũ được giữ nguyên.</p>
+            <p>Nhập lại tài khoản quản trị đang hoạt động để xác nhận.</p>
+            <form @onsubmit="Confirm" @onsubmit:preventDefault>
+                <label>Tài khoản quản trị
+                    <input class="form-control" required maxlength="50" autocomplete="username" @bind="userName" disabled="@busy" />
+                </label>
+                <label>Mật khẩu
+                    <input class="form-control" required type="password" maxlength="1024" autocomplete="current-password"
+                           @bind="password" disabled="@busy" />
+                </label>
+                @if (failed && !string.IsNullOrEmpty(message)) { <p role="alert" class="text-danger">@message</p> }
+                <div class="mode-actions">
+                    <button class="btn btn-secondary" type="button" @onclick="Cancel" disabled="@busy">Hủy</button>
+                    <button class="btn btn-primary" type="submit" disabled="@busy">@(busy ? "Đang xác nhận…" : "Đăng nhập và xác nhận")</button>
+                </div>
+            </form>
+        </section>
+    </div>
+}
+
+@code {
+    private bool editing, busy, desired, failed, disposed;
+    private long expectedRevision;
+    private string userName = "", password = "", message = "";
+
+    protected override void OnInitialized() => Mode.Changed += OnModeChanged;
+
+    private void Open()
+    {
+        if (busy) return;
+        var current = Mode.Current;
+        expectedRevision = current.Revision;
+        desired = !current.Enabled;
+        userName = Login.GetSessionVal("Username") ?? "";
+        password = message = "";
+        failed = false;
+        editing = true;
+    }
+
+    private void Cancel()
+    {
+        if (busy) return;
+        editing = false;
+        password = message = "";
+        failed = false;
+    }
+
+    private async Task Confirm()
+    {
+        if (busy || !editing) return;
+        busy = true;
+        try
+        {
+            var result = await Manager.ChangeAsync(desired, expectedRevision, userName, password);
+            message = result.Message;
+            failed = !result.Success;
+            if (result.Success) editing = false;
+        }
+        finally { password = ""; busy = false; }
+    }
+
+    private void OnModeChanged() => _ = Refresh();
+    private async Task Refresh()
+    {
+        if (disposed) return;
+        try { await InvokeAsync(StateHasChanged); }
+        catch (ObjectDisposedException) { }
+        catch (InvalidOperationException) { /* Renderer may stop before component disposal. */ }
+    }
+
+    public void Dispose()
+    {
+        disposed = true;
+        password = "";
+        Mode.Changed -= OnModeChanged;
+    }
+}

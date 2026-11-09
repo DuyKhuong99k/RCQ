@@ -131,11 +131,11 @@ LEFT JOIN HQ_Size s on p.MaSize = s.Id
 LEFT JOIN HQ_LoaiNguyenLieu lnl on p.MaLoaiNguyenLieu = lnl.Id
 ";
 
-        public TheThanhPham()
+        public TheThanhPham() : this(AppViewModels.Base.Ins.ConnectionString)
         {
-            connectionString = AppViewModels.Base.Ins.ConnectionString;
-
         }
+
+        public TheThanhPham(string connectionString) => this.connectionString = connectionString;
 
         public int Delete<T>(T item)
         {

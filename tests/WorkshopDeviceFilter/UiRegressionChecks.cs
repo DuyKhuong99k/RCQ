@@ -98,7 +98,7 @@ internal static class UiRegressionChecks
             && transferSource.Contains("NguoiXacNhan = actor") && transferSource.Contains("user?.IsAdmin != true"),
             "Server tự ghi giờ và tài khoản quản trị đang đăng nhập, không lấy người xác nhận từ client");
         var move = devices[devices.IndexOf("private async Task CloseDialogDoiKhuVuc()", StringComparison.Ordinal)..];
-        move = move[..move.IndexOf("private async void CloseDialogNhanKyCanLoi", StringComparison.Ordinal)];
+        move = move[..move.IndexOf("private void CloseDialogNhanKyCanLoi", StringComparison.Ordinal)];
         check(move.Contains("var doiKhuVuc = mayCan.WKv != SelectedKhuVuc;") && move.IndexOf("if (doiKhuVuc)",StringComparison.Ordinal)<move.IndexOf("await MayCanService.CommandDoiKhuVuc",StringComparison.Ordinal),
             "Đổi xưởng đơn thuần không gửi HTTP cấu hình khu vực xuống cân");
         check(move.IndexOf("MayCanService.Update(",StringComparison.Ordinal)<move.IndexOf("mayCan.MaXuong =",StringComparison.Ordinal)

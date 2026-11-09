@@ -124,9 +124,8 @@ namespace ViewModels.Repos.HQ
                 }
                 else if (AppViewModel.Instance.LoKv == AppKV.Hq)
                 {
-                    dbPMScontext db = new dbPMScontext();
-                    var items = db.HqLos.Where(x => x.MNgay >= DateTime.Now.AddDays(-30)).Select(x => x.Id).ToList();
-                    return items;
+                    using var db = new dbPMScontext();
+                    return HqLotCatalog.ActiveIds(db.HqLos).ToList();
                 }
                 else
                 {

@@ -58,8 +58,9 @@ public static class ScaleAttendanceProcessor
     }
 
     public static (bool Success, string Json) Process(ClientInfo client, string payload, int maxShiftHours = 16,
-        string? selectedProductCode = null)
+        string? selectedProductCode = null, string? selectedMaterialCode = null, bool attendanceEnabled = true)
     {
+        if (!attendanceEnabled) return Failure(AttendanceModeMessages.DisabledCode, AttendanceModeMessages.Disabled);
         if (maxShiftHours is < 1 or > 24)
             return Failure("INVALID_CONFIGURATION", "Giới hạn ca chấm công phải từ 1 đến 24 giờ.");
         Request? request;
@@ -103,12 +104,13 @@ public static class ScaleAttendanceProcessor
             ScaleAttendanceTransferService.LockCard(db, request.TheId);
             if (registeredDevice?.WKv == Vars.AppKV.Hq)
             {
-                var machines = ScaleAttendanceTransferService.OpenShifts(db, request.TheId)
-                    .Where(x => !ScaleAttendanceTransferService.IsExpired(x, time, maxShiftHours))
+                var machines = ScaleOnlineAttendanceService.OpenShifts(db, request.TheId, time, maxShiftHours)
                     .Select(x => x.MaSoMay).Append(machine);
                 ScaleSharedAttendanceService.LockMachines(db, machines);
-                var shared = ScaleSharedAttendanceService.Process(db, request, machine, name, time,
-                    selectedProductCode, employee, job: jobName, maxShiftHours: maxShiftHours);
+                var selected = ScaleWorkContext.Create(selectedProductCode, selectedMaterialCode,
+                    ScaleWorkshopHistory.Resolve(db, device, time));
+                var shared = ScaleOnlineAttendanceService.Process(db, request, machine, name, time,
+                    selected, employee, job: jobName, maxShiftHours: maxShiftHours);
                 if (shared.Success) transaction.Commit();
                 return shared;
             }
@@ -272,10 +274,13 @@ public static class ScaleAttendanceProcessor
                     x.NgayGio >= start && x.NgayGio <= time && x.ChiSanLuong && x.Status == 1)
                 : ScaleSharedAttendancePolicy.ShiftWeights(db.HqPhieuCans.AsNoTracking(),
                     db.ScaleAttendanceScans.AsNoTracking(), sharedShift, time, db.CheckInOuts.AsNoTracking());
+            var useRecordedWeight = sharedShift != null && ScaleWorkContext.FromSnapshot(
+                ScaleOnlineAttendanceService.Snapshot(db, sharedShift.Id)) != null;
             var products = weights
                 .GroupBy(x => x.MaThanhPham)
                 .Select(g => new { Code = g.Key, FirstTime = g.Min(x => x.NgayGio),
-                    Count = g.Count(), Weight = g.Sum(x => x.TrongLuong - x.TrongLuongTare) })
+                    Count = g.Count(), Weight = g.Sum(x => useRecordedWeight
+                        ? x.TrongLuong : x.TrongLuong - x.TrongLuongTare) })
                 .OrderBy(x => x.FirstTime).ThenBy(x => x.Code).ToList();
             totalBaskets = products.Sum(x => x.Count);
             totalWeight = products.Sum(x => x.Weight);

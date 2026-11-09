@@ -8,6 +8,14 @@ public static class ScaleSharedAttendancePolicy
 {
     public enum CheckInAction { Repeat, Continue, Switch }
 
+    // Online mới: không cần quẹt Vào từng máy. Cùng bộ mã luôn giữ ca gốc.
+    public static CheckInAction SelectContextAction(ScaleWorkContext current, ScaleWorkContext selected) =>
+        current.Matches(selected) ? CheckInAction.Repeat : CheckInAction.Switch;
+
+    public static bool CanUseContext(CheckInOut shift, ScaleAttendanceScan? initial,
+        DateTime time, ScaleWorkContext selected) => time >= shift.ThoiGian &&
+        ScaleWorkContext.FromSnapshot(initial)?.Matches(selected) == true;
+
     public static CheckInAction SelectCheckInAction(CheckInOut shift, int machine,
         string? shiftProduct, string? selectedProduct)
     {
@@ -40,6 +48,37 @@ public static class ScaleSharedAttendancePolicy
     public static IQueryable<HQ_PhieuCan> ShiftWeights(IQueryable<HQ_PhieuCan> weights,
         IQueryable<ScaleAttendanceScan> scans, CheckInOut shift, DateTime end,
         IQueryable<CheckInOut>? events = null)
+    {
+        // Snapshot đủ bộ mã đánh dấu ca online mới. Ca cũ giữ cách đối chiếu cũ.
+        var initialContext = scans.Where(x => x.Id == shift.Id &&
+            x.MaThanhPham != null && x.MaThanhPham != "" &&
+            x.MaLoaiNguyenLieu != null && x.MaLoaiNguyenLieu != "" &&
+            x.MaXuong != null && x.MaXuong != "");
+        var contextWeights = weights.Where(weight => weight.TheIdNhanVien == shift.MaChamCong &&
+            weight.NgayGio >= shift.ThoiGian && weight.NgayGio <= end &&
+            weight.ChiSanLuong && weight.Status == 1 && initialContext.Any(initial =>
+                initial.MaThanhPham == weight.MaThanhPham &&
+                initial.MaLoaiNguyenLieu == weight.MaLoaiNguyenLieu && initial.MaXuong == weight.MaXuong));
+        if (events != null)
+            contextWeights = contextWeights.Where(weight => !events.Any(checkout =>
+                checkout.VaoId == shift.Id && checkout.TrangThai == "Ra" && checkout.ThoiGian <= weight.NgayGio &&
+                events.Any(next => next.MaChamCong == shift.MaChamCong && next.TrangThai == "Vào" &&
+                    next.Id != shift.Id && next.ThoiGian == checkout.ThoiGian &&
+                    scans.Any(initial => initial.Id == next.Id && initial.MaThanhPham == weight.MaThanhPham &&
+                        initial.MaLoaiNguyenLieu == weight.MaLoaiNguyenLieu && initial.MaXuong == weight.MaXuong))));
+        // Giữ liên kết với weight để EF dịch EXISTS tại SQL, không thực thi
+        // Any() trên IQueryable bị capture trong giai đoạn tách tham số.
+        var legacyWeights = LegacyShiftWeights(weights, scans, shift, end, events)
+            .Where(weight => !scans.Any(initial => initial.Id == shift.Id &&
+                initial.MaThanhPham != null && initial.MaThanhPham != "" &&
+                initial.MaLoaiNguyenLieu != null && initial.MaLoaiNguyenLieu != "" &&
+                initial.MaXuong != null && initial.MaXuong != "" && weight.TheIdNhanVien == shift.MaChamCong));
+        return contextWeights.Concat(legacyWeights);
+    }
+
+    private static IQueryable<HQ_PhieuCan> LegacyShiftWeights(IQueryable<HQ_PhieuCan> weights,
+        IQueryable<ScaleAttendanceScan> scans, CheckInOut shift, DateTime end,
+        IQueryable<CheckInOut>? events)
     {
         var device = shift.MaSoMay.ToString(CultureInfo.InvariantCulture);
         if (events != null)

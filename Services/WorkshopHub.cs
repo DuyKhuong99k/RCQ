@@ -9,7 +9,7 @@ namespace Services;
 /// <summary>
 /// SignalR endpoint dành riêng cho thiết bị tại xưởng.
 /// </summary>
-public sealed class WorkshopHub : Hub
+public sealed class WorkshopHub(IAttendanceMode? attendanceMode = null) : Hub
 {
     public async Task Register(
         string deviceCode,
@@ -91,7 +91,7 @@ public sealed class WorkshopHub : Hub
             cardId,
             status,
             time,
-            xuong);
+            xuong, attendanceMode?.Current.Enabled ?? true);
 
         await Clients.Caller.SendAsync(
             "CHAMCONG_RESULT",
@@ -101,13 +101,17 @@ public sealed class WorkshopHub : Hub
 
 public static class AttendanceProcessor
 {
+    public static readonly TimeSpan MinimumCheckoutInterval = TimeSpan.FromMinutes(15);
+    public const string AlreadyCheckedInMessage = "đã quẹt vào";
+
     public static object Save(
         string deviceCode,
         string maTheTu,
         string? status,
         string time,
-        string xuong)
+        string xuong, bool attendanceEnabled = true)
     {
+        if (!attendanceEnabled) return new { success = false, message = AttendanceModeMessages.Disabled };
         // ----------------------------------------------------
         // 1. Parse thời gian từ firmware
         // ----------------------------------------------------
@@ -238,8 +242,26 @@ public static class AttendanceProcessor
 
         if (status == "Ra" && latest?.TrangThai != "Vào")
             return new { success = false, message = "Chưa có lượt Vào trong ngày. Vui lòng quẹt Vào trước.", maTheTu };
-        if (status == "Vào" && latest?.TrangThai == "Vào")
-            return new { success = false, message = "Đã có lượt Vào trong ngày chưa Ra.", maTheTu };
+        // Acknowledge the recognized employee, not a newly saved attendance row.
+        // Auto-toggle/early Ra and explicit repeated Vào must leave the original Vào untouched.
+        if (latest?.TrangThai == "Vào" &&
+            (status == "Vào" || when - latest.ThoiGian < MinimumCheckoutInterval))
+        {
+            transaction.Commit();
+            return new
+            {
+                success = true,
+                duplicated = true,
+                maTheTu,
+                maNhanVien = employeeId ?? "",
+                tenNhanVien = employee?.Name ?? "",
+                thoiGian = when,
+                xuong,
+                thietBi = deviceCode,
+                trangThai = AlreadyCheckedInMessage,
+                message = AlreadyCheckedInMessage
+            };
+        }
 
         // Tạo bản ghi mới sau khi xác định trạng thái.
         var item = new WorkshopAttendance

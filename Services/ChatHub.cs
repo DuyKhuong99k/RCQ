@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Http.Features;
+using System.Diagnostics;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
@@ -145,11 +146,17 @@ public sealed class ChatHub(
 
     public async Task SendData(string command, int len, string dataJson)
     {
-        var traceId = string.Equals(command, "CHAMCONG", StringComparison.OrdinalIgnoreCase)
-            ? Guid.NewGuid().ToString("N") : null;
+        var isLite = string.Equals(command, "LITE", StringComparison.OrdinalIgnoreCase);
+        var isAttendance = string.Equals(command, "CHAMCONG", StringComparison.OrdinalIgnoreCase);
+        var traceId = isAttendance ? Guid.NewGuid().ToString("N") : null;
+        string? machineId = null;
+        HqFirmwareSend.Scope? delivery = null;
         try
         {
             var client = userService.GetByConnectedId(Context.ConnectionId);
+            machineId = client?.Id;
+            if (client?.WKv == AppKV.Hq && (isLite || isAttendance))
+                delivery = HqFirmwareSend.Begin(Context.ConnectionId, Context.ConnectionAborted);
             if (traceId != null)
             {
                 string? scanId = null;
@@ -169,14 +176,26 @@ public sealed class ChatHub(
                 if (traceId != null)
                     logger.LogWarning("[CHAMCONG REJECT] Trace={Trace} Connection={Connection}: kết nối chưa xác định là máy cân.",
                         traceId, Context.ConnectionId);
-                var rejectError = JsonConvert.SerializeObject(new DataError { Cmd = command, ErrorString = "Kết nối chưa xác định là máy cân." });
-                await Clients.Caller.SendAsync("ReceiveData", command, rejectError);
+                var rejectError = CreateSendDataError(command, dataJson, machineId,
+                    "Kết nối chưa xác định là máy cân.");
+                if (delivery != null || isLite)
+                {
+                    delivery ??= HqFirmwareSend.Begin(Context.ConnectionId, Context.ConnectionAborted);
+                    await DeliverHqReply(command, dataJson, rejectError, delivery, machineId, traceId, 0);
+                }
+                else await Clients.Caller.SendAsync("ReceiveData", command, rejectError);
                 return;
             }
+            var routeStarted = Stopwatch.GetTimestamp();
             var dataToSend = await communicationService.Route(client, command, len, dataJson);
-            //await Task.Delay(300);
-            //dataToSend=   $"\"{ dataToSend.Replace("\\", "")}\"";
-            await Clients.Caller.SendAsync("ReceiveData",command, dataToSend);
+            var routeMs = Stopwatch.GetElapsedTime(routeStarted).TotalMilliseconds;
+            if (delivery != null)
+            {
+                await DeliverHqReply(command, dataJson, dataToSend, delivery, machineId, traceId, routeMs);
+                return;
+            }
+            // HQ online has already returned through its bounded delivery path.
+            await Clients.Caller.SendAsync("ReceiveData", command, dataToSend);
             if (traceId != null)
                 logger.LogInformation(
                     "[CHAMCONG TX] UTC={Utc:O} PID={Pid} Trace={Trace} Connection={Connection} Hash={Hash}",
@@ -185,6 +204,15 @@ public sealed class ChatHub(
         }
         catch (Exception e)
         {
+            if (delivery != null)
+            {
+                HqFirmwareSend.Log($"[HQ ROUTE ERROR] Machine={machineId}; Error={e.GetType().Name}; Outcome=UNKNOWN");
+                var fallback = CreateSendDataError(command, dataJson, machineId,
+                    ScaleOnlineMessages.ProcessingError, HqOnlineResponse.Unknown);
+                await DeliverHqReply(command, dataJson, fallback, delivery, machineId, traceId, 0);
+                return;
+            }
+            if (Context.ConnectionAborted.IsCancellationRequested) return;
             if (traceId != null)
                 logger.LogError(e, "[CHAMCONG ERROR] Trace={Trace} Connection={Connection}",
                     traceId, Context.ConnectionId);
@@ -192,16 +220,92 @@ public sealed class ChatHub(
 
             try
             {
-                var errorResponse = JsonConvert.SerializeObject(new DataError
-                {
-                    Cmd = command,
-                    ErrorString = "Máy chủ bận hoặc lỗi xử lý: " + e.Message
-                });
+                var errorResponse = CreateSendDataError(command, dataJson, machineId,
+                    isLite ? ScaleOnlineMessages.ProcessingError : "Máy chủ bận hoặc lỗi xử lý: " + e.Message,
+                    isLite ? HqOnlineResponse.Unknown : null);
                 await Clients.Caller.SendAsync("ReceiveData", command, errorResponse);
             }
             catch { /* tránh ngoại lệ lồng */ }
         }
-       
+        finally
+        {
+            delivery?.Dispose();
+        }
+    }
+
+    private static string CreateSendDataError(string command, string request, string? machine,
+        string message, string? saveStatus = null)
+    {
+        if (!string.Equals(command, "LITE", StringComparison.OrdinalIgnoreCase))
+            return JsonConvert.SerializeObject(new DataError { Cmd = command, ErrorString = message, SaveStatus = saveStatus });
+
+        var error = HqOnlineResponse.Error(command, message, HqOnlineResponse.Correlation(request),
+            machine, saveStatus ?? HqOnlineResponse.NotSaved);
+        return JsonConvert.SerializeObject(new DataTranfer
+        {
+            IsError = true,
+            DataError = JsonConvert.SerializeObject(error)
+        });
+    }
+
+    private async Task DeliverHqReply(string command, string request, string reply, HqFirmwareSend.Scope scope,
+        string? machine, string? trace, double routeMs)
+    {
+        if (!scope.TryBeginReply())
+        {
+            HqFirmwareSend.Log($"[HQ REPLY SKIPPED] Machine={machine}; Connection={scope.ConnectionId}; Original reply already attempted; SQL unchanged");
+            AbortCaller();
+            return;
+        }
+        var failure = scope.SendFailure;
+        if (failure == null)
+        {
+            var result = await HqFirmwareSend.RunAsync(token => Clients.Caller.SendAsync("ReceiveData", command, reply, token),
+                HqFirmwareSend.ReplyBudget, scope.ConnectionAborted);
+            if (result.Sent)
+            {
+                // Send completion is not a firmware application ACK. Logging must not resend a completed frame.
+                try
+                {
+                    if (routeMs + result.Milliseconds >= 2000)
+                        logger.LogWarning("[HQ WSS SLOW] Machine={Machine} Connection={Connection} RouteMs={RouteMs:F0} SendMs={SendMs:F0}",
+                            machine, scope.ConnectionId, routeMs, result.Milliseconds);
+                    if (trace != null)
+                        logger.LogInformation("[CHAMCONG TX] UTC={Utc:O} PID={Pid} Trace={Trace} Connection={Connection} Hash={Hash}",
+                            DateTimeOffset.UtcNow, Environment.ProcessId, trace, scope.ConnectionId, TraceHash(reply));
+                }
+                catch { }
+                return;
+            }
+            failure = new("ReceiveData", result.Reason ?? "UNCONFIRMED");
+            scope.Fail(failure.Target, failure.Reason);
+        }
+        // Parse audit-only metadata only on failed delivery, not on every successful ticket.
+        var status = HqFirmwareSend.SaveStatus(reply);
+        var id = ReplyCorrelationId(command, request);
+        HqFirmwareSend.Log($"[HQ TRANSPORT UNCONFIRMED] Machine={machine}; Id={id}; Connection={scope.ConnectionId}; Cmd={command}; SaveStatus={status}; Target={failure.Target}; Reason={failure.Reason}; No retry, SQL unchanged");
+        // A timed-out write may still be pending below SignalR. Abort the ORIGINAL connection
+        // rather than sending a contradictory fallback or letting late frames reach the next request.
+        AbortCaller();
+    }
+
+    private static string? ReplyCorrelationId(string command, string request)
+    {
+        var id = HqOnlineResponse.Correlation(request)?.Id;
+        if (id != null || !string.Equals(command, "CHAMCONG", StringComparison.OrdinalIgnoreCase)) return id;
+
+        try
+        {
+            var scanId = JObject.Parse(request).Value<string>("ChamCongId");
+            return scanId?.Length <= 100 ? scanId : null;
+        }
+        catch { return null; }
+    }
+
+    private void AbortCaller()
+    {
+        try { Context.Abort(); }
+        catch { /* The original connection may already have closed. */ }
     }
 
     private static string TraceHash(string value) =>
@@ -268,6 +372,12 @@ public sealed class ChatHub(
         {
             var mayCan = mayCansService.Find(id, true);
             var datas = JsonConvert.DeserializeObject<List<DataCMD>>(dataJson);
+            if (mayCan?.WKv == AppKV.Hq)
+            {
+                if (!await ApplyHqSelection(mayCan, datas, echo: false)) return;
+                datas = datas?.Where(x => !HqScaleSelection.IsSelector(x.PropetyName)).ToList();
+                if (datas?.Count == 0) return;
+            }
             if (datas != null)
                 if (mayCan != null)
                 {
@@ -292,6 +402,12 @@ public sealed class ChatHub(
         {
             var mayCan = mayCansService.Find(id, true);
             var datas = JsonConvert.DeserializeObject<List<DataCMD>>(dataJson);
+            if (mayCan?.WKv == AppKV.Hq)
+            {
+                if (!await ApplyHqSelection(mayCan, datas, echo: true)) return;
+                datas = datas?.Where(x => !HqScaleSelection.IsSelector(x.PropetyName)).ToList();
+                if (datas?.Count == 0) return;
+            }
             if (datas != null)
                 if (mayCan != null)
                 {
@@ -369,6 +485,45 @@ public sealed class ChatHub(
             //throw;
         }
     }
+    private async Task<bool> ApplyHqSelection(Models.Repos.Models.MayCan machine, List<DataCMD>? data, bool echo)
+    {
+        if (data == null) return false;
+        var client = userService.GetByConnectedId(Context.ConnectionId);
+        if (client?.IsMayCan != true || !client.IsActive || client.Id != machine.Id ||
+            machine.ConnectionId != Context.ConnectionId) return false;
+        return await HqOnlineWeightWriter.ForMachine(machine.Id, async () =>
+        {
+            var accepted = HqScaleSelection.ApplyFirmware(machine, Context.ConnectionId, data);
+            // Echo is NOT another web Set: do not create a second pending change.
+            // Hold the device gate through the reply so a newer web Set cannot be overtaken by this echo.
+            foreach (var item in accepted)
+            {
+                if (!echo) continue;
+                var target = item.PropetyName switch
+                {
+                    nameof(machine.MaThanhPham) => "SETTHANHPHAM",
+                    nameof(machine.MaLoaiNguyenLieu) => "SETLOAINGUYENLIEU",
+                    nameof(machine.MaSize) => "SETSIZE",
+                    _ => "SETLO"
+                };
+                if (machine.MType == "DESKTOP" || item.PropetyName == nameof(machine.MaLo))
+                    await Clients.Caller.SendAsync(target, item.PropetyValue);
+                else if (machine.MType == "BOARD")
+                {
+                    var name = item.PropetyName switch
+                    {
+                        nameof(machine.MaThanhPham) => converterService.ThanhPhamToName(item.PropetyValue, machine.WKv),
+                        nameof(machine.MaLoaiNguyenLieu) => converterService.LoaiNguyenLieuToName(item.PropetyValue),
+                        _ => converterService.SizeToName(item.PropetyValue, machine.WKv)
+                    };
+                    await Clients.Caller.SendAsync(target, item.PropetyValue, name);
+                }
+            }
+            if (accepted.Count > 0) mayCansService.NotifyItemChanged(machine);
+            return true;
+        });
+    }
+
     public async Task KeepAlive()
     {
         #if DEBUG

@@ -70,7 +70,7 @@ string? OldGetErrorLogic(string cardCode, int machine, DateTime time, int maxHou
     mockEmployees.TryGetValue(card.MaNhanVien, out var employee);
     if (!ScaleProductionAttendancePolicy.IsProductionCard(employee))
         return "HQ cần thẻ nhân viên hoặc nhóm sản xuất.";
-    if (!ScaleProductionAttendancePolicy.RequiresAttendance(employee))
+    if (!HqWeightBackupProcessor.RequiresLegacyAttendance(employee))
         return null;
 
     var latest = getScan(cardCode);
@@ -93,7 +93,7 @@ string? NewGetErrorLogic(string cardCode, int machine, DateTime time, int maxHou
     }
     if (!ScaleProductionAttendancePolicy.IsProductionCard(employee))
         return "HQ cần thẻ nhân viên hoặc nhóm sản xuất.";
-    if (!ScaleProductionAttendancePolicy.RequiresAttendance(employee))
+    if (!HqWeightBackupProcessor.RequiresLegacyAttendance(employee))
         return null;
 
     var latest = getScan(cardCode);

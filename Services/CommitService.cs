@@ -1,8 +1,6 @@
 using System.Globalization;
 using Models.Repos.Models;
 using Microsoft.Extensions.Options;
-using Microsoft.EntityFrameworkCore;
-using Models.Repos;
 using Newtonsoft.Json;
 using Vars;
 using Vars.Hubs;
@@ -11,8 +9,8 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Services;
 
-public class CommitService(IMayCansService mayCansService, ICoiService coiService, IMainService mainService,
-    IOptions<ScaleAttendanceOptions> attendanceOptions)
+public partial class CommitService(IMayCansService mayCansService, ICoiService coiService, IMainService mainService,
+    IOptions<ScaleAttendanceOptions> attendanceOptions, IAttendanceMode? attendanceMode = null)
     : ICommitService
 {
     private readonly object _lockItems = new();
@@ -496,7 +494,7 @@ public class CommitService(IMayCansService mayCansService, ICoiService coiServic
                     {
                         // HQ dùng thẻ nhân viên trực tiếp, không đi qua quy trình thẻ rổ.
                         var hqResult = await CommitHqLite(dataLite, maycan, cmd);
-                        mayCansService.NotifyItemChanged(maycan);
+                        HqOnlineUi.Notify(maycan, () => mayCansService.NotifyItemChanged(maycan));
                         return hqResult;
                     }
                     else
@@ -7442,153 +7440,6 @@ public class CommitService(IMayCansService mayCansService, ICoiService coiServic
 
         return new Tuple<bool, string>(isOK, dataErrorJson);
     }
-    private Tuple<bool,string> CommitHqBackup(IReadOnlyList<DataCoummunication> records, ClientInfo client, string cmd, bool batch)
-    {
-        var result=HqWeightBackupProcessor.Process(records,client,cmd,attendanceOptions.Value.MaxShiftHours,batch, saved => {
-            var machine=mayCansService.Find(client.Id);
-            if(machine==null) return;
-            foreach(var item in saved)
-                if(!machine.Items.OfType<HQ_PhieuCan>().Any(current=>current.Id==item.Id)) mayCansService.AddItem(machine,item);
-            var today=DateTimeOffset.UtcNow.ToOffset(TimeSpan.FromHours(7)).Date;
-            if(saved.Any(item=>item.NgayGio.Date==today)) {
-                var totals=mainService.VmPhieuCanHq.GetOnlineTotals(today,machine.Id,machine.MaNhanVien);
-                machine.TongSoRo=totals.MachineCount;
-                machine.TongTrongLuong=totals.MachineWeight;
-            }
-            machine.ThongBao=$"Đã xác nhận {saved.Count} phiếu backup trong SQL (bao gồm phiếu đã có).";
-            machine.ErrorString=null;
-            mayCansService.NotifyItemChanged(machine);
-        });
-        if(!result.Item1) {
-            var machine=mayCansService.Find(client.Id);
-            if(machine!=null) {
-                var error=JsonConvert.DeserializeObject<DataError>(result.Item2)?.ErrorString ?? "Backup HQ thất bại.";
-                machine.ErrorString=error; machine.ThongBao=error; machine.ColorString="red";
-                mayCansService.NotifyItemChanged(machine);
-            }
-        }
-        return result;
-    }
-
-    private async Task<Tuple<bool, string>> CommitHqLite(DataLite data, MayCan machine, string cmd)
-    {
-        Tuple<bool, string> Fail(string message)
-        {
-            machine.ErrorString = message;
-            machine.ThongBao = message;
-            machine.ColorString = "red";
-            return Tuple.Create(false, JsonConvert.SerializeObject(new DataError { Cmd = cmd, ErrorString = message }));
-        }
-
-        machine.TrongLuong = data.TrongLuong;
-        machine.TrongLuongTare = data.TrongLuongTare;
-        machine.TheView = data.TheId;
-        machine.IsStated = data.Stated == "ST" && data.TrongLuong > 0;
-        machine.ErrorString = null;
-        machine.ColorString = null;
-        if (!DateTime.TryParseExact(data.NgayGio, "yyyyMMddHHmmss", CultureInfo.InvariantCulture,
-                DateTimeStyles.None, out var time))
-            return Fail("Thời gian phiếu cân không hợp lệ.");
-        if (string.IsNullOrWhiteSpace(data.Id) || data.Id.Length > 100)
-            return Fail("Thiếu hoặc sai Id phiếu cân.");
-
-        // Không dùng trạng thái máy dùng chung để nhận phiếu; request phải báo cân ổn định.
-        if (data.Stated != "ST" || data.TrongLuong <= 0)
-            return Fail("CÂN CHƯA CÂN BẰNG. CHỜ CÂN BẰNG RỒI QUẸT LẠI THẺ");
-
-        // Chỉ xác nhận dữ liệu đã lưu; gửi lại không tăng tổng hay tạo phiếu mới.
-        var saved = mainService.VmPhieuCanHq.Get<HQ_PhieuCan>(data.Id);
-        if (saved != null)
-        {
-            if (saved.MayCan != machine.Id || saved.TheIdNhanVien != data.TheId)
-                return Fail("Id phiếu cân đã được dùng cho máy hoặc thẻ khác.");
-            machine.ThongBao = "ĐÃ HOÀN THÀNH";
-            machine.ColorString = "greenyellow";
-            return Tuple.Create(true, JsonConvert.SerializeObject(HqResponse(saved, machine)));
-        }
-
-        var card = mainService.VmThe.Items.FirstOrDefault(x => x.MaTheTu == data.TheId);
-        var employee = card == null ? null : mainService.VmNhanVien.Items
-            .FirstOrDefault(x => x.MaNhanVien == card.MaNhanVien);
-        if (employee == null) return Fail("Không tìm thấy thẻ nhân viên hoặc nhân viên.");
-        if (!ScaleProductionAttendancePolicy.IsProductionCard(employee))
-            return Fail("HQ cần thẻ nhân viên hoặc nhóm sản xuất.");
-
-        if (!int.TryParse(machine.Id, NumberStyles.None, CultureInfo.InvariantCulture, out var machineNumber))
-            return Fail("Mã máy cân không hợp lệ.");
-        using var attendanceDb = new dbPMScontext();
-
-        machine.MaNhanVien = employee.MaNhanVien;
-        machine.TheNhanVien = data.TheId;
-        machine.MaHoSo = employee.MaHoSo;
-        machine.NhanVienName = employee.Name;
-        machine.TheNhanVienAddDateTime = DateTime.Now;
-        if (!data.IsWaiting)
-            await mayCansService.CommandSetNhanVien(machine.Id, employee.MaNhanVien,
-                employee.MaHoSo ?? "", employee.Name ?? "");
-
-        if (data.TrongLuongTare < 0) return Fail("Trọng lượng tare không được âm.");
-        if (string.IsNullOrWhiteSpace(machine.MaLo)) return Fail("Chưa chọn lô.");
-        if (string.IsNullOrWhiteSpace(machine.MaSize)) return Fail("Chưa chọn size.");
-        if (string.IsNullOrWhiteSpace(machine.MaThanhPham)) return Fail("Chưa chọn thành phẩm.");
-        if (string.IsNullOrWhiteSpace(machine.MaLoaiNguyenLieu)) return Fail("Chưa chọn loại nguyên liệu.");
-
-        var historicalWorkshop = ScaleWorkshopHistory.Resolve(attendanceDb, machine.Id, time);
-        if (string.IsNullOrWhiteSpace(historicalWorkshop))
-            return Fail("Chưa xác định xưởng tại giờ cân. Kiểm tra lịch sử chuyển xưởng.");
-        var item = mainService.VmPhieuCanHq.CreateNew(data.Id, 0, machine.MaLo,
-            machine.MaLoaiNguyenLieu, machine.MaSize, machine.MaThanhPham, employee.MaNhanVien,
-            data.TrongLuong, 0, data.TrongLuongTare, data.TheId, "", time, machine.Id, historicalWorkshop);
-        // Cùng khóa SQL theo thẻ với Vào/Ra/chuyển máy. Kiểm tra lại sau khi
-        // cân ổn định và giữ khóa đến khi DAO lưu phiếu xong (kết nối riêng).
-        using var attendanceTransaction = attendanceDb.Database.BeginTransaction();
-        ScaleAttendanceTransferService.LockCard(attendanceDb, data.TheId);
-        var attendanceCheckInTx = ScaleProductionAttendancePolicy.GetError(attendanceDb, data.TheId,
-            machineNumber, time, attendanceOptions.Value.MaxShiftHours, employee, machine.MaThanhPham);
-        if (attendanceCheckInTx != null) return Fail(attendanceCheckInTx);
-        // Dùng chung khóa giữa các request online trong instance; database bảo vệ Id bằng khóa chính.
-        lock (_lockItems)
-        {
-            saved = mainService.VmPhieuCanHq.Get<HQ_PhieuCan>(data.Id);
-            if (saved == null)
-            {
-                if (HqWeightDuplicatePolicy.HasDuplicate(attendanceDb, item))
-                    return Fail(HqWeightDuplicatePolicy.ErrorMessage);
-                if (mainService.VmPhieuCanHq.Insert(item) <= 0) return Fail("Không lưu được phiếu cân HQ.");
-                mayCansService.AddItem(machine, item);
-            }
-            else
-            {
-                if (saved.MayCan != machine.Id || saved.TheIdNhanVien != data.TheId)
-                    return Fail("Id phiếu cân đã được dùng cho máy hoặc thẻ khác.");
-                item = saved;
-            }
-        }
-        machine.ThongBao = "ĐÃ HOÀN THÀNH";
-        machine.ColorString = "greenyellow";
-        attendanceTransaction.Commit();
-        return Tuple.Create(true, JsonConvert.SerializeObject(HqResponse(item, machine)));
-    }
-
-    private DataLiteRes HqResponse(HQ_PhieuCan item, MayCan machine)
-    {
-        var totals = mainService.VmPhieuCanHq.GetOnlineTotals(item.NgayGio, item.MayCan, item.MaNhanVien);
-        machine.TongSoRo = totals.MachineCount;
-        machine.TongTrongLuong = totals.MachineWeight;
-        return new DataLiteRes
-        {
-        Id = item.Id, STT = item.STT, TheId = item.TheIdNhanVien,
-        IsDataAction = 1, MessStr = "ĐÃ HOÀN THÀNH", MayCan = item.MayCan,
-        Ngay = item.Ngay.ToString("yyyyMMdd"), NgayGio = item.NgayGio.ToString("yyyyMMddHHmmss"),
-        MaLo = item.MaLo, MaSize = item.MaSize, MaThanhPham = item.MaThanhPham,
-        MaLoaiNguyenLieu = item.MaLoaiNguyenLieu, MaNhanVien = item.MaNhanVien,
-        TrongLuongNhan = item.TrongLuong, TrongLuongTare = item.TrongLuongTare,
-        ChiSanLuong = item.ChiSanLuong ? 1 : 0, Status = item.Status,
-        TongSoRoCan = totals.MachineCount, TongSoRo = totals.EmployeeCount,
-        TongTrongLuongCan = totals.MachineWeight, TongTrongLuong = totals.EmployeeWeight
-        };
-    }
-
     private void SetError(
     MayCan maycan,
     DataLite dataLite,

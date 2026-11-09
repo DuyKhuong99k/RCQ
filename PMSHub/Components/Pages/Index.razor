@@ -1,28 +1,16 @@
 ﻿@page "/"
+@page "/Home"
 @rendermode InteractiveServer
 @inject NavigationManager Navigation
+@using PMSHub.Navigation
 
 @inherits AuthenticatedComponent
 @code {
-    private bool isInitialized = false;
-    protected override async Task OnInitializedAsync()
+    protected override Task OnAuthenticatedAsync()
     {
-        
-        isInitialized = true;
-
-        await base.OnInitializedAsync();
-    }
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        // Chỉ điều hướng khi render lần đầu tiên để tránh vòng lặp
-        if (firstRender && isInitialized)
-        {
-            
-            Navigation.NavigateTo("/Home", forceLoad: true);
-        }
-
-        await base.OnAfterRenderAsync(firstRender);
+        // Keep old root/Home bookmarks, but redirect only after the session check succeeds.
+        Navigation.NavigateTo(HubRoutes.Default, forceLoad: true);
+        return Task.CompletedTask;
     }
 
 }

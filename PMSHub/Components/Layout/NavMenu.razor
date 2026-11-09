@@ -30,10 +30,25 @@
     <div class="menu-inner-shadow"></div>
 
     <ul class="menu-inner py-1">
-        <li class="menu-item @(IsActive("home") ? "active" : "")">
-            <NavLink href="Home" class="menu-link">
-                <i class="menu-icon tf-icons bx bx-home-circle"></i>
-                <div data-i18n="Analytics">Trang Chủ</div>
+        <li class="menu-item @(IsActive("devices") ? "active" : "")">
+            <NavLink href="devices" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-devices"></i>
+                <div data-i18n="Analytics">Máy cân</div>
+            </NavLink>
+        </li>
+        @if (ShowWorkshopDevices)
+        {
+            <li class="menu-item @(IsActive("WorkshopDevices") ? "active" : "")">
+                <NavLink href="WorkshopDevices" class="menu-link">
+                    <i class="menu-icon tf-icons bx bx-building"></i>
+                    <div data-i18n="Analytics">Máy chấm công tại xưởng</div>
+                </NavLink>
+            </li>
+        }
+        <li class="menu-item @(IsActive("NhanVien") ? "active" : "")">
+            <NavLink href="NhanVien" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-group"></i>
+                <div data-i18n="Analytics">Nhân Viên</div>
             </NavLink>
         </li>
         @* <li class="menu-item @(IsActive("TheRo") ? "active" : "")"> *@
@@ -42,20 +57,8 @@
         @*         <div data-i18n="Analytics">Thẻ Rổ</div> *@
         @*     </NavLink> *@
         @* </li> *@
-        @if (MainService.VmApp.ComName?.ToUpper() == nameof(ComNames.RCQTG) || MainService.VmApp.ComName?.ToUpper() == nameof(ComNames.NV))
+        @if (ShowWorkshopDevices)
         {
-            <li class="menu-item @(IsActive("devices") ? "active" : "")">
-                <NavLink href="devices" class="menu-link">
-                    <i class="menu-icon tf-icons bx bx-devices"></i>
-                    <div data-i18n="Analytics">Thiết Bị</div>
-                </NavLink>
-            </li>         
-            <li class="menu-item @(IsActive("WorkshopDevices") ? "active" : "")">
-                <NavLink href="WorkshopDevices" class="menu-link">
-                    <i class="menu-icon tf-icons bx bx-building"></i>
-                    <div data-i18n="Analytics">Thiết bị tại xưởng</div>
-                </NavLink>
-            </li>
             <li class="menu-item @(IsActive("TheNhanVien") ? "active" : "")">
                 <NavLink href="TheNhanVien" class="menu-link">
                     <i class="menu-icon tf-icons bx bx-id-card"></i>
@@ -71,12 +74,6 @@
         }
         else if (MainService.VmApp.ComName?.ToUpper() == nameof(ComNames.HL))
         {
-            <li class="menu-item @(IsActive("devices") ? "active" : "")">
-                <NavLink href="devices" class="menu-link">
-                    <i class="menu-icon tf-icons bx bx-devices"></i>
-                    <div data-i18n="Analytics">Thiết Bị</div>
-                </NavLink>
-            </li>
             <li class="menu-item @(IsActive("TheNhanVien") ? "active" : "")">
                 <NavLink href="TheNhanVien" class="menu-link">
                     <i class="menu-icon tf-icons bx bx-id-card"></i>
@@ -98,12 +95,6 @@
         }
         else if (MainService.VmApp.ComName?.ToUpper() != "")
         {
-            <li class="menu-item @(IsActive("devices") ? "active" : "")">
-                <NavLink href="devices" class="menu-link">
-                    <i class="menu-icon tf-icons bx bx-devices"></i>
-                    <div data-i18n="Analytics">Thiết Bị</div>
-                </NavLink>
-            </li>
             <li class="menu-item @(IsActive("coi-view") ? "active" : "")">
                 <NavLink href="coi-view" class="menu-link">
                     <i class="menu-icon tf-icons bx bx-analyse"></i>
@@ -163,6 +154,10 @@
 </aside>
 
 @code {
+    private bool ShowWorkshopDevices =>
+        string.Equals(MainService.VmApp.ComName, nameof(ComNames.RCQTG), StringComparison.OrdinalIgnoreCase) ||
+        string.Equals(MainService.VmApp.ComName, nameof(ComNames.NV), StringComparison.OrdinalIgnoreCase);
+
     private bool IsActive(string pathSegment)
     {
         var comname = MainService.VmApp.ComName;

@@ -1,0 +1,18 @@
+.employee-heading, .employee-toolbar, .employee-actions { display: flex; align-items: center; gap: .75rem; flex-wrap: wrap; }
+.employee-heading { justify-content: space-between; margin-bottom: 1rem; }
+.employee-heading p { margin: .5rem 0 0; }
+.employee-toolbar { margin: 1rem 0; }
+.employee-search { max-width: 400px; }
+.employee-selection { margin: 0 0 .75rem; color: #566a7f; }
+.employee-backdrop { position: fixed; inset: 0; background: #0007; z-index: 1100; display: flex; align-items: center; justify-content: center; padding: 1rem; }
+.employee-dialog { width: min(660px, 100%); max-height: 90vh; overflow-y: auto; overflow-wrap: anywhere; background: white; border-radius: .65rem; padding: 1.5rem; box-shadow: 0 1rem 3rem #0003; }
+.employee-dialog h4 { margin-bottom: 1.25rem; }
+.employee-fields, .employee-flags { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; margin: 1rem 0; }
+.employee-fields label { display: flex; flex-direction: column; gap: .4rem; min-width: 0; }
+.employee-field-caption { display: inline-flex; align-items: baseline; gap: .25rem; min-height: 1.5em; }
+.employee-flags label { display: flex; align-items: center; gap: .45rem; }
+.employee-actions { justify-content: flex-end; margin-top: 1.25rem; }
+.employee-confirm { max-width: 540px; }
+.employee-import { width: min(1040px, 100%); }
+.employee-import-file { display: flex; gap: .75rem; flex-wrap: wrap; margin: 1rem 0; }
+@media (max-width: 540px) { .employee-fields, .employee-flags { grid-template-columns: 1fr; } .employee-dialog { padding: 1rem; } }

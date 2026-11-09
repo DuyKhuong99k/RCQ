@@ -5,7 +5,7 @@ namespace PMSHub.Controllers;
 
 [ApiController]
 [Route("api/chamcongtaixuong")]
-public sealed class ChamCongTaiXuongController : ControllerBase
+public sealed class ChamCongTaiXuongController(IAttendanceMode? attendanceMode = null) : ControllerBase
 {
     [HttpPost("post")]
     public IActionResult Post([FromBody] Request request)
@@ -31,7 +31,7 @@ public sealed class ChamCongTaiXuongController : ControllerBase
                 maTheTu,
                 request.TrangThai,
                 time,
-                xuong));
+                xuong, attendanceMode?.Current.Enabled ?? true));
     }
 
     public sealed class Request

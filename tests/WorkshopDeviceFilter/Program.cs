@@ -64,10 +64,17 @@ Check(first.Items.Count == 0, "Tài khoản không có khu vực không xem đư
 first.Dispose();
 Check(machineProxy.HandlerCount("ItemUpdated") == 1, "Hủy phiên gỡ đăng ký sự kiện của riêng phiên đó");
 var root = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../../"));
-var login = File.ReadAllText(Path.Combine(root, "PMSHub/Components/Pages/LoginLocal.razor"));
+var login = File.ReadAllText(Path.Combine(root, "PMSHub/Components/Pages/LoginLocal.razor")) +
+    File.ReadAllText(Path.Combine(root, "PMSHub/Components/Pages/LoginLocal.razor.cs"));
 Check(!login.Contains("@bind-Value=\"@MainService.VmXiNghiep.SelectedItem\"") &&
     login.Contains("SessionService.Set(\"XuongId\", workshop.Ma)"), "Lựa chọn đăng nhập riêng từng trang và lưu vào phiên");
 Check(login.Contains("x.SuDung == true") && login.Contains("if (workshop == null)"), "Bắt buộc chọn xưởng hợp lệ đang sử dụng");
+await CardEnrollmentChecks.Run(Check);
+await EmployeeCardCatalogChecks.Run(Check);
+await LoginCatalogChecks.Run(Check);
+await HubNavigationChecks.Run(Check);
+await HubEmployeeUiChecks.Run(Check);
+HubEmployeeExcelChecks.Run(Check, args.FirstOrDefault(value => value.EndsWith(".xlsx", StringComparison.OrdinalIgnoreCase)));
 await UiRegressionChecks.Run(Check);
 LoginAccountChecks.Run(Check);
 Console.WriteLine($"PASS: {checks} checks. No SQL connection or firmware commands.");

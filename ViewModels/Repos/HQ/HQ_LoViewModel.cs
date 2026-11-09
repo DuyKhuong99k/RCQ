@@ -65,6 +65,11 @@ namespace ViewModels.Repos.HQ
         {
             try
             {
+                if (AppViewModel.Instance.LoKv == AppKV.Hq)
+                {
+                    ReloadHq();
+                    return;
+                }
                 // Reload();
                 Items.Clear();
                 var items = new ObservableRangeCollection<string>(Gets(AppViewModel.Instance.XuongId, IsServer));
@@ -88,6 +93,11 @@ namespace ViewModels.Repos.HQ
         }
         public void Reload()
         {
+            if (AppViewModel.Instance.LoKv == AppKV.Hq)
+            {
+                ReloadHq();
+                return;
+            }
             // Reload();
             Items.Clear();
             var items = new ObservableRangeCollection<string>(Gets(AppViewModel.Instance.XuongId, IsServer));
@@ -102,6 +112,15 @@ namespace ViewModels.Repos.HQ
             ItemsWithSize = new ObservableRangeCollection<Tuple<DateTime?, string, string>>(
                 GetsWithSize(AppViewModel.Instance.XuongId, IsServer));
         }
+        // Explicit HQ entry point: selecting an HQ machine must not depend on global LoKv.
+        public void ReloadHq()
+        {
+            using var db = new dbPMScontext();
+            var refreshed = HqLotCatalog.ActiveIds(db.HqLos).ToList();
+            // Query first: a failed refresh must not erase the previous list.
+            Items = new ObservableRangeCollection<string>(refreshed);
+        }
+
        public string GetByLevel(DateTime ngay, int level)
         {
             dbPMScontext db = new dbPMScontext();
@@ -132,14 +151,8 @@ namespace ViewModels.Repos.HQ
                 }
                 else if (AppViewModel.Instance.LoKv == Vars.AppKV.Hq)
                 {
-                    dbPMScontext db = new dbPMScontext();
-#if  DEBUG
-                    var items = db.HqLos.Where(x => x.MNgay >= DateTime.Now.AddDays(-365)).Select(x => x.Id).OrderByDescending(x=>x).ToList();
-          #else
-         var items = db.HqLos.Where(x => x.MNgay >= DateTime.Now.AddDays(-30)).Select(x => x.Id).OrderByDescending(x=>x).ToList();   
-#endif
-                  
-                    return items;
+                    using var db = new dbPMScontext();
+                    return HqLotCatalog.ActiveIds(db.HqLos).ToList();
                 }
                 else
                 {

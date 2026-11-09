@@ -1,0 +1,7 @@
+.attendance-mode { display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; margin:16px 0; padding:16px; border:1px solid #d9dce5; border-radius:8px; background:#fff; }
+.attendance-mode p { margin:6px 0; }
+.attendance-mode small { color:#657185; }
+.mode-backdrop { position:fixed; inset:0; z-index:1100; display:flex; align-items:center; justify-content:center; background:#0007; padding:20px; }
+.mode-dialog { width:min(100%,480px); max-height:90vh; overflow:auto; background:#fff; padding:24px; border-radius:10px; box-shadow:0 12px 40px #0004; }
+.mode-dialog label { display:block; margin:14px 0; }
+.mode-actions { display:flex; justify-content:flex-end; gap:10px; margin-top:20px; }

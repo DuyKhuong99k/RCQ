@@ -13,22 +13,22 @@ var checks=0;
 void Assert(bool ok,string name) { if(!ok) throw new Exception(name); checks++; }
 void Reject(Action action,string name) { try {action();} catch(ArgumentException){checks++;return;} throw new Exception(name); }
 Assert(!ScaleProductionAttendancePolicy.IsProductionCard(null),"Unregistered card rejected");
-Assert(ScaleProductionAttendancePolicy.RequiresAttendance(null),"Missing identity cannot bypass attendance");
+Assert(HqWeightBackupProcessor.RequiresLegacyAttendance(null),"Missing identity cannot bypass legacy backup attendance");
 for(var flags=0;flags<16;flags++) {
     var identity=new NhanVienDaiThanh {MaNhanVien="GROUP_TEST",IsHuman=(flags&1)!=0,
         IsNhom=(flags&2)!=0,IsChucNang=(flags&4)!=0,IsPhucVu=(flags&8)!=0};
     var eligible=(identity.IsHuman || identity.IsNhom) && !identity.IsChucNang && !identity.IsPhucVu;
     Assert(ScaleProductionAttendancePolicy.IsProductionCard(identity)==eligible,$"Production identity flags {flags}");
-    Assert(ScaleProductionAttendancePolicy.RequiresAttendance(identity)==(!eligible || !identity.IsNhom),
-        $"Only valid SQL group bypasses attendance, flags {flags}");
+    Assert(HqWeightBackupProcessor.RequiresLegacyAttendance(identity)==(!eligible || !identity.IsNhom),
+        $"Only valid SQL group retains historical offline exception, flags {flags}");
 }
 var groupCard=new NhanVienDaiThanh {MaNhanVien="MAYCAT2",IsNhom=true,IsHuman=false};
 Assert(ScaleProductionAttendancePolicy.IsProductionCard(groupCard)
-    && !ScaleProductionAttendancePolicy.RequiresAttendance(groupCard),"MAYCAT2 group weighs without Vao/Ra");
+    && !HqWeightBackupProcessor.RequiresLegacyAttendance(groupCard),"MAYCAT2 historical offline tickets retain compatibility");
 groupCard.IsHuman=true;
-Assert(!ScaleProductionAttendancePolicy.RequiresAttendance(groupCard),"Group with IsHuman=true also needs no Vao/Ra");
+Assert(!HqWeightBackupProcessor.RequiresLegacyAttendance(groupCard),"Mixed group historical offline tickets retain compatibility");
 groupCard.IsNhom=false;
-Assert(ScaleProductionAttendancePolicy.RequiresAttendance(groupCard),"Normal human still requires Vao/Ra");
+Assert(HqWeightBackupProcessor.RequiresLegacyAttendance(groupCard),"Normal human backup still requires historical Vao/Ra");
 var now=new DateTime(2026,10,12,14,0,0);
 DataCoummunication Record(int seconds=0)=>new() {Id="7779520."+new DateTime(2026,10,12,11,0,0).AddSeconds(seconds).ToString("yyyyMMddHHmmss"),
  NgayGio=new DateTime(2026,10,12,11,0,0).AddSeconds(seconds).ToString("yyyyMMddHHmmss"),TheId="0000000001",MayCan="7779520",
@@ -45,10 +45,23 @@ var wrongMachine=Record();wrongMachine.MayCan="7779521";Reject(()=>HqWeightBacku
 var wrongTime=Record();wrongTime.NgayGio="20261012110001";Reject(()=>HqWeightBackupProcessor.Normalize(wrongTime,"7779520",now),"Wrong time/id");
 var missingCode=Record();missingCode.MaThanhPham="";Reject(()=>HqWeightBackupProcessor.Normalize(missingCode,"7779520",now),"No current config fallback");
 var negative=Record();negative.TrongLuong=-1;Reject(()=>HqWeightBackupProcessor.Normalize(negative,"7779520",now),"Negative weight");
+var smallNet=Record();smallNet.TrongLuong=.4m;smallNet.TrongLuongTare=.8m;
+var smallTicket=HqWeightBackupProcessor.Normalize(smallNet,"7779520",now);
+Assert(smallTicket.TrongLuong==.4m && smallTicket.TrongLuongTare==.8m,"Net kg below tare is valid, do not subtract tare twice in Sync");
+foreach (var badValue in new[] {1000000000000000m, decimal.MaxValue, .0001m}) {
+    var badWeight=Record();badWeight.TrongLuong=badValue;
+    Reject(()=>HqWeightBackupProcessor.Normalize(badWeight,"7779520",now),"Sync rejects SQL range/precision overflow in net kg");
+    var badTare=Record();badTare.TrongLuongTare=badValue;
+    Reject(()=>HqWeightBackupProcessor.Normalize(badTare,"7779520",now),"Sync rejects SQL range/precision overflow in tare");
+}
 var cancelled=Record();cancelled.Status=-1;Reject(()=>HqWeightBackupProcessor.Normalize(cancelled,"7779520",now),"Cancelled ticket");
 var notProduction=Record();notProduction.ChiSanLuong=0;Reject(()=>HqWeightBackupProcessor.Normalize(notProduction,"7779520",now),"Never convert non-production ticket");
 var saved=HqWeightBackupProcessor.Normalize(Record(),"7779520",now);saved.MaSize="20X20";saved.MaLoaiNguyenLieu="CD001";saved.MaXuong="1";
 Assert(HqWeightBackupProcessor.MatchesExisting(saved,normalized),"Legacy replay with missing metadata and case difference");
+var originalOrdinal=saved.STT;saved.STT++;
+Assert(!HqWeightBackupProcessor.MatchesExisting(saved,normalized),"Sync rejects same Id with different STT");saved.STT=originalOrdinal;
+var originalCard=saved.TheId;saved.TheId="OTHER_CARD";
+Assert(!HqWeightBackupProcessor.MatchesExisting(saved,normalized),"Sync rejects same Id with different raw card");saved.TheId=originalCard;
 normalized.TrongLuong=9;Assert(!HqWeightBackupProcessor.MatchesExisting(saved,normalized),"Never overwrite changed weight");
 normalized=HqWeightBackupProcessor.Normalize(Record(),"7779520",now);
 HqWeightBackupProcessor.ResolveHistoricalMetadata(normalized,new[]{new HqWeightBackupProcessor.HistoricalMetadata("CD001","1")});

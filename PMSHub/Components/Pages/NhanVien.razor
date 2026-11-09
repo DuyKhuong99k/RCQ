@@ -1,0 +1,178 @@
+@page "/NhanVien"
+@using Services
+@using ViewModels.Repos.Staff
+@using Syncfusion.Blazor.Grids
+@using ViewModels.Repos.Hubs.IServices
+@inherits AuthenticatedComponent
+@rendermode InteractiveServer
+@inject HubEmployeeManager Manager
+@inject IHubEmployeeCardCatalog Catalog
+@inject ILogger<NhanVien> Logger
+
+<PageTitle>Nhân Viên</PageTitle>
+<section class="employee-page">
+    <div class="employee-heading">
+        <div>
+            <h3>Danh Sách Nhân Viên</h3>
+            <p>Xưởng: <strong>@(_state?.WorkshopName ?? "Chưa tải dữ liệu")</strong>. Chỉ quản lý hồ sơ thuộc xưởng đang đăng nhập.</p>
+        </div>
+        <a href="TheNhanVien" class="btn btn-outline-primary">Gán thẻ nhân viên</a>
+    </div>
+    @if (!string.IsNullOrEmpty(_message))
+    {
+        <p role="status" class="alert @(_failed ? "alert-warning" : "alert-success")">@_message</p>
+    }
+    <div class="employee-toolbar">
+        <button class="btn btn-primary" type="button" @onclick="OpenCreate" disabled="@(_busy || _state == null)">Thêm nhân viên</button>
+        <button class="btn btn-outline-primary" type="button" @onclick="OpenImport" disabled="@(_busy || _state == null)">Nhập từ Excel</button>
+        <button class="btn btn-outline-primary" type="button" @onclick="EditSelected" disabled="@(_busy || _selectedEmployee == null)">Sửa</button>
+        <button class="btn btn-outline-danger" type="button" @onclick="DeleteSelected" disabled="@(_busy || _selectedEmployee == null)">Xóa</button>
+        <button class="btn btn-outline-secondary" type="button" @onclick="ReloadAsync" disabled="@_busy">@(_busy ? "Đang xử lý…" : "Tải lại")</button>
+        <input class="form-control employee-search" aria-label="Tìm nhân viên" placeholder="Tìm mã, mã hồ sơ, họ tên, nhóm…"
+               @bind="_search" @bind:event="oninput" @bind:after="ClearSelectionAsync" disabled="@_busy" />
+    </div>
+    <p class="employee-selection" role="status">@(_selectedEmployee == null ? "Chọn một nhân viên trong bảng để sửa hoặc xóa." : $"Đã chọn: {_selectedEmployee.MaNhanVien} — {_selectedEmployee.Name}")</p>
+    <SfGrid @ref="_grid" TValue="HubEmployeeEdit" DataSource="@VisibleEmployees" AllowPaging="true" AllowSorting="true" AllowSelection="true" Width="100%" Height="500">
+        <GridPageSettings PageSize="20" PageSizes="@(new[] { "20", "50", "100" })" />
+        <GridSelectionSettings Mode="SelectionMode.Row" Type="SelectionType.Single" />
+        <GridEvents TValue="HubEmployeeEdit" RowSelected="SelectEmployee" RowDeselected="DeselectEmployee" OnActionBegin="ClearSelectionOnActionAsync" />
+        <GridColumns>
+            <GridColumn Field="@nameof(HubEmployeeEdit.MaNhanVien)" HeaderText="Mã nhân viên" IsPrimaryKey="true" Width="145" />
+            <GridColumn Field="@nameof(HubEmployeeEdit.MaHoSo)" HeaderText="Mã hồ sơ" Width="140" />
+            <GridColumn Field="@nameof(HubEmployeeEdit.Name)" HeaderText="Tên nhân viên" Width="210" />
+            <GridColumn Field="@nameof(HubEmployeeEdit.MaChamCong)" HeaderText="Mã chấm công" Width="150" />
+            <GridColumn Field="@nameof(HubEmployeeEdit.DeptName0)" HeaderText="Tên nhóm" Width="140" />
+            <GridColumn Field="@nameof(HubEmployeeEdit.IsContracting)" HeaderText="Đang làm" DisplayAsCheckBox="true" TextAlign="TextAlign.Center" Width="100" />
+            <GridColumn Field="@nameof(HubEmployeeEdit.IsPhucVu)" HeaderText="Phục vụ" DisplayAsCheckBox="true" TextAlign="TextAlign.Center" Width="100" />
+            <GridColumn Field="@nameof(HubEmployeeEdit.IsBanKiem)" HeaderText="Bàn kiểm" DisplayAsCheckBox="true" TextAlign="TextAlign.Center" Width="100" />
+            <GridColumn Field="@nameof(HubEmployeeEdit.IsChucNang)" HeaderText="Chức năng" DisplayAsCheckBox="true" TextAlign="TextAlign.Center" Width="110" />
+            <GridColumn Field="@nameof(HubEmployeeEdit.LoaiSanLuong)" HeaderText="Loại SL" Width="90" />
+            <GridColumn Field="@nameof(HubEmployeeEdit.IsHuman)" HeaderText="Nhân viên BT" DisplayAsCheckBox="true" TextAlign="TextAlign.Center" Width="120" />
+            <GridColumn Field="@nameof(HubEmployeeEdit.IsNhom)" HeaderText="Thẻ nhóm" DisplayAsCheckBox="true" TextAlign="TextAlign.Center" Width="105" />
+            <GridColumn Field="@nameof(HubEmployeeEdit.IsGiaCong)" HeaderText="Gia công" DisplayAsCheckBox="true" TextAlign="TextAlign.Center" Width="100" />
+            <GridColumn Field="@nameof(HubEmployeeEdit.IsNhanVienCat)" HeaderText="Nhân viên cắt" DisplayAsCheckBox="true" TextAlign="TextAlign.Center" Width="130" />
+            <GridColumn Field="@nameof(HubEmployeeEdit.IsShowDinhMuc)" HeaderText="Thông báo định mức" DisplayAsCheckBox="true" TextAlign="TextAlign.Center" Width="165" />
+        </GridColumns>
+    </SfGrid>
+</section>
+
+@if (_importing)
+{
+    <div class="employee-backdrop">
+        <section class="employee-dialog employee-import" role="dialog" aria-modal="true" aria-labelledby="employee-import-title">
+            <h4 id="employee-import-title">Nhập nhân viên từ Excel — @_state?.WorkshopName</h4>
+            <p>3 cột: <strong>Mã nhân viên, Mã hồ sơ, Tên nhân viên</strong>. Tối đa 1.000 dòng, file .xlsx tối đa 5 MB. Định dạng mã là Text để giữ số 0 ở đầu.</p>
+            <p>Chỉ thêm mới vào xưởng đang đăng nhập. Mã nhân viên đã có được bỏ qua; không ghi đè hồ sơ cũ. Nếu có dòng lỗi, chưa nhập dòng nào.</p>
+            <a href="templates/NhanVienImportTemplate.xlsx" download>Tải file Excel mẫu</a>
+            <fieldset disabled="@_busy">
+                <div class="employee-import-file">
+                    <InputFile OnChange="ReadImportFileAsync" accept=".xlsx" aria-label="Chọn file nhân viên Excel" disabled="@_busy" />
+                    @if (!string.IsNullOrEmpty(_importFileName)) { <span>@_importFileName</span> }
+                </div>
+            </fieldset>
+            @if (!string.IsNullOrEmpty(_importMessage)) { <p role="status" class="alert alert-info">@_importMessage</p> }
+            @if (_importResult is { Rows.Count: > 0 })
+            {
+                <p class="employee-selection">Bộ lọc chỉ thay đổi hiển thị; khi nhập vẫn xử lý toàn bộ danh sách đã kiểm tra.</p>
+                <SfGrid TValue="NhanVienImportRow" DataSource="@_importResult.Rows" AllowPaging="true" AllowFiltering="true" AllowSorting="true" Width="100%" Height="280">
+                    <GridPageSettings PageSize="20" PageSizes="@(new[] { "20", "50", "100" })" />
+                    <GridFilterSettings Type="FilterType.Excel" />
+                    <GridColumns>
+                        <GridColumn Field="@nameof(NhanVienImportRow.RowNumber)" HeaderText="Dòng Excel" Width="100" />
+                        <GridColumn Field="@nameof(NhanVienImportRow.MaNhanVien)" HeaderText="Mã nhân viên" Width="140" />
+                        <GridColumn Field="@nameof(NhanVienImportRow.MaHoSo)" HeaderText="Mã hồ sơ" Width="140" />
+                        <GridColumn Field="@nameof(NhanVienImportRow.Name)" HeaderText="Tên nhân viên" Width="200" />
+                        <GridColumn Field="@nameof(NhanVienImportRow.Message)" HeaderText="Kết quả kiểm tra" Width="310" />
+                    </GridColumns>
+                </SfGrid>
+            }
+            <p>Nhân viên mới: đang làm việc, nhân viên bình thường, loại sản lượng 1, bật thông báo định mức. Chưa gán thẻ tự động.</p>
+            <div class="employee-actions">
+                <button type="button" class="btn btn-secondary" @onclick="CloseImport" disabled="@_busy">Đóng</button>
+                <button type="button" class="btn btn-outline-primary" @onclick="CheckImportAsync" disabled="@(_busy || _importRows.Count == 0)">Kiểm tra danh sách</button>
+                <button type="button" class="btn btn-primary" @onclick="SaveImportAsync" disabled="@(!CanImport)">@(_busy ? "Đang xử lý…" : $"Nhập {_importResult?.ReadyCount ?? 0} nhân viên")</button>
+            </div>
+        </section>
+    </div>
+}
+
+@if (_editing)
+{
+    <div class="employee-backdrop">
+        <section class="employee-dialog" role="dialog" aria-modal="true" aria-labelledby="employee-title">
+            <h4 id="employee-title">@(_creating ? "Thêm nhân viên" : "Sửa nhân viên") — @_state?.WorkshopName</h4>
+            <EditForm Model="_form" OnValidSubmit="SaveAsync" FormName="hub-employee-edit">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+                <fieldset disabled="@_busy">
+                    <div class="employee-fields">
+                        <label>
+                            <span class="employee-field-caption">Mã nhân viên <span aria-hidden="true">*</span></span>
+                            <InputText class="form-control" @bind-Value="_form.MaNhanVien" maxlength="50" readonly="@(!_creating)" />
+                        </label>
+                        <label>
+                            <span class="employee-field-caption">Mã hồ sơ <span aria-hidden="true">*</span></span>
+                            <InputText class="form-control" @bind-Value="_form.MaHoSo" maxlength="50" />
+                        </label>
+                        <label>
+                            <span class="employee-field-caption">Tên nhân viên <span aria-hidden="true">*</span></span>
+                            <InputText class="form-control" @bind-Value="_form.Name" maxlength="100" />
+                        </label>
+                        <label>
+                            <span class="employee-field-caption">Mã chấm công</span>
+                            <InputText class="form-control" @bind-Value="_form.MaChamCong" maxlength="50" />
+                        </label>
+                        <label>
+                            <span class="employee-field-caption">Nhóm</span>
+                            <InputText class="form-control" @bind-Value="_form.DeptName0" maxlength="50" list="employee-groups" />
+                        </label>
+                        <datalist id="employee-groups">
+                            @foreach (var group in EmployeeGroups) { <option value="@group"></option> }
+                        </datalist>
+                        <label>
+                            <span class="employee-field-caption">Loại sản lượng</span>
+                            <InputSelect class="form-control" @bind-Value="_form.LoaiSanLuong">
+                                <option value="1">1 — Cộng sản lượng</option>
+                                <option value="0">0 — Chỉ ghi nhận</option>
+                                <option value="-1">-1 — Trừ sản lượng</option>
+                            </InputSelect>
+                        </label>
+                    </div>
+                    <div class="employee-flags">
+                        <label><InputCheckbox @bind-Value="_form.IsContracting" /> Trạng thái làm việc</label>
+                        <label><InputCheckbox @bind-Value="_form.IsHuman" /> Nhân viên bình thường</label>
+                        <label><InputCheckbox @bind-Value="_form.IsPhucVu" /> Phục vụ</label>
+                        <label><InputCheckbox @bind-Value="_form.IsGiaCong" /> Gia công</label>
+                        <label><InputCheckbox @bind-Value="_form.IsBanKiem" /> Bàn kiểm</label>
+                        <label><InputCheckbox @bind-Value="_form.IsChucNang" /> Chức năng</label>
+                        <label><InputCheckbox @bind-Value="_form.IsNhom" /> Nhóm</label>
+                        <label><InputCheckbox @bind-Value="_form.IsNhanVienCat" /> Nhân viên cắt</label>
+                        <label><InputCheckbox @bind-Value="_form.IsShowDinhMuc" /> Thông báo trạng thái định mức</label>
+                    </div>
+                    <p>Lưu hồ sơ không tự gán mã thẻ. Sau khi lưu, vào <strong>Gán thẻ nhân viên</strong> để gán thẻ cho nhân viên này.</p>
+                    @if (!string.IsNullOrEmpty(_formMessage)) { <p role="alert" class="text-danger">@_formMessage</p> }
+                    <div class="employee-actions">
+                        <button type="button" class="btn btn-secondary" @onclick="Cancel">Hủy</button>
+                        <button type="submit" class="btn btn-primary">@(_busy ? "Đang lưu…" : "Lưu nhân viên")</button>
+                    </div>
+                </fieldset>
+            </EditForm>
+        </section>
+    </div>
+}
+@if (_deleting != null)
+{
+    <div class="employee-backdrop">
+        <section class="employee-dialog employee-confirm" role="dialog" aria-modal="true" aria-labelledby="delete-employee-title">
+            <h4 id="delete-employee-title">Xác nhận xóa nhân viên</h4>
+            <p>Xóa hồ sơ <strong>@_deleting.MaNhanVien — @_deleting.Name</strong> trong xưởng @_state?.WorkshopName?</p>
+            <p>Chỉ xóa hồ sơ nhân viên và ghi nhật ký xóa như bên Báo Cáo; không xóa thẻ, phiếu cân hoặc lịch sử chấm công.</p>
+            <p class="text-danger">Sau khi xóa, thẻ còn gán mã này có thể không dùng để cân được; báo cáo cũ có thể không tra được tên. Nếu chỉ nghỉ việc, nên sửa và tắt Trạng thái làm việc thay vì xóa.</p>
+            @if (!string.IsNullOrEmpty(_formMessage)) { <p role="alert" class="text-danger">@_formMessage</p> }
+            <div class="employee-actions">
+                <button type="button" class="btn btn-secondary" @onclick="Cancel" disabled="@_busy">Hủy</button>
+                <button type="button" class="btn btn-danger" @onclick="DeleteAsync" disabled="@_busy">@(_busy ? "Đang kiểm tra…" : "Xác nhận xóa")</button>
+            </div>
+        </section>
+    </div>
+}

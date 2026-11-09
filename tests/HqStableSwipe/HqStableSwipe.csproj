@@ -10,8 +10,11 @@
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
     <Reference Include="PMSHub"><HintPath>../../PMSHub/bin/$(HubBuildConfiguration)/net8.0/PMSHub.dll</HintPath></Reference>
     <Reference Include="Services"><HintPath>../../PMSHub/bin/$(HubBuildConfiguration)/net8.0/Services.dll</HintPath></Reference>
+    <Reference Include="Dao"><HintPath>../../PMSHub/bin/$(HubBuildConfiguration)/net8.0/Dao.dll</HintPath></Reference>
+    <Reference Include="Microsoft.EntityFrameworkCore"><HintPath>../../PMSHub/bin/$(HubBuildConfiguration)/net8.0/Microsoft.EntityFrameworkCore.dll</HintPath></Reference>
     <Reference Include="Models"><HintPath>../../PMSHub/bin/$(HubBuildConfiguration)/net8.0/Models.dll</HintPath></Reference>
     <Reference Include="MvvmHelpers"><HintPath>../../PMSHub/bin/$(HubBuildConfiguration)/net8.0/MvvmHelpers.dll</HintPath></Reference>
+    <Reference Include="CommunityToolkit.Mvvm"><HintPath>../../PMSHub/bin/$(HubBuildConfiguration)/net8.0/CommunityToolkit.Mvvm.dll</HintPath></Reference>
     <Reference Include="Vars"><HintPath>../../PMSHub/bin/$(HubBuildConfiguration)/net8.0/Vars.dll</HintPath></Reference>
     <Reference Include="ViewModels"><HintPath>../../PMSHub/bin/$(HubBuildConfiguration)/net8.0/ViewModels.dll</HintPath></Reference>
     <Reference Include="Newtonsoft.Json"><HintPath>../../PMSHub/bin/$(HubBuildConfiguration)/net8.0/Newtonsoft.Json.dll</HintPath></Reference>

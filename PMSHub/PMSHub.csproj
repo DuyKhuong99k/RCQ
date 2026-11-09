@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <PackageReference Include="Blazored.LocalStorage" Version="4.5.0" />
+    <PackageReference Include="ClosedXML" Version="0.104.2" />
     <PackageReference Include="Dapper" Version="2.1.35" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="8.0.6" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.3">
@@ -64,4 +65,9 @@
     <_ContentIncludedByDefault Remove="Components\Pages\Dialogs\ChatLuongDialog.razor" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- Operator state belongs to the running server, never a developer's publish output. -->
+    <Content Update="App_Data\attendance-mode.json" CopyToOutputDirectory="Never" CopyToPublishDirectory="Never" />
+    <None Update="App_Data\attendance-mode.json" CopyToOutputDirectory="Never" CopyToPublishDirectory="Never" />
+  </ItemGroup>
 </Project>

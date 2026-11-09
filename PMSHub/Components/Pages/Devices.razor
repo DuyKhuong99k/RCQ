@@ -35,7 +35,7 @@
 @implements IDisposable
 
 <link rel="stylesheet" href="styles/card.css"/>
-<PageTitle>Devices</PageTitle>
+<PageTitle>Máy cân</PageTitle>
 <!-- Navbar -->
 @* <TopLayout /> *@
 <!-- / Navbar -->
@@ -44,7 +44,8 @@
 @*     <!-- Content --> *@
 
 @*     <div class="container-xxl flex-grow-1 container-p-y"> *@
-<h1>Danh Sách Thiết Bị</h1>
+<h1>Danh Sách Máy Cân</h1>
+<PMSHub.Components.Shared.AttendanceModePanel />
 @if (DeviceViewService.XiNghiep != null)
 {
     <p>Xưởng: <strong>@DeviceViewService.XiNghiep.Ten</strong></p>
@@ -912,7 +913,7 @@ else
             <div>@SelectedItems.FirstOrDefault()?.SubTitle</div>
         </Header>
         <Content>
-            @if (MainService.VmApp.ComName == nameof(ComNames.HL))
+            @if (UseHqLotSource)
             {
                 <SfComboBox TValue="string" Placeholder="Chọn Lô" FloatLabelType="FloatLabelType.Auto"
                             AllowFiltering="true" TItem="string" @bind-Value="@MainService.VmLoHq.SelectedItem"
@@ -1759,6 +1760,8 @@ else
     private bool IsVisibleDoiKhuVuc { get; set; }
     private bool IsVisibleNhatKyCanLoi { get; set; }
     private List<MayCan> SelectedItems = new();
+    private bool UseHqLotSource => SelectedItems.FirstOrDefault()?.WKv == AppKV.Hq ||
+        MainService.VmApp.ComName == nameof(ComNames.HL);
     private List<VmLogGhiNhanLoiCan> ListNhatKyCanLoi = new();
     private MayCan item = new();
     private readonly string expand = "Chi Tiết";
@@ -1951,6 +1954,20 @@ else
     {
         SelectedItems.Clear();
         SelectedItems.Add(_mayCan);
+        if (_mayCan.WKv == AppKV.Hq)
+        {
+            IsVisibleLo = false;
+            try
+            {
+                MainService.VmLoHq.ReloadHq();
+                MainService.VmLoHq.SelectedItem = _mayCan.MaLo;
+            }
+            catch (Exception)
+            {
+                ToastService.ShowToast("Không tải được danh sách lô. Kiểm tra SQL rồi thử lại.", ToastType.Error);
+                return;
+            }
+        }
         IsVisibleLo = true;
     }
 
@@ -2032,7 +2049,7 @@ else
         IsVisibleReload = false;
     }
 
-    private async void CloseDialogLo()
+    private async Task CloseDialogLo()
     {
         var hander = await ErrorHandler.HandleAsync(async () =>
         {
@@ -2040,7 +2057,7 @@ else
             var id = mayCan?.Id;
             if (id != null)
             {
-                if (MainService.VmApp.ComName == nameof(ComNames.HL))
+                if (UseHqLotSource)
                 {
                     await MayCanService.CommandSetLo(id, MainService.VmLoHq.SelectedItem);
                 }
@@ -2217,7 +2234,7 @@ else
         }
     }
 
-    private async void CloseDialogThanhPham()
+    private async Task CloseDialogThanhPham()
     {
         var mayCan = SelectedItems.FirstOrDefault();
         if (mayCan != null)
@@ -2264,7 +2281,7 @@ else
         }
     }
 
-    private async void CloseDialogSize()
+    private async Task CloseDialogSize()
     {
         var mayCan = SelectedItems.FirstOrDefault();
         if (mayCan != null)
@@ -2310,7 +2327,7 @@ else
         }
     }
 
-    private async void CloseDialogChieuXa()
+    private async Task CloseDialogChieuXa()
     {
         var mayCan = SelectedItems.FirstOrDefault();
         if (mayCan != null)
@@ -2331,7 +2348,7 @@ else
         }
     }
 
-    private async void CloseDialogCoi()
+    private async Task CloseDialogCoi()
     {
         var mayCan = SelectedItems.FirstOrDefault();
         if (mayCan != null)
@@ -2352,7 +2369,7 @@ else
         }
     }
 
-    private async void CloseDialogAo()
+    private async Task CloseDialogAo()
     {
         var mayCan = SelectedItems.FirstOrDefault();
         if (mayCan != null)
@@ -2373,7 +2390,7 @@ else
         }
     }
 
-    private async void CloseDialogPhuongTien()
+    private async Task CloseDialogPhuongTien()
     {
         var mayCan = SelectedItems.FirstOrDefault();
         if (mayCan != null)
@@ -2394,7 +2411,7 @@ else
         }
     }
 
-    private async void CloseDialogChatLuong()
+    private async Task CloseDialogChatLuong()
     {
         var mayCan = SelectedItems.FirstOrDefault();
         if (mayCan != null)
@@ -2449,12 +2466,12 @@ else
         if (!handler.IsSuccess)
             ToastService.ShowToast("Chưa chuyển được cân: " + handler.Error?.Message, ToastType.Error);
     }
-    private async void CloseDialogNhanKyCanLoi()
+    private void CloseDialogNhanKyCanLoi()
     {
         IsVisibleNhatKyCanLoi = false;
     }
 
-    private async void CloseDialogNguyenLieu(MouseEventArgs obj)
+    private async Task CloseDialogNguyenLieu(MouseEventArgs obj)
     {
         var mayCan = SelectedItems.FirstOrDefault();
         if (mayCan != null)
@@ -2481,7 +2498,7 @@ else
         DeviceViewService.Dispose();
     }
 
-    private async void OverlayClick(OverlayModalClickEventArgs args)
+    private void OverlayClick(OverlayModalClickEventArgs args)
     {
         args.PreventFocus = true;
         HideAllDialogs();

@@ -12,6 +12,11 @@ namespace Services;
 /// <summary>Restore HQ weight tickets at their original time; never overwrite an existing Id.</summary>
 public static class HqWeightBackupProcessor
 {
+    // Compatibility for historical offline tickets created before groups required shifts.
+    // Online LITE must never use this exception: it always validates the open shift.
+    public static bool RequiresLegacyAttendance(NhanVienDaiThanh? employee) =>
+        !ScaleProductionAttendancePolicy.IsProductionCard(employee) || employee?.IsNhom != true;
+
     public static HQ_PhieuCan Normalize(DataCoummunication data, string machine, DateTime now)
     {
         if (!int.TryParse(machine, NumberStyles.None, CultureInfo.InvariantCulture, out var number) || number <= 0)
@@ -37,8 +42,7 @@ public static class HqWeightBackupProcessor
         var weight = data.TrongLuongNhan ?? data.TrongLuong;
         if (data.TrongLuongNhan.HasValue && data.TrongLuong != 0 && data.TrongLuong != data.TrongLuongNhan)
             throw new ArgumentException("Hai trường trọng lượng backup không thống nhất.");
-        if (weight <= 0 || weight >= 1000000000000000m || data.TrongLuongTare < 0 || data.TrongLuongTare > weight
-            || decimal.Round(weight,3) != weight || decimal.Round(data.TrongLuongTare,3) != data.TrongLuongTare)
+        if (!HqWeightValues.IsValidTicket(weight, data.TrongLuongTare))
             throw new ArgumentException($"Trọng lượng/tare không hợp lệ trong phiếu {id}.");
         if (data.Status is < 0 or > 2)
             throw new ArgumentException($"Phiếu {id} bị hủy hoặc có trạng thái không hợp lệ; không khôi phục tự động.");
@@ -60,7 +64,8 @@ public static class HqWeightBackupProcessor
 
     private static bool CodeEquals(string? left, string? right) => string.Equals(left,right,StringComparison.OrdinalIgnoreCase);
     public static bool MatchesExisting(HQ_PhieuCan saved, HQ_PhieuCan requested) =>
-        saved.Id == requested.Id && saved.MayCan == requested.MayCan && saved.NgayGio == requested.NgayGio
+        saved.Id == requested.Id && saved.STT == requested.STT && saved.TheId == requested.TheId
+        && saved.MayCan == requested.MayCan && saved.NgayGio == requested.NgayGio
         && saved.TheIdNhanVien == requested.TheIdNhanVien && saved.TrongLuong == requested.TrongLuong
         && saved.TrongLuongTare == requested.TrongLuongTare && CodeEquals(saved.MaLo,requested.MaLo)
         && CodeEquals(saved.MaSize,requested.MaSize) && CodeEquals(saved.MaThanhPham,requested.MaThanhPham)
@@ -95,11 +100,12 @@ public static class HqWeightBackupProcessor
     }
 
     public static Tuple<bool,string> Process(IReadOnlyList<DataCoummunication> records, ClientInfo client,
-        string cmd, int maxHours, bool batch, Action<IReadOnlyList<HQ_PhieuCan>>? onCommitted = null)
+        string cmd, int maxHours, bool batch, Action<IReadOnlyList<HQ_PhieuCan>>? onCommitted = null,
+        bool attendanceEnabled = true)
     {
         try {
             if (records.Count == 0 || records.Any(x => x is null)) throw new ArgumentException("Backup không có phiếu hợp lệ.");
-            var now=DateTimeOffset.UtcNow.ToOffset(TimeSpan.FromHours(7)).DateTime;
+            var now=ScaleWorkshopHistory.BusinessNow();
             var items=records.Select(x=>Normalize(x,client.Id,now)).ToArray();
             if (items.Select(x=>x.Id).Distinct(StringComparer.Ordinal).Count()!=items.Length)
                 throw new ArgumentException("Một đợt backup có Id trùng. Chưa lưu đợt này.");
@@ -141,12 +147,12 @@ public static class HqWeightBackupProcessor
 
             var minTime = items.Min(x => x.NgayGio).AddHours(-maxHours);
             var maxTime = items.Max(x => x.NgayGio);
-            var preloadedScans = db.CheckInOuts.AsNoTracking()
+            var preloadedScans = attendanceEnabled ? db.CheckInOuts.AsNoTracking()
                 .Where(x => cardCodes.Contains(x.MaChamCong)
                     && (x.TrangThai == "Vào" || x.TrangThai == "Ra")
                     && x.ThoiGian >= minTime && x.ThoiGian <= maxTime)
                 .OrderByDescending(x => x.ThoiGian).ThenByDescending(x => x.Id)
-                .ToList();
+                .ToList() : new List<CheckInOut>();
 
             foreach(var item in items) {
                 if(savedMap.TryGetValue(item.Id, out var saved)) {
@@ -175,7 +181,7 @@ public static class HqWeightBackupProcessor
                         .Select(x=>new {x.MaLoaiNguyenLieu,x.MaXuong}).Distinct().ToList();
                     ResolveHistoricalMetadata(item,references.Select(x=>new HistoricalMetadata(x.MaLoaiNguyenLieu,x.MaXuong)).ToArray());
                 }
-                if(ScaleProductionAttendancePolicy.RequiresAttendance(employee)) {
+                if(attendanceEnabled && RequiresLegacyAttendance(employee)) {
                     var scan = preloadedScans
                         .Where(x => x.MaChamCong == item.TheIdNhanVien && x.ThoiGian <= item.NgayGio)
                         .OrderByDescending(x => x.ThoiGian).ThenByDescending(x => x.Id)
@@ -200,17 +206,17 @@ public static class HqWeightBackupProcessor
             db.SaveChanges(); transaction.Commit();
             // Updating UI state must never turn a committed database batch into a failure acknowledgement.
             try { onCommitted?.Invoke(acknowledgedItems); }
-            catch(Exception ex) { Console.WriteLine($"[HQ BACKUP UI ERROR] Machine={client.Id}; {ex.Message}"); }
+            catch(Exception ex) { HqFirmwareSend.Log($"[HQ BACKUP UI ERROR] Machine={client.Id}; {ex.Message}"); }
             var acknowledgements=acknowledgedItems.Select(x=>new DataCoummunication {
                 Id=x.Id, IdIn=x.Id, IdOut=x.Id, MayCan=x.MayCan, NgayGio=x.NgayGio.ToString("yyyyMMddHHmmss"),
                 TheId=x.TheIdNhanVien, TheIdNhanVien=x.TheIdNhanVien, MaNhanVien=x.MaNhanVien,
                 MaLo=x.MaLo,MaSize=x.MaSize,MaThanhPham=x.MaThanhPham,MaLoaiNguyenLieu=x.MaLoaiNguyenLieu,MaXuong=x.MaXuong,
                 TrongLuong=x.TrongLuong,TrongLuongTare=x.TrongLuongTare,Status=1,ChiSanLuong=1,STT=x.STT
             }).ToArray();
-            Console.WriteLine($"[HQ BACKUP OK] Machine={client.Id}; Cmd={cmd}; Received={items.Length}; Inserted={inserted}; Existing={existing}");
+            HqFirmwareSend.Log($"[HQ BACKUP OK] Machine={client.Id}; Cmd={cmd}; Received={items.Length}; Inserted={inserted}; Existing={existing}");
             return Tuple.Create(true,JsonConvert.SerializeObject(batch?(object)acknowledgements:acknowledgements[0]));
         } catch(Exception ex) {
-            Console.WriteLine($"[HQ BACKUP ERROR] Machine={client.Id}; Cmd={cmd}; {ex}");
+            HqFirmwareSend.Log($"[HQ BACKUP ERROR] Machine={client.Id}; Cmd={cmd}; {ex}");
             var message=ex is ArgumentException ? ex.Message : "Không lưu được backup HQ. Đợt này chưa được xác nhận lưu; kiểm tra log PMSHub rồi gửi lại cùng Id.";
             return Tuple.Create(false,JsonConvert.SerializeObject(new DataError {Cmd=cmd,ErrorString=message}));
         }

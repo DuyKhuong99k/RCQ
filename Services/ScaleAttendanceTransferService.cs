@@ -36,6 +36,16 @@ public static class ScaleAttendanceTransferService
             IF @result < 0 THROW 51001, N'Không thể khóa ca chấm công.', 1;");
     }
 
+    public static Task LockCardAsync(dbPMScontext db, string card, CancellationToken cancellation)
+    {
+        var resource = "ScaleAttendance:card:" + card.Trim().ToUpperInvariant();
+        return db.Database.ExecuteSqlInterpolatedAsync($@"
+            DECLARE @result int;
+            EXEC @result=sys.sp_getapplock @Resource={resource},@LockMode='Exclusive',
+                @LockOwner='Transaction',@LockTimeout=5000;
+            IF @result<0 THROW 51001,N'Không thể khóa ca chấm công.',1;", cancellation);
+    }
+
     public static List<CheckInOut> OpenShifts(dbPMScontext db, string? card = null) =>
         OpenShiftsQuery(db.CheckInOuts.AsNoTracking(), card)
             .OrderByDescending(x => x.ThoiGian).ToList();
@@ -68,8 +78,9 @@ public static class ScaleAttendanceTransferService
 
     // Time is deliberately NOT an argument: even an administrator cannot backdate a transfer.
     public static string Transfer(int userId, string openId, int targetMachine,
-        string reason, int maxShiftHours)
+        string reason, int maxShiftHours, bool attendanceEnabled = true)
     {
+        if (!attendanceEnabled) throw new InvalidOperationException(AttendanceModeMessages.TransferDisabled);
         var time = ServerTransferTime(DateTimeOffset.UtcNow);
         using var db = new dbPMScontext();
         var user = db.NguoiDungs.AsNoTracking().FirstOrDefault(x => x.Id == userId);
@@ -97,6 +108,8 @@ public static class ScaleAttendanceTransferService
         var active = OpenShifts(db, original.MaChamCong);
         var source = active.FirstOrDefault(x => x.Id == openId);
         if (source == null) throw new InvalidOperationException("Ca đã thay đổi hoặc đã Ra. Tải lại danh sách.");
+        if (ScaleWorkContext.FromSnapshot(ScaleOnlineAttendanceService.Snapshot(db, source.Id)) != null)
+            throw new InvalidOperationException(ScaleOnlineMessages.ManualTransfer);
         if (source.Isforget != 0) throw new InvalidOperationException("Ca đang bị đánh dấu lỗi. Cần xử lý giờ Ra thực tế trước khi chuyển máy.");
         var rootStart = source.ThoiGian;
         if (time <= source.ThoiGian || ScaleAttendanceProcessor.IsShiftExpired(rootStart, time, maxShiftHours, source.CaDem) ||

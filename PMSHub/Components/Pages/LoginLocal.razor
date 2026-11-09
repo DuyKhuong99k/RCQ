@@ -9,27 +9,24 @@
 @layout ErrorLayout
 @rendermode InteractiveServer
 @inject IMainService MainService
-@inject IJSRuntime jsRuntime
 @inject ILoginService loginService
 @inject NavigationManager Navigation
 @inject ISessionService SessionService
-@inject IMessageService MessageService
 @inject ILocalStorageService LocalStorage
-@inject IDeviceViewService DeviceViewService ;
-@inject IJSRuntime JsRuntime
 @inject IToastService ToastService
+@inject Services.IHubEmployeeCardCatalog EmployeeCardCatalog
+@inject ILogger<LoginLocal> Logger
 @inherits AuthenticatedComponent
-
 
 <PageTitle>Đăng Nhập</PageTitle>
 
 <div class="container-xxl">
     <div class="authentication-wrapper authentication-basic container-p-y">
         <div class="authentication-inner">
-            <!-- Register -->
+
             <div class="card">
                 <div class="card-body">
-                    <!-- Logo -->
+
                     <div class="app-brand justify-content-center">
                         <a href="index.html" class="app-brand-link gap-2">
                             <span class="app-brand-logo demo">
@@ -37,7 +34,7 @@
                             </span>
                         </a>
                     </div>
-                    <!-- /Logo -->
+
                     <h4 class="mb-2">Chào mừng đến với PMHub</h4>
                     <p class="mb-4">Vui lòng đăng nhập để bất đầu!</p>
                     <div class="mb-3">
@@ -78,18 +75,12 @@
                             </span>
                         </div>
                     </div>
-                    @*
-                    <div class="mb-3">
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="remember-me" />
-                            <label class="form-check-label" for="remember-me"> Giữ Phiên Đăng Nhập </label>
-                        </div>
-                    </div> *@
+
                     <div class="mb-3">
                         <div class="col-12">
-                            <button @onclick="DoLogin" class="btn btn-primary w-100" type="submit" id="loginBtn">
+                            <button @onclick="DoLogin" disabled="@isLoggingIn" class="btn btn-primary w-100" type="submit" id="loginBtn">
                                 <div class=" align-items-center">
-                                    <span id="txtDangNhap">Đăng Nhập</span>
+                                    <span id="txtDangNhap">@(isLoggingIn ? "Đang đăng nhập..." : "Đăng Nhập")</span>
                                     <div id="loadingIndicator" class=" spinner-border text-secondary" role="status" style="display: none;">
                                         <span class="visually-hidden">Đang tải...</span>
                                     </div>
@@ -108,128 +99,4 @@
     font-size: 17px;
     }
 
-
 </style>
-
-@code {
-    SfToast ToastObj;
-    private string ToastPosition = "Center";
-    private string ToastContent = "Tên đăng nhập hoặc mật khẩu không chính xác.";
-    private string userName { get; set; }
-    private string passWord { get; set; }
-    private string returnUrl;
-    private string selectedWorkshopCode = "";
-    private List<XiNghiep> AvailableWorkshops => MainService.VmXiNghiep.Items
-        .Where(x => x.SuDung == true).ToList();
-
-    // protected override void OnInitialized()
-    // {
-    //     // Lấy query string từ URL
-    //     // var uri = new Uri(Navigation.Uri);
-    //     // var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
-    //     //
-    //     // // Kiểm tra và lấy giá trị của `returnUrl`
-    //     // if (query.TryGetValue("returnUrl", out var url))
-    //     // {
-    //     //     returnUrl = url;
-    //     // }
-    // }
-    protected override async Task OnInitializedAsync()
-    {
-        var uri = new Uri(Navigation.Uri);
-        var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
-
-        // Kiểm tra và lấy giá trị của `returnUrl`
-        if (query.TryGetValue("returnUrl", out var url))
-        {
-            returnUrl = url;
-        }
-        if (loginService.IsUserAuthenticated())
-        {
-            Navigation.NavigateTo(returnUrl ?? "/", forceLoad: true);
-        }
-
-        await base.OnInitializedAsync();
-    }
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            // Lấy giá trị XuongId từ LocalStorage
-            //var xuongId = await JsRuntime.InvokeAsync<string>("localStorage.getItem", "XuongId");
-            var xuongId = await LocalStorage.GetItemAsync<string>("XuongId");
-            if (!string.IsNullOrEmpty(xuongId))
-            {
-                // Gán giá trị vào SelectedItem trong ViewModel
-                selectedWorkshopCode = AvailableWorkshops.FirstOrDefault(x => x.Ma == xuongId)?.Ma ?? "";
-                await InvokeAsync(StateHasChanged);
-            }
-        }
-    }
-
-
-
-    private bool isLoggingIn = false;
-
-    private async Task DoLogin()
-    {
-        if (isLoggingIn) return;
-        isLoggingIn = true;
-        try
-        {
-            var workshop = AvailableWorkshops.FirstOrDefault(x => x.Ma == selectedWorkshopCode);
-            if (workshop == null)
-            {
-                ToastService.ShowToast("Vui lòng chọn xưởng trước khi đăng nhập.", ToastType.Error);
-                return;
-            }
-            var loginResult = await Task.Run(() => loginService.LoginLocal(userName, passWord));
-            if (loginResult)
-            {
-                SessionService.Set("XuongId", workshop.Ma);
-                await LocalStorage.SetItemAsync("XuongId", workshop.Ma);
-                await LocalStorage.SetItemAsync("PageReloadKey", "false");
-                var userId = loginService.GetSessionVal("Username");
-                var o = new ToastOption
-                {
-                    Title = "Thông Báo",
-                    Content = $"User: {userId} - Đăng Nhập Thành Công",
-                };
-                o.SetType(ToastType.Success);
-
-                ToastService.ShowToast(o);
-                await Task.Delay(2000);
-                Navigation.NavigateTo(returnUrl ?? "/", forceLoad: true);
-            }
-            else
-            {
-                var o = new ToastOption
-                    {
-                        Title = "Thông Báo",
-                        Content = $"Tên đăng nhập hoặc mật khẩu không chính xác."
-                    };
-                o.SetType(ToastType.Error);
-
-                ToastService.ShowToast(o);
-            }
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e);
-        }
-        finally
-        {
-            isLoggingIn = false;
-        }
-    }
-
-    private async void keyUpEvent(KeyboardEventArgs obj)
-    {
-        if (obj.Code == "Enter" || obj.Code == "NumpadEnter")
-        {
-            await InvokeAsync(StateHasChanged);
-            await DoLogin();
-        }
-    }
-
-}

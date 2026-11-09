@@ -364,3 +364,7 @@ FodyWeavers.xsd
 **/.DS_Store
 .DS_Store
 */.DS_Store
+
+# Private operator setting; preserve it on each deployed Hub instead of publishing local state.
+/PMSHub/App_Data/attendance-mode.json
+/PMSHub/App_Data/attendance-mode.json.*.tmp

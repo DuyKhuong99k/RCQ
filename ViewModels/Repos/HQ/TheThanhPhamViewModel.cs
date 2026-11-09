@@ -52,6 +52,7 @@ namespace ViewModels.Repos.HQ
 
         private AppViewModel VmApp => AppViewModel.Instance;
         private MessageViewModel VmMessage => MessageViewModel.Instance;
+        private bool IsHq => string.Equals(VmApp.ComName, nameof(ComNames.RCQTG), StringComparison.OrdinalIgnoreCase);
 
         public TheThanhPham CopyItem(TheThanhPham item)
         {
@@ -242,7 +243,7 @@ namespace ViewModels.Repos.HQ
         public int Insert<T>(T item)
         {
             var dao = new Dao.Repos.HQ.TheThanhPham();
-            return dao.Insert(item);
+            return IsHq ? dao.InsertHq(item) : dao.Insert(item);
         }
 
         [RelayCommand(CanExecute = nameof(IsItemPass))]
@@ -318,7 +319,7 @@ namespace ViewModels.Repos.HQ
                 Items.Clear();
             }
 
-            if (VmApp.ComName == nameof(ComNames.RCQTG))
+            if (IsHq)
             {
                 var items = GetHqs<TheThanhPham>();
                 if (items.Any())
@@ -389,7 +390,7 @@ namespace ViewModels.Repos.HQ
         {
 
             var dao = new Dao.Repos.HQ.TheThanhPham();
-            return dao.Update(item);
+            return IsHq ? dao.UpdateHq(item) : dao.Update(item);
         }
         public int Update<T>(List<T> items)
         {
@@ -422,7 +423,7 @@ namespace ViewModels.Repos.HQ
                 //throw;
             }
             var dao = new Dao.Repos.HQ.TheThanhPham();
-            return dao.Update(items);
+            return IsHq ? dao.UpdateHq(items) : dao.Update(items);
         }
         [RelayCommand(CanExecute = nameof(IsItemPass))]
         private void Update_(TheThanhPham item)

@@ -225,7 +225,7 @@ namespace PMSHub.Controllers
             //    total = items.Count,
             //    PageIndex 
             //};
-            var items = mainService.VmThe.Items.Where(x => x.NgayGio.Date >= date.Date).OrderBy(x => x.MaNhanVien)
+            var items = mainService.VmThe.Items.Where(x => x.NgayGio.Date >= date.Date).OrderBy(x => x.MaNhanVien).ThenBy(x => x.MaTheTu)
                 .Skip((PageIndex - 1) * PageSize).Take(PageSize).Select(x => new
                 {
                     Id = x.MaTheTu, MaNhanVien = x.MaNhanVien, MaThanhPham = "", MaSize = "", ColorId = "",

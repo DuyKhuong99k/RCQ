@@ -9,14 +9,15 @@
 @using Syncfusion.Blazor.Grids
 @inject IJSRuntime JS
 
-<PageTitle>Thiết bị tại xưởng</PageTitle>
+<PageTitle>Máy chấm công tại xưởng</PageTitle>
 <div class="workshop-page">
     <div class="workshop-heading">
-        <div><h1>Thiết bị tại xưởng</h1><div class="workshop-summary">Tổng máy: <b>@Devices.Count</b><span class="summary-online">Đang bật: <b>@Devices.Count(x => x.IsOnline)</b></span><span class="summary-offline">Đang tắt: <b>@Devices.Count(x => !x.IsOnline)</b></span></div></div>
+        <div><h1>Máy chấm công tại xưởng</h1><div class="workshop-summary">Tổng máy: <b>@Devices.Count</b><span class="summary-online">Đang bật: <b>@Devices.Count(x => x.IsOnline)</b></span><span class="summary-offline">Đang tắt: <b>@Devices.Count(x => !x.IsOnline)</b></span></div></div>
         <button class="e-btn e-primary" @onclick="LoadAsync">Tải lại</button>
     </div>
+    <PMSHub.Components.Shared.AttendanceModePanel />
     @if (Devices.Count == 0)
-    { <div class="empty-workshop">Chưa có thiết bị tại xưởng kết nối.</div> }
+    { <div class="empty-workshop">Chưa có máy chấm công tại xưởng kết nối.</div> }
     else
     {
         <div class="device-card-grid">
