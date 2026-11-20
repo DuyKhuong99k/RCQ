@@ -94,6 +94,14 @@ internal static class HubEmployeeUiChecks
 
         var root = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../../"));
         var markup = File.ReadAllText(Path.Combine(root, "PMSHub/Components/Pages/NhanVien.razor"));
+        var employeeGridStart = markup.IndexOf("<SfGrid @ref=\"_grid\"", StringComparison.Ordinal);
+        var employeeGrid = markup[employeeGridStart..markup.IndexOf("</SfGrid>", employeeGridStart, StringComparison.Ordinal)];
+        check(employeeGrid.Contains("AllowFiltering=\"true\"") && employeeGrid.Contains("Type=\"FilterType.Excel\"") &&
+              !employeeGrid.Contains("AllowFiltering=\"false\""),
+            "Bảng Nhân viên có bộ lọc từng cột kiểu Excel cho cả mã, tên và cờ có/không");
+        check(employeeGrid.Contains("DataSource=\"@VisibleEmployees\"") && employeeGrid.Contains("PageSizes=\"@(new[] { \"20\", \"50\", \"100\" })\"") &&
+              employeeGrid.Contains("OnActionBegin=\"ClearSelectionOnActionAsync\""),
+            "Lọc cột kết hợp tìm nhanh, giữ phân trang 20/50/100 và xóa lựa chọn cũ tránh sửa/xóa nhầm");
         var importGridStart = markup.IndexOf("<SfGrid TValue=\"NhanVienImportRow\"", StringComparison.Ordinal);
         var importGrid = markup[importGridStart..markup.IndexOf("</SfGrid>", importGridStart, StringComparison.Ordinal)];
         check(importGrid.Contains("AllowFiltering=\"true\"") && importGrid.Contains("Type=\"FilterType.Excel\"") &&

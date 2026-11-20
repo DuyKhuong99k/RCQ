@@ -32,8 +32,9 @@
                @bind="_search" @bind:event="oninput" @bind:after="ClearSelectionAsync" disabled="@_busy" />
     </div>
     <p class="employee-selection" role="status">@(_selectedEmployee == null ? "Chọn một nhân viên trong bảng để sửa hoặc xóa." : $"Đã chọn: {_selectedEmployee.MaNhanVien} — {_selectedEmployee.Name}")</p>
-    <SfGrid @ref="_grid" TValue="HubEmployeeEdit" DataSource="@VisibleEmployees" AllowPaging="true" AllowSorting="true" AllowSelection="true" Width="100%" Height="500">
+    <SfGrid @ref="_grid" TValue="HubEmployeeEdit" DataSource="@VisibleEmployees" AllowPaging="true" AllowSorting="true" AllowFiltering="true" AllowSelection="true" Width="100%" Height="500">
         <GridPageSettings PageSize="20" PageSizes="@(new[] { "20", "50", "100" })" />
+        <GridFilterSettings Type="FilterType.Excel" />
         <GridSelectionSettings Mode="SelectionMode.Row" Type="SelectionType.Single" />
         <GridEvents TValue="HubEmployeeEdit" RowSelected="SelectEmployee" RowDeselected="DeselectEmployee" OnActionBegin="ClearSelectionOnActionAsync" />
         <GridColumns>

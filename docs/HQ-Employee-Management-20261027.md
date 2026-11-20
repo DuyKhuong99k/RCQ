@@ -2,6 +2,10 @@
 
 ## Vị trí và phạm vi
 
+Cập nhật 09/11/2026: bảng Nhân viên có bộ lọc từng cột kiểu Excel, tương tự các trang thẻ.
+Lọc kết hợp với tìm kiếm nhanh trên dữ liệu thuộc xưởng đang đăng nhập, không truy vấn SQL theo mỗi thao tác lọc.
+Giữ phân trang 20/50/100 và bỏ lựa chọn dòng cũ khi đổi bộ lọc để tránh sửa/xóa nhầm hồ sơ.
+
 - Mã Hub: `D:\RCQ\RCQ-ProductMaterialWorkshop`, nhánh `feature/hq-shift-product-material-workshop`.
 - Đối chiếu form và journal với `D:\RCQ\RCQ`, PMS ở nhánh `Dev_Khuong`: `PMS/Controllers/DanhMuc/StaffController.cs`, `PMS/Views/DanhMuc/Staff/NhanVienView.cshtml`, `WebAPI/Controllers/NhanVienDaiThanhsController.cs`.
 - Không checkout/merge nhánh, sửa cấu hình conflict hoặc chỉnh PMS Báo Cáo.
