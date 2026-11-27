@@ -69,5 +69,7 @@
     <!-- Operator state belongs to the running server, never a developer's publish output. -->
     <Content Update="App_Data\attendance-mode.json" CopyToOutputDirectory="Never" CopyToPublishDirectory="Never" />
     <None Update="App_Data\attendance-mode.json" CopyToOutputDirectory="Never" CopyToPublishDirectory="Never" />
+    <Content Remove="App_Data\ScaleReportSync\**" />
+    <None Remove="App_Data\ScaleReportSync\**" />
   </ItemGroup>
 </Project>

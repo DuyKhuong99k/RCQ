@@ -45,6 +45,9 @@ builder.Services.AddDataProtection()
     .SetApplicationName("PMSHub");
 // Đăng ký HttpClient factory
 builder.Services.AddHttpClient();
+builder.Services.AddScoped<PMSHub.ReportImport.ScaleReportSync>();
+builder.Services.AddHttpClient("ScaleReportSync").ConfigurePrimaryHttpMessageHandler(() =>
+    new HttpClientHandler { AllowAutoRedirect = false, UseProxy = false });
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();

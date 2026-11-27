@@ -1,0 +1,259 @@
+@page "/NhapBaoCaoCan"
+@inherits AuthenticatedComponent
+@rendermode InteractiveServer
+@using Microsoft.EntityFrameworkCore
+@using Models.Repos
+@using Models.Repos.Models
+@using PMSHub.ReportImport
+@using ViewModels.Repos.Hubs.IServices
+@inject ScaleReportSync Sync
+@inject IMayCansService Machines
+@inject IDeviceViewService Devices
+@inject ISessionService Session
+@inject ILoginService Login
+@inject IMainService Main
+@inject IJSRuntime Js
+@inject ILogger<ScaleReportImport> Logger
+
+<PageTitle>Nạp báo cáo cân — PMSHub</PageTitle>
+<h3>Nạp báo cáo cân</h3>
+@if (_ready)
+{
+        <section class="mb-4" aria-label="Đồng bộ báo cáo từ cân">
+            <h4>Đồng bộ báo cáo theo ngày</h4>
+            <fieldset disabled="@_busy">
+                <label for="report-scale">Cân HQ</label>
+                <select id="report-scale" class="form-select" @bind="_syncMachine">
+                    <option value="">Chọn cân</option>
+                    @foreach (var scale in Devices.Items.Where(x => x.WKv == Vars.AppKV.Hq))
+                    {
+                        <option value="@scale.Id">@scale.Id — @scale.DisplayName</option>
+                    }
+                </select>
+                <label for="report-day">Ngày báo cáo</label>
+                <input id="report-day" type="date" class="form-control" @bind="_syncDay" />
+                <button type="button" class="btn btn-outline-primary mt-2" @onclick="SyncDay">Tải và đồng bộ từ cân</button>
+            </fieldset>
+        </section>
+        <section class="csv-import-panel" aria-label="Nạp file báo cáo CSV">
+            <p>Chọn file xuất từ <strong>Báo cáo → Chi tiết → Xuất báo cáo</strong> trên cân. Không cần cân kết nối Hub.</p>
+            <p>Hệ thống tự nhận mã cân từ Id và ngày từ nội dung file.</p>
+            <p>
+                <a href="@ScaleReportCsv.TemplateDownloadUrl" download="MauBaoCaoCan.csv" data-enhance-nav="false">Tải file CSV mẫu</a>
+                — Mẫu chỉ có tiêu đề các cột bắt buộc, không có phiếu mẫu.
+            </p>
+            <p class="small">Mỗi file chỉ chứa phiếu của một cân trong một ngày. Giữ nguyên số 0 đầu mã, dùng ngày giờ dạng <code>yyyy-MM-dd HH:mm:ss</code> và dấu chấm cho phần thập phân.</p>
+            @if (!string.IsNullOrEmpty(_message))
+            {
+                <p role="status" class="alert @(_failed ? "alert-danger" : "alert-success")">@_message</p>
+            }
+            <fieldset disabled="@_busy">
+                <InputFile OnChange="ReadFile" accept=".csv" class="form-control" />
+                @if (_file != null)
+                {
+                    <p class="mt-3"><strong>@_fileName</strong> — cân <strong>@_file.Machine</strong>, ngày @_file.Day.ToString("dd/MM/yyyy"), @_file.Rows.Count phiếu,
+                        @_file.Rows.Sum(x => x.Net).ToString("0.###") kg.</p>
+                    <p>Nguyên liệu được lấy từ từng phiếu trong CSV và đối chiếu với danh mục trên server. Kiểm tra mã thành phẩm và size trước khi nạp.</p>
+                    <table class="table"><thead><tr><th>Tên trong file</th><th>Mã trên server</th></tr></thead><tbody>
+                        @foreach (var map in _productMap)
+                        {
+                            <tr><td>Thành phẩm: @map.Label</td><td><select class="form-select" @bind="map.Code" @bind:after="ClearAssignmentCheck" aria-label="Mã thành phẩm">
+                                <option value="">Chọn mã thành phẩm</option>
+                                @foreach (var value in _products) { <option value="@value.Id">@value.Id — @value.Ten</option> }
+                            </select></td></tr>
+                        }
+                        @foreach (var map in _sizeMap)
+                        {
+                            <tr><td>Size: @map.Label</td><td><select class="form-select" @bind="map.Code" @bind:after="ClearAssignmentCheck" aria-label="Mã size">
+                                <option value="">Chọn mã size</option>
+                                @foreach (var value in _sizes) { <option value="@value.Id">@value.Id — @value.Ten</option> }
+                            </select></td></tr>
+                        }
+                        @foreach (var material in _materialCodes)
+                        {
+                            <tr><td>Nguyên liệu: @material.Key</td><td>@material.Value</td></tr>
+                        }
+                    </tbody></table>
+                    <p>Chỉ nạp file đầy đủ của ngày này. Khi xác nhận, hệ thống sao lưu rồi thay toàn bộ phiếu SQL của đúng cân/ngày trong file.</p>
+                    <p class="small">CSV không lưu STT, cờ tính sản lượng và nhân viên phục vụ/bàn kiểm: nạp STT = 0, tính sản lượng = có, các nhân viên phụ để trống.</p>
+                }
+            </fieldset>
+            <div class="csv-import-actions">
+                <button type="button" class="btn btn-outline-primary" disabled="@(_busy || _file == null)" @onclick="CheckAssignments">Kiểm tra dữ liệu</button>
+                <button type="button" class="btn btn-primary" disabled="@(_busy || _file == null)" @onclick="Import">@(_busy ? "Đang xử lý…" : "Kiểm tra và nạp")</button>
+            </div>
+        </section>
+}
+else
+{
+    <p role="status">@(_message.Length == 0 ? "Đang kiểm tra xưởng và quyền truy cập…" : _message)</p>
+}
+
+@code {
+    private bool _ready, _busy, _failed;
+    private string _syncMachine = "";
+    private DateOnly _syncDay = DateOnly.FromDateTime(Services.ScaleWorkshopHistory.BusinessNow());
+    private string _machine = "", _fileName = "", _message = "";
+    private ScaleReportCsv.Document? _file;
+    private List<HQ_ThanhPham> _products = [];
+    private List<HQ_Size> _sizes = [];
+    private IReadOnlyDictionary<string, string> _materialCodes = new Dictionary<string, string>();
+    private List<Mapping> _productMap = [], _sizeMap = [];
+    private sealed class Mapping(string key, string label, string code = "")
+    { public string Key { get; } = key; public string Label { get; } = label; public string Code { get; set; } = code; }
+
+    private string Workshop()
+    {
+        var workshop = Session.Get("XuongId");
+        var machine = Machines.Find(_machine);
+        if (!Login.IsUserAuthenticated() || string.IsNullOrEmpty(workshop) || machine == null ||
+            machine.WKv != Vars.AppKV.Hq || machine.MaXuong != workshop || !Devices.Items.Any(x => x.Id == _machine))
+            throw new UnauthorizedAccessException("Mã cân trong file không phải cân HQ thuộc xưởng và phạm vi tài khoản đang đăng nhập.");
+        return workshop;
+    }
+
+    protected override async Task OnAuthenticatedAsync()
+    {
+        try
+        {
+            var workshop = Session.Get("XuongId");
+            if (!int.TryParse(Session.Get("UserId"), out var userId)) throw new UnauthorizedAccessException("Phiên đăng nhập không hợp lệ.");
+            await RequireActiveUserAsync();
+            Devices.XiNghiep = Main.VmXiNghiep.Items.FirstOrDefault(x => x.Ma == workshop && x.SuDung == true);
+            if (Devices.XiNghiep == null) throw new UnauthorizedAccessException("Chưa xác định xưởng đăng nhập.");
+            Devices.Load(userId);
+            _ready = true;
+        }
+        catch (Exception error) { Error(error); }
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task RequireActiveUserAsync()
+    {
+        await using var db = new dbPMScontext();
+        if (!Login.IsUserAuthenticated() || !int.TryParse(Session.Get("UserId"), out var id) ||
+            !await db.NguoiDungs.AnyAsync(x => x.Id == id && x.IsActive == true))
+            throw new UnauthorizedAccessException("Vui lòng đăng nhập bằng tài khoản đang hoạt động để nạp hoặc đồng bộ báo cáo cân.");
+    }
+
+    private async Task SyncDay()
+    {
+        if (_busy) return;
+        _busy = true; _message = "";
+        try
+        {
+            await RequireActiveUserAsync();
+            var machine = Machines.Find(_syncMachine);
+            var workshop = Session.Get("XuongId");
+            if (machine == null || machine.WKv != Vars.AppKV.Hq || string.IsNullOrWhiteSpace(workshop) ||
+                machine.MaXuong != workshop || !Devices.Items.Any(x => x.Id == machine.Id))
+                throw new UnauthorizedAccessException("Chọn cân HQ thuộc xưởng đang đăng nhập.");
+            var address = machine.IPAddr ?? "";
+            var day = _syncDay;
+            var report = await Sync.DownloadAsync(machine.Id, address, day);
+            if (report.Rows.Count == 0) throw new ArgumentException("Báo cáo rỗng. Không thay dữ liệu SQL.");
+            if (!await Js.InvokeAsync<bool>("confirm", $"Cân {machine.Id}, ngày {day:dd/MM/yyyy}: {report.Rows.Count} phiếu / {report.Net:0.###} kg. " +
+                "Hãy tạm dừng cân. Xác nhận sao lưu và thay toàn bộ phiếu SQL của cân/ngày này?")) return;
+            var latest = await Sync.DownloadAsync(machine.Id, address, day);
+            if (!Newtonsoft.Json.Linq.JToken.DeepEquals(report.Rows, latest.Rows) || report.Net != latest.Net)
+                throw new InvalidOperationException("Báo cáo trên cân đã thay đổi. Kiểm tra lại trước khi đồng bộ.");
+            await RequireActiveUserAsync();
+            if (Session.Get("XuongId") != workshop || !Devices.Items.Any(x => x.Id == machine.Id))
+                throw new UnauthorizedAccessException("Xưởng hoặc phạm vi tài khoản đã thay đổi.");
+            var result = await Sync.ReplaceAsync(latest, workshop);
+            _failed = false;
+            _message = $"Đã đồng bộ {result.Imported} phiếu / {result.Net:0.###} kg; thay {result.Removed} phiếu cũ. Bản sao: {result.Backup}";
+        }
+        catch (Exception error) { Error(error); }
+        finally { _busy = false; }
+    }
+
+    private async Task ReadFile(InputFileChangeEventArgs args)
+    {
+        if (_busy) return;
+        _busy = true; _file = null; _message = "";
+        try
+        {
+            if (!Login.IsUserAuthenticated()) throw new UnauthorizedAccessException("Vui lòng đăng nhập lại.");
+            var upload = args.File;
+            if (!string.Equals(Path.GetExtension(upload.Name), ".csv", StringComparison.OrdinalIgnoreCase))
+                throw new ArgumentException("Chỉ nhận file CSV xuất từ cân.");
+            await using var stream = upload.OpenReadStream(ScaleReportCsv.MaximumBytes);
+            using var reader = new StreamReader(stream, new System.Text.UTF8Encoding(false, true), detectEncodingFromByteOrderMarks: true);
+            var file = ScaleReportCsv.Read(await reader.ReadToEndAsync());
+            _machine = file.Machine;
+            Workshop();
+            await using var db = new dbPMScontext();
+            _products = await db.HqThanhPhams.AsNoTracking().OrderBy(x => x.Ten).ToListAsync();
+            _sizes = await db.HqSizes.AsNoTracking().OrderBy(x => x.Ten).ToListAsync();
+            var materials = await db.HqLoaiNguyenLieus.AsNoTracking().Select(x => new { x.Id, x.Ten }).ToListAsync();
+            _materialCodes = ScaleReportCsv.ResolveMaterials(file, materials.Select(x => (x.Id, x.Ten)));
+            static string Match(string name, IEnumerable<(string Id, string Name)> catalog)
+            {
+                var matches = catalog.Where(x => string.Equals(x.Name.Trim(), name.Trim(), StringComparison.OrdinalIgnoreCase)).ToArray();
+                return matches.Length == 1 ? matches[0].Id : "";
+            }
+            _productMap = file.Rows.Select(x => x.Product).Distinct().Select(x => new Mapping(x, x,
+                Match(x, _products.Select(p => (p.Id, p.Ten))))).ToList();
+            _sizeMap = file.Rows.Select(x => x.Size).Distinct().Select(x => new Mapping(x, x,
+                Match(x, _sizes.Select(p => (p.Id, p.Ten))))).ToList();
+            _fileName = upload.Name; _file = file;
+        }
+        catch (Exception error) { Error(error); }
+        finally { _busy = false; }
+    }
+
+    private async Task Import()
+    {
+        if (_busy || _file == null) return;
+        _busy = true; _message = "";
+        try
+        {
+            var workshop = Workshop();
+            var report = CreateReport();
+            if (!await Js.InvokeAsync<bool>("confirm", $"Nạp file {_fileName}: cân {_machine}, ngày {report.Day:dd/MM/yyyy}, {report.Rows.Count} phiếu, {report.Net:0.###} kg. " +
+                "Bạn xác nhận file đầy đủ và các mã đối chiếu đúng? Toàn bộ phiếu SQL của đúng cân/ngày sẽ được sao lưu rồi thay bằng file này.")) return;
+            await RequireActiveUserAsync();
+            if (Workshop() != workshop) throw new UnauthorizedAccessException("Xưởng đăng nhập đã thay đổi.");
+            var result = await Sync.ReplaceAsync(report, workshop);
+            _failed = false; _message = $"Đã nạp {result.Imported} phiếu / {result.Net:0.###} kg; thay {result.Removed} phiếu cũ. Bản sao: {result.Backup}";
+            _file = null;
+        }
+        catch (Exception error) { Error(error); }
+        finally { _busy = false; }
+    }
+
+    private static Dictionary<string, string> Codes(IEnumerable<Mapping> maps, IEnumerable<string> allowed)
+    {
+        var valid = allowed.ToHashSet(StringComparer.Ordinal);
+        if (maps.Any(x => !valid.Contains(x.Code))) throw new ArgumentException("Chọn đầy đủ mã thành phẩm và size hợp lệ.");
+        return maps.ToDictionary(x => x.Key, x => x.Code, StringComparer.Ordinal);
+    }
+
+    private ScaleReportSync.Report CreateReport()
+    {
+        var file = _file ?? throw new ArgumentException("Chọn file CSV trước.");
+        var products = Codes(_productMap, _products.Select(x => x.Id));
+        var sizes = Codes(_sizeMap, _sizes.Select(x => x.Id));
+        return ScaleReportCsv.Build(file, products, sizes, _materialCodes);
+    }
+
+    private void CheckAssignments()
+    {
+        try
+        {
+            var report = CreateReport();
+            _failed = false;
+            _message = $"Đã kiểm tra: đủ {report.Rows.Count} phiếu / {report.Net:0.###} kg đã đối chiếu nguyên liệu từ CSV. Chưa ghi SQL.";
+        }
+        catch (Exception error) { Error(error); }
+    }
+
+    private void ClearAssignmentCheck() { _message = ""; _failed = false; }
+
+    private void Error(Exception error)
+    {
+        Logger.LogWarning(error, "Không nạp được file báo cáo cân {Machine}", _machine);
+        _failed = true; _message = error.Message;
+    }
+}
